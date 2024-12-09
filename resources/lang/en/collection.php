@@ -61,6 +61,7 @@ return [
     'image_section_description' => 'Choose carefully the images that represent your collection',
     'data_section_title' => 'Collection data',
     'data_section_description' => 'Choose carefully the data that represent your collection',
+    'this_is_default_collection_of_the_team' => 'This is the default collection of the team',
     'wallet' => [
         'write_royalty_mint' => 'Enter the royalty percentage for minting',
         'write_royalty_rebind' => 'Enter the royalty percentage for rebind',

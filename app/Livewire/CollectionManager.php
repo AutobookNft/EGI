@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Helpers\FileHelper;
 use App\Models\Collection;
+use App\Models\Team;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Log;
@@ -21,15 +22,15 @@ class CollectionManager extends Component
 
     public $collection = [
         'user_id' => null,
-        'team_id'=> null,
-        'collection_name'=> null,
-        'type'=> null,
-        'show'=> null,
-        'position'=> null,
-        'EGI_number'=> null,
-        'floor_price'=> null,
-        'description'=> null,
-        'url_collection_site'=> null,
+        'team_id' => null,
+        'type' => null,
+        'show' => null,
+        'collection_name' => null,
+        'position' => null,
+        'EGI_number '=> null,
+        'floor_price' => null,
+        'description' => null,
+        'url_collection_site' => null,
         'path_image_banner' => '',
         'path_image_card' => '',
         'path_image_avatar' => '',
@@ -71,14 +72,20 @@ class CollectionManager extends Component
     {
         Log::channel('florenceegi')->info('Class: CollectionManager. Method: create()');
 
+         // Controlla se l'utente ha il permesso 'create collections'
+        if (!Auth::user()->can('create_collection')) {
+            abort(403, 'Non hai il permesso di creare una collection.');
+        }
+
         try {
+
             // Prepara i dati della collection
             $collectionData = $this->prepareCollectionData();
 
-            Log::channel('florenceegi')->info('Class: CollectionManager. Method: create(). Action: collection data', $this->collectionData);
+            Log::channel('florenceegi')->info('Class: CollectionManager. Method: create(). Action: collection data:' , $collectionData);
 
             // Valida i dati della collection
-            $this->validateCollection($collectionData);
+            $this->validateCollection();
 
             // Crea la collection
             $collection = $this->storeCollection($collectionData);
@@ -123,12 +130,37 @@ class CollectionManager extends Component
      */
     private function prepareCollectionData()
     {
-        return [
-            'user_id' => Auth::check() ? Auth::id() : null,
-            'team_id' => Auth::user() && Auth::user()->currentTeam ? Auth::user()->currentTeam->id : null,
-            'EPP_id' => config('app.epp_id'),
+
+        Log::channel('florenceegi')->info('Class: CollectionManager. Method: prepareCollectionData(). Action: collection data', [
+            'user' => Auth::id(),
+            'team' => Auth::user()->currentTeam->id,
             'show' => $this->collection['show'] ?? false,
             'type' => $this->collection['type'] ?? __('collection.type_image'),
+        ]);
+
+        // Imposta i valori predefiniti per i campi della collection
+        $this->collection['user_id'] = Auth::id() ?? null;
+        $this->collection['team_id'] = Auth::user()->currentTeam->id ?? null;
+
+        // type deve avere un valore predefinito, in quanto l'utente potrebbe dimentarsi di selezionare un tipo
+        $this->collection['type'] = __('collection.type_image') ?? 'image';
+
+        // show deve avere un valore predefinito impostato a false, se il controllo non viene modificato dall'utente, il valore di default potrebbe non essere gestito correttamente dal controllo stesso
+        $this->collection['show'] = $this->collection['show'] ?? false;
+
+        // EPP_id è un valore predefinito che può essere impostato nel file .env
+        /**
+         * NOTA
+         * In questa prima versione dell'applicazione l'EPP è fisso, in seguito gestiremo gli EPP mediante db
+         * */
+        $this->collection['EPP_id'] = config('app.epp_id', null);
+
+        return [
+            'user_id' => $this->collection['user_id'],
+            'team_id' => $this->collection['team_id'],
+            'EPP_id' => $this->collection['EPP_id'],
+            'show' => $this->collection['show'],
+            'type' => $this->collection['type'],
             'collection_name' => $this->collection['collection_name'],
             'description' => $this->collection['description'],
             'url_collection_site' => $this->collection['url_collection_site'],
@@ -141,17 +173,22 @@ class CollectionManager extends Component
     /**
      * Valida i dati della collection.
      *
-     * @param array $data
      * @return void
      * @throws \Illuminate\Validation\ValidationException
      */
-    private function validateCollection(array $data)
+    private function validateCollection()
     {
         $this->validate([
-            'collection.collection_name' => 'required|string|max:255',
-            'collection.team_id' => 'required|exists:teams,id',
             'collection.user_id' => 'required|exists:users,id',
+            'collection.team_id' => 'required|exists:teams,id',
+            'collection.collection_name' => 'required|string|max:255',
             'collection.type' => 'required|string',
+            'collection.position' => 'nullable|integer',
+            'collection.EGI_number' => 'nullable|integer',
+            'collection.floor_price' => 'nullable|numeric',
+            'collection.description' => 'nullable|string',
+            'collection.url_collection_site' => 'nullable|url',
+            'collection.show' => 'nullable|boolean',
         ]);
     }
 
@@ -163,7 +200,16 @@ class CollectionManager extends Component
      */
     private function storeCollection(array $data)
     {
-        return Collection::create($data);
+        // Trova il team esistente
+        $team = Team::findOrFail($data['team_id']);
+
+        // Crea la collection
+        $collection = Collection::create($data);
+
+        // Associa la collection al team
+        $collection->teams()->attach($team);
+
+        return $collection;
     }
 
     /**
@@ -176,7 +222,10 @@ class CollectionManager extends Component
     private function attachCollectionToTeam(Collection $collection, int $teamId)
     {
         $collection->teams()->attach($teamId);
+
     }
+
+
 
     public function update()
     {
@@ -382,18 +431,16 @@ class CollectionManager extends Component
     //     $query->where('users.id', Auth::id());
     // })->get();
 
-    public function readTheTeamsCollections(){
+    public function readTheTeamsCollections()
+    {
         $user = Auth::user();
 
-        // Verifica se l'utente è autenticato e ha team associati
-        if ($user && $user->teams()->exists()) {
-            $this->collections = Collection::whereHas('team', function ($query) use ($user) {
-                $query->whereHas('users', function ($userQuery) use ($user) {
-                    $userQuery->where('users.id', $user->id);
-                });
-            })->get();
+        // Verifica se l'utente è autenticato e ha un team corrente
+        if ($user && $user->currentTeam) {
+            // Recupera le collections associate al team corrente dell'utente
+            $this->collections = $user->currentTeam->collections()->with('teams')->get();
         } else {
-            // Collezione vuota se l'utente non è associato a nessun team
+            // Se l'utente non ha un team corrente, restituisce una collezione vuota
             $this->collections = collect();
         }
     }

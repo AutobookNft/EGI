@@ -56,11 +56,11 @@
                       <span class="label-text">{{__('collection.select_content_type')}}</span>
                     </div>
                     <select class="select select-bordered select-primary" wire:model="collection.type">
-                      <option disabled selected>{{__('collection.type_image')}}</option>
-                      <option>{{ __('collection.type_image') }}</option>
-                      <option>{{ __('collection.type_ebook') }}</option>
-                      <option>{{ __('collection.type_audio') }}</option>
-                      <option>{{ __('collection.type_video') }}</option>
+                        <option disabled selected>{{ __('collection.select_type') }}</option>
+                        <option value="image">{{ __('collection.type_image') }}</option>
+                        <option value="ebook">{{ __('collection.type_ebook') }}</option>
+                        <option value="audio">{{ __('collection.type_audio') }}</option>
+                        <option value="video">{{ __('collection.type_video') }}</option>
                     </select>
                 </label>
 

@@ -61,6 +61,7 @@ return [
     'image_section_description' => 'Scegli con cura le immagini che rappresentano la tua collezione',
     'data_section_title' => 'Anagrafica della collection',
     'data_section_description' => 'Scegli con cura i dati che rappresentano la tua collection',
+    'this_is_default_collection_of_the_team' => 'Questa è la collection predefinita del team',
     'wallet' => [
         'write_royalty_mint' => 'Inserisci la percentuale di royalty da applicare al mint',
         'write_royalty_rebind' => 'Inserisci la percentuale di royalty da applicare al rebind',

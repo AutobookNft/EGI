@@ -14,13 +14,15 @@ return new class extends Migration
         Schema::create('collections', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->nullable()->index(); // Creatore della collezione
+            $table->foreignId('creator_id')->nullable()->index(); // Creatore della collezione
+            $table->bigInteger('epp_id')->nullable()->index(); // ID dell'EPP
+            $table->foreignId('owner_id')->nullable()->index(); // ID dell'owner della collection, (utilizzato solo in caso di EGI_Asset)
             $table->string('collection_name')->index()->nullable(); // Nome della collection (se diverso da name)
             $table->boolean('show')->index()->nullable()->default(1); // Visibilità della collezione
             $table->boolean('personal_team')->nullable(); // Per compatibilità con 'teams'
             $table->char('creator')->index()->nullable(); // Riferimento al creatore
             $table->char('owner_wallet')->index()->nullable(); // Wallet del proprietario
             $table->string('address', 100)->index()->nullable(); // Indirizzo
-            $table->bigInteger('epp_id')->nullable()->index(); // ID dell'EPP
             $table->bigInteger('EGI_asset_id')->nullable()->index(); // ID dell'EGI Asset
             $table->text('description')->nullable(); // Descrizione
             $table->string('type', 10)->index()->nullable(); // Tipo della collection
@@ -31,7 +33,6 @@ return new class extends Migration
             $table->string('url_collection_site')->nullable(); // URL sito della collection
             $table->integer('position')->index()->nullable(); // Posizione
             $table->string('token')->index()->nullable(); // Token associato
-            $table->foreignId('owner_id')->nullable()->index(); // ID dell'owner della collection
             $table->integer('EGI_number')->nullable(); // Numero EGI
             $table->text('EGI_asset_roles')->nullable(); // Ruoli EGI
             $table->float('floor_price')->nullable(); // Prezzo minimo

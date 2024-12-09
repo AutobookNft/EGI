@@ -55,7 +55,7 @@
                 <div class="space-y-4">
                     <div>
                         <x-label for="name" value="{{ __('Name') }}" />
-                        <x-input id="first_name" type="text" name="first_name" :value="old('first_name')" required autofocus autocomplete="name"
+                        <x-input id="name" type="text" name="name" :value="old('name')" required autofocus autocomplete="name"
                                 class="input input-bordered w-full" />
                     </div>
 
