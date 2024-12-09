@@ -34,13 +34,13 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified',
 
         // Route::get('/uconfig', [UConfigController::class, 'index'])->name('open_uconfig');
 
-        Route::get('/assign-role', [RoleController::class, 'showAssignRoleForm'])->name('assign.role.form');
+        Route::get('/assign-role', [RoleController::class, 'showAssignRoleForm'])->name('assign.role.form')->middleware(['can:manage_roles']);;
 
-        Route::post('/assign-role', [RoleController::class, 'assignRole'])->name('assign.role');
+        Route::post('/assign-role', [RoleController::class, 'assignRole'])->name('assign.role')->middleware(['can:manage_roles']);;
 
-        Route::get('/assign-permissions', [RoleController::class, 'showAssignPermissionsForm'])->name('assign.permissions.form');
+        Route::get('/assign-permissions', [RoleController::class, 'showAssignPermissionsForm'])->name('assign.permissions.form')->middleware(['can:manage_roles']);;
 
-        Route::post('/assign-permissions', [RoleController::class, 'assignPermissions'])->name('assign.permissions');
+        Route::post('/assign-permissions', [RoleController::class, 'assignPermissions'])->name('assign.permissions')->middleware(['can:manage_roles']);;
 
     });
 

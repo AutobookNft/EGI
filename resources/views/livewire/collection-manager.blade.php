@@ -18,6 +18,8 @@
     <form wire:submit.prevent="{{ $collectionId ? 'update' : 'create' }}"
         class="p-6 space-y-6 bg-white rounded-lg shadow-sm">
 
+        {{--    {{ dd(auth()->user()->getAllPermissions()); }} --}}
+
         <div id="image_of_collection" class="p-4 border border-gray-300 rounded-lg bg-white shadow-md">
 
             <!-- Titolo della sezione -->

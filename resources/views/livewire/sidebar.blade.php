@@ -12,7 +12,7 @@
             </a>
 
             <!-- Admin Section -->
-            {{-- @can('manage_roles') --}}
+            @can('manage_roles')
                 <details class="collapse collapse-arrow bg-base-200">
                     <summary class="collapse-title text-lg font-medium">Admin</summary>
                     <div class="collapse-content space-y-2">
@@ -57,7 +57,7 @@
                         </details>
                     </div>
                 </details>
-            {{-- @endcan --}}
+            @endcan
 
             <!-- Gestione Collezioni -->
             <details class="collapse collapse-arrow bg-base-200">

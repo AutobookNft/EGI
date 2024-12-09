@@ -13,11 +13,12 @@ return new class extends Migration
     {
         Schema::create('team_collection', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('team_id')->constrained()->onDelete('cascade');
-            $table->unsignedBigInteger('collection_id')->constrained()->onDelete('cascade');
+            $table->foreignId('team_id')->constrained()->onDelete('cascade');
+            $table->foreignId('collection_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });
     }
+
 
     /**
      * Reverse the migrations.

@@ -12,7 +12,7 @@
             </a>
 
             <!-- Admin Section -->
-            @can('manage_roles')
+            @if (auth()->check() && auth()->user()->hasPermissionTo('manage_roles'))
                 <details class="collapse collapse-arrow bg-base-200">
                     <summary class="collapse-title text-lg font-medium">Admin</summary>
                     <div class="collapse-content space-y-2">
@@ -53,7 +53,7 @@
                         </details>
                     </div>
                 </details>
-            @endcan
+            @endif
 
             <!-- Gestione Collezioni -->
             <details class="collapse collapse-arrow bg-base-200">

@@ -1,43 +1,68 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
 
 class RolesAndPermissionsSeeder extends Seeder
 {
-    public function run(): void
-    {
-        // Reset cached roles and permissions
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+    /**
+     * Permessi e ruoli predefiniti.
+     */
+    private $permissions = [
+        'manage_roles',
+        'create_collection',
+        'read_collection',
+        'update_collection',
+        'delete_collection',
+        'view_users',
+        'edit_users',
+        'delete_users',
+        'create_users',
+        'view_dashboard',
+        'manage_settings',
+    ];
 
-        // Create permissions
-        $permissions = [
+    private $roles = [
+        'superadmin' => ['all'],
+        'admin' => [
             'manage_roles',
             'create_collection',
             'read_collection',
             'update_collection',
             'delete_collection',
-        ];
-
-        foreach ($permissions as $permission) {
-            Permission::create(['name' => $permission]);
-        }
-
-        // Create roles and assign permissions
-        $adminRole = Role::create(['name' => 'admin']);
-        $adminRole->givePermissionTo(Permission::all());
-
-        $creatorRole = Role::create(['name' => 'creator']);
-        $creatorRole->givePermissionTo([
+        ],
+        'creator' => [
             'create_collection',
             'read_collection',
             'update_collection',
             'delete_collection',
-        ]);
+        ],
+    ];
+
+    public function run(): void
+    {
+        // Reset cached roles and permissions
+        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+
+        // Creare tutti i permessi
+        foreach ($this->permissions as $permission) {
+            Permission::firstOrCreate(['name' => $permission]);
+        }
+
+        // Creare i ruoli e assegnare i permessi
+        foreach ($this->roles as $roleName => $rolePermissions) {
+            $role = Role::firstOrCreate(['name' => $roleName]);
+
+            if (in_array('all', $rolePermissions)) {
+                $role->givePermissionTo(Permission::all());
+            } else {
+                $role->givePermissionTo($rolePermissions);
+            }
+        }
+
+        $this->command->info('Ruoli e permessi creati con successo.');
     }
 }

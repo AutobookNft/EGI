@@ -63,6 +63,7 @@ class CollectionManager extends Component
 
         $this->collectionId = null;
 
+
         // Log::channel('florenceegi')->info('Class: CollectionManager. Method: mount(). Action: Collections loaded: '. $this->collections);
         // UltraLog::log('error', 'Start handling the exception', 'Exception message');
 
@@ -405,9 +406,39 @@ class CollectionManager extends Component
         $currentTeam = Auth::user()->currentTeam;
         $wallets = $currentTeam ? $currentTeam->wallets : collect();
 
+        $collection = Collection::findOrFail($currentTeam->id);
+
+        Log::channel('florenceegi')->info('Class: CollectionManager. Method: render(). Action: collection data: '. json_encode($collection));
+
+        $this->collection = [
+            'collection_name' => $collection->collection_name,
+            'user_id' => $collection->user_id,
+            'team_id' => $collection->team_id,
+            'type' => $collection->type,
+            'position' => $collection->position,
+            'show' => $collection->show,
+            'EGI_number' => $collection->EGI_number,
+            'floor_price' => $collection->floor_price,
+            'description' => $collection->description,
+            'url_collection_site' => $collection->url_collection_site,
+            'path_image_banner' => $collection->path_image_banner,
+            'path_image_card' => $collection->verified_image_card_path,
+            'path_image_avatar' => $collection->path_image_avatar,
+        ];
+
+        
+
         return view('livewire.collection-manager', [
             'wallets' => $wallets,
         ]);
+
+
+    }
+
+    // Legge tutti i dati della collection connessa al currentTeam e li scrive nei campi del form
+    public function prepareRender()
+    {
+
 
 
     }

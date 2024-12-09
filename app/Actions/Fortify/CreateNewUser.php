@@ -97,6 +97,7 @@ class CreateNewUser implements CreatesNewUsers
     {
         $team = $user->ownedTeams()->save(Team::forceCreate([
             'user_id' => $user->id,
+            'epp_id' => config('app.epp_id'),
             'name' => explode(' ', $user->name, 2)[0] . "'s Team",
             'personal_team' => true,
         ]));
@@ -114,6 +115,7 @@ class CreateNewUser implements CreatesNewUsers
     {
         tap(Collection::create([
             'user_id' => $user->id,
+            'epp_id' => config('app.epp_id'),
             'collection_name' => explode(' ', $user->name, 2)[0] . "'s collection",
             'description' => __('collection.this_is_default_collection_of_the_team') ?? 'This is the default collection of the team',
             'creator_id' => $user->id,
