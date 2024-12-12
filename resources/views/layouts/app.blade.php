@@ -13,7 +13,7 @@
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
-        <script>console.log('resources/views/layouts/app.blade.php');</script>
+        <script>console.log('resources/views/layouts/app.blade.php gg');</script>
 
          {{-- Icone di MaterialIcons --}}
          <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -25,7 +25,7 @@
         <!-- Styles -->
         @livewireStyles
     </head>
-   
+
     <body class="font-sans antialiased bg-base-200">
         <div class="drawer lg:drawer-open">
             <input id="main-drawer" type="checkbox" class="drawer-toggle" />
@@ -51,7 +51,7 @@
             </div>
 
             <!-- Sidebar -->
-            <livewire:sidebar />
+            <livewire:sidebar/>
 
             @stack('modals')
 

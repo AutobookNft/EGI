@@ -307,6 +307,10 @@ class CollectionManager extends Component
         }
     }
 
+    public function index(){
+        $this->collections = Collection::all();
+    }
+
     public function edit($collectionId)
     {
         Log::channel('florenceegi')->info('Editing collection', $this->collection);
@@ -426,13 +430,11 @@ class CollectionManager extends Component
             'path_image_avatar' => $collection->path_image_avatar,
         ];
 
-        
+
 
         return view('livewire.collection-manager', [
             'wallets' => $wallets,
         ]);
-
-
     }
 
     // Legge tutti i dati della collection connessa al currentTeam e li scrive nei campi del form

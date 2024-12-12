@@ -8,11 +8,11 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
 
-class AdminUserSeeder extends Seeder
+class SuperAdminUserSeeder extends Seeder
 {
     public function run(): void
     {
-        $adminEmail = 'fabiocherici@gmail.com';
+        $adminEmail = 'natan@gmail.com';
 
         $user = User::where('email', $adminEmail)->first();
 
@@ -21,7 +21,7 @@ class AdminUserSeeder extends Seeder
             return;
         }
 
-        $adminRole = Role::where('name', 'admin')->first();
+        $adminRole = Role::where('name', 'superadmin')->first();
 
         if (!$adminRole) {
             $this->command->error('Ruolo admin non trovato! Esegui prima il seeder dei ruoli.');

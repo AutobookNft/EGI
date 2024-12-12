@@ -5,8 +5,8 @@
 | Traduzione in italiano di tutti i dati dei dati di testata delle collection
 |--------------------------------------------------------------------------
 |
-
  */
+
 return [
     'create_validation_error' => 'Errore di validazione',
     'creation_failed' => 'Creazione fallita',

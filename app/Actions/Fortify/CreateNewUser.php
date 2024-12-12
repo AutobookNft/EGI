@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
+use Spatie\Permission\Models\Role;
 use Laravel\Jetstream\Jetstream;
 use Illuminate\Support\Str;
 
@@ -138,9 +139,34 @@ class CreateNewUser implements CreatesNewUsers
 
             // Associa i wallet predefiniti al team
             $this->attachDefaultWallets($team, $user);
+
+            // Assegna il ruolo di creator all'utente
+            $this->assignCreatorRole($user->id);
         });
     }
 
+    public function assignCreatorRole(int $userId)
+    {
+        // Trova l'utente con l'ID specificato
+        $user = User::find($userId);
+
+        // Controlla se l'utente esiste
+        if (!$user) {
+            session()->flash('error', 'Utente non trovato.');
+            return;
+        }
+
+        // Controlla se il ruolo 'creator' esiste, altrimenti lo crea
+        $creatorRole = Role::firstOrCreate(['name' => 'creator']);
+
+        // Assegna il ruolo 'creator' all'utente
+        if (!$user->hasRole('creator')) {
+            $user->assignRole($creatorRole);
+            session()->flash('success', 'Ruolo di creator assegnato con successo.');
+        } else {
+            session()->flash('info', 'L\'utente ha già il ruolo di creator.');
+        }
+    }
 
     /**
      * Attach default wallets to the team.

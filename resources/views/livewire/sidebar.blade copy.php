@@ -1,81 +1,28 @@
-<?php
+<script>
+    console.log('resources/views/livewire/sidebar.blade.php');
+</script>
+<div class="drawer-side">
+    <label for="main-drawer" class="drawer-overlay"></label>
+    <aside class="min-h-screen w-80 bg-base-100">
+        <div class="space-y-4 p-4">
+            <!-- Dashboard -->
+            <a href="{{ route('dashboard') }}"
+                class="{{ request()->routeIs('dashboard') ? 'btn-active' : '' }} btn btn-ghost w-full justify-start">
+                <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path
+                        d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
+                </svg>
+                Dashboard
+            </a>
 
-return [
-    'styles' => [
-        'elegant' => [
-            [
-                'name' => 'fallback',
-                'type' => 'solid',
-                'class' => 'h-6 w-6',
-                'html' => '
-                    <svg xmns="http://www.w3.org/2000/svg" viewBox="0 0 123.01 120.38" width="40" height="40"><defs><style>.cls-1{fill:none;stroke:#333;stroke-linecap:round;stroke-miterlimit:10;stroke-width:4px}.cls-3{fill:#333}</style></defs><g id="Layer_2" data-name="Layer 2"><g id="General_-_Icon" data-name="General - Icon"><g id="General_-_Icon-2" data-name="General - Icon">
-                        <path class="cls-1" d="m26.59 87.36 1.12-6.55A6.1 6.1 0 0 0 26 75.42L3.85 53.86a6.09 6.09 0 0 1 3.37-10.39L37.78 39a6.11 6.11 0 0 0 4.59-3.33L57.89 4.24a4 4 0 0 1 7.22 0l13.3 27M91.73 41.32 117.38 45c3.12.53 5.39 5.3 1.77 8.82L97 75.42a6.1 6.1 0 0 0-1.75 5.39l5.22 30.44a6.09 6.09 0 0 1-8.84 6.42L64.34 103.3a6.13 6.13 0 0 0-5.68 0l-27.33 14.37a6.09 6.09 0 0 1-8.84-6.42l1.33-7.77"/><path d="M66.79 33.5s4.46 13.5 7.83 15.86 16.59 4.23 16.59 4.23" style="stroke-linejoin:round;stroke-width:2px;fill:none;stroke:#333;stroke-linecap:round"/><circle class="cls-3" cx="97.5" cy="54.57" r="1"/><circle class="cls-3" cx="25.5" cy="94.57" r="2"/></g></g></g>
-                    </svg>',
-            ],
-            [
-                'name' => 'email',
-                'type' => 'solid',
-                'class' => 'h-4 w-4 opacity-70',
-                'html' => "
-                    <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='currentColor' class='%class%'>
-                        <path d='M2.5 3A1.5 1.5 0 0 0 1 4.5v.793c.026.009.051.02.076.032L7.674 8.51c.206.1.446.1.652 0l6.598-3.185A.755.755 0 0 1 15 5.293V4.5A1.5 1.5 0 0 0 13.5 3h-11Z' />
-                        <path d='M15 6.954 8.978 9.86a2.25 2.25 0 0 1-1.956 0L1 6.954V11.5A1.5 1.5 0 0 0 2.5 13h11a1.5 1.5 0 0 0 1.5-1.5V6.954Z' />
-                    </svg>",
-            ],
-            [
-                'name' => 'camera',
-                'type' => 'solid',
-                'class' => 'w-6 h-6 opacity-50 text-base-content',
-                'html' => "
-                    <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' class='%class%'>
-                        <path stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z'/>
-                        <path d='M15 13a3 3 0 11-6 0 3 3 0 016 0z'/>
-                    </svg>",
-            ],
-            [
-                'name' => 'collection-name',
-                'type' => 'solid',
-                'class' => 'w-12 h-12 opacity-50 text-base-content',
-                'html' => "
-                    <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' class='%class%'>
-                        <path d='M3 3h6v6H3V3zm0 9h6v6H3v-6zm9-9h6v6h-6V3zm0 9h6v6h-6v-6z'></path>
-                    </svg>",
-            ],
-            [
-                'name' => 'url',
-                'type' => 'solid',
-                'class' => 'w-12 h-12 opacity-50 text-base-content',
-                'html' => "
-                    <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' class='%class%'>
-                        <path d='M10.59 13.41L9.17 12l2.83-2.83a3 3 0 014.24 4.24L14.83 15l1.42 1.41 2.83-2.83a5 5 0 00-7.07-7.07L7.76 10.24a5 5 0 007.07 7.07L13.41 15l-2.82 2.82a3 3 0 01-4.24-4.24l2.82-2.82z'/>
-                    </svg>",
-            ],
-            [
-                'name' => 'collection-number',
-                'type' => 'material',
-                'class' => 'w-6 h-6 opacity-50 material-symbols-outlined text-base-content',
-                'html' => "<span class='%class%'>pin</span>",
-            ],
-            [
-                'name' => 'collection-position',
-                'type' => 'material-symbols-outlined',
-                'class' => 'w-6 h-6 opacity-50 material-symbols-outlined text-base-content',
-                'html' => "<span class='%class%'>stacks</span>",
-            ],
-
-            [
-                'name' => 'egi-base-price',
-                'type' => 'material',
-                'class' => 'w-6 h-6 opacity-50 material-symbols-outlined text-base-content',
-                'html' => "<span class='%class%'>payments</span>",
-            ],
-            [
-                'name' => 'permissions_roles',
-                'type' => 'solid',
-                'class' => 'w-12 h-12 text-base-content',
-                'host'=>'https://www.reshot.com/free-svg-icons/',
-                'name_on_host'=>'Authorization Manager',
-                'html' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="40" height="40"> xml:space="preserve">
+            <!-- Admin Section -->
+            @can('manage_roles')
+                <details class="collapse collapse-arrow bg-base-200">
+                    <summary class="collapse-title text-lg font-medium">Admin</summary>
+                    <div class="collapse-content space-y-2">
+                        <a href="{{ route('admin.roles.index') }}"
+                            class="{{ request()->routeIs('admin.roles.*') ? 'btn-active' : '' }} btn btn-ghost w-full justify-start">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="40" height="40" xml:space="preserve">
                                 <switch>
                                     <g>
                                         <circle fill="#13333D" cx="500" cy="500" r="398" />
@@ -134,15 +81,13 @@ return [
                                         </g>
                                     </g>
                                 </switch>
-                            </svg>',
-            ],
-            [
-                'name' => 'assign_roles',
-                'type' => 'solid',
-                'class' => 'w-12 h-12 text-base-content',
-                'host'=>'https://www.reshot.com/free-svg-icons/',
-                'name_on_host'=>'Protection',
-                'html' => '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 48 48" width="40" height="40">
+                            </svg>
+                            Roles & Permissions
+                        </a>
+                        <a href="{{ route('admin.assign.role.form') }}"
+                            class="{{ request()->routeIs('admin.roles.*') ? 'btn-active' : '' }} btn btn-ghost w-full justify-start">
+                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                                viewBox="0 0 48 48" width="40" height="40">
                                 <defs>
                                     <linearGradient id="c" x1="19.5" y1="47.82" x2="19.5"
                                         y2="-42.52" gradientUnits="userSpaceOnUse">
@@ -207,15 +152,13 @@ return [
                                 <path
                                     d="M35 38.92a2.16 2.16 0 0 0-2.59-1.35A2.13 2.13 0 0 0 31 38.91a2.16 2.16 0 0 0 .33.6 1.15 1.15 0 0 1 .24.73v.32a1.44 1.44 0 1 0 2.88 0v-.32a1.18 1.18 0 0 1 .25-.74 2.16 2.16 0 0 0 .3-.58z"
                                     style="fill:url(#k)" />
-                            </svg>',
-            ],
-            [
-                'name' => 'assign_permissions',
-                'type' => 'solid',
-                'class' => 'w-12 h-12 text-base-content',
-                'host'=>'https://www.reshot.com/free-svg-icons/',
-                'name_on_host'=>'System Protection',
-                'html' => ' <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="40" height="40" xml:space="preserve">
+                            </svg>
+                            Assign roles
+                        </a>
+                        <a href="{{ route('admin.assign.permissions.form') }}"
+                            class="{{ request()->routeIs('admin.roles.*') ? 'btn-active' : '' }} btn btn-ghost w-full justify-start">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="40"
+                                height="40" xml:space="preserve">
                                 <switch>
                                     <g>
                                         <circle fill="#13333D" cx="500" cy="500" r="398" />
@@ -269,104 +212,111 @@ return [
                                         </g>
                                     </g>
                                 </switch>
-                            </svg>',
-            ],
-            [
-                'name' => 'open',
-                'type' => 'solid',
-                'class' => 'w-12 h-12 text-base-content',
-                'host'=>'https://www.reshot.com/free-svg-icons/',
-                'name_on_host'=>'Open Door',
-                'html' => '<svg xmlns="http://www.w3.org/2000/svg" width="37.504" height="48">
-                            <path fill="#c6c6c6" d="M4.129 6.375h29.25v38.532H4.129z"/><path d="M3 5.25v40.782h31.5V5.25zm29.25 38.532h-27V7.5h27z" fill="#7a8e9b"/>
-                            <path fill="#525c6b" d="M37.504 46.032H0l3.001-3.282h31.503l3 3.282z"/><path fill="#e49a61" d="M24.128 2.829v42.342l2.25-.524V3.355l-2.25-.526zM34.504 5.25l-3.125-.728V43.48l3.125-.73V5.25zM12.004 0v48l10.375-2.421V2.421L12.004 0z"/>
-                            <path fill="#f1bb6b" d="M26.378 3.355v41.292l5.001-1.167V4.522l-5.001-1.167zM22.379 2.421v43.158l1.749-.408V2.829l-1.749-.408z"/><ellipse cx="17.004" cy="25.157" rx="1.688" ry="2.25" fill="#525c6b"/><ellipse cx="17.754" cy="25.157" rx="1.688" ry="2.25" fill="#c6c6c6"/>
-                           </svg>',
-            ],
-            [
-                'name' => 'art_therapy',
-                'type' => 'solid',
-                'class' => 'w-12 h-12 text-base-content',
-                'host'=>'https://www.reshot.com/free-svg-icons/',
-                'name_on_host'=>'Art Therapy',
-                'html' => '
-                    <svg version="1.1" id="Icon_Set" xmlns="http://www.w3.org/2000/svg" x="0" y="0" viewBox="0 0 512 512" width="40" height="40" style="enable-background:new 0 0 512 512" xml:space="preserve"><style>.st1{fill:#fd919e}.st2{fill:#4c4372}.st3{fill:#d3e6f8}.st5{fill:#7babf1}.st6{fill:#fff}</style><g id="Art_Theraphy"><circle cx="256" cy="256" r="207" style="fill:#f0c48a"/><path class="st5" d="M316.468 394.034H132.605c-9.804 0-17.752-7.948-17.752-17.752V135.718c0-9.804 7.948-17.752 17.752-17.752h183.863c9.804 0 17.752 7.948 17.752 17.752v240.564c.001 9.804-7.947 17.752-17.752 17.752z"/>
-                        <path class="st6" d="M141.233 143.654h166.609v224.692H141.233z"/>
-                        <path class="st3" d="M141.233 286h166.609v82.346H141.233z"/><path class="st3" d="M284.743 143.654h23.099v224.692h-23.099z"/>
-                        <path style="fill:#a4cff2" d="M284.743 286h23.099v82.346h-23.099z"/><path class="st6" d="M183.163 286h-27.841l13.921-24.111 13.92-24.11 13.92 24.11L211.004 286z"/>
-                        <path class="st1" d="M252.377 286h-41.373l20.686-35.831 20.687-35.831 20.687 35.831L293.751 286z"/><circle class="st1" cx="202.568" cy="188.714" r="20.405"/>
-                        <path class="st2" d="M316.468 400.034H132.605c-13.097 0-23.752-10.655-23.752-23.752V135.718c0-13.097 10.655-23.752 23.752-23.752h183.863c13.097 0 23.752 10.655 23.752 23.752v240.563c.001 13.098-10.655 23.753-23.752 23.753zM132.605 123.966c-6.48 0-11.752 5.272-11.752 11.752v240.563c0 6.48 5.272 11.752 11.752 11.752h183.863c6.48 0 11.752-5.272 11.752-11.752V135.718c0-6.48-5.272-11.752-11.752-11.752H132.605z"/><path class="st2" d="M307.841 374.346H141.232a6 6 0 0 1-6-6V143.654a6 6 0 0 1 6-6h166.609a6 6 0 0 1 6 6v224.692a6 6 0 0 1-6 6zm-160.609-12h154.609V149.654H147.232v212.692z"/><path class="st2" d="M307.841 374.346H141.232a6 6 0 0 1-6-6V286a6 6 0 0 1 6-6h166.609a6 6 0 0 1 6 6v82.346a6 6 0 0 1-6 6zm-160.609-12h154.609V292H147.232v70.346z"/><path class="st2" d="M211.003 292h-55.681a6 6 0 0 1-5.196-9l27.841-48.221a6.002 6.002 0 0 1 10.392 0L216.2 283a5.999 5.999 0 0 1-5.197 9zm-45.288-12h34.896l-17.448-30.221L165.715 280z"/><path class="st2" d="M293.751 292h-82.748a6 6 0 0 1-5.196-9l41.374-71.662a6.002 6.002 0 0 1 10.392 0L298.948 283a5.999 5.999 0 0 1-5.197 9zm-72.355-12h61.963l-30.981-53.662L221.396 280z"/><g><path class="st2" d="M202.568 215.12c-14.56 0-26.405-11.845-26.405-26.405s11.845-26.405 26.405-26.405 26.405 11.845 26.405 26.405-11.845 26.405-26.405 26.405zm0-40.811c-7.943 0-14.405 6.462-14.405 14.405s6.462 14.405 14.405 14.405 14.405-6.462 14.405-14.405-6.462-14.405-14.405-14.405z"/></g><g><path class="st1" d="m375.141 388.153-19.448-37.35c-7.458-14.323 2.218-31.953 18.35-32.68a23.535 23.535 0 0 1 2.196 0c16.132.727 25.808 18.357 18.35 32.68l-19.448 37.35z"/><path style="fill:#e8677d" d="M358.559 356.306h33.165l-16.583 31.847z"/><path class="st5" d="M375.141 318.098a14.182 14.182 0 0 1-14.095-12.614c-3.317-29.825-3.317-139.198 0-169.023a14.182 14.182 0 0 1 28.19 0c3.317 29.825 3.317 139.198 0 169.023a14.18 14.18 0 0 1-14.095 12.614z"/><path class="st2" d="M375.142 324.098a20.162 20.162 0 0 1-20.059-17.951c-3.363-30.249-3.363-140.1 0-170.349a20.162 20.162 0 0 1 20.058-17.951 20.162 20.162 0 0 1 20.059 17.951c3.363 30.25 3.363 140.101 0 170.35a20.162 20.162 0 0 1-20.058 17.95zm0-194.251a8.175 8.175 0 0 0-8.132 7.278c-3.224 28.994-3.224 138.702 0 167.696a8.173 8.173 0 0 0 8.131 7.277 8.173 8.173 0 0 0 8.131-7.277c3.224-28.994 3.224-138.703 0-167.697a8.171 8.171 0 0 0-8.13-7.277z"/><path class="st2" d="M375.141 394.153a6 6 0 0 1-5.322-3.229l-19.448-37.35c-4.527-8.693-4.296-18.973.617-27.496 4.788-8.308 13.306-13.522 22.785-13.949a30.145 30.145 0 0 1 2.739 0c9.476.427 17.994 5.641 22.782 13.949 4.913 8.523 5.144 18.803.617 27.496l-19.448 37.35a5.999 5.999 0 0 1-5.322 3.229zm.001-70.055c-.276 0-.551.006-.825.019-5.448.246-10.16 3.145-12.932 7.954-2.855 4.955-2.994 10.922-.37 15.962l14.126 27.129 14.126-27.129c2.625-5.04 2.486-11.007-.37-15.962-2.772-4.809-7.484-7.708-12.929-7.953a16.29 16.29 0 0 0-.826-.02z"/></g></g>
-                    </svg>',
-            ],
-            [
-                'name' => 'dahsboard',
-                'type' => 'solid',
-                'class' => 'w-12 h-12 text-base-content',
-                'host'=>'https://www.reshot.com/free-svg-icons/',
-                'name_on_host'=>'Dashboard',
-                'html' => '
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="40" height="40"><defs><style>.cls-1{fill:#7c7d7d}.cls-2{fill:#919191}.cls-3{fill:#dad7e5}.cls-4{fill:#edebf2}.cls-7{fill:#c6c3d8}.cls-9{fill:#fc6}.cls-10{fill:#ffde76}</style></defs><g id="Dashboard"><path class="cls-1" d="M6 31h36v16H6z"/>
-                        <path class="cls-2" d="M42 31v14H11a3 3 0 0 1-3-3V31z"/>
-                        <path class="cls-3" d="M18 36v3h-6v-3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1z"/>
-                        <path class="cls-4" d="M18 36v1h-2a2 2 0 0 1-2-2h3a1 1 0 0 1 1 1z"/>
-                        <path class="cls-3" d="M18 39v3a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1v-3z"/>
-                        <path class="cls-4" d="M18 39v2h-3a1 1 0 0 1-1-1v-1zM38 40h-2a1 1 0 0 1 0-2h2a1 1 0 0 1 0 2zM38 44h-2a1 1 0 0 1 0-2h2a1 1 0 0 1 0 2zM32 40h-2a1 1 0 0 1 0-2h2a1 1 0 0 1 0 2zM32 44h-2a1 1 0 0 1 0-2h2a1 1 0 0 1 0 2zM26 40h-2a1 1 0 0 1 0-2h2a1 1 0 0 1 0 2zM26 44h-2a1 1 0 0 1 0-2h2a1 1 0 0 1 0 2zM38 36h-2a1 1 0 0 1 0-2h2a1 1 0 0 1 0 2zM32 36h-2a1 1 0 0 1 0-2h2a1 1 0 0 1 0 2zM26 36h-2a1 1 0 0 1 0-2h2a1 1 0 0 1 0 2z"/>
-                        <path class="cls-1" d="M6 1h36v30H6z"/><path class="cls-2" d="M42 1v28H11a3 3 0 0 1-3-3V1z"/><path style="fill:#9fdbf3" d="M10 5h14v10H10z"/><path d="M24 5v8h-9a3 3 0 0 1-3-3V5z" style="fill:#b2e5fb"/><path class="cls-4" d="M29 15V5a1 1 0 0 1 2 0v10a1 1 0 0 1-2 0z"/><path class="cls-7" d="M31 14h-2a1 1 0 0 1 0-2h2a1 1 0 0 1 0 2z"/><path class="cls-4" d="M35 15V5a1 1 0 0 1 2 0v10a1 1 0 0 1-2 0z"/>
-                        <path class="cls-7" d="M37 10h-2a1 1 0 0 1 0-2h2a1 1 0 0 1 0 2z"/><path d="M24 9.5v2c-2.08 0-2.17-1.7-3.62-.69a3.17 3.17 0 0 1-4 0 1.2 1.2 0 0 0-1.63 0 3.16 3.16 0 0 1-4 0 1.18 1.18 0 0 0-.75-.31v-2c1.67 0 1.93 1 2.8 1s1.15-1 2.8-1 1.94 1 2.79 1 1.15-1 2.81-1 1.94 1 2.8 1z" style="fill:#8bd1ea"/>
-                        <path class="cls-9" d="M14 23a2 2 0 1 1-2.82-1.82A2 2 0 0 1 14 23z"/><path class="cls-10" d="M13.82 23.82a2 2 0 0 1-2.64-2.64 2 2 0 0 1 2.64 2.64z"/><circle class="cls-9" cx="20" cy="23" r="2"/><circle class="cls-9" cx="28" cy="23" r="2"/><circle class="cls-9" cx="36" cy="23" r="2"/>
-                        <path class="cls-10" d="M21.82 23.82a2 2 0 0 1-2.64-2.64 2 2 0 0 1 2.64 2.64zM29.82 23.82a2 2 0 0 1-2.64-2.64 2 2 0 0 1 2.64 2.64zM37.82 23.82a2 2 0 0 1-2.64-2.64 2 2 0 0 1 2.64 2.64z"/></g>
-                    </svg>',
-            ],
-            [
-                'name' => 'back',
-                'type' => 'solid',
-                'class' => 'w-12 h-12 text-base-content',
-                'host'=>'https://www.reshot.com/free-svg-icons/',
-                'name_on_host'=>'back',
-                'html' => '
-                    <svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="40" height="40" style="shape-rendering:geometricPrecision;text-rendering:geometricPrecision;image-rendering:optimizeQuality;fill-rule:evenodd;clip-rule:evenodd" viewBox="0 0 6.827 6.827">
-                        <path style="fill:#424242" d="M0 0h6.827v6.827H0z"/>
-                        <path d="M.853 3.413a2.56 2.56 0 1 1 5.12 0 2.56 2.56 0 0 1-5.12 0zM4.72 2.8H3.413a.08.08 0 0 1-.08-.08v-.5L2.14 3.413l1.193 1.194v-.5a.08.08 0 0 1 .08-.08H4.72V2.8zm-3.413.613a2.1 2.1 0 0 1 .617-1.49 2.1 2.1 0 0 1 1.49-.616 2.1 2.1 0 0 1 1.489.617 2.1 2.1 0 0 1 .617 1.49 2.1 2.1 0 0 1-.617 1.489 2.1 2.1 0 0 1-1.49.617 2.1 2.1 0 0 1-1.49-.617 2.1 2.1 0 0 1-.616-1.49zm.73-1.376a1.94 1.94 0 0 0-.57 1.376c0 .538.218 1.025.57 1.377.352.352.839.57 1.376.57a1.94 1.94 0 0 0 1.377-.57 1.94 1.94 0 0 0 .57-1.377 1.94 1.94 0 0 0-.57-1.376 1.94 1.94 0 0 0-1.377-.57 1.94 1.94 0 0 0-1.376.57z" style="fill:#fffffe"/>
-                    </svg>',
-            ],
-        ],
+                            </svg>
+                            Assign permissions
+                        </a>
+                        {{-- <details class="collapse collapse-arrow bg-base-200">
+                            <summary class="collapse-title text-lg font-medium">Ultra Confi Manager</summary>
+                                <a href="{{ route('admin.open_uconfig') }}"
+                                class="btn btn-ghost w-full justify-start {{ request()->routeIs('admin.roles.*') ? 'btn-active' : '' }}">
+                                    Ultra Config Manager
+                                </a>
+                        </details> --}}
+                    </div>
+                </details>
+            @endcan
 
-        // [
-        //     'name' => 'description',
-        //     'type' => 'solid',
-        //     'class' => 'icon-class',
-        //     'html' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="..."></path></svg>',
-        // ],
-        // [
-        //     'name' => 'type',
-        //     'type' => 'solid',
-        //     'class' => 'icon-class',
-        //     'html' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="..."></path></svg>',
-        // ],
-        // [
-        //     'name' => 'path_image_banner',
-        //     'type' => 'solid',
-        //     'class' => 'icon-class',
-        //     'html' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="..."></path></svg>',
-        // ],
-        // [
-        //     'name' => 'path_image_card',
-        //     'type' => 'solid',
-        //     'class' => 'icon-class',
-        //     'html' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="..."></path></svg>',
-        // ],
-        // [
-        //     'name' => 'path_image_avatar',
-        //     'type' => 'solid',
-        //     'class' => 'icon-class',
-        //     'html' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="..."></path></svg>',
-        // ],
-        // [
-        //     'name' => 'url_collection_site',
-        //     'type' => 'solid',
-        //     'class' => 'icon-class',
-        //     'html' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="..."></path></svg>',
-        // ],
-    ],
-    'default' => 'elegant',
-];
+            <!-- Gestione Collezioni -->
+            <details class="collapse-arrow collapse bg-base-200">
+                <summary class="collapse-title text-lg font-medium">Gestione Collezioni</summary>
+                <div class="collapse-content space-y-2">
+                    <a href="{{ route('collections.index') }}"
+                        class="{{ request()->routeIs('collections.*') ? 'btn-active' : '' }} btn btn-ghost w-full justify-start">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="40" height="40"
+                            style="enable-background:new 0 0 256 256" xml:space="preserve">
+                            <style>
+                                .st2 {
+                                    fill: none;
+                                    stroke: #6b1d1d;
+                                    stroke-width: .5;
+                                    stroke-miterlimit: 10
+                                }
+
+                                .st3 {
+                                    fill: #3a312a
+                                }
+
+                                .st8 {
+                                    fill: #f16c7a
+                                }
+
+                                .st9 {
+                                    fill: #8ac6dd
+                                }
+
+                                .st14 {
+                                    fill: #d7e057
+                                }
+                            </style>
+                            <g id="Layer_1">
+                                <path
+                                    d="M215.716 91.134h-7.02l-2.17 4.26c.18.58.28 1.19.28 1.83v67.58l7.81 17.84a1.5 1.5 0 0 1-.77 1.97l-7.04 3.08v30.01c0 3.36-2.73 6.09-6.09 6.09h15c3.36 0 6.09-2.73 6.09-6.09V97.224c0-3.36-2.73-6.09-6.09-6.09z"
+                                    style="fill:#decaad" />
+                                <path class="st14"
+                                    d="M47.717 25.964s3.408 12.659 13.222 13.246c0 0-13.1 4.525-13.321 14.202 0 0-2.579-13.572-12.925-14.059 0 .001 12.05-1.825 13.024-13.389z" />
+                                <path class="st3"
+                                    d="M47.617 54.912a1.502 1.502 0 0 1-1.473-1.217c-.023-.124-2.494-12.417-11.522-12.842a1.5 1.5 0 0 1-.155-2.982c.441-.069 10.895-1.817 11.754-12.033a1.501 1.501 0 0 1 2.943-.265c.031.116 3.259 11.626 11.864 12.141a1.501 1.501 0 0 1 .402 2.915c-.121.042-12.119 4.311-12.312 12.819a1.498 1.498 0 0 1-1.501 1.464zm-7.741-15.73c3.878 1.969 6.23 5.746 7.587 8.877 2.026-4.021 5.941-6.787 8.949-8.427-4.135-1.842-6.784-5.651-8.335-8.722-1.793 4.36-5.27 6.867-8.201 8.272z" />
+                                <path class="st14"
+                                    d="M26.018 42.945s2.411 8.954 9.352 9.369c0 0-9.266 3.201-9.422 10.045 0 0-1.824-9.6-9.142-9.944 0 0 8.524-1.291 9.212-9.47z" />
+                                <path class="st3"
+                                    d="M25.947 63.859a1.5 1.5 0 0 1-1.473-1.22c-.016-.082-1.704-8.442-7.739-8.726a1.5 1.5 0 0 1-.154-2.982c.296-.047 7.364-1.243 7.942-8.113a1.501 1.501 0 0 1 1.361-1.368 1.506 1.506 0 0 1 1.581 1.102c.023.079 2.229 7.919 7.994 8.264a1.5 1.5 0 0 1 .4 2.916c-.081.028-8.282 2.953-8.412 8.662a1.5 1.5 0 0 1-1.5 1.465zm-4.519-11.527c2.108 1.333 3.524 3.394 4.447 5.28 1.376-2.232 3.516-3.872 5.365-4.973-2.287-1.269-3.884-3.35-4.941-5.224-1.173 2.287-3.015 3.876-4.871 4.917z" />
+                                <path class="st14"
+                                    d="M26.018 16.287s2.411 8.954 9.352 9.37c0 0-9.266 3.201-9.422 10.045 0 0-1.824-9.6-9.142-9.944 0 0 8.524-1.292 9.212-9.471z" />
+                                <path class="st3"
+                                    d="M25.947 37.202a1.5 1.5 0 0 1-1.473-1.22c-.016-.082-1.704-8.442-7.739-8.726a1.5 1.5 0 0 1-.154-2.981c.296-.047 7.364-1.243 7.942-8.114a1.499 1.499 0 0 1 2.942-.267c.023.079 2.229 7.92 7.994 8.265a1.5 1.5 0 0 1 .4 2.915c-.081.028-8.282 2.952-8.412 8.662a1.5 1.5 0 0 1-1.5 1.466zm-4.519-11.528c2.108 1.333 3.524 3.395 4.447 5.28 1.376-2.232 3.516-3.872 5.365-4.973-2.287-1.269-3.884-3.35-4.941-5.223-1.173 2.286-3.015 3.875-4.871 4.916z" />
+                                <path
+                                    d="M126.234 75.213H33.411c-9.447 0-17.105 7.658-17.105 17.105v130.289c0 9.447 7.658 17.105 17.105 17.105H222.2c9.447 0 17.105-7.658 17.105-17.105V92.318c0-9.447-7.658-17.105-17.105-17.105H126.234z"
+                                    style="fill:#87796f" />
+                                <path class="st3"
+                                    d="M222.2 241.213H33.411c-10.259 0-18.605-8.346-18.605-18.605V92.318c0-10.259 8.347-18.605 18.605-18.605h92.822a1.5 1.5 0 1 1 0 3H33.411c-8.604 0-15.605 7.001-15.605 15.605v130.289c0 8.605 7.001 15.605 15.605 15.605H222.2c8.605 0 15.605-7.001 15.605-15.605V92.318c0-8.605-7.001-15.605-15.605-15.605h-83.155a1.5 1.5 0 1 1 0-3H222.2c10.259 0 18.605 8.346 18.605 18.605v130.289c.001 10.26-8.346 18.606-18.605 18.606z" />
+                                <path
+                                    d="M223.306 147.226V97.224c0-4.194-3.4-7.594-7.594-7.594H56.9a7.594 7.594 0 0 0-7.594 7.594v120.478c0 4.194 3.4 7.594 7.594 7.594h158.811c4.194 0 7.594-3.4 7.594-7.594v-70.476z"
+                                    style="fill:#fce8cb" />
+                                <path class="st3"
+                                    d="M215.712 226.796H56.9c-5.015 0-9.095-4.08-9.095-9.095V97.224c0-5.015 4.08-9.095 9.095-9.095h158.811c5.015 0 9.094 4.08 9.094 9.095v120.478c.001 5.014-4.078 9.094-9.093 9.094zM56.9 91.129a6.102 6.102 0 0 0-6.095 6.095v120.478a6.102 6.102 0 0 0 6.095 6.095h158.811a6.101 6.101 0 0 0 6.094-6.095V97.224a6.1 6.1 0 0 0-6.094-6.095H56.9z" />
+                                <circle class="st8" cx="32.306" cy="156.963" r="8" />
+                                <path class="st3"
+                                    d="M32.306 166.463c-5.238 0-9.5-4.262-9.5-9.5s4.262-9.5 9.5-9.5 9.5 4.262 9.5 9.5-4.262 9.5-9.5 9.5zm0-16c-3.584 0-6.5 2.916-6.5 6.5s2.916 6.5 6.5 6.5 6.5-2.916 6.5-6.5-2.916-6.5-6.5-6.5z" />
+                                <path class="st8" d="m92.306 150.577-31.754 55h63.508z" />
+                                <path class="st3"
+                                    d="M124.061 207.078H60.552a1.5 1.5 0 0 1-1.299-2.25l31.754-55a1.5 1.5 0 0 1 2.598 0l31.755 55a1.5 1.5 0 0 1-1.299 2.25zm-60.912-3h58.313l-29.157-50.5-29.156 50.5z" />
+                                <path transform="rotate(-23.648 160.806 162.746)" class="st9"
+                                    d="M120.996 122.935h79.619v79.619h-79.619z" />
+                                <path class="st3"
+                                    d="M140.308 216.679a1.5 1.5 0 0 1-1.375-.899l-31.936-72.934a1.502 1.502 0 0 1 .773-1.976l72.935-31.936a1.498 1.498 0 0 1 1.975.772l31.935 72.934a1.5 1.5 0 0 1-.773 1.976l-72.934 31.936c-.195.087-.4.127-.6.127zm-29.961-73.661 30.732 70.186 70.186-30.732-30.731-70.186-70.187 30.732z" />
+                                <path class="st8"
+                                    d="m235.846 34.542 2.932-5.801a8.499 8.499 0 0 0-3.752-11.42 8.499 8.499 0 0 0-11.42 3.752l-2.932 5.801 15.172 7.668z" />
+                                <path class="st3"
+                                    d="M235.847 36.042c-.232 0-.465-.054-.677-.161l-15.173-7.669a1.501 1.501 0 0 1-.662-2.016l2.933-5.801a9.936 9.936 0 0 1 5.804-4.99 9.946 9.946 0 0 1 7.632.576c4.921 2.487 6.9 8.515 4.414 13.436l-2.932 5.801a1.506 1.506 0 0 1-1.339.824zm-13.158-9.831 12.495 6.316 2.255-4.462c1.741-3.445.354-7.664-3.09-9.405a6.953 6.953 0 0 0-5.342-.403 6.948 6.948 0 0 0-4.062 3.493l-2.256 4.461z" />
+                                <path class="st9"
+                                    d="m202.646 62.252-51.209 100.499 15.172 7.668 69.237-135.877-15.172-7.669-11.968 23.488z" />
+                                <path class="st3"
+                                    d="M166.608 171.92c-.227 0-.459-.052-.676-.162l-15.173-7.669a1.504 1.504 0 0 1-.66-2.02l51.21-100.498a1.5 1.5 0 0 1 2.674 1.363l-50.527 99.157 12.496 6.315 67.875-133.205-12.496-6.315-11.289 22.156a1.5 1.5 0 0 1-2.674-1.363l11.969-23.488a1.501 1.501 0 0 1 2.014-.658l15.173 7.668a1.504 1.504 0 0 1 .66 2.02l-69.237 135.878a1.503 1.503 0 0 1-1.339.821z" />
+                                <path class="st8" d="m185.942 95.035-34.505 67.716 15.172 7.668 34.505-67.716z" />
+                                <path class="st3"
+                                    d="M166.608 171.92c-.227 0-.459-.052-.676-.162l-15.173-7.669a1.504 1.504 0 0 1-.66-2.02l34.506-67.716a1.502 1.502 0 0 1 2.014-.658l15.172 7.669a1.504 1.504 0 0 1 .66 2.02L167.946 171.1c-.265.52-.792.82-1.338.82zm-13.152-9.829 12.496 6.315 33.143-65.043-12.495-6.315-33.144 65.043z" />
+                                <path class="st14" d="m166.609 170.419-15.172-7.668-2.338 23.468z" />
+                                <path class="st3"
+                                    d="M149.099 187.72a1.502 1.502 0 0 1-1.493-1.649l2.338-23.469a1.5 1.5 0 0 1 2.168-1.19l15.173 7.669a1.5 1.5 0 0 1 .329 2.453l-17.511 15.8a1.499 1.499 0 0 1-1.004.386zm3.613-22.644-1.736 17.429 13.005-11.734-11.269-5.695z" />
+                                <circle class="st14" cx="120.806" cy="126.744" r="28.5" />
+                                <path class="st3"
+                                    d="M120.806 156.744c-16.542 0-30-13.458-30-30s13.458-30 30-30 30 13.458 30 30-13.458 30-30 30zm0-57c-14.888 0-27 12.112-27 27s12.112 27 27 27 27-12.112 27-27-12.113-27-27-27z" />
+                            </g>
+                        </svg>
+                        {{ __('collection.manage_collection') }}
+                    </a>
+                </div>
+            </details>
+        </div>
+    </aside>
+</div>

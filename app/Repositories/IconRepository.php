@@ -51,6 +51,13 @@ class IconRepository
 
             if (!$query_icon) {
                 Log::channel('florenceegi')->warning('Class IconRepository. Method: getIcon. Action: Icon Not Found', ['name' => $name, 'style' => $style]);
+
+                $fallback_icon = Icon::where('name', 'fallback')->where('style', $style)->first();
+
+                if ($fallback_icon) {
+                    return $fallback_icon->html;
+                }
+
                 return 'fallback'; // Puoi specificare un'icona di fallback
             }
 

@@ -18,6 +18,8 @@ return new class extends Migration
             $table->string('type'); // Tipo dell'icona, es: 'solid', 'regular', 'light', 'duotone', 'brands'
             $table->string('class'); // Altezza dell'icona, es: '448'
             $table->text('html'); // Contenuto HTML generico (SVG, tag <i>, ecc.)
+            $table->string('host'); // Host di provenienza dell'icona, es: 'fontawesome.com'
+            $table->string('name_on_host'); // Nome dell'icona sul host di provenienza, es: 'camera'
             $table->timestamps();
         });
     }

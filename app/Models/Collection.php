@@ -63,6 +63,12 @@ class Collection extends Model
         return $this->hasManyThrough(User::class, Team::class, 'id', 'id', 'team_id', 'user_id');
     }
 
+    public function egis()
+    {
+        return $this->hasMany(Egi::class);
+    }
+
+
     /**
      * Accessor per verificare se il file esiste fisicamente e restituire il percorso.
      */

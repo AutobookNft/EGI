@@ -25,6 +25,8 @@ return new class extends Migration
             $table->float('royalty_mint')->nullable($value = true);
             // royalty del secondo mercato
             $table->float('royalty_rebind')->nullable($value = true);
+            $table->string('approval', 25)->default('approved');
+            $table->json('previous_values')->nullable();
             $table->boolean('status')->nullable($value = true);
 
             $table->timestamps();
