@@ -42,7 +42,8 @@ class Sidebar extends Component
         ->where('context', $this->context)
         ->first();
 
-        // Recupera l'icona dal repository
+        Log::info('context: '.json_encode($context));
+
 
 
        // Se il contesto esiste, trasforma i dati nel formato desiderato
@@ -64,6 +65,7 @@ class Sidebar extends Component
                     'summary_icon' => $iconHtml ?? '',
                     'summary_route' => $summary->route ?? 'dashboard',
                     'icon' => $iconHtml ?? '',
+                    'summary_head' => $summary->head,
                     'submenu' => $summary->menus->map(function ($menu) {
 
                         // Recupero l'icona per il menu
@@ -81,6 +83,7 @@ class Sidebar extends Component
                             'name' =>__('side_nav_bar.'.$menu->name),
                             'route' => $menu->route,
                             'permission' => $menu->permission,
+                            'head' => $menu->head,
                             'icon' => $iconHtml,
                         ];
                     })->toArray(),

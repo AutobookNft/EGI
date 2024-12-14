@@ -25,6 +25,16 @@ class TeamWallet extends JetstreamTeam
 
     protected $appends = ['short_wallet'];
 
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function team()
+    {
+        return $this->belongsTo(Team::class);
+    }
+
     // Accessor per mostrare solo una parte dell'indirizzo
     public function getShortWalletAttribute()
     {

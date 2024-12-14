@@ -62,10 +62,22 @@ class BarContextsMenuSeeder extends Seeder
                 'context' => 'dashboard',
                 'summary' => 'collection_handling', // ID del summary 'Gestione Collezioni'
                 'name' => 'open_collection',
-                'route' => 'collections.carousel',
+                'route' => 'collections.open',
                 'permission' => 'view_collection',
                 'tip' => 'collection_handling',
                 'icon' => 'open',
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ],
+            [
+                'position' => 2,
+                'context' => 'dashboard',
+                'summary' => 'collection_handling', // ID del summary 'Gestione Collezioni'
+                'name' => 'new_collection',
+                'route' => 'collections.create',
+                'permission' => 'create_collection',
+                'tip' => 'new_collection',
+                'icon' => 'new_collection',
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],

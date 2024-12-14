@@ -329,6 +329,34 @@ return [
                         <path d="M.853 3.413a2.56 2.56 0 1 1 5.12 0 2.56 2.56 0 0 1-5.12 0zM4.72 2.8H3.413a.08.08 0 0 1-.08-.08v-.5L2.14 3.413l1.193 1.194v-.5a.08.08 0 0 1 .08-.08H4.72V2.8zm-3.413.613a2.1 2.1 0 0 1 .617-1.49 2.1 2.1 0 0 1 1.49-.616 2.1 2.1 0 0 1 1.489.617 2.1 2.1 0 0 1 .617 1.49 2.1 2.1 0 0 1-.617 1.489 2.1 2.1 0 0 1-1.49.617 2.1 2.1 0 0 1-1.49-.617 2.1 2.1 0 0 1-.616-1.49zm.73-1.376a1.94 1.94 0 0 0-.57 1.376c0 .538.218 1.025.57 1.377.352.352.839.57 1.376.57a1.94 1.94 0 0 0 1.377-.57 1.94 1.94 0 0 0 .57-1.377 1.94 1.94 0 0 0-.57-1.376 1.94 1.94 0 0 0-1.377-.57 1.94 1.94 0 0 0-1.376.57z" style="fill:#fffffe"/>
                     </svg>',
             ],
+            [
+                'name' => 'new_collection',
+                'type' => 'solid',
+                'class' => 'w-12 h-12 text-base-content',
+                'host' => 'DALL-E',
+                'name_on_host' => 'new_collection',
+                'html' => '<img src="/images/default/new_collection.webp" alt="Nuova Collezione" class="w-12 h-12 text-base-content">',
+
+            ],
+            [
+                'name' => 'open_collection',
+                'type' => 'solid',
+                'class' => 'w-12 h-12 text-base-content',
+                'host' => 'DALL-E',
+                'name_on_host' => 'open_collection',
+                'html' => '<img src="/images/default/open_collection.webp" alt="Nuova Collezione" class="w-12 h-12 text-base-content">',
+
+            ],
+            [
+                'name' => 'manage_collection',
+                'type' => 'solid',
+                'class' => 'w-12 h-12 text-base-content',
+                'host' => 'DALL-E',
+                'name_on_host' => 'manage_collection',
+                'html' => '<img src="/images/default/manage_collection.jpeg" alt="Nuova Collezione" class="w-12 h-12 text-base-content">',
+
+            ],
+
         ],
 
         // [

@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id(); // Chiave primaria auto-incrementante
             $table->string('context'); // Collegato a `bar_contexts`
             $table->string('summary');
+            $table->boolean('head')->default(false); // campo head: true or false
             $table->integer('position')->nullable();
             $table->string('route')->nullable();
             $table->string('permission')->nullable();

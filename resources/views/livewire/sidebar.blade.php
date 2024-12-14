@@ -9,18 +9,26 @@
                 @foreach ($menus as $menu)
                     @can($menu['permission'])
                         @if (count($menu['submenu']) > 0)
+
                             <!-- Summary con sottomenù -->
                             <details class="collapse collapse-arrow bg-base-200">
-
-                                <summary class="collapse-title text-lg font-medium">
+                                @if($menu['summary_head'] == true)
                                     <div class="flex gap-2">
                                         @if ($menu['summary_icon'])
                                             {!! $menu['summary_icon'] !!}
                                         @endif
                                         {{ $menu['name'] }}
                                     </div>
-
-                                </summary>
+                                @else
+                                    <summary class="collapse-title text-lg font-medium">
+                                        <div class="flex gap-2">
+                                            @if ($menu['summary_icon'])
+                                                {!! $menu['summary_icon'] !!}
+                                            @endif
+                                            {{ $menu['name'] }}
+                                        </div>
+                                    </summary>
+                                @endif
 
                                 <div class="collapse-content space-y-2">
                                     @foreach ($menu['submenu'] as $submenu)
@@ -41,12 +49,15 @@
                         @else
                             <!-- Summary senza voci -->
                             <a href="{{ Route::has($menu['summary_route']) ? route($menu['summary_route']) : '#' }}"
-                                class="collapse-title text-lg font-medium text-gray-500">
-                                <div class="flex gap-2">
+                                class="text-lg font-medium text-gray-500">
+                                <div class="flex gap-2 mb-8 mt-32">
                                     <div class = "mt-0"> {!! $menu['summary_icon'] !!} </div>
                                     <div class = "mt-1">{{ $menu['name'] }}</div>
                                 </div>
                             </a>
+                            
+                            <div class="border-t border-gray-200 dark:border-gray-600"></div>
+
                         @endif
                     @endcan
                 @endforeach

@@ -17,6 +17,7 @@ return [
     ],
 
     'open_collection' => 'Open Collection',
+    'new_collection' => 'New Collection',
     'permissions_roles' => 'Roles and Permissions',
     'assign_roles' => 'Assign Roles',
     'assign_permissions' => 'Assign Permissions',

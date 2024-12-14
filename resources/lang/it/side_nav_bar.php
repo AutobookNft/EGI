@@ -18,6 +18,7 @@
     ],
 
     'open_collection' => 'Apri Collezione',
+    'new_collection' => 'Nuova Collezione',
     'permissions_roles' => 'Ruoli e Permessi',
     'assign_roles' => 'Assegna Ruoli',
     'assign_permissions' => 'Assegna Permessi',

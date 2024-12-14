@@ -1,0 +1,1083 @@
+<?php
+
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Models\Icon;
+
+class IconAdminController extends Controller
+{
+
+    public function __construct()
+    {
+        $this->middleware('can:manage_icons');
+    }
+
+    public function index()
+    {
+        $icons = Icon::all();
+        return view('admin.icons.index', compact('icons'));
+    }
+
+    public function edit(Icon $icon)
+    {
+        return view('admin.icons.edit', compact('icon'));
+    }
+
+    public function update(Request $request, Icon $icon)
+    {
+        $request->validate([
+            'html' => 'required|string',
+        ]);
+
+        $icon->update([
+            'html' => $request->svg,
+        ]);
+
+        return redirect()->route('admin.icons.index')->with('status', 'Icon updated successfully!');
+    }
+}
+-------------------------------------------------------------------------------------------------------------------
+
+<?php
+
+namespace App\Providers;
+
+
+use App\Repositories\IconRepository;
+use App\Services\FileStorageService;
+use Illuminate\Support\ServiceProvider;
+
+
+use App\Models\User;
+use App\Models\TeamWallet as Wallet;
+use App\Models\Collection;
+use App\Models\Egi;
+use App\Policies\ProfilePolicy;
+use App\Policies\TeamWalletPolicy as WalletPolicy;
+use App\Policies\CollectionPolicy;
+use App\Policies\EgiPolicy;
+
+class AppServiceProvider extends ServiceProvider
+{
+
+    protected $policies = [
+        User::class => ProfilePolicy::class,
+        Wallet::class => WalletPolicy::class,
+        Collection::class => CollectionPolicy::class,
+        // Egi::class => EgiPolicy::class,
+    ];
+
+    /**
+     * Register any application services.
+     */
+    public function register(): void
+    {
+        $this->app->singleton(IconRepository::class);
+
+        // Registra il servizio di storage dei file
+        $this->app->singleton(FileStorageService::class, function () {
+            return new FileStorageService();
+        });
+    }
+
+    /**
+     * Bootstrap any application services.
+     */
+    public function boot(): void
+    {
+        //
+    }
+}
+-------------------------------------------------------------------------------------------------------------------
+
+<?php
+
+namespace App\Repositories;
+
+use App\Models\Icon;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
+
+class IconRepository
+{
+    /**
+     * Recupera un'icona specifica dal database o dalla cache.
+     *
+     * @param string $name  Nome dell'icona.
+     * @param string $style Stile dell'icona.
+     * @param string|null $customClass Classe personalizzata (opzionale).
+     * @return string|null  Contenuto HTML dell'icona.
+     */
+    public function getIcon(string $name, string $style, ?string $customClass = null): ?string
+    {
+
+        $this->clearCache($name, $style, $customClass);
+
+        // Log::channel('florenceegi')->info( 'Class IconRepository. Method: getIcon. Action: customClass: (' . $customClass .  ') name: (' . $name .')');
+
+        // Costruisce la chiave della cache
+        $cacheKey = $this->buildCacheKey($name, $style, $customClass);
+        // Log::channel('florenceegi')->info('Cache Key Generated', ['key' => $cacheKey, 'name' => $name, 'style' => $style, 'customClass' => $customClass]);
+
+        // Controlla se l'elemento è già in cache
+        $cachedValue = Cache::get($cacheKey);
+        if ($cachedValue) {
+            // Log::channel('florenceegi')->info('Cache Hit', ['key' => $cacheKey, 'cachedValue' => $cachedValue]);
+
+            // Sostituisce il segnaposto %class% con la classe personalizzata o quella di default
+            $finalClass = $customClass ?? 'default-class';
+            $processedValue = str_replace('%class%', $finalClass, $cachedValue);
+            // Log::channel('florenceegi')->info('Processed Cached Value', ['processedValue' => $processedValue, 'finalClass' => $finalClass]);
+
+            return $processedValue;
+        }
+
+        // Cache miss: esegue la closure per calcolare il valore
+        // Log::channel('florenceegi')->info('Class IconRepository. Method: getIcon. Action: Icon name', ['name' => $name]);
+
+        return Cache::remember($cacheKey, 3600, function () use ($name, $style, $customClass) {
+            // Log::channel('florenceegi')->info('Querying Database', ['name' => $name, 'style' => $style]);
+
+            $query_icon = Icon::where('name', $name)->where('style', $style)->first();
+
+            if (!$query_icon) {
+                Log::channel('florenceegi')->warning('Class IconRepository. Method: getIcon. Action: Icon Not Found', ['name' => $name, 'style' => $style]);
+
+                $fallback_icon = Icon::where('name', 'fallback')->where('style', $style)->first();
+
+                if ($fallback_icon) {
+                    return $fallback_icon->html;
+                }
+
+                return 'fallback'; // Puoi specificare un'icona di fallback
+            }
+
+            if ($customClass) {
+                $finalClass = $customClass;
+            } else {
+                $finalClass = $query_icon->class;
+            }
+
+            // Log::channel('florenceegi')->info('Class IconRepository. Method: getIcon. Action: Processed', ['$finalClass' => $finalClass]);
+            $processedHtml = str_replace('%class%', $finalClass, $query_icon->html);
+
+            return $processedHtml;
+        });
+    }
+
+    /**
+     * Recupera un'icona con lo stile predefinito.
+     *
+     * @param string $name Nome dell'icona.
+     * @return string      Contenuto HTML dell'icona (o fallback).
+     */
+    public function getDefaultIcon(string $name): string
+    {
+        $defaultStyle = config('icons.default');
+
+        // Determina lo stile dell'utente autenticato
+        if (Auth::check()) {
+            $defaultStyle = Auth::user()->icon_style ?? $defaultStyle;
+        }
+
+        return $this->getIcon($name, $defaultStyle) ?? $this->getFallbackIcon();
+    }
+
+
+    /**
+     * Recupera un'icona di fallback se quella richiesta non esiste.
+     *
+     * @return string Contenuto HTML dell'icona di fallback.
+     */
+    protected function getFallbackIcon(): string
+    {
+        return '<svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m2 0a2 2 0 00-2-2H9a2 2 0 00-2 2m8 0a2 2 0 01-2 2H9a2 2 0 01-2-2m6 0H9"></path>
+                </svg>';
+    }
+
+    /**
+     * Rimuove un'icona dalla cache.
+     *
+     * @param string|null $name  Nome dell'icona (opzionale).
+     * @param string|null $style Stile dell'icona (opzionale).
+     */
+    public function clearCache(?string $name = null, ?string $style = null, ?string $customClass): void
+    {
+        if ($name && $style) {
+            $cacheKey = $this->buildCacheKey($name, $style, $customClass);
+            Cache::forget($cacheKey);
+        } else {
+            // Elimina tutte le icone dalla cache
+            Cache::tags(['icons'])->flush();
+        }
+    }
+
+    /**
+     * Precarica tutte le icone in cache.
+     */
+    public function preloadIcons(): void
+    {
+        Icon::all()->each(function ($icon) {
+            $cacheKey = $this->buildCacheKey($icon->name, $icon->style, $icon->customClass);
+            Cache::put($cacheKey, $icon->html, 3600);
+        });
+    }
+
+    /**
+     * Costruisce la chiave della cache per un'icona.
+     *
+     * @param string $name  Nome dell'icona.
+     * @param string $style Stile dell'icona.
+     * @return string Chiave della cache.
+     */
+    protected function buildCacheKey(string $name, string $style, ?string $customClass = null): string
+    {
+        // Usa un hash per evitare che la chiave sia troppo lunga
+        $rawKey = "icon:{$style}:{$name}:{$customClass}";
+        return 'icon:' . md5($rawKey);
+    }
+
+}
+-------------------------------------------------------------------------------------------------------------------
+<?php
+
+namespace App\Services;
+
+use Illuminate\Support\Facades\Log;
+use Livewire\WithFileUploads;
+use Exception;
+use Illuminate\Support\Facades\Storage;
+
+class FileStorageService
+{
+    use WithFileUploads; // Necessario per sfruttare le funzionalità di Livewire
+
+    /**
+     * Salva un file Livewire in una posizione specifica.
+     *
+     * @param \Livewire\TemporaryUploadedFile $file
+     * @param string $path
+     * @param string $filename
+     * @param string $disk
+     * @return string
+     * @throws Exception
+     */
+    public function saveFile($file, string $path, ?string $filename=null, string $disk = 'public'): string
+    {
+        try {
+            // Usa storeAs per salvare il file
+            if ($filename){
+                $savedPath = $file->storeAs($path, $filename, $disk);
+            }else{
+                $savedPath = $file->store($path, $disk);
+            }
+            Log::channel('florenceegi')->info('File salvato:', ['path' => $savedPath]);
+
+            // Verifica se il file esiste usando il disco passato
+            if (! Storage::disk($disk)->exists("$path/$filename")) {
+                Log::channel('florenceegi')->error('File non trovato dopo storeAs.', ['path' => "$path/$filename"]);
+                throw new Exception('Errore durante il salvataggio del file.');
+            }
+
+            return $savedPath; // Restituisce il percorso relativo
+        } catch (Exception $e) {
+            Log::channel('florenceegi')->error('Errore nel salvataggio del file:', ['message' => $e->getMessage()]);
+            throw $e;
+        }
+    }
+
+}
+-------------------------------------------------------------------------------------------------------------------
+<?php
+
+namespace App\View\Components;
+
+use App\Repositories\IconRepository;
+use Illuminate\Support\Facades\Log;
+use Illuminate\View\Component;
+
+class FormInput extends Component
+{
+    public ?string $iconHtml = null;
+
+    public function __construct(
+        public string $type,
+        public string $label,
+        public string $model,
+        public string $id,
+        public bool $required = false,
+        public ?string $class = '',
+        public ?string $placeholder = '',
+        public ?string $icon = null, // Nome dell'icona da recuperare
+        public ?string $iconClass = null, // Classe personalizzata per l'icona
+        public string $datatip,
+        public string $style = 'primary',
+    ) {
+        // Validate style
+        $validStyles = ['primary', 'secondary', 'accent', 'info', 'success', 'warning', 'error'];
+        if (! in_array($style, $validStyles)) {
+            throw new \InvalidArgumentException('Style must be one of: '.implode(', ', $validStyles));
+        }
+
+        // Log::channel('florenceegi')->info( 'FormInput: iconClass: (' . $iconClass .  ') name: (' . $icon .')');
+
+        // Recupera l'icona dal repository
+        if ($icon) {
+            $repository = app(IconRepository::class);
+            $this->iconHtml = $repository->getIcon($icon, 'elegant', $iconClass);
+
+        }
+    }
+
+    public function render()
+    {
+        return view('components.form-input');
+    }
+}
+-------------------------------------------------------------------------------------------------------------------
+
+<?php
+
+namespace App\View\Components;
+
+use App\Models\Collection;
+use Illuminate\Support\Facades\Log;
+use Illuminate\View\Component;
+use App\Repositories\IconRepository;
+
+class ImageUploader extends Component
+{
+    public ?string $iconHtml = null;
+
+    public function __construct(
+        public string $model,
+        public string $id,
+        public string $label,
+        public $image ='',
+        public string $removeMethod = 'removeImage',
+        public ?string $icon = null, // Nome dell'icona da recuperare
+        public ?string $iconClass = null // Classe personalizzata per l'icona
+    ) {
+
+        // Log::channel('florenceegi')->info( 'Class: ImageUploader. Method: Construct(). Action: iconClass: (' . $iconClass .  ') name: (' . $icon .')');
+        // Log::channel('florenceegi')->info( 'Class: ImageUploader. Method: Construct(). Action: model: (' . $model .  ')');
+        // Log::channel('florenceegi')->info( 'Class: ImageUploader. Method: Construct(). Action: image: (' . $image .  ')');
+
+        // Recupera l'icona dal repository
+        if ($icon) {
+
+            $repository = app(IconRepository::class);
+            $this->iconHtml = $repository->getIcon($icon, 'elegant', $iconClass);
+        }
+    }
+
+    public function render()
+    {
+
+        return view('components.image-uploader');
+    }
+}
+-------------------------------------------------------------------------------------------------------------------
+<?php
+
+namespace App\Livewire\Collections;
+
+use Livewire\Component;
+use App\Models\Collection;
+use App\Repositories\IconRepository;
+use Illuminate\Support\Facades\Auth;
+
+class CollectionCarousel extends Component
+{
+    public $collections;
+    public $activeSlide = 0;
+    protected $iconRepository;
+
+    public function boot(IconRepository $iconRepository)
+    {
+        $this->iconRepository = $iconRepository;
+    }
+
+    public function mount()
+    {
+
+        $id = Auth::user()->currentTeam->id;
+        $this->collections = Collection::findOrFail($id);
+
+    }
+
+    public function nextSlide()
+    {
+        $this->activeSlide = ($this->activeSlide + 1) % count($this->collections);
+    }
+
+    public function prevSlide()
+    {
+        $this->activeSlide = ($this->activeSlide - 1 + count($this->collections)) % count($this->collections);
+    }
+
+    public function edit($id)
+    {
+        // Implementa la logica per modificare la collezione
+    }
+
+    public function delete($id)
+    {
+        // Implementa la logica per eliminare la collezione
+    }
+
+    public function render()
+    {
+        $iconHtml = $this->iconRepository->getIcon('camera', 'elegant', '');
+        return view('livewire.collections.collection-carousel', compact('iconHtml'));
+    }
+}
+-------------------------------------------------------------------------------------------------------------------
+<?php
+
+namespace App\Livewire\Collections;
+
+use App\Helpers\FileHelper;
+use App\Models\Collection;
+use App\Models\Team;
+use Livewire\Component;
+use Livewire\WithFileUploads;
+use Illuminate\Support\Facades\Log;
+use Livewire\Attributes\Validate;
+use App\Services\FileStorageService;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\DB;
+
+
+class CollectionManager extends Component
+{
+    use WithFileUploads;
+
+    public $collection = [
+        'user_id' => null,
+        'team_id' => null,
+        'type' => null,
+        'show' => null,
+        'collection_name' => null,
+        'position' => null,
+        'EGI_number '=> null,
+        'floor_price' => null,
+        'description' => null,
+        'url_collection_site' => null,
+        'path_image_banner' => '',
+        'path_image_card' => '',
+        'path_image_avatar' => '',
+    ];
+
+    public $collections;
+    public $model_collection = null;
+
+    // #[Validate('nullable|integer')]
+    // public $user_id;
+
+    #[Validate('nullable|string|max:255')]
+    public $type;
+
+    #[Validate('image|nullable')]
+    public $path_image_banner;
+
+    #[Validate('image|nullable')]
+    public $path_image_card;
+
+    #[Validate('image|nullable')]
+    public $path_image_avatar;
+
+    public $log;
+
+    public FileStorageService $fileStorageService;
+
+    public function mount($id = null)
+    {
+
+        if ($id) {
+            $this->authorize('read_collection_header');
+            $this->collection = Collection::findOrFail($id);
+        }
+
+    }
+
+    public function create()
+    {
+        Log::channel('florenceegi')->info('Class: CollectionManager. Method: create()');
+
+         // Controlla se l'utente ha il permesso 'create collections'
+        if (!Auth::user()->can('create_collection')) {
+            abort(403, 'Non hai il permesso di creare una collection.');
+        }
+
+        try {
+
+            // Prepara i dati della collection
+            $collectionData = $this->prepareCollectionData();
+
+            Log::channel('florenceegi')->info('Class: CollectionManager. Method: create(). Action: collection data:' , $collectionData);
+
+            // Valida i dati della collection
+            $this->validateCollection();
+
+            // Crea la collection
+            $collection = $this->storeCollection($collectionData);
+
+            // Associa la collection al team nella tabella pivot
+            $this->attachCollectionToTeam($collection, $collectionData['team_id']);
+
+            // Log di successo
+            Log::channel('florenceegi')->info('Collection created successfully', [
+                'collection_id' => $collection->id,
+                'collection_name' => $collection->collection_name,
+            ]);
+
+            // Reset dei campi di input e aggiornamento della lista delle collections
+            $this->resetInputFields();
+            $this->collections = Collection::all();
+
+            session()->flash('message', __('collection.created_successfully'));
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::channel('florenceegi')->warning('Validation failed during collection creation', [
+                'errors' => $e->errors(),
+                'collection_data' => $this->collection,
+            ]);
+            session()->flash('error', __('collection.create_validation_error'));
+            throw $e;
+
+        } catch (\Exception $e) {
+            Log::channel('florenceegi')->error('Failed to create collection', [
+                'error' => $e->getMessage(),
+                'collection_data' => $this->collection,
+                'stack_trace' => $e->getTraceAsString(),
+            ]);
+            session()->flash('error', __('collection.creation_failed'));
+        }
+    }
+
+    /**
+     * Prepara i dati per la creazione della collection.
+     *
+     * @return array
+     */
+    private function prepareCollectionData()
+    {
+
+        Log::channel('florenceegi')->info('Class: CollectionManager. Method: prepareCollectionData(). Action: collection data', [
+            'user' => Auth::id(),
+            'team' => Auth::user()->currentTeam->id,
+            'show' => $this->collection['show'] ?? false,
+            'type' => $this->collection['type'] ?? __('collection.type_image'),
+        ]);
+
+        // Imposta i valori predefiniti per i campi della collection
+        $this->collection['user_id'] = Auth::id() ?? null;
+        $this->collection['team_id'] = Auth::user()->currentTeam->id ?? null;
+
+        // type deve avere un valore predefinito, in quanto l'utente potrebbe dimentarsi di selezionare un tipo
+        $this->collection['type'] = __('collection.type_image') ?? 'image';
+
+        // show deve avere un valore predefinito impostato a false, se il controllo non viene modificato dall'utente, il valore di default potrebbe non essere gestito correttamente dal controllo stesso
+        $this->collection['show'] = $this->collection['show'] ?? false;
+
+        // EPP_id è un valore predefinito che può essere impostato nel file .env
+        /**
+         * NOTA
+         * In questa prima versione dell'applicazione l'EPP è fisso, in seguito gestiremo gli EPP mediante db
+         * */
+        $this->collection['EPP_id'] = config('app.epp_id', null);
+
+        return [
+            'user_id' => $this->collection['user_id'],
+            'team_id' => $this->collection['team_id'],
+            'EPP_id' => $this->collection['EPP_id'],
+            'show' => $this->collection['show'],
+            'type' => $this->collection['type'],
+            'collection_name' => $this->collection['collection_name'],
+            'description' => $this->collection['description'],
+            'url_collection_site' => $this->collection['url_collection_site'],
+            'position' => $this->collection['position'] ?? 0,
+            'EGI_number' => $this->collection['EGI_number'] ?? 0,
+            'floor_price' => $this->collection['floor_price'] ?? 0,
+        ];
+    }
+
+    /**
+     * Valida i dati della collection.
+     *
+     * @return void
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    private function validateCollection()
+    {
+        $this->validate([
+            'collection.user_id' => 'required|exists:users,id',
+            'collection.team_id' => 'required|exists:teams,id',
+            'collection.collection_name' => 'required|string|max:255',
+            'collection.type' => 'required|string',
+            'collection.position' => 'nullable|integer',
+            'collection.EGI_number' => 'nullable|integer',
+            'collection.floor_price' => 'nullable|numeric',
+            'collection.description' => 'nullable|string',
+            'collection.url_collection_site' => 'nullable|url',
+            'collection.show' => 'nullable|boolean',
+        ]);
+    }
+
+    /**
+     * Crea una nuova collection nel database.
+     *
+     * @param array $data
+     * @return \App\Models\Collection
+     */
+    private function storeCollection(array $data)
+    {
+        // Trova il team esistente
+        $team = Team::findOrFail($data['team_id']);
+
+        // Crea la collection
+        $collection = Collection::create($data);
+
+        // Associa la collection al team
+        $collection->teams()->attach($team);
+
+        return $collection;
+    }
+
+    /**
+     * Associa la collection al team nella tabella pivot.
+     *
+     * @param \App\Models\Collection $collection
+     * @param int $teamId
+     * @return void
+     */
+    private function attachCollectionToTeam(Collection $collection, int $teamId)
+    {
+        $collection->teams()->attach($teamId);
+
+    }
+
+    public function update()
+    {
+
+        try {
+
+            $this->validate();
+
+            // Ottengo l'istanza del servizio FileStorageService
+            $fileStorageService = app(FileStorageService::class);
+
+            // Recupera la collection da aggiornare
+            $collection = Collection::findOrFail($this->collectionId);
+
+            // Log::channel('florenceegi')->info('Class: CollectionManager. Method: update().Action: collection data', $this->collection);
+
+            // Creo il percorso dove salvare le immagini
+            $path = $this->createPathImage();
+
+              // Salva le immagini solo se sono state caricate
+            if (is_object($this->path_image_banner)) {
+
+                // Crea il nome del file
+                $filename = 'banner_' . $this->collectionId . '.' . $this->path_image_banner->extension();
+                // Memorizza l'immagine nel db e salva l'immagine nel filesystem
+                $this->collection['path_image_banner'] = $fileStorageService->saveFile($this->path_image_banner, $path,$filename);
+            }
+
+            if (is_object($this->path_image_card)) {
+
+                $filename = 'card_' . $this->collectionId . '.' . $this->path_image_card->extension();
+                $this->collection['path_image_card'] = $fileStorageService->saveFile($this->path_image_card, $path);
+
+            }
+
+            if (is_object($this->path_image_avatar)) {
+                $filename = 'avatar_' . $this->collectionId . '.' . $this->path_image_avatar->extension();
+                $this->collection['path_image_avatar'] =$fileStorageService->saveFile($this->path_image_avatar, $path, $filename);
+            }
+
+            // Salvo i dati della collection nel database
+            $collection->update($this->collection);
+
+            $this->path_image_card = $collection->verified_image_card_path;
+            $this->path_image_avatar = $collection->verified_image_avatar_path;
+            $this->path_image_banner = $collection->verified_image_banner_path;
+
+            // Log::channel('florenceegi')->info('Collection updated successfully', $this->collection);
+
+            // Resetta i campi del form
+            $this->resetInputFields();
+
+            // Aggiorna la lista delle collection
+            $this->readTheTeamsCollections();
+
+            // Mostra un messaggio di successo
+            session()->flash('message', __('collection.updated_successfully'));
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::channel('florenceegi')->error('Errore durante la validazione dei dati in update', $e->errors());
+            session()->flash('error', __('collection.update.validation_error'));
+            throw $e;
+
+        } catch (ModelNotFoundException $e) {
+            Log::channel('florenceegi')->error('Collection not found during update', [
+                'collection_id' => $this->collectionId
+            ]);
+            session()->flash('error', __('collection.not_found'));
+
+        } catch (\Exception $e) {
+            Log::channel('florenceegi')->error('Failed to update collection', [
+                'collection_id' => $this->collectionId,
+                'error' => $e->getMessage(),
+                'collection_data' => $this->collection,
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+            session()->flash('error', __('collection.update_failed'));
+        }
+    }
+
+    public function index(){
+        $this->collections = Collection::all();
+    }
+
+    public function edit($id)
+    {
+
+        if ($id) {
+            $this->authorize('update_collection');
+
+            Log::channel('florenceegi')->info('Editing collection', $this->collection);
+
+            $this->collection = Collection::findOrFail($id);
+
+            // $this->collection = [
+            //     'collection_name' => $collection->collection_name,
+            //     'user_id' => $collection->user_id,
+            //     'team_id' => $collection->team_id,
+            //     'type' => $collection->type,
+            //     'position' => $collection->position,
+            //     'show' => $collection->show,
+            //     'EGI_number' => $collection->EGI_number,
+            //     'floor_price' => $collection->floor_price,
+            //     'description' => $collection->description,
+            //     'url_collection_site' => $collection->url_collection_site,
+            //     'path_image_banner' => $collection->path_image_banner,
+            //     'path_image_card' => $collection->verified_image_card_path,
+            //     'path_image_avatar' => $collection->path_image_avatar,
+            // ];
+        }
+
+    }
+
+    public function delete($id)
+    {
+        Collection::find($id)->delete();
+        $this->collections = Collection::all();
+    }
+
+    private function resetInputFields()
+    {
+
+        // $this->user_id = '';
+        // $this->name = '';
+        // $this->show = false;
+        // $this->personal_team = false;
+        // $this->creator = '';
+        // $this->owner_wallet = '';
+        // $this->address = '';
+        // $this->collection_name = '';
+        // $this->description = '';
+        // $this->type = '';
+        // $this->position = '';
+        // $this->floor_price = '';
+        $this->path_image_banner = '';
+        $this->path_image_card = '';
+        $this->path_image_avatar = '';
+        // $this->path_image_EGI = '';
+        // $this->url_collection_site = '';
+        // $this->EGI_number = '';
+        // $this->EGI_asset_roles = '';
+        // $this->path_image_to_ipfs = '';
+        // $this->url_image_ipfs = '';
+
+        // Resetta gli altri campi
+    }
+
+    public function removeImage($type)
+    {
+        switch ($type) {
+            case 'banner':
+                $this->path_image_banner = '';
+                break;
+            case 'card':
+
+
+                // Log::channel('florenceegi')->info('Class: CollectionManager. Method: removeImage(). Action: type: '. $type);
+
+                // Elimina il riferimento anche dal database
+                DB::table('collections')->where('id', $this->collectionId)->update(['path_image_card' => null]);
+                Storage::delete($this->collection['path_image_card']);
+
+                $this->collection['path_image_card'] = null;
+                $this->path_image_card = null;
+
+                // $this->dispatch('remove_image');
+
+            case 'avatar':
+                $this->path_image_avatar = '';
+
+                break;
+        }
+
+        $this->dispatch('refresh');
+    }
+
+    public function render()
+    {
+
+        $collection = $this->model_collection;
+        $wallets = $collection->wallets;
+
+        Log::channel('florenceegi')->info('Class: CollectionManager. Method: render(). Action: collection data: '. json_encode($collection));
+
+        $this->collection = [
+            'collection_name' => $collection->collection_name,
+            'user_id' => $collection->user_id,
+            'team_id' => $collection->team_id,
+            'type' => $collection->type,
+            'position' => $collection->position,
+            'show' => $collection->show,
+            'EGI_number' => $collection->EGI_number,
+            'floor_price' => $collection->floor_price,
+            'description' => $collection->description,
+            'url_collection_site' => $collection->url_collection_site,
+            'path_image_banner' => $collection->path_image_banner,
+            'path_image_card' => $collection->verified_image_card_path,
+            'path_image_avatar' => $collection->path_image_avatar,
+        ];
+
+        return view('livewire.collection-manager', [
+            'wallets' => $wallets,
+        ]);
+    }
+
+    // Recupera tutte le collection che appartengono ai team a cui l'utente autenticato è associato.
+    // Relazioni coinvolte:
+    // 1. Una Collection appartiene a un Team (relazione `belongsTo` nel modello Collection).
+    // 2. Un Team può avere molti utenti associati (relazione `hasManyThrough` o `belongsToMany` con tabella pivot team_user).
+    // 3. Un utente (User) può essere membro di uno o più Team (relazione `belongsToMany` nel modello User).
+    //
+    // La logica della query:
+    // - Utilizziamo `whereHas('team')` per verificare che esista un team associato alla collection.
+    // - All'interno di `whereHas('team')`, verifichiamo che il team abbia utenti associati tramite `whereHas('users')`.
+    // - All'interno di `whereHas('users')`, filtriamo per includere solo i team che contengono l'utente autenticato (`auth()->id()`).
+    //
+    // Risultato:
+    // Otteniamo solo le collection che appartengono ai team a cui l'utente autenticato è associato.
+
+    // $this->collections = Collection::whereHas('users', function ($query) {
+    //     $query->where('users.id', Auth::id());
+    // })->get();
+
+    public function readTheTeamsCollections()
+    {
+        $user = Auth::user();
+
+        // Verifica se l'utente è autenticato e ha un team corrente
+        if ($user && $user->currentTeam) {
+            // Recupera le collections associate al team corrente dell'utente
+            $this->collections = $user->currentTeam->collections()->with('teams')->get();
+        } else {
+            // Se l'utente non ha un team corrente, restituisce una collezione vuota
+            $this->collections = collect();
+        }
+    }
+
+    private function createPathImage()
+    {
+        $filename =  config('app.bucket_root_file_folder') . "/creator_" . Auth::id() . "/collections_".$this->collectionId;
+        return $filename;
+    }
+}
+-------------------------------------------------------------------------------------------------------------------
+
+<?php
+
+namespace App\Livewire\Collections;
+
+use App\Repositories\IconRepository;
+use Livewire\Component;
+use App\Models\Collection;
+use Illuminate\Support\Facades\Auth;
+
+class Open extends Component
+{
+    public $collections;
+
+    protected $team_id;
+
+    public $noTeamMessage = null;
+
+    protected $iconRepository;
+
+    public function boot(IconRepository $iconRepository)
+    {
+        $this->iconRepository = $iconRepository;
+    }
+
+
+    public function mount()
+    {
+        // Verifico se l'utente ha un team corrente
+        $team = Auth::user()->currentTeam;
+
+        if (!$team) {
+            // L'utente non ha un team associato
+            $this->noTeamMessage = 'Non hai nessun team associato. Crea un team per iniziare a gestire le collection.';
+            return;
+        }
+
+        // Se esiste il team, assegno l'id
+        $this->team_id = $team->id;
+
+        // Recupero tutte le collection associate al team corrente
+        $this->collections = Collection::where('team_id', $this->team_id)->get();
+
+    }
+
+    public function render()
+    {
+
+        // Se l'utente non ha un team, mostro un messaggio di avviso
+        if ($this->noTeamMessage) {
+            return view('livewire.collections.no-team', [
+                'message' => $this->noTeamMessage,
+            ]);
+        }
+
+        // Se ci sono più di una collection, mostro il carousel
+        if ($this->collections->count() > 1) {
+            $iconHtml = $this->iconRepository->getIcon('camera', 'elegant', '');
+            return view('livewire.collections.collection-carousel', compact('iconHtml', 'collections'));
+        }
+
+        // Altrimenti mostro il collection-manager per la prima collection
+        return view('livewire.collections.collection-manager', [
+            'collection' => $this->collections->first(),
+        ]);
+    }
+}
+-------------------------------------------------------------------------------------------------------------------
+<?php
+
+namespace App\Livewire;
+
+use App\Models\BarContextMenu;
+use App\Repositories\IconRepository;
+use Livewire\Component;
+use Illuminate\Support\Facades\Route;
+use App\Models\BarContext;
+use Illuminate\Support\Facades\Log;
+
+class Sidebar extends Component
+{
+    public $context;
+    public $menus;
+
+    public function mount()
+    {
+        // Ottieni il nome della rotta corrente
+        $currentRouteName = Route::currentRouteName();
+
+        // Estrai il contesto dal nome della rotta (es: 'collections.index' -> 'collections')
+        $this->context = explode('.', $currentRouteName)[0];
+
+        Log::info($this->context);
+
+    }
+
+    public function render()
+    {
+
+
+        // Query per ottenere il contesto con i summary e i relativi menu
+        $context = BarContext::with([
+            'summaries' => function ($query) {
+                $query->orderBy('position', 'asc');
+            },
+            'summaries.menus' => function ($query) {
+                $query->orderBy('position', 'asc');
+            }
+        ])
+        ->where('context', $this->context)
+        ->first();
+
+        Log::info('context: '.json_encode($context));
+
+
+
+       // Se il contesto esiste, trasforma i dati nel formato desiderato
+       if ($context) {
+            $this->menus = $context->summaries->map(function ($summary) {
+
+                $icon = $summary->icon ?? '';
+                $iconClass = '';
+
+                // Recupero l'icona per il menu sommario
+                if ($icon) {
+                    $repository = app(IconRepository::class);
+                    $iconHtml = $repository->getIcon($icon, 'elegant', $iconClass);
+                }
+
+                return [
+                    'name' => __('side_nav_bar.title.'.$summary->summary),
+                    'permission' => $summary->permission,
+                    'summary_icon' => $iconHtml ?? '',
+                    'summary_route' => $summary->route ?? 'dashboard',
+                    'icon' => $iconHtml ?? '',
+                    'summary_head' => $summary->head,
+                    'submenu' => $summary->menus->map(function ($menu) {
+
+                        // Recupero l'icona per il menu
+                        $iconClass = '';
+                        $icon = $menu->icon ?? '';
+
+                        if ($icon) {
+                            $repository = app(IconRepository::class);
+                            $iconHtml = $repository->getIcon($icon, 'elegant', $iconClass);
+                        }
+
+                        Log::info('Icona: '. $iconHtml);
+
+                        return [
+                            'name' =>__('side_nav_bar.'.$menu->name),
+                            'route' => $menu->route,
+                            'permission' => $menu->permission,
+                            'head' => $menu->head,
+                            'icon' => $iconHtml,
+                        ];
+                    })->toArray(),
+                ];
+            })->toArray();
+        }
+
+        // Log::info(json_encode($this->menus));
+
+        // foreach($this->menus as $menu){
+        //     Log::info(json_encode('icon:'.$menu['summary_icon']));
+        //     foreach($menu['submenu'] as $submenu){
+        //         Log::info(json_encode($submenu['name']));
+        //     }
+        // }
+
+        return view('livewire.sidebar');
+    }
+}
+-------------------------------------------------------------------------------------------------------------------

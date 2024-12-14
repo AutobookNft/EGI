@@ -75,29 +75,33 @@ class RolesAndPermissionsSeeder extends Seeder
 
             // Views
             'view_user', 'view_profile', 'view_team', 'view_dashboard', 'view_bio', 'view_settings',
-            'view_notifications', 'view_logs',  'view_collection', 'view_EGI',
+            'view_notifications', 'view_logs',  'view_collection', 'view_EGI', 'view_collection_header'
         ],
 
         'admin' => [
             // Team
             'add_team_member', 'remove_team_member', 'modify_team_roles',
-            'view_team', 'view_dashboard',
 
             // Collection
             'read_collection', 'update_collection',
-            'view_collection',
 
             // EGI
             'create_EGI', 'read_EGI', 'update_EGI', 'delete_EGI',
-            'view_EGI',
+
+            // Views
+            'view_user', 'view_profile', 'view_team', 'view_dashboard', 'view_bio', 'view_settings',
+            'view_notifications', 'view_logs',  'view_collection', 'view_EGI', 'view_collection_header'
         ],
 
         'editor' => [
             // Collection
-            'read_collection', 'view_collection', 'view_dashboard',
+            'read_collection',
 
             // EGI
-            'read_EGI', 'update_EGI', 'view_EGI',
+            'read_EGI', 'update_EGI',
+
+            // Views
+            'view_profile', 'view_team', 'view_dashboard', 'view_collection', 'view_EGI', 'view_collection_header'
         ],
 
         'guest' => [
