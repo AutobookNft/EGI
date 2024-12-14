@@ -5,10 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Collection extends Model
 {
     use HasFactory;
+    use SoftDeletes; // Aggiungi il trait SoftDeletes
 
     /**
      * The attributes that are mass assignable.
@@ -16,17 +18,13 @@ class Collection extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'user_id',
+        'team_id',
+        'creator_id',
+        'owner_id',
         'collection_name',
-        'show',
-        'personal_team',
-        'creator',
-        'owner_wallet',
-        'address',
-        'epp_id',
-        'EGI_asset_id',
         'description',
         'type',
+        'show',
         'path_image_banner',
         'path_image_card',
         'path_image_avatar',
@@ -34,12 +32,15 @@ class Collection extends Model
         'url_collection_site',
         'position',
         'token',
-        'owner_id',
         'EGI_number',
         'EGI_asset_roles',
         'floor_price',
         'path_image_to_ipfs',
         'url_image_ipfs',
+        'epp_id',
+        'EGI_asset_id',
+        'owner_wallet',
+        'address',
     ];
 
     protected $appends = [
@@ -48,26 +49,27 @@ class Collection extends Model
         'verified_image_avatar_path',
     ];
 
-    public function teams()
-    {
-        return $this->belongsToMany(Team::class, 'team_collection');
-    }
-
+    // Relazione con il team
     public function team()
     {
         return $this->belongsTo(Team::class);
     }
 
-    public function users()
+    // Relazione con il creator
+    public function creator()
     {
-        return $this->hasManyThrough(User::class, Team::class, 'id', 'id', 'team_id', 'user_id');
+        return $this->belongsTo(User::class, 'creator_id');
     }
 
+    // Relazione con l'owner
+    public function owner()
+    {
+        return $this->belongsTo(User::class, 'owner_id');
+    }
     public function egis()
     {
         return $this->hasMany(Egi::class);
     }
-
 
     /**
      * Accessor per verificare se il file esiste fisicamente e restituire il percorso.

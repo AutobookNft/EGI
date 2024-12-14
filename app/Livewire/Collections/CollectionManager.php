@@ -3,6 +3,7 @@
 namespace App\Livewire\Collections;
 
 use App\Helpers\FileHelper;
+use App\Livewire\Traits\HandlesCollectionUpdate;
 use App\Models\Collection;
 use App\Models\Team;
 use App\Models\TeamWallet;
@@ -19,7 +20,7 @@ use Illuminate\Support\Facades\DB;
 
 class CollectionManager extends Component
 {
-    use WithFileUploads;
+    use WithFileUploads, HandlesCollectionUpdate;
 
     public $collection = [
         'user_id' => null,
@@ -245,85 +246,6 @@ class CollectionManager extends Component
     {
         $collection->teams()->attach($teamId);
 
-    }
-
-    public function update()
-    {
-
-        try {
-
-            $this->validate();
-
-            // Ottengo l'istanza del servizio FileStorageService
-            $fileStorageService = app(FileStorageService::class);
-
-            // Recupera la collection da aggiornare
-            $collection = Collection::findOrFail($this->collectionId);
-
-            // Log::channel('florenceegi')->info('Class: CollectionManager. Method: update().Action: collection data', $this->collection);
-
-            // Creo il percorso dove salvare le immagini
-            $path = $this->createPathImage();
-
-              // Salva le immagini solo se sono state caricate
-            if (is_object($this->path_image_banner)) {
-
-                // Crea il nome del file
-                $filename = 'banner_' . $this->collectionId . '.' . $this->path_image_banner->extension();
-                // Memorizza l'immagine nel db e salva l'immagine nel filesystem
-                $this->collection['path_image_banner'] = $fileStorageService->saveFile($this->path_image_banner, $path,$filename);
-            }
-
-            if (is_object($this->path_image_card)) {
-
-                $filename = 'card_' . $this->collectionId . '.' . $this->path_image_card->extension();
-                $this->collection['path_image_card'] = $fileStorageService->saveFile($this->path_image_card, $path);
-
-            }
-
-            if (is_object($this->path_image_avatar)) {
-                $filename = 'avatar_' . $this->collectionId . '.' . $this->path_image_avatar->extension();
-                $this->collection['path_image_avatar'] =$fileStorageService->saveFile($this->path_image_avatar, $path, $filename);
-            }
-
-            // Salvo i dati della collection nel database
-            $collection->update($this->collection);
-
-            $this->path_image_card = $collection->verified_image_card_path;
-            $this->path_image_avatar = $collection->verified_image_avatar_path;
-            $this->path_image_banner = $collection->verified_image_banner_path;
-
-            // Log::channel('florenceegi')->info('Collection updated successfully', $this->collection);
-
-            // Resetta i campi del form
-            $this->resetInputFields();
-
-            // Aggiorna la lista delle collection
-            $this->readTheTeamsCollections();
-
-            // Mostra un messaggio di successo
-            session()->flash('message', __('collection.updated_successfully'));
-
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            Log::channel('florenceegi')->error('Errore durante la validazione dei dati in update', $e->errors());
-            session()->flash('error', __('collection.update.validation_error'));
-            throw $e;
-
-        } catch (ModelNotFoundException $e) {
-            Log::channel('florenceegi')->error('Collection not found during update', [
-                'collection_id' => $this->collectionId
-            ]);
-            session()->flash('error', __('collection.not_found'));
-
-        } catch (\Exception $e) {
-            Log::channel('florenceegi')->error('Failed to update collection', [
-                'collection_id' => $this->collectionId,
-                'error' => $e->getMessage(),
-                'collection_data' => $this->collection,
-                'stack_trace' => $e->getTraceAsString()
-            ]);
-            session()->flash('error', __('collection.update_failed'));
-        }
     }
 
     public function index(){

@@ -2,30 +2,52 @@
 
 namespace App\Livewire\Collections;
 
+use App\Http\Resources\CollectionResource;
+use App\Livewire\Traits\HandlesCollectionUpdate;
 use App\Models\TeamWallet;
 use App\Repositories\IconRepository;
 use Livewire\Component;
 use App\Models\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Validate;
+use Livewire\Features\SupportFileUploads\WithFileUploads;
 
 class Open extends Component
 {
+
+    use WithFileUploads, HandlesCollectionUpdate;
+    public $defaultCollection = [
+        'user_id' => null,
+        'team_id' => null,
+        'type' => null,
+        'show' => null,
+        'collection_name' => null,
+        'position' => null,
+        'EGI_number' => null,
+        'floor_price' => null,
+        'description' => null,
+        'url_collection_site' => null,
+        'path_image_banner' => '',
+        'path_image_card' => '',
+        'path_image_avatar' => '',
+    ];
+
     public $collections;
 
-    protected $team_id;
+    public $collection = [];
 
-    public $noTeamMessage = null;
+    public $noTeamMessage = 'Non ci sono team o collection disponibili.';
 
     protected $iconRepository;
 
-    #[Validate('image|nullable')]
+    #[Validate('nullable')]
     public $path_image_banner;
 
-    #[Validate('image|nullable')]
+    #[Validate('nullable')]
     public $path_image_card;
 
-    #[Validate('image|nullable')]
+    #[Validate('nullable')]
     public $path_image_avatar;
 
     public function boot(IconRepository $iconRepository)
@@ -33,55 +55,65 @@ class Open extends Component
         $this->iconRepository = $iconRepository;
     }
 
-
     public function mount()
     {
-        $user = Auth::user();
 
-        // Recupera tutte le collection dell'utente connesso
-        $this->collections = Collection::where('user_id', $user->id)->get();
+        // Inizializza come una Collection vuota
+        $this->collections = new Collection();
+        $this->loadSingleCollection();
 
-        // Se non ci sono collection, imposta un messaggio di avviso
-        if ($this->collections->isEmpty()) {
-            $this->noTeamMessage = 'Non hai nessuna collection associata. Crea una collection per iniziare.';
-        }
     }
 
-    public function selectCollection($collectionId)
+    public function loadSingleCollection()
     {
-        $collection = Collection::findOrFail($collectionId);
+        // Recupera l'utente autenticato
+        $user = Auth::user();
 
-        // Cambia il currentTeam utilizzando la rotta di Jetstream
-        $this->redirect(route('current-team.update', ['team' => $collection->team_id]));
+        // Trova tutte le collection attive dei team a cui l'utente è associato
+        $this->collections = Collection::whereHas('team', function ($query) use ($user) {
+            $query->whereHas('users', function ($query) use ($user) {
+                $query->where('users.id', $user->id);
+            });
+        })->get();
 
-        // Reindirizza al CollectionManager per la collection selezionata
-        return redirect()->route('collection-manager', ['id' => $collectionId]);
+        // Verifica se c'è una sola collection attiva
+        if ($this->collections->count() === 1) {
+            $this->collection = (new CollectionResource($this->collections->first()))->toArray(request());
+        } else {
+            $this->collection = $this->defaultCollection;
+        }
+
+        Log::channel('florenceegi')->info('Current collection', ['collection' => $this->collection]);
     }
 
     public function render()
     {
-
-        // Se l'utente non ha un team, mostro un messaggio di avviso
-        if ($this->noTeamMessage) {
+        // Se l'utente non ha alcuna collection, mostra un messaggio di avviso
+        if (!$this->collections || $this->collections->isEmpty()) {
             return view('livewire.collections.no-team', [
                 'message' => $this->noTeamMessage,
             ]);
         }
 
-        $user = Auth::user();
-
-        // Se ci sono più di una collection, mostro il carousel
+        // Se ci sono più di una collection, mostra il carousel
         if ($this->collections->count() > 1) {
             $iconHtml = $this->iconRepository->getIcon('camera', 'elegant', '');
-            return view('livewire.collections.collection-carousel', compact('iconHtml', 'collections'));
+            return view('livewire.collections.collection-carousel', [
+                'iconHtml' => $iconHtml,
+                'collections' => $this->collections,
+            ]);
         }
 
-        // estrapola tutti gli wallets relazionati al team
-        $wallets = TeamWallet::where('team_id', $this->collections->team_id)->get();
+        // Se c'è una sola collection, carica i wallet del team associato
+        $team = $this->collections->first()->team ?? null;
+        $wallets = $team ? $team->wallets : [];
 
-        // Altrimenti mostro il collection-manager per la prima collection
+        // Mostra il collection-manager per la prima collection
         return view('livewire.collections.collection-manager', [
-            'collection' => $this->collections->first(),
+            'collection' => $this->collection,
+            'wallets' => $wallets,
         ]);
     }
+
+
 }

@@ -67,6 +67,6 @@ class Team extends JetstreamTeam
     // Relazione con le collections
     public function collections()
     {
-        return $this->belongsToMany(Collection::class, 'team_collection');
+        return $this->hasMany(Collection::class);
     }
 }

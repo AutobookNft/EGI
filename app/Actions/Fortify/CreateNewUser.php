@@ -130,7 +130,10 @@ class CreateNewUser implements CreatesNewUsers
             Log::channel('florenceegi')->info('Collection creata con successo', ['collection_id' => $collection->id]);
 
             // Associa la collection al team nella tabella pivot team_collection
-            $team->collections()->attach($collection->id);
+            // $team->collections()->attach($collection->id);
+
+            $collection->team()->associate($team);
+            $collection->save();
 
             Log::channel('florenceegi')->info('Collection associata al team nella tabella pivot team_collection', [
                 'team_id' => $team->id,
