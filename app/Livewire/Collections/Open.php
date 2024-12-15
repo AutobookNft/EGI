@@ -50,6 +50,8 @@ class Open extends Component
     #[Validate('nullable')]
     public $path_image_avatar;
 
+    protected $user;
+
     public function boot(IconRepository $iconRepository)
     {
         $this->iconRepository = $iconRepository;
@@ -67,12 +69,13 @@ class Open extends Component
     public function loadSingleCollection()
     {
         // Recupera l'utente autenticato
-        $user = Auth::user();
+        $this->user = Auth::user();
+        $user = $this->user;
 
         // Trova tutte le collection attive dei team a cui l'utente è associato
         $this->collections = Collection::whereHas('team', function ($query) use ($user) {
             $query->whereHas('users', function ($query) use ($user) {
-                $query->where('users.id', $user->id);
+                $query->where('users.id', $this->user->id);
             });
         })->get();
 
@@ -106,6 +109,8 @@ class Open extends Component
 
         // Se c'è una sola collection, carica i wallet del team associato
         $team = $this->collections->first()->team ?? null;
+
+        // carico i wallet del team
         $wallets = $team ? $team->wallets : [];
 
         // Mostra il collection-manager per la prima collection
@@ -114,6 +119,5 @@ class Open extends Component
             'wallets' => $wallets,
         ]);
     }
-
 
 }

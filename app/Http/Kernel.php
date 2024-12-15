@@ -2,7 +2,10 @@
 
 namespace App\Http;
 
+use App\Http\Middleware\CheckTeamPermission;
+use App\Http\Middleware\SetLanguage;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
+use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
 
 class Kernel extends HttpKernel
 {
@@ -15,8 +18,7 @@ class Kernel extends HttpKernel
      */
     protected $routeMiddleware = [
         // ... altri middleware
-        \App\Http\Middleware\SetLanguage::class,
-        // \App\Http\Middleware\AddViewDebugInfo::class,
+        // 'team' => CheckTeamPermission::class,
     ];
 
     /**
@@ -25,13 +27,12 @@ class Kernel extends HttpKernel
      * @var array
      */
     protected $middlewareGroups = [
-        'web' => [
-            // ... altri middleware
-            // \App\Http\Middleware\SetLocale::class,
-            \App\Http\Middleware\SetLanguage::class,
-            // \App\Http\Middleware\DisableCache::class,
-            // \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class, // Assicurati che questo sia presente
-        ],
+        // 'web' => [
+        //     // ... altri middleware
+        //     // \App\Http\Middleware\DisableCache::class,
+        //     SetLanguage::class,
+        //     RoleOrPermissionMiddleware::class, // Assicurati che questo sia presente
+        // ],
     ];
 
 }

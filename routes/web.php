@@ -15,6 +15,7 @@ use App\Livewire\Collections\Open;
 use App\Livewire\Collections\Show;
 use Illuminate\Support\Facades\Log;
 use UltraProject\UConfig\Http\Controllers\UConfigController;
+use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
 
 // Rotta per PhotoUploader
 Route::get('/photo-uploader', PhotoUploader::class)->name('photo-uploader');
@@ -25,7 +26,7 @@ Route::get('/', function () {
 });
 
 // Rotte protette da middleware
-Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified', SetLanguage::class])
+Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified'])
     ->group(function () {
 
         // Dashboard
@@ -40,53 +41,51 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified',
         // Admin Routes
         Route::prefix('admin')->name('admin.')->group(function () {
             Route::resource('roles', RoleController::class)
-                ->middleware(['can:manage_roles']);
+                ->middleware(['role_or_permission:manage_roles']);
 
             Route::resource('icons', IconAdminController::class)
-                ->middleware(['can:manage_icons']);
+                ->middleware(['role_or_permission: manage_icons']);
 
             Route::get('/assign-role', [RoleController::class, 'showAssignRoleForm'])
                 ->name('assign.role.form')
-                ->middleware(['can:manage_roles']);
+                ->middleware(['role_or_permission:manage_roles']);
 
             Route::post('/assign-role', [RoleController::class, 'assignRole'])
                 ->name('assign.role')
-                ->middleware(['can:manage_roles']);
+                ->middleware(['role_or_permission:manage_roles']);
 
             Route::get('/assign-permissions', [RoleController::class, 'showAssignPermissionsForm'])
                 ->name('assign.permissions.form')
-                ->middleware(['can:manage_roles']);
+                ->middleware(['role_or_permission:manage_roles']);
 
             Route::post('/assign-permissions', [RoleController::class, 'assignPermissions'])
                 ->name('assign.permissions')
-                ->middleware(['can:manage_roles']);
+                ->middleware(['role_or_permission:manage_roles']);
         });
 
         Route::prefix('collections')->group(function () {
 
             // Rotte per visualizzare il carousel delle collezioni, viene usata solamente se il team corrente ha più di una collezione associata
             Route::get('/carousel', CollectionCarousel::class)
-            ->middleware(['can:read_collection'])
-            ->name('collections.carousel');
+                ->middleware('team_can:read_collection')
+                ->name('collections.carousel');
 
             // Rotta per aprire vista della collezione
             Route::get('/{id}/edit', CollectionManager::class)
-                ->middleware('can:update_collection')
+                ->middleware('team_can:update_collection')
                 ->name('collections.edit');
 
             // Rotta per discernere se mostrare il carousel o la vista della collezione
             Route::get('/open', Open::class)
-                ->middleware('can:view_collection_header')
+                ->middleware('team_can:view_collection_header')
                 ->name('collections.open');
 
             // Rotta per aprire vista della collezione
             Route::get('/show', Show::class)
-                ->middleware('can:view_collection_header')
+                ->middleware('team_can:view_collection_header')
                 ->name('collections.show');
-
-
-
         });
+
 
         Route::get('/teams', TeamManager::class)
             ->middleware(['can:read_collection'])

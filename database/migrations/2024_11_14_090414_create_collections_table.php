@@ -19,6 +19,9 @@ return new class extends Migration
         $table->foreignId('creator_id')->nullable()->constrained('users')->onDelete('cascade'); // Creator della collection (specifico)
         $table->foreignId('owner_id')->nullable()->constrained('users')->onDelete('cascade');   // Owner della collection
 
+        // campo del ruolo
+        $table->string('role')->default('creator')->after('user_id')->index();
+        
         // Campi per identificatori esterni
         $table->bigInteger('epp_id')->nullable()->index();          // ID del progetto EPP
         $table->bigInteger('EGI_asset_id')->nullable()->index();    // ID dell'asset EGI

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Traits\HasTeamRoles;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -16,6 +17,7 @@ class User extends Authenticatable
 {
     use HasApiTokens;
     use HasRoles;
+
 
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory;
@@ -133,13 +135,30 @@ class User extends Authenticatable
 
     public function teams()
     {
-        return $this->belongsToMany(Team::class, 'team_user');
+        return $this->belongsToMany(Team::class, 'team_user')->withPivot('role');
     }
 
     public function wallets()
     {
         return $this->hasMany(TeamWallet::class);
     }
+
+    /**
+     * Verifica se l'utente è membro di un team specifico.
+     */
+    public function isMemberOfTeam($team)
+    {
+        return $this->teams()->where('team_id', $team->id)->exists();
+    }
+
+    /**
+     * Verifica se l'utente ha un ruolo specifico in un team.
+     */
+    public function hasRoleInTeam($role, $team)
+    {
+        return $this->teams()->where('team_id', $team->id)->wherePivot('role', $role)->exists();
+    }
+
 
     /**
      * Get the attributes that should be cast.
