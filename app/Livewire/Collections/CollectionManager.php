@@ -91,60 +91,60 @@ class CollectionManager extends Component
 
     }
 
-    public function create()
-    {
-        Log::channel('florenceegi')->info('Class: CollectionManager. Method: create()');
+        public function create()
+        {
+            Log::channel('florenceegi')->info('Class: CollectionManager. Method: create()');
 
-         // Controlla se l'utente ha il permesso 'create collections'
-        if (!Auth::user()->can('create_collection')) {
-            abort(403, 'Non hai il permesso di creare una collection.');
+            // Controlla se l'utente ha il permesso 'create collections'
+            if (!Auth::user()->can('create_collection')) {
+                abort(403, 'Non hai il permesso di creare una collection.');
+            }
+
+            try {
+
+                // Prepara i dati della collection
+                $collectionData = $this->prepareCollectionData();
+
+                Log::channel('florenceegi')->info('Class: CollectionManager. Method: create(). Action: collection data:' , $collectionData);
+
+                // Valida i dati della collection
+                $this->validateCollection();
+
+                // Crea la collection
+                $collection = $this->storeCollection($collectionData);
+
+                // Associa la collection al team nella tabella pivot
+                $this->attachCollectionToTeam($collection, $collectionData['team_id']);
+
+                // Log di successo
+                Log::channel('florenceegi')->info('Collection created successfully', [
+                    'collection_id' => $collection->id,
+                    'collection_name' => $collection->collection_name,
+                ]);
+
+                // Reset dei campi di input e aggiornamento della lista delle collections
+                $this->resetInputFields();
+                $this->collections = Collection::all();
+
+                session()->flash('message', __('collection.created_successfully'));
+
+            } catch (\Illuminate\Validation\ValidationException $e) {
+                Log::channel('florenceegi')->warning('Validation failed during collection creation', [
+                    'errors' => $e->errors(),
+                    'collection_data' => $this->collection,
+                ]);
+                session()->flash('error', __('collection.create_validation_error'));
+                throw $e;
+
+            } catch (\Exception $e) {
+                Log::channel('florenceegi')->error('Failed to create collection', [
+                    'error' => $e->getMessage(),
+                    'collection_data' => $this->collection,
+                    'stack_trace' => $e->getTraceAsString(),
+                ]);
+                session()->flash('error', __('collection.creation_failed'));
+            }
         }
-
-        try {
-
-            // Prepara i dati della collection
-            $collectionData = $this->prepareCollectionData();
-
-            Log::channel('florenceegi')->info('Class: CollectionManager. Method: create(). Action: collection data:' , $collectionData);
-
-            // Valida i dati della collection
-            $this->validateCollection();
-
-            // Crea la collection
-            $collection = $this->storeCollection($collectionData);
-
-            // Associa la collection al team nella tabella pivot
-            $this->attachCollectionToTeam($collection, $collectionData['team_id']);
-
-            // Log di successo
-            Log::channel('florenceegi')->info('Collection created successfully', [
-                'collection_id' => $collection->id,
-                'collection_name' => $collection->collection_name,
-            ]);
-
-            // Reset dei campi di input e aggiornamento della lista delle collections
-            $this->resetInputFields();
-            $this->collections = Collection::all();
-
-            session()->flash('message', __('collection.created_successfully'));
-
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            Log::channel('florenceegi')->warning('Validation failed during collection creation', [
-                'errors' => $e->errors(),
-                'collection_data' => $this->collection,
-            ]);
-            session()->flash('error', __('collection.create_validation_error'));
-            throw $e;
-
-        } catch (\Exception $e) {
-            Log::channel('florenceegi')->error('Failed to create collection', [
-                'error' => $e->getMessage(),
-                'collection_data' => $this->collection,
-                'stack_trace' => $e->getTraceAsString(),
-            ]);
-            session()->flash('error', __('collection.creation_failed'));
-        }
-    }
 
     /**
      * Prepara i dati per la creazione della collection.

@@ -1,18 +1,22 @@
 <div x-data="{ activeSlide: @entangle('activeSlide') }" class="relative w-full">
     <h3 class="mt-6 text-xl">{{ __('collection.collections') }}</h3>
+
     <div class="overflow-hidden">
-        <div class="flex transition-transform duration-300 ease-in-out"
+        <div class="flex flex-wrap md:flex-nowrap transition-transform duration-300 ease-in-out"
              :style="{ transform: `translateX(-${activeSlide * 100}%)` }">
+
             @foreach($collections as $index => $collection)
-                <div class="w-full flex-shrink-0">
-                    <div class="shadow-xl card bg-base-100 w-96">
+                <div class="w-full md:w-1/6 flex-shrink-0 px-2 mb-4 md:mb-0">
+                    <div class="shadow-xl card bg-base-100 h-full">
                         <figure class="px-10 pt-10">
                             @if($collection->verified_image_card_path && $collection->verified_image_card_path !== '')
                                 <div class="object-cover px-10 pt-10 rounded-full">
-                                    <img src="{{ Storage::url($collection->verified_image_card_path) }}" class="object-cover w-full h-full rounded-lg" alt="{{ $collection->path_image_card }}">
+                                    <img src="{{ Storage::url($collection->verified_image_card_path) }}" class="object-cover w-full h-32 rounded-lg" alt="{{ $collection->path_image_card }}">
                                 </div>
                             @else
-                                <div class="object-cover px-10 pt-10 rounded-full"> {!! $iconHtml !!} </div>
+                                <div class="object-cover px-10 pt-10 rounded-full">
+                                    {!! $iconHtml !!}
+                                </div>
                             @endif
                         </figure>
                         <div class="items-center text-center card-body">
@@ -37,13 +41,26 @@
                     </div>
                 </div>
             @endforeach
+
         </div>
     </div>
 
-    <button wire:click="prevSlide" class="btn btn-circle absolute left-0 top-1/2 transform -translate-y-1/2">❮</button>
-    <button wire:click="nextSlide" class="btn btn-circle absolute right-0 top-1/2 transform -translate-y-1/2">❯</button>
+    <!-- Pulsanti di Navigazione -->
+    <!-- Pulsante per Slide Precedente -->
+    <button wire:click="prevSlide"
+    class="btn btn-circle absolute left-0 top-1/2 transform -translate-y-1/2 z-10 hidden md:inline-flex">
+    ❮
+    </button>
 
-    <div class="flex justify-center mt-4">
+    <!-- Pulsante per Slide Successiva -->
+    <button wire:click="nextSlide"
+    class="btn btn-circle absolute right-0 top-1/2 transform -translate-y-1/2 z-10 hidden md:inline-flex">
+    ❯
+    </button>
+
+
+    <!-- Indicatori del Carousel -->
+    <div class="justify-center mt-4 hidden md:inline-flex">
         @foreach($collections as $index => $collection)
             <button wire:click="$set('activeSlide', {{ $index }})"
                     class="btn btn-xs mx-1"

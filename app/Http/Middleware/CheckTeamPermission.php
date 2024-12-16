@@ -23,6 +23,17 @@ class CheckTeamPermission
         // Recupera l'utente autenticato
         $user = Auth::user();
 
+        // Verifica se la rotta è per la creazione di una nuova collection
+        if ($request->route()->getName() === 'collections.create') {
+            // Se l'utente ha il permesso di creare una collection, permetti l'accesso
+            if ($user->can('create_collection')) {
+                return $next($request);
+            }
+
+            // Se l'utente non ha il permesso, blocca l'accesso
+            abort(403, 'Non hai il permesso di creare una collection.');
+        }
+
         // Verifica se la rotta è '/collections/open'
         if ($request->route()->getName() === 'collections.open') {
             // Trova tutte le collection attive dei team a cui l'utente è associato
@@ -37,7 +48,7 @@ class CheckTeamPermission
                 $collection = $collections->first();
             } else {
                 // Se non c'è una sola collection, blocca l'accesso
-                abort(403, 'Accesso non consentito: impossibile determinare una collection unica.');
+                return $next($request);
             }
         } else {
             // Recupera l'ID della collection dalla richiesta per le altre rotte
@@ -48,6 +59,7 @@ class CheckTeamPermission
             if (!$collection) {
                 abort(404, 'Collection non trovata.');
             }
+
         }
 
         // Recupera il team associato alla collection

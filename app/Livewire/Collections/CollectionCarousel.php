@@ -6,6 +6,7 @@ use Livewire\Component;
 use App\Models\Collection;
 use App\Repositories\IconRepository;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class CollectionCarousel extends Component
 {
@@ -21,9 +22,14 @@ class CollectionCarousel extends Component
     public function mount()
     {
 
-        $id = Auth::user()->currentTeam->id;
-        $this->collections = Collection::findOrFail($id);
-        
+        $team_id = Auth::user()->currentTeam->id;
+        $this->collections = Collection::where('team_id', $team_id)->get();
+
+        Log::channel('florenceegi')->info('Collections for team', [
+            'team_id' => $team_id,
+            'collections' => $this->collections,
+        ]);
+
     }
 
     public function nextSlide()

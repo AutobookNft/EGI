@@ -1,6 +1,7 @@
 <?php
 
 use App\Livewire\Collections\CollectionCarousel;
+use App\Livewire\Collections\CreateCollection;
 use App\Livewire\ShowCollection;
 use App\Livewire\TeamManager;
 use Illuminate\Support\Facades\Route;
@@ -79,6 +80,12 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
             Route::get('/open', Open::class)
                 ->middleware('team_can:view_collection_header')
                 ->name('collections.open');
+
+
+            // Rotta per discernere se mostrare il carousel o la vista della collezione
+            Route::get('/create', CreateCollection::class)
+                ->middleware('team_can:create_collection')
+                ->name('collections.create');
 
             // Rotta per aprire vista della collezione
             Route::get('/show', Show::class)

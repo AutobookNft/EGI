@@ -4,13 +4,13 @@ namespace App\Livewire\Collections;
 
 use App\Http\Resources\CollectionResource;
 use App\Livewire\Traits\HandlesCollectionUpdate;
+use App\Models\Collection;
 use App\Models\TeamWallet;
 use App\Repositories\IconRepository;
-use Livewire\Component;
-use App\Models\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Validate;
+use Livewire\Component;
 use Livewire\Features\SupportFileUploads\WithFileUploads;
 
 class Open extends Component
@@ -32,6 +32,9 @@ class Open extends Component
         'path_image_card' => '',
         'path_image_avatar' => '',
     ];
+
+    
+    public $activeSlide = 0;
 
     public $collections;
 
@@ -86,7 +89,7 @@ class Open extends Component
             $this->collection = $this->defaultCollection;
         }
 
-        Log::channel('florenceegi')->info('Current collection', ['collection' => $this->collection]);
+
     }
 
     public function render()
@@ -101,6 +104,11 @@ class Open extends Component
         // Se ci sono più di una collection, mostra il carousel
         if ($this->collections->count() > 1) {
             $iconHtml = $this->iconRepository->getIcon('camera', 'elegant', '');
+
+            Log::channel('florenceegi')->info('Current collection', [
+                'collections' => json_encode($this->collections, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
+            ]);
+
             return view('livewire.collections.collection-carousel', [
                 'iconHtml' => $iconHtml,
                 'collections' => $this->collections,
@@ -119,5 +127,16 @@ class Open extends Component
             'wallets' => $wallets,
         ]);
     }
+
+    public function nextSlide()
+    {
+        $this->activeSlide = ($this->activeSlide + 1) % count($this->collections);
+    }
+
+    public function prevSlide()
+    {
+        $this->activeSlide = ($this->activeSlide - 1 + count($this->collections)) % count($this->collections);
+    }
+
 
 }
