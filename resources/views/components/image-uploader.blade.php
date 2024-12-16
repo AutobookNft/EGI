@@ -21,28 +21,28 @@
 
     <div class="tooltip" data-tip="Click to upload image">
 
-        <div class="avatar">
-            <div class="w-24 border rounded-full cursor-pointer border-base-300 hover:border-primary"
-            @if($image === '' || $image === null)
-                onclick="document.getElementById('{{ $id }}').click();"
-            @endif
-            >
-
-                @if($image !== '' && $image !== null )
-                    <img src="{{ Storage::url($image) }}" class="object-cover w-full h-full rounded-full" title="{{ $image }}">
-                @else
-                    @if ($this->$model instanceof Illuminate\Http\UploadedFile)
-                        <img src="{{ $this->$model->temporaryUrl() }}" class="object-cover w-full h-full rounded-full">
-                    @else
-                        <div class="flex items-center justify-center h-full text-base-content">
-                            @if ($iconHtml)
-                                <div>{!! $iconHtml !!}</div>
-                            @endif
-                        </div>
-                    @endif
+            <div class="avatar">
+                <div class="w-24 border rounded-full cursor-pointer border-base-300 hover:border-primary"
+                @if($image === '' || $image === null)
+                    onclick="document.getElementById('{{ $id }}').click();"
                 @endif
+                >
+
+                    @if($image !== '' && $image !== null )
+                        <img src="{{ Storage::url($image) }}" class="object-cover w-full h-full rounded-full" title="{{ $image }}">
+                    @else
+                        @if ($this->$model instanceof Illuminate\Http\UploadedFile)
+                            <img src="{{ $this->$model->temporaryUrl() }}" class="object-cover w-full h-full rounded-full">
+                        @else
+                            <div class="flex items-center justify-center h-full text-base-content">
+                                @if ($iconHtml)
+                                <x-icon name="camera" class="w-8 h-8 opacity-50" />
+                                @endif
+                            </div>
+                        @endif
+                    @endif
+                </div>
             </div>
-        </div>
     </div>
 
     <input

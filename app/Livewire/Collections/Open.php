@@ -33,7 +33,7 @@ class Open extends Component
         'path_image_avatar' => '',
     ];
 
-    
+
     public $activeSlide = 0;
 
     public $collections;
@@ -105,9 +105,9 @@ class Open extends Component
         if ($this->collections->count() > 1) {
             $iconHtml = $this->iconRepository->getIcon('camera', 'elegant', '');
 
-            Log::channel('florenceegi')->info('Current collection', [
-                'collections' => json_encode($this->collections, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
-            ]);
+            // Log::channel('florenceegi')->info('Current collection', [
+            //     'collections' => json_encode($this->collections, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
+            // ]);
 
             return view('livewire.collections.collection-carousel', [
                 'iconHtml' => $iconHtml,

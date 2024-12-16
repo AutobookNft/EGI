@@ -6,6 +6,7 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
         <title>{{ config('app.name', 'Laravel') }}</title>
+        <script>console.log('resources/views/layouts/guest.blade.php');</script>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">

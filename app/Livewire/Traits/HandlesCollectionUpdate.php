@@ -18,22 +18,30 @@ trait HandlesCollectionUpdate
 
             $fileStorageService = app(FileStorageService::class);
 
-            $collection = Collection::findOrFail($this->collection['id']);
+            $collection = Collection::findOrFail($this->collectionId);
+
+            Log::channel('florenceegi')->info('Current collection', [
+                'collection' => json_encode($collection, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
+            ]);
+
+            Log::channel('florenceegi')->info('Modified collection', [
+                'collection' => json_encode($this->collection, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
+            ]);
 
             $path = $this->createPathImage();
 
             if (is_object($this->path_image_banner)) {
-                $filename = 'banner_' . $this->collection['id']. '.' . $this->path_image_banner->extension();
+                $filename = 'banner_' .$this->collectionId. '.' . $this->path_image_banner->extension();
                 $this->collection['path_image_banner'] = $fileStorageService->saveFile($this->path_image_banner, $path, $filename);
             }
 
             if (is_object($this->path_image_card)) {
-                $filename = 'card_' . $this->collection['id'] . '.' . $this->path_image_card->extension();
+                $filename = 'card_' . $this->collectionId . '.' . $this->path_image_card->extension();
                 $this->collection['path_image_card'] = $fileStorageService->saveFile($this->path_image_card, $path, $filename);
             }
 
             if (is_object($this->path_image_avatar)) {
-                $filename = 'avatar_' . $this->collection['id'] . '.' . $this->path_image_avatar->extension();
+                $filename = 'avatar_' . $this->collectionId . '.' . $this->path_image_avatar->extension();
                 $this->collection['path_image_avatar'] = $fileStorageService->saveFile($this->path_image_avatar, $path, $filename);
             }
 
@@ -51,7 +59,7 @@ trait HandlesCollectionUpdate
             throw $e;
 
         } catch (ModelNotFoundException $e) {
-            Log::channel('florenceegi')->error('Collection not found during update', ['collection_id' => $this->collection['id']]);
+            Log::channel('florenceegi')->error('Collection not found during update', ['collection_id' => $this->collectionId]);
             session()->flash('error', __('collection.not_found'));
 
         } catch (\Exception $e) {
@@ -66,7 +74,7 @@ trait HandlesCollectionUpdate
 
     private function createPathImage()
     {
-        $filename =  config('app.bucket_root_file_folder') . "/creator_" . Auth::id() . "/collections_".$this->collection['id'];
+        $filename =  config('app.bucket_root_file_folder') . "/creator_" . Auth::id() . "/collections_".$this->collectionId;
         return $filename;
     }
 }

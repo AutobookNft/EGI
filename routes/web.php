@@ -2,6 +2,7 @@
 
 use App\Livewire\Collections\CollectionCarousel;
 use App\Livewire\Collections\CreateCollection;
+use App\Livewire\Collections\HeadImagesManager;
 use App\Livewire\ShowCollection;
 use App\Livewire\TeamManager;
 use Illuminate\Support\Facades\Route;
@@ -91,6 +92,10 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
             Route::get('/show', Show::class)
                 ->middleware('team_can:view_collection_header')
                 ->name('collections.show');
+
+            Route::get('/head_images', HeadImagesManager::class)
+                // ->middleware('team_can:view_collection_header')
+                ->name('collections.head_images');
         });
 
 

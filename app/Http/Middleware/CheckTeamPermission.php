@@ -6,6 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Collection;
+use Illuminate\Support\Facades\Log;
 use Spatie\Permission\Models\Role;
 
 class CheckTeamPermission
@@ -54,6 +55,8 @@ class CheckTeamPermission
             // Recupera l'ID della collection dalla richiesta per le altre rotte
             $collectionId = $request->route('id') ?? $request->route('collection');
             $collection = Collection::find($collectionId);
+
+           
 
             // Se la collection non esiste, restituisci un errore 404
             if (!$collection) {
