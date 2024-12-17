@@ -48,4 +48,10 @@
             remove-method="removeImage"
             />
     </div>
+
+    <div class="flex justify-end space-x-2 mt-4">
+        <a href="{{ route('collections.head_images', ['id' => $collectionId]) }}" class="btn btn-primary btn-sm">
+            {{ __('collection.open_collection') }}
+        </a>
+    </div>
 </div>

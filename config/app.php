@@ -2,7 +2,17 @@
 
 return [
 
-     /*
+    /*
+    |--------------------------------------------------------------------------
+    | EGI Asset
+    |--------------------------------------------------------------------------
+    |
+    | Questo parametro determina se gli EGI asset sono abilitati o meno.
+    |
+    */
+    'egi_asset' => env('EGI_ASSET', false),
+
+    /*
     |--------------------------------------------------------------------------
     |
     | This value is the name of your application. This value is used when the

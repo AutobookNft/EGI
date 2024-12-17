@@ -1,70 +1,79 @@
-<div class="container mx-auto p-6">
-    <h2 class="text-2xl font-bold mb-4">{{ __('collection.manage_head_images') }}</h2>
+<div class="p-6 border border-gray-700 rounded-2xl bg-gray-800 shadow-lg">
 
-    <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
-        <!-- Upload Banner -->
-        <div class="form-control">
-            <label class="label">
-                <span class="font-semibold label-text">{{ __('collection.banner_image') }}</span>
-            </label>
-            <div class="tooltip" data-tip="Click to upload banner image">
-                <div class="w-full h-36 border rounded-lg cursor-pointer border-base-300 hover:border-primary"
-                     @if(!$bannerImage) onclick="document.getElementById('banner').click();" @endif>
-                    @if($bannerImage)
-                        <img src="{{ $bannerImage->temporaryUrl() }}" class="object-cover w-full h-full rounded-lg">
-                    @else
-                        <div class="flex items-center justify-center h-full text-base-content">
-                            <x-icon name="camera" class="w-12 h-12 opacity-50" />
-                        </div>
-                    @endif
-                </div>
-            </div>
-            <input type="file" wire:model="bannerImage" id="banner" class="hidden" accept="image/*">
-        </div>
+    <h2 class="text-2xl font-bold text-white mb-6">{{ __('collection.manage_head_images') }}</h2>
 
-        <!-- Upload Card -->
-        <div class="form-control">
-            <label class="label">
-                <span class="font-semibold label-text">{{ __('collection.card_image') }}</span>
-            </label>
-            <div class="tooltip" data-tip="Click to upload card image">
-                <div class="w-full h-24 border rounded-lg cursor-pointer border-base-300 hover:border-primary"
-                     @if(!$cardImage) onclick="document.getElementById('card').click();" @endif>
-                    @if($cardImage)
-                        <img src="{{ $cardImage->temporaryUrl() }}" class="object-cover w-full h-full rounded-lg">
-                    @else
-                        <div class="flex items-center justify-center h-full text-base-content">
-                            <x-icon name="camera" class="w-10 h-10 opacity-50" />
-                        </div>
-                    @endif
-                </div>
-            </div>
-            <input type="file" wire:model="cardImage" id="card" class="hidden" accept="image/*">
+    <!-- Banner -->
+    <div class="mb-8">
+        <h3 class="text-lg font-semibold text-white mb-2">{{ __('collection.banner_image') }}</h3>
+        <div class="w-full h-48 md:h-64 bg-gray-900 rounded-2xl shadow-md flex items-center justify-center overflow-hidden cursor-pointer hover:shadow-lg transition-shadow duration-300"
+             @if(!$bannerImage) onclick="document.getElementById('banner').click();" @endif>
+            @if($bannerImage)
+                <img src="{{ $bannerImage->temporaryUrl() }}" alt="Banner" class="w-full h-full object-contain">
+            @else
+                <x-repo-icon name="camera" class="w-16 h-16 text-gray-500 opacity-50" />
+            @endif
         </div>
-
-        <!-- Upload Avatar -->
-        <div class="form-control">
-            <label class="label">
-                <span class="font-semibold label-text">{{ __('collection.avatar_image') }}</span>
-            </label>
-            <div class="tooltip" data-tip="Click to upload avatar image">
-                <div class="w-24 h-24 border rounded-full cursor-pointer border-base-300 hover:border-primary"
-                     @if(!$avatarImage) onclick="document.getElementById('avatar').click();" @endif>
-                    @if($avatarImage)
-                        <img src="{{ $avatarImage->temporaryUrl() }}" class="object-cover w-full h-full rounded-full">
-                    @else
-                        <div class="flex items-center justify-center h-full text-base-content">
-                            <x-icon name="camera" class="w-8 h-8 opacity-50" />
-                        </div>
-                    @endif
-                </div>
-            </div>
-            <input type="file" wire:model="avatarImage" id="avatar" class="hidden" accept="image/*">
-        </div>
+        <input type="file" wire:model="bannerImage" id="banner" class="hidden" accept="image/*">
     </div>
 
-    <!-- Remove Buttons -->
-    <div class="mt-4 flex space-x-4">
+
+    <div class="flex flex-wrap gap-4">
+        <!-- Card Image -->
+        <div class="w-full sm:max-w-[300px] px-2 flex-shrink-0">
+            <x-collection-card :id="$collectionId" :editable="true" imageType="card" />
+
+            <!-- Input nascosto per caricare l'immagine -->
+            <input type="file" wire:model="cardImage" id="card-image-{{ $collectionId }}" class="hidden" accept="image/*">
+
+            <!-- Pulsante per Rimuovere l'Immagine -->
+            @if($cardImage)
+                <div class="mt-2">
+                    <button type="button" wire:click="removeImage('card')" class="btn btn-error">
+                        {{ __('label.delete_card') }}
+                    </button>
+                </div>
+            @endif
+        </div>
+
+        <!-- EGI Image -->
+        @if (config('app.egi_asset'))
+            <div class="w-full sm:max-w-[300px] px-2 flex-shrink-0">
+                <x-collection-card :id="$collectionId" :editable="true" imageType="EGI" />
+
+                <!-- Input nascosto per caricare l'immagine -->
+                <input type="file" wire:model="EGIImage" id="EGI-image-{{ $collectionId }}" class="hidden" accept="image/*">
+
+                <!-- Pulsante per Rimuovere l'Immagine EGI -->
+                @if($EGIImage)
+                    <div class="mt-2">
+                        <button type="button" wire:click="removeImage('EGI')" class="btn btn-error">
+                            {{ __('label.delete_egi') }}
+                        </button>
+                    </div>
+                @endif
+            </div>
+        @endif
+    </div>
+
+    <!-- Avatar -->
+    <div class="mb-8 text-center">
+        <h3 class="text-lg font-semibold text-white mb-2">{{ __('collection.avatar_image') }}</h3>
+        <div class="w-32 h-32 mx-auto bg-gray-900 rounded-full shadow-md flex items-center justify-center overflow-hidden cursor-pointer hover:shadow-lg transition-shadow duration-300"
+             @if(!$avatarImage) onclick="document.getElementById('avatar').click();" @endif>
+            @if($avatarImage)
+                <img src="{{ $avatarImage->temporaryUrl() }}" alt="Avatar" class="w-full h-full object-cover">
+            @else
+                <x-repo-icon name="camera" class="w-10 h-10 text-gray-500 opacity-50" />
+            @endif
+        </div>
+        <input type="file" wire:model="avatarImage" id="avatar" class="hidden" accept="image/*">
+    </div>
+
+
+
+
+    <!-- Pulsanti di Rimozione -->
+    <div class="mt-8 flex flex-wrap gap-4">
         @if($bannerImage)
             <button type="button" wire:click="removeImage('banner')" class="btn btn-error">
                 {{ __('label.delete_banner') }}
@@ -81,4 +90,5 @@
             </button>
         @endif
     </div>
+
 </div>

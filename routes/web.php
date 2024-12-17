@@ -93,7 +93,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
                 ->middleware('team_can:view_collection_header')
                 ->name('collections.show');
 
-            Route::get('/head_images', HeadImagesManager::class)
+            Route::get('/{id}/head-images', HeadImagesManager::class)
                 // ->middleware('team_can:view_collection_header')
                 ->name('collections.head_images');
         });
