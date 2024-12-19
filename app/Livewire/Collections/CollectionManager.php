@@ -26,7 +26,7 @@ class CollectionManager extends Component
         'creator_id' => null,
         'team_id' => null,
         'type' => null,
-        'show' => null,
+        'is_published' => null,
         'collection_name' => null,
         'position' => null,
         'EGI_number '=> null,
@@ -84,7 +84,7 @@ class CollectionManager extends Component
             'collection.EGI_number' => 'nullable|integer',
             'collection.floor_price' => 'nullable|numeric',
             'collection.description' => 'nullable|string',
-            'collection.show' => 'nullable|boolean',
+            'collection.is_published' => 'nullable|boolean',
         ]);
     }
 
@@ -132,7 +132,7 @@ class CollectionManager extends Component
             'user_id' => null,
             'team_id' => null,
             'type' => null,
-            'show' => null,
+            'is_published' => null,
             'collection_name' => null,
             'position' => null,
             'EGI_number '=> null,
@@ -195,7 +195,7 @@ class CollectionManager extends Component
             $this->collection['token'] = $collection->token;
             $this->collection['EGI_asset_roles'] = $collection->EGI_asset_roles;
             $this->collection['type'] = $collection->type;
-            $this->collection['show'] = $collection->show;
+            $this->collection['is_published'] = $collection->is_published;
             $this->collection['position'] = $collection->position;
             $this->collection['EGI_number'] = $collection->EGI_number;
             $this->collection['floor_price'] = $collection->floor_price;

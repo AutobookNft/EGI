@@ -21,7 +21,7 @@ return new class extends Migration
 
         // campo del ruolo
         $table->string('role')->default('creator')->after('user_id')->index();
-        
+
         // Campi per identificatori esterni
         $table->bigInteger('epp_id')->nullable()->index();          // ID del progetto EPP
         $table->bigInteger('EGI_asset_id')->nullable()->index();    // ID dell'asset EGI
@@ -41,7 +41,7 @@ return new class extends Migration
         $table->string('url_collection_site')->nullable();
 
         // Altri Campi
-        $table->boolean('show')->index()->default(1);
+        $table->boolean('is_published')->index()->default(1);
         $table->boolean('personal_team')->nullable();
         $table->char('creator')->index()->nullable();
         $table->char('owner_wallet')->index()->nullable();

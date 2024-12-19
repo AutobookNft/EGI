@@ -20,7 +20,7 @@ class CollectionResource extends JsonResource
             'creator_id' => $this->creator_id,
             'team_id' => $this->team_id,
             'type' => $this->type,
-            'show' => $this->show,
+            'is_published' => $this->is_published,
             'collection_name' => $this->collection_name,
             'position' => $this->position,
             'EGI_number' => $this->EGI_number,

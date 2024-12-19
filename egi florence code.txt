@@ -463,7 +463,7 @@ class CollectionManager extends Component
         'user_id' => null,
         'team_id' => null,
         'type' => null,
-        'show' => null,
+        'is_published' => null,
         'collection_name' => null,
         'position' => null,
         'EGI_number '=> null,
@@ -573,7 +573,7 @@ class CollectionManager extends Component
         Log::channel('florenceegi')->info('Class: CollectionManager. Method: prepareCollectionData(). Action: collection data', [
             'user' => Auth::id(),
             'team' => Auth::user()->currentTeam->id,
-            'show' => $this->collection['show'] ?? false,
+            'is_published' => $this->collection['is_published'] ?? false,
             'type' => $this->collection['type'] ?? __('collection.type_image'),
         ]);
 
@@ -584,8 +584,8 @@ class CollectionManager extends Component
         // type deve avere un valore predefinito, in quanto l'utente potrebbe dimentarsi di selezionare un tipo
         $this->collection['type'] = __('collection.type_image') ?? 'image';
 
-        // show deve avere un valore predefinito impostato a false, se il controllo non viene modificato dall'utente, il valore di default potrebbe non essere gestito correttamente dal controllo stesso
-        $this->collection['show'] = $this->collection['show'] ?? false;
+        // is_published deve avere un valore predefinito impostato a false, se il controllo non viene modificato dall'utente, il valore di default potrebbe non essere gestito correttamente dal controllo stesso
+        $this->collection['is_published'] = $this->collection['is_published'] ?? false;
 
         // EPP_id è un valore predefinito che può essere impostato nel file .env
         /**
@@ -598,7 +598,7 @@ class CollectionManager extends Component
             'user_id' => $this->collection['user_id'],
             'team_id' => $this->collection['team_id'],
             'EPP_id' => $this->collection['EPP_id'],
-            'show' => $this->collection['show'],
+            'is_published' => $this->collection['is_published'],
             'type' => $this->collection['type'],
             'collection_name' => $this->collection['collection_name'],
             'description' => $this->collection['description'],
@@ -627,7 +627,7 @@ class CollectionManager extends Component
             'collection.floor_price' => 'nullable|numeric',
             'collection.description' => 'nullable|string',
             'collection.url_collection_site' => 'nullable|url',
-            'collection.show' => 'nullable|boolean',
+            'collection.is_published' => 'nullable|boolean',
         ]);
     }
 
@@ -763,7 +763,7 @@ class CollectionManager extends Component
             //     'team_id' => $collection->team_id,
             //     'type' => $collection->type,
             //     'position' => $collection->position,
-            //     'show' => $collection->show,
+            //     'is_published' => $collection->is_published,
             //     'EGI_number' => $collection->EGI_number,
             //     'floor_price' => $collection->floor_price,
             //     'description' => $collection->description,
@@ -787,7 +787,7 @@ class CollectionManager extends Component
 
         // $this->user_id = '';
         // $this->name = '';
-        // $this->show = false;
+        // $this->is_published = false;
         // $this->personal_team = false;
         // $this->creator = '';
         // $this->owner_wallet = '';
@@ -853,7 +853,7 @@ class CollectionManager extends Component
             'team_id' => $collection->team_id,
             'type' => $collection->type,
             'position' => $collection->position,
-            'show' => $collection->show,
+            'is_published' => $collection->is_published,
             'EGI_number' => $collection->EGI_number,
             'floor_price' => $collection->floor_price,
             'description' => $collection->description,

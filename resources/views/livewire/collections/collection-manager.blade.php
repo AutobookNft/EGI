@@ -21,8 +21,17 @@
         <!-- Sezione dei dati della collection -->
         @include('livewire.collection-manager-includes.data_section')
 
+
+        <div id="image_of_collection" class="p-4 border border-gray-300 rounded-lg bg-white shadow-md">
+        <div class="flex justify-center space-x-2 mt-4">
+            <a href="{{ route('collections.head_images', ['id' => $collectionId]) }}" class="btn btn-primary btn-lg">
+                {{ __('collection.collection_image') }}
+            </a>
+        </div>
+        </div>
+
         <!-- Sezione delle immagini -->
-        @include('livewire.collection-manager-includes.image_section')
+        {{-- @include('livewire.collection-manager-includes.image_section') --}}
 
         <!-- Sezione dei wallets -->
         @include('livewire.collection-manager-includes.wallets_section')

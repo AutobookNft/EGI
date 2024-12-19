@@ -124,7 +124,7 @@ class CreateNewUser implements CreatesNewUsers
             'position' => 1,
             'EGI_number' => 1,
             'floor_price' => 0.0,
-            'show' => true,
+            'is_published' => true,
             'personal_team' => true,
         ]), function (Collection $collection) use ($team, $user) {
             Log::channel('florenceegi')->info('Collection creata con successo', ['collection_id' => $collection->id]);

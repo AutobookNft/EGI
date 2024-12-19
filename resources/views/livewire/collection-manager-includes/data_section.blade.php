@@ -31,12 +31,12 @@
                 icon_class="w-5 h-5 text-gray-400" />
         </div>
 
-        <!-- Collection Show -->
+        <!-- Collection is_published -->
         <div class="bg-gray-900 p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300">
             <div class="form-control w-52">
                 <label class="cursor-pointer label">
                     <span class="label-text text-white">{{ __('collection.publish_collection') }}</span>
-                    <input type="checkbox" class="toggle toggle-primary" wire:model='collection.show' />
+                    <input type="checkbox" class="toggle toggle-primary" wire:model='collection.is_published' />
                 </label>
             </div>
         </div>

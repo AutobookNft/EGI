@@ -21,7 +21,7 @@ class Open extends Component
         'user_id' => null,
         'team_id' => null,
         'type' => null,
-        'show' => null,
+        'is_published' => null,
         'collection_name' => null,
         'position' => null,
         'EGI_number' => null,

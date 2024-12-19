@@ -45,7 +45,7 @@ return new class extends Migration
             $table->date('creation_date')->nullable();
             $table->text('size')->nullable();
             $table->text('dimension')->nullable();
-            $table->boolean('show')->default(false)->nullable();
+            $table->boolean('is_published')->default(false)->nullable();
             $table->boolean('mint')->default(false)->nullable();
             $table->boolean('rebind')->default(true)->nullable();
             $table->text('file_crypt')->nullable();

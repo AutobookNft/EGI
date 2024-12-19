@@ -4,64 +4,54 @@ namespace App\Livewire\Collections;
 
 use App\Models\Collection;
 use Livewire\Component;
-use Livewire\WithFileUploads;
-use Illuminate\Support\Facades\Storage;
-use App\Services\FileStorageService;
 
+/**
+ * Class HeadImagesManager
+ *
+ * This Livewire component manages the header images (banner, card, and avatar)
+ * for a specific collection. It initializes the collection and provides a render
+ * method to display the associated view.
+ */
 class HeadImagesManager extends Component
 {
-    use WithFileUploads;
-
-    public $bannerImage;
-    public $cardImage;
-    public $avatarImage;
-    public $EGIImage;
+    /**
+     * The collection instance associated with the header images.
+     *
+     * @var Collection
+     */
     public $collection;
+
+    /**
+     * The unique identifier for the collection.
+     *
+     * @var int
+     */
     public $collectionId;
 
+    /**
+     * Mount the component and initialize the collection.
+     *
+     * @param int $id The ID of the collection to be managed.
+     *
+     * @return void
+     */
     public function mount($id)
     {
+        // Store the collection ID passed as a parameter.
         $this->collectionId = $id;
-        $this->collection = Collection::findOrFail($this->collectionId );
+
+        // Retrieve the collection from the database or fail with a 404 error if not found.
+        $this->collection = Collection::findOrFail($this->collectionId);
     }
 
-
-    public function saveBannerImage()
-    {
-        $fileStorageService = new FileStorageService();
-
-        if ($this->bannerImage) {
-            $path = 'collections/banners';
-            $filename = 'banner_' . $this->collection->id . '.' . $this->bannerImage->getClientOriginalExtension();
-            $collectionId = $this->collection->id;
-            $imageType = 'banner';
-
-            try {
-                $fileStorageService->saveFile($this->bannerImage, $path, $filename, 'public', $collectionId, $imageType);
-                session()->flash('success', 'Immagine banner salvata con successo!');
-            } catch (\Exception $e) {
-                session()->flash('error', 'Errore nel salvataggio dell\'immagine banner.');
-            }
-        }
-    }
-
-    public function removeImage($type)
-    {
-        switch ($type) {
-            case 'banner':
-                $this->bannerImage = null;
-                break;
-            case 'card':
-                $this->cardImage = null;
-                break;
-            case 'avatar':
-                $this->avatarImage = null;
-                break;
-        }
-    }
-
+    /**
+     * Render the component's view.
+     *
+     * @return \Illuminate\View\View The view associated with the component.
+     */
     public function render()
     {
+        // Return the Livewire view for managing head images.
         return view('livewire.collections.head-images-manager');
     }
 }

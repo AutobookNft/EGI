@@ -8,7 +8,7 @@
 
             @foreach($collections as $index => $collection)
             <div class="w-full sm:max-w-[350px] px-2 flex-shrink-0">
-                <x-collection-card :id="$collectionId" :editable="true" imageType="card" />
+                <x-collection-card :id="$collection->id" :editable="false" imageType="card" />
 
                 </div>
             @endforeach

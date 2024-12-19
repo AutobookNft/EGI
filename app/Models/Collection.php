@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\EGIImageCast;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
@@ -24,7 +25,7 @@ class Collection extends Model
         'collection_name',
         'description',
         'type',
-        'show',
+        'is_published',
         'path_image_banner',
         'path_image_card',
         'path_image_avatar',
@@ -43,12 +44,18 @@ class Collection extends Model
         'address',
     ];
 
-    protected $appends = [
-        'verified_image_card_path',
-        'verified_image_banner_path',
-        'verified_image_avatar_path',
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'image_banner' => EGIImageCast::class,
+        'image_card'   => EGIImageCast::class,
+        'image_avatar' => EGIImageCast::class,
+        'image_egi'    => EGIImageCast::class,
+        'is_published' => 'boolean',
     ];
-
     // Relazione con il team
     public function team()
     {
@@ -71,43 +78,5 @@ class Collection extends Model
         return $this->hasMany(Egi::class);
     }
 
-    /**
-     * Accessor per verificare se il file esiste fisicamente e restituire il percorso.
-     */
-    public function getVerifiedImageCardPathAttribute()
-    {
-        $path = $this->path_image_card;
-
-        // Verifica se il file esiste nel disco pubblico
-        if ($path && Storage::disk('public')->exists($path)) {
-            return $path; // Restituisci l'URL accessibile pubblicamente
-        }
-
-        return null; // Restituisci null se il file non esiste
-    }
-
-    public function getVerifiedImageBannerPathAttribute()
-    {
-        $path = $this->path_image_banner;
-
-        // Verifica se il file esiste nel disco pubblico
-        if ($path && Storage::disk('public')->exists($path)) {
-            return $path; // Restituisci l'URL accessibile pubblicamente
-        }
-
-        return null; // Restituisci null se il file non esiste
-    }
-
-    public function getVerifiedImageAvatarPathAttribute()
-    {
-        $path = $this->path_image_avatar;
-
-        // Verifica se il file esiste nel disco pubblico
-        if ($path && Storage::disk('public')->exists($path)) {
-            return $path; // Restituisci l'URL accessibile pubblicamente
-        }
-
-        return null; // Restituisci null se il file non esiste
-    }
 
 }

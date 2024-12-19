@@ -8,11 +8,20 @@
  */
 
 return [
+    'delete_card' => 'Elimina la card',
+    'delete_banner' => 'Elimina il banner',
+    'delete_avatar' => 'Elimina l\'avatar',
+    'delete_EGI' => 'Elimina l\'EGI',
+    'save_card' => 'Salva la card',
+    'save_banner' => 'Salva il banner',
+    'save_avatar' => 'Salva l\'avatar',
+    'save_EGI' => 'Salva l\'EGI',
     'create_validation_error' => 'Errore di validazione',
     'creation_failed' => 'Creazione fallita',
     'collection_delete' => 'Elimina la collezione',
     'avatar_image' => 'Immagine dell\'avatar',
     'card_image' => 'Immagine della card',
+    'EGI_image' => 'Immagine EGI',
     'banner_image' => 'Immagine del banner',
     'edit_collection_data' => 'Modifica i dati della collezione',
     'modifies_EGI' => 'Modifica EGI',
@@ -20,6 +29,7 @@ return [
     'open_collection' => 'Apri la collezione',
     'team_memebers' => 'Membri del team',
     'manage_collection' => 'Gestisci le collection',
+    'manage_head_images' => 'Gestisci le immagini di testata',
     'collection' => 'Collezione',
     'collections' => 'Collezioni',
     'collection_data' => 'Dati di testata delle collection',

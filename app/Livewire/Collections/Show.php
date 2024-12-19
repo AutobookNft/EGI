@@ -9,14 +9,13 @@ use Livewire\Component;
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Validate;
 
-
 class Show extends Component
 {
     public $collection = [
         'user_id' => null,
         'team_id' => null,
         'type' => null,
-        'show' => null,
+        'is_published' => null,
         'collection_name' => null,
         'position' => null,
         'EGI_number '=> null,
@@ -44,6 +43,9 @@ class Show extends Component
     {
 
         $user = Auth::user();
+
+        // Recupera la collection selezionata
+        $collection = Collection::find($this->collectionId);
 
         // estrapola tutti gli wallets relazionati al team
         $wallets = TeamWallet::where('team_id', $collection->team_id)->get();

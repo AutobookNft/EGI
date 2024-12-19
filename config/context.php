@@ -8,6 +8,6 @@ return [
         'collections.edit' => 'collection',
         'egi.index' => 'egi',
         'admin.roles.index' => 'admin',
-        'profile.show' => 'profile',
+        'profile.is_published' => 'profile',
     ],
 ];

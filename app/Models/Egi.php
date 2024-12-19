@@ -15,7 +15,7 @@ class Egi extends Model
         'auction_id', 'owner_id', 'drop_id', 'upload_id', 'creator', 'owner_wallet',
         'drop_title', 'title', 'description', 'extension', 'media', 'type', 'bind',
         'paired', 'price', 'floorDropPrice', 'position', 'creation_date', 'size',
-        'dimension', 'show', 'mint', 'rebind', 'file_crypt', 'file_hash',
+        'dimension', 'is_published', 'mint', 'rebind', 'file_crypt', 'file_hash',
         'file_IPFS', 'file_mime', 'status', 'is_public', 'updated_by'
     ];
 

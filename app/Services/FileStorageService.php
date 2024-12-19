@@ -16,7 +16,7 @@ class FileStorageService
      * Salva un file Livewire in una posizione specifica e aggiorna il percorso nel database.
      *
      * @param \Livewire\TemporaryUploadedFile $file
-     * @param string $path
+     * @param mixed $file
      * @param string $filename
      * @param string $disk
      * @param int $collectionId

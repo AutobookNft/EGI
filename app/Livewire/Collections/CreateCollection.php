@@ -15,7 +15,7 @@ class CreateCollection extends Component
         'user_id' => null,
         'team_id' => null,
         'type' => 'image',
-        'show' => false,
+        'is_published' => false,
         'collection_name' => null,
         'position' => null,
         'EGI_number' => null,
@@ -32,7 +32,7 @@ class CreateCollection extends Component
         'collection.EGI_number' => 'nullable|integer',
         'collection.floor_price' => 'nullable|numeric',
         'collection.description' => 'nullable|string',
-        'collection.show' => 'nullable|boolean',
+        'collection.is_published' => 'nullable|boolean',
     ];
 
     public function create()
@@ -78,7 +78,7 @@ class CreateCollection extends Component
         $this->collection['team_id'] = Auth::user()->currentTeam->id ?? null;
         $this->collection['epp_id'] = config('app.epp_id');
         $this->collection['type'] = 'image';
-        $this->collection['show'] = false;
+        $this->collection['is_published'] = false;
         $this->collection['position'] = 1;
         $this->collection['EGI_number'] = 1;
         $this->collection['floor_price'] = 0;
@@ -91,7 +91,7 @@ class CreateCollection extends Component
             'creator_id' => null,
             'team_id' => null,
             'type' => 'image',
-            'show' => false,
+            'is_published' => false,
             'collection_name' => null,
             'position' => null,
             'EGI_number' => null,
