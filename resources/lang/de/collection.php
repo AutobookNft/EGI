@@ -8,6 +8,7 @@
  */
 
 return [
+    'came_back_to_collection' => 'Zurück zur Sammlung',
     'confirm_delete_title' => 'Sind Sie sicher?',
     'confirm_delete_text' => 'Diese Aktion löscht das :type dauerhaft!',
     'confirm_delete_button' => 'Ja, löschen!',

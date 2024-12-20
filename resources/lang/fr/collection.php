@@ -8,6 +8,7 @@
  */
 
 return [
+    'came_back_to_collection' => 'Retour à la collection',
     'confirm_delete_title' => 'Êtes-vous sûr?',
     'confirm_delete_text' => 'Cette action supprimera l\'image de la :type de façon permanente!',
     'confirm_delete_button' => 'Oui, supprimer!',

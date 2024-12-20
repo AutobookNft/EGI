@@ -8,6 +8,7 @@
 
  */
 return [
+    'came_back_to_collection' => 'Voltar para a coleção',
     'confirm_delete_title' => 'Tem certeza?',
     'confirm_delete_text' => 'Esta ação excluirá permanentemente a imagem :type!',
     'confirm_delete_button' => 'Sim, exclua!',

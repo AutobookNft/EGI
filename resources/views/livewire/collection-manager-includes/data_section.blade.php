@@ -17,6 +17,9 @@
 
         <!-- Collection Name -->
         <div class="bg-gray-900 p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300">
+            <div class="label">
+                <span class="label-text text-white">{{ __('collection.collection_name') }}</span>
+            </div>
             <x-form-input
                 id="collection_name"
                 type="text"
@@ -60,10 +63,13 @@
     </div>
 
     <!-- Altri Campi -->
-    <div class="grid grid-cols-1 gap-6 md:grid-cols-4 mt-6">
+    <div class="grid grid-cols-1 gap-6 md:grid-cols-3 mt-6">
 
         <!-- EGI Number -->
         <div class="bg-gray-900 p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300">
+            <div class="label">
+                <span class="label-text text-white">{{ __('collection.EGI_number') }}</span>
+            </div>
             <x-form-input
                 :label="__('collection.EGI_number')"
                 :placeholder="__('collection.EGI_number')"
@@ -80,6 +86,9 @@
 
         <!-- Floor Price -->
         <div class="bg-gray-900 p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300">
+            <div class="label">
+                <span class="label-text text-white">{{ __('collection.set_base_EcoNFT_price') }}</span>
+            </div>
             <x-form-input
                 :label="__('collection.EGI_floor_price')"
                 :placeholder="__('collection.set_base_EcoNFT_price')"
@@ -96,6 +105,9 @@
 
         <!-- Collection Position -->
         <div class="bg-gray-900 p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300">
+            <div class="label">
+                <span class="label-text text-white">{{ __('collection.position_for_mor_than_one_collection') }}</span>
+            </div>
             <x-form-input
                 :label="__('collection.position')"
                 type="number"
@@ -130,20 +142,27 @@
         @enderror
     </div>
 
-    <!-- URL della Collection -->
-    <div class="mt-6 bg-gray-900 p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300">
-        <x-form-input
-            :label="__('collection.collection_site_URL')"
-            type="url"
-            :datatip="__('collection.collection_site_URL_suggest')"
-            model="collection.url_collection_site"
-            id="url_collection_site"
-            :placeholder="__('collection.collection_site_URL')"
-            width_label="w-full"
-            width_input="w-11/12"
-            required
-            icon="url"
-            icon_class="w-5 h-5 text-gray-400" />
+    <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <!-- URL della Collection -->
+        <div class="mt-6 bg-gray-900 p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300">
+            <x-form-input
+                :label="__('collection.collection_site_URL')"
+                type="url"
+                :datatip="__('collection.collection_site_URL_suggest')"
+                model="collection.url_collection_site"
+                id="url_collection_site"
+                :placeholder="__('collection.collection_site_URL')"
+                width_label="w-full"
+                width_input="w-11/12"
+                required
+                icon="url"
+                icon_class="w-5 h-5 text-gray-400" />
+        </div>
+        <div class="mt-6 bg-gray-900 p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 flex items-center justify-center">
+            <a href="{{ route('collections.head_images', ['id' => $collectionId]) }}" class="btn btn-primary btn-lg">
+                {{ __('collection.collection_image') }}
+            </a>
+        </div>
     </div>
 
 </div>

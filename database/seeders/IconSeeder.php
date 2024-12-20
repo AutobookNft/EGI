@@ -22,6 +22,8 @@ class IconSeeder extends Seeder
                     'type' => $icon['type'],
                     'class' => $icon['class'],
                     'html' => $icon['html'],
+                    'host' => $icon['host'],
+                    'name_on_host' => $icon['name_on_host'],
                 ]
             );
         }

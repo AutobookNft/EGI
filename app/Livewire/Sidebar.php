@@ -2,104 +2,64 @@
 
 namespace App\Livewire;
 
-use App\Models\BarContextMenu;
-use App\Repositories\IconRepository;
 use Livewire\Component;
 use Illuminate\Support\Facades\Route;
-use App\Models\BarContext;
-use Illuminate\Support\Facades\Log;
+use App\Services\Menu\ContextMenus;
+use App\Services\Menu\MenuConditionEvaluator;
+use App\Repositories\IconRepository;
 
 class Sidebar extends Component
 {
-    public $context;
-    public $menus;
+    public $menus = [];
+    public $contextTitle = '';
+    protected $iconRepo;
 
     public function mount()
     {
-        // Ottieni il nome della rotta corrente
+        $evaluator = new MenuConditionEvaluator();
+        $this->iconRepo = new IconRepository();
+
+        // Determina il contesto dalla rotta corrente
         $currentRouteName = Route::currentRouteName();
+        $context = explode('.', $currentRouteName)[0] ?? 'dashboard';
 
-        // Estrai il contesto dal nome della rotta (es: 'collections.index' -> 'collections')
-        $this->context = explode('.', $currentRouteName)[0];
+        // Imposta il titolo del contesto
+        $this->contextTitle = ucfirst($context);
 
-        Log::info($this->context);
+        // Ottieni i menu per il contesto corrente
+        $allMenus = ContextMenus::getMenusForContext($context);
 
+        // Filtra i menu in base ai permessi dell'utente
+        foreach ($allMenus as $menu) {
+            $filteredItems = array_filter($menu->items, function ($item) use ($evaluator) {
+                return $evaluator->shouldDisplay($item);
+            });
+
+            if (!empty($filteredItems)) {
+                // Converti il MenuGroup in un array associativo
+                $menuArray = [
+                    'name' => $menu->name,
+                    'icon' => $menu->icon,
+                    'items' => [],
+                ];
+
+                foreach ($filteredItems as $item) {
+                    $menuArray['items'][] = [
+                        'name' => $item->name,
+                        'route' => $item->route,
+                        'icon' => $this->iconRepo->getDefaultIcon($item->icon),
+                        'permission' => $item->permission,
+                        'children' => $item->children,
+                    ];
+                }
+
+                $this->menus[] = $menuArray;
+            }
+        }
     }
 
     public function render()
     {
-
-
-        // Query per ottenere il contesto con i summary e i relativi menu
-        $context = BarContext::with([
-            'summaries' => function ($query) {
-                $query->orderBy('position', 'asc');
-            },
-            'summaries.menus' => function ($query) {
-                $query->orderBy('position', 'asc');
-            }
-        ])
-        ->where('context', $this->context)
-        ->first();
-
-        Log::info('context: '.json_encode($context));
-
-
-
-       // Se il contesto esiste, trasforma i dati nel formato desiderato
-       if ($context) {
-            $this->menus = $context->summaries->map(function ($summary) {
-
-                $icon = $summary->icon ?? '';
-                $iconClass = '';
-
-                // Recupero l'icona per il menu sommario
-                if ($icon) {
-                    $repository = app(IconRepository::class);
-                    $iconHtml = $repository->getIcon($icon, 'elegant', $iconClass);
-                }
-
-                return [
-                    'name' => __('side_nav_bar.title.'.$summary->summary),
-                    'permission' => $summary->permission,
-                    'summary_icon' => $iconHtml ?? '',
-                    'summary_route' => $summary->route ?? 'dashboard',
-                    'icon' => $iconHtml ?? '',
-                    'summary_head' => $summary->head,
-                    'submenu' => $summary->menus->map(function ($menu) {
-
-                        // Recupero l'icona per il menu
-                        $iconClass = '';
-                        $icon = $menu->icon ?? '';
-
-                        if ($icon) {
-                            $repository = app(IconRepository::class);
-                            $iconHtml = $repository->getIcon($icon, 'elegant', $iconClass);
-                        }
-
-                        Log::info('Icona: '. $iconHtml);
-
-                        return [
-                            'name' =>__('side_nav_bar.'.$menu->name),
-                            'route' => $menu->route,
-                            'permission' => $menu->permission,
-                            'head' => $menu->head,
-                            'icon' => $iconHtml,
-                        ];
-                    })->toArray(),
-                ];
-            })->toArray();
-        }
-
-        // Log::info(json_encode($this->menus));
-
-        // foreach($this->menus as $menu){
-        //     Log::info(json_encode('icon:'.$menu['summary_icon']));
-        //     foreach($menu['submenu'] as $submenu){
-        //         Log::info(json_encode($submenu['name']));
-        //     }
-        // }
-
         return view('livewire.sidebar');
     }
 }

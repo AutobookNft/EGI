@@ -7,6 +7,8 @@ return [
                 'name' => 'fallback',
                 'type' => 'solid',
                 'class' => 'h-6 w-6',
+                'host'=>'',
+                'name_on_host'=>'',
                 'html' => '
                     <svg xmns="http://www.w3.org/2000/svg" viewBox="0 0 123.01 120.38" width="40" height="40"><defs><style>.cls-1{fill:none;stroke:#333;stroke-linecap:round;stroke-miterlimit:10;stroke-width:4px}.cls-3{fill:#333}</style></defs><g id="Layer_2" data-name="Layer 2"><g id="General_-_Icon" data-name="General - Icon"><g id="General_-_Icon-2" data-name="General - Icon">
                         <path class="cls-1" d="m26.59 87.36 1.12-6.55A6.1 6.1 0 0 0 26 75.42L3.85 53.86a6.09 6.09 0 0 1 3.37-10.39L37.78 39a6.11 6.11 0 0 0 4.59-3.33L57.89 4.24a4 4 0 0 1 7.22 0l13.3 27M91.73 41.32 117.38 45c3.12.53 5.39 5.3 1.77 8.82L97 75.42a6.1 6.1 0 0 0-1.75 5.39l5.22 30.44a6.09 6.09 0 0 1-8.84 6.42L64.34 103.3a6.13 6.13 0 0 0-5.68 0l-27.33 14.37a6.09 6.09 0 0 1-8.84-6.42l1.33-7.77"/><path d="M66.79 33.5s4.46 13.5 7.83 15.86 16.59 4.23 16.59 4.23" style="stroke-linejoin:round;stroke-width:2px;fill:none;stroke:#333;stroke-linecap:round"/><circle class="cls-3" cx="97.5" cy="54.57" r="1"/><circle class="cls-3" cx="25.5" cy="94.57" r="2"/></g></g></g>
@@ -16,6 +18,8 @@ return [
                 'name' => 'email',
                 'type' => 'solid',
                 'class' => 'h-4 w-4 opacity-70',
+                'host'=>'',
+                'name_on_host'=>'',
                 'html' => "
                     <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='currentColor' class='%class%'>
                         <path d='M2.5 3A1.5 1.5 0 0 0 1 4.5v.793c.026.009.051.02.076.032L7.674 8.51c.206.1.446.1.652 0l6.598-3.185A.755.755 0 0 1 15 5.293V4.5A1.5 1.5 0 0 0 13.5 3h-11Z' />
@@ -26,6 +30,8 @@ return [
                 'name' => 'camera',
                 'type' => 'solid',
                 'class' => 'w-6 h-6 opacity-50 text-base-content',
+                'host'=>'',
+                'name_on_host'=>'',
                 'html' => "
                     <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' class='%class%'>
                         <path stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z'/>
@@ -36,6 +42,8 @@ return [
                 'name' => 'collection-name',
                 'type' => 'solid',
                 'class' => 'w-12 h-12 opacity-50 text-base-content',
+                'host'=>'',
+                'name_on_host'=>'',
                 'html' => "
                     <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' class='%class%'>
                         <path d='M3 3h6v6H3V3zm0 9h6v6H3v-6zm9-9h6v6h-6V3zm0 9h6v6h-6v-6z'></path>
@@ -45,6 +53,8 @@ return [
                 'name' => 'url',
                 'type' => 'solid',
                 'class' => 'w-12 h-12 opacity-50 text-base-content',
+                'host'=>'',
+                'name_on_host'=>'',
                 'html' => "
                     <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' class='%class%'>
                         <path d='M10.59 13.41L9.17 12l2.83-2.83a3 3 0 014.24 4.24L14.83 15l1.42 1.41 2.83-2.83a5 5 0 00-7.07-7.07L7.76 10.24a5 5 0 007.07 7.07L13.41 15l-2.82 2.82a3 3 0 01-4.24-4.24l2.82-2.82z'/>
@@ -54,20 +64,26 @@ return [
                 'name' => 'collection-number',
                 'type' => 'material',
                 'class' => 'w-6 h-6 opacity-50 material-symbols-outlined text-base-content',
-                'html' => "<span class='%class%'>pin</span>",
+                'host'=>'https://fonts.google.com/icons',
+                'name_on_host'=>'pin',
+                'html' => "<span class='w-6 h-6 opacity-50 material-symbols-outlined text-base-content'>pin</span>",
             ],
             [
                 'name' => 'collection-position',
                 'type' => 'material-symbols-outlined',
                 'class' => 'w-6 h-6 opacity-50 material-symbols-outlined text-base-content',
-                'html' => "<span class='%class%'>stacks</span>",
+                'host'=>'https://fonts.google.com/icons',
+                'name_on_host'=>'stacks',
+                'html' => "<span class='w-6 h-6 opacity-50 material-symbols-outlined text-base-content'>stacks</span>",
             ],
 
             [
                 'name' => 'egi-base-price',
                 'type' => 'material',
                 'class' => 'w-6 h-6 opacity-50 material-symbols-outlined text-base-content',
-                'html' => "<span class='%class%'>payments</span>",
+                'host'=>'https://fonts.google.com/icons',
+                'name_on_host'=>'payments',
+                'html' => "<span class='w-6 h-6 opacity-50 material-symbols-outlined text-base-content'>payments</span>",
             ],
             [
                 'name' => 'permissions_roles',
