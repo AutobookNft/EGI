@@ -8,6 +8,7 @@
  */
 
 return [
+    'came_to_back' => 'Volver',
     "file_deleted_successfully" => "Archivo eliminado con éxito",
     'extension_not_allowed' => '¡Extensión no permitida!',
     'title_file_type_not_allowed' => '¡Tipo de archivo no permitido!',

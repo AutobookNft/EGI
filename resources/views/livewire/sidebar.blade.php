@@ -6,6 +6,12 @@
             {{ __($contextTitle) }}
         </div>
 
+        <div class="p-6">
+            <x-back-button />
+        </div>
+
+        <x-separator />
+
         <!-- Menu -->
         <div class="space-y-4 p-4 flex-1 overflow-y-auto">
             @if (!empty($menus))
@@ -44,6 +50,7 @@
                             </a>
                             <div class="border-t border-gray-300 my-4"></div>
                         @endif
+                        <x-separator />
                     @endif
                 @endforeach
             @else
