@@ -70,14 +70,15 @@ class BannerImageUpload extends Component
 
         // Check if the collection has a banner image.
         if ($collection->image_banner) {
-            // Retrieve the cached image path for the banner.
-            $this->existingImageUrl = EGIImageService::getCachedEGIImagePath(
-                $this->collectionId,
-                $collection->image_banner,
-                $collection->is_published,
-                null,
-                'head.banner' // PathKey for the banner image.
-            );
+        //     // Retrieve the cached image path for the banner.
+        //     $this->existingImageUrl = EGIImageService::getCachedEGIImagePath(
+        //         $this->collectionId,
+        //         $collection->image_banner,
+        //         $collection->is_published,
+        //         null,
+        //         'head.banner' // PathKey for the banner image.
+        //     );
+            $this->existingImageUrl = $collection->image_banner;
         }
 
         // Log the existing image URL for debugging purposes.

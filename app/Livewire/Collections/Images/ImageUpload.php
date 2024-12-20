@@ -90,6 +90,8 @@ class ImageUpload extends Component
                 null,
                 $this->getKeyInPathsFile()
             );
+
+            $this->existingImageUrl = $collection->$field;
         }
 
         // Log the image loading process for debugging purposes.

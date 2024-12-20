@@ -8,6 +8,12 @@
 
  */
 return [
+    'confirm_delete_title' => 'Tem certeza?',
+    'confirm_delete_text' => 'Esta ação excluirá permanentemente a imagem :type!',
+    'confirm_delete_button' => 'Sim, exclua!',
+    'cancel_delete_button' => 'Cancelar',
+    'deleted_title' => 'Excluído!',
+    'deleted_text' => 'A imagem do banner foi excluída com sucesso.',
     'delete_card' => 'Excluir cartão',
     'delete_banner' => 'Excluir banner',
     'delete_avatar' => 'Excluir avatar',

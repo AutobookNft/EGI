@@ -53,7 +53,7 @@ class Collection extends Model
         'image_banner' => EGIImageCast::class,
         'image_card'   => EGIImageCast::class,
         'image_avatar' => EGIImageCast::class,
-        'image_egi'    => EGIImageCast::class,
+        'image_EGI'    => EGIImageCast::class,
         'is_published' => 'boolean',
     ];
     // Relazione con il team

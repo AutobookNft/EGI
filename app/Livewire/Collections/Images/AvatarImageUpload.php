@@ -71,13 +71,14 @@ class AvatarImageUpload extends Component
         // Check if the collection has an avatar image.
         if ($collection->image_avatar) {
             // Retrieve the cached image path for the avatar.
-            $this->existingImageUrl = EGIImageService::getCachedEGIImagePath(
-                $this->collectionId,
-                $collection->image_avatar,
-                $collection->is_published,
-                null,
-                'head.avatar' // PathKey for the avatar image.
-            );
+            // $this->existingImageUrl = EGIImageService::getCachedEGIImagePath(
+            //     $this->collectionId,
+            //     $collection->image_avatar,
+            //     $collection->is_published,
+            //     null,
+            //     'head.avatar' // PathKey for the avatar image.
+            // );
+            $this->existingImageUrl = $collection->image_avatar;
         }
 
         // Log the existing image URL for debugging purposes.

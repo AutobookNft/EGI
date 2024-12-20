@@ -5,15 +5,15 @@
     <livewire:collections.images.banner-image-upload :collectionId="$collectionId">
 
     <div class="grid grid-cols-1 gap-6 sm:col-span-2 sm:grid-cols-3">
-        <livewire:collections.images.image-upload :collectionId="$collectionId" imageType="card" wire:model="image" />
+        <livewire:collections.images.image-upload :collectionId="$collectionId" imageType="card" />
 
         <!-- EGI Image -->
         @if (config('app.egi_asset'))
-            <livewire:collections.images.image-upload :collectionId="$collectionId" imageType="EGI" wire:model="EGIAssetImmage" />
+            <livewire:collections.images.image-upload :collectionId="$collectionId" imageType="EGI" />
         @endif
 
         <!-- Avatar -->
-        <livewire:collections.images.avatar-image-upload :collectionId="$collectionId" wire:model="avatarImage" />
+        <livewire:collections.images.avatar-image-upload :collectionId="$collectionId" />
     </div>
 
 </div>

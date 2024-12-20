@@ -32,8 +32,8 @@ class EGIImageCast implements CastsAttributes
         $pathKey = match ($key) {
             'image_banner' => 'head.banner',
             'image_card'   => 'head.card',
-            'image_avatar' => 'head.root',
-            'image_egi'    => 'head.EGI_asset',
+            'image_avatar' => 'head.avatar',
+            'image_EGI'    => 'head.EGI_asset',
             default        => 'head.root',
         };
 

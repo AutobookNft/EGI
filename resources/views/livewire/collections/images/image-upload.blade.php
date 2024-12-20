@@ -36,9 +36,44 @@
         @endif
 
         @if($existingImageUrl || $image)
-            <button type="button" wire:click="removeImage" class="btn btn-error">
+            <button type="button" onclick="confirmDelete({{ json_encode($imageType) }})" class="btn btn-error">
                 {{ __('collection.delete_' . $imageType) }}
             </button>
         @endif
     </div>
 </div>
+
+<!-- Script per SweetAlert2 -->
+<script>
+
+    function confirmDelete(type) {
+        // Mappa dei tipi di immagine per le traduzioni
+        const typeMap = {
+            'banner': '{{ __("collection.banner_image") }}',
+            'avatar': '{{ __("collection.avatar_image") }}',
+            'card': '{{ __("collection.card_image") }}',
+            'EGI': '{{ __("collection.EGI_image") }}'
+        };
+
+        Swal.fire({
+            title: '{{ __("collection.confirm_delete_title") }}',
+            text: '{{ __("collection.confirm_delete_text", ["type" => ":type"]) }}'.replace(':type', typeMap[type]),
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: '{{ __("collection.confirm_delete_button") }}',
+            cancelButtonText: '{{ __("collection.cancel_delete_button") }}'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                @this.removeImage();
+                Swal.fire(
+                    '{{ __("collection.deleted_title") }}',
+                    '{{ __("collection.deleted_text", ["type" => ":type"]) }}'.replace(':type', typeMap[type]),
+                    'success'
+                );
+            }
+        });
+    }
+
+</script>
