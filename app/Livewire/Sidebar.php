@@ -40,6 +40,7 @@ class Sidebar extends Component
                 $menuArray = [
                     'name' => $menu->name,
                     'icon' => $menu->icon,
+                    'permission' => $menu->permission ?? null,
                     'items' => [],
                 ];
 
@@ -48,8 +49,8 @@ class Sidebar extends Component
                         'name' => $item->name,
                         'route' => $item->route,
                         'icon' => $this->iconRepo->getDefaultIcon($item->icon),
-                        'permission' => $item->permission,
-                        'children' => $item->children,
+                        'permission' => $item->permission ?? null,
+                        'children' => $item->children ?? [],
                     ];
                 }
 
