@@ -11,12 +11,12 @@ use Illuminate\Support\Facades\Auth;
 
 trait HandlesCollectionUpdate
 {
+
     public function collectionUpdate()
     {
+
         try {
             $this->validate();
-
-            $fileStorageService = app(FileStorageService::class);
 
             $collection = Collection::findOrFail($this->collectionId);
 
@@ -28,28 +28,7 @@ trait HandlesCollectionUpdate
                 'collection' => json_encode($this->collection, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
             ]);
 
-            $path = $this->createPathImage();
-
-            if (is_object($this->path_image_banner)) {
-                $filename = 'banner_' .$this->collectionId. '.' . $this->path_image_banner->extension();
-                $this->collection['path_image_banner'] = $fileStorageService->saveFile($this->path_image_banner, $path, $filename);
-            }
-
-            if (is_object($this->path_image_card)) {
-                $filename = 'card_' . $this->collectionId . '.' . $this->path_image_card->extension();
-                $this->collection['path_image_card'] = $fileStorageService->saveFile($this->path_image_card, $path, $filename);
-            }
-
-            if (is_object($this->path_image_avatar)) {
-                $filename = 'avatar_' . $this->collectionId . '.' . $this->path_image_avatar->extension();
-                $this->collection['path_image_avatar'] = $fileStorageService->saveFile($this->path_image_avatar, $path, $filename);
-            }
-
             $collection->update($this->collection);
-
-            $this->path_image_banner = $collection['path_image_banner'];
-            $this->path_image_card = $collection['path_image_card'];
-            $this->path_image_avatar = $collection['path_image_avatar'];
 
             session()->flash('message', __('collection.updated_successfully'));
 
@@ -68,13 +47,8 @@ trait HandlesCollectionUpdate
                 'collection_data' => $this->collection,
                 'stack_trace' => $e->getTraceAsString(),
             ]);
-            session()->flash('error', __('collection.update_failed'));
+            session()->flash('error', __('collection.save_failed'));
         }
     }
 
-    private function createPathImage()
-    {
-        $filename =  config('app.bucket_root_file_folder') . "/creator_" . Auth::id() . "/collections_".$this->collectionId;
-        return $filename;
-    }
 }

@@ -49,7 +49,7 @@ class Team extends JetstreamTeam
     // Relazione con gli utenti
     public function users()
     {
-        return $this->belongsToMany(User::class, 'team_user');
+        return $this->belongsToMany(User::class, 'team_user', 'team_id', 'user_id');
     }
 
     // Relazione con il creatore del team (personal team)

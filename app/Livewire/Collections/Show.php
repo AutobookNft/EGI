@@ -7,7 +7,6 @@ use App\Models\TeamWallet;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Illuminate\Support\Facades\Log;
-use Livewire\Attributes\Validate;
 
 class Show extends Component
 {
@@ -22,19 +21,10 @@ class Show extends Component
         'floor_price' => null,
         'description' => null,
         'url_collection_site' => null,
-        'path_image_banner' => '',
-        'path_image_card' => '',
-        'path_image_avatar' => '',
+        'image_banner' => '',
+        'image_card' => '',
+        'image_avatar' => '',
     ];
-
-    #[Validate('image|nullable')]
-    public $path_image_banner;
-
-    #[Validate('image|nullable')]
-    public $path_image_card;
-
-    #[Validate('image|nullable')]
-    public $path_image_avatar;
 
     public $collections;
     public $collectionId;

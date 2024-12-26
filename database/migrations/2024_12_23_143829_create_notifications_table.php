@@ -11,11 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('bar_contexts', function (Blueprint $table) {
-            $table->string('context')->primary();
+        Schema::create('notifications', function (Blueprint $table) {
+            $table->char('id', 36)->primary(); // Utilizza char(36) per l'UUID
+            $table->string('type');
+            $table->morphs('notifiable');
+            $table->text('data');
+            $table->timestamp('read_at')->nullable();
             $table->timestamps();
         });
-
     }
 
     /**
@@ -23,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('bar_menu');
+        Schema::dropIfExists('notifications');
     }
 };

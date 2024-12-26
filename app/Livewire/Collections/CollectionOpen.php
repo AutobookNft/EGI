@@ -13,7 +13,7 @@ use Livewire\Attributes\Validate;
 use Livewire\Component;
 use Livewire\Features\SupportFileUploads\WithFileUploads;
 
-class Open extends Component
+class CollectionOpen extends Component
 {
 
     use WithFileUploads, HandlesCollectionUpdate;
@@ -28,9 +28,9 @@ class Open extends Component
         'floor_price' => null,
         'description' => null,
         'url_collection_site' => null,
-        'path_image_banner' => '',
-        'path_image_card' => '',
-        'path_image_avatar' => '',
+        'image_banner' => '',
+        'image_card' => '',
+        'image_avatar' => '',
     ];
 
 
@@ -43,17 +43,10 @@ class Open extends Component
     public $noTeamMessage = 'Non ci sono team o collection disponibili.';
 
     protected $iconRepository;
-
-    #[Validate('nullable')]
-    public $path_image_banner;
-
-    #[Validate('nullable')]
-    public $path_image_card;
-
-    #[Validate('nullable')]
-    public $path_image_avatar;
-
     protected $user;
+
+    public $collectionId;
+    public $teamId;
 
     public function boot(IconRepository $iconRepository)
     {
@@ -120,6 +113,10 @@ class Open extends Component
 
         // carico i wallet del team
         $wallets = $team ? $team->wallets : [];
+
+        $this->teamId = $team->id;
+
+        $this->collectionId = $this->collections->first()->id;
 
         // Mostra il collection-manager per la prima collection
         return view('livewire.collections.collection-manager', [

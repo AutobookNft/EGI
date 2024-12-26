@@ -72,6 +72,8 @@ return [
     'EGI_number' => 'EGI-Nummer',
     'position' => 'Position',
     'updated_successfully' => 'Sammlung erfolgreich gespeichert',
+    'save_failed' => 'Speichern fehlgeschlagen',
+    'collection_not_found' => 'Sammlung nicht gefunden',
     'tips_to_optimize_your_collection' => 'Tipps zur Optimierung Ihrer Sammlung',
     'tips_for_your_collection_images' => 'Tipps für die Bilder Ihrer Sammlung',
     'image_section_title' => 'Bilder der Sammlung',

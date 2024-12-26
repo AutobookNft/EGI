@@ -15,22 +15,29 @@
 
     <h2 class="mb-4 text-2xl font-bold">{{ __('collection.manage_collection') }}</h2>
 
-    <form wire:submit.prevent="collectionUpdate"
+    <form wire:submit.prevent="save"
         class="p-6 space-y-6 bg-white rounded-lg shadow-sm">
 
         <!-- Sezione dei dati della collection -->
         @include('livewire.collection-manager-includes.data_section')
 
-        <!-- Sezione delle immagini -->
-        {{-- @include('livewire.collection-manager-includes.image_section') --}}
-
         <!-- Sezione dei wallets -->
-        @include('livewire.collection-manager-includes.wallets_section')
+        {{-- @include('livewire.collection-manager-includes.wallets_section') --}}
 
-        <div class="flex justify-end">
-            <x-form-button type="submit" style="primary" class="px-6">
-                {{ __('label.save') }}
-            </x-form-button>
+        <div class="mt-6 bg-gray-900 p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 flex items-center justify-center">
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
+                <a href="{{ route('collections.head_images', ['id' => $collectionId]) }}" class="btn btn-primary btn-lg">
+                    {{ __('collection.collection_image') }}
+                </a>
+                <a href="{{ route('collections.user_team', ['id' => $collectionId, 'teamId' => $teamId]) }}" class="btn btn-primary btn-lg">
+                    {{ __('collection.collection_team') }}
+                </a>
+                <div class="flex justify-end">
+                    <x-form-button type="submit" style="primary" class="px-6">
+                        {{ __('label.save') }}
+                    </x-form-button>
+                </div>
+            </div>
         </div>
     </form>
 

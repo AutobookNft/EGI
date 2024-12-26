@@ -27,10 +27,15 @@
     </head>
 
     <body class="font-sans antialiased bg-base-200">
+        <!-- Inizio drawer -->
+        <!-- lg:drawer-open => Su schermi lg o maggiori, la sidebar è sempre visibile -->
+        <!-- drawer => classe DaisyUI per attivare il layout a scomparsa -->
         <div class="drawer lg:drawer-open">
+
+            <!-- Questo checkbox controlla lo stato del drawer -->
             <input id="main-drawer" type="checkbox" class="drawer-toggle" />
 
-            <!-- Page Content -->
+            <!-- Contenuto principale della pagina -->
             <div class="flex flex-col min-h-screen drawer-content">
                 <!-- Navbar -->
                 <livewire:navigation-menu />
@@ -51,6 +56,7 @@
             </div>
 
             <!-- Sidebar -->
+            <!-- Sidebar rimane invariata, semplicemente sta dentro .drawer-side -->
             <livewire:sidebar/>
 
             @stack('modals')
@@ -60,5 +66,8 @@
             @endif
         </div>
     </body>
+
+
+
 
 </html>

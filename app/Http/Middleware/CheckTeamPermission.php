@@ -24,6 +24,12 @@ class CheckTeamPermission
         // Recupera l'utente autenticato
         $user = Auth::user();
 
+        Log::channel('florenceegi')->info('User', [
+            'user_id' => $user->id,
+            'permission' => $permission,
+            'user_name' => $user->name
+        ]);
+
         // Verifica se la rotta è per la creazione di una nuova collection
         if ($request->route()->getName() === 'collections.create') {
             // Se l'utente ha il permesso di creare una collection, permetti l'accesso
@@ -35,8 +41,11 @@ class CheckTeamPermission
             abort(403, 'Non hai il permesso di creare una collection.');
         }
 
+        $rotta = $request->route()->getName();
+
+
         // Verifica se la rotta è '/collections/open'
-        if ($request->route()->getName() === 'collections.open') {
+        if ( $rotta === 'collections.open') {
             // Trova tutte le collection attive dei team a cui l'utente è associato
             $collections = Collection::whereHas('team', function ($query) use ($user) {
                 $query->whereHas('users', function ($query) use ($user) {
@@ -52,13 +61,11 @@ class CheckTeamPermission
                 return $next($request);
             }
         } else {
+
             // Recupera l'ID della collection dalla richiesta per le altre rotte
             $collectionId = $request->route('id') ?? $request->route('collection');
             $collection = Collection::find($collectionId);
-
-           
-
-            // Se la collection non esiste, restituisci un errore 404
+            //Se la collection non esiste, restituisci un errore 404
             if (!$collection) {
                 abort(404, 'Collection non trovata.');
             }
@@ -67,6 +74,11 @@ class CheckTeamPermission
 
         // Recupera il team associato alla collection
         $team = $collection->team;
+
+        Log::channel('florenceegi')->info('User', [
+            'team_id' => $team->id,
+            'permission' => $permission,
+        ]);
 
         // Se il team non esiste, restituisci un errore 404
         if (!$team) {
@@ -86,6 +98,10 @@ class CheckTeamPermission
         }
 
         $roleName = $teamMembership->pivot->role;
+        Log::channel('florenceegi')->info('User', [
+            'roleName' => $roleName,
+            'permission' => $permission,
+        ]);
 
         // Verifica se il ruolo esiste in Spatie
         $role = Role::where('name', $roleName)->first();
@@ -102,6 +118,14 @@ class CheckTeamPermission
         if (!$role->hasPermissionTo($permission)) {
             abort(403, 'Non hai i permessi necessari per eseguire questa azione.');
         }
+
+        // Log::channel('florenceegi')->info('Team permission', [
+        //     'team_id' => $team->id,
+        //     'collection_id' => $collection->id,
+        //     'user_id' => $user->id,
+        //     'role' => $role->name,
+        //     'permission' => $permission
+        // ]);
 
         return $next($request);
     }

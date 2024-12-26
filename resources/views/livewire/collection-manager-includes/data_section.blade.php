@@ -26,7 +26,7 @@
                 :label="__('collection.collection_name')"
                 :placeholder="__('collection.collection_name')"
                 :datatip="__('collection.collection_name')"
-                model="collection.collection_name"
+                model="collection_name"
                 width_label="w-full"
                 width_input="w-full"
                 icon="collection-name"
@@ -39,7 +39,7 @@
             <div class="form-control w-52">
                 <label class="cursor-pointer label">
                     <span class="label-text text-white">{{ __('collection.publish_collection') }}</span>
-                    <input type="checkbox" class="toggle toggle-primary" wire:model='collection.is_published' />
+                    <input type="checkbox" class="toggle toggle-primary" wire:model='is_published' />
                 </label>
             </div>
         </div>
@@ -48,10 +48,10 @@
         <div class="bg-gray-900 p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300">
             <label class="form-control w-full max-w-xs">
                 <div class="label">
-                    <span class="label-text text-white">{{ __('collection.select_content_type') }}</span>
+                    <span class="label-text text-white">{{ __('collection.collection_name') }}</span>
                 </div>
-                <select class="select select-bordered select-primary bg-gray-700 text-white">
-                    <option disabled selected>{{ __('collection.select_type') }}</option>
+                <select class="select select-bordered select-primary bg-gray-700 text-white" wire:model='type'>
+                    <option disabled selected>{{ __('collection.select_content_type') }}</option>
                     <option value="image">{{ __('collection.type_image') }}</option>
                     <option value="ebook">{{ __('collection.type_ebook') }}</option>
                     <option value="audio">{{ __('collection.type_audio') }}</option>
@@ -75,7 +75,7 @@
                 :placeholder="__('collection.EGI_number')"
                 :datatip="__('collection.EGI_number')"
                 type="number"
-                model="collection.EGI_number"
+                model="EGI_number"
                 id="EGI_number"
                 width_label="w-full"
                 width_input="w-full"
@@ -94,7 +94,7 @@
                 :placeholder="__('collection.set_base_EcoNFT_price')"
                 :datatip="__('collection.set_base_EcoNFT_price')"
                 type="number"
-                model="collection.floor_price"
+                model="floor_price"
                 id="floor_price"
                 width_label="w-full"
                 width_input="w-full"
@@ -112,7 +112,7 @@
                 :label="__('collection.position')"
                 type="number"
                 :datatip="__('collection.position_for_mor_than_one_collection')"
-                model="collection.position"
+                model="position"
                 :placeholder="__('collection.position')"
                 id="position"
                 width_label="w-full"
@@ -130,7 +130,7 @@
             {{ __('collection.collection_description') }}
         </h2>
         <div class="w-full tooltip tooltip-info z-10" data-tip="{{ __('collection.collection_description_suggest') }}">
-            <textarea wire:model="collection.description"
+            <textarea wire:model="description"
                       id="description"
                       class="textarea textarea-bordered textarea-primary bg-gray-900 text-white w-full min-h-[120px] rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300"
                       required
@@ -142,14 +142,14 @@
         @enderror
     </div>
 
-    <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+    <div class="grid grid-cols-1 gap-6 md:grid-cols-1">
         <!-- URL della Collection -->
         <div class="mt-6 bg-gray-900 p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300">
             <x-form-input
                 :label="__('collection.collection_site_URL')"
                 type="url"
                 :datatip="__('collection.collection_site_URL_suggest')"
-                model="collection.url_collection_site"
+                model="url_collection_site"
                 id="url_collection_site"
                 :placeholder="__('collection.collection_site_URL')"
                 width_label="w-full"
@@ -158,11 +158,7 @@
                 icon="url"
                 icon_class="w-5 h-5 text-gray-400" />
         </div>
-        <div class="mt-6 bg-gray-900 p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 flex items-center justify-center">
-            <a href="{{ route('collections.head_images', ['id' => $collectionId]) }}" class="btn btn-primary btn-lg">
-                {{ __('collection.collection_image') }}
-            </a>
-        </div>
+
     </div>
 
 </div>

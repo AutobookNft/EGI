@@ -1,9 +1,11 @@
 <?php
 
 use App\Livewire\Collections\CollectionCarousel;
+use App\Livewire\Collections\CollectionEdit;
+use App\Livewire\Collections\CollectionUserTeam;
+use App\Livewire\Collections\CollectionWallet;
 use App\Livewire\Collections\CreateCollection;
 use App\Livewire\Collections\HeadImagesManager;
-use App\Livewire\ShowCollection;
 use App\Livewire\TeamManager;
 use Illuminate\Support\Facades\Route;
 use App\Livewire\PhotoUploader;
@@ -12,12 +14,10 @@ use App\Http\Controllers\IconAdminController;
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\DropController;
 use App\Http\Middleware\SetLanguage;
-use App\Livewire\Collections\CollectionManager;
-use App\Livewire\Collections\Open;
-use App\Livewire\Collections\Show;
+use App\Livewire\Collections\CollectionOpen;
 use Illuminate\Support\Facades\Log;
 use UltraProject\UConfig\Http\Controllers\UConfigController;
-use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
+
 
 // Rotta per PhotoUploader
 Route::get('/photo-uploader', PhotoUploader::class)->name('photo-uploader');
@@ -73,35 +73,35 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
                 ->name('collections.carousel');
 
             // Rotta per aprire vista della collezione
-            Route::get('/{id}/edit', CollectionManager::class)
+            Route::get('/{id}/edit', CollectionEdit::class)
                 ->middleware('team_can:update_collection')
                 ->name('collections.edit');
 
             // Rotta per discernere se mostrare il carousel o la vista della collezione
-            Route::get('/open', Open::class)
+            Route::get('/open', CollectionOpen::class)
                 ->middleware('team_can:view_collection_header')
                 ->name('collections.open');
 
+            Route::get('/{id}/head-images', HeadImagesManager::class)
+                ->middleware('team_can:view_collection_header')
+                ->name('collections.head_images');
 
-            // Rotta per discernere se mostrare il carousel o la vista della collezione
             Route::get('/create', CreateCollection::class)
                 ->middleware('team_can:create_collection')
                 ->name('collections.create');
 
-            // Rotta per aprire vista della collezione
-            Route::get('/show', Show::class)
+            Route::get('/{id}/{teamId}/user-team', CollectionUserTeam::class)
                 ->middleware('team_can:view_collection_header')
-                ->name('collections.show');
+                ->name('collections.user_team');
 
-            Route::get('/{id}/head-images', HeadImagesManager::class)
-                // ->middleware('team_can:view_collection_header')
-                ->name('collections.head_images');
         });
 
 
-        Route::get('/teams', TeamManager::class)
-            ->middleware(['can:read_collection'])
-            ->name('teams');
+
+
+        // Route::get('/teams', TeamManager::class)
+        //     ->middleware(['can:read_collection'])
+        //     ->name('teams');
 
         // Rotte per Wallet
         Route::post('/wallets/{id}/approve', [WalletController::class, 'approve'])

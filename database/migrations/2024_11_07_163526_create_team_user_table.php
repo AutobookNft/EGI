@@ -16,6 +16,14 @@ return new class extends Migration
             $table->foreignId('team_id')->constrained()->onDelete('cascade');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('role')->nullable();
+            $table->string('wallet', 255)->nullable($value = true);
+            // dividendo all'atto della prima vendita
+            $table->float('royalty_mint')->nullable($value = true);
+            // royalty del secondo mercato
+            $table->float('royalty_rebind')->nullable($value = true);
+            $table->string('approval', 25)->default('approved');
+            $table->json('previous_values')->nullable();
+            $table->string('status', 25)->nullable($value = true);
             $table->timestamps();
 
             $table->unique(['team_id', 'user_id']);

@@ -72,6 +72,8 @@ return [
     'EGI_number' => 'EGI Number',
     'position' => 'Position',
     'updated_successfully' => 'Collection saved successfully',
+    'save_failed' => 'Save failed',
+    'collection_not_found' => 'Collection not found',
     'tips_to_optimize_your_collection' => 'Tips to optimize your collection',
     'tips_for_your_collection_images' => 'Tips for your collection images',
     'image_section_title' => 'Collection images',
@@ -103,5 +105,4 @@ return [
         'create' => 'Create a wallet',
         'delete_wallet' => 'Are you sure you want to delete this wallet?',
     ]
-
 ];

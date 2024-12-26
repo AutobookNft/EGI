@@ -15,9 +15,6 @@ class DatabaseSeeder extends Seeder
         $this->call([
             InitialSetupSeeder::class,
             RolesAndPermissionsSeeder::class,
-            BarContextsSeeder::class,
-            BarContextsSummariesSeeder::class,
-            BarContextsMenuSeeder::class,
             IconSeeder::class,
         ]);
     }

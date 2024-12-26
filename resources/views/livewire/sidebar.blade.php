@@ -1,4 +1,5 @@
 <div class="drawer-side">
+    <!-- drawer-overlay gestisce il click fuori dalla sidebar per chiuderla su mobile -->
     <label for="main-drawer" class="drawer-overlay"></label>
     <aside class="min-h-screen w-80 bg-base-100 flex flex-col">
         <!-- Titolo del Contesto -->
@@ -59,4 +60,5 @@
         </div>
     </aside>
 </div>
+
 
