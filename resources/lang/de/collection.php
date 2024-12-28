@@ -8,6 +8,7 @@
  */
 
 return [
+    'invite_collection_member' => 'Mitglied zur Sammlung einladen',
     'came_back_to_collection' => 'Zurück zur Sammlung',
     'confirm_delete_title' => 'Sind Sie sicher?',
     'confirm_delete_text' => 'Diese Aktion löscht das :type dauerhaft!',
@@ -34,7 +35,8 @@ return [
     'modifies_EGI' => 'EGI ändern',
     'new_collection' => 'Neue Sammlung',
     'open_collection' => 'Sammlung öffnen',
-    'team_memebers' => 'Teammitglieder',
+    'team_members_description' => 'Hier können Sie alle Teammitglieder sehen, die Zugriff auf diese Sammlung haben',
+    'collection_members' => 'Sammlungsmitglieder',
     'manage_head_images' => 'Kopfbilder verwalten',
     'manage_collection' => 'Sammlung verwalten',
     'collection' => 'Sammlung',

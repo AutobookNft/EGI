@@ -30,7 +30,7 @@
                     {{ __('collection.collection_image') }}
                 </a>
                 <a href="{{ route('collections.collection_user', ['id' => $collectionId]) }}" class="btn btn-primary btn-lg">
-                    {{ __('collection.team_memebers') }}
+                    {{ __('collection.collection_members') }}
                 </a>
                 <div class="flex justify-end">
                     <x-form-button type="submit" style="primary" class="px-6">

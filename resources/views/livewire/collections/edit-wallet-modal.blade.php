@@ -33,8 +33,13 @@
 
                 <!-- Azioni -->
                 <div class="flex justify-end space-x-4 mt-6">
-                    <button wire:click="$emit('closeEditModal')" class="btn btn-secondary">{{ __('Cancel') }}</button>
-                    <button wire:click="saveChanges" class="btn btn-primary">{{ __('Save') }}</button>
+                    <button wire:click="closeHandleWallets" class="btn btn-secondary">{{ __('label.cancel') }}</button>
+                    @if($mode === 'create')
+                        <button wire:click="createWallet" class="btn btn-secondary">{{ __('label.save') }}</button>
+                    @else
+                        <button wire:click="saveWallet" class="btn btn-primary">{{ __('label.save') }}</button>
+                    @endif
+
                 </div>
             </div>
         </div>

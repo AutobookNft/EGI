@@ -8,6 +8,7 @@
  */
 
 return [
+    'invite_collection_member' => 'Invita un membro alla collection',
     'came_back_to_collection' => 'Torna alla collection',
     'confirm_delete_title' => 'Sei sicuro?',
     'confirm_delete_text' => 'Questa azione eliminerà l\'immagine :type definitivamente!',
@@ -34,7 +35,8 @@ return [
     'modifies_EGI' => 'Modifica EGI',
     'new_collection' => 'Nuova collection',
     'open_collection' => 'Apri la collezione',
-    'team_memebers' => 'Membri del team',
+    'collection_members' => 'Membri della collection',
+    'team_members_description' => 'Qui puoi vedere tutti i membri del team che hanno accesso a questa collection',
     'manage_collection' => 'Gestisci le collection',
     'manage_head_images' => 'Gestisci le immagini di testata',
     'collection' => 'Collezione',

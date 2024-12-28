@@ -3,14 +3,17 @@
 namespace App\Livewire\Collections;
 
 use App\Models\CollectionUser;
+use App\Models\Wallet;
 use Livewire\Component;
 use Illuminate\Support\Facades\Log;
+use Livewire\Attributes\On;
 
 class CollectionUserMember extends Component
 {
     public $collectionUsers; // Lista membri del team
-    public $teamId;
+    public $wallets;
     public $collectionId;
+    public $show = false; // Proprietà per gestire la visibilità della modale
 
     public function mount($id)
     {
@@ -28,11 +31,20 @@ class CollectionUserMember extends Component
         $this->dispatch('open-invite-modal'); // Invia un evento ai figli compatibile con Livewire 3
     }
 
+    // #[On('openHandleWallets')]
+    // public function showHandleWallets()
+    // {
+    //     // $this->resetFields(); // Pulisce i campi
+    //     $this->show = true; // Mostra la modale
+    // }
+
     public function loadTeamUsers()
     {
         $this->collectionUsers = CollectionUser::where('collection_id', $this->collectionId)->get();
-        Log::channel('florenceegi')->info('CollectionUsers', [
-            'collectionUsers' => $this->collectionUsers
+        $this->wallets = Wallet::where('collection_id','=',$this->collectionId)->get();
+        Log::channel('florenceegi')->info('CollectionUsersMembers', [
+            'collectionId' => $this->collectionId,
+            'wallets' => $this->wallets
         ]);
 
     }

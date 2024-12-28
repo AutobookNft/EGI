@@ -89,7 +89,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
                 ->middleware('collection_can:create_collection')
                 ->name('collections.create');
 
-            Route::get('/{id}/user-team', CollectionUserMember::class)
+            Route::get('/{id}/members', CollectionUserMember::class)
                 ->middleware('collection_can:view_collection_header')
                 ->name('collections.collection_user');
 

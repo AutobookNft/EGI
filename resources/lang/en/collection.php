@@ -8,6 +8,7 @@
  */
 
 return [
+    'invite_collection_member' => 'Invite a member to the collection',
     'came_back_to_collection' => 'Back to the collection',
     'confirm_delete_title' => 'Are you sure?',
     'confirm_delete_text' => 'This action will permanently delete the :type image!',
@@ -34,7 +35,8 @@ return [
     'modifies_EGI' => 'Modifies EGI',
     'new_collection' => 'New collection',
     'open_collection' => 'Open collection',
-    'team_memebers' => 'Team members',
+    'team_members_description' => 'Here you can see all the team members who have access to this collection',
+    'collection_members' => 'Collection members',
     'manage_head_images' => 'Manage head images',
     'manage_collection' => 'Manage collection',
     'collection' => 'Collection',
