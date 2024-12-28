@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Middleware\CheckTeamPermission;
+use App\Http\Middleware\CheckCollectionPermission;
 use App\Http\Middleware\SetLanguage;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -16,7 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
-            'team_can' => CheckTeamPermission::class,
+            'collection_can' => CheckCollectionPermission::class,
             'role_or_permission' => RoleOrPermissionMiddleware::class,
         ]);
 

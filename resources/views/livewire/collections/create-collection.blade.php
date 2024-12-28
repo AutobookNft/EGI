@@ -8,7 +8,7 @@
             @error('collection_name') <span class="text-red-500">{{ $message }}</span> @enderror
         </div>
 
-        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Crea Collection</button>
+        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">{{ __('collection.new_collection') }}</button>
     </form>
 
     @if (session()->has('error'))

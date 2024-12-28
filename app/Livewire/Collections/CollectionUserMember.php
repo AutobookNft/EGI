@@ -2,23 +2,23 @@
 
 namespace App\Livewire\Collections;
 
+use App\Models\CollectionUser;
 use Livewire\Component;
-use App\Models\TeamUser;
 use Illuminate\Support\Facades\Log;
 
-class CollectionUserTeam extends Component
+class CollectionUserMember extends Component
 {
-    public $teamUsers; // Lista membri del team
+    public $collectionUsers; // Lista membri del team
     public $teamId;
     public $collectionId;
 
-    public function mount($id, $teamId)
+    public function mount($id)
     {
-        Log::channel('florenceegi')->info('Team id', [
+        Log::channel('florenceegi')->info('Collection id', [
             'collectionId' => $id
         ]);
 
-        $this->teamId = $teamId;
+
         $this->collectionId = $id;
         $this->loadTeamUsers();
     }
@@ -30,12 +30,15 @@ class CollectionUserTeam extends Component
 
     public function loadTeamUsers()
     {
-        $this->teamUsers = TeamUser::where('team_id', $this->teamId)->get();
+        $this->collectionUsers = CollectionUser::where('collection_id', $this->collectionId)->get();
+        Log::channel('florenceegi')->info('CollectionUsers', [
+            'collectionUsers' => $this->collectionUsers
+        ]);
 
     }
 
     public function render()
     {
-        return view('livewire.collections.collection-user-team');
+        return view('livewire.collections.collection-user');
     }
 }

@@ -20,7 +20,7 @@
 
             <div class="hidden sm:flex sm:items-center sm:ms-6">
                 <!-- Teams Dropdown (se abilitato) -->
-                @if (Laravel\Jetstream\Jetstream::hasTeamFeatures())
+                {{-- @if (Laravel\Jetstream\Jetstream::hasTeamFeatures())
                     <div class="ms-3 relative">
                         <x-dropdown align="right" width="60">
                             <x-slot name="trigger">
@@ -71,7 +71,7 @@
                             </x-slot>
                         </x-dropdown>
                     </div>
-                @endif
+                @endif --}}
 
                 <!-- Settings Dropdown -->
                 <div class="ms-3 relative">
@@ -207,7 +207,7 @@
                 </form>
 
                 <!-- Team Management -->
-                @if (Laravel\Jetstream\Jetstream::hasTeamFeatures())
+                {{-- @if (Laravel\Jetstream\Jetstream::hasTeamFeatures())
                     <div class="border-t border-gray-200 dark:border-gray-600"></div>
 
                     <div class="block px-4 py-2 text-xs text-gray-400">
@@ -237,7 +237,7 @@
                             <x-switchable-team :team="$team" component="responsive-nav-link" />
                         @endforeach
                     @endif
-                @endif
+                @endif --}}
             </div>
         </div>
     </div>

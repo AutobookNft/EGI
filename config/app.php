@@ -68,6 +68,7 @@ return [
     'natan_wallet_address' => env('NATAN_WALLET_ADDRESS'),
     'natan_royalty_mint' => env('NATAN_ROYALTY_MINT'),
     'natan_royalty_rebind' => env('NATAN_ROYALTY_REBIND'),
+    'epp_wallet_address' => env('EPP_WALLET_ADDRESS'),
     'epp_royalty_mint' => env('EPP_ROYALTY_BIND'),
     'epp_royalty_rebind' => env('EPP_ROYALTY_REBIND'),
     'mediator_royalty_mint' => env('MEDIATOR_ROYALTY_MINT'),

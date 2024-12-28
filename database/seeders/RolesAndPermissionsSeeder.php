@@ -20,7 +20,6 @@ class RolesAndPermissionsSeeder extends Seeder
 
         // Permessi per il Team
         'create_team',
-        'read_team',
         'update_team',
         'delete_team',
         'add_team_member',
@@ -29,14 +28,12 @@ class RolesAndPermissionsSeeder extends Seeder
 
         // Permessi per le Collection
         'create_collection',
-        'read_collection',
         'update_collection',
         'delete_collection',
         'read_collection_header',
 
         // Permessi per gli EGI
         'create_EGI',
-        'read_EGI',
         'update_EGI',
         'delete_EGI',
 
@@ -68,10 +65,10 @@ class RolesAndPermissionsSeeder extends Seeder
             'add_team_member', 'remove_team_member', 'modify_team_roles',
 
             // Collection
-            'create_collection', 'read_collection', 'update_collection', 'delete_collection',
+            'create_collection', 'update_collection', 'delete_collection',
 
             // EGI
-            'create_EGI', 'read_EGI', 'update_EGI', 'delete_EGI',
+            'create_EGI', 'update_EGI', 'delete_EGI',
 
             // Views
             'view_user', 'view_profile', 'view_team', 'view_dashboard', 'view_bio', 'view_settings',
@@ -83,10 +80,10 @@ class RolesAndPermissionsSeeder extends Seeder
             'add_team_member', 'remove_team_member', 'modify_team_roles',
 
             // Collection
-            'read_collection', 'update_collection',
+            'update_collection',
 
             // EGI
-            'create_EGI', 'read_EGI', 'update_EGI', 'delete_EGI',
+            'create_EGI', 'update_EGI', 'delete_EGI',
 
             // Views
             'view_user', 'view_profile', 'view_team', 'view_dashboard', 'view_bio', 'view_settings',
@@ -94,11 +91,9 @@ class RolesAndPermissionsSeeder extends Seeder
         ],
 
         'editor' => [
-            // Collection
-            'read_collection',
 
             // EGI
-            'read_EGI', 'update_EGI',
+            'update_EGI',
 
             // Views
             'view_profile', 'view_team', 'view_dashboard', 'view_collection', 'view_EGI', 'view_collection_header'
@@ -106,10 +101,10 @@ class RolesAndPermissionsSeeder extends Seeder
 
         'guest' => [
             // Collection
-            'read_collection_header', 'view_collection_header', 'view_dashboard',
+            'view_collection_header', 'view_dashboard',
 
             // EGI
-            'read_EGI', 'view_EGI',
+            'view_EGI',
         ],
     ];
 

@@ -12,7 +12,7 @@
 
     <!-- Griglia dei Membri del Team -->
     <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
-        @foreach($teamUsers as $member)
+        @foreach($collectionUsers as $member)
             <div class="{{ $member->status === 'pending' ? 'bg-yellow-800' : 'bg-gray-900' }} p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 cursor-pointer"
                  wire:click="$dispatch('openEditModal', {{ $member->id }})">
                 <div class="flex items-center mb-4">
@@ -43,14 +43,14 @@
     </div>
 
     <!-- Placeholder se non ci sono membri -->
-    @if($teamUsers->isEmpty())
+    {{-- @if($teamUsers->isEmpty())
         <div class="mt-6 text-center">
             <p class="text-gray-400">{{ __('collection.no_team_members') }}</p>
         </div>
-    @endif
+    @endif --}}
 
     <!-- Include le Modali -->
     <livewire:collections.edit-wallet-modal />
-    <livewire:collections.invite-user-to-team-modal :teamId="$teamId" />
+    <livewire:collections.invite-user-to-collection-modal :collectionId="$collectionId" />
 </div>
 

@@ -3,12 +3,11 @@
         use App\Repositories\IconRepository;
     @endphp
 
-
     <!-- Titolo della Dashboard -->
     <h2 class="text-3xl font-bold mb-6">{{ __('Dashboard') }}</h2>
 
     <!-- Statistiche -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <div class="bg-gray-700 p-4 rounded-lg shadow-md flex items-center">
             <div class="icon mr-4">
                 <!-- Icona per le Collections -->
@@ -20,7 +19,6 @@
                     @if ($icon)
                         {!! $icon !!}
                     @endif
-
                 </div>
             </div>
             <div>
@@ -31,39 +29,20 @@
 
         <div class="bg-gray-700 p-4 rounded-lg shadow-md flex items-center">
             <div class="icon mr-4">
-                <!-- Icona per i Teams -->
+                <!-- Icona per i Collection Members -->
                 <div class="icon-placeholder bg-gray-600 w-12 h-12 rounded-full flex items-center justify-center">
                     @php
-                        $icon = (new IconRepository())->getIcon('open_collection', 'elegant', '');
+                        $icon = (new IconRepository())->getIcon('members', 'elegant', '');
                     @endphp
 
-                    @if ($icon)
-                        {!! $icon !!}
-                    @endif
-
-                </div>
-            </div>
-            <div>
-                <h3 class="text-xl font-semibold">{{ __('Teams') }}</h3>
-                <p class="text-2xl font-bold">{{ $teamsCount }}</p>
-            </div>
-        </div>
-
-        <div class="bg-gray-700 p-4 rounded-lg shadow-md flex items-center">
-            <div class="icon mr-4">
-                <!-- Icona per i Team Members -->
-                <div class="icon-placeholder bg-gray-600 w-12 h-12 rounded-full flex items-center justify-center">
-                    @php
-                        $icon = (new IconRepository())->getIcon('open_collection', 'elegant', '');
-                    @endphp
                     @if ($icon)
                         {!! $icon !!}
                     @endif
                 </div>
             </div>
             <div>
-                <h3 class="text-xl font-semibold">{{ __('Team Members') }}</h3>
-                <p class="text-2xl font-bold">{{ $teamMembersCount }}</p>
+                <h3 class="text-xl font-semibold">{{ __('Collection Members') }}</h3>
+                <p class="text-2xl font-bold">{{ $collectionMembersCount }}</p>
             </div>
         </div>
     </div>
@@ -90,4 +69,3 @@
         @endforelse
     </div>
 </div>
-

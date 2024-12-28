@@ -10,11 +10,10 @@ use Livewire\Attributes\Validate;
 
 class CreateCollection extends Component
 {
-
     public $collection = [
-        'user_id' => null,
-        'team_id' => null,
+        'creator_id' => null,
         'type' => 'image',
+        'status' => 'draft',
         'is_published' => false,
         'collection_name' => null,
         'position' => null,
@@ -25,13 +24,14 @@ class CreateCollection extends Component
 
     // Regole di validazione
     protected $rules = [
-        'collection.team_id' => 'required|exists:teams,id',
+        'collection.creator_id' => 'required|exists:users,id',
         'collection.collection_name' => 'required|string|max:255',
         'collection.type' => 'required|string|in:image,e-book,audio,video',
         'collection.position' => 'nullable|integer',
         'collection.EGI_number' => 'nullable|integer',
         'collection.floor_price' => 'nullable|numeric',
         'collection.description' => 'nullable|string',
+        'collection.status' => 'nullable|string|in:draft,pending_approval,published',
         'collection.is_published' => 'nullable|boolean',
     ];
 
@@ -52,6 +52,9 @@ class CreateCollection extends Component
             ]);
 
             session()->flash('message', __('collection.created_successfully'));
+
+            // Associa l'utente come creator nella tabella pivot collection_user
+            $collection->users()->attach(Auth::id(), ['role' => 'creator']);
 
             // Reset dei campi
             $this->resetInputFields();
@@ -75,31 +78,30 @@ class CreateCollection extends Component
     private function prepareCollectionData()
     {
         $this->collection['creator_id'] = Auth::id();
-        $this->collection['team_id'] = Auth::user()->currentTeam->id ?? null;
         $this->collection['epp_id'] = config('app.epp_id');
-        $this->collection['type'] = 'image';
+        $this->collection['type'] = $this->collection['type'] ?? 'image';
+        $this->collection['status'] = 'draft';
         $this->collection['is_published'] = false;
-        $this->collection['position'] = 1;
-        $this->collection['EGI_number'] = 1;
-        $this->collection['floor_price'] = 0;
-
+        $this->collection['position'] = $this->collection['position'] ?? 1;
+        $this->collection['EGI_number'] = $this->collection['EGI_number'] ?? 1;
+        $this->collection['floor_price'] = $this->collection['floor_price'] ?? 0.0;
     }
 
     private function resetInputFields()
     {
         $this->collection = [
             'creator_id' => null,
-            'team_id' => null,
             'type' => 'image',
+            'status' => 'draft',
             'is_published' => false,
             'collection_name' => null,
             'position' => null,
             'EGI_number' => null,
             'floor_price' => null,
             'description' => null,
-            'url_collection_site' => null,
         ];
     }
+
     public function render()
     {
         return view('livewire.collections.create-collection');

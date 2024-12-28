@@ -2,11 +2,10 @@
 
 use App\Livewire\Collections\CollectionCarousel;
 use App\Livewire\Collections\CollectionEdit;
-use App\Livewire\Collections\CollectionUserTeam;
+use App\Livewire\Collections\CollectionUserMember;
 use App\Livewire\Collections\CollectionWallet;
 use App\Livewire\Collections\CreateCollection;
 use App\Livewire\Collections\HeadImagesManager;
-use App\Livewire\TeamManager;
 use Illuminate\Support\Facades\Route;
 use App\Livewire\PhotoUploader;
 use App\Http\Controllers\Admin\RoleController;
@@ -69,30 +68,30 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
 
             // Rotte per visualizzare il carousel delle collezioni, viene usata solamente se il team corrente ha più di una collezione associata
             Route::get('/carousel', CollectionCarousel::class)
-                ->middleware('team_can:read_collection')
+                ->middleware('collection_can:read_collection')
                 ->name('collections.carousel');
 
             // Rotta per aprire vista della collezione
             Route::get('/{id}/edit', CollectionEdit::class)
-                ->middleware('team_can:update_collection')
+                ->middleware('collection_can:view_collection_header')
                 ->name('collections.edit');
 
             // Rotta per discernere se mostrare il carousel o la vista della collezione
             Route::get('/open', CollectionOpen::class)
-                ->middleware('team_can:view_collection_header')
+                ->middleware('collection_can:view_collection_header')
                 ->name('collections.open');
 
             Route::get('/{id}/head-images', HeadImagesManager::class)
-                ->middleware('team_can:view_collection_header')
+                ->middleware('collection_can:view_collection_header')
                 ->name('collections.head_images');
 
             Route::get('/create', CreateCollection::class)
-                ->middleware('team_can:create_collection')
+                ->middleware('collection_can:create_collection')
                 ->name('collections.create');
 
-            Route::get('/{id}/{teamId}/user-team', CollectionUserTeam::class)
-                ->middleware('team_can:view_collection_header')
-                ->name('collections.user_team');
+            Route::get('/{id}/user-team', CollectionUserMember::class)
+                ->middleware('collection_can:view_collection_header')
+                ->name('collections.collection_user');
 
         });
 

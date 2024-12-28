@@ -13,15 +13,17 @@ return new class extends Migration
     {
         Schema::create('wallet_change_approvals', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('wallet_id')->constrained('team_user')->onDelete('cascade');
-            $table->foreignId('requested_by_user_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('approver_user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('wallet_id')->constrained('wallets')->onDelete('cascade')->unsignedBigInteger(); // Relazione con il wallet
+            $table->foreignId('requested_by_user_id')->constrained('users')->onDelete('cascade'); // Chi richiede la modifica
+            $table->foreignId('approver_user_id')->nullable()->constrained('users')->onDelete('cascade'); // Chi approva (se esiste)
             $table->string('change_type'); // Esempi: 'creation', 'update', 'delete'
-            $table->json('change_details'); // Dettagli della modifica
+            $table->json('change_details'); // Dettagli della modifica (es. vecchi e nuovi valori)
             $table->string('status')->default('pending'); // Valori: 'pending', 'approved', 'rejected'
-            $table->text('rejection_reason')->nullable();
+            $table->text('rejection_reason')->nullable(); // Motivo del rifiuto, se applicabile
             $table->timestamps();
         });
+
+
 
     }
 

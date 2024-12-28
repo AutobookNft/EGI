@@ -5,7 +5,6 @@ namespace App\Livewire\Collections;
 use App\Http\Resources\CollectionResource;
 use App\Livewire\Traits\HandlesCollectionUpdate;
 use App\Models\Collection;
-use App\Models\TeamWallet;
 use App\Repositories\IconRepository;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -15,13 +14,12 @@ use Livewire\Features\SupportFileUploads\WithFileUploads;
 
 class CollectionOpen extends Component
 {
-
     use WithFileUploads, HandlesCollectionUpdate;
+
     public $defaultCollection = [
-        'user_id' => null,
-        'team_id' => null,
+        'creator_id' => null,
         'type' => null,
-        'is_published' => null,
+        'status' => null,
         'collection_name' => null,
         'position' => null,
         'EGI_number' => null,
@@ -33,20 +31,14 @@ class CollectionOpen extends Component
         'image_avatar' => '',
     ];
 
-
     public $activeSlide = 0;
-
     public $collections;
-
     public $collection = [];
-
-    public $noTeamMessage = 'Non ci sono team o collection disponibili.';
-
+    public $noCollectionMessage = 'Non ci sono collection disponibili.';
     protected $iconRepository;
     protected $user;
 
     public $collectionId;
-    public $teamId;
 
     public function boot(IconRepository $iconRepository)
     {
@@ -56,41 +48,48 @@ class CollectionOpen extends Component
     public function mount()
     {
 
-        // Inizializza come una Collection vuota
-        $this->collections = new Collection();
-        $this->loadSingleCollection();
+        Log::channel('florenceegi')->info('CollectionOpen', [
+            'collections' => $this->collections,
+            'collection' => $this->collection,
+        ]);
+
+        $this->collections = collect(); // Inizializza come una Collection vuota
+        $this->loadCollections();
+
 
     }
 
-    public function loadSingleCollection()
+    public function loadCollections()
     {
         // Recupera l'utente autenticato
         $this->user = Auth::user();
         $user = $this->user;
 
-        // Trova tutte le collection attive dei team a cui l'utente è associato
-        $this->collections = Collection::whereHas('team', function ($query) use ($user) {
-            $query->whereHas('users', function ($query) use ($user) {
-                $query->where('users.id', $this->user->id);
-            });
+        // Recupera tutte le collection associate all'utente
+        $this->collections = Collection::whereHas('users', function ($query) use ($user) {
+            $query->where('user_id', $user->id);
         })->get();
 
-        // Verifica se c'è una sola collection attiva
+        // Verifica se c'è una sola collection
         if ($this->collections->count() === 1) {
             $this->collection = (new CollectionResource($this->collections->first()))->toArray(request());
         } else {
             $this->collection = $this->defaultCollection;
         }
-
-
     }
 
     public function render()
     {
+
+        Log::channel('florenceegi')->info('CollectionOpen', [
+            'collections' => $this->collections,
+            'collection' => $this->collection,
+        ]);
+
         // Se l'utente non ha alcuna collection, mostra un messaggio di avviso
         if (!$this->collections || $this->collections->isEmpty()) {
-            return view('livewire.collections.no-team', [
-                'message' => $this->noTeamMessage,
+            return view('livewire.collections.no-collection', [
+                'message' => $this->noCollectionMessage,
             ]);
         }
 
@@ -98,42 +97,27 @@ class CollectionOpen extends Component
         if ($this->collections->count() > 1) {
             $iconHtml = $this->iconRepository->getIcon('camera', 'elegant', '');
 
-            // Log::channel('florenceegi')->info('Current collection', [
-            //     'collections' => json_encode($this->collections, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
-            // ]);
-
             return view('livewire.collections.collection-carousel', [
                 'iconHtml' => $iconHtml,
                 'collections' => $this->collections,
             ]);
         }
 
-        // Se c'è una sola collection, carica i wallet del team associato
-        $team = $this->collections->first()->team ?? null;
-
-        // carico i wallet del team
-        $wallets = $team ? $team->wallets : [];
-
-        $this->teamId = $team->id;
-
+        // Se c'è una sola collection, carica i dettagli
         $this->collectionId = $this->collections->first()->id;
 
-        // Mostra il collection-manager per la prima collection
         return view('livewire.collections.collection-manager', [
             'collection' => $this->collection,
-            'wallets' => $wallets,
         ]);
     }
 
     public function nextSlide()
     {
-        $this->activeSlide = ($this->activeSlide + 1) % count($this->collections);
+        $this->activeSlide = ($this->activeSlide + 1) % $this->collections->count();
     }
 
     public function prevSlide()
     {
-        $this->activeSlide = ($this->activeSlide - 1 + count($this->collections)) % count($this->collections);
+        $this->activeSlide = ($this->activeSlide - 1 + $this->collections->count()) % $this->collections->count();
     }
-
-
 }

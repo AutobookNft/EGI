@@ -15,47 +15,41 @@ return new class extends Migration
         $table->id();
 
         // Relazioni
-        $table->foreignId('team_id')->nullable()->constrained()->onDelete('cascade');          // Team associato alla collection
-        $table->foreignId('creator_id')->nullable()->constrained('users')->onDelete('cascade'); // Creator della collection (specifico)
+        $table->foreignId('creator_id')->nullable()->constrained('users')->onDelete('cascade'); // Creator della collection
         $table->foreignId('owner_id')->nullable()->constrained('users')->onDelete('cascade');   // Owner della collection
 
-        // campo del ruolo
-        $table->string('role')->default('creator')->after('user_id')->index();
-
-        // Campi per identificatori esterni
+        // Identificatori esterni
         $table->bigInteger('epp_id')->nullable()->index();          // ID del progetto EPP
         $table->bigInteger('EGI_asset_id')->nullable()->index();    // ID dell'asset EGI
 
         // Dati della collection
-        $table->string('collection_name')->index()->nullable();
-        $table->text('description')->nullable();
-        $table->string('type', 10)->index()->nullable();
+        $table->string('collection_name')->index()->nullable();     // Nome della collection
+        $table->text('description')->nullable();                   // Descrizione
+        $table->string('type', 10)->index()->nullable();           // Tipo (es. standard, single_egi)
 
-        // Immagini e Percorsi
-        $table->string('path_image_banner', 1024)->nullable();
-        $table->string('path_image_card', 1024)->nullable();
-        $table->string('path_image_avatar', 1024)->nullable();
-        $table->string('path_image_EGI', 1024)->nullable();
-        $table->string('path_image_to_ipfs')->nullable();
-        $table->string('url_image_ipfs')->nullable();
-        $table->string('url_collection_site')->nullable();
+        // Immagini e percorsi
+        $table->string('image_banner', 1024)->nullable();          // Banner
+        $table->string('image_card', 1024)->nullable();            // Card
+        $table->string('image_avatar', 1024)->nullable();          // Avatar
+        $table->string('path_image_to_ipfs')->nullable();          // Percorso immagine IPFS
+        $table->string('url_image_ipfs')->nullable();              // URL immagine IPFS
+        $table->string('url_collection_site')->nullable();         // URL del sito della collection
 
-        // Altri Campi
-        $table->boolean('is_published')->index()->default(1);
-        $table->boolean('personal_team')->nullable();
-        $table->char('creator')->index()->nullable();
-        $table->char('owner_wallet')->index()->nullable();
-        $table->string('address', 100)->index()->nullable();
-        $table->integer('position')->index()->nullable();
-        $table->string('token')->index()->nullable();
-        $table->integer('EGI_number')->nullable();
-        $table->text('EGI_asset_roles')->nullable();
-        $table->float('floor_price')->nullable();
+        // Stato e pubblicazione
+        $table->string('status')->default('draft')->index();       // Stato: draft, pending_approval, published
+        $table->boolean('is_published')->default(false)->index();  // Booleano per indicare se è pubblicata
+
+        // Dati associati agli EGI
+        $table->integer('position')->nullable();                  // Posizione della collection
+        $table->integer('EGI_number')->nullable();                // Numero di EGI nella collection
+        $table->float('floor_price')->nullable();                 // Prezzo minimo
+        $table->text('EGI_asset_roles')->nullable();              // Ruoli relativi all'EGI
 
         // Timestamps
         $table->timestamps();
-        $table->softDeletes(); // Soft delete per una gestione più flessibile delle eliminazioni
+        $table->softDeletes(); // Soft delete per gestione più flessibile delle eliminazioni
     });
+
 
 }
 

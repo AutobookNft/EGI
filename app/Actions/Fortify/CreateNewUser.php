@@ -2,10 +2,9 @@
 
 namespace App\Actions\Fortify;
 
-use App\Models\Team;
 use App\Models\User;
 use App\Models\Collection;
-use App\Traits\HasCreateDefaultTeamWallets;
+use App\Traits\HasCreateDefaultCollectionWallets;
 use App\Traits\HasUtilitys;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -13,23 +12,22 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
 use Spatie\Permission\Models\Role;
-use Laravel\Jetstream\Jetstream;
-use Illuminate\Support\Str;
 
 class CreateNewUser implements CreatesNewUsers
 {
     use PasswordValidationRules;
-    use HasCreateDefaultTeamWallets;
+    use HasCreateDefaultCollectionWallets;
     use HasUtilitys;
 
+
     /**
-     * Create a newly registered user.
+     * Crea un nuovo utente registrato.
      *
      * @param  array<string, string>  $input
      */
     public function create(array $input): User
     {
-        Log::channel('florenceegi')->info('Classe: CreateNewUser Metodo create: Action: INIZIO', ['input' => $input]);
+        Log::channel('florenceegi')->info('Classe: CreateNewUser Metodo create: INIZIO', ['input' => $input]);
 
         // Validazione dell'input
         $this->validateInput($input);
@@ -50,8 +48,7 @@ class CreateNewUser implements CreatesNewUsers
                 'password' => $this->passwordRules(),
             ])->validate();
 
-            Log::channel('florenceegi')->info('Classe: CreateNewUser Metodo validateInput: Action: VALIDAZIONE OK');
-
+            Log::channel('florenceegi')->info('Classe: CreateNewUser Metodo validateInput: VALIDAZIONE OK');
         } catch (\Illuminate\Validation\ValidationException $e) {
             Log::channel('florenceegi')->error('Errore di validazione', ['errors' => $e->errors()]);
             throw $e;
@@ -61,10 +58,10 @@ class CreateNewUser implements CreatesNewUsers
     private function generateWalletDetails(): array
     {
         $wallet_address = $this->generateFakeAlgorandAddress();
-        Log::channel('florenceegi')->info('Classe: CreateNewUser Metodo generateWalletDetails: Action: GENERATO WALLET ADDRESS', ['wallet_address' => $wallet_address]);
+        Log::channel('florenceegi')->info('Generato wallet address', ['wallet_address' => $wallet_address]);
 
         $wallet_balance = config('app.virtual_wallet_balance');
-        Log::channel('florenceegi')->info('Classe: CreateNewUser Metodo generateWalletDetails: Action: GENERATO WALLET BALANCE', ['wallet_balance' => $wallet_balance]);
+        Log::channel('florenceegi')->info('Generato wallet balance', ['wallet_balance' => $wallet_balance]);
 
         return [$wallet_address, $wallet_balance];
     }
@@ -80,68 +77,38 @@ class CreateNewUser implements CreatesNewUsers
                 'language' => app()->getLocale(),
                 'password' => Hash::make($input['password']),
             ]), function (User $user) {
-                Log::channel('florenceegi')->info('User creato con successo', ['user_id' => $user->id]);
+                Log::channel('florenceegi')->info('Utente creato con successo', ['user_id' => $user->id]);
 
-                // Crea il team e la collection predefinita utilizzando tap
-                tap($this->createTeam($user), function ($team) use ($user) {
-                    Log::channel('florenceegi')->info('Team creato con successo', ['team_id' => $team->id, 'user_id' => $user->id]);
-                    $this->createDefaultCollection($team, $user);
-                });
+                // Crea la collection e i wallet predefiniti
+                $this->createDefaultCollection($user);
             });
         });
     }
 
     /**
-     * Create a personal team for the user.
+     * Crea una collection predefinita per l'utente.
      */
-    protected function createTeam(User $user): Team
-    {
-        $team = $user->ownedTeams()->save(Team::forceCreate([
-            'user_id' => $user->id,
-            'epp_id' => config('app.epp_id'),
-            'name' => explode(' ', $user->name, 2)[0] . "'s Team",
-            'personal_team' => true,
-        ]));
-
-        $team->users()->attach($user->id, ['role' => 'creator']);
-
-        return $team;
-    }
-
-
-    /**
-     * Create a default collection for the user's team and associarla alla tabella pivot team_collection.
-     */
-    protected function createDefaultCollection(Team $team, User $user): void
+    protected function createDefaultCollection(User $user): void
     {
         tap(Collection::create([
             'user_id' => $user->id,
             'epp_id' => config('app.epp_id'),
-            'collection_name' => explode(' ', $user->name, 2)[0] . "'s collection",
-            'description' => __('collection.this_is_default_collection_of_the_team') ?? 'This is the default collection of the team',
+            'collection_name' => explode(' ', $user->name, 2)[0] . "'s Collection",
+            'description' => __('collection.default_description'),
             'creator_id' => $user->id,
-            'type' => __('collection.type_image') ?? 'image',
+            'type' => 'standard',
             'position' => 1,
             'EGI_number' => 1,
             'floor_price' => 0.0,
-            'is_published' => true,
-            'personal_team' => true,
-        ]), function (Collection $collection) use ($team, $user) {
+            'is_published' => false,
+        ]), function (Collection $collection) use ($user) {
             Log::channel('florenceegi')->info('Collection creata con successo', ['collection_id' => $collection->id]);
 
-            // Associa la collection al team nella tabella pivot team_collection
-            // $team->collections()->attach($collection->id);
+            // Associa l'utente alla collection nella tabella pivot collection_user
+            $collection->users()->attach($user->id, ['role' => 'creator']);
 
-            $collection->team()->associate($team);
-            $collection->save();
-
-            Log::channel('florenceegi')->info('Collection associata al team nella tabella pivot team_collection', [
-                'team_id' => $team->id,
-                'collection_id' => $collection->id,
-            ]);
-
-            // Associa i wallet predefiniti al team
-            $this->attachDefaultWallets($team, $user);
+            // Crea i wallet predefiniti per la collection
+            $this->attachDefaultWallets($collection, $user);
 
             // Assegna il ruolo di creator all'utente
             $this->assignCreatorRole($user->id);
@@ -150,56 +117,36 @@ class CreateNewUser implements CreatesNewUsers
 
     public function assignCreatorRole(int $userId)
     {
-        // Trova l'utente con l'ID specificato
         $user = User::find($userId);
 
-        // Controlla se l'utente esiste
         if (!$user) {
-            session()->flash('error', 'Utente non trovato.');
+            Log::channel('florenceegi')->error('Utente non trovato durante l\'assegnazione del ruolo', ['user_id' => $userId]);
             return;
         }
 
-        // Controlla se il ruolo 'creator' esiste, altrimenti lo crea
         $creatorRole = Role::firstOrCreate(['name' => 'creator']);
 
-        // Assegna il ruolo 'creator' all'utente
         if (!$user->hasRole('creator')) {
             $user->assignRole($creatorRole);
-            session()->flash('success', 'Ruolo di creator assegnato con successo.');
-        } else {
-            session()->flash('info', 'L\'utente ha già il ruolo di creator.');
+            Log::channel('florenceegi')->info('Assegnato ruolo creator all\'utente', ['user_id' => $userId]);
         }
     }
 
     /**
-     * Attach default wallets to the team.
+     * Crea i wallet predefiniti per la collection.
      */
-    protected function attachDefaultWallets(Team $team, User $user): void
+    protected function attachDefaultWallets(Collection $collection, User $user): void
     {
-
-        $wallet_natan = config('app.natan_wallet_address');
-
-        $wallet_creator = $user->wallet; // Wallet dell'utente appena creato
-        $wallet_epp = User::find(config('app.epp_id'))->wallet ?? 'WalletEPP'; // Wallet EPP
-
-        $natan_royalty_mint = config('app.natan_royalty_mint'); // Royalty mint di Natan
-        $natan_royalty_rebind = config('app.natan_royalty_rebind'); // Royalty rebind di Natan
-
-        $epp_royalty_mint = config('app.mediator_royalty_mint'); // Royalty mint di EPP
-        $epp_royalty_rebind = config('app.mediator_royalty_rebind'); // Royalty rebind di EPP
-
-        $creator_royalty_mint = config('app.creator_royalty_mint'); // Royalty mint del creatore
-        $creator_royalty_rebind = config('app.creator_royalty_rebind'); // Royalty rebind del creatore
-
         $defaultWallets = [
-            ['user_id' => $user->id, 'user_role' => 'Creator', 'wallet' => $wallet_creator, 'royalty_mint' => $creator_royalty_mint, 'royalty_rebind' => $creator_royalty_rebind], // ID 0 mappato a Creator
-            ['user_id' => config('app.natan_id'), 'user_role' => 'Natan', 'wallet' => $wallet_natan, 'royalty_mint' => $natan_royalty_mint, 'royalty_rebind' => $natan_royalty_rebind], // ID 1 mappato a Natan
-            ['user_id' => config('app.epp_id'), 'user_role' => 'EPP', 'wallet' => $wallet_epp, 'royalty_mint' => $epp_royalty_mint, 'royalty_rebind' => $epp_royalty_rebind],     // ID 2 mappato a EPP
+            ['user_id' => $user->id, 'wallet' => $user->wallet, 'royalty_mint' => 50.0, 'royalty_rebind' => 10.0], // Wallet Creator
+            ['user_id' => config('app.natan_id'), 'wallet' => config('app.natan_wallet_address'), 'royalty_mint' => 25.0, 'royalty_rebind' => 5.0], // Wallet Natan
+            ['user_id' => config('app.epp_id'), 'wallet' => config('app.epp_wallet_address'), 'royalty_mint' => 25.0, 'royalty_rebind' => 5.0], // Wallet EPP
         ];
 
         foreach ($defaultWallets as $wallet) {
-            $team->wallets()->create($wallet);
+            $collection->wallets()->create($wallet);
         }
+
+        Log::channel('florenceegi')->info('Wallet predefiniti associati alla collection', ['collection_id' => $collection->id]);
     }
 }
-

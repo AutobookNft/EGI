@@ -63,10 +63,6 @@ class CollectionEdit extends Component
         $this->collectionId = $id;
         $collection = Collection::findOrFail($this->collectionId);
 
-        // estrapola il team_id dalla collection, serve per poter aprire la modale per la gestione dei memebri del team
-        $this->teamId = $collection->team_id;
-
-
         $this->collection_name = $collection->collection_name;
         $this->type = $collection->type;
         $this->position = $collection->position;
@@ -82,7 +78,38 @@ class CollectionEdit extends Component
     {
         $this->validate();
 
+       // Recupera la collection
         $collection = Collection::findOrFail($this->collectionId);
+
+        // Recupera l'utente autenticato
+        $user = Auth::user();
+
+        // Leggi il ruolo dell'utente nella tabella collection_user
+        $roleName = $collection->users()
+            ->where('user_id', $user->id)
+            ->pluck('role')
+            ->first();
+
+        if (!$roleName) {
+            abort(403, 'Non sei associato a questa collezione.');
+        }
+
+        // Verifica il permesso "update_collection" per il ruolo dell'utente
+        $hasPermission = \Spatie\Permission\Models\Role::where('name', $roleName)
+            ->whereHas('permissions', function ($query) {
+                $query->where('name', 'update_collection');
+            })
+            ->exists();
+
+        if (!$hasPermission) {
+            // abort(403, 'Non hai i permessi necessari per aggiornare questa collezione.');
+            $this->dispatch('swal:error', [
+                'title' => 'Permessi insufficienti',
+                'text' => 'Non hai i permessi necessari per aggiornare questa collezione.',
+            ]);
+            return;
+        }
+
         $collection->update([
             'collection_name' => $this->collection_name,
             'type' => $this->type,
@@ -96,19 +123,10 @@ class CollectionEdit extends Component
         session()->flash('message', 'Collezione aggiornata con successo!');
     }
 
-    #[On('team-member-updated')] // Ascolta l'evento dal componente figlio
-    public function loadTeamUsers()
-    {
-        $this->teamUsers = TeamUser::with('user')
-            ->where('team_id', $this->collectionId)
-            ->get();
-    }
-
     public function render()
     {
         return view('livewire.collections.collection-manager', [
             'teamUsers' => $this->teamUsers,
-            'teamId' => $this->teamId,
             'userId' => Auth::id(),
             'collectionId' => $this->collectionId,
         ]);

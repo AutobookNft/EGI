@@ -29,8 +29,8 @@
                 <a href="{{ route('collections.head_images', ['id' => $collectionId]) }}" class="btn btn-primary btn-lg">
                     {{ __('collection.collection_image') }}
                 </a>
-                <a href="{{ route('collections.user_team', ['id' => $collectionId, 'teamId' => $teamId]) }}" class="btn btn-primary btn-lg">
-                    {{ __('collection.collection_team') }}
+                <a href="{{ route('collections.collection_user', ['id' => $collectionId]) }}" class="btn btn-primary btn-lg">
+                    {{ __('collection.team_memebers') }}
                 </a>
                 <div class="flex justify-end">
                     <x-form-button type="submit" style="primary" class="px-6">
@@ -64,3 +64,17 @@
     }
 </script>
 
+<script>
+    document.addEventListener('livewire:init', () => {
+        // Gestisce errori di permessi o appartenenza
+        Livewire.on('swal:error', (text) => {
+            Swal.fire({
+                icon: 'error',
+                title: text[0]['title'],
+                text: text[0]['text'],
+                confirmButtonColor: '#d33',
+                confirmButtonText: 'Chiudi'
+            });
+        });
+    });
+</script>

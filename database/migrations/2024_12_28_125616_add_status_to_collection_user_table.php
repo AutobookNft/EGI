@@ -11,12 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('teams', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->string('name');
-            $table->boolean('personal_team');
-            $table->timestamps();
+        Schema::table('collection_user', function (Blueprint $table) {
+            $table->string('status')->default('accepted')->index()->after('collection_id');
         });
     }
 
@@ -25,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('teams');
+        Schema::table('collection_user', function (Blueprint $table) {
+            $table->dropColumn('status');
+        });
     }
 };
