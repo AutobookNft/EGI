@@ -4,11 +4,13 @@ namespace App\Livewire\Collections\Images;
 
 use App\Models\Collection;
 use App\Services\EGIImageService;
+use App\Traits\HasPermissionTrait;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\Attributes\Modelable;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use Livewire\Attributes\On;
 
 /**
  * Class ImageUpload
@@ -16,9 +18,9 @@ use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
  * This Livewire component manages the upload, display, and removal of
  * different types of images (card, EGI asset, or default) associated with a collection.
  */
-class ImageUpload extends Component
+class EgiImageUpload extends Component
 {
-    use WithFileUploads;
+    use WithFileUploads, HasPermissionTrait;
 
     /**
      * The image being uploaded or managed.
@@ -26,7 +28,7 @@ class ImageUpload extends Component
      * @var TemporaryUploadedFile|null
      */
     #[Modelable]
-    public $image;
+    public $image_EGI;
 
     /**
      * The unique identifier for the collection.
@@ -34,13 +36,6 @@ class ImageUpload extends Component
      * @var int
      */
     public $collectionId;
-
-    /**
-     * The type of the image (e.g., 'card', 'EGI', or default).
-     *
-     * @var string
-     */
-    public $imageType;
 
     /**
      * The URL of the existing image.
@@ -53,15 +48,13 @@ class ImageUpload extends Component
      * Mount the component and initialize the collection ID and image type.
      *
      * @param int    $collectionId The ID of the collection.
-     * @param string $imageType    The type of the image (e.g., 'card' or 'EGI').
      *
      * @return void
      */
-    public function mount($collectionId, $imageType)
+    public function mount($collectionId)
     {
         // Store the collection ID and image type passed as parameters.
         $this->collectionId = $collectionId;
-        $this->imageType = $imageType;
 
         // Load the existing image URL.
         $this->loadExistingImage();
@@ -77,30 +70,20 @@ class ImageUpload extends Component
         // Retrieve the collection or fail with a 404 error if not found.
         $collection = Collection::findOrFail($this->collectionId);
 
-        // Get the corresponding database field for the image type.
-        $field = $this->getDatabaseField();
-
         // Check if the collection has an image for the specified field.
-        if ($collection->$field) {
+        if ($collection->image_EGI) {
             // Retrieve the cached image path using the EGIImageService.
             $this->existingImageUrl = EGIImageService::getCachedEGIImagePath(
                 $this->collectionId,
-                $collection->$field,
+                $collection->image_EGI,
                 $collection->is_published,
                 null,
-                $this->getKeyInPathsFile()
+                'head.EGI_asset' // PathKey for the EGI image.
             );
 
-            $this->existingImageUrl = $collection->$field;
+            $this->existingImageUrl = $collection->image_EGI;
         }
 
-        // Log the image loading process for debugging purposes.
-        Log::channel('florenceegi')->info('Rendering ImageUpload', [
-            'collectionId' => $this->collectionId,
-            'existingImageUrl' => $this->existingImageUrl,
-            'imageType' => $this->imageType,
-            'field' => $field,
-        ]);
     }
 
     /**
@@ -110,42 +93,65 @@ class ImageUpload extends Component
      */
     public function saveImage()
     {
+
+        Log::channel('florenceegi')->info('EgiImageUpload, saveImage');
+
+        // Save the image using the EGIImageService.
+
         try {
+
+            $collection = Collection::findOrFail($this->collectionId);
+
+            Log::channel('florenceegi')->info('EgiImageUpload, saveImage', ['collection' => $collection]);
+
+            // Verifica il permesso "update_collection"
+            $this->hasPermission($collection, 'update_collection_image_header');
+
+            Log::channel('florenceegi')->info('EgiImageUpload, saveImage after permission', ['image_EGI' => $this->image_EGI]);
+
             // Check if an image has been uploaded.
-            if (!$this->image) {
+            if (!$this->image_EGI) {
                 throw new \Exception('No image to save.');
             }
 
             // Generate a unique filename with the appropriate prefix.
-            $prefix = $this->getPrefixSavedFile();
-            $filename = $prefix . uniqid() . '.' . $this->image->getClientOriginalExtension();
+            $filename = 'EGI_asset_' . uniqid() . '.' . $this->image_EGI->getClientOriginalExtension();
 
-            // Get the storage path key for the image type.
-            $pathKey = $this->getKeyInPathsFile();
+            Log::channel('florenceegi')->info('EgiImageUpload, saveImage', ['filename' => $filename]);
 
             // Save the image using the EGIImageService.
-            if (!EGIImageService::saveEGIImage($this->collectionId, $filename, $this->image, $pathKey)) {
-                throw new \Exception("Error saving the {$this->imageType} image.");
+            if (!EGIImageService::saveEGIImage($this->collectionId, $filename, $this->image_EGI, 'head.EGI_asset')) {
+                throw new \Exception("Error saving the EGI image.");
             }
 
+            Log::channel('florenceegi')->info('EgiImageUpload, saveImage', ['filename' => $filename]);
+
             // Update the corresponding database field with the new filename.
-            $collection = Collection::findOrFail($this->collectionId);
-            $collection->{$this->getDatabaseField()} = $filename;
+            $collection->image_EGI = $filename;
             $collection->save();
+
+            Log::channel('florenceegi')->info('EgiImageUpload, saveImage', ['filename' => $filename]);
 
             // Reload the existing image URL to reflect the new upload.
             $this->loadExistingImage();
 
             // Clear the uploaded image from the component state.
-            $this->image = null;
+            $this->image_EGI = null;
 
             // Flash a success message to the session.
-            session()->flash('success', ucfirst($this->imageType) . ' image saved successfully!');
+            session()->flash('success', 'EGI image saved successfully!');
         } catch (\Exception $e) {
             // Log the error and flash an error message to the session.
-            Log::error('Error saving the ' . $this->imageType . ' image: ' . $e->getMessage());
-            session()->flash('error', 'Error saving the ' . $this->imageType . ' image.');
+            Log::error('Error saving the EGI image: ' . $e->getMessage());
+            session()->flash('error', 'Error saving the EGI image.');
         }
+    }
+
+    #[On('egiImageRemove')]
+    public function egiImageRemove(){
+
+
+        $this->removeImage();
     }
 
     /**
@@ -159,73 +165,29 @@ class ImageUpload extends Component
             // Retrieve the collection or fail if not found.
             $collection = Collection::findOrFail($this->collectionId);
 
-            // Get the corresponding database field for the image type.
-            $field = $this->getDatabaseField();
-
             // Check if the collection has an image to remove.
-            if ($collection->$field) {
+            if ($collection->image_EGI) {
                 // Remove the old image using the EGIImageService.
-                EGIImageService::removeOldImage($this->getPrefixSavedFile(), $this->collectionId, $this->getKeyInPathsFile());
+                EGIImageService::removeOldImage('EGI_asset_', $this->collectionId, 'head.EGI_asset');
 
                 // Set the image field to null and save the collection.
-                $collection->$field = null;
+                $collection->image_EGI = null;
                 $collection->save();
 
                 // Clear the image state in the component.
-                $this->image = null;
+                $this->image_EGI = null;
                 $this->existingImageUrl = null;
 
                 // Flash a success message to the session.
-                session()->flash('success', ucfirst($this->imageType) . ' image removed successfully!');
+                session()->flash('success', 'Egi image removed successfully!');
             }
         } catch (\Exception $e) {
             // Log the error and flash an error message to the session.
-            Log::error('Error removing the ' . $this->imageType . ' image: ' . $e->getMessage());
-            session()->flash('error', 'Error removing the ' . $this->imageType . ' image.');
+            Log::error('Error removing the EGI image: ' . $e->getMessage());
+            session()->flash('error', 'Error removing the EGI image.');
         }
     }
 
-    /**
-     * Get the corresponding database field for the image type.
-     *
-     * @return string The database field name.
-     */
-    protected function getDatabaseField()
-    {
-        return match ($this->imageType) {
-            'card' => 'image_card',
-            'EGI' => 'image_EGI',
-            default => 'image',
-        };
-    }
-
-    /**
-     * Get the file prefix for the image type.
-     *
-     * @return string The file prefix.
-     */
-    protected function getPrefixSavedFile()
-    {
-        return match ($this->imageType) {
-            'card' => 'card_image_',
-            'EGI' => 'egi_asset_',
-            default => 'image_',
-        };
-    }
-
-    /**
-     * Get the storage path key for the image type.
-     *
-     * @return string The path key in the configuration file.
-     */
-    protected function getKeyInPathsFile()
-    {
-        return match ($this->imageType) {
-            'card' => 'head.card',
-            'EGI' => 'head.EGI_asset',
-            default => 'head.root',
-        };
-    }
 
     /**
      * Render the component's view with the appropriate image URL.
@@ -235,12 +197,12 @@ class ImageUpload extends Component
     public function render()
     {
         // Determine the image URL: temporary URL if the image is in preview, otherwise the existing URL.
-        $imageUrl = ($this->image instanceof TemporaryUploadedFile)
-            ? $this->image->temporaryUrl()
+        $imageUrl = ($this->image_EGI instanceof TemporaryUploadedFile)
+            ? $this->image_EGI->temporaryUrl()
             : $this->existingImageUrl;
 
         // Return the view with the image URL.
-        return view('livewire.collections.images.image-upload', [
+        return view('livewire.collections.images.egi-image-upload', [
             'imageUrl' => $imageUrl,
         ]);
     }

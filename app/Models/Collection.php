@@ -28,6 +28,7 @@ class Collection extends Model
         'image_banner',
         'image_card',
         'image_avatar',
+        'image_egi',
         'url_collection_site',
         'position',
         'EGI_number',
@@ -48,6 +49,7 @@ class Collection extends Model
         'image_banner' => EGIImageCast::class,
         'image_card'   => EGIImageCast::class,
         'image_avatar' => EGIImageCast::class,
+        'image_EGI'    => EGIImageCast::class,
         'is_published' => 'boolean',
     ];
 

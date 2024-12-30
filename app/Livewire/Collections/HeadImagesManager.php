@@ -3,6 +3,8 @@
 namespace App\Livewire\Collections;
 
 use App\Models\Collection;
+use App\Services\EGIImageService;
+use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 
 /**
@@ -42,6 +44,37 @@ class HeadImagesManager extends Component
 
         // Retrieve the collection from the database or fail with a 404 error if not found.
         $this->collection = Collection::findOrFail($this->collectionId);
+    }
+
+    /**
+     * Remove the existing banner image from storage and update the database.
+     *
+     * @return void
+     */
+    public function removeImage($type)
+    {
+
+        Log::channel('florenceegi')->info('HeadImagesManager, removeImage', ['type' => $type]);
+
+
+        // Clear the image state in the component.
+        switch ($type) {
+            case 'banner':
+                $this->dispatch('bannerImageRemove');
+                break;
+            case 'card':
+                $this->dispatch('cardImageRemove');
+                break;
+            case 'EGI':
+                $this->dispatch('egiImageRemove');
+                break;
+            case 'avatar':
+                $this->dispatch('avatarImageRemove');
+                break;
+        }
+
+
+
     }
 
     /**

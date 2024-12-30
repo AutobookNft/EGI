@@ -29,6 +29,7 @@ class RolesAndPermissionsSeeder extends Seeder
         // Permessi per le Collection
         'create_collection',
         'update_collection',
+        'update_collection_image_header',
         'delete_collection',
         'read_collection_header',
 
@@ -65,7 +66,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'add_team_member', 'remove_team_member', 'modify_team_roles',
 
             // Collection
-            'create_collection', 'update_collection', 'delete_collection',
+            'create_collection', 'update_collection', 'delete_collection','update_collection_image_header',
 
             // EGI
             'create_EGI', 'update_EGI', 'delete_EGI',
@@ -80,7 +81,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'add_team_member', 'remove_team_member', 'modify_team_roles',
 
             // Collection
-            'update_collection',
+            'update_collection', 'update_collection_image_header',
 
             // EGI
             'create_EGI', 'update_EGI', 'delete_EGI',
@@ -94,6 +95,9 @@ class RolesAndPermissionsSeeder extends Seeder
 
             // EGI
             'update_EGI',
+
+            // Collection
+            'update_collection_image_header',
 
             // Views
             'view_profile', 'view_team', 'view_dashboard', 'view_collection', 'view_EGI', 'view_collection_header'

@@ -4,11 +4,14 @@ namespace App\Livewire\Collections\Images;
 
 use App\Models\Collection;
 use App\Services\EGIImageService;
+use App\Traits\HasPermissionTrait;
+use App\Traits\SaveCollectionTraits;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\Attributes\Modelable;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use Livewire\Attributes\On;
 
 /**
  * Class AvatarImageUpload
@@ -18,7 +21,7 @@ use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
  */
 class AvatarImageUpload extends Component
 {
-    use WithFileUploads;
+    use WithFileUploads, HasPermissionTrait;
 
     /**
      * The avatar image being uploaded or managed.
@@ -26,7 +29,7 @@ class AvatarImageUpload extends Component
      * @var TemporaryUploadedFile|null
      */
     #[Modelable]
-    public $avatarImage;
+    public $image_avatar;
 
     /**
      * The unique identifier for the collection.
@@ -81,11 +84,11 @@ class AvatarImageUpload extends Component
             $this->existingImageUrl = $collection->image_avatar;
         }
 
-        // Log the existing image URL for debugging purposes.
-        Log::channel('florenceegi')->info('Rendering AvatarImageUpload', [
-            'collectionId' => $this->collectionId,
-            'existingImageUrl' => $this->existingImageUrl,
-        ]);
+    }
+
+    #[On('avatarImageRemove')]
+    public function avatarImageRemove(){
+        $this->removeImage();
     }
 
     /**
@@ -95,22 +98,28 @@ class AvatarImageUpload extends Component
      */
     public function saveImage()
     {
+
+        $collection = Collection::findOrFail($this->collectionId);
+
+        // Verifica il permesso "update_collection"
+        $this->hasPermission($collection, 'update_collection_image_header');
+
+
         try {
             // Check if an image has been uploaded.
-            if (!$this->avatarImage) {
+            if (!$this->image_avatar) {
                 throw new \Exception('No image to save.');
             }
 
             // Generate a unique filename with the 'avatar_image_' prefix.
-            $filename = 'avatar_image_' . uniqid() . '.' . $this->avatarImage->getClientOriginalExtension();
+            $filename = 'avatar_image_' . uniqid() . '.' . $this->image_avatar->getClientOriginalExtension();
 
             // Save the image using the EGIImageService.
-            if (!EGIImageService::saveEGIImage($this->collectionId, $filename, $this->avatarImage, 'head.avatar')) {
+            if (!EGIImageService::saveEGIImage($this->collectionId, $filename, $this->image_avatar, 'head.avatar')) {
                 throw new \Exception('Error saving the avatar image.');
             }
 
             // Retrieve the collection and update the image_avatar field.
-            $collection = Collection::findOrFail($this->collectionId);
             $collection->image_avatar = $filename;
             $collection->save();
 
@@ -118,7 +127,7 @@ class AvatarImageUpload extends Component
             $this->loadExistingImage();
 
             // Clear the uploaded image from the component state.
-            $this->avatarImage = null;
+            $this->image_avatar = null;
 
             // Flash a success message to the session.
             session()->flash('success', 'Avatar image saved successfully!');
@@ -143,14 +152,14 @@ class AvatarImageUpload extends Component
             // Check if the collection has an avatar image.
             if ($collection->image_avatar) {
                 // Remove the old image using the EGIImageService.
-                EGIImageService::removeOldImage('avatar_image_', $this->collectionId, 'head.root');
+                EGIImageService::removeOldImage('avatar_image_', $this->collectionId, 'head.avatar');
 
                 // Set the image_avatar field to null and save the collection.
                 $collection->image_avatar = null;
                 $collection->save();
 
                 // Clear the image state in the component.
-                $this->avatarImage = null;
+                $this->image_avatar = null;
                 $this->existingImageUrl = null;
 
                 // Flash a success message to the session.
@@ -171,8 +180,8 @@ class AvatarImageUpload extends Component
     public function render()
     {
         // Determine the image URL: temporary URL if the image is in preview, otherwise the existing URL.
-        $imageUrl = ($this->avatarImage instanceof TemporaryUploadedFile)
-            ? $this->avatarImage->temporaryUrl()
+        $imageUrl = ($this->image_avatar instanceof TemporaryUploadedFile)
+            ? $this->image_avatar->temporaryUrl()
             : $this->existingImageUrl;
 
         // Return the view with the image URL.

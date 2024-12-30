@@ -145,6 +145,9 @@
     <div class="grid grid-cols-1 gap-6 md:grid-cols-1">
         <!-- URL della Collection -->
         <div class="mt-6 bg-gray-900 p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300">
+            <div class="label">
+                <span class="label-text text-white">{{ __('collection.collection_site_URL_suggest') }}</span>
+            </div>
             <x-form-input
                 :label="__('collection.collection_site_URL')"
                 type="url"
@@ -153,7 +156,7 @@
                 id="url_collection_site"
                 :placeholder="__('collection.collection_site_URL')"
                 width_label="w-full"
-                width_input="w-11/12"
+                width_input="w-full"
                 required
                 icon="url"
                 icon_class="w-5 h-5 text-gray-400" />

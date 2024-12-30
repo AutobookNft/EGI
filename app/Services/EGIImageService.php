@@ -19,6 +19,13 @@ class EGIImageService
             $services = config('paths.hosting');
             $relativePathTemplate = config("paths.paths.{$pathKey}");
 
+            Log::channel('florenceegi')->info('Inizio rimozione vecchio file', [
+                'prefix' => $prefix,
+                'collectionId' => $collectionId,
+                'pathKey' => $pathKey,
+                'relativePathTemplate' => $relativePathTemplate,
+            ]);
+
             if (!$relativePathTemplate) {
                 Log::channel('florenceegi')->error("Percorso non valido per la chiave: {$pathKey}");
                 return false;
@@ -74,7 +81,7 @@ class EGIImageService
         $relativePathTemplate = config("paths.paths.{$pathKey}");
 
         if (!$relativePathTemplate) {
-            Log::error("Percorso non valido per la chiave: {$pathKey}");
+            Log::channel('florenceegi')->error("Percorso non valido per la chiave: {$pathKey}");
             return false;
         }
 
@@ -85,7 +92,7 @@ class EGIImageService
 
         foreach ($services as $serviceName => $serviceConfig) {
             if (!$serviceConfig['is_active']) {
-                Log::info("Servizio {$serviceName} disattivato. Salvataggio saltato.");
+                Log::channel('florenceegi')->info("Servizio {$serviceName} disattivato. Salvataggio saltato.");
                 continue;
             }
 
@@ -93,10 +100,10 @@ class EGIImageService
 
             try {
                 Storage::disk($disk)->put($fullPath, $file->get());
-                Log::info("File salvato su {$serviceName}: {$fullPath}");
+                Log::channel('florenceegi')->info("File salvato su {$serviceName}: {$fullPath}");
                 $atLeastOneSuccess = true;
             } catch (\Exception $e) {
-                Log::error("Errore nel salvataggio su {$serviceName}: " . $e->getMessage());
+                Log::channel('florenceegi')->error("Errore nel salvataggio su {$serviceName}: " . $e->getMessage());
             }
         }
 

@@ -18,7 +18,8 @@ class CollectionResource extends JsonResource
         return [
             'id' => $this->id,
             'creator_id' => $this->creator_id,
-            'team_id' => $this->team_id,
+            'owner_id' => $this->owner_id,
+            'epp_id' => $this->epp_id,
             'type' => $this->type,
             'is_published' => $this->is_published,
             'collection_name' => $this->collection_name,
@@ -27,9 +28,9 @@ class CollectionResource extends JsonResource
             'floor_price' => $this->floor_price,
             'description' => $this->description,
             'url_collection_site' => $this->url_collection_site,
-            'path_image_banner' => $this->path_image_banner,
-            'path_image_card' => $this->path_image_card,
-            'path_image_avatar' => $this->path_image_avatar,
+            'image_banner' => $this->path_image_banner,
+            'image_card' => $this->path_image_card,
+            'image_avatar' => $this->path_image_avatar,
         ];
     }
 }

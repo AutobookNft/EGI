@@ -13,22 +13,22 @@ use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\Attributes\On;
 
 /**
- * Class BannerImageUpload
+ * Class ImageUpload
  *
  * This Livewire component manages the upload, display, and removal of
- * the banner image associated with a specific collection.
+ * different types of images (card, EGI asset, or default) associated with a collection.
  */
-class BannerImageUpload extends Component
+class CardImageUpload extends Component
 {
     use WithFileUploads, HasPermissionTrait;
 
     /**
-     * The banner image being uploaded or managed.
+     * The image being uploaded or managed.
      *
      * @var TemporaryUploadedFile|null
      */
     #[Modelable]
-    public $image_banner;
+    public $image_card;
 
     /**
      * The unique identifier for the collection.
@@ -38,30 +38,30 @@ class BannerImageUpload extends Component
     public $collectionId;
 
     /**
-     * The URL of the existing banner image.
+     * The URL of the existing image.
      *
      * @var string|null
      */
     public $existingImageUrl;
 
     /**
-     * Mount the component and initialize the collection ID.
+     * Mount the component and initialize the collection ID and image type.
      *
-     * @param int $collectionId The ID of the collection.
+     * @param int    $collectionId The ID of the collection.
      *
      * @return void
      */
     public function mount($collectionId)
     {
-        // Store the collection ID passed as a parameter.
+        // Store the collection ID and image type passed as parameters.
         $this->collectionId = $collectionId;
 
-        // Load the existing banner image.
+        // Load the existing image URL.
         $this->loadExistingImage();
     }
 
     /**
-     * Load the existing banner image URL from the database.
+     * Load the existing image URL from the database.
      *
      * @return void
      */
@@ -70,121 +70,121 @@ class BannerImageUpload extends Component
         // Retrieve the collection or fail with a 404 error if not found.
         $collection = Collection::findOrFail($this->collectionId);
 
-        // Check if the collection has a banner image.
-        if ($collection->image_banner) {
-            // Retrieve the cached image path for the banner.
+        // Check if the collection has an image for the specified field.
+        if ($collection->image_card) {
+            // Retrieve the cached image path using the EGIImageService.
             $this->existingImageUrl = EGIImageService::getCachedEGIImagePath(
                 $this->collectionId,
-                $collection->image_banner,
+                $collection->image_card,
                 $collection->is_published,
                 null,
-                'head.banner' // PathKey for the banner image.
+                'head.card' // PathKey for the card image.
             );
-            $this->existingImageUrl = $collection->image_banner;
-        }
 
+            $this->existingImageUrl = $collection->image_card;
+        }
     }
 
     /**
-     * Save the uploaded banner image to the storage and update the database.
+     * Save the uploaded image to storage and update the database.
      *
      * @return void
      */
     public function saveImage()
     {
 
-        $collection = Collection::findOrFail($this->collectionId);
-
-        // Verifica il permesso "update_collection"
-        $this->hasPermission($collection, 'update_collection_image_header');
-
         try {
+
+            $collection = Collection::findOrFail($this->collectionId);
+
+            // Verifica il permesso "update_collection"
+            $this->hasPermission($collection, 'update_collection_image_header');
+
             // Check if an image has been uploaded.
-            if (!$this->image_banner) {
+            if (!$this->image_card) {
                 throw new \Exception('No image to save.');
             }
 
-            // Generate a unique filename with the 'banner_image_' prefix.
-            $filename = 'banner_image_' . uniqid() . '.' . $this->image_banner->getClientOriginalExtension();
+            $filename = 'card_image_' . uniqid() . '.' . $this->image_card->getClientOriginalExtension();
 
             // Save the image using the EGIImageService.
-            if (!EGIImageService::saveEGIImage($this->collectionId, $filename, $this->image_banner, 'head.banner')) {
-                throw new \Exception('Error saving the banner image.');
+            if (!EGIImageService::saveEGIImage($this->collectionId, $filename, $this->image_card, 'head.card')) {
+                throw new \Exception("Error saving the card image.");
             }
 
-            // Retrieve the collection and update the image_banner field.
-            $collection->image_banner = $filename;
+            // Update the corresponding database field with the new filename.
+            $collection->image_card = $filename;
             $collection->save();
 
             // Reload the existing image URL to reflect the new upload.
             $this->loadExistingImage();
 
             // Clear the uploaded image from the component state.
-            $this->image_banner = null;
+            $this->image_card = null;
 
             // Flash a success message to the session.
-            session()->flash('success', 'Banner image saved successfully!');
+            session()->flash('success', 'card image saved successfully!');
         } catch (\Exception $e) {
             // Log the error and flash an error message to the session.
-            Log::error('Error saving the banner image: ' . $e->getMessage());
-            session()->flash('error', 'Error saving the banner image.');
+            Log::error('Error saving the card image: ' . $e->getMessage());
+            session()->flash('error', 'Error saving the card image.');
         }
     }
 
-    #[On('bannerImageRemove')]
-    public function bannerImageRemove(){
+    #[On('cardImageRemove')]
+    public function cardImageRemove(){
+
         $this->removeImage();
     }
 
     /**
-     * Remove the existing banner image from storage and update the database.
+     * Remove the existing image from storage and update the database.
      *
      * @return void
      */
     public function removeImage()
     {
-
         try {
             // Retrieve the collection or fail if not found.
             $collection = Collection::findOrFail($this->collectionId);
 
-            // Check if the collection has a banner image.
-            if ($collection->image_banner) {
+            // Check if the collection has an image to remove.
+            if ($collection->image_card) {
                 // Remove the old image using the EGIImageService.
-                EGIImageService::removeOldImage('banner_image_', $this->collectionId, 'head.banner');
+                EGIImageService::removeOldImage('card_image_', $this->collectionId, 'head.card');
 
-                // Set the image_banner field to null and save the collection.
-                $collection->image_banner = null;
+                // Set the image field to null and save the collection.
+                $collection->image_card = null;
                 $collection->save();
 
                 // Clear the image state in the component.
-                $this->image_banner = null;
+                $this->image_card = null;
                 $this->existingImageUrl = null;
 
                 // Flash a success message to the session.
-                session()->flash('success', 'Banner image removed successfully!');
+                session()->flash('success', 'card image removed successfully!');
             }
         } catch (\Exception $e) {
             // Log the error and flash an error message to the session.
-            Log::error('Error removing the banner image: ' . $e->getMessage());
-            session()->flash('error', 'Error removing the banner image.');
+            Log::error('Error removing the card image: ' . $e->getMessage());
+            session()->flash('error', 'Error removing the card image.');
         }
     }
 
     /**
      * Render the component's view with the appropriate image URL.
      *
-     * @return \Illuminate\View\View The view for the banner image upload component.
+     * @return \Illuminate\View\View The view for the image upload component.
      */
     public function render()
     {
         // Determine the image URL: temporary URL if the image is in preview, otherwise the existing URL.
-        $imageUrl = ($this->image_banner instanceof TemporaryUploadedFile)
-            ? $this->image_banner->temporaryUrl()
+        $imageUrl = ($this->image_card instanceof TemporaryUploadedFile)
+            ? $this->image_card->temporaryUrl()
             : $this->existingImageUrl;
 
         // Return the view with the image URL.
-        return view('livewire.collections.images.banner-image-upload', [
+        return view('livewire.collections.images.card-image-upload', [
             'imageUrl' => $imageUrl,
         ]);
     }
