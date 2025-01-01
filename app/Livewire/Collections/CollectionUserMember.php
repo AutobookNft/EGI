@@ -2,17 +2,25 @@
 
 namespace App\Livewire\Collections;
 
+use App\Models\Collection;
 use App\Models\CollectionUser;
 use App\Models\Wallet;
 use Livewire\Component;
 use Illuminate\Support\Facades\Log;
-use Livewire\Attributes\On;
+use App\Traits\HasPermissionTrait;
 
 class CollectionUserMember extends Component
 {
+
+    use HasPermissionTrait;
+
     public $collectionUsers; // Lista membri del team
     public $wallets;
+
+    public $collection;
     public $collectionId;
+    public $collectionName;
+    public $collectionOwner; // Proprietario della collection
     public $show = false; // Proprietà per gestire la visibilità della modale
 
     public function mount($id)
@@ -21,32 +29,30 @@ class CollectionUserMember extends Component
             'collectionId' => $id
         ]);
 
-
         $this->collectionId = $id;
+
+        // Carica la collection e i suoi dati
+        $this->loadCollectionData();
         $this->loadTeamUsers();
     }
 
-    public function openInviteModal()
+    public function loadCollectionData()
     {
-        $this->dispatch('open-invite-modal'); // Invia un evento ai figli compatibile con Livewire 3
-    }
+        $this->collection = Collection::findOrFail($this->collectionId);
 
-    // #[On('openHandleWallets')]
-    // public function showHandleWallets()
-    // {
-    //     // $this->resetFields(); // Pulisce i campi
-    //     $this->show = true; // Mostra la modale
-    // }
+        $this->collectionName = $this->collection->collection_name;
+        $this->collectionOwner = $this->collection->owner; // Assumendo che esista una relazione `owner` nel modello Collection
+    }
 
     public function loadTeamUsers()
     {
         $this->collectionUsers = CollectionUser::where('collection_id', $this->collectionId)->get();
-        $this->wallets = Wallet::where('collection_id','=',$this->collectionId)->get();
+        $this->wallets = Wallet::where('collection_id', '=', $this->collectionId)->get();
+
         Log::channel('florenceegi')->info('CollectionUsersMembers', [
             'collectionId' => $this->collectionId,
             'wallets' => $this->wallets
         ]);
-
     }
 
     public function render()
@@ -54,3 +60,4 @@ class CollectionUserMember extends Component
         return view('livewire.collections.collection-user');
     }
 }
+

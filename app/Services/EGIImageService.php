@@ -2,258 +2,174 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class EGIImageService
 {
     /**
-     * Rimuove i file esistenti con un determinato prefisso dai servizi di hosting attivi.
+     * Elimina tutti i file che iniziano con $prefix in $pathKey, su tutti i servizi attivi.
      */
     public static function removeOldImage(string $prefix, int $collectionId, string $pathKey): bool
     {
-        try {
-            $services = config('paths.hosting');
-            $relativePathTemplate = config("paths.paths.{$pathKey}");
+        $activeHostings = static::getActiveHostings();
+        $folderPath = static::resolveFolderPath($pathKey, $collectionId);
 
-            Log::channel('florenceegi')->info('Inizio rimozione vecchio file', [
-                'prefix' => $prefix,
-                'collectionId' => $collectionId,
-                'pathKey' => $pathKey,
-                'relativePathTemplate' => $relativePathTemplate,
-            ]);
-
-            if (!$relativePathTemplate) {
-                Log::channel('florenceegi')->error("Percorso non valido per la chiave: {$pathKey}");
-                return false;
-            }
-
-            $relativePath = str_replace('{collectionId}', $collectionId, $relativePathTemplate);
-            $allSuccess = true;
-
-            foreach ($services as $serviceName => $serviceConfig) {
-                if (!$serviceConfig['is_active']) {
-                    Log::channel('florenceegi')->info("Servizio {$serviceName} disattivato. Eliminazione saltata.");
-                    continue;
-                }
-
-                $disk = $serviceConfig['disk'];
-
-                $files = Storage::disk($disk)->files($relativePath);
+        foreach ($activeHostings as $hostingName => $hostingConfig) {
+            try {
+                $disk = Storage::disk($hostingConfig['disk']);
+                $files = $disk->files($folderPath);
 
                 foreach ($files as $file) {
-                    if (str_starts_with(basename($file), $prefix)) {
-                        Log::channel('florenceegi')->info('Rimozione vecchia immagine', [
-                            'file' => $file,
-                            'disk' => $disk,
-                            'service' => $serviceName,
-                        ]);
-
-                        if (!Storage::disk($disk)->delete($file)) {
-                            Log::channel('florenceegi')->error("Errore durante l'eliminazione del file: {$file} su {$serviceName}");
-                            $allSuccess = false;
-                        }
+                    // Str::startsWith serve a controllare se il filename inizia col prefisso
+                    if (Str::startsWith(basename($file), $prefix)) {
+                        $disk->delete($file);
                     }
                 }
+            } catch (\Exception $e) {
+                Log::channel('florenceegi')->error('Errore durante la rimozione del vecchio file', [
+                    'error'        => $e->getMessage(),
+                    'prefix'       => $prefix,
+                    'collectionId' => $collectionId,
+                    'pathKey'      => $pathKey,
+                ]);
+                return false;
             }
-
-            return $allSuccess;
-        } catch (\Exception $e) {
-            Log::channel('florenceegi')->error('Errore durante la rimozione del vecchio file', [
-                'error' => $e->getMessage(),
-                'prefix' => $prefix,
-                'collectionId' => $collectionId,
-                'pathKey' => $pathKey,
-            ]);
-            return false;
         }
+
+        return true;
     }
 
     /**
-     * Salva un'immagine nei servizi di hosting attivi.
+     * Salva il file $filename sul disco di tutti i servizi attivi.
+     * Ritorna true se almeno un caricamento va a buon fine.
      */
-    public static function saveEGIImage(int $collectionId, string $filename, $file, string $pathKey): bool
-    {
-        $services = config('paths.hosting');
-        $relativePathTemplate = config("paths.paths.{$pathKey}");
-
-        if (!$relativePathTemplate) {
-            Log::channel('florenceegi')->error("Percorso non valido per la chiave: {$pathKey}");
-            return false;
-        }
-
-        $relativePath = str_replace('{collectionId}', $collectionId, $relativePathTemplate);
-        $fullPath = $relativePath . $filename;
+    public static function saveEGIImage(
+        int $collectionId,
+        string $filename,
+        $file,
+        string $pathKey
+    ): bool {
+        $activeHostings = static::getActiveHostings();
+        $folderPath = static::resolveFolderPath($pathKey, $collectionId);
 
         $atLeastOneSuccess = false;
 
-        foreach ($services as $serviceName => $serviceConfig) {
-            if (!$serviceConfig['is_active']) {
-                Log::channel('florenceegi')->info("Servizio {$serviceName} disattivato. Salvataggio saltato.");
-                continue;
-            }
-
-            $disk = $serviceConfig['disk'];
-
+        foreach ($activeHostings as $hostingName => $hostingConfig) {
             try {
-                Storage::disk($disk)->put($fullPath, $file->get());
-                Log::channel('florenceegi')->info("File salvato su {$serviceName}: {$fullPath}");
+                $disk = Storage::disk($hostingConfig['disk']);
+                // Invece di costruire manualmente il filePath e fare file_get_contents,
+                // usiamo putFileAs(), che si occupa di caricare il file correttamente.
+                $disk->putFileAs($folderPath, $file, $filename);
+
                 $atLeastOneSuccess = true;
             } catch (\Exception $e) {
-                Log::channel('florenceegi')->error("Errore nel salvataggio su {$serviceName}: " . $e->getMessage());
+                Log::channel('florenceegi')->error('Errore salvataggio immagine EGI', [
+                    'error'        => $e->getMessage(),
+                    'filename'     => $filename,
+                    'collectionId' => $collectionId,
+                    'hosting'      => $hostingName,
+                ]);
             }
         }
 
         return $atLeastOneSuccess;
     }
 
+
     /**
-     * Ottiene il percorso dell'immagine memorizzata nella cache.
+     * Ritorna l'URL (o percorso) dal caching; se non presente in cache, lo costruisce e lo salva.
      */
-    public static function getCachedEGIImagePath(int $collectionId, string $filename, bool $isPublished, ?string $hostingService = null, string $pathKey = 'head.banner'): ?string
-    {
-        $cacheKey = "egi_image_path_{$collectionId}_{$filename}";
-        if ($hostingService) {
-            $cacheKey .= "_{$hostingService}";
+    public static function getCachedEGIImagePath(
+        int $collectionId,
+        string $filename,
+        bool $isPublished,
+        ?string $hostingService = null,
+        string $pathKey = 'head.banner'
+    ): ?string {
+        if (!$filename) {
+            return null;
         }
-        $cacheDuration = $isPublished ? now()->addDays(7) : now()->addMinutes(30);
 
-        Log::channel('florenceegi')->info('getCachedEGIImagePath chiamato', [
-            'collectionId' => $collectionId,
-            'filename' => $filename,
-            'hostingService' => $hostingService,
-            'cacheKey' => $cacheKey,
-            'pathKey' => $pathKey,
-        ]);
+        // Creiamo una chiave univoca per la cache
+        $cacheKey = "EGIImagePath_{$collectionId}_{$filename}_{$hostingService}";
 
-        return Cache::remember($cacheKey, $cacheDuration, function () use ($collectionId, $filename, $hostingService, $pathKey) {
-            $imagePath = self::getEGIImagePath($collectionId, $filename, $hostingService, $pathKey);
+        return Cache::remember($cacheKey, now()->addDay(), function () use (
+            $collectionId, $filename, $pathKey, $hostingService, $isPublished
+        ) {
+            // Se non c'è hostingService, usa quello predefinito
+            $hostingToUse = $hostingService ?: static::getDefaultHosting();
 
-            Log::channel('florenceegi')->info('Percorso immagine calcolato', [
-                'imagePath' => $imagePath,
-            ]);
+            // Ottieni i dettagli dell'hosting
+            $hostingConfig = config("paths.hosting.$hostingToUse");
+            if (!$hostingConfig) {
+                return null;
+            }
 
-            return $imagePath;
+            $folderPath = static::resolveFolderPath($pathKey, $collectionId);
+
+            $baseUrl = rtrim($hostingConfig['url'], '/');
+            $fullUrl = "{$baseUrl}/{$folderPath}{$filename}";
+
+            // Se l'EGI non è pubblicato, potresti gestire un placeholder o simile
+            if (!$isPublished) {
+                // Esempio, potresti loggare o ritornare un'immagine placeholder
+            }
+
+            return $fullUrl;
         });
     }
 
     /**
-     * Ottiene il percorso dell'immagine dall'hosting attivo o dai fallback.
+     * Invalida la cache per un certo file.
      */
-    protected static function getEGIImagePath(int $collectionId, string $filename, ?string $hostingService = null, string $pathKey = 'head.banner'): ?string
-    {
-        $hostingService = $hostingService ?? self::getDefaultHostingService();
-        $servicesToTry = array_merge([$hostingService], Config::get("paths.hosting.{$hostingService}.fallback", []));
-        $services = Config::get('paths.hosting');
-
-        Log::channel('florenceegi')->info('Inizio getEGIImagePath', [
-            'collectionId' => $collectionId,
-            'filename' => $filename,
-            'hostingService' => $hostingService,
-            'servicesToTry' => $servicesToTry,
-            'pathKey' => $pathKey,
-        ]);
-
-        foreach ($servicesToTry as $service) {
-            if (empty($services[$service]['is_active']) || !$services[$service]['is_active']) {
-                Log::channel('florenceegi')->info("Servizio {$service} disattivato. Verifica saltata.");
-                continue;
-            }
-
-            $baseUrl = $services[$service]['url'];
-            $relativePathTemplate = Config::get("paths.paths.{$pathKey}");
-
-            Log::channel('florenceegi')->info('Template del percorso relativo', [
-                'relativePathTemplate' => $relativePathTemplate,
-            ]);
-
-            $relativePath = str_replace('{collectionId}', $collectionId, $relativePathTemplate);
-            $fullPath = rtrim($baseUrl, '/') . '/' . $relativePath . $filename;
-
-            Log::channel('florenceegi')->info('Tentativo di verifica immagine', [
-                'service' => $service,
-                'disk' => 'public',
-                'relativePath' => $relativePath,
-                'fullPath' => $fullPath,
-            ]);
-
-            if ($service === 'Local') {
-                if (Storage::disk('public')->exists($relativePath . $filename)) {
-                    Log::channel('florenceegi')->info('File trovato su disco locale', [
-                        'path' => $relativePath . $filename,
-                        'url' => asset('storage/' . $relativePath . $filename),
-                    ]);
-                    return asset('storage/' . $relativePath . $filename);
-                } else {
-                    Log::channel('florenceegi')->error('File non trovato su disco locale', [
-                        'path' => $relativePath . $filename,
-                    ]);
-                }
-            } else {
-                if (self::checkImageExists($fullPath)) {
-                    return $fullPath;
-                } else {
-                    Log::channel('florenceegi')->error('File non trovato su servizio remoto', [
-                        'service' => $service,
-                        'url' => $fullPath,
-                    ]);
-                }
-            }
-        }
-
-        Log::channel('florenceegi')->error("Immagine non disponibile su nessun servizio di hosting per il file: {$filename}");
-        return null;
-    }
-
-    /**
-     * Verifica se un'immagine esiste all'URL specificato.
-     */
-    protected static function checkImageExists(string $url): bool
-    {
-        try {
-            $response = Http::head($url);
-            return $response->successful();
-        } catch (\Exception $e) {
-            Log::error("Errore durante il controllo dell'immagine: {$url}", ['error' => $e->getMessage()]);
-            return false;
-        }
-    }
-
-    /**
-     * Invalida la cache dell'immagine.
-     */
-    public static function invalidateEGIImageCache(int $collectionId, string $filename, ?string $hostingService = null): void
-    {
-        $cacheKey = "egi_image_path_{$collectionId}_{$filename}_{$hostingService}";
+    public static function invalidateEGIImageCache(
+        int $collectionId,
+        string $filename,
+        ?string $hostingService = null
+    ): void {
+        $cacheKey = "EGIImagePath_{$collectionId}_{$filename}_{$hostingService}";
         Cache::forget($cacheKey);
     }
 
+
     /**
-     * Ottiene il servizio di hosting predefinito.
+     * Recupera i soli hosting con 'is_active' => true
      */
-    protected static function getDefaultHostingService(): string
+    protected static function getActiveHostings(): array
     {
-        $services = Config::get('paths.hosting');
-
-        // Cerca il primo servizio attivo con is_default = true
-        foreach ($services as $serviceName => $serviceConfig) {
-            if (!empty($serviceConfig['is_default']) && !empty($serviceConfig['is_active'])) {
-                return $serviceName;
-            }
-        }
-
-        // Se nessun servizio è marcato come default, restituisci il primo servizio attivo
-        foreach ($services as $serviceName => $serviceConfig) {
-            if (!empty($serviceConfig['is_active'])) {
-                return $serviceName;
-            }
-        }
-
-        // Se nessun servizio è attivo, ritorna 'Local' come fallback
-        return 'Local';
+        $allHostings = config('paths.hosting', []);
+        return array_filter($allHostings, fn($hosting) => $hosting['is_active'] === true);
     }
 
+    /**
+     * Restituisce il nome dell'hosting di default (es. "Local") o "Digital Ocean".
+     */
+    protected static function getDefaultHosting(): string
+    {
+        $default = config('paths.default_hosting', 'Local');
+        return $default;
+    }
+
+    /**
+     * Risolve la path prendendola da config('paths.paths') e sostituendo {collectionId}.
+     */
+    protected static function resolveFolderPath(string $pathKey, int $collectionId): string
+    {
+        $keys = explode('.', $pathKey);
+        $pathsConfig = config('paths.paths', []);
+
+        $current = $pathsConfig;
+        foreach ($keys as $key) {
+            if (!isset($current[$key])) {
+                return '';
+            }
+            $current = $current[$key];
+        }
+
+        // Ora $current è una stringa che contiene "{collectionId}"
+        return str_replace('{collectionId}', $collectionId, $current);
+    }
 }

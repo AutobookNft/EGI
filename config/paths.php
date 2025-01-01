@@ -12,10 +12,10 @@ return [
             'is_active' => true,
         ],
         'Digital Ocean' => [
-            'url' => env('BUCKET_PATH_FILE_FOLDER_DO', 'https://frangettediskspace.fra1.digitaloceanspaces.com'),
+            'url' => env('BUCKET_PATH_FILE_FOLDER_READ', 'https://frangettediskspace.fra1.digitaloceanspaces.com'),
             'disk' => 'do',
             'is_default' => false,
-            'is_active' => false,
+            'is_active' => true,
         ],
         'AWS' => [
             'url' => env('AWS_URL', 'https://aws.example.com'),
@@ -46,5 +46,7 @@ return [
             'root' => 'users_files/users-data/',
             'documents' => 'users_files/users-data/documents/',
         ],
+        'icons' => env('PATH_ICONS', 'https://frangettediskspace.fra1.digitaloceanspaces.com/assets/images/icons/'),
+        'temp' => env('BUCKET_TMP_FILE_FOLDER', 'temp'),
     ],
 ];

@@ -32,7 +32,7 @@
     <div class="mt-2 flex justify-center gap-2">
         @if ($image_EGI instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile)
             <button type="button" wire:click="saveImage" class="btn btn-success">
-                {{ __('collection.save_egi') }}
+                {{ __('collection.save_EGI') }}
             </button>
         @endif
 

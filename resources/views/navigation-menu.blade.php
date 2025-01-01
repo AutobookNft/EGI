@@ -9,6 +9,9 @@
                     </a>
                 </div>
 
+                {{-- @if (Auth::user()->can('superadmin')) --}}
+                {{-- @endif --}}
+
                 <!-- Navigation Links Desktop -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                     <x-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
@@ -16,7 +19,15 @@
                     </x-nav-link>
                     <!-- Altri link desktop se vuoi -->
                 </div>
+
             </div>
+
+            <div class="flex">
+                <div class="shrink-0 flex items-center text-4xl text-gray-700 dark:text-gray-500">
+                    {{ Auth::user()->name }}
+                </div>
+            </div>
+
 
             <div class="hidden sm:flex sm:items-center sm:ms-6">
                 <!-- Teams Dropdown (se abilitato) -->

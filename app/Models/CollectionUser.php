@@ -51,5 +51,15 @@ class CollectionUser extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    /**
+     * Relazione con il modello Wallet.
+     * Supponendo che la tabella `wallets` abbia una colonna `collection_user_id`
+     * per identificare il wallet associato al CollectionUser.
+     */
+    public function wallet()
+    {
+        return $this->hasOne(Wallet::class, 'user_id', 'id');
+    }
 }
 

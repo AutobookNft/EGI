@@ -2,18 +2,30 @@
 
 namespace App\Livewire\Collections;
 
+use App\Models\Collection;
+use Illuminate\Support\Facades\Notification;
+use App\Models\User;
 use App\Models\Wallet;
+use App\Models\WalletChangeApproval;
+use App\Notifications\WalletChangeRequest;
+use App\Notifications\WalletChangeResponse;
+use App\Traits\HasPermissionTrait;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 use Livewire\Attributes\On;
 
 class EditWalletModal extends Component
 {
+
+    use HasPermissionTrait;
+
     public $walletId; // Proprietà per identificare l'utente nella collection
     public $collectionId; // Proprietà per identificare l'utente nella collection
     public $walletAddress;
     public $royaltyMint;
     public $royaltyRebind;
+    public $approverUserId;
 
     public $mode = 'create'; // Modalità di apertura della modale
     public $show = false; // Proprietà per gestire la visibilità della modale
@@ -48,17 +60,23 @@ class EditWalletModal extends Component
         $this->show = true; // Mostra la modale
         $this->mode = 'edit';
     }
-
     #[On('openForCreateNewWallets')]
-    public function openForCreateNewWallets($collectionId)
+    public function openForCreateNewWallets($collectionId = null, $userId = null)
     {
-        Log::channel('florenceegi')->info('Collection id', [
-            'collectionId' => $collectionId
-        ]);
-        $this->collectionId = $collectionId;
+        if ($collectionId) {
+            Log::channel('florenceegi')->info('Collection id', [
+                'collectionId' => $collectionId
+            ]);
+            $this->collectionId = $collectionId;
+            $this->approverUserId = $userId;
+        } else {
+            Log::channel('florenceegi')->info('No Collection ID provided for wallet creation.');
+        }
+
         $this->show = true; // Mostra la modale
         $this->mode = 'create';
     }
+
 
     public function closeHandleWallets()
     {
@@ -70,22 +88,43 @@ class EditWalletModal extends Component
 
     public function createNewWallet()
     {
+
+        Log::channel('florenceegi')->info('createNewWallet');
+
         $this->validate([
             'walletAddress' => 'required|string',
             'royaltyMint' => 'nullable|numeric|min:0|max:100',
             'royaltyRebind' => 'nullable|numeric|min:0|max:100',
         ]);
 
-        Wallet::create([
-            'collection_id' => $this->collectionId,
-            'wallet' => $this->walletAddress,
-            'royalty_mint' => $this->royaltyMint,
-            'royalty_rebind' => $this->royaltyRebind,
+        // Uso la relazione tra il modello Wallet e il metodo collection per recuperare la collection
+        $collection = Collection::findOrFail($this->collectionId);
+        // $approverUserId = $collection->creator_id;
+
+        Log::channel('florenceegi')->info('createNewWallet PRIMA della verifica dei permessi', [
+            'collectionId' => $this->collectionId,
+            'approverUserId' => $this->approverUserId
         ]);
 
-        $this->dispatch('collectionMemberUpdated');
+        // Verifica permessi
+        if (!$this->hasPermission($collection, 'create_wallet')) {
+            session()->flash('error', __('You do not have permission to create a wallet.'));
+            return;
+        }
+
+        Log::channel('florenceegi')->info('createNewWallet DOPO della verifica dei permessi', [
+            'collectionId' => $this->collectionId,
+            'approverUserId' => $this->approverUserId
+        ]);
+
+        // Verifica e aggiorna la quota del creator
+        $this->validateAndAdjustCreatorQuota($collection, $this->royaltyMint, $this->royaltyRebind);
+
+        // Crea una proposta di wallet
+        $this->proposeNewWallet($this->collectionId, $this->approverUserId, $this->walletAddress, $this->royaltyMint, $this->royaltyRebind);
+
         $this->show = false;
-        session()->flash('message', __('Wallet created successfully!'));
+        session()->flash('message', __('Wallet creation request sent successfully!'));
     }
 
     public function saveWallet()
@@ -97,6 +136,29 @@ class EditWalletModal extends Component
         ]);
 
         $wallet = Wallet::findOrFail($this->walletId);
+
+        // **Controllo dei Permessi**
+        if ($wallet->user_id !== Auth::id()) {
+            // Usa il trait per verificare i permessi sulla collection
+            $this->hasPermission($wallet->collection, 'update_wallet');
+        }
+
+        // **Validazione delle Quote**
+        $remainingMint = $this->validateCreatorModification('royalty_mint', $wallet, $this->royaltyMint);
+        $remainingRebind = $this->validateCreatorModification('royalty_rebind', $wallet, $this->royaltyRebind);
+
+        // **Gestione delle Riduzioni e Accredito all’EPP**
+        $this->handleReductionsAndEpp($wallet, $remainingMint, $remainingRebind);
+
+        // **Inserimento in wallet_change_approvals**
+        if ($wallet->user_id !== Auth::id()) {
+            $this->createWalletApproval($wallet);
+            session()->flash('message', __('The modification has been submitted for approval.'));
+            $this->show = false;
+            return;
+        }
+
+        // **Applicazione della Modifica**
         $wallet->update([
             'wallet' => $this->walletAddress,
             'royalty_mint' => $this->royaltyMint,
@@ -106,6 +168,134 @@ class EditWalletModal extends Component
         $this->dispatch('collectionMemberUpdated');
         $this->show = false;
         session()->flash('message', __('Wallet updated successfully!'));
+    }
+
+
+    private function handleReductionsAndEpp($wallet, $remainingMint, $remainingRebind)
+    {
+        $eppWallet = Wallet::where('collection_id', $wallet->collection_id)->where('platform_role', 'EPP')->first();
+
+        if ($remainingMint < 0) {
+            $eppWallet->increment('royalty_mint', abs($remainingMint));
+        }
+
+        if ($remainingRebind < 0) {
+            $eppWallet->increment('royalty_rebind', abs($remainingRebind));
+        }
+    }
+
+    private function validateCreatorModification($type, $wallet, $newValue)
+    {
+        $maxValue = $type === 'royalty_mint' ? 70.0 : 4.5;
+        $currentSum = Wallet::where('collection_id', $wallet->collection_id)->sum($type);
+
+        $newSum = $currentSum - $wallet->$type + $newValue;
+
+        if ($newSum > $maxValue) {
+            throw new \Exception(__('The total exceeds the maximum allowed percentage.'));
+        }
+
+        return $maxValue - $newSum;
+    }
+
+    public function validateAndAdjustCreatorQuota($collection, $newMint, $newRebind)
+    {
+        $creatorWallet = Wallet::where('collection_id', $collection->id)
+                            ->where('user_id', $collection->creator_id)
+                            ->first();
+
+        if (!$creatorWallet) {
+            throw new \Exception(__('Creator wallet not found.'));
+        }
+
+        // Verifica se il creator ha abbastanza quota disponibile
+        if ($creatorWallet->royalty_mint < $newMint || $creatorWallet->royalty_rebind < $newRebind) {
+            throw new \Exception(__('Creator does not have enough quota to allocate.'));
+        }
+
+        // Riduci la quota del creator
+        // $creatorWallet->update([
+        //     'royalty_mint' => $creatorWallet->royalty_mint - $newMint,
+        //     'royalty_rebind' => $creatorWallet->royalty_rebind - $newRebind,
+        // ]);
+    }
+
+    public function proposeNewWallet($collection, $approverUserId, $walletAddress, $mint, $rebind)
+    {
+
+        Log::channel('florenceegi')->info('proposeNewWallet', [
+            'approverUserId' => $approverUserId
+        ]);
+
+        $approval = WalletChangeApproval::create([
+            'wallet_id' => null, // Perché è un nuovo wallet
+            'requested_by_user_id' => Auth::user()->id, // Chi inoltra la richiesta
+            'approver_user_id' => $approverUserId, // Chi deve approvare la richiesta
+            'change_type' => 'create',
+            'change_details' => [
+                'wallet_address' => $walletAddress,
+                'royalty_mint' => $mint,
+                'royalty_rebind' => $rebind,
+            ],
+            'status' => 'pending',
+        ]);
+
+        // Notifica il membro della collection
+        $member = User::find($approverUserId);
+        Notification::send($member, new WalletChangeRequest($approval));
+    }
+
+    private function createWalletApproval($wallet)
+    {
+        $approval = WalletChangeApproval::create([
+            'wallet_id' => $wallet->id,
+            'requested_by_user_id' => Auth::user()->id,
+            'approver_user_id' => $wallet->user_id,
+            'change_type' => 'update',
+            'change_details' => [
+                'old' => $wallet->only(['wallet', 'royalty_mint', 'royalty_rebind']),
+                'new' => [
+                    'wallet' => $this->walletAddress,
+                    'royalty_mint' => $this->royaltyMint,
+                    'royalty_rebind' => $this->royaltyRebind,
+                ],
+            ],
+            'status' => 'pending',
+        ]);
+
+        Log::channel('florenceegi')->info('createWalletApproval', [
+            'approval' => $approval
+        ]);
+
+        // Invia notifica al proprietario del wallet
+        $walletOwner = $wallet->user;
+        Notification::send($walletOwner, new WalletChangeRequest($approval));
+
+    }
+
+    public function approveChange($approvalId)
+    {
+        $approval = WalletChangeApproval::findOrFail($approvalId);
+        $wallet = $approval->wallet;
+
+        $wallet->update($approval->change_details['new']);
+        $approval->update(['status' => 'approved']);
+
+        Notification::send($approval->requestedBy, new WalletChangeResponse($approval, 'approved'));
+        session()->flash('message', __('The wallet change has been approved.'));
+    }
+
+    public function declineChange($approvalId, $reason = null)
+    {
+        $approval = WalletChangeApproval::findOrFail($approvalId);
+
+        $approval->update([
+            'status' => 'rejected',
+            'rejection_reason' => $reason,
+        ]);
+
+        Notification::send($approval->requestedBy, new WalletChangeResponse($approval, 'rejected'));
+        session()->flash('message', __('The wallet change has been declined.'));
     }
 
     public function render()

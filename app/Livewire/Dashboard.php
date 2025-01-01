@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\CollectionInvitation;
+use App\Services\Notifications\NotificationHandlerFactory;
 use Livewire\Component;
 use App\Models\Collection;
 use App\Models\CollectionUser;
@@ -36,42 +37,61 @@ class Dashboard extends Component
         ->count();
     }
 
-    public function acceptInvitation($invitationId)
+    public function handleNotificationAction($notificationId, $action)
     {
-        $invitation = CollectionInvitation::findOrFail($invitationId);
+        $notification = Auth::user()->notifications()->findOrFail($notificationId);
+        $type = $notification->type;
 
-        // Aggiorna lo stato dell'invito
-        $invitation->update(['status' => 'accepted']);
+        $handler = NotificationHandlerFactory::getHandler($type);
+        $handler->handle($notification, $action);
 
-        // Aggiunge l'utente alla collection
-        CollectionUser::create([
-            'collection_id' => $invitation->collection_id,
-            'user_id' => Auth::id(),
-            'role' => $invitation->role,
-        ]);
-
-        // Elimina la notifica associata
-        Auth::user()->notifications()->where('data->invitation_id', $invitationId)->delete();
-
-        session()->flash('message', __('Invitation accepted successfully!'));
         $this->loadStats();
         $this->loadNotifications();
     }
 
-    public function declineInvitation($invitationId)
-    {
-        $invitation = CollectionInvitation::findOrFail($invitationId);
+    // public function acceptInvitation($invitationId)
+    // {
+    //     $invitation = CollectionInvitation::findOrFail($invitationId);
 
-        // Aggiorna lo stato dell'invito a 'declined'
-        $invitation->update(['status' => 'declined']);
+    //     // Aggiorna lo stato dell'invito
+    //     $invitation->update(['status' => 'accepted']);
 
-        // Elimina la notifica associata
-        Auth::user()->notifications()->where('data->invitation_id', $invitationId)->delete();
+    //     // Aggiunge l'utente alla collection
+    //     CollectionUser::create([
+    //         'collection_id' => $invitation->collection_id,
+    //         'user_id' => Auth::id(),
+    //         'role' => $invitation->role,
+    //     ]);
 
-        session()->flash('message', __('Invitation declined successfully!'));
-        $this->loadStats();
-        $this->loadNotifications();
-    }
+    //     // Aggiorna l'outcome della notifica associata
+    //     $notification = Auth::user()->notifications()->where('data->invitation_id', $invitationId)->first();
+    //     if ($notification) {
+    //         $notification->update(['outcome' => 'accepted']);
+    //     }
+
+    //     session()->flash('message', __('Invitation accepted successfully!'));
+    //     $this->loadStats();
+    //     $this->loadNotifications();
+    // }
+
+    //     public function declineInvitation($invitationId)
+    // {
+    //     $invitation = CollectionInvitation::findOrFail($invitationId);
+
+    //     // Aggiorna lo stato dell'invito a 'declined'
+    //     $invitation->update(['status' => 'declined']);
+
+    //     // Aggiorna l'outcome della notifica associata
+    //     $notification = Auth::user()->notifications()->where('data->invitation_id', $invitationId)->first();
+    //     if ($notification) {
+    //         $notification->update(['outcome' => 'declined']);
+    //     }
+
+    //     session()->flash('message', __('Invitation declined successfully!'));
+    //     $this->loadStats();
+    //     $this->loadNotifications();
+    // }
+
 
     public function loadNotifications()
     {
@@ -80,6 +100,17 @@ class Dashboard extends Component
             'notifications' => $this->notifications
         ]);
     }
+
+    public function getNotificationView($notification)
+    {
+        $notificationViews = [
+            'App\Notifications\WalletChangeRequest' => 'notifications.wallet-change-request',
+            'App\Notifications\CollectionInvitationNotification' => 'notifications.invitation',
+        ];
+
+        return $notificationViews[$notification->type] ?? 'notifications.default';
+    }
+
 
     public function render()
     {

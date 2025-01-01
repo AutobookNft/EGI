@@ -15,6 +15,7 @@ return new class extends Migration
             $table->char('id', 36)->primary(); // Utilizza char(36) per l'UUID
             $table->string('type');
             $table->morphs('notifiable');
+            $table->string('outcome')->nullable()->default('pending'); // Nuovo campo per l'esito
             $table->text('data');
             $table->timestamp('read_at')->nullable();
             $table->timestamps();

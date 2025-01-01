@@ -12,13 +12,7 @@
             <div class="icon mr-4">
                 <!-- Icona per le Collections -->
                 <div class="icon-placeholder bg-gray-600 w-12 h-12 rounded-full flex items-center justify-center">
-                    @php
-                        $icon = (new IconRepository())->getIcon('open_collection', 'elegant', '');
-                    @endphp
-
-                    @if ($icon)
-                        {!! $icon !!}
-                    @endif
+                   <x-repo-icon name="open_collection" class="text-gray-500 opacity-90" />
                 </div>
             </div>
             <div>
@@ -31,13 +25,7 @@
             <div class="icon mr-4">
                 <!-- Icona per i Collection Members -->
                 <div class="icon-placeholder bg-gray-600 w-12 h-12 rounded-full flex items-center justify-center">
-                    @php
-                        $icon = (new IconRepository())->getIcon('members', 'elegant', '');
-                    @endphp
-
-                    @if ($icon)
-                        {!! $icon !!}
-                    @endif
+                    <x-repo-icon name="members" class="" />
                 </div>
             </div>
             <div>
@@ -51,21 +39,36 @@
     <div class="bg-gray-700 p-6 rounded-lg shadow-md">
         <h3 class="text-2xl font-bold mb-4">{{ __('Notifications') }}</h3>
 
-        @forelse ($notifications as $notification)
-            <div class="bg-gray-600 p-4 mb-4 rounded-lg flex items-center justify-between">
-                <div>
-                    <p class="text-lg">{{ $notification->data['message'] }}</p>
-                    <p class="text-sm text-gray-400">{{ $notification->created_at->diffForHumans() }}</p>
-                </div>
-                <div class="flex space-x-2">
-                    @if (isset($notification->data['invitation_id']))
-                        <button wire:click="acceptInvitation({{ $notification->data['invitation_id'] }})" class="btn btn-primary">{{ __('Accept') }}</button>
-                        <button wire:click="declineInvitation({{ $notification->data['invitation_id'] }})" class="btn btn-secondary">{{ __('Decline') }}</button>
-                    @endif
-                </div>
-            </div>
+        @forelse ($notifications->filter(fn($notification) => $notification->outcome === 'pending') as $notification)
+            @include($this->getNotificationView($notification))
         @empty
             <p class="text-gray-400">{{ __('No notifications available.') }}</p>
         @endforelse
+
     </div>
+
+    <div class="bg-gray-700 p-6 rounded-lg shadow-md mt-2">
+        <h3 class="text-xl font-bold text-white mb-4">{{ __('Processed Notifications') }}</h3>
+
+        <div class="space-y-4">
+            @forelse ($notifications->whereIn('outcome', ['accepted', 'declined']) as $notification)
+                <div class="flex items-start space-x-4">
+                    <!-- Indicatore Temporale -->
+                    <div class="w-2 h-2 rounded-full bg-gray-400 mt-2"></div>
+
+                    <!-- Contenuto della Notifica -->
+                    <div class="flex-1 bg-gray-800 p-4 rounded-lg shadow-md">
+                        <p class="text-md font-semibold text-white">{{ $notification->data['message'] }}</p>
+                        <p class="text-sm text-gray-300">
+                            {{ __('Outcome:') }} <span class="font-bold">{{ ucfirst($notification->outcome) }}</span>
+                        </p>
+                        <p class="text-xs text-gray-500">{{ $notification->created_at->diffForHumans() }}</p>
+                    </div>
+                </div>
+            @empty
+                <p class="text-gray-400">{{ __('No processed notifications.') }}</p>
+            @endforelse
+        </div>
+    </div>
+
 </div>

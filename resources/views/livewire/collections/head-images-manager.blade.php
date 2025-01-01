@@ -17,11 +17,8 @@
     </div>
 
     <!-- Bottone che permette di aprire la collection -->
-    <div class="mt-8 ml-2">
-        <a href="{{ route('collections.edit', ['id' => $collection->id]) }}" class="btn btn-primary btn-sm">
-            {{ __('collection.came_back_to_collection') }}
-        </a>
-    </div>
+    @include('livewire.collection-manager-includes.back_to_collection_button')
+
 </div>
 
 <!-- Script per SweetAlert2 -->

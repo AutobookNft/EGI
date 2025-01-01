@@ -71,6 +71,9 @@ class RolesAndPermissionsSeeder extends Seeder
             // EGI
             'create_EGI', 'update_EGI', 'delete_EGI',
 
+            // Wallet
+            'create_wallet', 'update_wallet', 'approve_wallet', 'reject_wallet',
+
             // Views
             'view_user', 'view_profile', 'view_team', 'view_dashboard', 'view_bio', 'view_settings',
             'view_notifications', 'view_logs',  'view_collection', 'view_EGI', 'view_collection_header'

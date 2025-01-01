@@ -35,7 +35,7 @@
                 <div class="flex justify-end space-x-4 mt-6">
                     <button wire:click="closeHandleWallets" class="btn btn-secondary">{{ __('label.cancel') }}</button>
                     @if($mode === 'create')
-                        <button wire:click="createWallet" class="btn btn-secondary">{{ __('label.save') }}</button>
+                        <button wire:click="createNewWallet" class="btn btn-secondary">{{ __('label.save') }}</button>
                     @else
                         <button wire:click="saveWallet" class="btn btn-primary">{{ __('label.save') }}</button>
                     @endif

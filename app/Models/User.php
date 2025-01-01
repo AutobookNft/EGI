@@ -141,7 +141,7 @@ class User extends Authenticatable
 
     public function wallets()
     {
-        return $this->hasMany(TeamWallet::class);
+        return $this->hasMany(Wallet::class);
     }
 
     /**

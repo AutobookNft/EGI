@@ -28,6 +28,7 @@ class WalletChangeApproval extends Model
         'change_type',
         'change_details',
         'status',
+        'type', // Nuovo campo
         'rejection_reason',
     ];
 

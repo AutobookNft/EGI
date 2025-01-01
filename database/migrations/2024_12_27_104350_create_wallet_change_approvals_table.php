@@ -19,11 +19,12 @@ return new class extends Migration
             $table->string('change_type'); // Esempi: 'creation', 'update', 'delete'
             $table->json('change_details'); // Dettagli della modifica (es. vecchi e nuovi valori)
             $table->string('status')->default('pending'); // Valori: 'pending', 'approved', 'rejected'
+            $table->string('approval')->default('approved'); // Valori: 'pending', 'approved'
+            $table->string('type')->default('update'); // Valori: 'update', 'create'
+            $table->json('previous_values')->nullable(); // Per tenere traccia dei vecchi valori in caso di rifiuto
             $table->text('rejection_reason')->nullable(); // Motivo del rifiuto, se applicabile
             $table->timestamps();
         });
-
-
 
     }
 
