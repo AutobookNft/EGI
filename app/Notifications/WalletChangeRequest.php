@@ -27,17 +27,17 @@ class WalletChangeRequest extends Notification
             'notifiable' => $notifiable
         ]);
 
-
         return [
-            'message' => $this->approval->type === 'wallet_create'
+            'message' => $this->approval->change_type === 'create'
                 ? __('A new wallet has been proposed for you.')
                 : __('A change has been requested for your wallet.'),
             'wallet_address' => $this->approval->change_details['wallet_address'],
             'royalty_mint' => $this->approval->change_details['royalty_mint'],
             'royalty_rebind' => $this->approval->change_details['royalty_rebind'],
-            'approval_id' => $this->approval->id,
+            'wallet_change_approvals_id' => $this->approval->id,
             'requested_by' => $this->approval->requested_by_user_id,
             'type' => $this->approval->change_type, // Aggiunto per distinguere i tipi di notifica
+            'status' => 'proposal', // Definisce questa notifica come una [proposta]
         ];
     }
 }

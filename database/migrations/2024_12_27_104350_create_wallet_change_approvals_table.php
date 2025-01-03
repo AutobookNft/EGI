@@ -17,6 +17,8 @@ return new class extends Migration
             $table->foreignId('requested_by_user_id')->constrained('users')->onDelete('cascade'); // Chi richiede la modifica
             $table->foreignId('approver_user_id')->nullable()->constrained('users')->onDelete('cascade'); // Chi approva (se esiste)
             $table->string('change_type'); // Esempi: 'creation', 'update', 'delete'
+            // notification_id
+            $table->string('notification_id')->nullable(); // ID della notifica associata
             $table->json('change_details'); // Dettagli della modifica (es. vecchi e nuovi valori)
             $table->string('status')->default('pending'); // Valori: 'pending', 'approved', 'rejected'
             $table->string('approval')->default('approved'); // Valori: 'pending', 'approved'

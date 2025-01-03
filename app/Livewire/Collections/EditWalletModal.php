@@ -245,34 +245,6 @@ class EditWalletModal extends Component
         Notification::send($member, new WalletChangeRequest($approval));
     }
 
-    private function createWalletApproval($wallet)
-    {
-        $approval = WalletChangeApproval::create([
-            'wallet_id' => $wallet->id,
-            'requested_by_user_id' => Auth::user()->id,
-            'approver_user_id' => $wallet->user_id,
-            'change_type' => 'update',
-            'change_details' => [
-                'old' => $wallet->only(['wallet', 'royalty_mint', 'royalty_rebind']),
-                'new' => [
-                    'wallet' => $this->walletAddress,
-                    'royalty_mint' => $this->royaltyMint,
-                    'royalty_rebind' => $this->royaltyRebind,
-                ],
-            ],
-            'status' => 'pending',
-        ]);
-
-        Log::channel('florenceegi')->info('createWalletApproval', [
-            'approval' => $approval
-        ]);
-
-        // Invia notifica al proprietario del wallet
-        $walletOwner = $wallet->user;
-        Notification::send($walletOwner, new WalletChangeRequest($approval));
-
-    }
-
     public function approveChange($approvalId)
     {
         $approval = WalletChangeApproval::findOrFail($approvalId);
@@ -281,7 +253,7 @@ class EditWalletModal extends Component
         $wallet->update($approval->change_details['new']);
         $approval->update(['status' => 'approved']);
 
-        Notification::send($approval->requestedBy, new WalletChangeResponse($approval, 'approved'));
+        Notification::send($approval->requestedBy, new WalletChangeResponse($approval, 'proposal'));
         session()->flash('message', __('The wallet change has been approved.'));
     }
 

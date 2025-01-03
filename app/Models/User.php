@@ -134,30 +134,10 @@ class User extends Authenticatable
         return $this->attributes['icon_style'] ?? config('icons.default');
     }
 
-    public function teams()
-    {
-        return $this->belongsToMany(Team::class, 'team_user')->withPivot('role');
-    }
 
     public function wallets()
     {
         return $this->hasMany(Wallet::class);
-    }
-
-    /**
-     * Verifica se l'utente è membro di un team specifico.
-     */
-    public function isMemberOfTeam($team)
-    {
-        return $this->teams()->where('team_id', $team->id)->exists();
-    }
-
-    /**
-     * Verifica se l'utente ha un ruolo specifico in un team.
-     */
-    public function hasRoleInTeam($role, $team)
-    {
-        return $this->teams()->where('team_id', $team->id)->wherePivot('role', $role)->exists();
     }
 
 

@@ -28,7 +28,7 @@ class WalletChangeResponse extends Notification
             'message' => $this->status === 'approved'
                 ? __('Your wallet change has been approved.')
                 : __('Your wallet change has been declined. Reason: ') . $this->approval->rejection_reason,
-            'approval_id' => $this->approval->id,
+            'wallet_change_approvals_id' => $this->approval->id,
         ];
     }
 }

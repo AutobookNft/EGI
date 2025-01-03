@@ -41,6 +41,7 @@
                     </div>
                 </div>
                 @if(!$member->wallet && $canCreateWallet)
+                <!-- Bottone per creare un nuovo wallet. Il listener si trova in /home/fabio/EGI/app/Livewire/Collections/EditWalletModal.php -->
                     <button class="btn btn-primary w-full sm:w-auto" wire:click="$dispatch('openForCreateNewWallets', { collectionId: {{ $member->collection_id }}, userId: {{ $member->user_id }} })">
                         {{ __('collection.wallet.create_wallet_for_member') }}
                     </button>

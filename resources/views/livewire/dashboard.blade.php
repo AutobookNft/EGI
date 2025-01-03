@@ -25,7 +25,7 @@
             <div class="icon mr-4">
                 <!-- Icona per i Collection Members -->
                 <div class="icon-placeholder bg-gray-600 w-12 h-12 rounded-full flex items-center justify-center">
-                    <x-repo-icon name="members" class="" />
+                    <x-repo-icon name="collection-name" class="" />
                 </div>
             </div>
             <div>
@@ -39,36 +39,87 @@
     <div class="bg-gray-700 p-6 rounded-lg shadow-md">
         <h3 class="text-2xl font-bold mb-4">{{ __('Notifications') }}</h3>
 
-        @forelse ($notifications->filter(fn($notification) => $notification->outcome === 'pending') as $notification)
+        <!-- Notifiche Pendenti -->
+        @forelse ($pendingNotifications as $notification)
             @include($this->getNotificationView($notification))
+            {{-- @dump($notification) --}}
         @empty
-            <p class="text-gray-400">{{ __('No notifications available.') }}</p>
+            <p class="text-gray-400">{{ __('No pending notifications available.') }}</p>
         @endforelse
-
     </div>
 
-    <div class="bg-gray-700 p-6 rounded-lg shadow-md mt-2">
-        <h3 class="text-xl font-bold text-white mb-4">{{ __('Processed Notifications') }}</h3>
+    <!-- Bottone per Mostrare/Nascondere Storico -->
+    <div class="text-right mt-4">
+        <button wire:click="toggleHistoricalNotifications" class="btn btn-sm btn-secondary">
+            {{ $showHistoricalNotifications ? __('Hide Processed Notifications') : __('Show Processed Notifications') }}
+        </button>
+    </div>
 
-        <div class="space-y-4">
-            @forelse ($notifications->whereIn('outcome', ['accepted', 'declined']) as $notification)
-                <div class="flex items-start space-x-4">
-                    <!-- Indicatore Temporale -->
-                    <div class="w-2 h-2 rounded-full bg-gray-400 mt-2"></div>
+    <!-- Notifiche Storiche -->
+    @if ($showHistoricalNotifications)
+        <div class="bg-gray-700 p-6 rounded-lg shadow-md mt-4">
+            <h3 class="text-xl font-bold text-white mb-4">{{ __('Processed Notifications') }}</h3>
 
-                    <!-- Contenuto della Notifica -->
-                    <div class="flex-1 bg-gray-800 p-4 rounded-lg shadow-md">
-                        <p class="text-md font-semibold text-white">{{ $notification->data['message'] }}</p>
-                        <p class="text-sm text-gray-300">
-                            {{ __('Outcome:') }} <span class="font-bold">{{ ucfirst($notification->outcome) }}</span>
-                        </p>
-                        <p class="text-xs text-gray-500">{{ $notification->created_at->diffForHumans() }}</p>
+            <div class="space-y-4">
+                @forelse ($historicalNotifications as $notification)
+                    <div class="flex items-start space-x-4">
+                        <div class="w-2 h-2 rounded-full bg-gray-400 mt-2"></div>
+                        <div class="flex-1 bg-gray-800 p-4 rounded-lg shadow-md">
+                            <!-- Inizio del Collapse -->
+                            <div class="collapse collapse-arrow bg-gray-600 rounded-lg">
+                                <input type="checkbox" id="collapse-{{ $notification->id }}" class="peer hidden" />
+
+                                <!-- Label modificata -->
+                                <label for="collapse-{{ $notification->id }}" class="collapse-title flex justify-between items-center text-lg font-medium cursor-pointer text-gray-200">
+                                    <span>{{ $notification->data['message'] }}</span>
+                                    <button
+                                        wire:click="deleteNotificationAction('{{ $notification->id }}')"
+                                        wire:confirm="{{ __('notification.confirm_delete') }}"
+                                        class="btn btn-warning btn-sm">
+                                        {{ __('label.delete') }}
+                                    </button>
+                                </label>
+
+                                <!-- Contenuto del Collapse -->
+                                <div class="collapse-content peer-checked:block hidden">
+                                    <p class="text-sm text-gray-300">
+                                        {{ __('notification.reply') }}:
+                                        <span class="font-bold {{ $notification->outcome === 'declined' ? 'text-red-500' : 'text-green-500' }}">
+                                            {{ ucfirst($notification->outcome) }}
+                                        </span>
+                                    </p>
+
+                                    @if(isset($notification->data['reason']) && $notification->data['reason'])
+                                        @if(isset($notification->data['approver']) && $notification->data['approver'])
+                                            <p class="text-sm text-gray-300">
+                                                {{ __('notification.receiver') }}: <span class="font-bold">{{ $notification->data['approver'] }}</span>
+                                            </p>
+                                        @endif
+                                        <p class="text-sm text-gray-300">
+                                            {{ __('notification.proposal_declined_reason') }}: <span class="font-bold">{{ $notification->data['reason'] }}</span>
+                                        </p>
+                                        <p class="text-sm text-gray-300">
+                                            {{ __('collection.wallet.royalty_mint') }}: <span class="font-bold">{{ $notification->data['royalty_mint'] .'%' }}</span>
+                                        </p>
+                                        <p class="text-sm text-gray-300">
+                                            {{ __('collection.wallet.royalty_rebind') }}: <span class="font-bold">{{ $notification->data['royalty_rebind'] .'%' }}</span>
+                                        </p>
+                                    @endif
+                                </div>
+                            </div>
+                            <!-- Fine del Collapse -->
+                            <p class="text-xs text-gray-500">{{ $notification->created_at->diffForHumans() }}</p>
+                        </div>
                     </div>
-                </div>
-            @empty
-                <p class="text-gray-400">{{ __('No processed notifications.') }}</p>
-            @endforelse
+                @empty
+                    <p class="text-gray-400">{{ __('No historical notifications.') }}</p>
+                @endforelse
+            </div>
+
         </div>
-    </div>
+    @endif
+
+
+    <livewire:proposals.decline-proposal-modal />
 
 </div>

@@ -22,6 +22,7 @@ class WalletChangeApproval extends Model
      * @var array
      */
     protected $fillable = [
+        'id',
         'wallet_id',
         'requested_by_user_id',
         'approver_user_id',
@@ -30,6 +31,15 @@ class WalletChangeApproval extends Model
         'status',
         'type', // Nuovo campo
         'rejection_reason',
+    ];
+
+        /**
+     * The accessors to append to the model's array form.
+     *
+     * @var array<int, string>
+     */
+    protected $appends = [
+        'notification_id',
     ];
 
     /**
