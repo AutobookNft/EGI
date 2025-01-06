@@ -89,21 +89,30 @@
                                         </span>
                                     </p>
 
-                                    @if(isset($notification->data['reason']) && $notification->data['reason'])
-                                        @if(isset($notification->data['approver']) && $notification->data['approver'])
-                                            <p class="text-sm text-gray-300">
-                                                {{ __('notification.receiver') }}: <span class="font-bold">{{ $notification->data['approver'] }}</span>
-                                            </p>
-                                        @endif
+                                    <!-- Controlliamo che ci siano dettagli della proposta -->
+                                    @if($notification->approval_details)
                                         <p class="text-sm text-gray-300">
-                                            {{ __('notification.proposal_declined_reason') }}: <span class="font-bold">{{ $notification->data['reason'] }}</span>
+                                            {{ __('collection.wallet.wallet_address') }}:
+                                            <span class="font-bold">{{ $notification->approval_details->wallet_address }}</span>
                                         </p>
                                         <p class="text-sm text-gray-300">
-                                            {{ __('collection.wallet.royalty_mint') }}: <span class="font-bold">{{ $notification->data['royalty_mint'] .'%' }}</span>
+                                            {{ __('collection.wallet.royalty_mint') }}:
+                                            <span class="font-bold">{{ $notification->approval_details->royalty_mint . '%' }}</span>
                                         </p>
                                         <p class="text-sm text-gray-300">
-                                            {{ __('collection.wallet.royalty_rebind') }}: <span class="font-bold">{{ $notification->data['royalty_rebind'] .'%' }}</span>
+                                            {{ __('collection.wallet.royalty_rebind') }}:
+                                            <span class="font-bold">{{ $notification->approval_details->royalty_rebind . '%' }}</span>
                                         </p>
+                                        <p class="text-sm text-gray-300">
+                                            {{ __('notification.status') }}:
+                                            <span class="font-bold">{{ ucfirst($notification->approval_details->status) }}</span>
+                                        </p>
+                                        <p class="text-sm text-gray-300">
+                                            {{ __('notification.type') }}:
+                                            <span class="font-bold">{{ ucfirst($notification->approval_details->change_type) }}</span>
+                                        </p>
+                                    @else
+                                        <p class="text-sm text-gray-300">{{ __('notification.no_details_available') }}</p>
                                     @endif
                                 </div>
                             </div>

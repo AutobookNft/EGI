@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\CollectionInvitation;
+use App\Models\WalletChangeApproval;
 use App\Services\Notifications\NotificationHandlerFactory;
 use Livewire\Component;
 use App\Models\Collection;
@@ -40,6 +41,12 @@ class Dashboard extends Component
         ->count();
     }
 
+
+/**
+ * Questo metodo gestisce l'evento "proposal-declined" emesso dal metodo decline() del componente DeclineProposalModal.
+ *
+ * @return void
+ */
     #[On('proposal-declined')]
     public function handleProposalDeclined()
     {
@@ -53,6 +60,19 @@ class Dashboard extends Component
         session()->flash('message', __('The proposal was declined successfully and a notification was sent to the proposer.'));
     }
 
+    #[On('proposal-accepted')]
+    public function handleProposalAccepted()
+    {
+        // Log dell'evento per verifica
+        Log::channel('florenceegi')->info('Dashboard: proposal-accepted event received.');
+
+        // Ricaricare le notifiche pendenti e storiche
+        $this->loadNotifications();
+
+        // Mostrare un messaggio di successo all'utente
+        session()->flash('message', __('The proposal was accepted successfully and a notification was sent to the proposer.'));
+    }
+
     public function openDeclineModal($notification)
     {
         Log::channel('florenceegi')->info('Dashboard: openDeclineModal', [
@@ -60,8 +80,23 @@ class Dashboard extends Component
 
         ]);
 
-        // il listener si trova in app/Livewire/Proposals/DeclineProposalModal.php
-        $this->dispatch('open-decline-modal', $notification);
+        $notification = [
+            'id' => $notification->id,
+            'approval_id' => $notification->approval_details->id ?? null,
+            'message' => $notification->data['message'],
+            'change_type' => $notification->approval_details->change_type ?? null,
+        ];
+        $this->dispatchBrowserEvent('open-decline-modal', $notification);
+    }
+
+    public function openAcceptModal($notification)
+    {
+        Log::channel('florenceegi')->info('Dashboard: openAcceptModal', [
+            'notification' => $notification,
+        ]);
+
+        // il listener si trova in app/Livewire/Proposals/AcceptProposalModal.php
+        $this->dispatch('open-accept-modal', $notification);
     }
 
     public function notificationArchive($notificationId, $action)
@@ -83,27 +118,62 @@ class Dashboard extends Component
         $this->loadNotifications();
     }
 
+    // public function loadNotifications()
+    // {
+    //     $this->pendingNotifications = Auth::user()->notifications()
+    //     ->where(function ($query) {
+    //         $query->whereNull('read_at')
+    //               ->orWhere('outcome', 'pending');
+    //     })
+    //     ->orderBy('created_at', 'desc')
+    //     ->get();
+
+    //     $this->historicalNotifications = Auth::user()->notifications()
+    //         ->whereIn('outcome', ['accepted', 'declined', 'done'])
+    //         ->orderBy('created_at', 'desc')
+    //         ->get();
+
+    //     Log::channel('florenceegi')->info('Dashboard: loadNotifications', [
+    //         'pendingNotifications' => $this->pendingNotifications,
+    //         'historicalNotifications' => $this->historicalNotifications,
+    //     ]);
+
+    // }
+
     public function loadNotifications()
     {
+        // Notifiche in sospeso
         $this->pendingNotifications = Auth::user()->notifications()
-        ->where(function ($query) {
-            $query->whereNull('read_at')
-                  ->orWhere('outcome', 'pending');
-        })
-        ->orderBy('created_at', 'desc')
-        ->get();
+            ->where(function ($query) {
+                $query->whereNull('read_at')
+                    ->orWhere('outcome', 'pending');
+            })
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($notification) {
+                $approval = WalletChangeApproval::find($notification->data['wallet_change_approvals_id']);
+                $notification->approval_details = $approval; // Colleghiamo alla notifica i dettagli completi della proposta di wallet
 
+                return $notification;
+            });
+
+        // Notifiche storiche
         $this->historicalNotifications = Auth::user()->notifications()
             ->whereIn('outcome', ['accepted', 'declined', 'done'])
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->get()
+            ->map(function ($notification) {
+                $approval = WalletChangeApproval::find($notification->data['wallet_change_approvals_id']);
+                $notification->approval_details = $approval; // Colleghiamo alla notifica i dettagli completi della proposta di wallet
+                return $notification;
+            });
 
-        Log::channel('florenceegi')->info('Dashboard: loadNotifications', [
-            'pendingNotifications' => $this->pendingNotifications,
-            'historicalNotifications' => $this->historicalNotifications,
-        ]);
+        // Log::channel('florenceegi')->info('Dashboard: loadNotifications', [
+        //     'pendingNotifications' => $this->pendingNotifications,
 
+        // ]);
     }
+
 
     public function handleNotificationAction($notificationId, $action)
     {

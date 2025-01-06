@@ -12,13 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('notifications', function (Blueprint $table) {
-            $table->char('id', 36)->primary(); // Utilizza char(36) per l'UUID
-            $table->string('type');
-            $table->morphs('notifiable');
-            $table->string('outcome')->nullable()->default('pending'); // Nuovo campo per l'esito
-            $table->text('data');
-            $table->timestamp('read_at')->nullable();
-            $table->timestamps();
+            $table->char('id', 36)->primary(); // UUID come chiave primaria
+            $table->string('type', 255); // Tipo di notifica (es. class name)
+            $table->string('notifiable_type', 255); // Modello polimorfico
+            $table->unsignedBigInteger('notifiable_id'); // ID del modello polimorfico
+            $table->text('data'); // Dati aggiuntivi in formato JSON
+            $table->string('outcome', 25)->default('pending'); // Stato della notifica
+            $table->timestamp('read_at')->nullable(); // Data di lettura
+            $table->timestamps(); // `created_at` e `updated_at`
         });
     }
 

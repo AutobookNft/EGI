@@ -57,7 +57,7 @@ class CollectionUserMember extends Component
 
     public function render()
     {
-        return view('livewire.collections.collection-user');
+        return view('livewire.collections.collection-user-member');
     }
 }
 

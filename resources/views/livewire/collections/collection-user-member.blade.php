@@ -1,6 +1,8 @@
 @php
+    // Gestione del permesso per creare un wallet
     $canCreateWallet = (new \App\Livewire\Collections\CollectionUserMember)->userHasPermissionInCollection($collectionId, 'create_wallet');
 @endphp
+
 <div id="collection_management" class="p-6 border border-gray-700 rounded-2xl bg-gray-800 shadow-lg">
     <!-- Titolo della sezione -->
     <div id="collection_management" class="p-6 border border-gray-700 rounded-2xl bg-gray-800 shadow-lg">
@@ -14,17 +16,19 @@
                 <p class="text-sm text-gray-400">{{ __('collection.team_members_description') }}</p>
             </div>
             @if($canCreateWallet)
+
                 <div class="flex flex-wrap space-x-0 gap-4">
+                    <!-- Bottone per invitare un nuovo membro alla collection -->
                     <button class="btn btn-primary w-full sm:w-auto" wire:click="dispatch('openInviteModal')">
                         {{ __('collection.invite_collection_member') }}
                     </button>
+                    <!-- Bottone per creare un nuovo wallet -->
                     <button class="btn btn-primary w-full sm:w-auto" wire:click="$dispatch('openForCreateNewWallets')">
                         {{ __('collection.wallet.create_the_wallet') }}
                     </button>
                 </div>
             @endif
-        </div>
-        <!-- Restante contenuto della vista -->
+        </div>+
     </div>
 
     <!-- Sezione Membri della Collection -->

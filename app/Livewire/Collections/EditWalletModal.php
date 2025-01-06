@@ -3,6 +3,7 @@
 namespace App\Livewire\Collections;
 
 use App\Models\Collection;
+use App\Services\Notifications\NotificationHandlerFactory;
 use Illuminate\Support\Facades\Notification;
 use App\Models\User;
 use App\Models\Wallet;
@@ -14,6 +15,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 use Livewire\Attributes\On;
+use App\Rules\ValidWalletAddress;
 
 class EditWalletModal extends Component
 {
@@ -60,6 +62,7 @@ class EditWalletModal extends Component
         $this->show = true; // Mostra la modale
         $this->mode = 'edit';
     }
+
     #[On('openForCreateNewWallets')]
     public function openForCreateNewWallets($collectionId = null, $userId = null)
     {
@@ -88,16 +91,29 @@ class EditWalletModal extends Component
 
     public function createNewWallet()
     {
-
         Log::channel('florenceegi')->info('createNewWallet');
 
         $this->validate([
-            'walletAddress' => 'required|string',
-            'royaltyMint' => 'nullable|numeric|min:0|max:100',
-            'royaltyRebind' => 'nullable|numeric|min:0|max:100',
+            // 'walletAddress' => [
+            //     'required',
+            //     'string',
+            //     new ValidWalletAddress(),
+            // ],
+            'royaltyMint' => [
+                'nullable',
+                'numeric',
+                'min:0',
+                'max:' . config('app.creator_royalty_mint'),
+            ],
+            'royaltyRebind' => [
+                'nullable',
+                'numeric',
+                'min:0',
+                'max:' . config('app.creator_royalty_rebind'),
+            ],
         ]);
 
-        // Uso la relazione tra il modello Wallet e il metodo collection per recuperare la collection
+        // Trovo la collection
         $collection = Collection::findOrFail($this->collectionId);
         // $approverUserId = $collection->creator_id;
 
@@ -106,7 +122,7 @@ class EditWalletModal extends Component
             'approverUserId' => $this->approverUserId
         ]);
 
-        // Verifica permessi
+        // Verifica permessi per l'utente autenticato
         if (!$this->hasPermission($collection, 'create_wallet')) {
             session()->flash('error', __('You do not have permission to create a wallet.'));
             return;
@@ -200,6 +216,7 @@ class EditWalletModal extends Component
 
     public function validateAndAdjustCreatorQuota($collection, $newMint, $newRebind)
     {
+
         $creatorWallet = Wallet::where('collection_id', $collection->id)
                             ->where('user_id', $collection->creator_id)
                             ->first();
@@ -222,11 +239,11 @@ class EditWalletModal extends Component
 
     public function proposeNewWallet($collection, $approverUserId, $walletAddress, $mint, $rebind)
     {
-
         Log::channel('florenceegi')->info('proposeNewWallet', [
-            'approverUserId' => $approverUserId
+            'approverUserId' => $approverUserId,
         ]);
 
+        // Creazione della proposta
         $approval = WalletChangeApproval::create([
             'wallet_id' => null, // Perché è un nuovo wallet
             'requested_by_user_id' => Auth::user()->id, // Chi inoltra la richiesta
@@ -240,9 +257,9 @@ class EditWalletModal extends Component
             'status' => 'pending',
         ]);
 
-        // Notifica il membro della collection
-        $member = User::find($approverUserId);
-        Notification::send($member, new WalletChangeRequest($approval));
+        // Usa la factory per inviare la notifica con l'action "proposal"
+        $handler = NotificationHandlerFactory::getHandler(WalletChangeRequest::class);
+        $handler->handle($approval, 'proposal');
     }
 
     public function approveChange($approvalId)
