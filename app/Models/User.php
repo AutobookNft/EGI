@@ -140,17 +140,20 @@ class User extends Authenticatable
         return $this->hasMany(Wallet::class);
     }
 
+    public function customNotifications()
+    {
+        return $this->hasMany(CustomDatabaseNotification::class, 'notifiable_id')
+                    ->where('notifiable_type', self::class);
+    }
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    // protected function casts(): array
-    // {
-    //     return [
-    //         'email_verified_at' => 'datetime',
-    //         'password' => 'hashed',
-    //     ];
-    // }
+    public function walletChangeProposer()
+    {
+        return $this->hasMany(WalletChangeApprovalModel::class, 'proposer_id');
+    }
+
+    public function walletChangeReceiver()
+    {
+        return $this->hasMany(WalletChangeApprovalModel::class, 'receiver_id');
+    }
+
 }

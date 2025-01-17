@@ -4,9 +4,14 @@ namespace App\Livewire\Proposals;
 
 use App\Models\WalletChangeApproval;
 
+use App\Models\WalletChangeApprovalModel;
+use App\Services\Notifications\NotificationHandlerFactory;
+use App\Services\Notifications\WalletChangeRequestHandler;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\On;
 use Livewire\Component;
+use Livewire\Attributes\Validate;
 
 class DeclineProposalModal extends Component
 {
@@ -14,25 +19,20 @@ class DeclineProposalModal extends Component
     public $context;
     public $type;
     public $walletChangeApprovalId;
+
+    #[Validate('required|string|max:500')]
     public $reason = '';
     public $notification;
 
-    protected $rules = [
-        'reason' => 'required|string|max:500',
-    ];
 
     #[On('open-decline-modal')]
     public function openDeclineModal($notification)
     {
-
         $this->notification = $notification;
-
         Log::channel('florenceegi')->info('DeclineProposalModal: openModal', [
             '$this->notification_data' => $notification,
         ]);
-
         $this->isVisible = true;
-
     }
 
     public function closeModal()
@@ -40,38 +40,29 @@ class DeclineProposalModal extends Component
         $this->isVisible = false;
     }
 
-
+     /**
+     * Declina una richiesta di modifica del wallet.
+     * @param int $approvalId
+     * @param string|null $reason
+     * @method static WalletChangeApprovalModel findOrFail(int|string $id)
+     * @return void
+     */
     public function decline()
     {
 
-        Log::channel('florenceegi')->info('DeclineProposalModal: decline', [
-            'notification' =>  json_encode($this->notification),
-            'type' => $this->type,
-            'reason' => $this->reason,
-        ]);
-
         $this->validate();
 
-        // Trova la proposta nel database
-        $proposal = WalletChangeApproval::findOrFail($this->notification['data']['wallet_change_approvals_id']);
+        // Recupera il record da WalletChangeApproval per l'ID del proposer
+        $walletChangeApproval = Auth::user()->walletChangeProposer;
 
-        // Aggiorna lo stato della proposta a "declined" e salva la motivazione
-        $proposal->update([
-            'type' => $this->notification['data']['type'],
-            'status' => 'declined',
-            'rejection_reason' => $this->reason,
-            'read_at' => now(),
-            'notification_id' => $this->notification['id']
-        ]);
+        // Aggiorna lo stato della proposta a "rejected"
+        $walletChangeApproval->handleRejection();
 
-        // Aggiungo i dati alla notifica di risposta
-        $this->notification['type'] = $proposal->type;
-        $this->notification['reason'] = $this->reason;
-        $this->notification['approver_user_id'] = $proposal->approver_user_id;
+        // Gestione della notifica
+        $handler = NotificationHandlerFactory::getHandler(WalletChangeRequestHandler::class);
+        $handler->handle($walletChangeApproval, $this->reason);
 
-
-        // Crea la notifica di declino per il proponente
-        $proposal->requestedBy->notify(new ProposalDeclinedNotification($this->notification));
+        session()->flash('message', __('collection.wallet.wallet_change_rejected'));
 
         // Nasconde la modale
         $this->isVisible = false;
@@ -79,9 +70,6 @@ class DeclineProposalModal extends Component
         // Invia l'evento per aggiornare la dashboard
         $this->dispatch('proposal-declined');
     }
-
-
-
 
     public function render()
     {

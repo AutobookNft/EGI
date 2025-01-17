@@ -9,24 +9,42 @@
 
             @if($notification->approval_details)
                 <div class="mb-2">
-                    <p class="text-md text-gray-300 truncate w-full" title="{{ $notification->approval_details->wallet_address }}">
+                    <p class="text-md text-gray-300 truncate w-full" title="{{ $notification->approval_details->change_details['wallet_address'] }}">
                         <strong>{{ __('Wallet Address:') }}</strong>
                         {{ $notification->approval_details->wallet_address }}
                     </p>
                 </div>
                 <div class="mb-2">
                     <p class="text-md text-gray-300">
-                        <strong>{{ __('Mint Royalty:') }}</strong> {{ $notification->approval_details->royalty_mint }}%
+                        <strong>{{ __('Mint Royalty:') }}</strong> {{ $notification->approval_details->change_details['royalty_mint']}}%
                     </p>
                 </div>
                 <div class="mb-2">
                     <p class="text-md text-gray-300">
-                        <strong>{{ __('Rebind Royalty:') }}</strong> {{ $notification->approval_details->royalty_rebind }}%
+                        <strong>{{ __('Rebind Royalty:') }}</strong> {{ $notification->approval_details->change_details['royalty_rebind'] }}%
                     </p>
                 </div>
+                @php
+                    // Associa ogni status a una classe CSS diversa
+                    switch ($notification->approval_details->status) {
+                        case 'pending':
+                            $statusClass = 'text-yellow-500';
+                            break;
+                        case 'accepted':
+                            $statusClass = 'text-green-500';
+                            break;
+                        case 'declined':
+                            $statusClass = 'text-red-500';
+                            break;
+                        default:
+                            $statusClass = 'text-gray-300';
+                    }
+                @endphp
                 <div class="mb-2">
                     <p class="text-md text-gray-300">
-                        <strong>{{ __('Status:') }}</strong> {{ ucfirst($notification->approval_details->status) }}
+                        <strong>{{ __('Status:') }}</strong> <span class="{{ $statusClass }}">
+                            {{ ucfirst($notification->approval_details->status) }}
+                        </span>
                     </p>
                 </div>
                 <div class="mb-2">
@@ -59,8 +77,9 @@
                     wire:click="openDeclineModal({{ json_encode([
                         'id' => $notification->id,
                         'approval_id' => $notification->approval_details->id ?? null,
-                        'message' => $notification->data['message'],
-                        'change_type' => $notification->approval_details->change_type ?? null,
+                        'data' => $notification['data'],
+                        'message' => $notification['data']['message'],
+                        'model_id' => $notification->model_id ?? null,
                     ]) }})"
                     class="btn btn-secondary">
                     {{ __('Decline') }}

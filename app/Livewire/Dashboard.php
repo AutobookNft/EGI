@@ -81,12 +81,13 @@ class Dashboard extends Component
         ]);
 
         $notification = [
-            'id' => $notification->id,
-            'approval_id' => $notification->approval_details->id ?? null,
-            'message' => $notification->data['message'],
-            'change_type' => $notification->approval_details->change_type ?? null,
+            'id' => $notification['id'],
+            'data' => $notification['data'],
+            'approval_id' => $notification->approval_details['id'] ?? null,
+            'message' => $notification['message'],
+            'model_id' => $notification['model_id'] ?? null,
         ];
-        $this->dispatchBrowserEvent('open-decline-modal', $notification);
+        $this->dispatch('open-decline-modal', $notification);
     }
 
     public function openAcceptModal($notification)
@@ -118,62 +119,39 @@ class Dashboard extends Component
         $this->loadNotifications();
     }
 
-    // public function loadNotifications()
-    // {
-    //     $this->pendingNotifications = Auth::user()->notifications()
-    //     ->where(function ($query) {
-    //         $query->whereNull('read_at')
-    //               ->orWhere('outcome', 'pending');
-    //     })
-    //     ->orderBy('created_at', 'desc')
-    //     ->get();
-
-    //     $this->historicalNotifications = Auth::user()->notifications()
-    //         ->whereIn('outcome', ['accepted', 'declined', 'done'])
-    //         ->orderBy('created_at', 'desc')
-    //         ->get();
-
-    //     Log::channel('florenceegi')->info('Dashboard: loadNotifications', [
-    //         'pendingNotifications' => $this->pendingNotifications,
-    //         'historicalNotifications' => $this->historicalNotifications,
-    //     ]);
-
-    // }
-
     public function loadNotifications()
     {
-        // Notifiche in sospeso
-        $this->pendingNotifications = Auth::user()->notifications()
+        // Notifiche pendenti
+        $this->pendingNotifications = Auth::user()
+            ->customNotifications()
             ->where(function ($query) {
                 $query->whereNull('read_at')
-                    ->orWhere('outcome', 'pending');
+                      ->orWhere('outcome', 'pending');
             })
+            ->with('model') // Carica la relazione polimorfica (WalletChangeApproval, ecc.)
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(function ($notification) {
-                $approval = WalletChangeApproval::find($notification->data['wallet_change_approvals_id']);
-                $notification->approval_details = $approval; // Colleghiamo alla notifica i dettagli completi della proposta di wallet
-
+                $notification->approval_details = $notification->model;
                 return $notification;
             });
+
+        Log::channel('florenceegi')->info('Dashboard: loadNotifications', [
+            'pendingNotifications' => $this->pendingNotifications,
+        ]);
 
         // Notifiche storiche
-        $this->historicalNotifications = Auth::user()->notifications()
+        $this->historicalNotifications = Auth::user()
+            ->customNotifications()
             ->whereIn('outcome', ['accepted', 'declined', 'done'])
+            ->with('model')
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(function ($notification) {
-                $approval = WalletChangeApproval::find($notification->data['wallet_change_approvals_id']);
-                $notification->approval_details = $approval; // Colleghiamo alla notifica i dettagli completi della proposta di wallet
+                $notification->approval_details = $notification->model;
                 return $notification;
             });
-
-        // Log::channel('florenceegi')->info('Dashboard: loadNotifications', [
-        //     'pendingNotifications' => $this->pendingNotifications,
-
-        // ]);
     }
-
 
     public function handleNotificationAction($notificationId, $action)
     {

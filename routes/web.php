@@ -26,6 +26,11 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+// Rotta per phpinfo
+Route::get('/phpinfo', function () {
+    phpinfo();
+});
+
 // Rotte protette da middleware
 Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified'])
     ->group(function () {

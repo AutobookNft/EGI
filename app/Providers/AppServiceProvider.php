@@ -17,6 +17,9 @@ use App\Policies\TeamWalletPolicy as WalletPolicy;
 use App\Policies\CollectionPolicy;
 use App\Policies\EgiPolicy;
 
+use Illuminate\Support\Facades\Notification;
+use App\Notifications\Channels\CustomDatabaseChannel;
+
 class AppServiceProvider extends ServiceProvider
 {
 
@@ -45,6 +48,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Registriamo un driver nominato "custom_database"
+        Notification::extend('custom_database', function ($app) {
+            return new CustomDatabaseChannel();
+        });
     }
 }

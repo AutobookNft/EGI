@@ -16,7 +16,7 @@ class Navigation extends Component
     public function render(): View
     {
 
-        $this->currentTeam = Auth::user()->currentTeam?->name ?? NESSUN_TEAM;
+        // $this->currentTeam = Auth::user()->currentTeam?->name ?? NESSUN_TEAM;
 
         return view('livewire.layout.navigation', [
             'user' => Auth::user(),

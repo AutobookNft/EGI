@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('collection_id')->constrained()->onDelete('cascade'); // Relazione con collections
             $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete(); // Nullable per wallet anonimi
             $table->string('wallet', 255)->nullable(); // Indirizzo del wallet
-            $table->string('platform_role', 25)->nullable(); // Tipo di wallet (es. 'metamask', 'sollet')
+            $table->string('platform_role', 25)->nullable(); // Ruolo all'interno della piattaforma: Creator, Mediator, Epp, Natan, etc.
             $table->float('royalty_mint')->nullable(); // Percentuale della prima vendita
             $table->float('royalty_rebind')->nullable(); // Percentuale del mercato secondario
             $table->boolean('is_anonymous')->default(true); // Indica se il wallet è anonimo

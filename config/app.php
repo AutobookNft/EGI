@@ -35,6 +35,17 @@ return [
     */
     'egi_asset' => env('EGI_ASSET', false),
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | PLATFORM_BLOCKCHAIN
+    |--------------------------------------------------------------------------
+    |
+    | Questo parametro determina SU QUALE BLOCKCHAIN è basata la piattaforma.
+    |
+    */
+    'platform_blockchain' => env('PLATFORM_BLOCKCHAIN', 'algorand'),
+
     /*
     |--------------------------------------------------------------------------
     |

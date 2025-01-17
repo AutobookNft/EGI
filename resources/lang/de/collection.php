@@ -106,5 +106,18 @@ return [
         'username' => 'Benutzername',
         'create' => 'Ein Wallet erstellen',
         'delete_wallet' => 'Sind Sie sicher, dass Sie dieses Wallet löschen möchten?',
+        'approver' => 'Genehmiger',
+        'proposer' => 'Antragsteller',
+        'owner' => 'Besitzer',
+        'wallet_change_rejected' => 'Das Wallet wurde abgelehnt',
+        'wallet_change_approved' => 'Das Wallet wurde genehmigt',
+        'reason' => 'Grund',
+        'wallet_change_request_approved' => 'Das Wallet wurde genehmigt',
+        'creator_does_not_have_enough_quota_to_allocate' => 'Der Ersteller hat nicht genug Quote zum Zuweisen',
+        'creator_wallet_not_found' => 'Ersteller-Wallet nicht gefunden',
+        'total_exceeds_the_maximum_allowed_percentage' => 'Das Gesamtergebnis übersteigt den maximal zulässigen Prozentsatz',
+        'wallet_updated_successfully' => 'Wallet erfolgreich aktualisiert',
+        'modification_has_been_submitted_for_approval' => 'Die Änderung wurde zur Genehmigung eingereicht',
+        'you_do_not_have_permission_to_create_a_wallet' => 'Sie haben keine Berechtigung, ein Wallet zu erstellen',
     ]
 ];

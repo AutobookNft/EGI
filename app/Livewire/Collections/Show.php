@@ -38,7 +38,7 @@ class Show extends Component
         $collection = Collection::find($this->collectionId);
 
         // estrapola tutti gli wallets relazionati al team
-        $wallets = TeamWallet::where('team_id', $collection->team_id)->get();
+        $wallets = "";// Wallet::where('team_id', $collection->team_id)->get();
 
         // Recupera tutte le collection dell'utente connesso
         $this->collections = Collection::where('user_id', $user->id)->get();

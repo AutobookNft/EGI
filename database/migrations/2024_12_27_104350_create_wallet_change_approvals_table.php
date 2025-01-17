@@ -13,21 +13,16 @@ return new class extends Migration
     {
         Schema::create('wallet_change_approvals', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('wallet_id')->constrained('wallets')->onDelete('cascade')->unsignedBigInteger(); // Relazione con il wallet
-            $table->foreignId('requested_by_user_id')->constrained('users')->onDelete('cascade'); // Chi richiede la modifica
-            $table->foreignId('approver_user_id')->nullable()->constrained('users')->onDelete('cascade'); // Chi approva (se esiste)
-            $table->string('change_type'); // Esempi: 'creation', 'update', 'delete'
-            // notification_id
-            $table->string('notification_id')->nullable(); // ID della notifica associata
-            $table->json('change_details'); // Dettagli della modifica (es. vecchi e nuovi valori)
+            $table->foreignId('wallet_id')->unsignedBigInteger(); // Relazione con il wallet
+            $table->foreignId('proposer_id')->unsignedBigInteger()->nullable()->constrained('users')->onDelete('cascade'); // Chi propone la modifica
+            $table->foreignId('riceiver_id')->unsignedBigInteger()->nullable()->constrained('users')->onDelete('cascade'); // Chi riceve la modifica (approva o rifiuta)
+            $table->string('wallet', 255)->nullable(); // Indirizzo del wallet
+            $table->float('royalty_mint')->nullable(); // Percentuale della prima vendita
+            $table->float('royalty_rebind')->nullable(); // Percentuale del mercato secondario
             $table->string('status')->default('pending'); // Valori: 'pending', 'approved', 'rejected'
-            $table->string('approval')->default('approved'); // Valori: 'pending', 'approved'
-            $table->string('type')->default('update'); // Valori: 'update', 'create'
-            $table->json('previous_values')->nullable(); // Per tenere traccia dei vecchi valori in caso di rifiuto
-            $table->text('rejection_reason')->nullable(); // Motivo del rifiuto, se applicabile
+            $table->string('type')->default('update'); // Valori: 'update', 'create' , 'delete'
             $table->timestamps();
         });
-
     }
 
     /**

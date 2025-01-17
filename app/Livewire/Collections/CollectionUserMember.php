@@ -5,9 +5,11 @@ namespace App\Livewire\Collections;
 use App\Models\Collection;
 use App\Models\CollectionUser;
 use App\Models\Wallet;
+use App\Models\WalletChangeApproval;
 use Livewire\Component;
 use Illuminate\Support\Facades\Log;
 use App\Traits\HasPermissionTrait;
+use Illuminate\Support\Facades\Auth;
 
 class CollectionUserMember extends Component
 {
@@ -21,6 +23,7 @@ class CollectionUserMember extends Component
     public $collectionId;
     public $collectionName;
     public $collectionOwner; // Proprietario della collection
+    public $walletProposals;
     public $show = false; // Proprietà per gestire la visibilità della modale
 
     public function mount($id)
@@ -48,10 +51,14 @@ class CollectionUserMember extends Component
     {
         $this->collectionUsers = CollectionUser::where('collection_id', $this->collectionId)->get();
         $this->wallets = Wallet::where('collection_id', '=', $this->collectionId)->get();
+        $this->walletProposals = WalletChangeApproval::where('requested_by_user_id', '=', Auth::user()->id)
+        ->where('status', '=', 'pending')
+        ->get();
 
         Log::channel('florenceegi')->info('CollectionUsersMembers', [
             'collectionId' => $this->collectionId,
-            'wallets' => $this->wallets
+            'wallets' => $this->wallets,
+            'walletProposals' => $this->walletProposals
         ]);
     }
 

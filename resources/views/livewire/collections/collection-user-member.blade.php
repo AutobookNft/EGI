@@ -11,7 +11,7 @@
             <div>
                 <h2 class="text-2xl font-bold text-white">{{ $collectionName }}</h2>
                 <p class="text-sm text-gray-400">
-                    {{ __('Owner:') }} {{ $collectionOwner->name }} {{ $collectionOwner->last_name }}
+                    {{ __('collection.wallet.owner') }}: {{ $collectionOwner->name }} {{ $collectionOwner->last_name }}
                 </p>
                 <p class="text-sm text-gray-400">{{ __('collection.team_members_description') }}</p>
             </div>
@@ -40,14 +40,14 @@
                     <img class="w-12 h-12 rounded-full" src="{{ $member->user->profile_photo_url }}" alt="{{ $member->user->name }}">
                     <div class="ml-4">
                         <h3 class="text-lg font-bold text-white">{{ $member->user->name }} {{ $member->user->last_name }}</h3>
-                        <p class="text-sm text-gray-400">{{ __('Role: ') . $member->role }}</p>
+                        <p class="text-sm text-gray-400">{{ __('collection.wallet.user_role') .': '. $member->role }}</p>
                         <p class="text-sm text-gray-400">{{ __('User id: ') . $member->user_id }}</p>
                     </div>
                 </div>
                 @if(!$member->wallet && $canCreateWallet)
                 <!-- Bottone per creare un nuovo wallet. Il listener si trova in /home/fabio/EGI/app/Livewire/Collections/EditWalletModal.php -->
-                    <button class="btn btn-primary w-full sm:w-auto" wire:click="$dispatch('openForCreateNewWallets', { collectionId: {{ $member->collection_id }}, userId: {{ $member->user_id }} })">
-                        {{ __('collection.wallet.create_wallet_for_member') }}
+                    <button id="create_new_wallet" class="btn btn-primary w-full sm:w-auto" wire:click="$dispatch('openForCreateNewWallets', { collectionId: {{ $member->collection_id }}, userId: {{ $member->user_id }} })">
+                        {{ __('collection.wallet.create_the_wallet') }}
                     </button>
                 @endif
             </div>
@@ -58,38 +58,73 @@
     <h3 class="text-xl font-bold text-white mt-8 mb-4">{{ __('collection.wallets') }}</h3>
     <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
         @foreach($wallets as $wallet)
-            <div class="{{ !$canCreateWallet || in_array($wallet->platform_role, ['natan', 'EPP']) ? 'bg-gray-700 opacity-75 cursor-not-allowed' : 'bg-gray-900' }} p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300">
+            <div class="{{ !$canCreateWallet || in_array($wallet->platform_role, ['natan', 'EPP']) ? 'bg-gray-700 opacity-75 cursor-not-allowed' : 'bg-gray-900' }}  p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300">
                 <div>
                     <p class="text-sm text-gray-400">
-                        <strong>{{ __('Role:') }}</strong> {{ $wallet->platform_role }}
+                        <strong>{{ __('collection.wallet.user_role')}}:</strong> {{ $wallet->platform_role }}
                     </p>
                     <p class="text-sm text-gray-400">
-                        <strong>{{ __('Wallet Address:') }}</strong> {{ substr($wallet->wallet, 0, 6) }}...{{ substr($wallet->wallet, -4) }}
+                        <strong>{{ __('collection.wallet.address') }}:</strong> {{ substr($wallet->wallet, 0, 6) }}...{{ substr($wallet->wallet, -4) }}
                     </p>
                     <p class="text-sm text-gray-400">
-                        <strong>{{ __('Mint Royalty:') }}</strong> {{ $wallet->royalty_mint }}%
+                        <strong>{{ __('collection.wallet.royalty_mint') }}:</strong> {{ $wallet->royalty_mint }}%
                     </p>
                     <p class="text-sm text-gray-400">
-                        <strong>{{ __('Rebind Royalty:') }}</strong> {{ $wallet->royalty_rebind }}%
+                        <strong>{{ __('collection.wallet.royalty_rebind') }}:</strong> {{ $wallet->royalty_rebind }}%
                     </p>
 
                     <!-- Nome e Cognome dell'Utente Correlato -->
                     @if($wallet->user)
                         <p class="text-sm text-gray-400">
-                            <strong>{{ __('Owner:') }}</strong> {{ $wallet->user->name }} {{ $wallet->user->last_name }}
+                            <strong>{{ __('collection.wallet.owner') }}:</strong> {{ $wallet->user->name }} {{ $wallet->user->last_name }}
                         </p>
                     @else
                         <p class="text-sm text-gray-400">
-                            <strong>{{ __('Owner:') }}</strong> {{ __('Unassigned') }}
+                            <strong>{{ __('collection.wallet.owner') }}:</strong> {{ __('Unassigned') }}
                         </p>
                     @endif
                 </div>
 
                 @if($canCreateWallet && (!in_array($wallet->platform_role, ['natan', 'EPP']) || Auth::user()->hasRole('superadmin')))
+                    <!-- Bottone per gestire il wallet. Il listener si trova in /home/fabio/EGI/app/Livewire/Collections/EditWalletModal.php -->
                     <button wire:click="$dispatch('openHandleWallets', { walletId: {{ $wallet->id }} })" class="btn btn-primary mt-4 w-full">
                         {{ __('collection.wallet.manage_wallet') }}
                     </button>
                 @endif
+            </div>
+        @endforeach
+    </div>
+
+    <h3 class="text-xl font-bold text-white mt-8 mb-4">{{ __('collection.wallets') }}</h3>
+    <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
+        @foreach($walletProposals as $wallet)
+            <div class="{{ !$canCreateWallet || in_array($wallet->platform_role, ['natan', 'EPP']) ? 'bg-gray-700 opacity-75 cursor-not-allowed' : 'bg-gray-900' }} {{ $wallet->status === 'pending' ? 'bg-yellow-800' : 'bg-gray-900' }}  p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300">
+                <div>
+                    <p class="text-sm text-gray-400">
+                        <strong>{{ __('collection.wallet.user_role')}}:</strong> {{ $wallet->platform_role }}
+                    </p>
+                    <p class="text-sm text-gray-400">
+                        <strong>{{ __('collection.wallet.address') }}:</strong> {{ substr($wallet->change_details['wallet_address'], 0, 15) }}...{{ substr($wallet->wallet, -4) }}
+                    </p>
+                    <p class="text-sm text-gray-400">
+                        <strong>{{ __('collection.wallet.royalty_mint') }}:</strong> {{ $wallet->change_details['royalty_mint'] }}%
+                    </p>
+                    <p class="text-sm text-gray-400">
+                        <strong>{{ __('collection.wallet.royalty_rebind') }}:</strong> {{ $wallet->change_details['royalty_rebind'] }}%
+                    </p>
+
+                    <!-- Nome e Cognome dell'Utente Correlato -->
+                    @if($wallet->approver)
+                        <p class="text-sm text-gray-400">
+                            <strong>{{ __('collection.wallet.royalty_rebind') }}:</strong> {{ $wallet->approver->name }} {{ $wallet->approver->last_name }}
+                        </p>
+                    @else
+                        <p class="text-sm text-gray-400">
+                            <strong>{{ __('collection.wallet.approver') }}:</strong> {{ __('Unassigned') }}
+                        </p>
+                    @endif
+                </div>
+
             </div>
         @endforeach
 

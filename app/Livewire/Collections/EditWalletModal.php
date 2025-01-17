@@ -3,13 +3,16 @@
 namespace App\Livewire\Collections;
 
 use App\Models\Collection;
+use App\Models\WalletChangeApprovalModel;
+use App\Notifications\WalletChangeRequestCreation;
+use App\Notifications\WalletChangeResponseApproval;
+use App\Notifications\WalletChangeResponseRejection;
 use App\Services\Notifications\NotificationHandlerFactory;
+use App\Services\Notifications\WalletChangeRequestHandler;
 use Illuminate\Support\Facades\Notification;
 use App\Models\User;
 use App\Models\Wallet;
 use App\Models\WalletChangeApproval;
-use App\Notifications\WalletChangeRequest;
-use App\Notifications\WalletChangeResponse;
 use App\Traits\HasPermissionTrait;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -124,7 +127,7 @@ class EditWalletModal extends Component
 
         // Verifica permessi per l'utente autenticato
         if (!$this->hasPermission($collection, 'create_wallet')) {
-            session()->flash('error', __('You do not have permission to create a wallet.'));
+            session()->flash('error', __('collection.wallet.you_do_not_have_permission_to_create_a_wallet'));
             return;
         }
 
@@ -140,7 +143,7 @@ class EditWalletModal extends Component
         $this->proposeNewWallet($this->collectionId, $this->approverUserId, $this->walletAddress, $this->royaltyMint, $this->royaltyRebind);
 
         $this->show = false;
-        session()->flash('message', __('Wallet creation request sent successfully!'));
+        session()->flash('message', __('collection.wallet.wallet_creation_request_sent_successfully'));
     }
 
     public function saveWallet()
@@ -169,7 +172,7 @@ class EditWalletModal extends Component
         // **Inserimento in wallet_change_approvals**
         if ($wallet->user_id !== Auth::id()) {
             $this->createWalletApproval($wallet);
-            session()->flash('message', __('The modification has been submitted for approval.'));
+            session()->flash('message', __('collection.wallet.modification_has_been_submitted_for_approval'));
             $this->show = false;
             return;
         }
@@ -183,7 +186,7 @@ class EditWalletModal extends Component
 
         $this->dispatch('collectionMemberUpdated');
         $this->show = false;
-        session()->flash('message', __('Wallet updated successfully!'));
+        session()->flash('message', __('collection.wallet.wallet_updated_successfully'));
     }
 
 
@@ -208,7 +211,7 @@ class EditWalletModal extends Component
         $newSum = $currentSum - $wallet->$type + $newValue;
 
         if ($newSum > $maxValue) {
-            throw new \Exception(__('The total exceeds the maximum allowed percentage.'));
+            throw new \Exception(__('collection.wallet.total_exceeds_the_maximum_allowed_percentage'));
         }
 
         return $maxValue - $newSum;
@@ -222,12 +225,12 @@ class EditWalletModal extends Component
                             ->first();
 
         if (!$creatorWallet) {
-            throw new \Exception(__('Creator wallet not found.'));
+            throw new \Exception(__('collection.wallet.creator_wallet_not_found'));
         }
 
         // Verifica se il creator ha abbastanza quota disponibile
         if ($creatorWallet->royalty_mint < $newMint || $creatorWallet->royalty_rebind < $newRebind) {
-            throw new \Exception(__('Creator does not have enough quota to allocate.'));
+            throw new \Exception(__('collection.wallet.creator_does_not_have_enough_quota_to_allocate'));
         }
 
         // Riduci la quota del creator
@@ -243,48 +246,49 @@ class EditWalletModal extends Component
             'approverUserId' => $approverUserId,
         ]);
 
-        // Creazione della proposta
-        $approval = WalletChangeApproval::create([
-            'wallet_id' => null, // Perché è un nuovo wallet
-            'requested_by_user_id' => Auth::user()->id, // Chi inoltra la richiesta
-            'approver_user_id' => $approverUserId, // Chi deve approvare la richiesta
-            'change_type' => 'create',
-            'change_details' => [
-                'wallet_address' => $walletAddress,
-                'royalty_mint' => $mint,
-                'royalty_rebind' => $rebind,
-            ],
+        // Creazione del payload della proposta,
+        // questo record viene creato una sola volta e contiene tutti i dati della proposat
+        $walletChangeApproval = WalletChangeApprovalModel::create([
+            'wallet_id' => null, // Perché è un nuovo wallet e non è ancora stato creato UN RECORD NELLA TABELLA wallet, questa è una proposta di creazione
+            'proposer_id' => Auth::user()->id, // Chi inoltra la richiesta
+            'receiver_id' => $approverUserId, // Chi deve approvare la richiesta
+            'wallet' => $walletAddress,
+            'royalty_mint' => $mint,
+            'royalty_rebind' => $rebind,
+            'type' => 'creation', // tipo di proposta
             'status' => 'pending',
         ]);
 
         // Usa la factory per inviare la notifica con l'action "proposal"
-        $handler = NotificationHandlerFactory::getHandler(WalletChangeRequest::class);
-        $handler->handle($approval, 'proposal');
+        $handler = NotificationHandlerFactory::getHandler(WalletChangeRequestHandler::class);
+        $handler->handle($walletChangeApproval);
     }
 
+    /**
+     * Summary of approveChange
+     * @param mixed $approvalId
+     * @return void
+     * @method static WalletChangeApprovalModel findOrFail(int|string $id)
+     */
     public function approveChange($approvalId)
     {
-        $approval = WalletChangeApproval::findOrFail($approvalId);
-        $wallet = $approval->wallet;
+        $walletChangeApproval = WalletChangeApprovalModel::findOrFail($approvalId);
+        $wallet = $walletChangeApproval->wallet;
 
-        $wallet->update($approval->change_details['new']);
-        $approval->update(['status' => 'approved']);
+        // $wallet->update($walletChangeApproval->change_details['new']);
+        /**
+         *
+         * Quì c'è da implementare la logica per l'approvazione della modifica del wallet
+         *
+         */
 
-        Notification::send($approval->requestedBy, new WalletChangeResponse($approval, 'proposal'));
-        session()->flash('message', __('The wallet change has been approved.'));
-    }
+        // Aggiorna lo stato della proposta a "created"
+        $walletChangeApproval->handleCreation();
 
-    public function declineChange($approvalId, $reason = null)
-    {
-        $approval = WalletChangeApproval::findOrFail($approvalId);
+        $handler = NotificationHandlerFactory::getHandler(WalletChangeRequestHandler::class);
+        $handler->handle($walletChangeApproval);
 
-        $approval->update([
-            'status' => 'rejected',
-            'rejection_reason' => $reason,
-        ]);
-
-        Notification::send($approval->requestedBy, new WalletChangeResponse($approval, 'rejected'));
-        session()->flash('message', __('The wallet change has been declined.'));
+        session()->flash('message', __('collection.wallet.wallet_change_request_approved'));
     }
 
     public function render()

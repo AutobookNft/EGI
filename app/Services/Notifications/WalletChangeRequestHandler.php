@@ -3,28 +3,26 @@
 namespace App\Services\Notifications;
 
 use App\Contracts\NotificationHandlerInterface;
-use App\Models\WalletChangeApproval;
+use App\Notifications\WalletChangeRequestCreation;
+use App\Notifications\WalletChangeResponseApproval;
 use Illuminate\Support\Facades\Notification;
-use App\Notifications\WalletChangeRequest;
+use App\Notifications\WalletChangeResponseRejection;
 
 class WalletChangeRequestHandler implements NotificationHandlerInterface
 {
-    public function handle($data, string $action)
+    public function handle($walletChangeApproval, $reason = null)
     {
-        if ($action === 'proposal') {
+        if ($walletChangeApproval->status === 'creation') {
             // Invio della notifica iniziale
-            $approval = $data; // Il modello WalletChangeApproval
-            $receiver = $approval->approver; // Utente destinatario (approver) definito nella relazione in WalletChangeApproval
-            Notification::send($receiver, new WalletChangeRequest($approval));
-        } elseif ($action === 'accept') {
+            Notification::send($walletChangeApproval->receiver_id, new WalletChangeRequestCreation($walletChangeApproval));
+        } elseif ($walletChangeApproval->status === 'approved') {
             // Logica per accettare
-            WalletChangeApproval::findOrFail($data['approval_id'])->update(['status' => 'approved']);
-        } elseif ($action === 'decline') {
+            Notification::send($walletChangeApproval->receiver_id, new WalletChangeResponseApproval ($walletChangeApproval));
+        } elseif ($walletChangeApproval->status === 'rejected') {
             // Logica per declinare
-            WalletChangeApproval::findOrFail($data['approval_id'])->update(['status' => 'declined']);
+            Notification::send($walletChangeApproval->receiver_id, new WalletChangeResponseRejection($walletChangeApproval, $reason));
         } else {
-            throw new \Exception("Azione '{$action}' non supportata per WalletChangeRequest.");
+            throw new \Exception("Azione '{$walletChangeApproval->status}' non supportata per WalletChangeRequest.");
         }
     }
 }
-    

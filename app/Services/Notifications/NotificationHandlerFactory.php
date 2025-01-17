@@ -9,7 +9,10 @@ class NotificationHandlerFactory
     public static function getHandler(string $type): NotificationHandlerInterface
     {
         $handlers = [
-            'App\Notifications\WalletChangeRequest' => WalletChangeRequestHandler::class,
+            'App\Notifications\WalletChangeResponseRejection' => WalletChangeRequestHandler::class,
+            'App\Notifications\WalletChangeResponseApproval' => WalletChangeRequestHandler::class,
+            'App\Notifications\WalletChangeRequestCreation' => WalletChangeRequestHandler::class,
+            'App\Notifications\WalletChangeRequestUpdate' => WalletChangeRequestHandler::class,
             'App\Notifications\InvitationNotification' => InvitationNotificationHandler::class,
         ];
 

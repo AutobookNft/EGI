@@ -6,5 +6,5 @@ use Illuminate\Notifications\DatabaseNotification;
 
 interface NotificationHandlerInterface
 {
-    public function handle(DatabaseNotification $notification, string $action);
+    public function handle(DatabaseNotification $notification);
 }
