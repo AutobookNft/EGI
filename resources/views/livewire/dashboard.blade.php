@@ -35,18 +35,67 @@
         </div>
     </div>
 
-    <!-- Notifiche -->
-    <div class="bg-gray-700 p-6 rounded-lg shadow-md">
-        <h3 class="text-2xl font-bold mb-4">{{ __('Notifications') }}</h3>
+    <!-- Header con thumbnails delle notifiche -->
+    <div x-data="{
+        activeId: @entangle('activeNotificationId'),
+        showNotification(id) {
+            this.activeId = id;
+            $wire.setActiveNotification(id);
+            // Forza il refresh del contenuto
+            $wire.$refresh();
+        }
+    }">
+        <!-- Thumbnails -->
+        <div class="flex overflow-x-auto p-2 space-x-2 no-scrollbar">
+            @foreach($pendingNotifications as $notif)
+                <button
+                    x-on:click="showNotification('{{ $notif->id }}')"
+                    :class="{
+                        'bg-gray-700': activeId === '{{ $notif->id }}',
+                        'bg-gray-800 hover:bg-gray-700': activeId !== '{{ $notif->id }}'
+                    }"
+                    class="flex-shrink-0 p-3 rounded-md transition-colors duration-150"
+                >
+                    <div class="flex items-center space-x-3">
+                        <!-- Icona basata sul tipo di notifica -->
+                        @if($notif->type === 'App\Notifications\WalletChangeRequestCreation')
+                            <svg class="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" />
+                            </svg>
+                        @else
+                            <svg class="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" />
+                            </svg>
+                        @endif
 
-        <!-- Notifiche Pendenti -->
-        @forelse ($pendingNotifications as $notification)
-            @include($this->getNotificationView($notification))
-            {{-- @dump($notification) --}}
-        @empty
-            <p class="text-gray-400">{{ __('No pending notifications available.') }}</p>
-        @endforelse
-    </div>
+                        <!-- Preview del contenuto -->
+                        <div class="text-left">
+                            <p class="text-sm font-medium text-white truncate max-w-[150px]">
+                                {{ Str::limit($notif->data['message'] ?? '', 20) }}
+                            </p>
+                            <p class="text-xs text-gray-400">
+                                {{ $notif->created_at->diffForHumans() }}
+                            </p>
+                        </div>
+                    </div>
+                </button>
+            @endforeach
+        </div>
+
+
+       <!-- Contenuto notifica -->
+       <div
+       x-show="activeId"
+       x-transition
+       class="bg-gray-700 rounded-b-lg"
+   >
+       @if($activeNotificationId && ($notification = $this->getActiveNotification()))
+           <div wire:key="notification-{{ $activeNotificationId }}">
+               @include($this->getNotificationView($notification), ['notification' => $notification])
+           </div>
+       @endif
+   </div>
+</div>
 
     <!-- Bottone per mostrare/nascondere lo storico delle notifiche -->
     <div class="text-right mt-4">

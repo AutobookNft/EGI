@@ -24,10 +24,17 @@ class Dashboard extends Component
     public $pendingNotifications = [];
     public $historicalNotifications = [];
 
+    public $activeNotificationId = null;
+
     public function mount()
     {
         $this->loadStats();
         $this->loadNotifications();
+
+        // Se ci sono notifiche pendenti, seleziona automaticamente la prima
+        if ($this->pendingNotifications->isNotEmpty()) {
+            $this->activeNotificationId = $this->pendingNotifications->first()->id;
+        }
     }
 
     public function loadStats()
@@ -41,12 +48,11 @@ class Dashboard extends Component
         ->count();
     }
 
-
-/**
- * Questo metodo gestisce l'evento "proposal-declined" emesso dal metodo decline() del componente DeclineProposalModal.
- *
- * @return void
- */
+    /**
+     * Questo metodo gestisce l'evento "proposal-declined" emesso dal metodo decline() del componente DeclineProposalModal.
+     *
+     * @return void
+     */
     #[On('proposal-declined')]
     public function handleProposalDeclined()
     {
@@ -75,18 +81,6 @@ class Dashboard extends Component
 
     public function openDeclineModal($notification)
     {
-        Log::channel('florenceegi')->info('Dashboard: openDeclineModal', [
-            'notification' => $notification,
-
-        ]);
-
-        $notification = [
-            'id' => $notification['id'],
-            'data' => $notification['data'],
-            'approval_id' => $notification->approval_details['id'] ?? null,
-            'message' => $notification['message'],
-            'model_id' => $notification['model_id'] ?? null,
-        ];
         $this->dispatch('open-decline-modal', $notification);
     }
 
@@ -121,6 +115,7 @@ class Dashboard extends Component
 
     public function loadNotifications()
     {
+
         // Notifiche pendenti
         $this->pendingNotifications = Auth::user()
             ->customNotifications()
@@ -128,23 +123,24 @@ class Dashboard extends Component
                 $query->whereNull('read_at')
                       ->orWhere('outcome', 'pending');
             })
-            ->with('model') // Carica la relazione polimorfica (WalletChangeApproval, ecc.)
+            ->with('model') // Carica la relazione polimorfica (WalletChangeApprovalModel, ecc.)
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(function ($notification) {
                 $notification->approval_details = $notification->model;
+                Log::channel('florenceegi')->info('Dashboard: loadNotifications', [
+                    'notification' => $notification,
+                ]);
+
                 return $notification;
             });
 
-        Log::channel('florenceegi')->info('Dashboard: loadNotifications', [
-            'pendingNotifications' => $this->pendingNotifications,
-        ]);
 
         // Notifiche storiche
         $this->historicalNotifications = Auth::user()
             ->customNotifications()
             ->whereIn('outcome', ['accepted', 'declined', 'done'])
-            ->with('model')
+            ->with('notifications')
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(function ($notification) {
@@ -172,13 +168,60 @@ class Dashboard extends Component
 
     public function getNotificationView($notification)
     {
+
         $notificationViews = [
-            'App\Notifications\WalletChangeRequest' => 'notifications.wallet-change-request',
+            'App\Notifications\WalletChangeRequestCreation' => 'notifications.wallet-change-request',
+            'App\Notifications\WalletChangeResponseRejection' => 'notifications.wallet-change-response-rejected',
             'App\Notifications\CollectionInvitationNotification' => 'notifications.invitation',
             'App\Livewire\Proposals\ProposalDeclinedNotification' => 'notifications.proposa-declined-notification',
         ];
 
-        return $notificationViews[$notification->type] ?? 'notifications.default';
+        return $notificationViews[$notification->type] ;
+    }
+
+    public function setActiveNotification($id)
+    {
+
+        // Log::channel('florenceegi')->info('Dashboard: setActiveNotification chiamato', [
+        //     'id' => $id,
+        //     'vecchio_id' => $this->activeNotificationId
+        // ]);
+
+        $this->activeNotificationId = $id;
+
+        // Log::channel('florenceegi')->info('Dashboard: setActiveNotification completato', [
+        //     'nuovo_id' => $this->activeNotificationId,
+        //     'notifica_attiva' => $this->getActiveNotification()
+        // ]);
+
+        $this->dispatch('notification-changed');  // Dispatch un evento
+    }
+
+    public function getActiveNotification()
+    {
+        if (!$this->activeNotificationId) {
+            return null;
+        }
+
+        $notification = Auth::user()
+            ->customNotifications()
+            ->where('id', $this->activeNotificationId) // Filtra per l'ID specifico
+            ->with('model') // Carica la relazione polimorfica
+            ->first();
+
+        if ($notification) {
+            $notification->approval_details = $notification->model; // Aggiungi approval_details se necessario
+            Log::channel('florenceegi')->info('Notification loaded:', [
+                'notification' => $notification,
+            ]);
+        }
+
+        // Se non trovata, cerca nelle notifiche storiche
+        if (!$notification && $this->showHistoricalNotifications) {
+            $notification = $this->historicalNotifications->firstWhere('id', $this->activeNotificationId);
+        }
+
+        return $notification;
     }
 
     public function render()

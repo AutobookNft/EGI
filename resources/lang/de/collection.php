@@ -119,5 +119,6 @@ return [
         'wallet_updated_successfully' => 'Wallet erfolgreich aktualisiert',
         'modification_has_been_submitted_for_approval' => 'Die Änderung wurde zur Genehmigung eingereicht',
         'you_do_not_have_permission_to_create_a_wallet' => 'Sie haben keine Berechtigung, ein Wallet zu erstellen',
+        'proposal_rejected' => 'Vorschlag abgelehnt',
     ]
 ];

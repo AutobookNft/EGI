@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('wallet_change_approvals', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('wallet_id')->unsignedBigInteger(); // Relazione con il wallet
+            $table->foreignId('wallet_id')->unsignedBigInteger()->nullable(); // Relazione con il wallet
             $table->foreignId('proposer_id')->unsignedBigInteger()->nullable()->constrained('users')->onDelete('cascade'); // Chi propone la modifica
-            $table->foreignId('riceiver_id')->unsignedBigInteger()->nullable()->constrained('users')->onDelete('cascade'); // Chi riceve la modifica (approva o rifiuta)
+            $table->foreignId('receiver_id')->unsignedBigInteger()->nullable()->constrained('users')->onDelete('cascade'); // Chi riceve la modifica (approva o rifiuta)
             $table->string('wallet', 255)->nullable(); // Indirizzo del wallet
             $table->float('royalty_mint')->nullable(); // Percentuale della prima vendita
             $table->float('royalty_rebind')->nullable(); // Percentuale del mercato secondario

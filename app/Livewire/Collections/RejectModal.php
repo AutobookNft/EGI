@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Collections;
 
+use App\Models\WalletChangeApprovalModel;
 use Livewire\Component;
 use App\Models\WalletChangeApproval;
 
@@ -20,7 +21,7 @@ class RejectModal extends Component
 
     public function reject()
     {
-        $approval = WalletChangeApproval::findOrFail($this->approvalId);
+        $approval = WalletChangeApprovalModel::findOrFail($this->approvalId);
 
         $approval->wallet->update(json_decode($approval->wallet->previous_values, true));
         $approval->wallet->update(['approval' => 'approved']);

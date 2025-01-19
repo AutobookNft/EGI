@@ -120,5 +120,6 @@ return [
         'modification_has_been_submitted_for_approval' => 'The modification has been submitted for approval',
         'wallet_creation_request_sent_successfully' => 'The wallet creation request has been sent successfully',
         'you_do_not_have_permission_to_create_a_wallet' => 'You do not have permission to create a wallet',
+        'proposal_rejected' => 'Proposal rejected',
     ]
 ];

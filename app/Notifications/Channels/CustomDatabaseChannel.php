@@ -4,6 +4,7 @@ namespace App\Notifications\Channels;
 
 use App\Models\CustomDatabaseNotification;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\Log;
 
 class CustomDatabaseChannel
 {
@@ -11,6 +12,12 @@ class CustomDatabaseChannel
     {
         // Recupera i dati dal metodo "toCustomDatabase()" della notifica
         $data = $notification->toCustomDatabase($notifiable);
+
+        Log::channel('florenceegi')->info('CustomDatabaseChannel: send', [
+            'notifiable' => $notifiable,
+            'notification' => $notification,
+            'data' => $data,
+        ]);
 
         // Creiamo manualmente il record nella tabella notifications
         return CustomDatabaseNotification::create([

@@ -26,11 +26,21 @@ class WalletChangeResponseRejection extends Notification
 
     public function toCustomDatabase($notifiable)
     {
+
+        $message = __('collection.wallet.wallet_change_rejected');
+
+        // Recupera il nome e il cognome dell'utente ricevente per inserirlo nel messaggio da reinviare al proponente,
+        // in questo modo il proponente sa chi ha rifiutato la sua proposta
+        $name = $this->walletChangeApproval->receiver->name ?? '';
+        $lastName = $this->walletChangeApproval->receiver->last_name ?? '';
+
         return [
             'model_type' => get_class($this->walletChangeApproval),
             'model_id'   => $this->walletChangeApproval->id,
             'data' =>[
-                'message' => __('collection.wallet_change_rejected, ') . __('collection.reason') . $this->reason
+                'message' => $message,
+                'reason' => $this->reason,
+                'user' => $name . ' ' . $lastName,
             ],
             'outcome' => 'rejected',
         ];

@@ -3,6 +3,7 @@
 namespace App\Services\Notifications;
 
 use App\Contracts\NotificationHandlerInterface;
+use Illuminate\Support\Facades\Log;
 
 class NotificationHandlerFactory
 {
@@ -19,6 +20,7 @@ class NotificationHandlerFactory
         if (!isset($handlers[$type])) {
             throw new \Exception("Gestore per il tipo '{$type}' non trovato.");
         }
+
 
         return app($handlers[$type]);
     }

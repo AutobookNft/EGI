@@ -120,5 +120,6 @@ return [
         'modification_has_been_submitted_for_approval' => 'La modifica è stata inviata per l\'approvazione',
         'wallet_creation_request_sent_successfully' => 'La richiesta di creazione del wallet è stata inviata con successo',
         'you_do_not_have_permission_to_create_a_wallet' => 'Non hai il permesso di creare un wallet',
+        'proposal_rejected' => 'Proposta rifiutata',
     ]
 ];

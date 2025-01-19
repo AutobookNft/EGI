@@ -26,7 +26,7 @@ class WalletChangeApprovalModel extends Model
         'id',
         'wallet_id',
         'proposer_id',
-        'riceiver_id',
+        'receiver_id',
         'wallet',
         'platform_role',
         'royalty_mint',
@@ -42,7 +42,7 @@ class WalletChangeApprovalModel extends Model
     public function handleCreation()
     {
         // Logica specifica per la creazione
-        $this->update(['status' => 'created']);
+        $this->update(['status' => 'pending']);
     }
 
     /**
@@ -91,6 +91,21 @@ class WalletChangeApprovalModel extends Model
         return $this->morphMany(CustomDatabaseNotification::class, 'model');
     }
 
+    /**
+     * Relazione con il modello User.
+     */
+    public function proposer()
+    {
+        return $this->belongsTo(User::class, 'proposer_id');
+    }
+
+    /**
+     * Relazione con il modello User.
+     */
+    public function receiver()
+    {
+        return $this->belongsTo(User::class, 'receiver_id');
+    }
 
 
 }

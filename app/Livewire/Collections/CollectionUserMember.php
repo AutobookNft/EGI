@@ -6,6 +6,7 @@ use App\Models\Collection;
 use App\Models\CollectionUser;
 use App\Models\Wallet;
 use App\Models\WalletChangeApproval;
+use App\Models\WalletChangeApprovalModel;
 use Livewire\Component;
 use Illuminate\Support\Facades\Log;
 use App\Traits\HasPermissionTrait;
@@ -50,10 +51,12 @@ class CollectionUserMember extends Component
     public function loadTeamUsers()
     {
         $this->collectionUsers = CollectionUser::where('collection_id', $this->collectionId)->get();
+
         $this->wallets = Wallet::where('collection_id', '=', $this->collectionId)->get();
-        $this->walletProposals = WalletChangeApproval::where('requested_by_user_id', '=', Auth::user()->id)
-        ->where('status', '=', 'pending')
-        ->get();
+
+        $this->walletProposals = WalletChangeApprovalModel::where('proposer_id', '=', Auth::user()->id)
+            ->where('status', '=', 'pending')
+            ->get();
 
         Log::channel('florenceegi')->info('CollectionUsersMembers', [
             'collectionId' => $this->collectionId,

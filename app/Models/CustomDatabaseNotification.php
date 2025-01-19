@@ -27,9 +27,10 @@ class CustomDatabaseNotification extends DatabaseNotification
 
     /**
      * Summary of model
-     * Relazione polimorfica con il modello associato alla notifica
-     * questo modello a cui può essere asscioata la notifica costituisce il payload della notifica
-     * Esempio di utilizzo: model_type: App\Notifications\WalletChangeRequest model_id: 30
+     * Relazione polimorfica la notifica viene associata a un modello specifico
+     * questo modello specifico costituisce il payload della notifica
+     * Esempio di utilizzo: model_type: App\Notifications\WalletChangeRequestModel - model_id: 30
+     *
      * @return \Illuminate\Database\Eloquent\Relations\MorphTo
      */
     public function model(): MorphTo

@@ -2,11 +2,12 @@
 
 namespace App\Livewire\Proposals;
 
-use App\Models\WalletChangeApproval;
-
 use App\Models\WalletChangeApprovalModel;
+use App\Notifications\WalletChangeRequestCreation;
+use App\Notifications\WalletChangeResponseRejection;
 use App\Services\Notifications\NotificationHandlerFactory;
 use App\Services\Notifications\WalletChangeRequestHandler;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\On;
@@ -24,14 +25,10 @@ class DeclineProposalModal extends Component
     public $reason = '';
     public $notification;
 
-
     #[On('open-decline-modal')]
     public function openDeclineModal($notification)
     {
         $this->notification = $notification;
-        Log::channel('florenceegi')->info('DeclineProposalModal: openModal', [
-            '$this->notification_data' => $notification,
-        ]);
         $this->isVisible = true;
     }
 
@@ -52,15 +49,30 @@ class DeclineProposalModal extends Component
 
         $this->validate();
 
-        // Recupera il record da WalletChangeApproval per l'ID del proposer
-        $walletChangeApproval = Auth::user()->walletChangeProposer;
+        // Ottiene il recordo del payload della proposta
+        $walletChangeApproval = WalletChangeApprovalModel::find($this->notification['wallet_change_approvals_id']); // Recupera un singolo record
 
         // Aggiorna lo stato della proposta a "rejected"
-        $walletChangeApproval->handleRejection();
+        if ($walletChangeApproval) {
+
+            Log::channel('florenceegi')->info('DeclineProposalModal: decline', [
+                'walletChangeApproval' => $walletChangeApproval,
+            ]);
+            $walletChangeApproval->handleRejection();
+
+        } else {
+            // Gestisci il caso in cui il record non viene trovato
+            Log::channel('florenceegi')->error('DeclineProposalModal: decline', [
+                'message' => 'WalletChangeApproval record not found.',
+                'walletChangeApprovalId' => $walletChangeApproval,
+            ]);
+        }
+
+        $proposer = User::findOrFail($walletChangeApproval->proposer_id);
 
         // Gestione della notifica
-        $handler = NotificationHandlerFactory::getHandler(WalletChangeRequestHandler::class);
-        $handler->handle($walletChangeApproval, $this->reason);
+        $handler = NotificationHandlerFactory::getHandler(WalletChangeResponseRejection::class);
+        $handler->handle($proposer, $walletChangeApproval, $this->reason);
 
         session()->flash('message', __('collection.wallet.wallet_change_rejected'));
 

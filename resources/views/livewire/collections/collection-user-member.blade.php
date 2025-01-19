@@ -55,7 +55,7 @@
     </div>
 
     <!-- Sezione Wallet -->
-    <h3 class="text-xl font-bold text-white mt-8 mb-4">{{ __('collection.wallets') }}</h3>
+    <h3 class="text-xl font-bold text-white mt-8 mb-4">{{ __('collection.wallet.wallets') }}</h3>
     <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
         @foreach($wallets as $wallet)
             <div class="{{ !$canCreateWallet || in_array($wallet->platform_role, ['natan', 'EPP']) ? 'bg-gray-700 opacity-75 cursor-not-allowed' : 'bg-gray-900' }}  p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300">
@@ -95,7 +95,7 @@
         @endforeach
     </div>
 
-    <h3 class="text-xl font-bold text-white mt-8 mb-4">{{ __('collection.wallets') }}</h3>
+    <h3 class="text-xl font-bold text-white mt-8 mb-4">{{ __('collection.wallet.wallets') }}</h3>
     <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
         @foreach($walletProposals as $wallet)
             <div class="{{ !$canCreateWallet || in_array($wallet->platform_role, ['natan', 'EPP']) ? 'bg-gray-700 opacity-75 cursor-not-allowed' : 'bg-gray-900' }} {{ $wallet->status === 'pending' ? 'bg-yellow-800' : 'bg-gray-900' }}  p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300">
@@ -104,13 +104,13 @@
                         <strong>{{ __('collection.wallet.user_role')}}:</strong> {{ $wallet->platform_role }}
                     </p>
                     <p class="text-sm text-gray-400">
-                        <strong>{{ __('collection.wallet.address') }}:</strong> {{ substr($wallet->change_details['wallet_address'], 0, 15) }}...{{ substr($wallet->wallet, -4) }}
+                        <strong>{{ __('collection.wallet.address') }}:</strong> {{ substr($wallet->wallet, 0, 15) }}...{{ substr($wallet->wallet, -4) }}
                     </p>
                     <p class="text-sm text-gray-400">
-                        <strong>{{ __('collection.wallet.royalty_mint') }}:</strong> {{ $wallet->change_details['royalty_mint'] }}%
+                        <strong>{{ __('collection.wallet.royalty_mint') }}:</strong> {{ $wallet->royalty_mint }}%
                     </p>
                     <p class="text-sm text-gray-400">
-                        <strong>{{ __('collection.wallet.royalty_rebind') }}:</strong> {{ $wallet->change_details['royalty_rebind'] }}%
+                        <strong>{{ __('collection.wallet.royalty_rebind') }}:</strong> {{ $wallet->royalty_rebind }}%
                     </p>
 
                     <!-- Nome e Cognome dell'Utente Correlato -->
