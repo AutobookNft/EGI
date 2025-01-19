@@ -128,7 +128,7 @@ class EditWalletModal extends Component
 
         // Verifica permessi per l'utente autenticato
         if (!$this->hasPermission($collection, 'create_wallet')) {
-            session()->flash('error', __('collection.wallet.you_do_not_have_permission_to_create_a_wallet'));
+            session()->flash('error', __('collection.wallet.create_denied'));
             return;
         }
 
@@ -144,7 +144,7 @@ class EditWalletModal extends Component
         $this->proposeNewWallet();
 
         $this->show = false;
-        session()->flash('message', __('collection.wallet.wallet_creation_request_sent_successfully'));
+        session()->flash('message', __('collection.wallet.creation_request_success'));
     }
 
     public function saveWallet()

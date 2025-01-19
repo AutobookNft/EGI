@@ -172,7 +172,7 @@ class Dashboard extends Component
         $notificationViews = [
             'App\Notifications\WalletChangeRequestCreation' => 'notifications.wallet-change-request',
             'App\Notifications\WalletChangeResponseRejection' => 'notifications.wallet-change-response-rejected',
-            'App\Notifications\CollectionInvitationNotification' => 'notifications.invitation',
+            'App\Notifications\InvitationProposal' => 'notifications.invitation',
             'App\Livewire\Proposals\ProposalDeclinedNotification' => 'notifications.proposa-declined-notification',
         ];
 

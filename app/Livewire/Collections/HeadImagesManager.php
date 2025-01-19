@@ -73,8 +73,6 @@ class HeadImagesManager extends Component
                 break;
         }
 
-
-
     }
 
     /**

@@ -2,23 +2,36 @@
 
 namespace App\Livewire\Collections;
 
-use App\Models\CollectionInvitation;
 use App\Models\Collection;
-use App\Models\User;
-use App\Notifications\CollectionInvitationNotification;
+use App\Services\InvitationService;
 use Livewire\Component;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Notification;
 use Livewire\Attributes\On;
 use Spatie\Permission\Models\Role; // Importiamo i ruoli di Spatie
+use Livewire\Attributes\Validate;
 
 class InviteUserToCollectionModal extends Component
 {
-    public $email; // Email dell'utente da invitare
-    public $role; // Ruolo dell'utente nella collection
-    public $roles; // Ruoli disponibili
-    public $collectionId; // ID della collection corrente
-    public $show = false; // Gestisce la visibilità della modale
+    #[Validate('required|email')]
+    public string $email = '';
+
+    #[Validate('required|string')]
+    public string $role = '';
+
+    protected array $roles = [];
+
+    #[Validate('required|exists:collections,id')]
+    public int $collectionId;
+
+    public bool $show = false;
+
+    private InvitationService $invitationService;
+
+
+    public function boot(InvitationService $invitationService)
+    {
+        $this->invitationService = $invitationService;
+    }
 
     public function mount($collectionId)
     {
@@ -30,36 +43,46 @@ class InviteUserToCollectionModal extends Component
 
     public function invite()
     {
-        $this->validate([
-            'email' => 'required|email',
-            'role' => 'required|in:' . implode(',', $this->roles), // Validazione sui ruoli definiti
-        ]);
 
-        // Verifica se l'utente esiste già nel sistema
-        $user = User::where('email', $this->email)->first();
+        $this->validate();
 
-        // Registra l'invito nella tabella `collection_invitations`
-        $invitation = CollectionInvitation::create([
-            'collection_id' => $this->collectionId,
-            'email' => $this->email,
-            'role' => $this->role,
-            'status' => 'pending',
-        ]);
+        try {
 
-        // Invia notifica all'utente, se esiste
-        if ($user) {
-            Notification::send($user, new CollectionInvitationNotification($invitation->id));
+            $collection = Collection::findOrFail($this->collectionId);
+
+            // Verifica permessi per l'utente autenticato
+            if (!$this->hasPermission($collection, 'add_team_member')) {
+                session()->flash('error', __('collection.collaborators.add_denied'));
+                return;
+            }
+
+            $this->invitationService->createInvitation(
+                collection: $collection,
+                email: $this->email,
+                role: $this->role
+            );
+
+            $this->resetFields();
+            $this->show = false;
+            $this->dispatch('collection-member-updated');
+
+        } catch (\Exception $e) {
+
+            Log::channel('florenceegi')->error('Errore invito', [
+                'error' => $e->getMessage(),
+                'collection_id' => $this->collectionId
+            ]);
+
+            $this->addError(name: 'invitation', message: 'Errore durante su invio di invito');
+
         }
 
-        Log::channel('florenceegi')->info('Collection Invitation Sent', [
-            'collection_id' => $this->collectionId,
-            'email' => $this->email,
-            'role' => $this->role,
-        ]);
-
         $this->resetFields();
+
         $this->show = false;
+
         $this->dispatch('collection-member-updated'); // Aggiorna il genitore
+
     }
 
     #[On('openInviteModal')]

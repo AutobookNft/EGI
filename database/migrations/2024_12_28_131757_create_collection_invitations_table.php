@@ -17,6 +17,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('collection_id')->constrained()->onDelete('cascade'); // Associazione alla collection
             $table->string('email'); // Email dell'invitato
+            $table->string('proposal_name'); // Il nome di chi ha proposto l'invito
             $table->string('role'); // Ruolo proposto per l'invitato
             $table->enum('status', ['pending', 'accepted', 'rejected'])->default('pending'); // Stato dell'invito
             $table->timestamps();

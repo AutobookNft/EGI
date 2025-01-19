@@ -19,7 +19,6 @@ class CollectionUserMember extends Component
 
     public $collectionUsers; // Lista membri del team
     public $wallets;
-
     public $collection;
     public $collectionId;
     public $collectionName;
@@ -37,6 +36,8 @@ class CollectionUserMember extends Component
 
         // Carica la collection e i suoi dati
         $this->loadCollectionData();
+
+        // Carica i collaboratori della collection
         $this->loadTeamUsers();
     }
 
@@ -45,7 +46,8 @@ class CollectionUserMember extends Component
         $this->collection = Collection::findOrFail($this->collectionId);
 
         $this->collectionName = $this->collection->collection_name;
-        $this->collectionOwner = $this->collection->owner; // Assumendo che esista una relazione `owner` nel modello Collection
+
+        $this->collectionOwner = $this->collection->creator;
     }
 
     public function loadTeamUsers()

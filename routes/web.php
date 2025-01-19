@@ -100,13 +100,6 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
 
         });
 
-
-
-
-        // Route::get('/teams', TeamManager::class)
-        //     ->middleware(['can:read_collection'])
-        //     ->name('teams');
-
         // Rotte per Wallet
         Route::post('/wallets/{id}/approve', [WalletController::class, 'approve'])
             ->name('wallets.approve')

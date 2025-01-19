@@ -118,8 +118,8 @@ return [
         'total_exceeds_the_maximum_allowed_percentage' => 'O total excede a porcentagem máxima permitida',
         'wallet_updated_successfully' => 'Wallet atualizada com sucesso',
         'modification_has_been_submitted_for_approval' => 'A modificação foi enviada para aprovação',
-        'wallet_creation_request_sent_successfully' => 'A solicitação de criação da wallet foi enviada com sucesso',
-        'you_do_not_have_permission_to_create_a_wallet' => 'Você não tem permissão para criar uma wallet',
+        'creation_request_success' => 'A solicitação de criação da wallet foi enviada com sucesso',
+        'create_denied' => 'Você não tem permissão para criar uma wallet',
         'proposal_rejected' => 'Proposta rejeitada',
     ]
 ];

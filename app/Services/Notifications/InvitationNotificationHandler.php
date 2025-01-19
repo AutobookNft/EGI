@@ -4,35 +4,44 @@
 namespace App\Services\Notifications;
 
 use App\Contracts\NotificationHandlerInterface;
-use Illuminate\Notifications\DatabaseNotification;
+use App\Enums\InvitationStatus;
+
 use App\Models\CollectionInvitation;
-use App\Models\CollectionUser;
-use Illuminate\Support\Facades\Auth;
+use App\Notifications\InvitationApproval;
+use App\Notifications\InvitationProposal;
+use App\Notifications\InvitationRejection;
+use App\Models\User;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 
 class InvitationNotificationHandler implements NotificationHandlerInterface
 {
-    public function handle(DatabaseNotification $notification, string $action)
+    public function handle(User $message_to, $collectionInvitation)
     {
-        $invitationId = $notification->data['invitation_id'];
+        $action = match ($collectionInvitation->status_enum) {
+            InvitationStatus::PENDING => 'proposal',
+            InvitationStatus::ACCEPTED => 'approved',
+            InvitationStatus::REJECTED => 'rejected',
+            default => throw new \Exception("Azione non supportata per CollectionInvitation."),
+        };
+        
+        try {
+            match ($action) {  // Qui usiamo $action invece di $collectionInvitation->status
+                'proposal' => Notification::send($message_to, new InvitationProposal($collectionInvitation)),
+                'approved' => Notification::send($message_to, new InvitationApproval($collectionInvitation)),
+                'rejected' => Notification::send($message_to, new InvitationRejection($collectionInvitation)),
+            };
 
-        if ($action === 'accept') {
-            $invitation = CollectionInvitation::findOrFail($invitationId);
-            $invitation->update(['status' => 'accepted']);
+        } catch (\Exception $e) {
 
-            CollectionUser::create([
-                'collection_id' => $invitation->collection_id,
-                'user_id' => Auth::id(),
-                'role' => $invitation->role,
+            Log::channel('florenceegi')->error('Errore notifica', [
+                'error' => $e->getMessage(),
+                'action' => $action,
+                'status' => $collectionInvitation->status,
+                'collection_invitation_id' => $collectionInvitation->id
             ]);
-
-            $notification->update(['outcome' => 'accepted']);
-        } elseif ($action === 'decline') {
-            $invitation = CollectionInvitation::findOrFail($invitationId);
-            $invitation->update(['status' => 'declined']);
-
-            $notification->update(['outcome' => 'declined']);
-        } else {
-            throw new \Exception("Azione '{$action}' non supportata per InvitationNotification.");
+            throw $e;
         }
     }
 }
+

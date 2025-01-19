@@ -72,7 +72,7 @@ class CollectionOpen extends Component
         // Recupera l'utente autenticato
         $this->user = Auth::user();
 
-        $user = $this->user; // Nella callback non si puù usare $this
+        $user = $this->user; // Nella callback non si puù usare $this per questo motivo si crea una variabile locale
 
         // Recupera tutte le collection associate all'utente
         $this->collections = Collection::whereHas('users', function ($query) use ($user) {

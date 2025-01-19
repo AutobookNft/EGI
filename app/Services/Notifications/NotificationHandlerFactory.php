@@ -14,7 +14,7 @@ class NotificationHandlerFactory
             'App\Notifications\WalletChangeResponseApproval' => WalletChangeRequestHandler::class,
             'App\Notifications\WalletChangeRequestCreation' => WalletChangeRequestHandler::class,
             'App\Notifications\WalletChangeRequestUpdate' => WalletChangeRequestHandler::class,
-            'App\Notifications\InvitationNotification' => InvitationNotificationHandler::class,
+            'App\\Notifications\\InvitationProposal' => InvitationNotificationHandler::class,
         ];
 
         if (!isset($handlers[$type])) {
