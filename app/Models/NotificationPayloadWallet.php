@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
-class WalletChangeApprovalModel extends Model
+class NotificationPayloadWallet extends Model
 {
     use HasFactory;
 
@@ -15,7 +15,7 @@ class WalletChangeApprovalModel extends Model
      *
      * @var string
      */
-    protected $table = 'wallet_change_approvals';
+    protected $table = 'notification_payload_wallets';
 
     /**
      * Gli attributi assegnabili in massa.

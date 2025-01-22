@@ -13,11 +13,12 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('collection_invitations', function (Blueprint $table) {
+        Schema::create('notification_payload_invitations', function (Blueprint $table) {
             $table->id();
             $table->foreignId('collection_id')->constrained()->onDelete('cascade'); // Associazione alla collection
+            $table->foreignId('proposer_id')->unsignedBigInteger()->nullable()->constrained('users')->onDelete('cascade'); // Chi propone la modifica
+            $table->foreignId('receiver_id')->unsignedBigInteger()->nullable()->constrained('users')->onDelete('cascade'); // Chi riceve la modifica (approva o rifiuta)
             $table->string('email'); // Email dell'invitato
-            $table->string('proposal_name'); // Il nome di chi ha proposto l'invito
             $table->string('role'); // Ruolo proposto per l'invitato
             $table->enum('status', ['pending', 'accepted', 'rejected'])->default('pending'); // Stato dell'invito
             $table->timestamps();
@@ -31,6 +32,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('collection_invitations');
+        Schema::dropIfExists('notification_payload_invitations');
     }
 };

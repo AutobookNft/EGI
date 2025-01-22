@@ -2,7 +2,7 @@
 
 namespace App\Livewire;
 
-use App\Models\CollectionInvitation;
+use App\Models\NotificationPayloadWallet;
 use App\Models\WalletChangeApproval;
 use App\Services\Notifications\NotificationHandlerFactory;
 use Livewire\Component;
@@ -120,10 +120,11 @@ class Dashboard extends Component
         $this->pendingNotifications = Auth::user()
             ->customNotifications()
             ->where(function ($query) {
-                $query->whereNull('read_at')
-                      ->orWhere('outcome', 'pending');
+                // $query->whereNull('read_at')
+                //       ->orWhere('outcome', 'pending');
+                $query->where('outcome', 'pending');
             })
-            ->with('model') // Carica la relazione polimorfica (WalletChangeApprovalModel, ecc.)
+            ->with('model') // Carica la relazione polimorfica (NotificationPayloadWallet, ecc.)
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(function ($notification) {
@@ -139,8 +140,8 @@ class Dashboard extends Component
         // Notifiche storiche
         $this->historicalNotifications = Auth::user()
             ->customNotifications()
-            ->whereIn('outcome', ['accepted', 'declined', 'done'])
-            ->with('notifications')
+            ->whereIn('outcome', ['accepted', 'rejected', 'done'])
+            ->with('model')
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(function ($notification) {
@@ -151,11 +152,16 @@ class Dashboard extends Component
 
     public function handleNotificationAction($notificationId, $action)
     {
+
+        // crea il record della notifica corrente, per trovare i dati necessari alla risposta
         $notification = Auth::user()->notifications()->findOrFail($notificationId);
+
         $type = $notification->type;
 
+        $message_to = $notification->data['proposer_id'];
+
         $handler = NotificationHandlerFactory::getHandler($type);
-        $handler->handle($notification, $action);
+        $handler->handle($message_to, $notification, $action);
 
         $this->loadStats();
         $this->loadNotifications();
@@ -182,17 +188,7 @@ class Dashboard extends Component
     public function setActiveNotification($id)
     {
 
-        // Log::channel('florenceegi')->info('Dashboard: setActiveNotification chiamato', [
-        //     'id' => $id,
-        //     'vecchio_id' => $this->activeNotificationId
-        // ]);
-
         $this->activeNotificationId = $id;
-
-        // Log::channel('florenceegi')->info('Dashboard: setActiveNotification completato', [
-        //     'nuovo_id' => $this->activeNotificationId,
-        //     'notifica_attiva' => $this->getActiveNotification()
-        // ]);
 
         $this->dispatch('notification-changed');  // Dispatch un evento
     }

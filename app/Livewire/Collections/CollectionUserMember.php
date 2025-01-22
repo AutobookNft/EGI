@@ -6,7 +6,7 @@ use App\Models\Collection;
 use App\Models\CollectionUser;
 use App\Models\Wallet;
 use App\Models\WalletChangeApproval;
-use App\Models\WalletChangeApprovalModel;
+use App\Models\NotificationPayloadWallet;
 use Livewire\Component;
 use Illuminate\Support\Facades\Log;
 use App\Traits\HasPermissionTrait;
@@ -56,7 +56,7 @@ class CollectionUserMember extends Component
 
         $this->wallets = Wallet::where('collection_id', '=', $this->collectionId)->get();
 
-        $this->walletProposals = WalletChangeApprovalModel::where('proposer_id', '=', Auth::user()->id)
+        $this->walletProposals = NotificationPayloadWallet::where('proposer_id', '=', Auth::user()->id)
             ->where('status', '=', 'pending')
             ->get();
 

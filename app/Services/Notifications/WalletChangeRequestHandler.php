@@ -10,19 +10,19 @@ use App\Notifications\WalletChangeResponseRejection;
 
 class WalletChangeRequestHandler implements NotificationHandlerInterface
 {
-    public function handle($message_to, $walletChangeApproval, $reason = null)
+    public function handle($message_to, $walletChange, $reason = null)
     {
-        if ($walletChangeApproval['status'] === 'pending') {
+        if ($walletChange['status'] === 'pending') {
             // Invio della notifica iniziale
-            Notification::send($message_to, new WalletChangeRequestCreation($walletChangeApproval));
-        } elseif ($walletChangeApproval['status'] === 'approved') {
+            Notification::send($message_to, new WalletChangeRequestCreation($walletChange));
+        } elseif ($walletChange['status'] === 'approved') {
             // Logica per accettare
-            Notification::send($message_to, new WalletChangeResponseApproval ($walletChangeApproval));
-        } elseif ($walletChangeApproval['status'] === 'rejected') {
+            Notification::send($message_to, new WalletChangeResponseApproval ($walletChange));
+        } elseif ($walletChange['status'] === 'rejected') {
             // Logica per declinare
-            Notification::send($message_to, new WalletChangeResponseRejection($walletChangeApproval, $reason));
+            Notification::send($message_to, new WalletChangeResponseRejection($walletChange, $reason));
         } else {
-            throw new \Exception("Azione '{$walletChangeApproval->status}' non supportata per WalletChangeRequest.");
+            throw new \Exception("Azione '{$walletChange->status}' non supportata per WalletChangeRequest.");
         }
     }
 }

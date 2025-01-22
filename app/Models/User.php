@@ -148,12 +148,12 @@ class User extends Authenticatable
 
     public function walletChangeProposer()
     {
-        return $this->hasMany(WalletChangeApprovalModel::class, 'proposer_id');
+        return $this->hasMany(NotificationPayloadWallet::class, 'proposer_id');
     }
 
     public function walletChangeReceiver()
     {
-        return $this->hasMany(WalletChangeApprovalModel::class, 'receiver_id');
+        return $this->hasMany(NotificationPayloadWallet::class, 'receiver_id');
     }
 
 }

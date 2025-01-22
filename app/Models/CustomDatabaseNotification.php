@@ -12,6 +12,7 @@ class CustomDatabaseNotification extends DatabaseNotification
     protected $fillable = [
         'id',
         'type',
+        'view',
         'notifiable_type',
         'notifiable_id',
         'model_type',
@@ -20,6 +21,7 @@ class CustomDatabaseNotification extends DatabaseNotification
         'read_at',
         'created_at',
         'updated_at',
+        'outcome',
     ];
 
     public $incrementing = false; // se usi UUID

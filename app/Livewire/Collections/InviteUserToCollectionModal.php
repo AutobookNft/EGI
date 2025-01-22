@@ -9,16 +9,20 @@ use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\On;
 use Spatie\Permission\Models\Role; // Importiamo i ruoli di Spatie
 use Livewire\Attributes\Validate;
+use App\Traits\HasPermissionTrait;
 
 class InviteUserToCollectionModal extends Component
 {
+
+    use HasPermissionTrait;
+
     #[Validate('required|email')]
     public string $email = '';
 
     #[Validate('required|string')]
     public string $role = '';
 
-    protected array $roles = [];
+    public array $roles = [];
 
     #[Validate('required|exists:collections,id')]
     public int $collectionId;
@@ -57,9 +61,9 @@ class InviteUserToCollectionModal extends Component
             }
 
             $this->invitationService->createInvitation(
-                collection: $collection,
-                email: $this->email,
-                role: $this->role
+                $collection,
+                $this->email,
+                $this->role
             );
 
             $this->resetFields();

@@ -112,7 +112,7 @@ class Collection extends Model
      */
     public function canBePublished(): bool
     {
-        $pendingApprovals = WalletChangeApprovalModel::whereHas('wallet', function ($query) {
+        $pendingApprovals = NotificationPayloadWallet::whereHas('wallet', function ($query) {
             $query->where('collection_id', $this->id);
         })->where('status', 'pending')->exists();
 

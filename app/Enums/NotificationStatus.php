@@ -13,35 +13,24 @@ namespace App\Enums;
  * - PENDING: Invito in attesa di una risposta.
  * - ACCEPTED: Invito accettato.
  * - REJECTED: Invito rifiutato.
- * - REQUEST: Richiesta di invito.
- * - PROPOSED: Proposta di invito.
  *
  * Funzionalità principali:
  * - Conversione da stringhe del database in valori dell'enum.
  * - Tipizzazione forte per garantire la validità degli stati.
- * - Utilizzo:
- *    $status = InvitationStatus::PENDING;
- *    if ($status === InvitationStatus::PENDING) {
- *       // Esegui azioni specifiche per lo stato 'pending'.
- *    }
- *
- *    $invitation = NotificationPayloadInvitation::find(1);
- *    $invitation['view'] = InvitationStatus::PENDING->value;
- *    $invitation->save();
  *
  * @package App\Enums
  */
-enum InvitationStatus: string
+enum NotificationStatus: string
 {
-    // In attesa
-    case PENDING = 'pending';
-    // Accettato
-    case ACCEPTED = 'accepted';
-    case REQUEST = 'request';
-    // Richiesta
-    case REJECTED = 'rejected';
-    // Rifiuto
+
+    // Notifica inviata.
     case PROPOSED = 'proposed';
+
+    // risposta con accettazione
+    case ACCEPTED = 'accepted';
+
+    // risposta con rifiuto
+    case REJECTED = 'rejected';
 
     /**
      * Converte un valore stringa del database in un'istanza dell'enum.
@@ -54,9 +43,7 @@ enum InvitationStatus: string
     {
         // Usa il costrutto match per mappare i valori stringa ai casi dell'enum.
         return match($value) {
-            'pending' => self::PENDING,
             'accepted' => self::ACCEPTED,
-            'request' => self::REQUEST,
             'rejected' => self::REJECTED,
             'proposed' => self::PROPOSED,
             default => throw new \ValueError("Status '$value' non valido") // Lancia un'eccezione per valori non riconosciuti.

@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Proposals;
 
-use App\Models\WalletChangeApproval;
+use App\Models\NotificationPayloadWallet;
 
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\On;
@@ -13,7 +13,7 @@ class AcceptProposalModal extends Component
     public $isVisible = false;
     public $context;
     public $type;
-    public $walletChangeApprovalId;
+    public $notificationPayloadWallet;
     public $reason = '';
     public $notification;
 
@@ -53,7 +53,7 @@ class AcceptProposalModal extends Component
         $this->validate();
 
         // Trova la proposta nel database
-        $proposal = WalletChangeApproval::findOrFail($this->notification['data']['wallet_change_approvals_id']);
+        $proposal = NotificationPayloadWallet::findOrFail($this->notification['data']['notification_payload_wallet_id']);
 
         // Aggiorna lo stato della proposta a "accepted" e salva la motivazione
         $proposal->update([
@@ -70,10 +70,15 @@ class AcceptProposalModal extends Component
         $this->notification['approver_user_id'] = $proposal->approver_user_id;
 
 
-        // Crea la notifica di declino per il proponente
-        $proposal->requestedBy->notify(new ProposalAcceptedNotification($this->notification));
+        /**
+         * Gestione della compensazione del wallet del proposer
+         * 
+         */
 
-        // Compensazione del wallet del proponente
+        // Invia la notifica di risposta
+
+        //------------------------------
+
 
         // Nasconde la modale
         $this->isVisible = false;

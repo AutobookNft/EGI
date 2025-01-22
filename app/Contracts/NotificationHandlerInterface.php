@@ -7,5 +7,5 @@ use App\Models\User;
 
 interface NotificationHandlerInterface
 {
-    public function handle(User $receiver, DatabaseNotification $notification);
+    public function handle(User $message_to, DatabaseNotification $notification);
 }

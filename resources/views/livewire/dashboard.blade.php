@@ -83,19 +83,43 @@
         </div>
 
 
-       <!-- Contenuto notifica -->
-       <div
-       x-show="activeId"
-       x-transition
-       class="bg-gray-700 rounded-b-lg"
-   >
-       @if($activeNotificationId && ($notification = $this->getActiveNotification()))
-           <div wire:key="notification-{{ $activeNotificationId }}">
-               @include($this->getNotificationView($notification), ['notification' => $notification])
-           </div>
-       @endif
-   </div>
-</div>
+        <!-- Contenuto notifica -->
+        <div
+            x-show="activeId"
+            x-transition
+            class="bg-gray-700 rounded-b-lg"
+            >
+            @if($activeNotificationId && ($notification = $this->getActiveNotification()))
+                <div wire:key="notification-{{ $activeNotificationId }}">
+
+                    @php
+                        // Recupera la chiave della view dalla notifica
+                        $viewKey = $notification->view ?? null;
+
+                        // Recupera la configurazione corrispondente alla chiave specificata
+                        $config = $viewKey ? config('notification-views.invitations.' . $viewKey, []) : [];
+
+                        // Estrai i valori view e render dalla configurazione, con fallback ai valori predefiniti
+                        $view = $config['view'] ?? null;
+                        $render = $config['render'] ?? 'livewire';
+                    @endphp
+
+                    @if($view)
+                        @if($render === 'livewire')
+                            @livewire($view, ['notification' => $notification])
+                        @elseif($config['render_type'] === 'include')
+                            @include($view, ['notification' => $notification])
+                        @endif
+                    @else
+                    <div class="text-red-500">
+                       {{ __('Tipo di notifica non supportata' )}}: {{ $view }}
+                    </div>
+                    @endif
+                </div>
+            @endif
+        </div>
+
+    </div>
 
     <!-- Bottone per mostrare/nascondere lo storico delle notifiche -->
     <div class="text-right mt-4">

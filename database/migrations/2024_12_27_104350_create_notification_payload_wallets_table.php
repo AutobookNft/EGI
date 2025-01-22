@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('wallet_change_approvals', function (Blueprint $table) {
+        Schema::create('notification_payload_wallets', function (Blueprint $table) {
             $table->id();
             $table->foreignId('wallet_id')->unsignedBigInteger()->nullable(); // Relazione con il wallet
             $table->foreignId('proposer_id')->unsignedBigInteger()->nullable()->constrained('users')->onDelete('cascade'); // Chi propone la modifica
@@ -30,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('wallet_change_approvals');
+        Schema::dropIfExists('notification_payload_wallets');
     }
 };

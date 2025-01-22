@@ -83,7 +83,7 @@
 
                 <button wire:click="openDeclineModal({{ json_encode([
                         'id' => $notification->id,
-                        'wallet_change_approvals_id' => $notification->approval_details->id ?? null,
+                        'notification_payload_wallet_id' => $notification->approval_details->id ?? null,
                         'data' => $notification['data'],
                         'message' => $notification['data']['message'],
                         'model_id' => $notification->model_id ?? null,

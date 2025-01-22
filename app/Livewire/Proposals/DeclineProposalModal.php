@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Proposals;
 
-use App\Models\WalletChangeApprovalModel;
+use App\Models\NotificationPayloadWallet;
 use App\Notifications\WalletChangeRequestCreation;
 use App\Notifications\WalletChangeResponseRejection;
 use App\Services\Notifications\NotificationHandlerFactory;
@@ -41,7 +41,7 @@ class DeclineProposalModal extends Component
      * Declina una richiesta di modifica del wallet.
      * @param int $approvalId
      * @param string|null $reason
-     * @method static WalletChangeApprovalModel findOrFail(int|string $id)
+     * @method static NotificationPayloadWallet findOrFail(int|string $id)
      * @return void
      */
     public function decline()
@@ -50,7 +50,7 @@ class DeclineProposalModal extends Component
         $this->validate();
 
         // Ottiene il recordo del payload della proposta
-        $walletChangeApproval = WalletChangeApprovalModel::find($this->notification['wallet_change_approvals_id']); // Recupera un singolo record
+        $walletChangeApproval = NotificationPayloadWallet::find($this->notification['notification_payload_wallets_id']); // Recupera un singolo record
 
         // Aggiorna lo stato della proposta a "rejected"
         if ($walletChangeApproval) {

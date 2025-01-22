@@ -5,43 +5,36 @@ namespace App\Services\Notifications;
 
 use App\Contracts\NotificationHandlerInterface;
 use App\Enums\InvitationStatus;
-
-use App\Models\CollectionInvitation;
-use App\Notifications\InvitationApproval;
-use App\Notifications\InvitationProposal;
-use App\Notifications\InvitationRejection;
+use App\Notifications\Channels\CustomDatabaseChannel;
+use App\Notifications\InvitationAccepted;
 use App\Models\User;
+use App\Notifications\InvitationRejection;
+use App\Notifications\InvitationRequest;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
+use App\Models\Notification as NotificationModel;
 
 class InvitationNotificationHandler implements NotificationHandlerInterface
 {
-    public function handle(User $message_to, $collectionInvitation)
+    public function handle(User $message_to, $notification)
     {
-        $action = match ($collectionInvitation->status_enum) {
-            InvitationStatus::PENDING => 'proposal',
-            InvitationStatus::ACCEPTED => 'approved',
-            InvitationStatus::REJECTED => 'rejected',
-            default => throw new \Exception("Azione non supportata per CollectionInvitation."),
-        };
-        
-        try {
-            match ($action) {  // Qui usiamo $action invece di $collectionInvitation->status
-                'proposal' => Notification::send($message_to, new InvitationProposal($collectionInvitation)),
-                'approved' => Notification::send($message_to, new InvitationApproval($collectionInvitation)),
-                'rejected' => Notification::send($message_to, new InvitationRejection($collectionInvitation)),
-            };
 
+        $status = InvitationStatus::fromDatabase($notification->status);
+
+        try {
+            if (InvitationStatus::ACCEPTED->value === $status->value) {
+                Notification::send($message_to, new InvitationAccepted($notification));
+            } elseif (InvitationStatus::REJECTED->value === $status->value) {
+                Notification::send($message_to, new InvitationRejection($notification));
+            } elseif (InvitationStatus::PENDING->value === $status->value) {
+                Notification::send($message_to, new InvitationRequest($notification));
+            }
         } catch (\Exception $e) {
 
-            Log::channel('florenceegi')->error('Errore notifica', [
-                'error' => $e->getMessage(),
-                'action' => $action,
-                'status' => $collectionInvitation->status,
-                'collection_invitation_id' => $collectionInvitation->id
-            ]);
             throw $e;
         }
     }
+
+
 }
 

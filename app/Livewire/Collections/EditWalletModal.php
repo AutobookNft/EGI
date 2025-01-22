@@ -3,7 +3,7 @@
 namespace App\Livewire\Collections;
 
 use App\Models\Collection;
-use App\Models\WalletChangeApprovalModel;
+use App\Models\NotificationPayloadWallet;
 use App\Notifications\WalletChangeRequestCreation;
 use App\Notifications\WalletChangeResponseApproval;
 use App\Notifications\WalletChangeResponseRejection;
@@ -83,7 +83,6 @@ class EditWalletModal extends Component
         $this->show = true; // Mostra la modale
         $this->mode = 'create';
     }
-
 
     public function closeHandleWallets()
     {
@@ -170,7 +169,7 @@ class EditWalletModal extends Component
         // **Gestione delle Riduzioni e Accredito all’EPP**
         $this->handleReductionsAndEpp($wallet, $remainingMint, $remainingRebind);
 
-        // **Inserimento in wallet_change_approvals**
+        // **Inserimento in notification_payload_wallets**
         if ($wallet->user_id !== Auth::id()) {
             $this->createWalletApproval($wallet);
             session()->flash('message', __('collection.wallet.modification_has_been_submitted_for_approval'));
@@ -249,7 +248,7 @@ class EditWalletModal extends Component
 
         // Creazione del payload della proposta,
         // questo record viene creato una sola volta e contiene tutti i dati della proposat
-        $walletChangeApproval = WalletChangeApprovalModel::create([
+        $walletChangeApproval = NotificationPayloadWallet::create([
             'proposer_id' => Auth::user()->id, // Chi inoltra la richiesta
             'receiver_id' => $this->receiverUserId, // Chi deve approvare la richiesta
             'wallet' => $this->walletAddress,
@@ -270,11 +269,11 @@ class EditWalletModal extends Component
      * Summary of approveChange
      * @param mixed $approvalId
      * @return void
-     * @method static WalletChangeApprovalModel findOrFail(int|string $id)
+     * @method static NotificationPayloadWallet findOrFail(int|string $id)
      */
     public function approveChange($approvalId)
     {
-        $walletChangeApproval = WalletChangeApprovalModel::findOrFail($approvalId);
+        $walletChangeApproval = NotificationPayloadWallet::findOrFail($approvalId);
         $wallet = $walletChangeApproval->wallet;
 
         // $wallet->update($walletChangeApproval->change_details['new']);
