@@ -1,18 +1,18 @@
 <?php
 
 
-namespace App\Notifications;
+namespace App\Notifications\Wallets;
 
 use App\Notifications\Channels\CustomDatabaseChannel;
 use Illuminate\Notifications\Notification;
 use Illuminate\Notifications\Messages\DatabaseMessage;
 
-class WalletChangeResponseRejection extends Notification
+class WalletRejection extends Notification
 {
     private $walletChangeApproval;
     private $reason;
 
-    public function __construct($walletChangeApproval, $reason)
+    public function __construct($walletChangeApproval, $reason = null)
     {
         $this->walletChangeApproval = $walletChangeApproval;
         $this->reason = $reason;

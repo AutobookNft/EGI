@@ -41,6 +41,7 @@ class DeclineProposalModal extends Component
      * Declina una richiesta di modifica del wallet.
      * @param int $approvalId
      * @param string|null $reason
+     * @param \App\Models\User $proposer
      * @method static NotificationPayloadWallet findOrFail(int|string $id)
      * @return void
      */
@@ -50,7 +51,7 @@ class DeclineProposalModal extends Component
         $this->validate();
 
         // Ottiene il recordo del payload della proposta
-        $walletChangeApproval = NotificationPayloadWallet::find($this->notification['notification_payload_wallets_id']); // Recupera un singolo record
+        $walletChangeApproval = NotificationPayloadWallet::find($this->notification['notification_payload_wallets_id'])->first(); // Recupera un singolo record
 
         // Aggiorna lo stato della proposta a "rejected"
         if ($walletChangeApproval) {
@@ -68,7 +69,7 @@ class DeclineProposalModal extends Component
             ]);
         }
 
-        $proposer = User::findOrFail($walletChangeApproval->proposer_id);
+        $proposer = User::find($walletChangeApproval->proposer_id)->first();
 
         // Gestione della notifica
         $handler = NotificationHandlerFactory::getHandler(WalletChangeResponseRejection::class);

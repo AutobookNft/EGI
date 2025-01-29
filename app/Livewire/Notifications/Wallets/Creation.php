@@ -1,35 +1,33 @@
 <?php
 
-namespace App\Livewire\Notifications\Invitations;
+namespace App\Livewire\Notifications\Wallets;
 
-use App\Enums\InvitationStatus;
+use App\Enums\WalletStatus;
 use App\Models\CollectionUser;
-use App\Models\NotificationPayloadInvitation;
+use App\Models\NotificationPayloadWallet;
 use App\Models\User;
-use Livewire\Attributes\On;
-use App\Services\Notifications\InvitationNotificationHandler;
 use App\Services\Notifications\NotificationHandlerFactory;
+use App\Services\Notifications\WalletNotificationHandler;
+use Exception;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
-use Illuminate\Support\Facades\DB;
-use Exception;
 
-class Request extends Component
+class Creation extends Component
 {
+    public $notification;
 
-    public mixed $notification;
-
-    public function mount(mixed $notification)
+    public function mount($notification)
     {
         $this->notification = $notification;
     }
 
     /**
-     * Gestisce la risposta a una notifica di invito (accettazione o rifiuto).
+     * Gestisce la risposta a una notifica di proposta di creazione di un nuovo wallet (accettazione o rifiuto).
      *
      * Questo metodo:
-     * - Recupera la notifica associata all'invito e il payload corrispondente.
+     * - Recupera la notifica associata alla proposta e il payload corrispondente.
      * - Esegue la logica di accettazione o rifiuto in base all'opzione scelta dall'utente.
      * - Aggiorna lo stato della notifica e invia una notifica di aggiornamento al proponente.
      * - Utilizza una transazione per garantire l'integrità dei dati.
@@ -45,7 +43,7 @@ class Request extends Component
      * - In caso di errore, tutte le operazioni vengono annullate e l'eccezione è loggata.
      * - Il metodo utilizza la factory NotificationHandlerFactory per gestire l'invio della notifica.
      */
-    #[On('response')]
+    
     public function response($option)
     {
 
@@ -53,27 +51,27 @@ class Request extends Component
             // Inizio della transazione
             DB::beginTransaction();
 
-            // L'utente che ha proposto la collaborazione
+            // L'utente che ha proposto il wallet
             $proposer_id = $this->notification->data['user_id'] ?? null;
 
             // Si crea l'oggetto User da usare per inviare la notifica
             $message_to = User::find($proposer_id);
 
             // Si recupera l'oggetto NotificationPayloadInvitation creato al momento dell'invio della proposta
-            $notificationPayloadInvitation = NotificationPayloadInvitation::find($this->notification->model_id);
+            $notificationPayloadWallet = NotificationPayloadWallet::find($this->notification->model_id);
 
             // Accetta o rifiuta l'invito
             if ($option === 'accepted') {
-                $this->accept($notificationPayloadInvitation);
+                $this->accept($notificationPayloadWallet);
             } else {
-                $this->reject($notificationPayloadInvitation);
+                $this->reject($notificationPayloadWallet);
             }
 
             // Invia la notifica
-            $handler = NotificationHandlerFactory::getHandler(InvitationNotificationHandler::class);
+            $handler = NotificationHandlerFactory::getHandler(WalletNotificationHandler::class);
             $handler->handle($message_to, $this->notification);
 
-            Log::channel('florenceegi')->info('InvitationResponse:response DOPO', [
+            Log::channel('florenceegi')->info('WalletResponse: response DOPO', [
                 'notification->id' => $this->notification->id,
             ]);
 
@@ -81,7 +79,7 @@ class Request extends Component
             // Conferma la transazione
             DB::commit();
 
-            Log::channel('florenceegi')->info('Transazione completata con successo per la risposta all\'invito.');
+            Log::channel('florenceegi')->info('Transazione completata con successo per la risposta alla creazione del wallet.');
 
              // Dispatcha un evento di successo al frontend
             $this->dispatch('notification-response', option: $option, success: true);
@@ -91,7 +89,7 @@ class Request extends Component
             DB::rollBack();
 
             // Log dell'errore
-            Log::channel('florenceegi')->error('Errore durante la gestione della risposta all\'invito:', [
+            Log::channel('florenceegi')->error('Errore durante la gestione della risposta alla creazione del wallet:', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -101,30 +99,30 @@ class Request extends Component
         }
     }
 
-    public function accept($notificationPayloadInvitation)
+    public function accept($notificationPayloadWallet)
     {
 
-        Log::channel('florenceegi')->info('InvitationAccepted:accept', [
-            'notificationPayloadInvitation' => $notificationPayloadInvitation,
+        Log::channel('florenceegi')->info('WalletAccepted:accept', [
+            'notificationPayloadWallet' => $notificationPayloadWallet,
         ]);
 
         // Validazione preliminare del payload
-        if (!$notificationPayloadInvitation || !$notificationPayloadInvitation->collection_id || !$notificationPayloadInvitation->role) {
+        if (!$notificationPayloadWallet || !$notificationPayloadWallet->collection_id || !$notificationPayloadWallet->role) {
             throw new Exception('Dati mancanti nel payload dell\'invito.');
         }
 
         try {
             // Aggiorna lo stato dell'invito come approvato
-            $notificationPayloadInvitation->handleApproval();
+            $notificationPayloadWallet->handleApproval();
 
             // L'utente che ha approvato l'invito
             $user = Auth::user();
 
             $data = [
-                'collection_id' => $notificationPayloadInvitation->collection_id,
+                'collection_id' => $notificationPayloadWallet->collection_id,
                 'user_id' => $user->id,
-                'role' => $notificationPayloadInvitation->role,
-                'status' => InvitationStatus::ACCEPTED->value,
+                'role' => $notificationPayloadWallet->role,
+                'status' => WalletStatus::ACCEPTED->value,
             ];
 
             Log::channel('florenceegi')->info('Dati di payload', $data);
@@ -137,16 +135,16 @@ class Request extends Component
             }
 
             // Aggiorna tutti i dati della notifica
-            $this->notification['model_type'] = get_class($notificationPayloadInvitation);
-            $this->notification['status'] = InvitationStatus::ACCEPTED->value;
-            $this->notification['view'] = 'invitations.' . InvitationStatus::ACCEPTED->value;
-            $this->notification['message'] = __('Proposta di collaborazione approvata.');
+            $this->notification['model_type'] = get_class($notificationPayloadWallet);
+            $this->notification['status'] = WalletStatus::ACCEPTED->value;
+            $this->notification['view'] = 'wallets.' . WalletStatus::ACCEPTED->value;
+            $this->notification['message'] = __('collection.wallet.wallet_change_approved');
             $this->notification['collection_name'] = $this->notification->data['collection_name'] ?? null;
             $this->notification['receiver_id'] = $user->id;
             $this->notification['receiver_name'] = $user->name . ' ' . $user->last_name;
 
         } catch (Exception $e) {
-            Log::error('Errore durante l\'accettazione dell\'invito:', [
+            Log::error('Errore durante l\'accettazione della creazione di un wallet:', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -155,7 +153,7 @@ class Request extends Component
         }
     }
 
-    public function reject($notificationPayloadInvitation)
+    public function reject($notificationPayloadWallet)
     {
 
 
@@ -165,38 +163,38 @@ class Request extends Component
 
 
         // Validazione preliminare dei parametri
-        if (!$notificationPayloadInvitation || !$collectionName || !$receiverName) {
+        if (!$notificationPayloadWallet || !$collectionName || !$receiverName) {
             throw new Exception('Parametri mancanti o non validi per la gestione del rifiuto.');
         }
 
         try {
             // Aggiorna lo stato dell'invito come rifiutato
-            $notificationPayloadInvitation->handleRejection();
+            $notificationPayloadWallet->handleRejection();
 
             // Verifica che lo stato sia stato aggiornato correttamente
-            if (!$notificationPayloadInvitation->isRejected()) { // Metodo ipotetico
+            if (!$notificationPayloadWallet->isRejected()) { // Metodo ipotetico
                 throw new Exception('Errore durante l\'aggiornamento dello stato dell\'invito.');
             }
 
             // Aggiorna lo stato della notifica
-            $this->notification['status'] = InvitationStatus::REJECTED->value;
-            $this->notification['view'] = 'invitations.' . InvitationStatus::REJECTED->value;
+            $this->notification['status'] = WalletStatus::REJECTED->value;
+            $this->notification['view'] = 'invitations.' . WalletStatus::REJECTED->value;
             $this->notification['collection_name'] = $collectionName;
             $this->notification['receiver_name'] = $receiverName;
             $this->notification['receiver_id'] = $user->id;
 
             // Aggiungi un messaggio personalizzato
-            $this->notification['message'] = __('Proposta di collaborazione rifiutata.');
+            $this->notification['message'] = __('collection.wallet.wallet_change_rejected');
 
             // Log dell'operazione
-            Log::info('Invito rifiutato', [
+            Log::info('Proposta creazione wallet rifiutata', [
                 'notification_id' => $this->notification['id'] ?? null,
                 'collection_name' => $collectionName,
                 'receiver_name' => $receiverName,
             ]);
         } catch (Exception $e) {
             // Log dell'errore
-            Log::error('Errore durante il rifiuto dell\'invito:', [
+            Log::error('Errore durante il rifiuto della proposta di creazione di un nuovo wallet:', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -208,6 +206,6 @@ class Request extends Component
 
     public function render()
     {
-        return view('livewire.notifications.invitations.request');
+        return view('livewire.notifications.wallets.creation');
     }
 }

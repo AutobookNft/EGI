@@ -39,11 +39,8 @@ class NotificationHandlerFactory
 
         $handlers = [
             // Handler per le notifiche di gestione delle modifiche ai wallet.
-            'App\Notifications\WalletChangeResponseRejection' => WalletChangeRequestHandler::class,
-            'App\Notifications\WalletChangeResponseApproval' => WalletChangeRequestHandler::class,
-            'App\Notifications\WalletChangeRequestCreation' => WalletChangeRequestHandler::class,
-            'App\Notifications\WalletChangeRequestUpdate' => WalletChangeRequestHandler::class,
-
+            'App\Services\Notifications\WalletNotificationHandler' => WalletNotificationHandler::class,
+            
             // Handler per la notifica di proposta di invito a una collezione.
             'App\Services\Notifications\InvitationNotificationHandler' => InvitationNotificationHandler::class,
         ];

@@ -1,13 +1,13 @@
 <?php
 
 
-namespace App\Notifications;
+namespace App\Notifications\Wallets;
 
 use App\Notifications\Channels\CustomDatabaseChannel;
 use Illuminate\Notifications\Notification;
 use Illuminate\Notifications\Messages\DatabaseMessage;
 
-class WalletChangeResponseApproval extends Notification
+class WalletAccepted extends Notification
 {
     private $walletChangeApproval;
     private $status;

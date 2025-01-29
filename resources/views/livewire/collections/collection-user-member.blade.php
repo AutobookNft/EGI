@@ -1,6 +1,7 @@
 @php
     // Gestione del permesso per creare un wallet
     $canCreateWallet = (new \App\Livewire\Collections\CollectionUserMember)->userHasPermissionInCollection($collectionId, 'create_wallet');
+    $collectionId = $collection->id;
 @endphp
 
 <div id="collection_management" class="p-6 border border-gray-700 rounded-2xl bg-gray-800 shadow-lg">
@@ -15,6 +16,7 @@
                 </p>
                 <p class="text-sm text-gray-400">{{ __('collection.team_members_description') }}</p>
             </div>
+
             @if($canCreateWallet)
 
                 <div class="flex flex-wrap space-x-0 gap-4">
@@ -23,19 +25,22 @@
                         {{ __('collection.invite_collection_member') }}
                     </button>
                     <!-- Bottone per creare un nuovo wallet -->
-                    <button class="btn btn-primary w-full sm:w-auto" wire:click="$dispatch('openForCreateNewWallets')">
+                    <button id="createNewWallet" name = "createNewWallet" class="btn btn-primary w-full sm:w-auto">
                         {{ __('collection.wallet.create_the_wallet') }}
                     </button>
                 </div>
             @endif
-        </div>+
+        </div>
     </div>
 
     <!-- Sezione Membri della Collection -->
     <h3 class="text-xl font-bold text-white mb-4">{{ __('collection.members') }}</h3>
     <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
         @foreach($collectionUsers as $member)
-            <div class="{{ $member->status === 'pending' ? 'bg-yellow-800' : 'bg-gray-900' }} p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300">
+            <div
+                data-user-id="{{ $member->user_id }}"
+                data-collection-id="{{ $member->collection_id }}"
+                class="{{ $member->status === 'pending' ? 'bg-yellow-800' : 'bg-gray-900' }} p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300">
                 <div class="flex items-center mb-4">
                     <img class="w-12 h-12 rounded-full" src="{{ $member->user->profile_photo_url }}" alt="{{ $member->user->name }}">
                     <div class="ml-4">
@@ -44,9 +49,19 @@
                         <p class="text-sm text-gray-400">{{ __('User id: ') . $member->user_id }}</p>
                     </div>
                 </div>
-                @if(!$member->wallet && $canCreateWallet)
-                <!-- Bottone per creare un nuovo wallet. Il listener si trova in /home/fabio/EGI/app/Livewire/Collections/EditWalletModal.php -->
-                    <button id="create_new_wallet" class="btn btn-primary w-full sm:w-auto" wire:click="$dispatch('openForCreateNewWallets', { collectionId: {{ $member->collection_id }}, userId: {{ $member->user_id }} })">
+
+                @if(
+                    !$member->wallet &&
+                    $canCreateWallet &&
+                    !$member->notificationPayloadWallets->contains('status', 'pending') &&
+                    !in_array($member->role, ['natan', 'EPP'])
+                )
+                    <!-- Bottone per creare un nuovo wallet gestito da JavaScript -->
+                    <button
+                        data-collection-id="{{ $member->collection_id }}"
+                        data-user-id="{{ $member->user_id }}"
+                        data-user="{{$member->user_id}}"
+                        class="create-wallet-btn btn btn-primary w-full sm:w-auto">
                         {{ __('collection.wallet.create_the_wallet') }}
                     </button>
                 @endif
@@ -87,6 +102,7 @@
 
                 @if($canCreateWallet && (!in_array($wallet->platform_role, ['natan', 'EPP']) || Auth::user()->hasRole('superadmin')))
                     <!-- Bottone per gestire il wallet. Il listener si trova in /home/fabio/EGI/app/Livewire/Collections/EditWalletModal.php -->
+
                     <button wire:click="$dispatch('openHandleWallets', { walletId: {{ $wallet->id }} })" class="btn btn-primary mt-4 w-full">
                         {{ __('collection.wallet.manage_wallet') }}
                     </button>
@@ -96,9 +112,10 @@
     </div>
 
     <h3 class="text-xl font-bold text-white mt-8 mb-4">{{ __('collection.wallet.wallets') }}</h3>
-    <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
+    <div id="wallet-list" class="grid grid-cols-1 gap-6 md:grid-cols-3">
         @foreach($walletProposals as $wallet)
-            <div class="{{ !$canCreateWallet || in_array($wallet->platform_role, ['natan', 'EPP']) ? 'bg-gray-700 opacity-75 cursor-not-allowed' : 'bg-gray-900' }} {{ $wallet->status === 'pending' ? 'bg-yellow-800' : 'bg-gray-900' }}  p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300">
+            <div id="wallet-{{ $wallet->id }}" class="wallet-item {{ !$canCreateWallet || in_array($wallet->platform_role, ['natan', 'EPP']) ? 'bg-gray-700 opacity-75 cursor-not-allowed' : 'bg-gray-900' }} {{ $wallet->status === 'pending' ? 'bg-yellow-800' : 'bg-gray-900' }}  p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300">
+
                 <div>
                     <p class="text-sm text-gray-400">
                         <strong>{{ __('collection.wallet.user_role')}}:</strong> {{ $wallet->platform_role }}
@@ -114,15 +131,29 @@
                     </p>
 
                     <!-- Nome e Cognome dell'Utente Correlato -->
-                    @if($wallet->approver)
+                    @if($wallet->receiver)
                         <p class="text-sm text-gray-400">
-                            <strong>{{ __('collection.wallet.royalty_rebind') }}:</strong> {{ $wallet->approver->name }} {{ $wallet->approver->last_name }}
+                            <strong>{{ __('collection.wallet.approver') }}:</strong> {{ $wallet->receiver->name }} {{ $wallet->receiver->last_name }}
                         </p>
                     @else
                         <p class="text-sm text-gray-400">
                             <strong>{{ __('collection.wallet.approver') }}:</strong> {{ __('Unassigned') }}
                         </p>
                     @endif
+
+                    <!-- Aggiungiamo qui il bottone Elimina -->
+                    <div class="mt-4 flex justify-end">
+                        <button
+                            data-id="{{ $wallet->id }}"
+                            data-collection="{{ $collectionId }}"
+                            data-user="{{ $wallet->receiver_id }}"  {{-- Questo è l'utente che ha creato il wallet --}}
+                            class="delete-proposal-wallet px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded-md transition-colors duration-150 flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                            {{ __('label.delete') }}
+                        </button>
+                    </div>
                 </div>
 
             </div>
@@ -133,9 +164,40 @@
     <!-- Bottone che permette di aprire la collection -->
     @include('livewire.collection-manager-includes.back_to_collection_button')
 
-    <!-- Placeholder se non ci sono membri o wallet -->
-
+    <script>
+        window.translations = {
+            'collection.wallet.creation_error': '{{ __("collection.wallet.creation_error") }}',
+            'collection.wallet.creation_error_generic': '{{ __("collection.wallet.creation_error_generic") }}',
+            'collection.wallet.confirmation_title': '{{ __("collection.wallet.confirmation_title") }}',
+            'collection.wallet.confirmation_text': '{{ __("collection.wallet.confirmation_text", ["walletId" => ":walletId"]) }}',
+            'collection.wallet.confirm_delete': '{{ __("collection.wallet.confirm_delete") }}',
+            'collection.wallet.cancel_delete': '{{ __("collection.wallet.cancel_delete") }}',
+            'collection.wallet.deletion_error': '{{ __("collection.wallet.deletion_error") }}',
+            'collection.wallet.deletion_error_generic': '{{ __("collection.wallet.deletion_error_generic") }}',
+            'collection.wallet.create_the_wallet': '{{ __("collection.wallet.create_the_wallet") }}',
+           // Aggiungi altre traduzioni se necessario
+        };
+    </script>
     <!-- Include le Modali -->
     <livewire:collections.edit-wallet-modal />
     <livewire:collections.invite-user-to-collection-modal :collectionId="$collectionId" />
+
+    <script type="module" src="{{ asset('js/DeleteProposalWallet.js') }}" defer></script>
+
 </div>
+
+<!-- Script per aprire la modale per creare un nuovo wallet -->
+{{-- <script>
+document.addEventListener('click', async (event) => {
+    const openModalButton = event.target.closest('.open-wallet-modal-btn');
+    if (!openModalButton) return;
+
+    const collectionId = openModalButton.dataset.collectionId;
+    const userId = openModalButton.dataset.userId;
+
+    // Apri la modale Livewire
+    Livewire.emit('openForCreateNewWallets', { collectionId, userId });
+});
+</script> --}}
+
+

@@ -121,5 +121,14 @@ return [
         'creation_request_success' => 'A solicitação de criação da wallet foi enviada com sucesso',
         'create_denied' => 'Você não tem permissão para criar uma wallet',
         'proposal_rejected' => 'Proposta rejeitada',
+        'wallet_creation_request' => 'Você recebeu a proposta de uma nova carteira',
+        'creation_error' => 'Erro ao criar a carteira',
+        'creation_error_generic' => 'Ocorreu um erro ao criar a carteira.',
+        'confirmation_title' => 'Tem certeza?',
+        'confirmation_text' => 'Deseja eliminar a proposta de carteira ID: #{walletId}?',
+        'confirm_delete' => 'Sim, eliminar!',
+        'cancel_delete' => 'Não, cancelar',
+        'deletion_error' => 'Erro ao eliminar',
+        'deletion_error_generic' => 'Ocorreu um erro ao eliminar.',
     ]
 ];

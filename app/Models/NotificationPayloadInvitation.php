@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Collection;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Facades\Log;
 
 class NotificationPayloadInvitation extends Model implements NotifiablePayload
@@ -131,5 +132,10 @@ class NotificationPayloadInvitation extends Model implements NotifiablePayload
     public function receiver()
     {
         return $this->belongsTo(User::class, 'receiver_id');
+    }
+
+    public function notifications(): MorphMany
+    {
+        return $this->morphMany(CustomDatabaseNotification::class, 'model');
     }
 }

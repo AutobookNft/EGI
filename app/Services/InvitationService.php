@@ -28,7 +28,6 @@ class InvitationService
                 // User destinatario della risposta, si verifica se esiste
                 $user = User::where('email', $email)->firstOrFail();
 
-
                 // Status dell'invito
                 $status = InvitationStatus::PENDING->value;
 
@@ -42,7 +41,7 @@ class InvitationService
                     'status' => $status, // Stato dell'invito
                 ];
 
-                Log::channel('florenceegi')->info('dati di payload', $data);
+                Log::channel('florenceegi')->info('InvitationService:dati di payload', $data);
 
                 // Scrive i dati di payload nel db
                 $invitation = NotificationPayloadInvitation::create($data);
@@ -54,7 +53,7 @@ class InvitationService
                 $invitation['model_id'] = $invitation->id;
                 $invitation['model_type'] = get_class($invitation);
                 $invitation['message'] = __('Sei stato invitato a partecipare ad una collezione.');
-                $invitation['view'] = InvitationStatus::REQUEST->value;
+                $invitation['view'] = 'invitations.' . InvitationStatus::REQUEST->value;
 
                 // Gestione notifica
                 $handler = NotificationHandlerFactory::getHandler(InvitationNotificationHandler::class);

@@ -11,6 +11,7 @@ use Livewire\Component;
 use Illuminate\Support\Facades\Log;
 use App\Traits\HasPermissionTrait;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 
 class CollectionUserMember extends Component
 {
@@ -65,6 +66,50 @@ class CollectionUserMember extends Component
             'wallets' => $this->wallets,
             'walletProposals' => $this->walletProposals
         ]);
+    }
+
+    public function deleteProposalWallet(Request $request, $walletId)
+    {
+
+        Log::channel('florenceegi')->info('DeleteProposalWallet', [
+            'walletId' => $walletId
+        ]);
+
+        $collectionId = $request->collection_id;
+
+        try {
+
+            $wallet = NotificationPayloadWallet::findOrFail($walletId);
+            $collection = Collection::findOrFail($collectionId);
+
+            // Verifica permessi per l'utente autenticato
+            if (!$this->hasPermission($collection, 'create_wallet')) {
+                Log::channel('florenceegi')->error('Utente non autorizzato a cancellare la proposta wallet', [
+                    'collectionId' => $collectionId,
+                    'walletId' => $walletId
+                ]);
+                session()->flash('error', __('label.unauthorized_action'));
+                return;
+            }
+
+            if (!$wallet) {
+                Log::channel('florenceegi')->error('Proposta Wallet non trovata', [
+                    'walletId' => $walletId
+                ]);
+                return response()->json(['message' => 'Proposta Wallet non trovata'], 404);
+            }
+
+            $wallet->delete();
+            return response()->json(['message' => 'Proposta Wallet eliminata con successo'], 200);
+        } catch (\Exception $e) {
+            Log::channel('florenceegi')->error('Errore durante l\'eliminazione della proposta wallet', [
+                'walletId' => $walletId,
+                'error' => $e->getMessage()
+            ]);
+            return response()->json(['message' => 'Errore durante l\'eliminazione'], 500);
+        }
+
+
     }
 
     public function render()

@@ -8,6 +8,14 @@
  */
 
 return [
+    'dashboard' => 'Dashboard',
+    'collection' => 'Collezione',
+    'collection_members' => 'Membri della collezione',
+    'created_at' => 'Creato il',
+    'no_action_available' => 'Nessuna azione disponibile',
+    'accept' => 'Accetta',
+    'decline' => 'Rifiuta',
+    'unauthorized_action' => 'Non sei autorizzato a eseguire questo tipo di azione',
     'came_to_back' => 'Torna indietro',
     "file_deleted_successfully" => "File eliminato con successo",
     'title_extension_not_allowed' => 'Estensione non consentita!',
@@ -70,6 +78,7 @@ return [
     'wait_for_the_files_to_load' => 'Attendi il caricamento dei file',
     'access_the_control_panel' => 'Accedi al pannello di controllo',
     'of' => 'di',
+    'from' => 'da',
     'errors_in_the_files' => 'Errori nei file',
     'loading' => 'Caricamento...',
     'utilities_image_file' => 'Utility, immagine e caricamento file',

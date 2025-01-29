@@ -16,6 +16,7 @@ use App\Http\Middleware\SetLanguage;
 use App\Livewire\Collections\CollectionOpen;
 use Illuminate\Support\Facades\Log;
 use UltraProject\UConfig\Http\Controllers\UConfigController;
+use App\Livewire\Collections\EditWalletModal;
 
 
 // Rotta per PhotoUploader
@@ -119,3 +120,14 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
             dd((session()->all()));
         });
     });
+
+ // Rotte per fetch, per eliminazione della proposal wallet
+ Route::delete('/wallets/{walletId}', [CollectionUserMember::class, 'deleteProposalWallet'])
+    ->name('wallets.delete')
+    ->middleware(['can:create_wallet']);
+
+// Route per fetch per creare un nuovo wallet
+Route::post('/wallets/create', [EditWalletModal::class, 'createNewWallet'])
+    ->name('wallets.create')
+    ->middleware(['can:create_wallet']);
+

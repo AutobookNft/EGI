@@ -121,5 +121,14 @@ return [
         'creation_request_success' => 'Die Wallet-Erstellungsanfrage wurde erfolgreich gesendet',
         'create_denied' => 'Sie haben keine Berechtigung, ein Wallet zu erstellen',
         'proposal_rejected' => 'Vorschlag abgelehnt',
+        'wallet_creation_request' => 'Sie haben den Vorschlag für eine neue Brieftasche erhalten',
+        'creation_error' => 'Fehler beim Erstellen der Wallet',
+        'creation_error_generic' => 'Beim Erstellen der Wallet ist ein Fehler aufgetreten.',
+        'confirmation_title' => 'Sind Sie sicher?',
+        'confirmation_text' => 'Möchten Sie den Wallet-Vorschlag ID: #{walletId} löschen?',
+        'confirm_delete' => 'Ja, löschen!',
+        'cancel_delete' => 'Nein, abbrechen',
+        'deletion_error' => 'Fehler beim Löschen',
+        'deletion_error_generic' => 'Beim Löschen ist ein Fehler aufgetreten.',
     ]
 ];

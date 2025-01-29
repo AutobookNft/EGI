@@ -39,6 +39,7 @@ class InvitationAccepted extends Notification
                 'user_id' => $this->notification->receiver_id,
                 'collection_name' => $this->notification->collection_name,
              ],
+            'prev_id' => $this->notification->id,
             'read_at' => now(),
             'outcome' => $this->notification->status,
         ];

@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Collections;
 
+use App\Enums\WalletStatus;
 use App\Models\Collection;
 use App\Models\NotificationPayloadWallet;
 use App\Notifications\WalletChangeRequestCreation;
@@ -9,6 +10,7 @@ use App\Notifications\WalletChangeResponseApproval;
 use App\Notifications\WalletChangeResponseRejection;
 use App\Services\Notifications\NotificationHandlerFactory;
 use App\Services\Notifications\WalletChangeRequestHandler;
+use App\Services\Notifications\WalletNotificationHandler;
 use Illuminate\Support\Facades\Notification;
 use App\Models\User;
 use App\Models\Wallet;
@@ -19,6 +21,7 @@ use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 use Livewire\Attributes\On;
 use App\Rules\ValidWalletAddress;
+use Illuminate\Http\Request;
 
 class EditWalletModal extends Component
 {
@@ -67,23 +70,14 @@ class EditWalletModal extends Component
     }
 
     #[On('openForCreateNewWallets')]
-    public function openForCreateNewWallets($collectionId = null, $userId = null)
+    public function openForCreateNewWallets($collectionId, $userId)
     {
-        if ($collectionId) {
-            Log::channel('florenceegi')->info('Collection id', [
-                'collectionId' => $collectionId,
-                'userId' => $userId
-            ]);
-            $this->collectionId = $collectionId;
-            $this->receiverUserId = $userId;
-        } else {
-            Log::channel('florenceegi')->info('No Collection ID provided for wallet creation.');
-        }
-
+        $this->collectionId = $collectionId;
+        $this->receiverUserId = $userId;
         $this->show = true; // Mostra la modale
-        $this->mode = 'create';
     }
 
+    #[On('closeForCreateNewWallets')]
     public function closeHandleWallets()
     {
         $this->walletAddress = null;
@@ -92,32 +86,49 @@ class EditWalletModal extends Component
         $this->show = false; // Mostra la modale
     }
 
-    public function createNewWallet()
+    public function createNewWallet(Request $request)
     {
-        Log::channel('florenceegi')->info('createNewWallet');
 
-        $this->validate([
-            // 'walletAddress' => [
+        $walletAddress = $request->input('wallet_address');
+        $collectionId = $request->input('collection_id');
+        $userId = $request->input('user_id');
+
+        Log::channel('florenceegi')->info('createNewWallet', [
+            'collectionId' => $collectionId,
+            'receiverUserId' => $userId,
+            'walletAddress' => $walletAddress
+        ]);
+
+        $minRoyaltyMint = 0;
+        $maxRoyaltyRebind = config('app.creator_royalty_rebind');
+
+        $request->validate([
+            // 'wallet_address' => [
             //     'required',
             //     'string',
             //     new ValidWalletAddress(),
             // ],
-            'royaltyMint' => [
+            'royalty_mint' => [
                 'nullable',
                 'numeric',
                 'min:0',
                 'max:' . config('app.creator_royalty_mint'),
             ],
-            'royaltyRebind' => [
+            'royalty_rebind' => [
                 'nullable',
                 'numeric',
-                'min:0',
-                'max:' . config('app.creator_royalty_rebind'),
+                'min:'.  $minRoyaltyMint,
+                'max:' . $maxRoyaltyRebind,
             ],
         ]);
 
+
+        // $walletAddress = $request->input('wallet_address');
+        $royaltyMint = $request->input('royalty_mint');
+        $royaltyRebind = $request->input('royalty_rebind');
+
         // Trovo la collection
-        $collection = Collection::findOrFail($this->collectionId);
+        $collection = Collection::findOrFail($collectionId);
         // $approverUserId = $collection->creator_id;
 
         Log::channel('florenceegi')->info('createNewWallet PRIMA della verifica dei permessi', [
@@ -125,25 +136,19 @@ class EditWalletModal extends Component
             'approverUserId' => $this->receiverUserId
         ]);
 
-        // Verifica permessi per l'utente autenticato
-        if (!$this->hasPermission($collection, 'create_wallet')) {
-            session()->flash('error', __('collection.wallet.create_denied'));
-            return;
-        }
-
-        Log::channel('florenceegi')->info('createNewWallet DOPO della verifica dei permessi', [
-            'collectionId' => $this->collectionId,
-            'approverUserId' => $this->receiverUserId
-        ]);
-
         // Verifica e aggiorna la quota del creator
-        $this->validateAndAdjustCreatorQuota($collection, $this->royaltyMint, $this->royaltyRebind);
+        $this->validateAndAdjustCreatorQuota($collection, $royaltyMint, $royaltyRebind);
 
         // Crea una proposta di wallet
-        $this->proposeNewWallet();
+        $this->proposeNewWallet($collection, $userId, $royaltyMint, $royaltyRebind, $walletAddress);
 
         $this->show = false;
+
         session()->flash('message', __('collection.wallet.creation_request_success'));
+
+        return response()->json(['message' => __('collection.wallet.creation_request_success'), 'success' => true]);
+
+
     }
 
     public function saveWallet()
@@ -240,29 +245,39 @@ class EditWalletModal extends Component
         // ]);
     }
 
-    public function proposeNewWallet()
+    public function proposeNewWallet($collection, $userId, $royaltyMint, $royaltyRebind, $walletAddress)
     {
-        Log::channel('florenceegi')->info('proposeNewWallet', [
-            'approverUserId' => $this->receiverUserId,
-        ]);
+
+        $receiver = User::findOrFail($userId);
+
+        $type = WalletStatus::CREATION->value;
+        $status = WalletStatus::PENDING->value;
+
+        $data = [
+            'proposer_id' => Auth::user()->id, // Chi inoltra la richiesta
+            'receiver_id' => $userId, // Chi deve approvare la richiesta
+            'wallet' => $walletAddress,
+            'royalty_mint' =>$royaltyMint,
+            'royalty_rebind' => $royaltyRebind,
+            'type' => $type,
+            'status' => $status,
+        ];
+
+        Log::channel('florenceegi')->info('EditWalletModal:dati di payload', $data);
 
         // Creazione del payload della proposta,
-        // questo record viene creato una sola volta e contiene tutti i dati della proposat
-        $walletChangeApproval = NotificationPayloadWallet::create([
-            'proposer_id' => Auth::user()->id, // Chi inoltra la richiesta
-            'receiver_id' => $this->receiverUserId, // Chi deve approvare la richiesta
-            'wallet' => $this->walletAddress,
-            'royalty_mint' =>$this->royaltyMint,
-            'royalty_rebind' => $this->royaltyRebind,
-            'type' => 'creation', // tipo di proposta
-            'status' => 'pending',
-        ]);
+        $walletPayload = NotificationPayloadWallet::create($data);
 
-        $receiver = User::findOrFail($this->receiverUserId);
+        $walletPayload['collection_name'] = $collection->collection_name;
+        $walletPayload['proposer_name'] = Auth::user()->name . ' ' . Auth::user()->last_name; // Nome di chi fa la proposta
+        $walletPayload['model_id'] = $walletPayload->id;
+        $walletPayload['model_type'] = get_class($walletPayload);
+        $walletPayload['message'] = __('collection.wallet.wallet_creation_request');
+        $walletPayload['view'] = 'wallets.' . $type; // La vista da mostrare
 
         // Usa la factory per inviare la notifica con l'action "proposal"
-        $handler = NotificationHandlerFactory::getHandler(WalletChangeRequestCreation::class);
-        $handler->handle($receiver, $walletChangeApproval);
+        $handler = NotificationHandlerFactory::getHandler(WalletNotificationHandler::class);
+        $handler->handle($receiver, $walletPayload);
     }
 
     /**
@@ -273,8 +288,8 @@ class EditWalletModal extends Component
      */
     public function approveChange($approvalId)
     {
-        $walletChangeApproval = NotificationPayloadWallet::findOrFail($approvalId);
-        $wallet = $walletChangeApproval->wallet;
+        $notification = NotificationPayloadWallet::findOrFail($approvalId)->first();
+        $wallet = $notification->wallet;
 
         // $wallet->update($walletChangeApproval->change_details['new']);
         /**
@@ -284,10 +299,10 @@ class EditWalletModal extends Component
          */
 
         // Aggiorna lo stato della proposta a "created"
-        $walletChangeApproval->handleCreation();
+        $notification->handleCreation();
 
         $handler = NotificationHandlerFactory::getHandler(WalletChangeRequestHandler::class);
-        $handler->handle($walletChangeApproval);
+        $handler->handle($notification);
 
         session()->flash('message', __('collection.wallet.wallet_change_request_approved'));
     }

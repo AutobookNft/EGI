@@ -121,5 +121,14 @@ return [
         'creation_request_success' => 'The wallet creation request has been sent successfully',
         'create_denied' => 'You do not have permission to create a wallet',
         'proposal_rejected' => 'Proposal rejected',
+        'wallet_creation_request' => 'You have received the proposal for a new wallet',
+        'creation_error' => 'Error during wallet creation',
+        'creation_error_generic' => 'An error occurred during wallet creation.',
+        'confirmation_title' => 'Are you sure?',
+        'confirmation_text' => 'Do you want to delete the wallet proposal ID: #{walletId}?',
+        'confirm_delete' => 'Yes, delete!',
+        'cancel_delete' => 'No, cancel',
+        'deletion_error' => 'Error during deletion',
+        'deletion_error_generic' => 'An error occurred during deletion.',
     ]
 ];

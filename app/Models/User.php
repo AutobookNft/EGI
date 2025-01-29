@@ -126,12 +126,13 @@ class User extends Authenticatable
      */
     protected $appends = [
         'profile_photo_url',
+        'icon_style',
     ];
 
     public function getIconStyleAttribute(): string
     {
         // Ritorna l'icon_style dall'attributo o un valore di default
-        return $this->attributes['icon_style'] ?? config('icons.default');
+        return $this->attributes['icon_style'] ?? config('icons.styles.default');
     }
 
 

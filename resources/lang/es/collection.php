@@ -121,5 +121,14 @@ return [
         'creation_request_success' => 'La solicitud de creación del wallet se ha enviado con éxito',
         'create_denied' => 'No tienes permiso para crear un wallet',
         'proposal_rejected' => 'Propuesta rechazada',
+        'wallet_creation_request' => 'Has recibido la propuesta de un nuevo monedero',
+        'creation_error' => 'Error al crear la billetera',
+        'creation_error_generic' => 'Se ha producido un error al crear la billetera.',
+        'confirmation_title' => '¿Estás seguro?',
+        'confirmation_text' => '¿Quieres eliminar la propuesta de billetera ID: #{walletId}?',
+        'confirm_delete' => 'Sí, ¡eliminar!',
+        'cancel_delete' => 'No, cancelar',
+        'deletion_error' => 'Error al eliminar',
+        'deletion_error_generic' => 'Se ha producido un error al eliminar.',
     ]
 ];

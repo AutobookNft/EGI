@@ -8,6 +8,11 @@
  */
 
 return [
+    'created_at' => 'Criado em',
+    'no_action_available' => 'Nenhuma ação disponível',
+    'accept' => 'Aceitar',
+    'decline' => 'Declinar',
+    'unauthorized_action' => 'Você não está autorizado a realizar este tipo de ação',
     'came_to_back' => 'Voltar',
     "file_deleted_successfully" => "Arquivo excluído com sucesso",
     'extension_not_allowed' => 'Extensão não permitida!',
@@ -70,6 +75,7 @@ return [
     'wait_for_the_files_to_load' => 'Aguarde o carregamento dos arquivos',
     'access_the_control_panel' => 'Acesse o painel de controle',
     'of' => 'de',
+    'from' => 'de',
     'errors_in_the_files' => 'Erros nos arquivos',
     'loading' => 'Carregando...',
     'utilities_image_file' => 'Utilitários, imagem e upload de arquivos',

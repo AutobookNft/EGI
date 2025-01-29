@@ -17,60 +17,27 @@ class IconRepository
      * @param string|null $customClass Classe personalizzata (opzionale).
      * @return string|null  Contenuto HTML dell'icona.
      */
-    public function getIcon(string $name, string $style, ?string $customClass = null): ?string
+    public function getIcon(string $name, string $style = null, ?string $customClass = null): ?string
     {
-
+        // Cancella la cache prima di recuperare l'icona (se necessario)
         $this->clearCache($name, $style, $customClass);
-
-        // Log::channel('florenceegi')->info( 'Class IconRepository. Method: getIcon. Action: customClass: (' . $customClass .  ') name: (' . $name .')');
 
         // Costruisce la chiave della cache
         $cacheKey = $this->buildCacheKey($name, $style, $customClass);
-        // Log::channel('florenceegi')->info('Cache Key Generated', ['key' => $cacheKey, 'name' => $name, 'style' => $style, 'customClass' => $customClass]);
 
         // Controlla se l'elemento è già in cache
-        $cachedValue = Cache::get($cacheKey);
-        if ($cachedValue) {
-            // Log::channel('florenceegi')->info('Cache Hit', ['key' => $cacheKey, 'cachedValue' => $cachedValue]);
+        return Cache::tags(['icons'])->remember($cacheKey, 3600, function () use ($name, $style, $customClass) {
 
-            // Sostituisce il segnaposto %class% con la classe personalizzata o quella di default
-            $finalClass = $customClass ?? 'default-class';
-            $processedValue = str_replace('%class%', $finalClass, $cachedValue);
-            // Log::channel('florenceegi')->info('Processed Cached Value', ['processedValue' => $processedValue, 'finalClass' => $finalClass]);
-
-            return $processedValue;
-        }
-
-        // Cache miss: esegue la closure per calcolare il valore
-        // Log::channel('florenceegi')->info('Class IconRepository. Method: getIcon. Action: Icon name', ['name' => $name]);
-
-        return Cache::remember($cacheKey, 3600, function () use ($name, $style, $customClass) {
-            // Log::channel('florenceegi')->info('Querying Database', ['name' => $name, 'style' => $style]);
-
-            $query_icon = Icon::where('name', $name)->where('style', $style)->first();
+            $query_icon = Icon::where('name', $name)->where('style', "=",$style)->first();
+            Log::channel('florenceegi')->info("IconRepository: query_icon: $query_icon");
 
             if (!$query_icon) {
-                Log::channel('florenceegi')->warning('Class IconRepository. Method: getIcon. Action: Icon Not Found', ['name' => $name, 'style' => $style]);
-
-                $fallback_icon = Icon::where('name', 'fallback')->where('style', $style)->first();
-
-                if ($fallback_icon) {
-                    return $fallback_icon->html;
-                }
-
-                return 'fallback'; // Puoi specificare un'icona di fallback
+                Log::warning("Icona non trovata: $name ($style)");
+                return 'fallback';
             }
 
-            if ($customClass) {
-                $finalClass = $customClass;
-            } else {
-                $finalClass = $query_icon->class;
-            }
-
-            // Log::channel('florenceegi')->info('Class IconRepository. Method: getIcon. Action: Processed', ['$finalClass' => $finalClass]);
-            $processedHtml = str_replace('%class%', $finalClass, $query_icon->html);
-
-            return $processedHtml;
+            $finalClass = $customClass ?? $query_icon->class;
+            return str_replace('%class%', $finalClass, $query_icon->html);
         });
     }
 
@@ -91,7 +58,6 @@ class IconRepository
 
         return $this->getIcon($name, $defaultStyle) ?? $this->getFallbackIcon();
     }
-
 
     /**
      * Recupera un'icona di fallback se quella richiesta non esiste.
@@ -117,8 +83,12 @@ class IconRepository
             $cacheKey = $this->buildCacheKey($name, $style, $customClass);
             Cache::forget($cacheKey);
         } else {
-            // Elimina tutte le icone dalla cache
-            Cache::tags(['icons'])->flush();
+            // Usa Cache::tags() solo se Redis è attivo, altrimenti pulisce tutta la cache
+            if (config('cache.default') === 'redis') {
+                Cache::tags(['icons'])->flush();
+            } else {
+                Cache::flush();
+            }
         }
     }
 
@@ -129,7 +99,7 @@ class IconRepository
     {
         Icon::all()->each(function ($icon) {
             $cacheKey = $this->buildCacheKey($icon->name, $icon->style, $icon->customClass);
-            Cache::put($cacheKey, $icon->html, 3600);
+            Cache::tags(['icons'])->put($cacheKey, $icon->html, 3600);
         });
     }
 
@@ -138,13 +108,13 @@ class IconRepository
      *
      * @param string $name  Nome dell'icona.
      * @param string $style Stile dell'icona.
+     * @param string|null $customClass Classe personalizzata (opzionale).
      * @return string Chiave della cache.
      */
-    protected function buildCacheKey(string $name, string $style, ?string $customClass = null): string
+    protected function buildCacheKey(string $name, ?string $style = 'elegant', ?string $customClass = null): string
     {
-        // Usa un hash per evitare che la chiave sia troppo lunga
+        // Usa un hash per evitare chiavi troppo lunghe
         $rawKey = "icon:{$style}:{$name}:{$customClass}";
         return 'icon:' . md5($rawKey);
     }
-
 }

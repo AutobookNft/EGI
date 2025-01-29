@@ -8,6 +8,11 @@
 
 
 return [
+    'created_at' => 'Created at',
+    'no_action_available' => 'No action available',
+    'accept' => 'Accept',
+    'decline' => 'Decline',
+    'unauthorized_action' => 'You are not authorized to perform this type of action',
     'came_to_back' => 'Back',
     "file_deleted_successfully" => "File deleted successfully",
     'extension_not_allowed' => 'Extension not allowed!',
@@ -70,6 +75,7 @@ return [
     'wait_for_the_files_to_load' => 'Wait for the files to load',
     'access_the_control_panel' => 'Access the control panel',
     'of' => 'of',
+    'from' => 'from',
     'errors_in_the_files' => 'Errors in the files',
     'loading' => 'Loading...',
     'utilities_image_file' => 'Utilities, image and file upload',

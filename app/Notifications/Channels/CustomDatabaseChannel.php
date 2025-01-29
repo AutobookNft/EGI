@@ -12,16 +12,30 @@ class CustomDatabaseChannel
 {
     public function send($notifiable, Notification $notification)
     {
+
         // Recupera i dati dal metodo "toCustomDatabase()" della notifica
         $data = $notification->toCustomDatabase($notifiable);
+
+        $notification_prevId = $data['prev_id'] ?? null;
+
+        Log::channel('florenceegi')->info('CustomDatabaseChannel:send', [
+            'notification_prevId' => $notification_prevId,
+        ]);
+
 
         // Ottieni il nome della classe della notifica
         $action = get_class($notification);
 
+        Log::channel('florenceegi')->info('CustomDatabaseChannel:send', [
+            'action' => $action,
+            // 'notification' => $notification,
+            // 'data' => $data,
+        ]);
+
         // Mappatura delle classi di notifica agli stati di InvitationStatus
         $actionMap = [
-            'App\Notifications\InvitationAccepted' => InvitationStatus::ACCEPTED,
-            'App\Notifications\InvitationRejection' => InvitationStatus::REJECTED,
+            'App\\Notifications\\InvitationAccepted' => InvitationStatus::ACCEPTED,
+            'App\\Notifications\\InvitationRejection' => InvitationStatus::REJECTED,
         ];
 
         // Controlla se l'azione corrisponde a una chiave nella mappatura
@@ -31,17 +45,15 @@ class CustomDatabaseChannel
 
         // Se l'azione è ACCEPTED o REJECTED, aggiorna la notifica precedente
         if ($action === InvitationStatus::ACCEPTED || $action === InvitationStatus::REJECTED) {
-            $this->updatePreviousNotification($notification->id, $action);
-
-            Log::channel('florenceegi')->info('CustomDatabaseChannel:send', [
-                'notification' => $notification,
-                'data' => $data,
+            Log::channel('florenceegi')->info('Notifica precedente aggiornata', [
+                'notification->id' => $notification->id,
             ]);
+            $this->updatePreviousNotification($notification_prevId, $action);
         }
 
         // Validazione dei dati
         if (!isset($data['view'], $data['model_type'], $data['model_id'])) {
-            Log::error('Dati mancanti per la notifica', ['data' => $data]);
+            Log::channel('florenceegi')->error('Dati mancanti per la notifica', ['data' => $data]);
             return null;
         }
 
@@ -59,7 +71,7 @@ class CustomDatabaseChannel
             'outcome'        => $data['outcome'] ?? null,
         ]);
 
-        Log::info('Notifica creata', [
+        Log::channel('florenceegi')->info('Notifica creata', [
             'id' => $createdNotification->id,
             'type' => $createdNotification->type,
         ]);
@@ -78,10 +90,14 @@ class CustomDatabaseChannel
      */
     private function updatePreviousNotification($notificationId, $outcome)
     {
-        $prev_notification = ModelsNotification::where('id', $notificationId)->first();
+        $prev_notification = ModelsNotification::where('id', "=",$notificationId)->first();
 
         if (!$prev_notification) {
-            Log::warning('Notifica precedente non trovata', ['id' => $notificationId]);
+            Log::channel('florenceegi')->warning('Notifica precedente non trovata', [
+                'id' => $notificationId,
+                'outcome' => $outcome,
+                // 'trace' => (new \Exception())->getTraceAsString() // Aggiunge lo stack trace
+            ]);
             return;
         }
 
@@ -90,7 +106,7 @@ class CustomDatabaseChannel
             'outcome' => $outcome,
         ]);
 
-        Log::info('Notifica precedente aggiornata', [
+        Log::channel('florenceegi')->info('Notifica precedente aggiornata', [
             'id' => $notificationId,
             'outcome' => $outcome,
         ]);

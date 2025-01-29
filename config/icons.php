@@ -372,8 +372,29 @@ return [
                 'html' => '<img src="/images/default/manage_collection.jpeg" alt="Nuova Collezione" class="w-12 h-12 text-base-content rounded-full">',
 
             ],
+            [
+                'name' => 'wallet',
+                'type' => 'solid',
+                'class' => 'w-12 h-12 text-base-content',
+                'host' => 'svg',
+                'name_on_host' => '',
+                'html' => '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24">
+                                <g fill="none" fill-rule="evenodd">
+                                    <!-- Contorno del wallet -->
+                                    <path fill="#4A5568" d="M19 7H7a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V9a2 2 0 00-2-2z"/>
 
-        ],
+                                    <!-- Dettagio carta/denaro -->
+                                    <rect width="14" height="10" x="5" y="9" fill="#A0AEC0" rx="2"/>
+
+                                    <!-- Linea superiore del wallet -->
+                                    <path stroke="#2D3748" stroke-linecap="round" stroke-width="2" d="M7 11h10"/>
+
+                                    <!-- Simbolo "+" di creazione -->
+                                    <path fill="#48BB78" d="M13 4a1 1 0 012 0v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0V9h-3a1 1 0 010-2h3V4z"/>
+                                </g>
+                            </svg>'
+            ],
+
 
         // [
         //     'name' => 'description',
@@ -413,4 +434,5 @@ return [
         // ],
     ],
     'default' => 'elegant',
+],
 ];

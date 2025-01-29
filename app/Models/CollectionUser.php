@@ -22,18 +22,6 @@ class CollectionUser extends Model
         'status',
     ];
 
-    // const STATUS_PENDING = 'pending';
-    // const STATUS_ACCEPTED = 'accepted';
-    // const STATUS_REJECTED = 'rejected';
-
-    // public static function statuses()
-    // {
-    //     return [
-    //         self::STATUS_PENDING,
-    //         self::STATUS_ACCEPTED,
-    //         self::STATUS_REJECTED,
-    //     ];
-    // }
 
     protected $casts = [
         'is_owner' => 'boolean',
@@ -60,6 +48,16 @@ class CollectionUser extends Model
     public function wallet()
     {
         return $this->hasOne(Wallet::class, 'user_id', 'id');
+    }
+
+    /**
+     * Relazione uno a molti con NotificationPayloadWallet
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function notificationPayloadWallets()
+    {
+        return $this->hasMany(NotificationPayloadWallet::class, 'receiver_id', 'user_id');
     }
 }
 

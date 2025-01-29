@@ -120,11 +120,15 @@ class Dashboard extends Component
         $this->pendingNotifications = Auth::user()
             ->customNotifications()
             ->where(function ($query) {
-                // $query->whereNull('read_at')
-                //       ->orWhere('outcome', 'pending');
                 $query->where('outcome', 'pending');
             })
             ->with('model') // Carica la relazione polimorfica (NotificationPayloadWallet, ecc.)
+            ->tap(function($query) {
+                Log::channel('florenceegi')->info('SQL Query:', [
+                    'sql' => $query->toSql(),
+                    'bindings' => $query->getBindings()
+                ]);
+            })
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(function ($notification) {
@@ -135,6 +139,10 @@ class Dashboard extends Component
 
                 return $notification;
             });
+
+        Log::channel('florenceegi')->info('Active notification:', [
+            'pendingNotifications' => $this->pendingNotifications,
+        ]);
 
 
         // Notifiche storiche
@@ -158,7 +166,7 @@ class Dashboard extends Component
 
         $type = $notification->type;
 
-        $message_to = $notification->data['proposer_id'];
+        $message_to = $notification->data['user_id'];
 
         $handler = NotificationHandlerFactory::getHandler($type);
         $handler->handle($message_to, $notification, $action);

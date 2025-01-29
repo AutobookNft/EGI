@@ -121,5 +121,14 @@ return [
         'creation_request_success' => 'La demande de création de wallet a été envoyée avec succès',
         'create_denied' => 'Vous n\'avez pas la permission de créer un wallet',
         'proposal_rejected' => 'Proposition rejetée',
+        'wallet_creation_request' => 'Vous avez reçu la proposition d\'un nouveau portefeuille',
+        'creation_error' => 'Erreur lors de la création du portefeuille',
+        'creation_error_generic' => 'Une erreur s\'est produite lors de la création du portefeuille.',
+        'confirmation_title' => 'Êtes-vous sûr ?',
+        'confirmation_text' => 'Voulez-vous supprimer la proposition de portefeuille ID : #{walletId} ?',
+        'confirm_delete' => 'Oui, supprimer !',
+        'cancel_delete' => 'Non, annuler',
+        'deletion_error' => 'Erreur lors de la suppression',
+        'deletion_error_generic' => 'Une erreur s\'est produite lors de la suppression.',
     ]
 ];

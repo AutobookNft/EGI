@@ -68,11 +68,15 @@ class AcceptProposalModal extends Component
         $this->notification['type'] = $proposal->type;
         $this->notification['reason'] = $this->reason;
         $this->notification['approver_user_id'] = $proposal->approver_user_id;
+        $this->notification['approver_user_name'] = $proposal->approver_user_name;
+        $this->notification['collection_name'] = $proposal->collection_name;
+        $this->notification['message'] = 'Proposta di collaborazione accettata.';
+        $this->notification['view'] = 'wallets.' . $proposal->type;
 
 
         /**
          * Gestione della compensazione del wallet del proposer
-         * 
+         *
          */
 
         // Invia la notifica di risposta

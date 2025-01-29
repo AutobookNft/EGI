@@ -30,11 +30,11 @@ trait HasPermissionTrait
             ->pluck('role')
             ->first();
 
-            Log::channel('florenceegi')->info('HasPermissionTraits: Debug Info', [
-                'User ID' => $user->id,
-                'Collection ID' => $collection->id,
-                'Role Name' => $roleName
-            ]);
+        Log::channel('florenceegi')->info('HasPermissionTraits: Debug Info', [
+            'User ID' => $user->id,
+            'Collection ID' => $collection->id,
+            'Role Name' => $roleName
+        ]);
 
         if (!$roleName) {
             // Lancia un'eccezione se l'utente non è associato alla collezione

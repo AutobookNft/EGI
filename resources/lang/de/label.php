@@ -8,6 +8,11 @@
 
 
 return [
+    'created_at' => 'Erstellt am',
+    'no_action_available' => 'Keine Aktion verfügbar',
+    'accept' => 'Akzeptieren',
+    'decline' => 'Ablehnen',
+    'unauthorized_action' => 'Sie sind nicht berechtigt, diese Art von Aktion auszuführen',
     'came_to_back' => 'Zurück',
     "file_deleted_successfully" => "Datei erfolgreich gelöscht",
     'extension_not_allowed' => 'Erweiterung nicht erlaubt!',
@@ -70,6 +75,7 @@ return [
     'wait_for_the_files_to_load' => 'Warten Sie, bis die Dateien geladen sind',
     'access_the_control_panel' => 'Zugriff auf das Kontrollfeld',
     'of' => 'von',
+    'from' => 'von',
     'errors_in_the_files' => 'Fehler in den Dateien',
     'loading' => 'Laden...',
     'utilities_image_file' => 'Dienstprogramme, Bild- und Datei-Upload',

@@ -80,6 +80,17 @@ class NotificationPayloadWallet extends Model
         return $this->belongsTo(Wallet::class);
     }
 
+
+    public function getModelType(): string
+    {
+        return static::class;
+    }
+
+    public function getModelId(): int
+    {
+        return $this->id;
+    }
+
     /**
      * Relazione polimorfica con il modello CustomDatabaseNotification.
      * si tratta di un modello per peronsalizzare Notification
@@ -105,6 +116,16 @@ class NotificationPayloadWallet extends Model
     public function receiver()
     {
         return $this->belongsTo(User::class, 'receiver_id');
+    }
+
+    /**
+     * Relazione con CollectionUser
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function collectionUser()
+    {
+        return $this->belongsTo(CollectionUser::class, 'receiver_id', 'user_id');
     }
 
 
