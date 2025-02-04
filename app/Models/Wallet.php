@@ -17,6 +17,7 @@ class Wallet extends Model
         'royalty_rebind',
         'is_anonymous',
         'metadata',
+        'platform_role',
     ];
 
     protected $casts = [

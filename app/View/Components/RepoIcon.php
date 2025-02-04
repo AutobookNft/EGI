@@ -15,7 +15,7 @@ class RepoIcon extends Component
         public ?string $class = null
     ) {
         $repository = app(IconRepository::class);
-        Log::channel('florenceegi')->info('RepoIcon: icon name: ' . $name);
+        // Log::channel('florenceegi')->info('RepoIcon: icon name: ' . $name);
         $this->iconHtml = $repository->getIcon($name, 'elegant', $class);
     }
 

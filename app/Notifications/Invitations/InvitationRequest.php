@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Notifications;
+namespace App\Notifications\Invitations;
 
 use App\Notifications\Channels\CustomDatabaseChannel;
 use Illuminate\Notifications\Notification;
@@ -31,14 +31,17 @@ class InvitationRequest extends Notification
         return [
             'model_type'    => $this->notification->model_type, // Esempio: App\Models\WalletChangeApproval
             'model_id'      => $this->notification->model_id,   // L'ID del record
-            'view'          =>  $this->notification->view,
-            'data'          => [
-                'message'       => $this->notification->message,
-                'user_name'     => $this->notification->proposer_name,
-                'user_id'       => $this->notification->proposer_id,
-                'collection_name' => $this->notification->collection_name,
-                ],
-            'outcome' => $this->notification->status,
+            'view'          => $this->notification->view,
+            'sender_id'     => $this->notification->proposer_id,
+
+            'data'        => [
+               'message'   => $this->notification->message,
+               'sender'   => $this->notification->proposer_name,
+               'email'    => $this->notification->proposer_email,
+               'collection_name'  => $this->notification->collection_name,
+            ],
+
+            'outcome' => $this->notification->status
         ];
     }
 }

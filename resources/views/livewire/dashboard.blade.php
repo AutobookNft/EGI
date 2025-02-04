@@ -100,18 +100,27 @@
                         // Estrai i valori view e render dalla configurazione, con fallback ai valori predefiniti
                         $view = $config['view'] ?? null;
                         $render = $config['render'] ?? 'livewire';
+
+                        Log::channel('florenceegi')->info('view debug', [
+                            'viewKey' => $viewKey,
+                            'view' => $view,
+                            'config' => $config,
+                            'notification' => $notification,
+                        ]);
                     @endphp
 
+                    @dump($view)
                     @if($view)
+
                         @if($render === 'livewire')
-                            @livewire($view, ['notification' => $notification])
+                            @livewire($view, ['notification' => $notification], key('notif-'.$notification->id))
                         @elseif($render === 'include')
                             @include($view, ['notification' => $notification])
                         @endif
                     @else
-                    <div class="text-red-500">
-                       {{ __('Tipo di notifica non supportata' )}}: {{ $view }}
-                    </div>
+                        <div class="text-red-500">
+                        {{ __('Tipo di notifica non supportata' )}}: {{ $view }}
+                        </div>
                     @endif
                 </div>
             @endif
@@ -129,6 +138,6 @@
     <!-- Notifiche Storiche -->
     @include('livewire.partials.notification-history')
 
-    <livewire:proposals.decline-proposal-modal />
+    <livewire:notifications.wallets.decline-proposal-modal />
 
 </div>

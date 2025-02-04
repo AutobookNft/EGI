@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Collections;
+namespace App\Livewire\Notifications\Invitations;
 
 use App\Models\Collection;
 use App\Services\InvitationService;
@@ -109,6 +109,6 @@ class InviteUserToCollectionModal extends Component
 
     public function render()
     {
-        return view('livewire.collections.invite-user-to-collection-modal');
+        return view('livewire.notifications.invitations.invite-user-to-collection-modal');
     }
 }

@@ -148,6 +148,7 @@ return [
         'remove_error_message' => 'Si è verificato un errore durante la rimozione del collaboratore',
         'remove_error_button' => 'Chiudi',
         'add_error' => 'Errore durante l\'aggiunta del collaboratore',
+        'proposal_rejected' => 'Proposta di collaborazione rifiutata',
+        'proposal_accepted' => 'Proposta di collaborazione accettata',
     ]
-
 ];

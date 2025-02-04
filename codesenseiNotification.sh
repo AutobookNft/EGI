@@ -33,6 +33,7 @@ resources_dirs=(
     "livewire/notifications"
     "livewire/partials"
     "livewire/proposal"
+    "livewire/collections"
     "notifications"
     "partials"
 )

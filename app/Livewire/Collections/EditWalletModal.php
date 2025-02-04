@@ -2,25 +2,24 @@
 
 namespace App\Livewire\Collections;
 
-use App\Enums\WalletStatus;
+use App\Enums\NotificationStatus;
+
 use App\Models\Collection;
 use App\Models\NotificationPayloadWallet;
-use App\Notifications\WalletChangeRequestCreation;
-use App\Notifications\WalletChangeResponseApproval;
-use App\Notifications\WalletChangeResponseRejection;
+
 use App\Services\Notifications\NotificationHandlerFactory;
 use App\Services\Notifications\WalletChangeRequestHandler;
 use App\Services\Notifications\WalletNotificationHandler;
-use Illuminate\Support\Facades\Notification;
+
 use App\Models\User;
 use App\Models\Wallet;
-use App\Models\WalletChangeApproval;
+
 use App\Traits\HasPermissionTrait;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 use Livewire\Attributes\On;
-use App\Rules\ValidWalletAddress;
+
 use Illuminate\Http\Request;
 
 class EditWalletModal extends Component
@@ -91,7 +90,7 @@ class EditWalletModal extends Component
 
         $walletAddress = $request->input('wallet_address');
         $collectionId = $request->input('collection_id');
-        $userId = $request->input('user_id');
+        $userId = $request->input('user_id'); // receiver
 
         Log::channel('florenceegi')->info('createNewWallet', [
             'collectionId' => $collectionId,
@@ -137,7 +136,7 @@ class EditWalletModal extends Component
         ]);
 
         // Verifica e aggiorna la quota del creator
-        $this->validateAndAdjustCreatorQuota($collection, $royaltyMint, $royaltyRebind);
+        $this->validateCreatorQuota($collectionId, $royaltyMint, $royaltyRebind);
 
         // Crea una proposta di wallet
         $this->proposeNewWallet($collection, $userId, $royaltyMint, $royaltyRebind, $walletAddress);
@@ -147,8 +146,66 @@ class EditWalletModal extends Component
         session()->flash('message', __('collection.wallet.creation_request_success'));
 
         return response()->json(['message' => __('collection.wallet.creation_request_success'), 'success' => true]);
+    }
 
+    public function proposeNewWallet($collection, $userId, $royaltyMint, $royaltyRebind, $walletAddress)
+    {
 
+        $receiver = User::findOrFail($userId);
+
+        $type = NotificationStatus::CREATION->value;
+        $status = NotificationStatus::PENDING_CREATE->value;
+
+        $data = [
+            'proposer_id' => Auth::user()->id, // Chi inoltra la richiesta
+            'receiver_id' => $userId, // Chi deve approvare la richiesta
+            'collection_id' => $collection->id,
+            'wallet' => $walletAddress,
+            'royalty_mint' =>$royaltyMint,
+            'royalty_rebind' => $royaltyRebind,
+            'status' => $status, // Stato della richiesta, può essere "pending", "accepted", "rejected"
+            'type' => $type, // Tipo di richiesta, può essere "creation" o "update" (Il wallet può essere creato ex novo oppure può essere modificato, ecco il perché della distinzione con type)
+        ];
+
+        Log::channel('florenceegi')->info('EditWalletModal:dati di payload', $data);
+
+        // Creazione del payload della proposta,
+        $walletPayload = NotificationPayloadWallet::create($data);
+
+        $walletPayload['collection_name'] = $collection->collection_name;
+        $walletPayload['proposer_name'] = Auth::user()->name . ' ' . Auth::user()->last_name; // Nome di chi fa la proposta
+        $walletPayload['model_id'] = $walletPayload->id;
+        $walletPayload['model_type'] = get_class($walletPayload);
+        $walletPayload['message'] = __('collection.wallet.wallet_creation_request');
+        $walletPayload['view'] = 'wallets.' . $type; // La vista da mostrare
+
+        // Usa la factory per inviare la notifica con l'action "proposal"
+        $handler = NotificationHandlerFactory::getHandler(WalletNotificationHandler::class);
+        $handler->handle($receiver, $walletPayload);
+    }
+
+    public function validateCreatorQuota($collectionId, $newMint, $newRebind,)
+    {
+
+        $proposer_id = Auth::user()->id;
+
+        Log::channel('florenceegi')->info('EditWalletModal:validateAndAdjustCreatorQuota', [
+            'collection_id' => $collectionId,
+            'proposer_id' => $proposer_id,
+        ]);
+
+        $creatorWallet = Wallet::where('collection_id', $collectionId)
+                            ->where('user_id', $proposer_id)
+                            ->first();
+
+        if (!$creatorWallet) {
+            throw new \Exception(__('collection.wallet.creator_wallet_not_found'));
+        }
+
+        // Verifica se il creator ha abbastanza quota disponibile
+        if ($creatorWallet->royalty_mint < $newMint || $creatorWallet->royalty_rebind < $newRebind) {
+            throw new \Exception(__('collection.wallet.creator_does_not_have_enough_quota_to_allocate'));
+        }
     }
 
     public function saveWallet()
@@ -222,63 +279,7 @@ class EditWalletModal extends Component
         return $maxValue - $newSum;
     }
 
-    public function validateAndAdjustCreatorQuota($collection, $newMint, $newRebind)
-    {
 
-        $creatorWallet = Wallet::where('collection_id', $collection->id)
-                            ->where('user_id', $collection->creator_id)
-                            ->first();
-
-        if (!$creatorWallet) {
-            throw new \Exception(__('collection.wallet.creator_wallet_not_found'));
-        }
-
-        // Verifica se il creator ha abbastanza quota disponibile
-        if ($creatorWallet->royalty_mint < $newMint || $creatorWallet->royalty_rebind < $newRebind) {
-            throw new \Exception(__('collection.wallet.creator_does_not_have_enough_quota_to_allocate'));
-        }
-
-        // Riduci la quota del creator
-        // $creatorWallet->update([
-        //     'royalty_mint' => $creatorWallet->royalty_mint - $newMint,
-        //     'royalty_rebind' => $creatorWallet->royalty_rebind - $newRebind,
-        // ]);
-    }
-
-    public function proposeNewWallet($collection, $userId, $royaltyMint, $royaltyRebind, $walletAddress)
-    {
-
-        $receiver = User::findOrFail($userId);
-
-        $type = WalletStatus::CREATION->value;
-        $status = WalletStatus::PENDING->value;
-
-        $data = [
-            'proposer_id' => Auth::user()->id, // Chi inoltra la richiesta
-            'receiver_id' => $userId, // Chi deve approvare la richiesta
-            'wallet' => $walletAddress,
-            'royalty_mint' =>$royaltyMint,
-            'royalty_rebind' => $royaltyRebind,
-            'type' => $type,
-            'status' => $status,
-        ];
-
-        Log::channel('florenceegi')->info('EditWalletModal:dati di payload', $data);
-
-        // Creazione del payload della proposta,
-        $walletPayload = NotificationPayloadWallet::create($data);
-
-        $walletPayload['collection_name'] = $collection->collection_name;
-        $walletPayload['proposer_name'] = Auth::user()->name . ' ' . Auth::user()->last_name; // Nome di chi fa la proposta
-        $walletPayload['model_id'] = $walletPayload->id;
-        $walletPayload['model_type'] = get_class($walletPayload);
-        $walletPayload['message'] = __('collection.wallet.wallet_creation_request');
-        $walletPayload['view'] = 'wallets.' . $type; // La vista da mostrare
-
-        // Usa la factory per inviare la notifica con l'action "proposal"
-        $handler = NotificationHandlerFactory::getHandler(WalletNotificationHandler::class);
-        $handler->handle($receiver, $walletPayload);
-    }
 
     /**
      * Summary of approveChange

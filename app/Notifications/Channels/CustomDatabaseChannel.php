@@ -3,6 +3,8 @@
 namespace App\Notifications\Channels;
 
 use App\Enums\InvitationStatus;
+use App\Enums\NotificationStatus;
+use App\Enums\WalletStatus;
 use App\Models\CustomDatabaseNotification;
 use App\Models\Notification as ModelsNotification;
 use Illuminate\Notifications\Notification;
@@ -19,7 +21,7 @@ class CustomDatabaseChannel
         $notification_prevId = $data['prev_id'] ?? null;
 
         Log::channel('florenceegi')->info('CustomDatabaseChannel:send', [
-            'notification_prevId' => $notification_prevId,
+            'data' => $data,
         ]);
 
 
@@ -34,8 +36,10 @@ class CustomDatabaseChannel
 
         // Mappatura delle classi di notifica agli stati di InvitationStatus
         $actionMap = [
-            'App\\Notifications\\InvitationAccepted' => InvitationStatus::ACCEPTED,
-            'App\\Notifications\\InvitationRejection' => InvitationStatus::REJECTED,
+            'App\\Notifications\\Invitations\\InvitationAccepted' => NotificationStatus::ACCEPTED,
+            'App\\Notifications\\Invitations\\InvitationRejection' => NotificationStatus::REJECTED,
+            'App\\Notifications\\Wallets\\WalletRejection' => NotificationStatus::REJECTED,
+            'App\\Notifications\\Wallets\\WalletAccepted' => NotificationStatus::ACCEPTED,
         ];
 
         // Controlla se l'azione corrisponde a una chiave nella mappatura
@@ -44,7 +48,7 @@ class CustomDatabaseChannel
         }
 
         // Se l'azione è ACCEPTED o REJECTED, aggiorna la notifica precedente
-        if ($action === InvitationStatus::ACCEPTED || $action === InvitationStatus::REJECTED) {
+        if ($action === NotificationStatus::ACCEPTED || $action === NotificationStatus  ::REJECTED) {
             Log::channel('florenceegi')->info('Notifica precedente aggiornata', [
                 'notification->id' => $notification->id,
             ]);
@@ -64,10 +68,10 @@ class CustomDatabaseChannel
             'view'           => $data['view'],
             'notifiable_type'=> get_class($notifiable),
             'notifiable_id'  => $notifiable->getKey(),
+            'sender_id'      => $data['sender_id'] ?? null,
             'model_type'     => $data['model_type'],
             'model_id'       => $data['model_id'],
             'data'           => $data['data'] ?? [],
-            'read_at'        => $data['read_at'] ?? null,
             'outcome'        => $data['outcome'] ?? null,
         ]);
 

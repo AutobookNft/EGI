@@ -24,37 +24,36 @@
 
                                 <!-- Contenuto del Collapse -->
                                 <div class="collapse-content peer-checked:block hidden">
-                                    <p class="text-sm text-gray-300">
+                                    <h3 class="text-md text-gray-300">
                                         {{ __('notification.reply') }}:
-                                        <span class="font-bold {{ $notification->outcome === 'declined' ? 'text-red-500' : 'text-green-500' }}">
+                                        <span class="font-bold {{ $notification->outcome === 'rejected' ? 'text-red-500' : 'text-green-500' }}">
                                             {{ ucfirst($notification->outcome) }}
                                         </span>
-                                    </p>
+                                    </h3>
+
+                                    <div class="m-2"></div> <!-- Spazio vuoto -->
 
                                     <!-- Controlliamo che ci siano dettagli della proposta -->
-                                    @if($notification->approval_details)
-                                        <p class="text-sm text-gray-300">
-                                            {{ __('collection.wallet.wallet_address') }}:
-                                            <span class="font-bold">{{ $notification->approval_details->wallet_address }}</span>
-                                        </p>
-                                        <p class="text-sm text-gray-300">
-                                            {{ __('collection.wallet.royalty_mint') }}:
-                                            <span class="font-bold">{{ $notification->approval_details->royalty_mint . '%' }}</span>
-                                        </p>
-                                        <p class="text-sm text-gray-300">
-                                            {{ __('collection.wallet.royalty_rebind') }}:
-                                            <span class="font-bold">{{ $notification->approval_details->royalty_rebind . '%' }}</span>
-                                        </p>
-                                        <p class="text-sm text-gray-300">
-                                            {{ __('notification.status') }}:
-                                            <span class="font-bold">{{ ucfirst($notification->approval_details->status) }}</span>
-                                        </p>
-                                        <p class="text-sm text-gray-300">
-                                            {{ __('notification.type') }}:
-                                            <span class="font-bold">{{ ucfirst($notification->approval_details->change_type) }}</span>
-                                        </p>
+                                    @if(isset($notification->data) && is_array($notification->data))
+                                        <div class="bg-gray-800 text-white p-4 rounded-lg shadow-md">
+                                            <h3 class="text-md font-bold mb-2 text-yellow-400">Dati della Notifica</h3>
+                                            <ul class="space-y-1">
+                                                @foreach ($notification->data as $key => $value)
+                                                    @if($key !=="message")
+                                                        <li class="border-b border-gray-700 py-1 text-sm">
+                                                            <strong class="text-green-400">{{ ucfirst(str_replace('_', ' ', $key)) }}:</strong>
+                                                            @if(is_array($value) || is_object($value))
+                                                                <pre class="text-gray-300 bg-gray-900 p-2 rounded">{{ json_encode($value, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
+                                                            @else
+                                                                <span class="text-gray-200">{{ $value ?? 'N/A' }}</span>
+                                                            @endif
+                                                        </li>
+                                                    @endif
+                                                @endforeach
+                                            </ul>
+                                        </div>
                                     @else
-                                        <p class="text-sm text-gray-300">{{ __('notification.no_details_available') }}</p>
+                                        <p class="text-red-500">Nessun dato disponibile.</p>
                                     @endif
                                 </div>
                             </div>

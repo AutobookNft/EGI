@@ -8,6 +8,7 @@
 
 
 return [
+    'message' => 'Message',
     'created_at' => 'Created at',
     'no_action_available' => 'No action available',
     'accept' => 'Accept',

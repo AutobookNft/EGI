@@ -24,11 +24,11 @@ class CheckCollectionPermission
         // Recupera l'utente autenticato
         $user = Auth::user();
 
-        Log::channel('florenceegi')->info('Middleware: CheckCollectionPermission', [
-            'user_id' => $user->id,
-            'permission' => $permission,
-            'user_name' => $user->name,
-        ]);
+        // Log::channel('florenceegi')->info('Middleware: CheckCollectionPermission', [
+        //     'user_id' => $user->id,
+        //     'permission' => $permission,
+        //     'user_name' => $user->name,
+        // ]);
 
         // Verifica se la rotta è 'collections.open'
         $rotta = $request->route()->getName();
@@ -67,16 +67,16 @@ class CheckCollectionPermission
         // Recupera il ruolo dell'utente nella collection
         $roleName = $membership->pivot->role;
 
-        Log::channel('florenceegi')->info('Middleware: CheckCollectionPermission', [
-            'collection_id' => $collection->id,
-            'role_name' => $roleName,
-        ]);
+        // Log::channel('florenceegi')->info('Middleware: CheckCollectionPermission', [
+        //     'collection_id' => $collection->id,
+        //     'role_name' => $roleName,
+        // ]);
 
         // Verifica se il ruolo esiste in Spatie
         $role = Role::where('name', $roleName)->first();
-        log::channel('florenceegi')->info('Middleware: CheckCollectionPermission', [
-            'role' => $role,
-        ]);
+        // log::channel('florenceegi')->info('Middleware: CheckCollectionPermission', [
+        //     'role' => $role,
+        // ]);
 
         if (!$role) {
             abort(403, 'Ruolo non valido.');

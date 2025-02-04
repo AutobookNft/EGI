@@ -4,7 +4,7 @@
 namespace App\Services\Notifications;
 
 use App\Contracts\NotificationHandlerInterface;
-use App\Enums\WalletStatus;
+use App\Enums\NotificationStatus;
 use App\Models\User;
 use App\Notifications\Wallets\WalletAccepted;
 use App\Notifications\Wallets\WalletCreation;
@@ -19,16 +19,21 @@ class WalletNotificationHandler implements NotificationHandlerInterface
     public function handle(User $message_to, $notification)
     {
 
-        $action = WalletStatus::fromDatabase($notification->type);
+        $action = NotificationStatus::fromDatabase(value: $notification->status);
+
+        Log::channel('florenceegi')->info('WalletNotificationHandler', [
+            '$action' =>$action
+        ]);
+
 
         try {
-            if (WalletStatus::CREATION->value === $action->value) {
+            if (NotificationStatus::PENDING_CREATE->value === $action->value) {
                 Notification::send($message_to, new WalletCreation($notification));
-            } elseif (WalletStatus::UPDATE->value === $action->value) {
+            } elseif (NotificationStatus::PENDING_UPDATE->value === $action->value) {
                 Notification::send($message_to, new WalletUpdate($notification));
-            } elseif (WalletStatus::ACCEPTED->value === $action->value) {
+            } elseif (NotificationStatus::ACCEPTED->value === $action->value) {
                 Notification::send($message_to, new WalletAccepted($notification));
-            } elseif (WalletStatus::REJECTED->value === $action->value) {
+            } elseif (NotificationStatus::REJECTED->value === $action->value) {
                 Notification::send($message_to, new WalletRejection($notification));
             }
         } catch (\Exception $e) {

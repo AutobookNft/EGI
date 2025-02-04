@@ -32,6 +32,12 @@ Route::get('/phpinfo', function () {
     phpinfo();
 });
 
+use Livewire\Livewire;
+
+Route::get('/debug/livewire/{component}', function ($component) {
+    return Livewire::test($component)->render();
+});
+
 // Rotte protette da middleware
 Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified'])
     ->group(function () {
@@ -130,4 +136,10 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
 Route::post('/wallets/create', [EditWalletModal::class, 'createNewWallet'])
     ->name('wallets.create')
     ->middleware(['can:create_wallet']);
+
+    // Rotta per eliminare una proposal invitation
+Route::delete('/invitations/{invitationId}', [CollectionUserMember::class, 'deleteProposalInvitation'])
+    ->name('invitations.delete')
+    ->middleware(['collection_can:add_team_member']);
+
 

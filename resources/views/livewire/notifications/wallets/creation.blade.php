@@ -26,25 +26,35 @@
                 </div>
             </div>
 
-
             <!-- Dettagli Principali -->
             <div class="space-y-3">
                 @if($notification->approval_details)
-
                     @php
                         // Associa ogni status a una classe CSS per il colore
                         switch ($notification->approval_details->status) {
+                            case 'pending_create':
+                                $statusClass = 'text-yellow-500';
+                                $status = 'pending';
+                                break;
+                            case 'pending_update':
+                                $statusClass = 'text-yellow-500';
+                                $status = 'pending';
+                                break;
                             case 'pending':
                                 $statusClass = 'text-yellow-500';
+                                $status = 'pending';
                                 break;
                             case 'accepted':
                                 $statusClass = 'text-green-500';
+                                $status = 'accepted';
                                 break;
                             case 'rejected':
                                 $statusClass = 'text-red-500';
+                                $status = 'rejected';
                                 break;
                             default:
                                 $statusClass = 'text-gray-300';
+                                $status = 'unknown';
                         }
                     @endphp
 
@@ -55,9 +65,10 @@
                                 {{ $notification->approval_details->wallet }}
                             </p>
                         </div>
+
                         <div class="bg-gray-700 p-3 rounded">
                             <p class="text-sm text-gray-400 mb-1">{{ __('collection.wallet.status') }}</p>
-                            <p class="text-sm {{ $statusClass }}">{{ ucfirst($notification->approval_details->status) }}</p>
+                            <p class="text-sm {{ $statusClass }}">{{ $status }}</p>
                         </div>
                         <div class="bg-gray-700 p-3 rounded">
                             <p class="text-sm text-gray-400 mb-1">{{ __('collection.wallet.royalty_mint') }}</p>
@@ -82,30 +93,32 @@
 
         <!-- Contenitore dei Bottoni -->
         @if (isset($notification->approval_details) && $notification->approval_details->type === 'creation')
-            <div class="flex flex-col space-y-2 md:w-auto">
-                <button wire:click="handleNotificationAction('{{ $notification->id }}', 'accept')"
-                    class="flex items-center justify-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-md transition-colors duration-150"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                    </svg>
-                    {{ __('label.accept') }}
-                </button>
+            <div class="flex space-x-3 mb-3">
+                <div class="flex space-x-3 mb-3">
+                    <button
+                        id="accept-invitation"
+                        {{-- wire:dispatch="response('accepted')" --}}
+                        class="flex-1 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        {{ __('Accept') }}
+                    </button>
 
-                <button wire:click="openDeclineModal({{ json_encode([
+                    <button wire:click="openDeclineModal({{ json_encode([
                         'id' => $notification->id,
-                        'notification_payload_wallet_id' => $notification->approval_details->id ?? null,
                         'data' => $notification['data'],
                         'message' => $notification['data']['message'],
                         'model_id' => $notification->model_id ?? null,
+                        'model_type' => $notification->model_type ?? null,
                     ]) }})"
-                    class="flex items-center justify-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-md transition-colors duration-150"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                    </svg>
-                    {{ __('label.decline') }}
-                </button>
+                        class="flex-1 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        {{ __('Decline') }}
+                    </button>
+                </div>
             </div>
         @else
             <p class="text-gray-400">{{ __('notification.show_processed_notifications') }}</p>
@@ -113,18 +126,20 @@
     </div>
 </div>
 
+
+
 @script
 <script>
 
     const acceptButton = document.getElementById('accept-invitation');
-    const rejectButton = document.getElementById('reject-invitation');
+    // const rejectButton = document.getElementById('reject-invitation');
 
     // Gestione messaggio di conferma per accettare
     acceptButton.addEventListener('click', function (event) {
         event.preventDefault();
         Swal.fire({
             title: 'Sei sicuro?',
-            text: 'Accettando entrerai nel team della collection.',
+            text: 'Accettando accetterai le condizioni del wallet.',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonText: 'Sì, accetto!',
@@ -136,39 +151,39 @@
             buttonsStyling: false
         }).then((result) => {
             if (result.isConfirmed) {
-                console.log('Invito accettato!');
+                console.log('Nuovo Wallet accettato!');
                 $wire.dispatch('response', { option: 'accepted' });
             }
         });
     });
 
     // Gestione messaggio di conferma per rifiutare
-    rejectButton.addEventListener('click', function (event) {
-        event.preventDefault();
-        Swal.fire({
-            title: 'Sei sicuro?',
-            text: 'Rifiutando non entrerai nel team della collection.',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Sì, rifiuto!',
-            cancelButtonText: 'No, annulla',
-            customClass: {
-                confirmButton: 'btn btn-danger',
-                cancelButton: 'btn btn-secondary'
-            },
-            buttonsStyling: false
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $wire.dispatch('response', { option: 'rejected' });
-            }
-        });
-    });
+    // rejectButton.addEventListener('click', function (event) {
+    //     event.preventDefault();
+    //     Swal.fire({
+    //         title: 'Sei sicuro?',
+    //         text: 'Rifiutando non beneficerai di questo wallet.',
+    //         icon: 'warning',
+    //         showCancelButton: true,
+    //         confirmButtonText: 'Sì, rifiuto!',
+    //         cancelButtonText: 'No, annulla',
+    //         customClass: {
+    //             confirmButton: 'btn btn-danger',
+    //             cancelButton: 'btn btn-secondary'
+    //         },
+    //         buttonsStyling: false
+    //     }).then((result) => {
+    //         if (result.isConfirmed) {
+    //             $wire.dispatch('response', { option: 'rejected' });
+    //         }
+    //     });
+    // });
 
     // Ascolta la risposta dal backend
     $wire.on('notification-response', (event) => {
         if (event.detail.success) {
             Swal.fire(
-                event.detail.option === 'accept' ? 'Invito accettato!' : 'Invito rifiutato!',
+                event.detail.option === 'accept' ? 'Nuovo Wallet accettato!' : 'Nuovo Wallet rifiutato!',
                 'Operazione completata con successo.',
                 'success'
             );
@@ -182,4 +197,5 @@
     });
 </script>
 @endscript
+
 

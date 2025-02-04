@@ -29,10 +29,10 @@ class IconRepository
         return Cache::tags(['icons'])->remember($cacheKey, 3600, function () use ($name, $style, $customClass) {
 
             $query_icon = Icon::where('name', $name)->where('style', "=",$style)->first();
-            Log::channel('florenceegi')->info("IconRepository: query_icon: $query_icon");
+            // Log::channel('florenceegi')->info("IconRepository: query_icon: $query_icon");
 
             if (!$query_icon) {
-                Log::warning("Icona non trovata: $name ($style)");
+                Log::channel('florenceegi')->warning("Icona non trovata: $name ($style)");
                 return 'fallback';
             }
 

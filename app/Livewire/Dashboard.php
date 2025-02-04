@@ -2,13 +2,15 @@
 
 namespace App\Livewire;
 
-use App\Models\NotificationPayloadWallet;
-use App\Models\WalletChangeApproval;
+use App\Models\CustomDatabaseNotification;
+use App\Models\User;
 use App\Services\Notifications\NotificationHandlerFactory;
 use Livewire\Component;
 use App\Models\Collection;
 use App\Models\CollectionUser;
+use App\Models\Notification;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\On;
 use Illuminate\Support\Facades\Log;
 
@@ -28,6 +30,9 @@ class Dashboard extends Component
 
     public function mount()
     {
+
+        Log::channel('florenceegi')->info('Dashboard: mount');
+
         $this->loadStats();
         $this->loadNotifications();
 
@@ -46,6 +51,14 @@ class Dashboard extends Component
         })
         ->where('user_id', '!=', Auth::id())
         ->count();
+
+
+        Log::channel('florenceegi')->info('Dashboard: loadStats', [
+            'collectionsCount' => $this->collectionsCount,
+            'collectionMembersCount' => $this->collectionMembersCount,
+        ]);
+
+
     }
 
     /**
@@ -86,9 +99,9 @@ class Dashboard extends Component
 
     public function openAcceptModal($notification)
     {
-        Log::channel('florenceegi')->info('Dashboard: openAcceptModal', [
-            'notification' => $notification,
-        ]);
+        // Log::channel('florenceegi')->info('Dashboard: openAcceptModal', [
+        //     'notification' => $notification,
+        // ]);
 
         // il listener si trova in app/Livewire/Proposals/AcceptProposalModal.php
         $this->dispatch('open-accept-modal', $notification);
@@ -116,46 +129,38 @@ class Dashboard extends Component
     public function loadNotifications()
     {
 
-        // Notifiche pendenti
+        Log::channel('florenceegi')->info('Dashboard: loadNotifications');
+
         $this->pendingNotifications = Auth::user()
-            ->customNotifications()
-            ->where(function ($query) {
-                $query->where('outcome', 'pending');
-            })
-            ->with('model') // Carica la relazione polimorfica (NotificationPayloadWallet, ecc.)
-            ->tap(function($query) {
-                Log::channel('florenceegi')->info('SQL Query:', [
-                    'sql' => $query->toSql(),
-                    'bindings' => $query->getBindings()
-                ]);
-            })
-            ->orderBy('created_at', 'desc')
-            ->get()
-            ->map(function ($notification) {
-                $notification->approval_details = $notification->model;
-                Log::channel('florenceegi')->info('Dashboard: loadNotifications', [
-                    'notification' => $notification,
-                ]);
+        ->customNotifications() // Assicura che qui usi la relazione su 'notifiable'
+        ->where(function ($query) {
+            $query->where('outcome', 'LIKE', '%pending%')
+                ->orWhere(function ($subQuery) {
+                    $subQuery->whereIn('outcome', ['accepted', 'rejected'])
+                            ->whereNull('read_at');
+                });
+        })
+        ->orderBy('created_at', 'desc')
+        ->with('model') // Carica il payload (Invitation o Wallet)
+        ->get();
 
-                return $notification;
-            });
 
-        Log::channel('florenceegi')->info('Active notification:', [
+        Log::channel('florenceegi')->info('Dashboard: loadNotifications', [
             'pendingNotifications' => $this->pendingNotifications,
         ]);
-
 
         // Notifiche storiche
         $this->historicalNotifications = Auth::user()
             ->customNotifications()
-            ->whereIn('outcome', ['accepted', 'rejected', 'done'])
+            ->whereNotNull('read_at') // Solo notifiche già lette
             ->with('model')
             ->orderBy('created_at', 'desc')
-            ->get()
-            ->map(function ($notification) {
-                $notification->approval_details = $notification->model;
-                return $notification;
-            });
+            ->get();
+
+        Log::channel('florenceegi')->info('Dashboard: loadNotifications', [
+            'historicalNotifications' => $this->historicalNotifications,
+        ]);
+
     }
 
     public function handleNotificationAction($notificationId, $action)
@@ -203,21 +208,37 @@ class Dashboard extends Component
 
     public function getActiveNotification()
     {
+
+        Log::channel('florenceegi')->info('Dashboard: getActiveNotification', [
+            'activeNotificationId' => $this->activeNotificationId,
+        ]);
+
         if (!$this->activeNotificationId) {
             return null;
         }
 
-        $notification = Auth::user()
-            ->customNotifications()
-            ->where('id', $this->activeNotificationId) // Filtra per l'ID specifico
-            ->with('model') // Carica la relazione polimorfica
-            ->first();
+        $notification = CustomDatabaseNotification::query()
+        ->where('id', $this->activeNotificationId) // Filtra per l'ID specifico
+        ->with('model') // Carica la relazione polimorfica
+        ->first();
+
+        // $notification = Auth::user()
+        //     ->customNotifications()
+        //     ->where('id', $this->activeNotificationId) // Filtra per l'ID specifico
+        //     ->with('model') // Carica la relazione polimorfica
+        //     ->first();
+
+
+
+        Log::channel('florenceegi')->info('Dashboard: getActiveNotification', [
+            'view' => $notification->view,
+        ]);
 
         if ($notification) {
             $notification->approval_details = $notification->model; // Aggiungi approval_details se necessario
-            Log::channel('florenceegi')->info('Notification loaded:', [
-                'notification' => $notification,
-            ]);
+            // Log::channel('florenceegi')->info('Notification loaded:', [
+            //     'notification' => $notification,
+            // ]);
         }
 
         // Se non trovata, cerca nelle notifiche storiche
@@ -225,14 +246,18 @@ class Dashboard extends Component
             $notification = $this->historicalNotifications->firstWhere('id', $this->activeNotificationId);
         }
 
+        Log::channel('florenceegi')->info('Dashboard: getActiveNotification', [
+            'notification' => $notification,
+        ]);
+
         return $notification;
     }
 
     public function render()
     {
         return view('livewire.dashboard', [
-            'pendingNotifications' => $this->pendingNotifications,
-            'historicalNotifications' => $this->historicalNotifications,
+            'pendingNotifications' => $this->pendingNotifications ?? [],
+            'historicalNotifications' => $this->historicalNotifications ?? [],
         ]);
     }
 }

@@ -3,19 +3,20 @@
 
 namespace App\Notifications\Wallets;
 
+use App\Enums\NotificationStatus;
 use App\Notifications\Channels\CustomDatabaseChannel;
 use Illuminate\Notifications\Notification;
 use Illuminate\Notifications\Messages\DatabaseMessage;
 
 class WalletRejection extends Notification
 {
-    private $walletChangeApproval;
+    private $notification;
     private $reason;
 
-    public function __construct($walletChangeApproval, $reason = null)
+    public function __construct($notification)
     {
-        $this->walletChangeApproval = $walletChangeApproval;
-        $this->reason = $reason;
+        $this->notification = $notification;
+        $this->reason = $notification->reason;
 
     }
 
@@ -27,22 +28,21 @@ class WalletRejection extends Notification
     public function toCustomDatabase($notifiable)
     {
 
-        $message = __('collection.wallet.wallet_change_rejected');
-
-        // Recupera il nome e il cognome dell'utente ricevente per inserirlo nel messaggio da reinviare al proponente,
-        // in questo modo il proponente sa chi ha rifiutato la sua proposta
-        $name = $this->walletChangeApproval->receiver->name ?? '';
-        $lastName = $this->walletChangeApproval->receiver->last_name ?? '';
-
         return [
-            'model_type' => get_class($this->walletChangeApproval),
-            'model_id'   => $this->walletChangeApproval->id,
-            'data' =>[
-                'message' => $message,
-                'reason' => $this->reason,
-                'user' => $name . ' ' . $lastName,
+            'model_type'        => $this->notification->model_type, // Esempio: App\Models\WalletChangeApproval
+            'model_id'          => $this->notification->model_id,   // L'ID del record
+            'view'              =>  $this->notification->view,
+            'prev_id'           => $this->notification->prev_id, // L'id di notification appartiene alla notifica di creazione, qui stiamo creando una notifica di accettazione e dobbiamo passare l'id della notifica di creazione per poterne aggiornare lo stato
+            'sender_id'         => $this->notification->receiver_id,
+            'data' => [
+                'message'       => $this->notification->message,
+                'reason'        => $this->reason,
+                'sender'     => $this->notification->proposer_name,
+                'email'    => $this->notification->proposer_email,
+                'collection_name' => $this->notification->collection_name,
             ],
-            'outcome' => 'rejected',
+
+            'outcome' => NotificationStatus::REJECTED->value,
         ];
     }
 }

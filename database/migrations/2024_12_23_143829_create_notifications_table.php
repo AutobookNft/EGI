@@ -17,10 +17,10 @@ return new class extends Migration
             $table->string('model_type', 255); // Modello polimorfico per i payloads
             $table->unsignedBigInteger('model_id'); // ID del modello polimorfico per i payloads
             $table->string('notifiable_type', 255); // Modello polimorfico
-            $table->unsignedBigInteger('notifiable_id'); // ID del modello polimorfico
+            $table->unsignedBigInteger('notifiable_id'); // ID del modello polimorfico. Se User, l'id corrisponde a chi riceve la notifica
+            $table->unsignedBigInteger('sender_id'); // ID di chi invia la notifica
             $table->text('data'); // Dati aggiuntivi in formato JSON
             $table->string('outcome', 25)->default('pending'); // Stato della notifica
-            $table->timestamp('archived')->nullable(); // Data di archiviazione
             $table->timestamp('read_at')->nullable(); // Data di lettura
             $table->timestamps(); // `created_at` e `updated_at`
         });

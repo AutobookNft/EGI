@@ -3,6 +3,7 @@
 namespace App\Livewire\Notifications\Invitations;
 
 use App\Enums\InvitationStatus;
+use App\Enums\NotificationStatus;
 use App\Models\CollectionUser;
 use App\Models\NotificationPayloadInvitation;
 use App\Models\User;
@@ -54,10 +55,14 @@ class Request extends Component
             DB::beginTransaction();
 
             // L'utente che ha proposto la collaborazione
-            $proposer_id = $this->notification->data['user_id'] ?? null;
+            $proposer_id = $this->notification->model->proposer_id ?? null;
 
-            // Si crea l'oggetto User da usare per inviare la notifica
+            // Si crea l'oggetto User da usare per inviare la notifica di risposta
             $message_to = User::find($proposer_id);
+
+            if (!$message_to) {
+                throw new Exception('Utente non trovato, id: ' . $proposer_id);
+            }
 
             // Si recupera l'oggetto NotificationPayloadInvitation creato al momento dell'invio della proposta
             $notificationPayloadInvitation = NotificationPayloadInvitation::find($this->notification->model_id);
@@ -76,7 +81,6 @@ class Request extends Component
             Log::channel('florenceegi')->info('InvitationResponse:response DOPO', [
                 'notification->id' => $this->notification->id,
             ]);
-
 
             // Conferma la transazione
             DB::commit();
@@ -117,14 +121,17 @@ class Request extends Component
             // Aggiorna lo stato dell'invito come approvato
             $notificationPayloadInvitation->handleApproval();
 
-            // L'utente che ha approvato l'invito
-            $user = Auth::user();
+            // L'utente che sta approvando l'invito
+            $receiver = Auth::user();
+
+            $metadata=""; // Eventuali dati aggiuntivi da salvare
 
             $data = [
                 'collection_id' => $notificationPayloadInvitation->collection_id,
-                'user_id' => $user->id,
+                'user_id' => $receiver->id,
                 'role' => $notificationPayloadInvitation->role,
-                'status' => InvitationStatus::ACCEPTED->value,
+                'joined_at' => now(), // Data di accettazione
+                'metadata' => $metadata,
             ];
 
             Log::channel('florenceegi')->info('Dati di payload', $data);
@@ -138,12 +145,13 @@ class Request extends Component
 
             // Aggiorna tutti i dati della notifica
             $this->notification['model_type'] = get_class($notificationPayloadInvitation);
-            $this->notification['status'] = InvitationStatus::ACCEPTED->value;
-            $this->notification['view'] = 'invitations.' . InvitationStatus::ACCEPTED->value;
-            $this->notification['message'] = __('Proposta di collaborazione approvata.');
+            $this->notification['status'] = NotificationStatus::ACCEPTED->value;
+            $this->notification['view'] = 'invitations.' . NotificationStatus::ACCEPTED->value;
+            $this->notification['message'] = __('collection.collaborators.proposal_approved');
             $this->notification['collection_name'] = $this->notification->data['collection_name'] ?? null;
-            $this->notification['receiver_id'] = $user->id;
-            $this->notification['receiver_name'] = $user->name . ' ' . $user->last_name;
+            $this->notification['receiver_id'] = $receiver->id;
+            $this->notification['receiver_name'] = $receiver->name . ' ' . $receiver->last_name;
+            $this->notification['receiver_email'] = $receiver->email;
 
         } catch (Exception $e) {
             Log::error('Errore durante l\'accettazione dell\'invito:', [
@@ -179,11 +187,15 @@ class Request extends Component
             }
 
             // Aggiorna lo stato della notifica
-            $this->notification['status'] = InvitationStatus::REJECTED->value;
-            $this->notification['view'] = 'invitations.' . InvitationStatus::REJECTED->value;
+            $this->notification['status'] = NotificationStatus::REJECTED->value;
+            $this->notification['view'] = 'invitations.' . NotificationStatus::REJECTED->value;
+            $this->notification['message'] = __('collection.collaborators.proposal_rejected');
             $this->notification['collection_name'] = $collectionName;
             $this->notification['receiver_name'] = $receiverName;
             $this->notification['receiver_id'] = $user->id;
+            $this->notification['receiver_name'] = $user->name . ' ' . $user->last_name;
+            $this->notification['receiver_email'] = $user->email;
+
 
             // Aggiungi un messaggio personalizzato
             $this->notification['message'] = __('Proposta di collaborazione rifiutata.');

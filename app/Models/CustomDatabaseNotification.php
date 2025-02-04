@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Facades\Log;
 
 class CustomDatabaseNotification extends DatabaseNotification
 {
@@ -15,6 +16,7 @@ class CustomDatabaseNotification extends DatabaseNotification
         'view',
         'notifiable_type',
         'notifiable_id',
+        'sender_id',
         'model_type',
         'model_id',
         'data',
@@ -26,7 +28,6 @@ class CustomDatabaseNotification extends DatabaseNotification
 
     public $incrementing = false; // se usi UUID
 
-
     /**
      * Summary of model
      * Relazione polimorfica la notifica viene associata a un modello specifico
@@ -37,7 +38,22 @@ class CustomDatabaseNotification extends DatabaseNotification
      */
     public function model(): MorphTo
     {
-        return $this->morphTo('model');
+        return $this->morphTo('model', 'model_type', 'model_id');
+    }
+
+    public function notifiable(): MorphTo
+    {
+        return $this->morphTo('notifiable', 'notifiable_type', 'notifiable_id');
+    }
+
+    /**
+     * Recupera il wallet associato alla notifica.
+     *
+     * @return string|null
+     */
+    public function getWalletAttribute(): ?string
+    {
+        return $this->model instanceof NotificationPayloadWallet ? $this->model->wallet : null;
     }
 
 }

@@ -2,13 +2,17 @@
 
 namespace App\Livewire\Notifications\Wallets;
 
+use App\Enums\NotificationStatus;
+use App\Enums\PlatformRole;
 use App\Enums\WalletStatus;
 use App\Models\CollectionUser;
 use App\Models\NotificationPayloadWallet;
 use App\Models\User;
+use App\Models\Wallet;
 use App\Services\Notifications\NotificationHandlerFactory;
 use App\Services\Notifications\WalletNotificationHandler;
 use Exception;
+use Livewire\Attributes\On;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -17,6 +21,7 @@ use Livewire\Component;
 class Creation extends Component
 {
     public $notification;
+    protected $userName;
 
     public function mount($notification)
     {
@@ -43,7 +48,7 @@ class Creation extends Component
      * - In caso di errore, tutte le operazioni vengono annullate e l'eccezione è loggata.
      * - Il metodo utilizza la factory NotificationHandlerFactory per gestire l'invio della notifica.
      */
-    
+    #[On('response')]
     public function response($option)
     {
 
@@ -53,11 +58,18 @@ class Creation extends Component
 
             // L'utente che ha proposto il wallet
             $proposer_id = $this->notification->data['user_id'] ?? null;
+            $prev_id = $this->notification->id; // L'id di notification appartiene alla notifica di creazione, qui stiamo creando una notifica di accettazione e dobbiamo passare l'id della notifica di creazione per poterne aggiornare lo stato
+
+            Log::channel('florenceegi')->info('WalletResponse: response PRIMA', [
+                'notification->id' => $this->notification->id,
+            ]);
 
             // Si crea l'oggetto User da usare per inviare la notifica
             $message_to = User::find($proposer_id);
 
-            // Si recupera l'oggetto NotificationPayloadInvitation creato al momento dell'invio della proposta
+            $this->userName = Auth::user()->name . ' ' . Auth::user()->last_name;
+
+            // Si recupera l'oggetto NotificationPayloadWallet creato al momento dell'invio della proposta
             $notificationPayloadWallet = NotificationPayloadWallet::find($this->notification->model_id);
 
             // Accetta o rifiuta l'invito
@@ -67,9 +79,16 @@ class Creation extends Component
                 $this->reject($notificationPayloadWallet);
             }
 
+            $notificationPayloadWallet['proposer_name'] = Auth::user()->name . ' ' . Auth::user()->last_name; // Nome di chi fa la proposta
+            $notificationPayloadWallet['model_id'] = $notificationPayloadWallet->id;
+            $notificationPayloadWallet['model_type'] = get_class($notificationPayloadWallet);
+            $notificationPayloadWallet['message'] = __('collection.wallet.wallet_change_accepted');
+            $notificationPayloadWallet['view'] = 'wallets.' . NotificationStatus::ACCEPTED->value; // La vista da mostrare
+            $notificationPayloadWallet['prev_id'] = $prev_id;
+
             // Invia la notifica
             $handler = NotificationHandlerFactory::getHandler(WalletNotificationHandler::class);
-            $handler->handle($message_to, $this->notification);
+            $handler->handle($message_to, $notificationPayloadWallet);
 
             Log::channel('florenceegi')->info('WalletResponse: response DOPO', [
                 'notification->id' => $this->notification->id,
@@ -107,41 +126,20 @@ class Creation extends Component
         ]);
 
         // Validazione preliminare del payload
-        if (!$notificationPayloadWallet || !$notificationPayloadWallet->collection_id || !$notificationPayloadWallet->role) {
+        if (!$notificationPayloadWallet || !$notificationPayloadWallet->collection_id) {
             throw new Exception('Dati mancanti nel payload dell\'invito.');
         }
 
         try {
-            // Aggiorna lo stato dell'invito come approvato
-            $notificationPayloadWallet->handleApproval();
 
-            // L'utente che ha approvato l'invito
-            $user = Auth::user();
+            // Aggiorna lo stato dalla proposta come approvata
+            $notificationPayloadWallet->handleAccepted();
 
-            $data = [
-                'collection_id' => $notificationPayloadWallet->collection_id,
-                'user_id' => $user->id,
-                'role' => $notificationPayloadWallet->role,
-                'status' => WalletStatus::ACCEPTED->value,
-            ];
+            log::channel('florenceegi')->info('WalletAccepted:handleAccepted', [
+                'notificationPayloadWallet' => $notificationPayloadWallet->status,
+            ]);
 
-            Log::channel('florenceegi')->info('Dati di payload', $data);
-
-            // Aggiungi l'utente alla collezione
-            $collectionUser = CollectionUser::create($data);
-
-            if (!$collectionUser) {
-                throw new Exception('Errore nella creazione del record CollectionUser.');
-            }
-
-            // Aggiorna tutti i dati della notifica
-            $this->notification['model_type'] = get_class($notificationPayloadWallet);
-            $this->notification['status'] = WalletStatus::ACCEPTED->value;
-            $this->notification['view'] = 'wallets.' . WalletStatus::ACCEPTED->value;
-            $this->notification['message'] = __('collection.wallet.wallet_change_approved');
-            $this->notification['collection_name'] = $this->notification->data['collection_name'] ?? null;
-            $this->notification['receiver_id'] = $user->id;
-            $this->notification['receiver_name'] = $user->name . ' ' . $user->last_name;
+            $this->AjustCreatorQuota($notificationPayloadWallet);
 
         } catch (Exception $e) {
             Log::error('Errore durante l\'accettazione della creazione di un wallet:', [
@@ -153,9 +151,46 @@ class Creation extends Component
         }
     }
 
-    public function reject($notificationPayloadWallet)
+    public function AjustCreatorQuota($notificationPayloadWallet)
     {
 
+        $collection_id = $notificationPayloadWallet->collection_id;
+        $proposer_id = $notificationPayloadWallet->proposer_id;
+        $newMint = $notificationPayloadWallet->royalty_mint;
+        $newRebind = $notificationPayloadWallet->royalty_rebind;
+        $wallet = $notificationPayloadWallet->wallet;
+
+        Log::channel('florenceegi')->info('validateAndAdjustCreatorQuota', [
+            'collection_id' => $collection_id,
+            'proposer_id' => $proposer_id,
+            'newMint' => $newMint,
+            'newRebind' => $newRebind,
+            'wallet' => $wallet,
+        ]);
+
+        $creatorWallet = Wallet::where('collection_id', $collection_id)
+                            ->where('user_id', $proposer_id)
+                            ->first();
+
+        // Riduci la quota del creator
+        $creatorWallet->update([
+            'royalty_mint' => $creatorWallet->royalty_mint - $newMint,
+            'royalty_rebind' => $creatorWallet->royalty_rebind - $newRebind,
+        ]);
+
+        // Creazione del nuovo wallet
+        return Wallet::create([
+            'collection_id' => $collection_id,
+            'user_id' => $proposer_id,
+            'wallet' => $wallet,
+            'royalty_mint' => $newMint,
+            'royalty_rebind' => $newRebind,
+            'platform_role' => PlatformRole::STAFF_MEMBER->value,
+        ]);
+    }
+
+    public function reject($notificationPayloadWallet)
+    {
 
         $user = Auth::user();
         $receiverName = $user->name . ' ' . $user->last_name;
@@ -168,17 +203,18 @@ class Creation extends Component
         }
 
         try {
+
             // Aggiorna lo stato dell'invito come rifiutato
             $notificationPayloadWallet->handleRejection();
 
             // Verifica che lo stato sia stato aggiornato correttamente
-            if (!$notificationPayloadWallet->isRejected()) { // Metodo ipotetico
-                throw new Exception('Errore durante l\'aggiornamento dello stato dell\'invito.');
-            }
+            // if (!$notificationPayloadWallet->isRejected()) { // Metodo ipotetico
+            //     throw new Exception('Errore durante l\'aggiornamento dello stato dell\'invito.');
+            // }
 
             // Aggiorna lo stato della notifica
-            $this->notification['status'] = WalletStatus::REJECTED->value;
-            $this->notification['view'] = 'invitations.' . WalletStatus::REJECTED->value;
+            $this->notification['status'] = NotificationStatus::REJECTED->value;
+            $this->notification['view'] = 'invitations.' . NotificationStatus::REJECTED->value;
             $this->notification['collection_name'] = $collectionName;
             $this->notification['receiver_name'] = $receiverName;
             $this->notification['receiver_id'] = $user->id;
@@ -203,6 +239,8 @@ class Creation extends Component
             throw $e;
         }
     }
+
+
 
     public function render()
     {

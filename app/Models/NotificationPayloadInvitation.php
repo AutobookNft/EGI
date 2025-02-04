@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Contracts\NotifiablePayload;
 use App\Enums\InvitationStatus;
+use App\Enums\NotificationStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Collection;
@@ -50,7 +51,7 @@ class NotificationPayloadInvitation extends Model implements NotifiablePayload
 
     public function getRecipient(): User
     {
-        return User::where('email', $this->email)->firstOrFail();
+        // return User::where('email', $this->email)->firstOrFail();
     }
 
     public function getModelType(): string
@@ -76,17 +77,17 @@ class NotificationPayloadInvitation extends Model implements NotifiablePayload
     // Helper per determinare lo stato in base all'enum normalizzato
     public function isPending(): bool
     {
-        return $this->status === InvitationStatus::PENDING;
+        return $this->status === NotificationStatus::PENDING;
     }
 
     public function isAccepted(): bool
     {
-        return $this->status === InvitationStatus::ACCEPTED;
+        return $this->status === NotificationStatus::ACCEPTED;
     }
 
     public function isRejected(): bool
     {
-        return $this->status === InvitationStatus::REJECTED;
+        return $this->status === NotificationStatus::REJECTED;
     }
 
     /**
@@ -104,7 +105,7 @@ class NotificationPayloadInvitation extends Model implements NotifiablePayload
     public function handleApproval()
     {
         // Logica specifica per l'approvazione
-        $this->update(['status' => InvitationStatus::ACCEPTED]);
+        $this->update(['status' => NotificationStatus::ACCEPTED]);
     }
 
     /**
@@ -113,7 +114,7 @@ class NotificationPayloadInvitation extends Model implements NotifiablePayload
     public function handleRejection()
     {
         // Logica specifica per il rifiuto
-        $this->update(['status' =>  InvitationStatus::REJECTED]);
+        $this->update(['status' =>  NotificationStatus::REJECTED]);
     }
 
     /**

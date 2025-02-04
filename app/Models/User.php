@@ -17,9 +17,7 @@ class User extends Authenticatable
 {
     use HasApiTokens;
     use HasRoles;
-    use Notifiable;
-
-
+    
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory;
     use HasProfilePhoto;
@@ -33,7 +31,7 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
-        'user_id',
+        'id',
         'name',
         'last_name',
         'email',
@@ -143,8 +141,7 @@ class User extends Authenticatable
 
     public function customNotifications()
     {
-        return $this->hasMany(CustomDatabaseNotification::class, 'notifiable_id')
-                    ->where('notifiable_type', self::class);
+        return $this->morphMany(CustomDatabaseNotification::class, 'notifiable');
     }
 
     public function walletChangeProposer()

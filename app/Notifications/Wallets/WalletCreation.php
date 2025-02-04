@@ -2,6 +2,7 @@
 
 namespace App\Notifications\Wallets;
 
+use App\Enums\NotificationStatus;
 use App\Enums\WalletStatus;
 use Illuminate\Notifications\Notification;
 use Illuminate\Notifications\Messages\DatabaseMessage;
@@ -24,17 +25,23 @@ class WalletCreation extends Notification
 
     public function toCustomDatabase($notifiable)
     {
+
+        Log::channel('florenceegi')->info('WalletCreation', [
+            'notification' => $this->notification
+        ]);
+
         return [
             'model_type'    => $this->notification->model_type, // Esempio: App\Models\WalletChangeApproval
             'model_id'      => $this->notification->model_id,   // L'ID del record
             'view'          =>  $this->notification->view,
+            'sender_id'         => $this->notification->proposer_id,
             'data'          => [
                 'message'       => $this->notification->message,
-                'user_name'     => $this->notification->proposer_name,
-                'user_id'       => $this->notification->proposer_id,
+                'sender'     => $this->notification->proposer_name,
+                'email'    => $this->notification->proposer_email,
                 'collection_name' => $this->notification->collection_name,
-                ],
-            'outcome' => $this->notification->status,
+            ],
+            'outcome' => NotificationStatus::PENDING_CREATE->value,
         ];
     }
 }

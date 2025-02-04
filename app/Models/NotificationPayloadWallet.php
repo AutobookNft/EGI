@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\NotificationStatus;
+use App\Enums\WalletStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -24,7 +26,7 @@ class NotificationPayloadWallet extends Model
      */
     protected $fillable = [
         'id',
-        'wallet_id',
+        'collection_id',
         'proposer_id',
         'receiver_id',
         'wallet',
@@ -42,7 +44,11 @@ class NotificationPayloadWallet extends Model
     public function handleCreation()
     {
         // Logica specifica per la creazione
-        $this->update(['status' => 'pending']);
+        $this->update([
+            'status' => NotificationStatus::PENDING_CREATE->value,
+            'type'   => NotificationStatus::CREATION->value
+
+        ]);
     }
 
     /**
@@ -51,16 +57,21 @@ class NotificationPayloadWallet extends Model
     public function handleUpdate()
     {
         // Logica specifica per l'update
-        $this->update(['status' => 'updated']);
+        $this->update([
+            'status' =>  NotificationStatus::PENDING_UPDATE->value,
+            'type'   =>  NotificationStatus::UPDATE->value
+        ]);
     }
 
     /**
      * Metodo per gestire l'approvazione
      */
-    public function handleApproval()
+    public function handleAccepted()
     {
         // Logica specifica per l'approvazione
-        $this->update(['status' => 'approved']);
+        $this->update([
+            'status'    =>  NotificationStatus::ACCEPTED->value,
+        ]);
     }
 
     /**
@@ -69,7 +80,26 @@ class NotificationPayloadWallet extends Model
     public function handleRejection()
     {
         // Logica specifica per il rifiuto
-        $this->update(['status' => 'rejected']);
+        $this->update([
+            'status' =>  NotificationStatus::REJECTED->value
+        ]);
+    }
+
+
+    // Helper per determinare lo stato in base all'enum normalizzato
+    public function isPending(): bool
+    {
+        return $this->status === NotificationStatus::PENDING;
+    }
+
+    public function isAccepted(): bool
+    {
+        return $this->status === NotificationStatus::ACCEPTED;
+    }
+
+    public function isRejected(): bool
+    {
+        return $this->status === NotificationStatus::REJECTED;
     }
 
     /**

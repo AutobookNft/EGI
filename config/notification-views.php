@@ -3,17 +3,18 @@
 
 return [
     'invitations' => [
+        'accepted' => [
+            'view'=>'notifications.invitations.approval',
+            'render'=>'livewire',
+        ],
+
         'request' => [
             'view'=>'notifications.invitations.request',
             'render'=>'livewire',
         ],
 
         'rejected' => [
-            'view'=>'notifications.invitations.approval',
-            'render'=>'livewire',
-        ],
-        'accepted' => [
-            'view'=>'notifications.invitations.approval',
+            'view'=>'notifications.invitations.rejected',
             'render'=>'livewire',
         ],
     ],

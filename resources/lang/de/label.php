@@ -8,6 +8,7 @@
 
 
 return [
+    'message' => 'Nachricht',
     'created_at' => 'Erstellt am',
     'no_action_available' => 'Keine Aktion verfügbar',
     'accept' => 'Akzeptieren',

@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('notification_payload_wallets', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('wallet_id')->unsignedBigInteger()->nullable(); // Relazione con il wallet
+            $table->foreignId('collection_id')->unsignedBigInteger()->nullable()->constrained('collections')->onDelete('cascade'); // Relazione con il wallet
             $table->foreignId('proposer_id')->unsignedBigInteger()->nullable()->constrained('users')->onDelete('cascade'); // Chi propone la modifica
             $table->foreignId('receiver_id')->unsignedBigInteger()->nullable()->constrained('users')->onDelete('cascade'); // Chi riceve la modifica (approva o rifiuta)
             $table->string('wallet', 255)->nullable(); // Indirizzo del wallet
