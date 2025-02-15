@@ -1,48 +1,27 @@
 <?php
 
-
 namespace App\Notifications\Wallets;
 
-use App\Enums\NotificationStatus;
+use App\DataTransferObjects\Notifications\Wallets\WalletNotificationData;
 use App\Notifications\Channels\CustomDatabaseChannel;
 use Illuminate\Notifications\Notification;
-use Illuminate\Notifications\Messages\DatabaseMessage;
 
 class WalletRejection extends Notification
 {
-    private $notification;
-    private $reason;
+    private WalletNotificationData $notificationData;
 
-    public function __construct($notification)
+    public function __construct(WalletNotificationData $notificationData)
     {
-        $this->notification = $notification;
-        $this->reason = $notification->reason;
-
+        $this->notificationData = $notificationData;
     }
 
     public function via($notifiable)
     {
-        return [CustomDatabaseChannel::class];;
+        return [CustomDatabaseChannel::class];
     }
 
     public function toCustomDatabase($notifiable)
     {
-
-        return [
-            'model_type'        => $this->notification->model_type, // Esempio: App\Models\WalletChangeApproval
-            'model_id'          => $this->notification->model_id,   // L'ID del record
-            'view'              =>  $this->notification->view,
-            'prev_id'           => $this->notification->prev_id, // L'id di notification appartiene alla notifica di creazione, qui stiamo creando una notifica di accettazione e dobbiamo passare l'id della notifica di creazione per poterne aggiornare lo stato
-            'sender_id'         => $this->notification->receiver_id,
-            'data' => [
-                'message'       => $this->notification->message,
-                'reason'        => $this->reason,
-                'sender'     => $this->notification->proposer_name,
-                'email'    => $this->notification->proposer_email,
-                'collection_name' => $this->notification->collection_name,
-            ],
-
-            'outcome' => NotificationStatus::REJECTED->value,
-        ];
+        return $this->notificationData->toNotificationData();
     }
 }

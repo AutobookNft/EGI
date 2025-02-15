@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Collections;
+namespace App\Livewire\Notifications\Wallets;
 
 use App\Enums\NotificationStatus;
 
@@ -89,7 +89,7 @@ class EditWalletModal extends Component
     {
 
         $walletAddress = $request->input('wallet_address');
-        $collectionId = $request->input('collection_id');
+        $collectionId = $request->input('id');
         $userId = $request->input('user_id'); // receiver
 
         Log::channel('florenceegi')->info('createNewWallet', [
@@ -174,6 +174,7 @@ class EditWalletModal extends Component
 
         $walletPayload['collection_name'] = $collection->collection_name;
         $walletPayload['proposer_name'] = Auth::user()->name . ' ' . Auth::user()->last_name; // Nome di chi fa la proposta
+        $walletPayload['proposer_email'] = Auth::user()->email;
         $walletPayload['model_id'] = $walletPayload->id;
         $walletPayload['model_type'] = get_class($walletPayload);
         $walletPayload['message'] = __('collection.wallet.wallet_creation_request');
@@ -310,6 +311,6 @@ class EditWalletModal extends Component
 
     public function render()
     {
-        return view('livewire.collections.edit-wallet-modal');
+        return view('livewire.notifications.wallets.edit-wallet-modal');
     }
 }

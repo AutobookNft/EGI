@@ -53,7 +53,7 @@ class CheckCollectionPermission
 
             // Se la collection non esiste, restituisci un errore 404
             if (!$collection) {
-                abort(404, 'Collection non trovata.');
+                abort(404, 'CheckCollectionPermission: Collection non trovata.');
             }
         }
 

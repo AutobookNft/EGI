@@ -51,5 +51,5 @@
             </div>
         @endif
     </form>
-    <script type="module" src="{{ asset('js/CreateProposalWallet.js') }}" defer></script>
+    {{-- <script type="module" src="{{ asset('js/CreateProposalWallet.js') }}" defer></script> --}}
 </div>

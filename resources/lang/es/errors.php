@@ -32,6 +32,8 @@ return [
     'UNEXPECTED_ERROR' => 'Error genérico del servidor, el equipo técnico ha sido informado',
     'ERROR_DELETING_LOCAL_TEMP_FILE' => 'Error al eliminar el archivo temporal local',
 
+    'user_not_found' => 'Usuario no encontrado',
+    'error' => 'Error',
     'scan_error' => 'Error de escaneo',
     'virus_found' => 'Virus encontrado',
     'required' => 'El campo es obligatorio.',

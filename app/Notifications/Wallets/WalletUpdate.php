@@ -25,19 +25,20 @@ class WalletUpdate extends Notification
     public function toCustomDatabase($notifiable)
     {
         return [
-            'model_type'        => $this->notification->model_type, // Esempio: App\Models\WalletChangeApproval
-            'model_id'          => $this->notification->model_id,   // L'ID del record
-            'view'              =>  $this->notification->view,
-            'prev_id'           => $this->notification->prev_id, // L'id di notification appartiene alla notifica di creazione, qui stiamo creando una notifica di accettazione e dobbiamo passare l'id della notifica di creazione per poterne aggiornare lo stato
-            'sender_id'         => $this->notification->receiver_id,
-            'data' => [
-                'message'       => $this->notification->message,
-                'sender'     => $this->notification->proposer_name,
-                'email'    => $this->notification->proposer_email,
-                'collection_name' => $this->notification->collection_name,
+            'model_type'    => $this->notification->getModelType(), // Esempio: App\Models\WalletChangeApproval
+            'model_id'      => $this->notification->getModelId(),   // L'ID del record
+            'view'          =>  $this->notification->getView(),
+            'prev_id'       => $this->notification->getPrevId(), // L'id di notification appartiene alla notifica di creazione, qui stiamo creando una notifica di accettazione e dobbiamo passare l'id della notifica di creazione per poterne aggiornare lo stato
+            'sender_id'         => $this->notification->getSenderId(),
+            'data'          => [
+                'message'       => $this->notification->getMessage(),
+                'sender'     => $this->notification->getSenderName(),
+                'email'    => $this->notification->getSenderEmail(),
+                'collection_name' => $this->notification->getCollectionName(),
+                'old_royalty_mint' => $this->notification->getOldRoyaltyMint(),
+                'old_royalty_rebind' => $this->notification->getOldRoyaltyRebind(),
             ],
-
-            'outcome' => NotificationStatus::UPDATE->value,
+            'outcome' => $this->notification->getStatus(),
         ];
     }
 }

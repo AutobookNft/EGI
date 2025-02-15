@@ -6,6 +6,7 @@ use App\Enums\NotificationStatus;
 use App\Enums\PlatformRole;
 use App\Enums\WalletStatus;
 use App\Models\CollectionUser;
+use App\Models\CustomDatabaseNotification;
 use App\Models\NotificationPayloadWallet;
 use App\Models\User;
 use App\Models\Wallet;
@@ -57,15 +58,23 @@ class Creation extends Component
             DB::beginTransaction();
 
             // L'utente che ha proposto il wallet
-            $proposer_id = $this->notification->data['user_id'] ?? null;
+            $proposer_id = $this->notification->model->proposer_id ?? null;
             $prev_id = $this->notification->id; // L'id di notification appartiene alla notifica di creazione, qui stiamo creando una notifica di accettazione e dobbiamo passare l'id della notifica di creazione per poterne aggiornare lo stato
 
             Log::channel('florenceegi')->info('WalletResponse: response PRIMA', [
                 'notification->id' => $this->notification->id,
             ]);
 
+            Log::channel('florenceegi')->info('WalletResponse: ', [
+                'proposer_id' => $proposer_id,
+            ]);
+
             // Si crea l'oggetto User da usare per inviare la notifica
             $message_to = User::find($proposer_id);
+
+            if (!$message_to) {
+                throw new Exception('Utente non trovato.');
+            }
 
             $this->userName = Auth::user()->name . ' ' . Auth::user()->last_name;
 
@@ -75,25 +84,26 @@ class Creation extends Component
             // Accetta o rifiuta l'invito
             if ($option === 'accepted') {
                 $this->accept($notificationPayloadWallet);
+                // Se accetta non occorre creare una notifica di risposta
             } else {
                 $this->reject($notificationPayloadWallet);
+
+                $notificationPayloadWallet['proposer_name'] = Auth::user()->name . ' ' . Auth::user()->last_name; // Nome di chi fa la proposta
+                $notificationPayloadWallet['model_id'] = $notificationPayloadWallet->id;
+                $notificationPayloadWallet['model_type'] = get_class($notificationPayloadWallet);
+                $notificationPayloadWallet['message'] = __('collection.wallet.wallet_change_rejected');
+                $notificationPayloadWallet['view'] = 'wallets.' . NotificationStatus::ACCEPTED->value; // La vista da mostrare
+                $notificationPayloadWallet['prev_id'] = $prev_id;
+
+                // Invia la notifica
+                $handler = NotificationHandlerFactory::getHandler(WalletNotificationHandler::class);
+                $handler->handle($message_to, $notificationPayloadWallet);
+
+                Log::channel('florenceegi')->info('WalletResponse: response DOPO', [
+                    'notification->id' => $this->notification->id,
+                ]);
+
             }
-
-            $notificationPayloadWallet['proposer_name'] = Auth::user()->name . ' ' . Auth::user()->last_name; // Nome di chi fa la proposta
-            $notificationPayloadWallet['model_id'] = $notificationPayloadWallet->id;
-            $notificationPayloadWallet['model_type'] = get_class($notificationPayloadWallet);
-            $notificationPayloadWallet['message'] = __('collection.wallet.wallet_change_accepted');
-            $notificationPayloadWallet['view'] = 'wallets.' . NotificationStatus::ACCEPTED->value; // La vista da mostrare
-            $notificationPayloadWallet['prev_id'] = $prev_id;
-
-            // Invia la notifica
-            $handler = NotificationHandlerFactory::getHandler(WalletNotificationHandler::class);
-            $handler->handle($message_to, $notificationPayloadWallet);
-
-            Log::channel('florenceegi')->info('WalletResponse: response DOPO', [
-                'notification->id' => $this->notification->id,
-            ]);
-
 
             // Conferma la transazione
             DB::commit();
@@ -101,7 +111,7 @@ class Creation extends Component
             Log::channel('florenceegi')->info('Transazione completata con successo per la risposta alla creazione del wallet.');
 
              // Dispatcha un evento di successo al frontend
-            $this->dispatch('notification-response', option: $option, success: true);
+            // $this->dispatch('notification-response', option: $option, success: true);
 
         } catch (Exception $e) {
             // Annulla la transazione in caso di errore
@@ -150,11 +160,28 @@ class Creation extends Component
             throw $e; // Rilancia l'eccezione per una gestione ulteriore
         }
     }
+    #[On('archive')]
+    public function archive($id)
+    {
+        Log::channel('florenceegi')->info('archive', [
+            'notification' => $id,
+        ]);
+
+        $notification = CustomDatabaseNotification::find($id);
+
+        $notification->update([
+            'read_at' => now(),
+        ]);
+
+        // $this->dispatch('load-notifications');
+
+    }
 
     public function AjustCreatorQuota($notificationPayloadWallet)
     {
 
         $collection_id = $notificationPayloadWallet->collection_id;
+        $receiver_id = $notificationPayloadWallet->receiver_id;
         $proposer_id = $notificationPayloadWallet->proposer_id;
         $newMint = $notificationPayloadWallet->royalty_mint;
         $newRebind = $notificationPayloadWallet->royalty_rebind;
@@ -162,12 +189,13 @@ class Creation extends Component
 
         Log::channel('florenceegi')->info('validateAndAdjustCreatorQuota', [
             'collection_id' => $collection_id,
-            'proposer_id' => $proposer_id,
+            'receiver_id' => $receiver_id,
             'newMint' => $newMint,
             'newRebind' => $newRebind,
             'wallet' => $wallet,
         ]);
 
+        // Recupera il wallet del creator per poter aggiornare le quote di mint e rebind
         $creatorWallet = Wallet::where('collection_id', $collection_id)
                             ->where('user_id', $proposer_id)
                             ->first();
@@ -178,15 +206,24 @@ class Creation extends Component
             'royalty_rebind' => $creatorWallet->royalty_rebind - $newRebind,
         ]);
 
-        // Creazione del nuovo wallet
-        return Wallet::create([
+        $this->notification->update([
+            'outcome' => NotificationStatus::ACCEPTED->value,
+        ]);
+
+        Wallet::create([
             'collection_id' => $collection_id,
-            'user_id' => $proposer_id,
+            'user_id' => $receiver_id,
             'wallet' => $wallet,
             'royalty_mint' => $newMint,
             'royalty_rebind' => $newRebind,
             'platform_role' => PlatformRole::STAFF_MEMBER->value,
         ]);
+
+        // $this->dispatch('load-notifications');
+
+        // Creazione del nuovo wallet
+        return;
+
     }
 
     public function reject($notificationPayloadWallet)
@@ -214,7 +251,7 @@ class Creation extends Component
 
             // Aggiorna lo stato della notifica
             $this->notification['status'] = NotificationStatus::REJECTED->value;
-            $this->notification['view'] = 'invitations.' . NotificationStatus::REJECTED->value;
+            $this->notification['view'] = 'wallets.' . NotificationStatus::REJECTED->value;
             $this->notification['collection_name'] = $collectionName;
             $this->notification['receiver_name'] = $receiverName;
             $this->notification['receiver_id'] = $user->id;
@@ -228,6 +265,7 @@ class Creation extends Component
                 'collection_name' => $collectionName,
                 'receiver_name' => $receiverName,
             ]);
+
         } catch (Exception $e) {
             // Log dell'errore
             Log::error('Errore durante il rifiuto della proposta di creazione di un nuovo wallet:', [
@@ -240,10 +278,9 @@ class Creation extends Component
         }
     }
 
-
-
     public function render()
     {
+        Log::channel('florenceegi')->info('WalletsCreation:render');
         return view('livewire.notifications.wallets.creation');
     }
 }

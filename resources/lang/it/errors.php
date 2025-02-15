@@ -33,6 +33,8 @@ return [
     'UNEXPECTED_ERROR' => 'Problema interno, l\'assistenza è già allertata',
     'ERROR_DELETING_LOCAL_TEMP_FILE' => 'Errore durante l\'eliminazione del file temporaneo locale',
 
+    'user_not_found' => 'Utente non trovato',
+    'error' => 'Errore',
     'required' => 'Il campo è obbligatorio.',
     'file' => 'Si è verificato un errore durante il caricamento del file.',
     'mimes' => 'Il file deve essere di tipo: :values.',

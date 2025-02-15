@@ -2,6 +2,8 @@
 
 namespace App\Enums;
 
+use ValueError;
+
 /**
  * Enum InvitationStatus
  *
@@ -29,14 +31,16 @@ namespace App\Enums;
 enum NotificationStatus: string
 {
 
+    case DONE = 'done';
     case CREATION = 'creation';
     case PENDING = 'pending';
     case PENDING_CREATE = 'pending_create';
     case PENDING_UPDATE = 'pending_update';
     case REQUEST = 'request';
-    case ACCEPTED = 'accepted';
+    case ACCEPTED = 'Accepted'; // Invito accettato: NOTA: deve essere con A maiuscola per compatibilità con la UI
     case UPDATE = 'update';
-    case REJECTED = 'rejected';
+    case REJECTED = 'Rejected'; // Invito rifiutato: NOTA: deve essere con R maiuscola per compatibilità con la UI
+    case ARCHIVED = 'Archived'; // Invito archiviato: NOTA: deve essere con A maiuscola per compatibilità con la UI
 
     /**
      * Converte un valore stringa del database in un'istanza dell'enum.
@@ -49,15 +53,17 @@ enum NotificationStatus: string
     {
         // Usa il costrutto match per mappare i valori stringa ai casi dell'enum.
         return match($value) {
+            'done' => self::DONE,
             'pending' => self::PENDING,
             'pending_create' => self::PENDING_CREATE,
             'pending_update' => self::PENDING_UPDATE,
             'creation' => self::CREATION,
-            'accepted' => self::ACCEPTED,
+            'Accepted' => self::ACCEPTED,
             'update' => self::UPDATE,
-            'rejected' => self::REJECTED,
+            'Rejected' => self::REJECTED,
             'request' => self::REQUEST,
-            default => throw new \ValueError("Status '$value' non valido") // Lancia un'eccezione per valori non riconosciuti.
+            'Archived' => self::ARCHIVED,
+            default => throw new ValueError("Status '$value' non valido") // Lancia un'eccezione per valori non riconosciuti.
         };
     }
 }

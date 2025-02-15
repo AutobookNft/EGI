@@ -43,6 +43,7 @@ class RolesAndPermissionsSeeder extends Seeder
         'update_wallet',
         'approve_wallet',
         'reject_wallet',
+        'delete_wallet',
 
         // Permessi per le views
         'view_dashboard',
@@ -62,7 +63,7 @@ class RolesAndPermissionsSeeder extends Seeder
         'superadmin' => ['all'],
         'creator' => [
             // Team
-            'create_team', 'read_team', 'update_team', 'delete_team',
+            'create_team', 'update_team', 'delete_team',
             'add_team_member', 'remove_team_member', 'modify_team_roles',
 
             // Collection
@@ -72,7 +73,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'create_EGI', 'update_EGI', 'delete_EGI',
 
             // Wallet
-            'create_wallet', 'update_wallet', 'approve_wallet', 'reject_wallet',
+            'create_wallet', 'update_wallet', 'approve_wallet', 'reject_wallet', 'delete_wallet',
 
             // Views
             'view_user', 'view_profile', 'view_team', 'view_dashboard', 'view_bio', 'view_settings',

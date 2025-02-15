@@ -86,6 +86,16 @@ return [
     'creator_royalty_mint' => env('CREATOR_ROYALTY_MINT'),
     'creator_royalty_rebind' => env('CREATOR_ROYALTY_REBIND'),
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | Threshold royalty for Creator
+    |--------------------------------------------------------------------------
+    */
+    'creator_royalty_mint_threshold'=> env('CREATOR_ROYALTY_MINT_THRESHOLD'),
+    'creator_royalty_rebind_threshold'=> env('CREATOR_ROYALTY_REBIND_THRESHOLD'),
+
+
     /*
     |--------------------------------------------------------------------------
     | Bucket Path File Folder
@@ -109,14 +119,14 @@ return [
     'do_endpoint' => env('DO_ENDPOINT'),
     'do_bucket_folder' => env('DO_BUCKET_FOLDER'),
 
-
     /*
     |--------------------------------------------------------------------------
     | Wallet balance per la simulazione del minting e rebinding
     |--------------------------------------------------------------------------
     |
-     */
+    */
     'virtual_wallet_balance' => 1000000,
+
     /*
     |--------------------------------------------------------------------------
     | Application Name
@@ -240,10 +250,7 @@ return [
         'de' => 'Deutsch'
     ],
 
-
-
     'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),
-
     'faker_locale' => env('APP_FAKER_LOCALE', 'en_US'),
 
     /*

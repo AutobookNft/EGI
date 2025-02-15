@@ -65,9 +65,14 @@
                 {!! $debugInfo ?? '' !!}
             @endif
         </div>
+
+
+        <script>
+            window.appConfig = @json(config('app'));
+        </script>
+
+        <script src="{{ url('translations.js') }}"></script>
+
     </body>
-
-
-
 
 </html>

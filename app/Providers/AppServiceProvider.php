@@ -6,19 +6,15 @@ namespace App\Providers;
 use App\Repositories\IconRepository;
 use App\Services\FileStorageService;
 use Illuminate\Support\ServiceProvider;
-
-
 use App\Models\User;
 use App\Models\TeamWallet as Wallet;
 use App\Models\Collection;
-use App\Models\Egi;
 use App\Policies\ProfilePolicy;
 use App\Policies\TeamWalletPolicy as WalletPolicy;
 use App\Policies\CollectionPolicy;
-use App\Policies\EgiPolicy;
-
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\Channels\CustomDatabaseChannel;
+use App\Services\Notifications\WalletService;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -38,9 +34,15 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(IconRepository::class);
 
         // Registra il servizio di storage dei file
-        $this->app->singleton(FileStorageService::class, function () {
+        $this->app->singleton(FileStorageService::class, function ($app) {
             return new FileStorageService();
         });
+
+        // $this->app->singleton(WalletService::class, function ($app) {
+        //     return new WalletService();
+        // });
+
+
     }
 
     /**

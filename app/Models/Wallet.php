@@ -35,5 +35,15 @@ class Wallet extends Model
         return $this->belongsTo(User::class);
     }
 
+        /**
+     * Relazione uno a molti con NotificationPayloadWallet
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function notificationPayloadWallets()
+    {
+        return $this->hasMany(NotificationPayloadWallet::class, 'receiver_id', 'user_id');
+    }
+
 
 }

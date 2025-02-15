@@ -32,6 +32,8 @@ return [
     'UNEXPECTED_ERROR' => 'Generischer Serverfehler, das technische Team wurde informiert',
     'ERROR_DELETING_LOCAL_TEMP_FILE' => 'Fehler beim Löschen der lokalen temporären Datei',
 
+    'user_not_found' => 'Benutzer nicht gefunden',
+    'error' => 'Fehler',
     'unexpected_error' => 'Unerwarteter Fehler',
     'scan_error' => 'Fehler beim Scannen',
     'virus_found' => 'Virus gefunden',

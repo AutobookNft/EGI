@@ -26,6 +26,10 @@ class CustomDatabaseNotification extends DatabaseNotification
         'outcome',
     ];
 
+    protected $casts = [
+        'data' => 'array', // Questo converte automaticamente il JSON in un array associativo
+    ];
+
     public $incrementing = false; // se usi UUID
 
     /**

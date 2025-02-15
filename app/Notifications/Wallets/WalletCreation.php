@@ -31,17 +31,17 @@ class WalletCreation extends Notification
         ]);
 
         return [
-            'model_type'    => $this->notification->model_type, // Esempio: App\Models\WalletChangeApproval
-            'model_id'      => $this->notification->model_id,   // L'ID del record
-            'view'          =>  $this->notification->view,
-            'sender_id'         => $this->notification->proposer_id,
+            'model_type'    => $this->notification->getModelType(), // Esempio: App\Models\WalletChangeApproval
+            'model_id'      => $this->notification->getModelId(),   // L'ID del record
+            'view'          =>  $this->notification->getView(),
+            'sender_id'         => $this->notification->getSenderId(),
             'data'          => [
-                'message'       => $this->notification->message,
-                'sender'     => $this->notification->proposer_name,
-                'email'    => $this->notification->proposer_email,
-                'collection_name' => $this->notification->collection_name,
+                'message'       => $this->notification->getMessage(),
+                'sender'     => $this->notification->getSenderName(),
+                'email'    => $this->notification->getSenderEmail(),
+                'collection_name' => $this->notification->getCollectionName(),
             ],
-            'outcome' => NotificationStatus::PENDING_CREATE->value,
+            'outcome' => $this->notification->getStatus(),
         ];
     }
 }

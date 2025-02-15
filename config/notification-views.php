@@ -20,12 +20,23 @@ return [
     ],
     'wallets' => [
         'creation' => [
-            'view'=>'notifications.wallets.creation',
-            'render'=>'livewire',
+            'view' => 'notifications.wallets.creation',
+            'render' => 'controller',
+            'controller' => 'App\\Http\\Controllers\\Notifications\Wallets\\NotificationWalletResponseController'
         ],
         'accepted' => [
             'view'=>'notifications.wallets.accepted',
             'render'=>'livewire',
+        ],
+        'pending_create' => [
+            'view'=>'notifications.wallets.creation',
+            'render' => 'controller',
+            'controller' => 'App\\Http\\Controllers\\Notifications\Wallets\\NotificationWalletResponseController'
+        ],
+        'pending_update' => [
+            'view'=>'notifications.wallets.update',
+            'render' => 'controller',
+            'controller' => 'App\\Http\\Controllers\\Notifications\Wallets\\NotificationWalletResponseController'
         ],
         'change-request' => [
             'view'=>'livewire.notifications.wallets.change-request',

@@ -54,6 +54,13 @@
             @if(app()->environment('local'))
                 {!! $debugInfo ?? '' !!}
             @endif
+
+            <script>
+                window.appConfig = @json(config('app'));
+            </script>
+
+            <script src="{{ url('translations.js') }}"></script>
+
         </div>
     </body>
 </html>

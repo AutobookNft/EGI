@@ -18,7 +18,8 @@ return [
     'proposal_declined_message' => 'La tua proposta è stata rifiutata.',
     'reply' => 'Risposta',
     'wallet_changes_approved' => 'Le modifiche al portafoglio sono state approvate',
-    'no_pending_notifications' => 'Nessuna notifica in sospeso disponibile.',
+    'no_notifications' => 'Nessuna notifica',
+    'select_notification' => 'Seleziona una notifica per visualizzarne i dettagli',
     'hide_processed_notifications' => 'Hide Processed Notifications.',
     'show_processed_notifications' => 'Show Processed Notifications.',
     'confirm_delete' => 'Sei sicuro di voler eliminare questa notifica?',
@@ -26,4 +27,5 @@ return [
     'receiver' => 'Destinatario',
     'proposed_creation_new_wallet' => 'Hai proposto la creazione di un nuovo portafoglio',
     'proposed_change_to_a_wallet' => 'Hai proposto la modifica a un portafoglio',
+    'no_historical_notifications' => 'Nessuna notifica storica',
 ];

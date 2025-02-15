@@ -32,6 +32,8 @@ return [
     'UNEXPECTED_ERROR' => 'Generic server error, technical team has been informed',
     'ERROR_DELETING_LOCAL_TEMP_FILE' => 'Error deleting local temporary file',
 
+    'user_not_found' => 'User not found',
+    'error' => 'Error',
     'scan_error' => 'Scan error',
     'virus_found' => 'Virus found',
     'required' => 'The field is required.',

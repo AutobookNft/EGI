@@ -14,19 +14,15 @@
                                 <!-- Label modificata -->
                                 <label for="collapse-{{ $notification->id }}" class="collapse-title flex justify-between items-center text-lg font-medium cursor-pointer text-gray-200">
                                     <span>{{ $notification->data['message'] }}</span>
-                                    <button
-                                        wire:click="deleteNotificationAction('{{ $notification->id }}')"
-                                        wire:confirm="{{ __('notification.confirm_delete') }}"
-                                        class="btn btn-warning btn-sm">
+                                    <button onclick="confirmDelete('{{ $notification->id }}')" class="btn btn-warning btn-sm">
                                         {{ __('label.delete') }}
                                     </button>
                                 </label>
-
                                 <!-- Contenuto del Collapse -->
                                 <div class="collapse-content peer-checked:block hidden">
                                     <h3 class="text-md text-gray-300">
                                         {{ __('notification.reply') }}:
-                                        <span class="font-bold {{ $notification->outcome === 'rejected' ? 'text-red-500' : 'text-green-500' }}">
+                                        <span class="font-bold {{ $notification->outcome === App\Enums\NotificationStatus::REJECTED->value ? 'text-red-500' : 'text-green-500' }}">
                                             {{ ucfirst($notification->outcome) }}
                                         </span>
                                     </h3>
@@ -62,9 +58,31 @@
                         </div>
                     </div>
                 @empty
-                    <p class="text-gray-400">{{ __('No historical notifications.') }}</p>
+                    <p class="text-gray-400">{{ __('notification.no_historical_notifications') }}</p>
                 @endforelse
             </div>
 
         </div>
     @endif
+
+    @script
+        <script>
+        window.confirmDelete = function(notificationId) {
+            Swal.fire({
+                title: "{{ __('label.delete') }}",
+                text: "{{ __('notification.confirm_delete') }}",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#d33",
+                cancelButtonColor: "#3085d6",
+                confirmButtonText: "{{ __('label.confirm') }}",
+                cancelButtonText: "{{ __('label.cancel') }}"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $wire.dispatch('deleteNotification', { notificationId: notificationId });
+                }
+            });
+        }
+        </script>
+    @endscript
+

@@ -11,6 +11,7 @@ use App\Models\NotificationPayloadWallet;
 use Livewire\Component;
 use Illuminate\Support\Facades\Log;
 use App\Traits\HasPermissionTrait;
+use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
@@ -59,11 +60,11 @@ class CollectionUserMember extends Component
 
         $this->wallets = Wallet::where('collection_id', '=', $this->collectionId)->get();
 
-        $this->walletProposals = NotificationPayloadWallet::where('proposer_id', '=', Auth::user()->id)
+        $this->walletProposals = NotificationPayloadWallet::where('collection_id', '=', $this->collectionId)
             ->where('status', 'LIKE', '%pending%')
             ->get();
 
-        $this->invitationProposal = NotificationPayloadInvitation::where('proposer_id', '=', Auth::user()->id)
+        $this->invitationProposal = NotificationPayloadInvitation::where('collection_id', '=', $this->collectionId)
             ->where('status', 'LIKE', '%pending%')
             ->get();
 
@@ -74,29 +75,17 @@ class CollectionUserMember extends Component
         // ]);
     }
 
-    public function deleteProposalWallet(Request $request, $walletId)
+    public function deleteProposalWallet(Request $request, $id, $walletId)
     {
 
         Log::channel('florenceegi')->info('DeleteProposalWallet', [
             'walletId' => $walletId
         ]);
 
-        $collectionId = $request->collection_id;
-
         try {
 
             $wallet = NotificationPayloadWallet::findOrFail($walletId);
-            $collection = Collection::findOrFail($collectionId);
-
-            // Verifica permessi per l'utente autenticato
-            if (!$this->hasPermission($collection, 'create_wallet')) {
-                Log::channel('florenceegi')->error('Utente non autorizzato a cancellare la proposta wallet', [
-                    'collectionId' => $collectionId,
-                    'walletId' => $walletId
-                ]);
-                session()->flash('error', __('label.unauthorized_action'));
-                return;
-            }
+            $notification = $wallet->notifications()->first();
 
             if (!$wallet) {
                 Log::channel('florenceegi')->error('Proposta Wallet non trovata', [
@@ -106,8 +95,9 @@ class CollectionUserMember extends Component
             }
 
             $wallet->delete();
+            $notification->delete();
             return response()->json(['message' => 'Proposta Wallet eliminata con successo'], 200);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::channel('florenceegi')->error('Errore durante l\'eliminazione della proposta wallet', [
                 'walletId' => $walletId,
                 'error' => $e->getMessage()
@@ -116,22 +106,20 @@ class CollectionUserMember extends Component
         }
     }
 
-    public function deleteProposalInvitation(Request $request, $invitationId)
+    public function deleteProposalInvitation(Request $request, $id, $invitationId)
     {
         Log::channel('florenceegi')->info('DeleteProposalInvitation', [
             'invitationId' => $invitationId
         ]);
 
-        $collectionId = $request->collection_id;
-
         try {
             $invitation = NotificationPayloadInvitation::findOrFail($invitationId);
-            $collection = Collection::findOrFail($collectionId);
+            $collection = Collection::findOrFail($id);
 
             // Verifica permessi per l'utente autenticato
-            if (!$this->hasPermission($collection, 'manage_invitations')) {
+            if (!$this->hasPermission($collection, 'add_team_member')) {
                 Log::channel('florenceegi')->error('Utente non autorizzato a cancellare la proposta di invito', [
-                    'collectionId' => $collectionId,
+                    'collectionId' => $id,
                     'invitationId' => $invitationId
                 ]);
                 return response()->json(['message' => __('label.unauthorized_action')], 403);
@@ -146,7 +134,7 @@ class CollectionUserMember extends Component
 
             $invitation->delete();
             return response()->json(['message' => 'Proposta Invito eliminata con successo'], 200);
-        } catch (\Exception $e) {
+        } catch ( Exception $e) {
             Log::channel('florenceegi')->error('Errore durante l\'eliminazione della proposta invito', [
                 'invitationId' => $invitationId,
                 'error' => $e->getMessage()

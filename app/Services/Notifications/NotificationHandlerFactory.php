@@ -1,58 +1,53 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Notifications;
 
 use App\Contracts\NotificationHandlerInterface;
-
+use App\Enums\NotificationHandlerType;
+use Exception;
 use Illuminate\Support\Facades\Log;
 
 /**
  * Class NotificationHandlerFactory
  *
- * Questa classe è responsabile della creazione di istanze di handler
- * per la gestione delle notifiche. Ogni tipo di notifica è associato
- * a un handler specifico che implementa l'interfaccia NotificationHandlerInterface.
- *
- * Funzionalità principali:
- * - Mappa i tipi di notifica ai rispettivi handler.
- * - Restituisce l'istanza appropriata dell'handler per gestire una notifica.
+ * Factory per la creazione di handler di notifiche.
+ * Gestisce la creazione degli handler appropriati in base al tipo di notifica.
  *
  * @package App\Services\Notifications
  */
 class NotificationHandlerFactory
 {
     /**
-     * Restituisce l'istanza dell'handler per il tipo di notifica specificato.
+     * Crea e restituisce l'handler appropriato per il tipo di notifica specificato.
      *
-     * @param string $type Il tipo di notifica (classe completa con namespace).
-     * @return NotificationHandlerInterface L'istanza dell'handler appropriato.
-     * @throws \Exception Se il tipo di notifica non è mappato a un handler.
+     * @param NotificationHandlerType $type Il tipo di notifica da gestire
+     * @return NotificationHandlerInterface L'handler istanziato
+     *
+     * @throws Exception Se l'handler richiesto non esiste o non implementa l'interfaccia corretta
      */
-    public static function getHandler(string $type): NotificationHandlerInterface
+    public static function getHandler(NotificationHandlerType $type): NotificationHandlerInterface
     {
-        // Mappa i tipi di notifica ai rispettivi handler.
+        $handlerClass = $type->getHandlerClass();
 
-        Log::channel('florenceegi')->info('NotificationHandlerFactory', [
-            'type' => $type,
-        ]);
+        try {
+            if (!class_exists($handlerClass)) {
+                throw new Exception("Handler non trovato: {$handlerClass}");
+            }
 
+            if (!is_subclass_of($handlerClass, NotificationHandlerInterface::class)) {
+                throw new Exception("La classe {$handlerClass} non implementa NotificationHandlerInterface");
+            }
 
-        $handlers = [
-            // Handler per le notifiche di gestione delle modifiche ai wallet.
-            'App\Services\Notifications\WalletNotificationHandler' => WalletNotificationHandler::class,
-            
-            // Handler per la notifica di proposta di invito a una collezione.
-            'App\Services\Notifications\InvitationNotificationHandler' => InvitationNotificationHandler::class,
-        ];
-
-        // Verifica se il tipo di notifica è supportato.
-        if (!isset($handlers[$type])) {
-            // Se non supportato, lancia un'eccezione con un messaggio descrittivo.
-            throw new \Exception("Gestore per il tipo '{$type}' non trovato.");
+            return app($handlerClass);
+        } catch (Exception $e) {
+            Log::channel('florenceegi')->error('Errore creazione handler', [
+                'type' => $type->value,
+                'handler_class' => $handlerClass,
+                'error' => $e->getMessage()
+            ]);
+            throw $e;
         }
-
-        // Restituisce l'istanza dell'handler appropriato utilizzando la funzione app().
-        return app($handlers[$type]);
     }
 }
-

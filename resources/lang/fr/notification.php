@@ -18,7 +18,8 @@
     'proposal_declined_message' => 'Votre proposition a été refusée.',
     'reply' => 'Répondre',
     'wallet_changes_approved' => 'Les modifications du portefeuille ont été approuvées',
-    'no_pending_notifications' => 'Aucune notification en attente disponible.',
+    'no_notifications' => 'Aucune notification',
+    'select_notification' => 'Sélectionnez une notification pour voir les détails',
     'hide_processed_notifications' => 'Masquer les notifications traitées.',
     'show_processed_notifications' => 'Afficher les notifications traitées.',
     'confirm_delete' => 'Êtes-vous sûr de vouloir supprimer cette notification ?',
@@ -26,5 +27,6 @@
     'receiver' => 'Destinataire',
     'proposed_creation_new_wallet' => 'Vous avez proposé la création d\'un nouveau portefeuille',
     'proposed_change_to_a_wallet' => 'Vous avez proposé une modification d\'un portefeuille',
+    'no_historical_notifications' => 'Aucune notification historique',
 ];
 

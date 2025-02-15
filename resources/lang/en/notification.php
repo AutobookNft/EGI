@@ -19,7 +19,8 @@ return [
     'proposal_declined_message' => 'Your proposal has been declined.',
     'reply' => 'Reply',
     'wallet_changes_approved' => 'Wallet changes have been approved',
-    'no_pending_notifications' => 'No pending notifications available.',
+    'no_notifications' => 'No notifications',
+    'select_notification' => 'Select a notification to view details',
     'hide_processed_notifications' => 'Hide Processed Notifications.',
     'show_processed_notifications' => 'Show Processed Notifications.',
     'confirm_delete' => 'Are you sure you want to delete this notification?',
@@ -27,5 +28,6 @@ return [
     'receiver' => 'Receiver',
     'proposed_creation_new_wallet' => 'You have proposed the creation of a new wallet',
     'proposed_change_to_a_wallet' => 'You have proposed a change to a wallet',
+    'no_historical_notifications' => 'No historical notifications',
 ];
 

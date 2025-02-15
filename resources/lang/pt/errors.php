@@ -32,6 +32,8 @@ return [
     'UNEXPECTED_ERROR' => 'Erro inesperado',
     'ERROR_DELETING_LOCAL_TEMP_FILE' => 'Erro ao excluir o arquivo temporário local',
 
+    'user_not_found' => 'Usuário não encontrado',
+    'Error' => 'Erro',
     'scan_error' => 'Erro de digitalização',
     'virus_found' => 'Vírus encontrado',
     'required' => 'O campo é obrigatório.',

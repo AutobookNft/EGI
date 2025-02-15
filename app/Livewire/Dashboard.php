@@ -57,8 +57,6 @@ class Dashboard extends Component
             'collectionsCount' => $this->collectionsCount,
             'collectionMembersCount' => $this->collectionMembersCount,
         ]);
-
-
     }
 
     /**
@@ -107,61 +105,61 @@ class Dashboard extends Component
         $this->dispatch('open-accept-modal', $notification);
     }
 
-    public function notificationArchive($notificationId, $action)
+    // public function notificationArchive($notificationId, $action)
+    // {
+    //     $notification = Auth::user()->notifications()->findOrFail($notificationId);
+    //     $notification->update([
+    //         'read_at' => now(),
+    //         'outcome' => $action,
+    //     ]);
+
+    //     $this->loadNotifications();
+    // }
+    #[On('deleteNotification')]
+    public function deleteNotification($notificationId)
     {
-        $notification = Auth::user()->notifications()->findOrFail($notificationId);
-        $notification->update([
-            'read_at' => now(),
-            'outcome' => $action,
+        Log::channel('florenceegi')->info('🗑 deleteNotificationAction() - Deleting notification:', [
+            'notificationId' => $notificationId,
         ]);
-
-        $this->loadNotifications();
-    }
-
-    public function deleteNotificationAction($notificationId)
-    {
         $notification = Auth::user()->notifications()->findOrFail($notificationId);
         $notification->delete();
 
         $this->loadNotifications();
     }
-
+    #[On('load-notifications')]
     public function loadNotifications()
     {
-
-        Log::channel('florenceegi')->info('Dashboard: loadNotifications');
-
         $this->pendingNotifications = Auth::user()
-        ->customNotifications() // Assicura che qui usi la relazione su 'notifiable'
-        ->where(function ($query) {
-            $query->where('outcome', 'LIKE', '%pending%')
-                ->orWhere(function ($subQuery) {
-                    $subQuery->whereIn('outcome', ['accepted', 'rejected'])
-                            ->whereNull('read_at');
-                });
-        })
-        ->orderBy('created_at', 'desc')
-        ->with('model') // Carica il payload (Invitation o Wallet)
-        ->get();
+            ->customNotifications()
+            ->where(function ($query) {
+                $query->where('outcome', 'LIKE', '%pending%')
+                    ->orWhere(function ($subQuery) {
+                        $subQuery->whereIn('outcome', ['accepted', 'rejected'])
+                                ->whereNull('read_at');
+                    });
+            })
+            ->orderBy('created_at', 'desc')
+            ->with('model')
+            ->get();
 
-
-        Log::channel('florenceegi')->info('Dashboard: loadNotifications', [
-            'pendingNotifications' => $this->pendingNotifications,
+        Log::channel('florenceegi')->info('🔍 loadNotifications() - Pending Notifications:', [
+            'pendingNotifications' => $this->pendingNotifications->pluck('id')->toArray(),
+            'activeNotificationId' => $this->activeNotificationId,
         ]);
 
         // Notifiche storiche
         $this->historicalNotifications = Auth::user()
             ->customNotifications()
-            ->whereNotNull('read_at') // Solo notifiche già lette
+            ->whereNotNull('read_at')
             ->with('model')
             ->orderBy('created_at', 'desc')
             ->get();
 
-        Log::channel('florenceegi')->info('Dashboard: loadNotifications', [
-            'historicalNotifications' => $this->historicalNotifications,
+        Log::channel('florenceegi')->info('🔍 loadNotifications() - Historical Notifications:', [
+            'historicalNotifications' => $this->historicalNotifications->pluck('id')->toArray(),
         ]);
-
     }
+
 
     public function handleNotificationAction($notificationId, $action)
     {
@@ -182,72 +180,59 @@ class Dashboard extends Component
 
     public function toggleHistoricalNotifications()
     {
+        $this->loadNotifications();
         $this->showHistoricalNotifications = !$this->showHistoricalNotifications;
     }
 
-    public function getNotificationView($notification)
-    {
-
-        $notificationViews = [
-            'App\Notifications\WalletChangeRequestCreation' => 'notifications.wallet-change-request',
-            'App\Notifications\WalletChangeResponseRejection' => 'notifications.wallet-change-response-rejected',
-            'App\Notifications\InvitationProposal' => 'notifications.invitation',
-            'App\Livewire\Proposals\ProposalDeclinedNotification' => 'notifications.proposa-declined-notification',
-        ];
-
-        return $notificationViews[$notification->type] ;
-    }
-
+    #[On('setActiveNotification')]
     public function setActiveNotification($id)
     {
-
         $this->activeNotificationId = $id;
+        $this->loadNotifications();
 
-        $this->dispatch('notification-changed');  // Dispatch un evento
+        Log::channel('florenceegi')->info('🔄 setActiveNotification() - Active Notification Set:', [
+            'activeNotificationId' => $this->activeNotificationId,
+        ]);
+
+        // Dispatch a Livewire per aggiornare solo il componente della notifica attiva
+        $this->dispatch('notification-updated');
     }
+
 
     public function getActiveNotification()
     {
-
-        Log::channel('florenceegi')->info('Dashboard: getActiveNotification', [
+        Log::channel('florenceegi')->info('🔎 getActiveNotification() - Checking for active notification:', [
             'activeNotificationId' => $this->activeNotificationId,
         ]);
 
         if (!$this->activeNotificationId) {
+            Log::channel('florenceegi')->info('⚠️ getActiveNotification() - No activeNotificationId set.');
             return null;
         }
 
-        $notification = CustomDatabaseNotification::query()
-        ->where('id', $this->activeNotificationId) // Filtra per l'ID specifico
-        ->with('model') // Carica la relazione polimorfica
-        ->first();
+        $notification = Auth::user()
+            ->customNotifications()
+            ->where('id', $this->activeNotificationId)
+            ->with('model')
+            ->first();
 
-        // $notification = Auth::user()
-        //     ->customNotifications()
-        //     ->where('id', $this->activeNotificationId) // Filtra per l'ID specifico
-        //     ->with('model') // Carica la relazione polimorfica
-        //     ->first();
-
-
-
-        Log::channel('florenceegi')->info('Dashboard: getActiveNotification', [
-            'view' => $notification->view,
-        ]);
-
-        if ($notification) {
-            $notification->approval_details = $notification->model; // Aggiungi approval_details se necessario
-            // Log::channel('florenceegi')->info('Notification loaded:', [
-            //     'notification' => $notification,
-            // ]);
+        if (!$notification) {
+            Log::channel('florenceegi')->error('❌ getActiveNotification() - Notification NOT FOUND in DB!', [
+                'activeNotificationId' => $this->activeNotificationId,
+            ]);
+            return null;
         }
 
-        // Se non trovata, cerca nelle notifiche storiche
-        if (!$notification && $this->showHistoricalNotifications) {
-            $notification = $this->historicalNotifications->firstWhere('id', $this->activeNotificationId);
-        }
+        // Recupera la vista dal file di configurazione
+        $viewKey = $notification->view ?? null;
+        $config = $viewKey ? config('notification-views.' . $viewKey, []) : [];
+        $view = $config['view'] ?? null;
+        $render = $config['render'] ?? 'livewire';
 
-        Log::channel('florenceegi')->info('Dashboard: getActiveNotification', [
-            'notification' => $notification,
+        Log::channel('florenceegi')->info('✅ getActiveNotification() - View retrieved:', [
+            'viewKey' => $viewKey,
+            'view' => $view,
+            'render' => $render,
         ]);
 
         return $notification;

@@ -34,7 +34,7 @@ class NotificationPayloadWallet extends Model
         'royalty_mint',
         'royalty_rebind',
         'status',
-        'type', // Nuovo campo
+        'type',
 
     ];
 
@@ -156,6 +156,10 @@ class NotificationPayloadWallet extends Model
     public function collectionUser()
     {
         return $this->belongsTo(CollectionUser::class, 'receiver_id', 'user_id');
+    }
+
+    public function collection(){
+        return $this->belongsTo(Collection::class);
     }
 
 
