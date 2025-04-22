@@ -5,25 +5,28 @@ console.log('DeleteProposalWallet.js caricato');
  */
 export class DeleteProposalWallet {
     /**
-     * @translation_desc Utilizziamo il pattern Singleton per assicurarci che ci sia una sola istanza di questa classe.
-     */
+         * @translation_desc Utilizziamo il pattern Singleton per assicurarci che ci sia una sola istanza di questa classe.
+         */
     static instance = null;
 
     /**
-     * @translation_desc Costruttore della classe.
-     * @translation_desc Inizializza la classe e ne crea una sola istanza.
-     */
-    constructor() {
+        * @translation_desc Costruttore della classe.
+        * @translation_desc Inizializza la classe e ne crea una sola istanza.
+        */
+    constructor(options = {}) { // Aggiungi options per uniformità
         console.log('App constructed delete proposal wallet');
-        if (DeleteProposalWallet.instance) return DeleteProposalWallet.instance;
+        if (DeleteProposalWallet.instance) {
+            console.warn(`⛔ Tentativo di inizializzazione multipla di DeleteProposalWallet ignorato`);
+            return DeleteProposalWallet.instance;
+        }
+        this.options = options || { apiBaseUrl: '/notifications' }; // Opzionale, per uniformità
         DeleteProposalWallet.instance = this;
-
         this.init();
     }
 
     /**
-     * @translation_desc Inizializza i listener degli eventi.
-     */
+        * @translation_desc Inizializza i listener degli eventi.
+        */
     async init() {
         // Assicura che le traduzioni siano caricate
         await ensureTranslationsLoaded();

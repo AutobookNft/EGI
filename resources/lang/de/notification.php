@@ -28,6 +28,7 @@ return [
     'proposed_creation_new_wallet' => 'Sie haben die Erstellung eines neuen Wallets vorgeschlagen',
     'proposed_change_to_a_wallet' => 'Sie haben eine Änderung an einem Wallet vorgeschlagen',
     'no_historical_notifications' => 'Keine historischen Benachrichtigungen',
+    'notification_list_error' => 'Fehler beim Abrufen der Benachrichtigungsliste',
 ];
 
 

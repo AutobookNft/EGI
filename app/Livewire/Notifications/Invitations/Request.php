@@ -2,14 +2,12 @@
 
 namespace App\Livewire\Notifications\Invitations;
 
-use App\Enums\InvitationStatus;
+use App\DataTransferObjects\Payloads\Wallets\InvitationAcceptRequest;
 use App\Enums\NotificationStatus;
 use App\Models\CollectionUser;
 use App\Models\NotificationPayloadInvitation;
-use App\Models\User;
+use App\Services\Notifications\InvitationService;
 use Livewire\Attributes\On;
-use App\Services\Notifications\InvitationNotificationHandler;
-use App\Services\Notifications\NotificationHandlerFactory;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
@@ -54,33 +52,31 @@ class Request extends Component
             // Inizio della transazione
             DB::beginTransaction();
 
-            // L'utente che ha proposto la collaborazione
-            $proposer_id = $this->notification->model->proposer_id ?? null;
-
-            // Si crea l'oggetto User da usare per inviare la notifica di risposta
-            $message_to = User::find($proposer_id);
-
-            if (!$message_to) {
-                throw new Exception('Utente non trovato, id: ' . $proposer_id);
-            }
 
             // Si recupera l'oggetto NotificationPayloadInvitation creato al momento dell'invio della proposta
             $notificationPayloadInvitation = NotificationPayloadInvitation::find($this->notification->model_id);
 
+            /**
+             * @var NotificationPayloadInvitation $notificationPayloadInvitation
+             */
+            $invitationAcceptRequest = InvitationAcceptRequest::fromNotification($notificationPayloadInvitation);
+
+            $invitationService = new InvitationService;
+
             // Accetta o rifiuta l'invito
             if ($option === 'accepted') {
-                $this->accept($notificationPayloadInvitation);
+                $invitationService->acceptInvitation($invitationAcceptRequest);
             } else {
                 $this->reject($notificationPayloadInvitation);
             }
 
-            // Invia la notifica
-            $handler = NotificationHandlerFactory::getHandler(InvitationNotificationHandler::class);
-            $handler->handle($message_to, $this->notification);
+            // NOTA: notifica per accepted soppressa!
+            // $handler = NotificationHandlerFactory::getHandler(InvitationNotificationHandler::class);
+            // $handler->handle($message_to, $this->notification);
 
-            Log::channel('florenceegi')->info('InvitationResponse:response DOPO', [
-                'notification->id' => $this->notification->id,
-            ]);
+            // Log::channel('florenceegi')->info('InvitationResponse:response DOPO', [
+            //     'notification->id' => $this->notification->id,
+            // ]);
 
             // Conferma la transazione
             DB::commit();

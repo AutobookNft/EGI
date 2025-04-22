@@ -84,6 +84,8 @@ return [
     'data_section_description' => 'Choisissez soigneusement les données qui représentent votre collection',
     'this_is_default_collection_of_the_team' => 'Ceci est la collection par défaut de l\'équipe',
     'wallet' => [
+        'donation' => 'Donation',
+        'donation_success' => 'Donation envoyée avec succès',
         'insufficient_quota' => 'Vous n\'avez pas suffisamment de quota pour créer un portefeuille',
         'write_royalty_mint' => 'Entrez le pourcentage de royalties pour la frappe',
         'write_royalty_rebind' => 'Entrez le pourcentage de royalties pour la réattribution',
@@ -113,6 +115,7 @@ return [
         'owner' => 'Propriétaire',
         'wallet_change_rejected' => 'Le portefeuille a été rejeté',
         'wallet_change_approved' => 'Le portefeuille a été approuvé',
+        'wallet_change_expired' => 'Le portefeuille a expiré',
         'reason' => 'Raison',
         'wallet_change_request_approved' => 'La demande de modification du portefeuille a été approuvée',
         'creator_does_not_have_enough_quota_to_allocate' => 'Le créateur n’a pas suffisamment de quota à attribuer',
@@ -137,6 +140,7 @@ return [
         'royalty_mint_placeholder' => 'Entrez le pourcentage de royalties de frappe',
         'royalty_rebind_placeholder' => 'Entrez le pourcentage de royalties de réattribution',
         'validation' => [
+            'ceck_pending_wallet' => 'Impossible d\'effectuer l\'action car un portefeuille est déjà en attente.',
             'address_required' => 'L’adresse du portefeuille est requise.',
             'mint_invalid' => 'Pourcentage de royalties de frappe invalide.',
             'rebind_invalid' => 'Pourcentage de royalties de réattribution invalide.',
@@ -147,6 +151,7 @@ return [
         'permission_denied' => 'Vous n’avez pas la permission d’effectuer cette action.',
     ],
     'invitation' => [
+        'proposal_collaboration' => 'Vous avez été invité à collaborer à la collection',
         'confirmation_title' => 'Êtes-vous sûr ?',
         'confirmation_text' => 'Voulez-vous supprimer l’invitation ID : #{invitationId} ?',
         'confirm_delete' => 'Oui, supprimer !',

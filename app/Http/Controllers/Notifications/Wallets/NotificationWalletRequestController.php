@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Notifications\Wallets;
 
 use App\DataTransferObjects\Notifications\Wallets\WalletCreateRequest;
+use App\DataTransferObjects\Notifications\Wallets\WalletDonationRequest;
 use App\DataTransferObjects\Notifications\Wallets\WalletUpdateRequest;
 use App\Exceptions\WalletException;
 use App\Http\Controllers\Controller;
+use App\Rules\NoPendingWalletProposal;
 use App\Services\Notifications\RequestWalletService;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -163,6 +165,59 @@ class NotificationWalletRequestController extends Controller
                 'success' => false
             ], 422);
         }
+    }
 
+    public function requestDonation(Request $request): JsonResponse
+    {
+
+        try {
+
+            $validated = $request->validate([
+                'royaltyMint' => ['required', 'numeric', 'min:0', 'max:' . config('app.creator_royalty_mint')],
+                'royaltyRebind' => ['required', 'numeric', 'min:0', 'max:' . config('app.creator_royalty_rebind')],
+            ]);
+
+            Log::channel('florenceegi')->info('Wallet creation request:', [
+                'request' => $validated
+            ]);
+
+            // Aggiungo l'id della collezione
+            $validated['collection_id'] = $request->input('collection_id');
+
+            $walletRequest = WalletDonationRequest::fromRequest($validated, Auth::id());
+
+            $this->requestWalletService->donationWalletRequest($walletRequest);
+
+            Log::channel('florenceegi')->info('Wallet donation request DONE:', [
+                'data' => $walletRequest
+            ]);
+
+            return response()->json(['data' => $walletRequest], 200,);
+
+        } catch (WalletException $e) {
+            Log::channel('florenceegi')->error('Error donation wallet request:', [
+                'error' => $e->getMessage(),
+                // 'trace' => $e->getTraceAsString(),
+                'request' => $request->all()
+            ]);
+
+            return response()->json([
+                'message' => $e->getMessage(),
+                'success' => false
+            ], 422);
+
+        } catch (Exception $e) {
+            Log::channel('florenceegi')->error('Error donation wallet request:', [
+                'error' => $e->getMessage(),
+                // 'trace' => $e->getTraceAsString(),
+                'request' => $request->all()
+            ]);
+
+            return response()->json([
+                'message' => $e->getMessage(),
+                'success' => false
+            ], 422);
+
+        }
     }
 }

@@ -28,5 +28,6 @@
     'proposed_creation_new_wallet' => 'Vous avez proposé la création d\'un nouveau portefeuille',
     'proposed_change_to_a_wallet' => 'Vous avez proposé une modification d\'un portefeuille',
     'no_historical_notifications' => 'Aucune notification historique',
+    'notification_list_error' => 'Erreur lors de la récupération des notifications',
 ];
 

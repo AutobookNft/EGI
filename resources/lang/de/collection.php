@@ -84,6 +84,8 @@ return [
     'data_section_description' => 'Wählen Sie sorgfältig die Daten aus, die Ihre Sammlung repräsentieren',
     'this_is_default_collection_of_the_team' => 'Dies ist die Standardkollektion des Teams',
     'wallet' => [
+        'donation' => 'Spende',
+        'donation_success' => 'Spende erfolgreich',
         'insufficient_quota' => 'Sie haben nicht genügend Kontingent, um eine Wallet zu erstellen',
         'write_royalty_mint' => 'Geben Sie den Prozentsatz der Prägegebühren ein',
         'write_royalty_rebind' => 'Geben Sie den Prozentsatz der Bindungsgebühren ein',
@@ -113,6 +115,7 @@ return [
         'owner' => 'Eigentümer',
         'wallet_change_rejected' => 'Das Wallet wurde abgelehnt',
         'wallet_change_approved' => 'Das Wallet wurde genehmigt',
+        'wallet_change_expired' => 'Das Wallet ist abgelaufen',
         'reason' => 'Grund',
         'wallet_change_request_approved' => 'Die Wallet-Änderungsanfrage wurde genehmigt',
         'creator_does_not_have_enough_quota_to_allocate' => 'Der Ersteller hat nicht genügend Kontingent zur Verfügung',
@@ -137,6 +140,7 @@ return [
         'royalty_mint_placeholder' => 'Geben Sie den Prägegebühren-Prozentsatz ein',
         'royalty_rebind_placeholder' => 'Geben Sie den Bindungsgebühren-Prozentsatz ein',
         'validation' => [
+            'ceck_pending_wallet' => "Die Aktion kann nicht ausgeführt werden, da bereits ein ausstehendes Wallet existiert.",
             'address_required' => 'Die Wallet-Adresse ist erforderlich.',
             'mint_invalid' => 'Ungültiger Prägegebühren-Prozentsatz.',
             'rebind_invalid' => 'Ungültiger Bindungsgebühren-Prozentsatz.',
@@ -147,6 +151,7 @@ return [
         'permission_denied' => 'Sie haben keine Berechtigung, diese Aktion auszuführen.',
     ],
     'invitation' => [
+        'proposal_collaboration' => 'Sie wurden eingeladen, an der Sammlung mitzuarbeiten',
         'confirmation_title' => 'Sind Sie sicher?',
         'confirmation_text' => 'Möchten Sie die Einladung ID: #{invitationId} löschen?',
         'confirm_delete' => 'Ja, löschen!',

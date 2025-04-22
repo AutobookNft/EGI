@@ -21,8 +21,7 @@ interface NotificationDataInterface
     public function getModelType(): string;
     public function getModelId(): int;
     public function getSenderId(): ?int;
-    public function getOldRoyaltyMint(): ?float;
-    public function getOldRoyaltyRebind(): ?float;
+
 
 
 }

@@ -2,9 +2,9 @@
 
 namespace App\Rules;
 
-use Illuminate\Contracts\Validation\Rule;
+use Illuminate\Contracts\Validation\ValidationRule;
 
-class ValidAlgorandAddress implements Rule
+class ValidAlgorandAddress implements ValidationRule
 {
     public function passes($attribute, $value)
     {

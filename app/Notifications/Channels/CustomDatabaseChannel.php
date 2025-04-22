@@ -34,7 +34,7 @@ class CustomDatabaseChannel
             // 'data' => $data,
         ]);
 
-        // Mappatura delle classi di notifica agli stati di InvitationStatus
+        // Mappatura delle classi di notifica agli stati di InvitationStatus. SOLO RESPONSE
         $actionMap = [
             'App\\Notifications\\Invitations\\InvitationAccepted' => NotificationStatus::ACCEPTED,
             'App\\Notifications\\Invitations\\InvitationRejection' => NotificationStatus::REJECTED,

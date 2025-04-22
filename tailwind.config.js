@@ -21,6 +21,7 @@ export default {
                 'nft-secondary': '#818cf8',
                 'nft-accent': '#4f46e5',
                 'nft-neutral': '#1f2937',
+                'custom-orange': '#F6AD55'
             },
         },
     },

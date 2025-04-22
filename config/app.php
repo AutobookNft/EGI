@@ -292,4 +292,14 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Application Key
+    |--------------------------------------------------------------------------
+    */
+
+    'notifications' => [
+      'expiration_hours' => env('NOTIFICATION_EXPIRATION_HOURS', 72),
+    ],
+
 ];

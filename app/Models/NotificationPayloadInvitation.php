@@ -35,6 +35,7 @@ class NotificationPayloadInvitation extends Model implements NotifiablePayload
         'email',
         'role',
         'status',
+        'metadata',
     ];
 
     // protected $casts = [

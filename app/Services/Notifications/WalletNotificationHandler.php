@@ -15,7 +15,8 @@ use App\Notifications\Wallets\{
     WalletAccepted,
     WalletCreation,
     WalletUpdate,
-    WalletRejection
+    WalletRejection,
+    WalletExpiration,
 };
 use Exception;
 use Illuminate\Support\Facades\{
@@ -82,6 +83,7 @@ class WalletNotificationHandler implements NotificationHandlerInterface
             NotificationStatus::PENDING_UPDATE => WalletUpdate::class,
             NotificationStatus::ACCEPTED => WalletAccepted::class,
             NotificationStatus::REJECTED => WalletRejection::class,
+            NotificationStatus::EXPIRED => WalletExpiration::class,
             default => throw new Exception("Stato notifica non valido: {$action->value}")
         };
 

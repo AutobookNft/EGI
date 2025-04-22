@@ -84,6 +84,8 @@ return [
     'data_section_description' => 'Elige cuidadosamente los datos que representan tu colección',
     'this_is_default_collection_of_the_team' => 'Esta es la colección predeterminada del equipo',
     'wallet' => [
+        'donation' => 'Donación',
+        'donation_success' => 'Donación enviada con éxito',
         'insufficient_quota' => 'No tienes suficiente cuota para crear una billetera',
         'write_royalty_mint' => 'Ingrese el porcentaje de regalías para la acuñación',
         'write_royalty_rebind' => 'Ingrese el porcentaje de regalías para la reasignación',
@@ -113,6 +115,7 @@ return [
         'owner' => 'Propietario',
         'wallet_change_rejected' => 'El monedero ha sido rechazado',
         'wallet_change_approved' => 'El monedero ha sido aprobado',
+        'wallet_change_expired' => 'El monedero ha caducado',
         'reason' => 'Razón',
         'wallet_change_request_approved' => 'La solicitud de modificación del monedero ha sido aprobada',
         'creator_does_not_have_enough_quota_to_allocate' => 'El creador no tiene suficiente cuota para asignar',
@@ -137,6 +140,7 @@ return [
         'royalty_mint_placeholder' => 'Ingrese el porcentaje de regalías de acuñación',
         'royalty_rebind_placeholder' => 'Ingrese el porcentaje de regalías de reasignación',
         'validation' => [
+            'ceck_pending_wallet' => "No es posible realizar la acción porque ya existe una billetera pendiente.",
             'address_required' => 'La dirección del monedero es obligatoria.',
             'mint_invalid' => 'Porcentaje de regalías de acuñación inválido.',
             'rebind_invalid' => 'Porcentaje de regalías de reasignación inválido.',
@@ -147,6 +151,7 @@ return [
         'permission_denied' => 'No tiene permiso para realizar esta acción.',
     ],
     'invitation' => [
+        'proposal_collaboration' => 'Has sido invitado a colaborar en la colección.',
         'confirmation_title' => '¿Está seguro?',
         'confirmation_text' => '¿Desea eliminar la invitación ID: #{invitationId}?',
         'confirm_delete' => 'Sí, eliminar!',

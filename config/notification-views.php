@@ -28,13 +28,23 @@ return [
             'view'=>'notifications.wallets.accepted',
             'render'=>'livewire',
         ],
+        'rejected' => [
+            'view'=>'notifications.wallets.rejected',
+            'render' => 'controller',
+            'controller' => 'App\\Http\\Controllers\\Notifications\Wallets\\NotificationWalletResponseController'
+        ],
         'pending_create' => [
             'view'=>'notifications.wallets.creation',
             'render' => 'controller',
             'controller' => 'App\\Http\\Controllers\\Notifications\Wallets\\NotificationWalletResponseController'
         ],
-        'pending_update' => [
+        'expired' => [
             'view'=>'notifications.wallets.update',
+            'render' => 'controller',
+            'controller' => 'App\\Http\\Controllers\\Notifications\Wallets\\NotificationWalletResponseController'
+        ],
+        'pending_update' => [
+            'view'=>'notifications.wallets.creation',
             'render' => 'controller',
             'controller' => 'App\\Http\\Controllers\\Notifications\Wallets\\NotificationWalletResponseController'
         ],

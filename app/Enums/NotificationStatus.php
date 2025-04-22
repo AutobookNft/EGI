@@ -30,17 +30,17 @@ use ValueError;
  */
 enum NotificationStatus: string
 {
-
     case DONE = 'done';
     case CREATION = 'creation';
     case PENDING = 'pending';
     case PENDING_CREATE = 'pending_create';
     case PENDING_UPDATE = 'pending_update';
     case REQUEST = 'request';
-    case ACCEPTED = 'Accepted'; // Invito accettato: NOTA: deve essere con A maiuscola per compatibilità con la UI
+    case ACCEPTED = 'Accepted'; // Maiuscolo per compatibilità con la UI
     case UPDATE = 'update';
-    case REJECTED = 'Rejected'; // Invito rifiutato: NOTA: deve essere con R maiuscola per compatibilità con la UI
-    case ARCHIVED = 'Archived'; // Invito archiviato: NOTA: deve essere con A maiuscola per compatibilità con la UI
+    case REJECTED = 'Rejected'; // Maiuscolo per compatibilità con la UI
+    case ARCHIVED = 'Archived'; // Maiuscolo per compatibilità con la UI
+    case EXPIRED = 'expired';
 
     /**
      * Converte un valore stringa del database in un'istanza dell'enum.
@@ -51,19 +51,22 @@ enum NotificationStatus: string
      */
     public static function fromDatabase(string $value): self
     {
-        // Usa il costrutto match per mappare i valori stringa ai casi dell'enum.
+
+        // Usa il costrutto match per i restanti stati
         return match($value) {
             'done' => self::DONE,
-            'pending' => self::PENDING,
-            'pending_create' => self::PENDING_CREATE,
-            'pending_update' => self::PENDING_UPDATE,
             'creation' => self::CREATION,
             'Accepted' => self::ACCEPTED,
             'update' => self::UPDATE,
             'Rejected' => self::REJECTED,
             'request' => self::REQUEST,
             'Archived' => self::ARCHIVED,
-            default => throw new ValueError("Status '$value' non valido") // Lancia un'eccezione per valori non riconosciuti.
+            'expired' => self::EXPIRED,
+            'pending_create' => self::PENDING_CREATE,
+            'pending_update' => self::PENDING_UPDATE,
+            'pending' => self::PENDING,
+            default => throw new ValueError("Status '$value' non valido")
         };
     }
+
 }

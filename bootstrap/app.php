@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\CheckCollectionPermission;
+use App\Http\Middleware\CheckPendingWallet;
 use App\Http\Middleware\SetLanguage;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -18,6 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'collection_can' => CheckCollectionPermission::class,
             'role_or_permission' => RoleOrPermissionMiddleware::class,
+            'check.pending.wallet' => CheckPendingWallet::class,
         ]);
 
         // Middleware groups per le rotte web

@@ -12,6 +12,7 @@ use App\Models\NotificationPayloadWallet;
 class WalletQuotaValidation
 {
     public function __construct(
+        public readonly int $id,
         public readonly int $collection_id, // UUID
         public readonly int $proposer_id,
         public readonly int $receiver_id,
@@ -29,6 +30,7 @@ class WalletQuotaValidation
     public static function fromPayload(NotificationPayloadWallet $payload): self
     {
         return new self(
+            id: $payload->id,
             collection_id: $payload->collection_id,
             proposer_id: $payload->proposer_id,
             receiver_id: $payload->receiver_id,

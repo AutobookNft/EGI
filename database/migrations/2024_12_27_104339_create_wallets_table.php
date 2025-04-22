@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('collection_id')->constrained()->onDelete('cascade'); // Relazione con collections
             $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete(); // Nullable per wallet anonimi
-            $table->string('wallet', 255)->nullable(); // Indirizzo del wallet
+            $table->foreignId('notification_payload_wallets_id')->nullable()->constrained('notification_payload_wallets')->nullOnDelete();
             $table->string('platform_role', 25)->nullable(); // Ruolo all'interno della piattaforma: Creator, Mediator, Epp, Natan, etc.
             $table->float('royalty_mint')->nullable(); // Percentuale della prima vendita
             $table->float('royalty_rebind')->nullable(); // Percentuale del mercato secondario

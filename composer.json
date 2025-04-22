@@ -1,10 +1,10 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/laravel",
+    "name": "florence-egi/florence-egi",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
-    "keywords": ["laravel", "framework"],
-    "license": "MIT",
+    "description": "FlorenceEGI Ecosystem - Empowering Creators with Ecological Goods Invent.",
+    "keywords": ["laravel", "framework", "nft", "egi", "florence", "creator economy", "sustainability"],
+    "license": "Proprietary",
     "require": {
         "php": "^8.2",
         "laravel/framework": "^11.31",
@@ -12,9 +12,14 @@
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
         "league/flysystem-aws-s3-v3": "^3.29",
-        "livewire/flux": "^1.0",
         "livewire/livewire": "^3.0",
-        "spatie/laravel-permission": "^6.10"
+        "spatie/laravel-permission": "^6.10",
+        "ultra/ultra-upload-manager": "dev-main",
+        "ultra/ultra-error-manager": "dev-main",
+        "ultra/ultra-translation-manager": "dev-main",
+        "ultra/ultra-log-manager": "dev-main",
+        "ultra/ultra-config-manager": "dev-main",
+        "ultra/egi-module": "@dev"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
@@ -34,7 +39,6 @@
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
         }
-
     },
     "autoload-dev": {
         "psr-4": {
@@ -47,7 +51,9 @@
             "@php artisan package:discover --ansi"
         ],
         "post-update-cmd": [
-            "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
+            "@php artisan vendor:publish --tag=laravel-assets --ansi --force",
+            "@php artisan vendor:publish --provider='Ultra\\UltraErrorManager\\Providers\\ErrorManagerServiceProvider' --tag=uem-config --force",
+            "@php artisan vendor:publish --provider='Ultra\\UltraErrorManager\\Providers\\ErrorManagerServiceProvider' --tag=uem-migrations --force"
         ],
         "post-root-package-install": [
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
@@ -76,6 +82,20 @@
             "php-http/discovery": true
         }
     },
-    "minimum-stability": "stable",
+    "repositories": [
+        {
+            "type": "path",
+            "url": "packages/ultra/egi-module",
+            "options": {
+                "symlink": true
+            }
+        },
+        { "type": "vcs", "url": "https://github.com/AutobookNft/UltraUploadManager.git" },
+        { "type": "vcs", "url": "https://github.com/AutobookNft/UltraErrorManager.git" },
+        { "type": "vcs", "url": "https://github.com/AutobookNft/UltraTranslationManager.git" },
+        { "type": "vcs", "url": "https://github.com/AutobookNft/UltraLogManager.git" },
+        { "type": "vcs", "url": "https://github.com/AutobookNft/UltraConfigManager.git" }
+    ],
+    "minimum-stability": "dev",
     "prefer-stable": true
 }

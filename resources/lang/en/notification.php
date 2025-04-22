@@ -29,5 +29,6 @@ return [
     'proposed_creation_new_wallet' => 'You have proposed the creation of a new wallet',
     'proposed_change_to_a_wallet' => 'You have proposed a change to a wallet',
     'no_historical_notifications' => 'No historical notifications',
+    'notification_list_error' => 'Error loading the notification list',
 ];
 

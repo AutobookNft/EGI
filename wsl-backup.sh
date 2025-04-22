@@ -24,7 +24,6 @@ drive_h="/mnt/h/EGI_backup/${timestamp}"
 # Directory da escludere dal backup
 exclude_dirs=(
     "--exclude=.venv/"
-    "--exclude=codesensei/"
     "--exclude=vendor/"
     "--exclude=storage/"
     "--exclude=node_modules/"

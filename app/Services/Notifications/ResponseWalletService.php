@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace App\Services\Notifications;
 
 use App\DataTransferObjects\Notifications\Wallets\WalletCreateRequest;
-use App\DataTransferObjects\Notifications\Wallets\WalletNotificationData;
+use App\DataTransferObjects\Notifications\NotificationData;
 use App\DataTransferObjects\Notifications\Wallets\WalletUpdateRequest;
 use App\DataTransferObjects\Payloads\Wallets\WalletAcceptRequest;
 use App\DataTransferObjects\Payloads\Wallets\WalletError;
+use App\DataTransferObjects\Payloads\Wallets\WalletExpireResponse;
 use App\DataTransferObjects\Payloads\Wallets\WalletQuotaValidation;
 use App\DataTransferObjects\Payloads\Wallets\WalletRejectRequest;
 use App\Enums\NotificationHandlerType;
@@ -74,6 +75,7 @@ class ResponseWalletService
                 // $this->acceptNotification($walletPayload, $request);
 
             });
+
         } catch (Exception $e) {
             Log::channel('florenceegi')->error('Errore durante l\'accettazione del wallet:', [
                 'message' => $e->getMessage(),
@@ -151,6 +153,7 @@ class ResponseWalletService
             [
                 'collection_id' => $validation['collection_id'],
                 'user_id' => $validation['receiver_id'],
+                'notification_payload_wallets_id' => $validation['id'],
                 'wallet' => $validation['wallet'],
                 'royalty_mint' => $validation['required_mint_quota'],
                 'royalty_rebind' => $validation['required_rebind_quota'],
@@ -162,7 +165,7 @@ class ResponseWalletService
 
     private function requestNotification($walletPayload, $request): void{
         // Preparare i dati per la notifica
-        $notificationData = new WalletNotificationData(
+        $notificationData = new NotificationData(
             model_type: $walletPayload::class,
             model_id: $walletPayload->id,
             view: 'wallets.'.$walletPayload->status,
@@ -205,7 +208,7 @@ class ResponseWalletService
         $notification = CustomDatabaseNotification::findOrFail($request->notification_id);
 
         // Preparazione e invio notifica
-        $notificationData = new WalletNotificationData(
+        $notificationData = new NotificationData(
             model_type: $walletPayload::class,
             model_id: $walletPayload->id,
             view: 'wallets.'.NotificationStatus::ACCEPTED->value,
@@ -251,7 +254,7 @@ class ResponseWalletService
                 /** @var User|null $recipient */
                 $recipient = User::findOrFail($request->proposer_id);
 
-                $notificationData = new WalletNotificationData(
+                $notificationData = new NotificationData(
                     model_type: $walletPayload::class,
                     model_id: $walletPayload->id,
                     view: 'wallets.'.NotificationStatus::REJECTED->value,
@@ -279,6 +282,80 @@ class ResponseWalletService
         }
     }
 
+    /**
+     * Gestisce il rifiuto di un wallet
+     */
+    public function expiredWallet(WalletExpireResponse $request): void
+    {
+        try {
+            DB::transaction(function () use ($request) {
+
+                // Recupero la notifica
+                $notification = CustomDatabaseNotification::findOrFail($request->notification_id);
+                $walletPayload = $notification->model;
+
+                // recupero il wallet del receiver per recuperare i valori delle quote
+                $receiverWallet = Wallet::where('collection_id', $walletPayload->collection_id)
+                    ->where('user_id', $walletPayload->receiver_id)
+                    ->firstOrFail();
+
+                // recuper i valori delle quote
+                $oldRoyaltyMint = $receiverWallet->royalty_mint;
+                $oldRoyaltyRebind = $receiverWallet->royalty_rebind;
+
+                Log::channel('florenceegi')->info('WalletService:Expiring wallet', [
+                    'notification' => $notification,
+                    'walletPayload' => $walletPayload,
+                ]);
+
+                // Aggiornamento stati
+                $notification->update([
+                    'outcome' => NotificationStatus::EXPIRED->value,
+                    'read_at' => now(),
+                ]);
+                $walletPayload->update(['status' => NotificationStatus::EXPIRED->value]);
+
+                // Invio notifica
+                /** @var User|null $recipient */
+                $recipient = User::findOrFail($request->proposer_id);
+
+                /** @var User|null $receiver */
+                $receiver = User::findOrFail($walletPayload->receiver_id);
+
+                Log::channel('florenceegi')->info('WalletService:Expiring wallet', [
+                    'receiver' => $walletPayload->walletModel,
+                ]);
+
+                $notificationData = new NotificationData(
+                    model_type: $walletPayload::class,
+                    model_id: $walletPayload->id,
+                    view: 'wallets.'.NotificationStatus::EXPIRED->value,
+                    prev_id: null,
+                    sender_id: $walletPayload->receiver_id, // Auth::id(),
+                    message: __('collection.wallet.wallet_change_expired'),
+                    reason: '',
+                    sender_name: $receiver->name.' '.$receiver->last_name,
+                    sender_email: $receiver->email,  // Email di chi sta inviando la notifica
+                    collection_name: $walletPayload->collection->collection_name,
+                    status: NotificationStatus::EXPIRED->value,
+                    old_royalty_mint: $oldRoyaltyMint,
+                    old_royalty_rebind: $oldRoyaltyRebind,
+                );
+
+                $handler = $this->notificationFactory->getHandler(NotificationHandlerType::WALLET);
+                $handler->handle($recipient, $notificationData);
+            });
+        } catch (Exception $e) {
+            Log::channel('florenceegi')->error('Errore durante la expired', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'notification_id' => $request->notification_id,
+                'wallet_payload_id' => $request->wallet_payload_id,
+            ]);
+            throw $e;
+        }
+    }
+
 
     /**
      * Aggiorna le quote di un wallet esistente in base alla proposta di modifica.
@@ -292,56 +369,47 @@ class ResponseWalletService
             'validation' => (array) $validation,
         ]);
 
-        // Recupera il wallet da aggiornare
-        $wallet = Wallet::where('collection_id', "=",$validation['collection_id'])
-            ->where('user_id', $validation['receiver_id'])
-            ->firstOrFail();
+        try {
 
-        // Recupera il wallet del creator
-        $creatorWallet = Wallet::where('collection_id', $validation['collection_id'])
-            ->where('user_id', $validation['proposer_id'])
-            ->firstOrFail();
+            // Wallet del receiver
+            $receiverWallet = Wallet::where('collection_id', $validation['collection_id'])
+                ->where('user_id', $validation['receiver_id'])
+                ->firstOrFail();
 
-        // Log per debugging
-        Log::channel('florenceegi')->info('WalletService: Wallets found', [
-            'wallet' => $wallet,
-            'creatorWallet' => $creatorWallet,
-        ]);
+            // Wallet del creator
+            $creatorWallet = Wallet::where('collection_id', $validation['collection_id'])
+                ->where('user_id', $validation['proposer_id'])
+                ->firstOrFail();
 
-        // Calcola la variazione delle quote
-        $mintQuotaChange = ($validation['required_mint_quota'] !== null)
-            ? $validation['required_mint_quota'] - ($validation['old_royalty_mint'] ?? 0)
-            : 0;
+            // Log PRIMA dell'aggiornamento
+            Log::channel('florenceegi')->info('WalletService: Before Update', [
+                'wallet_before' => $receiverWallet->toArray(),
+                'creatorWallet_before' => $creatorWallet->toArray(),
+            ]);
 
-        $rebindQuotaChange = ($validation['required_rebind_quota'] !== null)
-            ? $validation['required_rebind_quota'] - ($validation['old_royalty_rebind'] ?? 0)
-            : 0;
+            $creatorWallet->update([
+                'royalty_mint' => max(0, $creatorWallet->royalty_mint + ($receiverWallet->royalty_mint - ($validation['required_mint_quota'] ?? 0))),
+                'royalty_rebind' => max(0, $creatorWallet->royalty_rebind + ($receiverWallet->royalty_rebind - ($validation['required_rebind_quota'] ?? 0))),
+            ]);
 
-        // Log delle variazioni per debugging
-        Log::channel('florenceegi')->info('WalletService: Calculated quota changes', [
-            'mintQuotaChange' => $mintQuotaChange,
-            'rebindQuotaChange' => $rebindQuotaChange,
-        ]);
+            $receiverWallet->update([
+                'royalty_mint' => $validation['required_mint_quota'] ?? $receiverWallet->royalty_mint,
+                'royalty_rebind' => $validation['required_rebind_quota'] ?? $receiverWallet->royalty_rebind,
+            ]);
 
-        $creatorWallet->update([
-            'royalty_mint' => $creatorWallet->royalty_mint + ($wallet->royalty_mint - $validation['required_mint_quota']),
-            'royalty_rebind' => $creatorWallet->royalty_rebind + ($wallet->royalty_rebind - $validation['required_rebind_quota']),
-        ]);
+            // Log DOPO aggiornamento
+            Log::channel('florenceegi')->info('WalletService: Wallet updated successfully', [
+                'updatedWallet' => $receiverWallet->toArray(),
+                'updatedCreatorWallet' => $creatorWallet->toArray(),
+            ]);
+        } catch (Exception $e) {
+            Log::channel('florenceegi')->error('❌ WalletService: Errore durante l’aggiornamento del wallet', [
+                'error' => $e->getMessage(),
+            ]);
 
-
-        // Aggiorna il wallet modificato con i nuovi valori
-        $wallet->update([
-            'royalty_mint' => $validation['required_mint_quota'] ?? $wallet->royalty_mint,
-            'royalty_rebind' => $validation['required_rebind_quota'] ?? $wallet->royalty_rebind,
-        ]);
-
-        // Log finale
-        Log::channel('florenceegi')->info('WalletService: Wallet updated successfully', [
-            'updatedWallet' => $wallet,
-            'updatedCreatorWallet' => $creatorWallet,
-        ]);
+            throw $e; // Rilancia l'errore per permettere alla transazione principale di gestirlo
+        }
     }
-
 
     /**
      * Ottiene lo stato di una notifica
@@ -352,6 +420,7 @@ class ResponseWalletService
             'pending_create', 'pending_update', 'pending' => 'pending',
             'Accepted' => 'accepted',
             'Rejected' => 'rejected',
+            'expired' => 'expired',
             default => 'unknown',
         };
     }
@@ -365,6 +434,7 @@ class ResponseWalletService
             'pending' => 'text-yellow-500',
             'Accepted' => 'text-green-500',
             'Rejected' => 'text-red-500',
+            'expired' => 'text-red-500',
             default => 'text-gray-500',
         };
     }

@@ -18,6 +18,7 @@ class Collection extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'id',
         'creator_id',
         'owner_id',
         'collection_name',

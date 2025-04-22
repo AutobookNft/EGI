@@ -1,9 +1,13 @@
 export class DeleteProposalInvitation {
     static instance = null;
 
-    constructor() {
+    constructor(options = {}) { // Aggiungi options per uniformità
         console.log('DeleteProposalInvitation constructed');
-        if (DeleteProposalInvitation.instance) return DeleteProposalInvitation.instance;
+        if (DeleteProposalInvitation.instance) {
+            console.warn(`⛔ Tentativo di inizializzazione multipla di DeleteProposalInvitation ignorato`);
+            return DeleteProposalInvitation.instance;
+        }
+        this.options = options || { apiBaseUrl: '/notifications' }; // Opzionale, per uniformità
         DeleteProposalInvitation.instance = this;
         this.init();
     }
@@ -76,23 +80,5 @@ export class DeleteProposalInvitation {
         }
     }
 
-    // showCreateButton(collectionId, userId) {
-    //     console.log('showCreateButton:', collectionId, userId);
-    //     const userCard = document.querySelector(`[data-user-id="${userId}"][data-collection-id="${collectionId}"]`);
-    //     if (userCard) {
-    //         const existingButton = userCard.querySelector('.create-invitation-btn');
-    //         if (!existingButton) {
-    //             const button = document.createElement('button');
-    //             button.classList.add('create-invitation-btn', 'btn', 'btn-primary', 'w-full', 'sm:w-auto');
-    //             button.dataset.collectionId = collectionId;
-    //             button.dataset.userId = userId;
-    //             button.textContent = window.translations['collection.invitation.create_invitation'] || "Create Invitation";
-    //             userCard.appendChild(button);
-    //         }
-    //     }
-    // }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    new DeleteProposalInvitation();
-});

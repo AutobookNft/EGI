@@ -84,6 +84,8 @@ return [
     'data_section_description' => 'Choose carefully the data that represent your collection',
     'this_is_default_collection_of_the_team' => 'This is the default collection of the team',
     'wallet' => [
+        'donation' => 'Donation',
+        'donation_success' => 'Donation sent successfully',
         'insufficient_quota' => 'You do not have enough quota to create a wallet',
         'write_royalty_mint' => 'Enter the royalty percentage for minting',
         'write_royalty_rebind' => 'Enter the royalty percentage for rebind',
@@ -113,6 +115,7 @@ return [
         'owner' => 'Owner',
         'wallet_change_rejected' => 'The wallet has been rejected',
         'wallet_change_approved' => 'The wallet has been approved',
+        'wallet_change_expired' => 'The wallet has expired',
         'reason' => 'Reason',
         'wallet_change_request_approved' => 'The wallet has been approved',
         'creator_does_not_have_enough_quota_to_allocate' => 'The creator does not have enough quota to allocate',
@@ -137,6 +140,7 @@ return [
         'royalty_mint_placeholder' => 'Enter the mint royalty percentage',
         'royalty_rebind_placeholder' => 'Enter the rebind royalty percentage',
         'validation' => [
+            'ceck_pending_wallet' => "It is not possible to perform the action because there is already a pending wallet.",
             'address_required' => 'The wallet address is required.',
             'mint_invalid' => 'Invalid mint royalty percentage.',
             'rebind_invalid' => 'Invalid rebind royalty percentage.',
@@ -147,6 +151,7 @@ return [
         'permission_denied' => 'You do not have permission to perform this action.',
     ],
     'invitation' => [
+        'proposal_collaboration' => 'You have been invited to collaborate on the collection',
         'confirmation_title' => 'Are you sure?',
         'confirmation_text' => 'Do you want to delete the invitation ID: #{invitationId}?',
         'confirm_delete' => 'Yes, delete!',

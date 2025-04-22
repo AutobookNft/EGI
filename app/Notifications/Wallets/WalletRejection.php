@@ -2,15 +2,15 @@
 
 namespace App\Notifications\Wallets;
 
-use App\DataTransferObjects\Notifications\Wallets\WalletNotificationData;
+use App\DataTransferObjects\Notifications\NotificationData;
 use App\Notifications\Channels\CustomDatabaseChannel;
 use Illuminate\Notifications\Notification;
 
 class WalletRejection extends Notification
 {
-    private WalletNotificationData $notificationData;
+    private NotificationData $notificationData;
 
-    public function __construct(WalletNotificationData $notificationData)
+    public function __construct(NotificationData $notificationData)
     {
         $this->notificationData = $notificationData;
     }

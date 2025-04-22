@@ -63,3 +63,32 @@ if (!function_exists('getDynamicBucketUrl')) {
         }
     }
 }
+
+if (!function_exists('hasPendingWallet')) {
+    /**
+     * Verifica se esiste un wallet pending per il Creator.
+     *
+     * @param int $proposerId
+     * @return bool
+     */
+    function hasPendingWallet(int $proposerId): bool
+    {
+
+        Log::channel('florenceegi')->info('hasPendingWallet: Verifica wallet pending', [
+            'proposerId' => $proposerId
+        ]);
+
+        $payload = \App\Models\NotificationPayloadWallet::where('proposer_id', $proposerId)
+            ->where('status', 'LIKE', '%pending%')
+            ->exists();
+
+        Log::channel('florenceegi')->info('hasPendingWallet: Risultato verifica wallet pending', [
+            'payload' => $payload
+        ]);
+
+        // Supponiamo di usare il modello NotificationPayloadWallet
+        // e che la colonna 'status' contenga il valore 'pending' per i wallet in attesa.
+        return $payload;
+    }
+}
+

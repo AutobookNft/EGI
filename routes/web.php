@@ -3,6 +3,7 @@
 use App\Actions\Jetstream\UpdateTeamName;
 use App\Enums\NotificationStatus;
 use App\Http\Controllers\Formazione;
+use App\Http\Controllers\Notifications\Invitations\NotificationInvitationResponseController;
 use App\Http\Controllers\Notifications\NotificationDetailsController;
 use App\Http\Controllers\Notifications\Wallets\NotificationWalletResponseController;
 use App\Http\Controllers\Notifications\Wallets\NotificationWalletRequestController;
@@ -21,8 +22,11 @@ use App\Http\Controllers\DropController;
 use App\Http\Middleware\SetLanguage;
 use App\Livewire\Collections\CollectionOpen;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Request;
 use UltraProject\UConfig\Http\Controllers\UConfigController;
+use Livewire\Livewire;
 
 Route::get('/formazione', [Formazione::class, 'index'])->name('formazione.index');
 
@@ -40,11 +44,20 @@ Route::get('/phpinfo', function () {
     phpinfo();
 });
 
-use Livewire\Livewire;
-
 Route::get('/debug/livewire/{component}', function ($component) {
     return Livewire::test($component)->render();
 });
+
+//  // Rotte per Drop
+//  Route::post('/drops/{id}/join', [DropController::class, 'join'])
+//  ->name('drops.join')
+//  ->middleware(['can:join_drop']);
+
+// Rotta di debug per visualizzare la sessione
+Route::get('/session', function () {
+ dd((session()->all()));
+});
+
 
 // Rotte protette da middleware
 Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified'])
@@ -54,6 +67,9 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         Route::get('/dashboard', function () {
             return view('dashboard');
         })->name('dashboard');
+
+        // Dashboard statica temporanea per test
+        Route::get('/dashboard-static', [App\Http\Controllers\DashboardStaticController::class, 'index'])->name('dashboard.static');
 
         Route::get('/debug-context', function () {
             return Route::currentRouteName();
@@ -126,55 +142,44 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
             // Route per fetch per creare un nuovo wallet
             Route::post('/{id}/wallets/create', [NotificationWalletRequestController::class, 'requestCreateWallet'])
                 ->name('wallets.create')
-                ->middleware(['collection_can:create_wallet']);
+                ->middleware(['collection_can:create_wallet', 'check.pending.wallet']);
 
             Route::post('/{id}/wallets/update', [NotificationWalletRequestController::class, 'requestUpdateWallet'])
                 ->name('wallets.update')
-                ->middleware(['collection_can:update_wallet']);
+                ->middleware(['collection_can:update_wallet', 'check.pending.wallet']);
 
+            Route::post('/{id}/wallets/donation', [NotificationWalletRequestController::class, 'requestDonation'])
+                ->name('wallets.update')
+                ->middleware(['collection_can:update_wallet', 'check.pending.wallet']);
 
         });
-
-        // Rotte per Wallet
-        Route::post('/wallets/{id}/approve', [WalletController::class, 'approve'])
-            ->name('wallets.approve')
-            ->middleware(['can:approve_wallet']);
-
-        Route::post('/wallets/{id}/reject', [WalletController::class, 'reject'])
-            ->name('wallets.reject')
-            ->middleware(['can:reject_wallet']);
-
-        // Rotte per Drop
-        Route::post('/drops/{id}/join', [DropController::class, 'join'])
-            ->name('drops.join')
-            ->middleware(['can:join_drop']);
-
-        // Rotta di debug per visualizzare la sessione
-        Route::get('/session', function () {
-            dd((session()->all()));
-        });
-
-    });
 
     // Rotte per la gestione delle notifiche
     Route::prefix('notifications')->group(function () {
+
         Route::get('{id}/details', [NotificationDetailsController::class, 'show'])
-        ->name('notifications.details');
+            ->name('notifications.details');
 
         Route::get('/request', [NotificationWalletResponseController::class, 'fetchHeadThumbnailList'])->name('head.thumbnails.list');
-        Route::post('{notificationId}/response', [NotificationWalletResponseController::class, 'response'])->name('notifications.response');
-        Route::post('{notificationId}/archive', [NotificationWalletResponseController::class, 'notificationArchive'])->name('notifications.notificationArchive');
 
-        Route::post('/notifications/wallets/create', [NotificationWalletRequestController::class, 'walletCreateRequest'])
-            ->name('notifications.wallets.create')
-            ->middleware([' :create_wallet']);
 
-        Route::post('/notifications/wallets/update', [NotificationWalletRequestController::class, 'walletUpdateRequest'])
-            ->name('notifications.wallets.create')
-            ->middleware([' :create_wallet']);
+        Route::prefix('wallet')->group(function () {
 
-        // Route::post('{notification}/accept', [NotificationDetailsController::class, 'accept'])->name('notifications.accept');
-        // Route::post('{notification}/reject', [NotificationDetailsController::class, 'reject'])->name('notifications.reject');
+            Route::post('/response', [NotificationWalletResponseController::class, 'response'])->name('notifications.wallets.response');
+
+            Route::post('/archive', [NotificationWalletResponseController::class, 'notificationArchive'])->name('notifications.wallets.notificationArchive');
+
+        });
+
+        Route::prefix('invitation')->group(function () {
+
+            // Rotte per le Invitation
+            Route::post('/response', [NotificationInvitationResponseController::class, 'response'])->name('notifications.invitations.response');
+
+            Route::post('/archive', [NotificationInvitationResponseController::class, 'notificationArchive'])->name('notifications.invitations.notificationArchive');
+
+        });
+
     });
 
     Route::get('/translations.js', function () {
@@ -182,9 +187,12 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
             'notification' =>[
                 'no_notifications' => __('notification.no_notifications'),
                 'select_notification' => __('notification.select_notification'),
+                'notification_list_error' => __('collection.wallet.notification_list_error'),
             ],
             'collection' => [
                 'wallet' => [
+                    'donation' => __('collection.wallet.donation'),
+                    'donation_success' => __('collection.wallet.donation_success'),
                     'accept' => __('label.accept'),
                     'decline' => __('label.decline'),
                     'archived' => __('label.archived'),
@@ -205,7 +213,6 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
                     'royalty_mint_placeholder' => __('collection.wallet.royalty_mint_placeholder'),
                     'royalty_rebind_placeholder' => __('collection.wallet.royalty_rebind_placeholder'),
 
-                    // ✅ Aggiunte chiavi mancanti
                     'success_title' => __('collection.wallet.success_title'),
                     'creation_success_detail' => __('collection.wallet.creation_success_detail'),
 
@@ -220,6 +227,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
                         'creation_error_generic' => __('collection.wallet.creation_error_generic'),
                         'creation_error' => __('collection.wallet.creation_error'),
                         'permission_denied' => __('collection.wallet.permission_denied'),
+
                     ],
 
                     'creation_success' => __('collection.wallet.creation_success'),
@@ -243,10 +251,27 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
 
     // Rotte per la gestione delle costanti enum
     Route::get('/js/enums', function (Request $request) {
+
+        Log::channel('florenceegi')->info('Richiesta costanti enum', [
+            'user' => Auth::user()->id,
+            'notificationStatus' => collect(NotificationStatus::cases())->mapWithKeys(fn($enum) => [$enum->name => $enum->value])
+        ]);
+
         return response()->json([
             'NotificationStatus' => collect(NotificationStatus::cases())->mapWithKeys(fn($enum) => [$enum->name => $enum->value])
         ]);
     });
+
+
+});
+
+// Rotta per le citazioni
+Route::get('/api/quote', function () {
+    $response = Http::get('https://zenquotes.io/api/random');
+    return response($response->body())
+              ->header('Content-Type', 'application/json')
+              ->header('Access-Control-Allow-Origin', '*');
+});
 
 
 

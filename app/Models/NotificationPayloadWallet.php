@@ -105,9 +105,9 @@ class NotificationPayloadWallet extends Model
     /**
      * Relazione con il modello Wallet.
      */
-    public function wallet()
+    public function walletModel()
     {
-        return $this->belongsTo(Wallet::class);
+        return $this->hasOne(Wallet::class, 'notification_payload_wallets_id', 'id');
     }
 
 

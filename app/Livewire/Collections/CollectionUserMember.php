@@ -8,12 +8,15 @@ use App\Models\NotificationPayloadInvitation;
 use App\Models\Wallet;
 use App\Models\WalletChangeApproval;
 use App\Models\NotificationPayloadWallet;
+use App\Services\Notifications\InvitationService;
 use Livewire\Component;
 use Illuminate\Support\Facades\Log;
 use App\Traits\HasPermissionTrait;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use Spatie\Permission\Models\Role; // Importiamo i ruoli di Spatie
+use Livewire\Attributes\Validate;
 
 class CollectionUserMember extends Component
 {
@@ -29,14 +32,31 @@ class CollectionUserMember extends Component
     public $walletProposals;
     public $invitationProposal;
     public $show = false; // Proprietà per gestire la visibilità della modale
+    public $roles = []; // Ruoli disponibili
+
+    #[Validate('required|email')]
+    public string $email = '';
+
+    #[Validate('required|string')]
+    public string $role = '';
+
+    private InvitationService $invitationService;
+
+    public function boot(InvitationService $invitationService)
+    {
+        $this->invitationService = $invitationService;
+    }
 
     public function mount($id)
     {
-        Log::channel('florenceegi')->info('Collection id', [
+        Log::channel('florenceegi')->info('CollectionUserMember: Collection id', [
             'collectionId' => $id
         ]);
 
         $this->collectionId = $id;
+
+          // Carica i ruoli disponibili da Spatie
+        $this->roles = Role::pluck('name')->toArray(); // Recupera i nomi dei ruoli dalla tabella 'roles'
 
         // Carica la collection e i suoi dati
         $this->loadCollectionData();
@@ -68,11 +88,10 @@ class CollectionUserMember extends Component
             ->where('status', 'LIKE', '%pending%')
             ->get();
 
-        // Log::channel('florenceegi')->info('CollectionUsersMembers', [
-        //     'collectionId' => $this->collectionId,
-        //     'wallets' => $this->wallets,
-        //     'walletProposals' => $this->walletProposals
-        // ]);
+        Log::channel('florenceegi')->info('CollectionUserMember: Team users', [
+            'collectionUsers' => $this->collectionUsers->count()
+        ]);
+
     }
 
     public function deleteProposalWallet(Request $request, $id, $walletId)
@@ -141,6 +160,68 @@ class CollectionUserMember extends Component
             ]);
             return response()->json(['message' => 'Errore durante l\'eliminazione'], 500);
         }
+    }
+
+    public function invite()
+    {
+
+        $this->validate();
+
+        try {
+
+            /**
+             * @var mixed
+             */
+            $collection = Collection::findOrFail($this->collectionId);
+
+            // Verifica permessi per l'utente autenticato
+            if (!$this->hasPermission($collection, 'add_team_member')) {
+                session()->flash('error', __('collection.collaborators.add_denied'));
+                return;
+            }
+
+            $this->invitationService->createInvitation(
+                $collection,
+                $this->email,
+                $this->role
+            );
+
+            $this->loadTeamUsers();
+            $this->resetFields();
+            $this->show = false;
+            $this->dispatch('collection-member-updated'); // Aggiorna il genitore
+
+        } catch (Exception $e) {
+
+            Log::channel('florenceegi')->error('Errore invito', [
+                'error' => $e->getMessage(),
+                'collection_id' => $this->collectionId
+            ]);
+
+            $this->addError(name: 'invitation', message: 'Errore durante su invio di invito');
+
+        }
+
+    }
+
+    public function openInviteModal()
+    {
+        Log::channel('florenceegi')->info('OpenInviteModal', [
+            'collectionId' => $this->collectionId
+        ]);
+        $this->resetFields(); // Pulisce i campi
+        $this->show = true; // Mostra la modale
+    }
+
+    public function resetFields()
+    {
+        $this->email = '';
+        $this->role = '';
+    }
+
+    public function closeModal()
+    {
+        $this->show = false;
     }
 
 

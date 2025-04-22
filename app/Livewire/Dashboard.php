@@ -134,7 +134,7 @@ class Dashboard extends Component
             ->where(function ($query) {
                 $query->where('outcome', 'LIKE', '%pending%')
                     ->orWhere(function ($subQuery) {
-                        $subQuery->whereIn('outcome', ['accepted', 'rejected'])
+                        $subQuery->whereIn('outcome', ['accepted', 'rejected', 'expired'])
                                 ->whereNull('read_at');
                     });
             })
@@ -143,7 +143,7 @@ class Dashboard extends Component
             ->get();
 
         Log::channel('florenceegi')->info('🔍 loadNotifications() - Pending Notifications:', [
-            'pendingNotifications' => $this->pendingNotifications->pluck('id')->toArray(),
+            'pendingNotifications' => $this->pendingNotifications,
             'activeNotificationId' => $this->activeNotificationId,
         ]);
 
@@ -152,11 +152,15 @@ class Dashboard extends Component
             ->customNotifications()
             ->whereNotNull('read_at')
             ->with('model')
-            ->orderBy('created_at', 'desc')
+            ->orderBy('read_at', 'desc')
             ->get();
 
         Log::channel('florenceegi')->info('🔍 loadNotifications() - Historical Notifications:', [
             'historicalNotifications' => $this->historicalNotifications->pluck('id')->toArray(),
+        ]);
+
+        Log::channel('florenceegi')->info('🔍 loadNotifications() - Active Notification:', [
+            'activeNotification' => $this->historicalNotifications,
         ]);
     }
 

@@ -12,6 +12,7 @@ class Wallet extends Model
     protected $fillable = [
         'collection_id',
         'user_id',
+        'notification_payload_wallets_id',
         'wallet',
         'royalty_mint',
         'royalty_rebind',
@@ -35,15 +36,24 @@ class Wallet extends Model
         return $this->belongsTo(User::class);
     }
 
-        /**
-     * Relazione uno a molti con NotificationPayloadWallet
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function notificationPayloadWallets()
+    // /**
+    //  * Relazione uno a molti con NotificationPayloadWallet
+    //  *
+    //  * @return \Illuminate\Database\Eloquent\Relations\HasMany
+    //  */
+    // public function notificationPayloadWallets()
+    // {
+    //     return $this->hasMany(NotificationPayloadWallet::class, 'id', 'notification_payload_wallets_id');
+    // }
+
+    public function notificationPayloadWallet()
     {
-        return $this->hasMany(NotificationPayloadWallet::class, 'receiver_id', 'user_id');
+        return $this->belongsTo(NotificationPayloadWallet::class, 'notification_payload_wallets_id', 'id');
     }
 
+    public function notificationPayload()
+    {
+        return $this->belongsTo(NotificationPayloadWallet::class, 'notification_payload_wallets_id', 'id');
+    }
 
 }

@@ -3,7 +3,9 @@
 namespace App\Livewire\Notifications\Invitations;
 
 use App\Models\Collection;
-use App\Services\InvitationService;
+
+
+use App\Services\Notifications\InvitationService;
 use Livewire\Component;
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\On;
@@ -90,8 +92,11 @@ class InviteUserToCollectionModal extends Component
     }
 
     #[On('openInviteModal')]
-    public function showInviteModal()
+    public function openInviteModal()
     {
+        Log::channel('florenceegi')->info('OpenInviteModal', [
+            'collectionId' => $this->collectionId
+        ]);
         $this->resetFields(); // Pulisce i campi
         $this->show = true; // Mostra la modale
     }

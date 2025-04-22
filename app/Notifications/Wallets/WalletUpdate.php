@@ -37,6 +37,8 @@ class WalletUpdate extends Notification
                 'collection_name' => $this->notification->getCollectionName(),
                 'old_royalty_mint' => $this->notification->getOldRoyaltyMint(),
                 'old_royalty_rebind' => $this->notification->getOldRoyaltyRebind(),
+                'proposal_royalty_mint' => $this->notification->getProposalRoyaltyMint(),
+                'proposal_royalty_rebind' => $this->notification->getProposalRoyaltyRebind(),
             ],
             'outcome' => $this->notification->getStatus(),
         ];

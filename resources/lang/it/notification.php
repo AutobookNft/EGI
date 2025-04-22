@@ -28,4 +28,5 @@ return [
     'proposed_creation_new_wallet' => 'Hai proposto la creazione di un nuovo portafoglio',
     'proposed_change_to_a_wallet' => 'Hai proposto la modifica a un portafoglio',
     'no_historical_notifications' => 'Nessuna notifica storica',
+    'notification_list_error' => 'Errore durante il recupero delle notifiche',
 ];

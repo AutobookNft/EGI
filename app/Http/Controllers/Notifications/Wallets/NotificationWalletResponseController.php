@@ -10,11 +10,12 @@ use App\DataTransferObjects\Payloads\Wallets\{
     WalletResponse,
     WalletError
 };
+
 use App\Enums\NotificationStatus;
 use App\Http\Controllers\Controller;
 use App\Models\CustomDatabaseNotification;
+use App\Services\Notifications\InvitationService;
 use App\Services\Notifications\ResponseWalletService;
-use App\Services\Notifications\WalletService;
 use Exception;
 use Illuminate\Http\{Request, JsonResponse};
 use Illuminate\Support\Facades\{Auth, Log};
@@ -23,20 +24,27 @@ use Illuminate\View\View;
 class NotificationWalletResponseController extends Controller
 {
     public function __construct(
-        private readonly ResponseWalletService $responseWalletService
+        private readonly ResponseWalletService $responseWalletService,
+        private readonly InvitationService $responseInvitationService,
     ) {}
 
     /**
      * Gestisce la risposta a una notifica wallet (accettazione o rifiuto)
+     * @param Request $request
+     * @param string $notificationId
+     * @return JsonResponse
+     * @throws Exception
      */
-    public function response(Request $request, string $notificationId): JsonResponse
+    public function response(Request $request): JsonResponse
     {
         $action = $request->input('action');
+        $notificationId = $request->input('notificationId');
 
         Log::channel('florenceegi')->info('Risposta notifica wallet', [
             'notification_id' => $notificationId,
             'action' => $action
         ]);
+
 
         if (!in_array($action, [
             NotificationStatus::ACCEPTED->value,
@@ -72,7 +80,9 @@ class NotificationWalletResponseController extends Controller
                 default => $this->handleDone($notification)
             };
 
+
         } catch (Exception $e) {
+
             Log::channel('florenceegi')->error('Errore elaborazione notifica', [
                 'error' => $e->getMessage(),
                 'notification_id' => $notificationId,
@@ -85,6 +95,7 @@ class NotificationWalletResponseController extends Controller
             );
         }
     }
+
 
     /**
      * Gestisce l'accettazione di una notifica wallet
@@ -229,6 +240,11 @@ class NotificationWalletResponseController extends Controller
      */
     private function findNotification(string $notificationId): CustomDatabaseNotification
     {
+
+        Log::channel('florenceegi')->info('Ricerca notifica', [
+            'notification_id' => $notificationId
+        ]);
+
         $notification = Auth::user()
             ->customNotifications()
             ->where('id', $notificationId)

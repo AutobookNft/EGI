@@ -1,5 +1,5 @@
 <div>
-    @if($show)
+
         <div class="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center">
             <div class="bg-gray-800 p-6 rounded-2xl w-full max-w-md shadow-lg">
                 <h3 class="text-2xl font-bold text-white mb-4">{{ __('Invite Collection Member') }}</h3>
@@ -23,7 +23,7 @@
                             <option value="{{ $role }}">{{ ucfirst($role) }}</option>
                         @endforeach
                     </select>
-                    @error('role') <span class="text-error text-sm">{{ $message }}</span> @enderror
+                    {{-- @error('role') <span class="text-error text-sm">{{ $message }}</span> @enderror --}}
                 </div>
 
                 <!-- Azioni -->
@@ -33,5 +33,5 @@
                 </div>
             </div>
         </div>
-    @endif
+   
 </div>

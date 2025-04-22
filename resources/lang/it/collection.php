@@ -84,6 +84,8 @@ return [
     'data_section_description' => 'Scegli con cura i dati che rappresentano la tua collection',
     'this_is_default_collection_of_the_team' => 'Questa è la collection predefinita del team',
     'wallet' => [
+        'donation' => 'Donazione',
+        'donation_success' => 'Donazione effettuata con successo',
         'insufficient_quota' => 'Non hai sufficiente quota per creare un wallet',
         'write_royalty_mint' => 'Inserisci la percentuale di royalty per il minting',
         'write_royalty_rebind' => 'Inserisci la percentuale di royalty per il rebind',
@@ -113,6 +115,7 @@ return [
         'owner' => 'Proprietario',
         'wallet_change_rejected' => 'Il wallet è stato rifiutato',
         'wallet_change_approved' => 'Il wallet è stato approvato',
+        'wallet_change_expired' => 'Il wallet è scaduto',
         'reason' => 'Motivo',
         'wallet_change_request_approved' => 'La richiesta di modifica del wallet è stata approvata',
         'creator_does_not_have_enough_quota_to_allocate' => 'Il creatore non ha abbastanza quota da assegnare',
@@ -137,6 +140,7 @@ return [
         'royalty_mint_placeholder' => 'Inserisci la percentuale di royalty di minting',
         'royalty_rebind_placeholder' => 'Inserisci la percentuale di royalty di rebind',
         'validation' => [
+            'ceck_pending_wallet'=> 'Non è possibile eseguire l\'azione perché esiste già un wallet pending.',
             'address_required' => 'L\'indirizzo del wallet è obbligatorio.',
             'mint_invalid' => 'Percentuale di royalty di minting non valida.',
             'rebind_invalid' => 'Percentuale di royalty di rebind non valida.',
@@ -146,7 +150,8 @@ return [
         'creation_success_detail' => 'Il wallet è stato creato con successo.',
         'permission_denied' => 'Non hai il permesso di eseguire questa azione.',
     ],
-        'invitation' => [
+    'invitation' => [
+        'proposal_collaboration' => 'Sei stato invitato a collaborare alla collection',
         'confirmation_title' => 'Sei sicuro?',
         'confirmation_text' => 'Vuoi eliminare l\'invito ID: #{invitationId}?',
         'confirm_delete' => 'Sì, elimina!',

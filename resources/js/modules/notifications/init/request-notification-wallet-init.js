@@ -11,14 +11,13 @@
  */
 
 // request-notification-wallet-init.js
-import RequestCreateNotificationWallet from '../components/request-create-notification-wallet.js';
-import RequestUpdateNotificationWallet from '../components/request-update-notification-wallet.js';
+import RequestCreateNotificationWallet from '../requests/wallets/create.js';
+import RequestUpdateNotificationWallet from '../requests/wallets/update.js';
+import RequestWalletDonation from '../requests/wallets/donation.js';
 
-document.addEventListener('DOMContentLoaded', () => {
-    new RequestCreateNotificationWallet({
-        apiBaseUrl: '/notifications'
-    });
-    new RequestUpdateNotificationWallet({
-        apiBaseUrl: '/notifications'
-    });
-});
+// Esporta le classi per l’import in main.js
+export {
+    RequestCreateNotificationWallet,
+    RequestUpdateNotificationWallet,
+    RequestWalletDonation,
+};

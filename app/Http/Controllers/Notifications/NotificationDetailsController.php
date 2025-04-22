@@ -27,15 +27,22 @@ class NotificationDetailsController extends Controller
         }
 
         $viewKey = $notification->view ?? null;
+
+        if (is_array($viewKey)) {
+            $viewKey = array_map('strtolower', $viewKey); // Converte ogni elemento dell'array in minuscolo
+        } elseif (is_string($viewKey)) {
+            $viewKey = strtolower($viewKey); // Converte la stringa in minuscolo
+        }
+
         $config = $viewKey ? config('notification-views.' . $viewKey, []) : [];
 
         $view = $config['view'] ?? null;
 
-        if (is_array($view)) {
-            $view = array_map('strtolower', $view); // Converte ogni elemento dell'array in minuscolo
-        } elseif (is_string($view)) {
-            $view = strtolower($view); // Converte la stringa in minuscolo
-        }
+        Log::channel('florenceegi')->info('NotificationDetailsController:show', [
+            'viewKey' => $viewKey,
+            'view' => $view,
+        ]);
+
 
         $render = $config['render'] ?? 'controller';
         $controller = $config['controller'] ?? null;
@@ -53,6 +60,11 @@ class NotificationDetailsController extends Controller
 
         if ($view) {
             if ($render === 'livewire') {
+                Log::channel('florenceegi')->info('Cosa sto aprendo', [
+                    'render' => $render,
+                    'view' => $view,
+                    'notification' => $notification,
+                ]);
                 return view('livewire.' . $view, ['notification' => $notification]);
             } elseif ($render === 'controller' && $controller) {
                 $data = app()->make($controller)->prepare($notification);
@@ -62,11 +74,17 @@ class NotificationDetailsController extends Controller
                 ]);
                 return view($view, $data);
             } else {
+                Log::channel('florenceegi')->info('Cosa sto aprendo', [
+                    'render' => $render,
+                    'view' => $view,
+                    'notification' => $notification,
+                ]);
                 return view($view, ['notification' => $notification]);
             }
         } else {
             return response()->json(['error' => 'Tipo di notifica non supportata'], 400);
         }
     }
+
 }
-//
+

@@ -28,5 +28,6 @@
     'proposed_creation_new_wallet' => 'Has propuesto la creación de una nueva cartera',
     'proposed_change_to_a_wallet' => 'Has propuesto un cambio en una cartera',
     'no_historical_notifications' => 'Sin notificaciones históricas',
+    'notification_list_error' => 'Error al recuperar la lista de notificaciones',
 ];
 

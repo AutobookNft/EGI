@@ -28,5 +28,6 @@
     'proposed_creation_new_wallet' => 'Você propôs a criação de uma nova carteira',
     'proposed_change_to_a_wallet' => 'Você propôs uma alteração em uma carteira',
     'no_historical_notifications' => 'Nenhuma notificação histórica',
+    'notification_list_error' => 'Erro ao carregar a lista de notificações',
 ];
 

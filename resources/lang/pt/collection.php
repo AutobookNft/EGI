@@ -84,6 +84,8 @@ return [
     'data_section_description' => 'Escolha cuidadosamente os dados que representam sua coleção',
     'this_is_default_collection_of_the_team' => 'Esta é a coleção padrão da equipe',
     'wallet' => [
+        'donation' => 'Doação',
+        'donation_success' => 'Doação enviada com sucesso',
         'insufficient_quota' => 'Você não tem cota suficiente para criar uma carteira',
         'write_royalty_mint' => 'Insira a porcentagem de royalties para cunhagem',
         'write_royalty_rebind' => 'Insira a porcentagem de royalties para rebind',
@@ -113,6 +115,7 @@ return [
         'owner' => 'Proprietário',
         'wallet_change_rejected' => 'A carteira foi rejeitada',
         'wallet_change_approved' => 'A carteira foi aprovada',
+        'wallet_change_expired' => 'A carteira expirou',
         'reason' => 'Motivo',
         'wallet_change_request_approved' => 'O pedido de alteração da carteira foi aprovado',
         'creator_does_not_have_enough_quota_to_allocate' => 'O criador não tem cota suficiente para alocar',
@@ -137,6 +140,7 @@ return [
         'royalty_mint_placeholder' => 'Insira a porcentagem de royalties de cunhagem',
         'royalty_rebind_placeholder' => 'Insira a porcentagem de royalties de rebind',
         'validation' => [
+            'ceck_pending_wallet' => 'Não é possível executar a ação porque já existe uma carteira pendente.',
             'address_required' => 'O endereço da carteira é obrigatório.',
             'mint_invalid' => 'Porcentagem de royalties de cunhagem inválida.',
             'rebind_invalid' => 'Porcentagem de royalties de rebind inválida.',
@@ -147,6 +151,7 @@ return [
         'permission_denied' => 'Você não tem permissão para realizar esta ação.',
     ],
     'invitation' => [
+        'proposal_collaboration' => 'Foi convidado a colaborar na coleção',
         'confirmation_title' => 'Tem certeza?',
         'confirmation_text' => 'Deseja excluir o convite ID: #{invitationId}?',
         'confirm_delete' => 'Sim, excluir!',

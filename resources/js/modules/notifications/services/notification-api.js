@@ -9,18 +9,14 @@
  * fornendo metodi statici per effettuare le chiamate API necessarie.
  */
 
-
-// api.js
-export async function sendAction(notificationId, action, reason = null) {
+export async function sendAction(actionRequest, baseUrl) {
     try {
 
-        const baseUrl = this.options.apiBaseUrl || '/defaultBaseUrl';
-        const url = `${baseUrl}/${notificationId}/response`;
+        console.log(`🚀 sendAction chiamato con azione ${actionRequest.action} per la notifica ${actionRequest.notificationId}`);
 
-        console.log(`🚀 Invio azione ${action} per notifica ${notificationId} a ${url}`);
+        const url = `${baseUrl}/response`;
 
-        const payload = { action: action, reason: reason };
-        console.log("📦 Payload inviato:", JSON.stringify(payload, null, 2));
+        console.log(`🚀 parametri ${JSON.stringify(actionRequest)} per notifica a ${url}`);
 
         const response = await fetch(url, {
             method: 'POST',
@@ -29,11 +25,11 @@ export async function sendAction(notificationId, action, reason = null) {
                 'Accept': 'application/json',
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
             },
-            body: JSON.stringify(payload)
+            body: JSON.stringify(actionRequest)
         });
 
         const text = await response.text();
-        console.log('📢 Risposta del server:', text);
+        // console.log('📢 Risposta del server:', text);
 
         let data;
         try {
