@@ -302,4 +302,51 @@ return [
       'expiration_hours' => env('NOTIFICATION_EXPIRATION_HOURS', 72),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Redirect to collection
+    |--------------------------------------------------------------------------
+    |
+    | This value determines whether the application should redirect to the
+    | collection page after a successful upload. If set to true, the user
+    | will be redirected to the collection page after uploading a file.
+    | If set to false, the user will be redirected to the home page.
+    |
+    | This setting is useful for applications that have a specific workflow
+    | or user experience in mind. By default, it is set to false.
+    |
+    */
+
+    'redirect_to_collection' => env('REDIRECT_TO_COLLECTION', false),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Redirect to upload page
+    |--------------------------------------------------------------------------
+    |
+    | This value determines which page should be displayed after a file
+    | is uploaded through the egi-module form.
+    |
+    | The value becomes a window variable thanks to getGlobalConfig() in UUM.
+    | The returnToCollection button uses the same variable to decide
+    | which page the user should be redirected to.
+    |
+    */
+
+    'redirect_to_url_after_upload' => env('UPLOAD_REDIRECT_TO_URL_AFTER_UPLOAD', 'home'),
+
+   /*
+    |--------------------------------------------------------------------------
+    | Redirect to upload page after login
+    |--------------------------------------------------------------------------
+    |
+    | This value determines which page should be displayed after logging in
+    | through the egi-module form.
+    |
+    | The value is read by the boot() method in the FortifyServiceProvider.
+    |
+    */
+
+    'redirect_to_url_after_login' => env('UPLOAD_REDIRECT_TO_URL_AFTER_LOGIN', 'home'),
+
 ];

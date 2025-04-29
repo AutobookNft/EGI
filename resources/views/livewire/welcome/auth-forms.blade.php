@@ -1,33 +1,29 @@
+<script>console.log('/resources/views/livewire/welcome/auth-forms.blade.php');</script>
+
 <div>
     <!-- Tab Navigation -->
-    <div class="tabs tabs-boxed bg-base-200 bg-opacity-50 mb-6">
-        <a wire:click="$set('showLogin', true)"
-           class="tab {{ $showLogin ? 'tab-active' : '' }}">
-            Login
-        </a>
-        <a wire:click="$set('showLogin', false)"
-           class="tab {{ !$showLogin ? 'tab-active' : '' }}">
-            Register
-        </a>
+    <div class="tabs tabs-boxed bg-base-200 bg-opacity-50 mb-6" id="authTabs">
+        <a href="#" data-tab="login" class="tab tab-login tab-active">Login</a>
+        <a href="#" data-tab="register" class="tab tab-register">Register</a>
     </div>
 
     <!-- Forms Container -->
     <div class="transition-all duration-300">
-        @if($showLogin)
+
             <x-auth-session-status class="mb-4" :status="session('status')" />
 
             <form method="POST" action="{{ route('login') }}">
                 @csrf
-                <div class="space-y-4">
+                <div id="form-login" class="space-y-4">
                     <div>
                         <x-label for="email" value="{{ __('Email') }}" />
-                        <x-input id="email" type="email" name="email" :value="old('email')" required autofocus autocomplete="username"
+                        <x-input id="email_l" type="email" name="email" :value="old('email')" required autofocus autocomplete="username"
                                 class="input input-bordered w-full" />
                     </div>
 
                     <div>
                         <x-label for="password" value="{{ __('Password') }}" />
-                        <x-input id="password" type="password" name="password" required autocomplete="current-password"
+                        <x-input id="password_l" type="password" name="password" required autocomplete="current-password"
                                 class="input input-bordered w-full" />
                     </div>
 
@@ -49,10 +45,9 @@
                     </x-button>
                 </div>
             </form>
-        @else
             <form method="POST" action="{{ route('register') }}">
                 @csrf
-                <div class="space-y-4">
+                <div id="form-register" class="space-y-4 hidden">
                     <div>
                         <x-label for="name" value="{{ __('Name') }}" />
                         <x-input id="name" type="text" name="name" :value="old('name')" required autofocus autocomplete="name"
@@ -61,13 +56,13 @@
 
                     <div>
                         <x-label for="email" value="{{ __('Email') }}" />
-                        <x-input id="email" type="email" name="email" :value="old('email')" required autocomplete="username"
+                        <x-input id="email_r" type="email" name="email" :value="old('email')" required autocomplete="username"
                                 class="input input-bordered w-full" />
                     </div>
 
                     <div>
                         <x-label for="password" value="{{ __('Password') }}" />
-                        <x-input id="password" type="password" name="password" required autocomplete="new-password"
+                        <x-input id="password_r" type="password" name="password" required autocomplete="new-password"
                                 class="input input-bordered w-full" />
                     </div>
 
@@ -98,6 +93,31 @@
                     </x-button>
                 </div>
             </form>
-        @endif
+
     </div>
 </div>
+<script>
+
+document.addEventListener('DOMContentLoaded', () => {
+    const loginTab = document.querySelector('.tab-login');
+    const registerTab = document.querySelector('.tab-register');
+    const loginForm = document.getElementById('form-login');
+    const registerForm = document.getElementById('form-register');
+
+    loginTab.addEventListener('click', (e) => {
+        e.preventDefault();
+        loginTab.classList.add('tab-active');
+        registerTab.classList.remove('tab-active');
+        loginForm.classList.remove('hidden');
+        registerForm.classList.add('hidden');
+    });
+
+    registerTab.addEventListener('click', (e) => {
+        e.preventDefault();
+        registerTab.classList.add('tab-active');
+        loginTab.classList.remove('tab-active');
+        registerForm.classList.remove('hidden');
+        loginForm.classList.add('hidden');
+    });
+});
+</script>

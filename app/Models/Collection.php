@@ -117,6 +117,6 @@ class Collection extends Model
             $query->where('collection_id', $this->id);
         })->where('status', 'pending')->exists();
 
-        return !$pendingApprovals && $this->status === 'draft';
+        return !$pendingApprovals && $this->status === 'published';
     }
 }

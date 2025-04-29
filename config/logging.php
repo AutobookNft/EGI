@@ -118,9 +118,23 @@ return [
             'replace_placeholders' => true,
         ],
 
+        'upload' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/UltraUploadManager.log'),
+            'level' => 'debug',
+            'days' => 7,  // Numero di giorni per cui conservare i log
+        ],
+
         'florenceegi' => [
             'driver' => 'daily',
             'path' => storage_path('logs/florenceegi.log'),
+            'level' => 'debug',
+            'days' => 7,  // Numero di giorni per cui conservare i log
+        ],
+
+        'javascript' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/javascript.log'),
             'level' => 'debug',
             'days' => 7,  // Numero di giorni per cui conservare i log
         ],

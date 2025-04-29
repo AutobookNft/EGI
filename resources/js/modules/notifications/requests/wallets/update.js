@@ -1,4 +1,4 @@
-console.log('🚀 RequestNotificationWallet loaded');
+console.log('🚀 RequestUpdateNotificationWallet loaded');
 
 export class RequestUpdateNotificationWallet {
     constructor(options = {}) {

@@ -88,7 +88,7 @@ class Egi extends Model
      *
      * @var string
      */
-    protected $table = 'egi';
+    protected $table = 'egis';
 
     /**
      * The attributes that are mass assignable.

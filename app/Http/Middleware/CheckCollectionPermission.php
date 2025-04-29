@@ -24,11 +24,11 @@ class CheckCollectionPermission
         // Recupera l'utente autenticato
         $user = Auth::user();
 
-        // Log::channel('florenceegi')->info('Middleware: CheckCollectionPermission', [
-        //     'user_id' => $user->id,
-        //     'permission' => $permission,
-        //     'user_name' => $user->name,
-        // ]);
+        Log::channel('florenceegi')->info('Middleware: CheckCollectionPermission', [
+            'user_id' => $user->id,
+            'permission' => $permission,
+            'user_name' => $user->name,
+        ]);
 
         // Verifica se la rotta è 'collections.open'
         $rotta = $request->route()->getName();
@@ -49,7 +49,14 @@ class CheckCollectionPermission
         } else {
             // Recupera l'ID della collection dalla richiesta per le altre rotte
             $collectionId = $request->route('id') ?? $request->route('collection');
+
+            Log::channel('florenceegi')->info('Middleware: CheckCollectionPermission', [
+                'collection_id' => $collectionId,
+            ]);
+
+
             $collection = Collection::find($collectionId);
+
 
             // Se la collection non esiste, restituisci un errore 404
             if (!$collection) {

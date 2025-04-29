@@ -1,0 +1,42 @@
+{
+    "compilerOptions": {
+      "target": "es2020",
+      "module": "esnext",
+      "moduleResolution": "node",
+      "lib": ["es2020", "dom", "dom.iterable"],
+      "strict": true,
+      "esModuleInterop": true,
+      "skipLibCheck": true,
+      "forceConsistentCasingInFileNames": true,
+      "resolveJsonModule": true,
+      "isolatedModules": true,
+      "noEmit": true,
+      "jsx": "react",
+      "baseUrl": "./",
+      "paths": {
+        "@/*": ["resources/js/*"],
+        "@ts/*": ["resources/ts/*"]
+      },
+      "typeRoots": [
+          "./node_modules/@types"
+      ],
+      "sourceMap": true,
+      "outDir": "./public/build"
+    },
+    "include": [
+      "resources/ts/**/*.ts",
+      "resources/ts/**/*.d.ts",
+      "vendor/ultra/*/resources/ts/**/*.ts",
+      "vendor/ultra/*/resources/ts/**/*.js",
+      "vendor/ultra/*/resources/ts/**/*.d.ts",
+      "resources/ts/global.d.ts"
+    ],
+    "exclude": [
+      "node_modules",
+      "public",
+      "storage",
+      "vendor/*/*/*",
+      "!vendor/ultra",
+      "!vendor/ultra/*"
+    ]
+  }

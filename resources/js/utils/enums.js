@@ -5,7 +5,14 @@ export function loadEnums() {
         enumPromise = new Promise(async (resolve, reject) => {
             try {
                 console.log("⏳ Caricamento ENUM...");
-                const response = await fetch('/js/enums');
+
+                const response = await fetch('/js/enums', {
+                    headers: {
+                      'Accept': 'application/json',
+                      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    }
+                  })
+
                 console.log('ENUM response', response);
                 if (!response.ok) throw new Error(`Errore nel caricamento ENUM: ${response.status}`);
 

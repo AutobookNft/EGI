@@ -7,6 +7,7 @@ export default defineConfig({
         laravel({
             // Input Principali di FlorenceEGI
             input: [
+                'resources/js/logo3d.js',
                 'resources/css/app.css',
                 'resources/js/app.js',
                 // --- Input dai Pacchetti Ultra/EGI (Aggiunti) ---
@@ -102,6 +103,6 @@ export default defineConfig({
     },
     // Mantieni la tua configurazione optimizeDeps
     optimizeDeps: {
-        include: ['tailwindcss', 'daisyui'],
+        include: ['tailwindcss', 'daisyui', 'three', 'three/examples/jsm/controls/OrbitControls.js'],
     }
 });

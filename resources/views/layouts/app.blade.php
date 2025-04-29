@@ -31,13 +31,11 @@
         <!-- lg:drawer-open => Su schermi lg o maggiori, la sidebar è sempre visibile -->
         <!-- drawer => classe DaisyUI per attivare il layout a scomparsa -->
         <div class="drawer lg:drawer-open">
-
             <!-- Questo checkbox controlla lo stato del drawer -->
             <input id="main-drawer" type="checkbox" class="drawer-toggle" />
 
-            <!-- Contenuto principale della pagina -->
             <div class="flex flex-col min-h-screen drawer-content">
-                <!-- Navbar -->
+
                 <livewire:navigation-menu />
 
                 <!-- Page Heading -->
@@ -65,7 +63,6 @@
                 {!! $debugInfo ?? '' !!}
             @endif
         </div>
-
 
         <script>
             window.appConfig = @json(config('app'));

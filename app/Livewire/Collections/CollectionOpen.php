@@ -127,13 +127,13 @@ class CollectionOpen extends Component
         return view('livewire.collections.collection-manager');
     }
 
-    // public function nextSlide()
-    // {
-    //     $this->activeSlide = ($this->activeSlide + 1) % $this->collections->count();
-    // }
+    public function nextSlide()
+    {
+        $this->activeSlide = ($this->activeSlide + 1) % $this->collections->count();
+    }
 
-    // public function prevSlide()
-    // {
-    //     $this->activeSlide = ($this->activeSlide - 1 + $this->collections->count()) % $this->collections->count();
-    // }
+    public function prevSlide()
+    {
+        $this->activeSlide = ($this->activeSlide - 1 + $this->collections->count()) % $this->collections->count();
+    }
 }

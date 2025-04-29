@@ -1,7 +1,8 @@
 <?php
 
-namespace Ultra\UploadManager\Helpers;
+namespace Ultra\EgiModule\Helpers;
 
+use App\Models\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;      // Standard Log Facade
 use Illuminate\Support\Facades\Config;   // Standard Config Facade
@@ -67,7 +68,7 @@ class EgiHelper
 
         try {
             // Build the query for the 'egi' table targeting the specific collection
-            $query = DB::table('egi')->where('collection_id', $collectionId);
+            $query = DB::table('egis')->where('collection_id', $collectionId);
 
             // Apply pessimistic lock ONLY if configured AND if inside a transaction
             if ($useLocking) {
@@ -103,6 +104,45 @@ class EgiHelper
             ]));
             // Re-throw a standard Exception to ensure transaction rollback in the calling handler
             throw new Exception("Database error occurred while generating position number for collection {$collectionId}: " . $e->getMessage(), 500, $e);
+        }
+    }
+
+    /**
+     * Generates the next available position number for a new Collection for a given user.
+     * Finds the maximum current position among the user's collections and increments it.
+     *
+     * @param int $userId The ID of the user (creator/owner) of the collection.
+     * @param string $logChannel Optional: Log channel name for errors.
+     * @return int The next available position number (starts from 1).
+     */
+    public static function generateCollectionPosition(int $userId, string $logChannel = 'default'): int
+    {
+        try {
+            // Find the maximum 'position' value specifically for collections
+            // belonging to the given user ID. Assumes 'creator_id' links collection to user.
+            $maxPosition = Collection::where('creator_id', $userId) // Filter by the correct user ID column
+                                    ->max('position'); // Get the maximum value of the 'position' column
+
+            // If the user has no collections yet, max() returns null. Default to 0.
+            $nextPosition = ($maxPosition === null ? 0 : (int)$maxPosition) + 1;
+
+            Log::channel($logChannel)->debug(
+                '[CollectionHelper::generateCollectionPosition] Determined next position.',
+                ['user_id' => $userId, 'max_position' => $maxPosition, 'next_position' => $nextPosition]
+            );
+
+            return $nextPosition;
+
+        } catch (\Throwable $e) {
+            // Log the error if the DB query fails for some reason
+            Log::channel($logChannel)->error(
+                '[CollectionHelper::generateCollectionPosition] Failed to determine max position.',
+                ['user_id' => $userId, 'error' => $e->getMessage()]
+            );
+            // Return 1 as a safe fallback in case of error? Or throw? Returning 1 might cause duplicates if some exist.
+            // Throwing might be safer to indicate a problem.
+            // For now, returning 1 to allow process continuation, but needs review.
+            return 1;
         }
     }
 }

@@ -14,13 +14,13 @@ trait HasCreateDefaultCollectionWallets
      * @param  Collection  $collection
      * @param  string  $wallet_creator
      */
-    public function generateDefaultWallets(Collection $collection, string $wallet_creator, $creator_id): void
+    public function generateDefaultWallets(Collection $collection, ?string $wallet_creator='', $creator_id): void
     {
         $natan_wallet_address = config('app.natan_wallet_address');
         $natan_royalty_mint = config('app.natan_royalty_mint');
         $natan_royalty_rebind = config('app.natan_royalty_rebind');
-        $mediator_royalty_mint = config('app.mediator_royalty_mint');
-        $mediator_royalty_rebind = config('app.mediator_royalty_rebind');
+        // $mediator_royalty_mint = config('app.mediator_royalty_mint');
+        // $mediator_royalty_rebind = config('app.mediator_royalty_rebind');
         $epp_wallet_address = config('app.epp_wallet_address');
         $epp_royalty_mint = config('app.epp_royalty_mint');
         $epp_royalty_rebind = config('app.epp_royalty_rebind');
@@ -34,8 +34,8 @@ trait HasCreateDefaultCollectionWallets
             $natan_wallet_address,
             $natan_royalty_mint,
             $natan_royalty_rebind,
-            $mediator_royalty_mint,
-            $mediator_royalty_rebind,
+            // $mediator_royalty_mint,
+            // $mediator_royalty_rebind,
             $epp_wallet_address,
             $epp_royalty_mint,
             $epp_royalty_rebind,
@@ -70,7 +70,7 @@ trait HasCreateDefaultCollectionWallets
      * @param  string  $royalty_rebind
      * @param  Collection  $collection
      */
-    protected function createWallet(string $role, string $address, string $royalty_mint, string $royalty_rebind, Collection $collection, $id): void
+    protected function createWallet(string $role, ?string $address='', string $royalty_mint, string $royalty_rebind, Collection $collection, $id): void
     {
         Wallet::create([
             'collection_id' => $collection->id,

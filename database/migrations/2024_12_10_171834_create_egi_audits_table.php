@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('egi_audits', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('egi_id')->constrained('egi')->onDelete('cascade');
+            $table->foreignId('egi_id')->constrained('egis')->onDelete('cascade');
             $table->foreignId('user_id')->constrained('users'); // Utente che ha effettuato la modifica
             $table->json('old_values')->nullable();
             $table->json('new_values')->nullable();

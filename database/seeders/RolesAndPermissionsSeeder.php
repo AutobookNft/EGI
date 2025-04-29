@@ -17,6 +17,7 @@ class RolesAndPermissionsSeeder extends Seeder
 
         'manage_roles',
         'manage_permissions',
+        'manage_egi',
 
         // Permessi per il Team
         'create_team',
@@ -70,7 +71,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'create_collection', 'update_collection', 'delete_collection','update_collection_image_header',
 
             // EGI
-            'create_EGI', 'update_EGI', 'delete_EGI',
+            'create_EGI', 'update_EGI', 'delete_EGI', 'manage_egi',
 
             // Wallet
             'create_wallet', 'update_wallet', 'approve_wallet', 'reject_wallet', 'delete_wallet',
@@ -88,7 +89,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'update_collection', 'update_collection_image_header',
 
             // EGI
-            'create_EGI', 'update_EGI', 'delete_EGI',
+            'create_EGI', 'update_EGI', 'delete_EGI', 'manage_egi',
 
             // Views
             'view_user', 'view_profile', 'view_team', 'view_dashboard', 'view_bio', 'view_settings',
@@ -98,7 +99,7 @@ class RolesAndPermissionsSeeder extends Seeder
         'editor' => [
 
             // EGI
-            'update_EGI',
+            'update_EGI', 'manage_egi',
 
             // Collection
             'update_collection_image_header',

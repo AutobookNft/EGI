@@ -16,6 +16,7 @@ use App\Livewire\Notifications\Wallets\EditWalletModal;
 use Illuminate\Support\Facades\Route;
 use App\Livewire\PhotoUploader;
 use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\Controller;
 use App\Http\Controllers\IconAdminController;
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\DropController;
@@ -25,19 +26,24 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Request;
-use UltraProject\UConfig\Http\Controllers\UConfigController;
+
 use Livewire\Livewire;
+use Ultra\EgiModule\Http\Controllers\EgiUploadController;
+use Ultra\EgiModule\Http\Controllers\EgiUploadPageController;
 
-Route::get('/formazione', [Formazione::class, 'index'])->name('formazione.index');
 
+// Route::view('/home', 'home')
+//      ->name('home');
+
+Route::get('/home', [DropController::class, 'index'])->name('home');
 
 // Rotta per PhotoUploader
 Route::get('/photo-uploader', PhotoUploader::class)->name('photo-uploader');
 
 // Rotta per la home
-Route::get('/', function () {
-    return view('welcome');
-});
+// Route::get('/', function () {
+//     return view('welcome');
+// });
 
 // Rotta per phpinfo
 Route::get('/phpinfo', function () {
@@ -62,6 +68,18 @@ Route::get('/session', function () {
 // Rotte protette da middleware
 Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified'])
     ->group(function () {
+
+        Route::get('/api/check-upload-authorization', [Ultra\UploadManager\Controllers\Config\ConfigController::class, 'checkUploadAuthorization'])
+            ->name('upload.authorization');
+
+        Route::get('/upload/egi', [EgiUploadPageController::class, 'showUploadPage'])
+            // ->middleware(['auth', 'collection_can:manage_egi']) // Auth qui è ridondante se già nel gruppo app? Meglio solo permessi specifici.
+            ->name('egi.upload.page');
+
+        Route::post('/upload/egi', [EgiUploadController::class, 'handleUpload'])
+            // ->middleware(['auth', 'collection_can:manage_egi']) // Auth qui è ridondante se già nel gruppo app? Meglio solo permessi specifici.
+            ->name('egi.upload.store');
+
 
         // Dashboard
         Route::get('/dashboard', function () {
@@ -182,87 +200,88 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
 
     });
 
-    Route::get('/translations.js', function () {
-        $translations = [
-            'notification' =>[
-                'no_notifications' => __('notification.no_notifications'),
-                'select_notification' => __('notification.select_notification'),
-                'notification_list_error' => __('collection.wallet.notification_list_error'),
-            ],
-            'collection' => [
-                'wallet' => [
-                    'donation' => __('collection.wallet.donation'),
-                    'donation_success' => __('collection.wallet.donation_success'),
-                    'accept' => __('label.accept'),
-                    'decline' => __('label.decline'),
-                    'archived' => __('label.archived'),
-                    'save' => __('label.save'),
-                    'cancel' => __('label.cancel'),
-                    'address' => __('collection.wallet.address'),
-                    'royalty_mint' => __('collection.wallet.royalty_mint'),
-                    'royalty_rebind' => __('collection.wallet.royalty_rebind'),
-                    'confirmation_title' => __('collection.wallet.confirmation_title'),
-                    'confirmation_text' => __('collection.wallet.confirmation_text', ['walletId' => ':walletId']),
-                    'confirm_delete' => __('collection.wallet.confirm_delete'),
-                    'cancel_delete' => __('collection.wallet.cancel_delete'),
-                    'deletion_error' => __('collection.wallet.deletion_error'),
-                    'deletion_error_generic' => __('collection.wallet.deletion_error_generic'),
-                    'create_the_wallet' => __('collection.wallet.create_the_wallet'),
-                    'update_the_wallet' => __('collection.wallet.update_the_wallet'),
-                    'address_placeholder' => __('collection.wallet.address_placeholder'),
-                    'royalty_mint_placeholder' => __('collection.wallet.royalty_mint_placeholder'),
-                    'royalty_rebind_placeholder' => __('collection.wallet.royalty_rebind_placeholder'),
 
-                    'success_title' => __('collection.wallet.success_title'),
-                    'creation_success_detail' => __('collection.wallet.creation_success_detail'),
 
-                    'validation' => [
-                        'address_required' => __('collection.wallet.validation.address_required'),
-                        'mint_invalid' => __('collection.wallet.validation.mint_invalid'),
-                        'rebind_invalid' => __('collection.wallet.validation.rebind_invalid'),
-                    ],
+});
 
-                    'error' => [
-                        'error_title' => __('errors.error'),
-                        'creation_error_generic' => __('collection.wallet.creation_error_generic'),
-                        'creation_error' => __('collection.wallet.creation_error'),
-                        'permission_denied' => __('collection.wallet.permission_denied'),
+Route::get('/translations.js', function () {
+    $translations = [
+        'notification' =>[
+            'no_notifications' => __('notification.no_notifications'),
+            'select_notification' => __('notification.select_notification'),
+            'notification_list_error' => __('collection.wallet.notification_list_error'),
+        ],
+        'collection' => [
+            'wallet' => [
+                'donation' => __('collection.wallet.donation'),
+                'donation_success' => __('collection.wallet.donation_success'),
+                'accept' => __('label.accept'),
+                'decline' => __('label.decline'),
+                'archived' => __('label.archived'),
+                'save' => __('label.save'),
+                'cancel' => __('label.cancel'),
+                'address' => __('collection.wallet.address'),
+                'royalty_mint' => __('collection.wallet.royalty_mint'),
+                'royalty_rebind' => __('collection.wallet.royalty_rebind'),
+                'confirmation_title' => __('collection.wallet.confirmation_title'),
+                'confirmation_text' => __('collection.wallet.confirmation_text', ['walletId' => ':walletId']),
+                'confirm_delete' => __('collection.wallet.confirm_delete'),
+                'cancel_delete' => __('collection.wallet.cancel_delete'),
+                'deletion_error' => __('collection.wallet.deletion_error'),
+                'deletion_error_generic' => __('collection.wallet.deletion_error_generic'),
+                'create_the_wallet' => __('collection.wallet.create_the_wallet'),
+                'update_the_wallet' => __('collection.wallet.update_the_wallet'),
+                'address_placeholder' => __('collection.wallet.address_placeholder'),
+                'royalty_mint_placeholder' => __('collection.wallet.royalty_mint_placeholder'),
+                'royalty_rebind_placeholder' => __('collection.wallet.royalty_rebind_placeholder'),
 
-                    ],
+                'success_title' => __('collection.wallet.success_title'),
+                'creation_success_detail' => __('collection.wallet.creation_success_detail'),
 
-                    'creation_success' => __('collection.wallet.creation_success'),
+                'validation' => [
+                    'address_required' => __('collection.wallet.validation.address_required'),
+                    'mint_invalid' => __('collection.wallet.validation.mint_invalid'),
+                    'rebind_invalid' => __('collection.wallet.validation.rebind_invalid'),
                 ],
-                'invitation' => [
-                    'confirmation_title' => __('collection.invitation.confirmation_title'),
-                    'confirmation_text' => __('collection.invitation.confirmation_text', ['invitationId' => ':invitationId']),
-                    'confirm_delete' => __('collection.invitation.confirm_delete'),
-                    'cancel_delete' => __('collection.invitation.cancel_delete'),
-                    'deletion_error' => __('collection.invitation.deletion_error'),
-                    'deletion_error_generic' => __('collection.invitation.deletion_error_generic'),
-                    'create_invitation' => __('collection.invitation.create_invitation'),
-                ]
+
+                'error' => [
+                    'error_title' => __('errors.error'),
+                    'creation_error_generic' => __('collection.wallet.creation_error_generic'),
+                    'creation_error' => __('collection.wallet.creation_error'),
+                    'permission_denied' => __('collection.wallet.permission_denied'),
+
+                ],
+
+                'creation_success' => __('collection.wallet.creation_success'),
+            ],
+            'invitation' => [
+                'confirmation_title' => __('collection.invitation.confirmation_title'),
+                'confirmation_text' => __('collection.invitation.confirmation_text', ['invitationId' => ':invitationId']),
+                'confirm_delete' => __('collection.invitation.confirm_delete'),
+                'cancel_delete' => __('collection.invitation.cancel_delete'),
+                'deletion_error' => __('collection.invitation.deletion_error'),
+                'deletion_error_generic' => __('collection.invitation.deletion_error_generic'),
+                'create_invitation' => __('collection.invitation.create_invitation'),
             ]
-        ];
+        ]
+    ];
 
-        return response("window.translations = " . json_encode($translations, JSON_PRETTY_PRINT) . ";")
-            ->header('Content-Type', 'application/javascript')
-            ->header('Cache-Control', 'no-cache, must-revalidate');
-    });
+    return response("window.translations = " . json_encode($translations, JSON_PRETTY_PRINT) . ";")
+        ->header('Content-Type', 'application/javascript')
+        ->header('Cache-Control', 'no-cache, must-revalidate');
+});
 
-    // Rotte per la gestione delle costanti enum
-    Route::get('/js/enums', function (Request $request) {
+// Rotte per la gestione delle costanti enum
+Route::get('/js/enums', function (Request $request) {
 
-        Log::channel('florenceegi')->info('Richiesta costanti enum', [
-            'user' => Auth::user()->id,
-            'notificationStatus' => collect(NotificationStatus::cases())->mapWithKeys(fn($enum) => [$enum->name => $enum->value])
-        ]);
+    Log::channel('florenceegi')->info('Richiesta costanti enum', [
+        // 'user' => Auth::user()->id,
+        'notificationStatus' => collect(NotificationStatus::cases())->mapWithKeys(fn($enum) => [$enum->name => $enum->value])
+    ]);
 
-        return response()->json([
-            'NotificationStatus' => collect(NotificationStatus::cases())->mapWithKeys(fn($enum) => [$enum->name => $enum->value])
-        ]);
-    });
-
-
+    return response()->json([
+        'NotificationStatus' => collect(NotificationStatus::cases())->mapWithKeys(fn($enum) => [$enum->name => $enum->value])
+    ]);
 });
 
 // Rotta per le citazioni

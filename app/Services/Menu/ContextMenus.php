@@ -2,6 +2,8 @@
 
 namespace App\Services\Menu;
 
+use App\Services\Menu\Items\BackToDashboardMenu;
+use App\Services\Menu\Items\EgiUploadPageMenu;
 use App\Services\Menu\Items\PermissionsRolesMenu;
 use App\Services\Menu\Items\AssignRolesMenu;
 use App\Services\Menu\Items\AssignPermissionsMenu;
@@ -28,17 +30,23 @@ class ContextMenus
                     new NewCollectionMenu(),
                 ]);
                 $menus[] = $collectionsMenu;
-
                 break;
 
             case 'collections':
                 $collectionsMenu = new MenuGroup('Collections', '<i class="fas fa-folder-open"></i>', [
                     new OpenCollectionMenu(),
                     new NewCollectionMenu(),
+
                 ]);
                 $menus[] = $collectionsMenu;
                 break;
 
+           case 'egi':
+                $collectionsMenu = new MenuGroup('Back to dashboard', '<i class="fas fa-folder-open"></i>', [
+                    new BackToDashboardMenu()
+                ]);
+                $menus[] = $collectionsMenu;
+                break;
             default:
                 $defaultMenu = new MenuGroup('General', '<i class="fas fa-cogs"></i>', []);
                 $menus[] = $defaultMenu;

@@ -7,6 +7,13 @@ use Illuminate\Support\Facades\Log; // Per debug iniziale
 
 class EgiModuleServiceProvider extends ServiceProvider
 {
+
+    /**
+    * Log channel for this handler.
+    * @var string
+    */
+    protected string $logChannel = 'upload'; // Default channel
+
     /**
      * Register any application services.
      */
@@ -15,7 +22,7 @@ class EgiModuleServiceProvider extends ServiceProvider
         // Puoi unire configurazioni qui se crei un file config/egi.php
         // $this->mergeConfigFrom(__DIR__.'/../../config/egi.php', 'egi');
 
-        Log::debug('EgiModuleServiceProvider registered.'); // Log per verifica
+        // Log::channel($this->logChannel)->debug('EgiModuleServiceProvider registered.'); // Log per verifica
     }
 
     /**
@@ -23,29 +30,39 @@ class EgiModuleServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-         Log::debug('EgiModuleServiceProvider booted.'); // Log per verifica
+         // *** RIGA CHIAVE PER LE VISTE ***
+        // Dice a Laravel:
+        // - Cerca le viste in 'packages/ultra/egi-module/resources/views'
+        // - Assegna a queste viste il namespace 'egimodule'
+        $this->loadViewsFrom(__DIR__.'/../../resources/views', 'egimodule');
 
-        // Registra rotte se le definisci nel pacchetto
-        // $this->loadRoutesFrom(__DIR__.'/../../routes/egi.php');
+        // Aggiungi qui anche la configurazione per la pubblicazione (se vuoi)
+        if ($this->app->runningInConsole()) {
 
-        // Registra migration se le definisci nel pacchetto
-        // $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');
+            $this->publishes([
+                // Pubblica il file di config del pacchetto in config/egi.php dell'app
+                __DIR__.'/../../config/egi.php' => config_path('egi.php'),
+            ], 'egi-config'); // Tag specifico per la config EGI
 
-        // Registra traduzioni se le definisci nel pacchetto
+            $this->publishes([
+                // Pubblica le viste in resources/views/vendor/egimodule
+                __DIR__.'/../../resources/views' => resource_path('views/vendor/egimodule'),
+            ], 'egi-views'); // Tag specifico per le viste EGI
+
+            // Pubblica altri assets se necessario (config, migrations, etc.)
+
+        }
+
+        // *** RIGA CHIAVE PER LE ROTTE ***
+        // Dice a Laravel di caricare il file di rotte specifico del pacchetto.
+        // Applica automaticamente il middleware 'web' a queste rotte.
+        $this->loadRoutesFrom(__DIR__.'/../../routes/web.php'); // O api.php se sono rotte API
+
+        // Carica traduzioni se necessario
         // $this->loadTranslationsFrom(__DIR__.'/../../resources/lang', 'egimodule');
 
-        // Registra viste se le definisci nel pacchetto
-        // $this->loadViewsFrom(__DIR__.'/../../resources/views', 'egimodule');
+        // Registra comandi console se necessario
+        // $this->commands([...]);
 
-        // Rendi pubblicabili le risorse (config, assets, etc.)
-        // if ($this->app->runningInConsole()) {
-        //     $this->publishes([
-        //       __DIR__.'/../../config/egi.php' => config_path('egi.php'),
-        //     ], 'egi-config');
-        //
-        //     $this->publishes([
-        //         __DIR__.'/../../resources/assets' => public_path('vendor/egimodule'),
-        //     ], 'egi-assets');
-        // }
     }
 }

@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Laravel\Fortify\Fortify;
+use Illuminate\Support\Facades\Config;
 
 class FortifyServiceProvider extends ServiceProvider
 {
@@ -42,5 +43,11 @@ class FortifyServiceProvider extends ServiceProvider
         RateLimiter::for('two-factor', function (Request $request) {
             return Limit::perMinute(5)->by($request->session()->get('login.id'));
         });
+
+        Fortify::redirects('login', function() {
+            // Sempre /home oppure logica dinamica
+            return Config::get('app.upload_redirect_to_url_after_login').'/home';
+        });
+
     }
 }

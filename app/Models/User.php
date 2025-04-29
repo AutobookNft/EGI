@@ -17,7 +17,7 @@ class User extends Authenticatable
 {
     use HasApiTokens;
     use HasRoles;
-    
+
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory;
     use HasProfilePhoto;
@@ -37,6 +37,7 @@ class User extends Authenticatable
         'email',
         'icon_style',
         'password',
+        'default_collection_id',
         'language',
         'wallet',
         'wallet_balance',
@@ -91,7 +92,6 @@ class User extends Authenticatable
         'rea',
         'org_fiscal_code',
         'org_vat_number',
-        'current_team_id',
         'profile_photo_path',
     ];
 

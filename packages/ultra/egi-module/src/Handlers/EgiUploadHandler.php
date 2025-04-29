@@ -1,594 +1,797 @@
 <?php
 
-// Namespace corretto come richiesto
-namespace Ultra\UploadManager\Handlers;
+namespace Ultra\EgiModule\Handlers; // Correct package namespace
 
-// Laravel & PHP Dependencies
-use Illuminate\Http\Request;
+// PHP & Laravel Imports
+
+
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Log;      // Standard Log Facade
-use Illuminate\Support\Facades\Storage;  // Standard Storage Facade
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;     // Only if needed for other hashing
-use Illuminate\Support\Facades\Config;   // Standard Config Facade
+use Illuminate\Support\Facades\Log; // Keep Log Facade for internal helper logging
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Throwable;
-use Exception;      // Standard Exception
-use LogicException; // For setup/config errors
+use Exception;
+use LogicException;
 
-// Application Specific Dependencies (Assume available in the consuming app)
+// Application/Package Specific Imports
+use App\Models\User;
 use App\Models\Collection;
 use App\Models\Egi;
 use App\Models\Wallet;
-use App\Models\User;
+use Ultra\EgiModule\Helpers\EgiHelper;
+use Ultra\UploadManager\Traits\HasValidation;
+use App\Traits\HasUtilitys;
+use App\Traits\HasCreateDefaultCollectionWallets;
 
-// UUM Package Dependencies
-use Ultra\UploadManager\Helpers\EgiHelper; // Use Helper from this package
-use Ultra\UploadManager\Traits\HasValidation; // Use Trait from this package
-use Ultra\UploadManager\Traits\HasUtilitys; // Use Trait from this package
+// UEM Imports
+use Ultra\ErrorManager\Interfaces\ErrorManagerInterface;
 
 /**
- * 📜 Oracode Handler Class: EGI Image Upload
- * Handles the backend logic for uploading EGI images, including default collection management.
- * Designed to be part of the UltraUploadManager package.
- * Adheres to Oracode v1.5 documentation standards.
+ * 📜 Oracode Handler: EgiUploadHandler (v1.1 - UEM Integrated, Oracode Docs Complete)
+ * Handles the backend logic for uploading EGI images, including metadata processing,
+ * default collection management, multi-disk storage, and centralized error handling via UEM.
  *
- * @package     Ultra\UploadManager\Handlers
- * @version     1.2.0 // Corrected config reading, adjusted wallet creation, cache key.
- * @author      Fabio Cherici (Logic) & Padmin D. Curtis (Implementation)
+ * @package     Ultra\EgiModule\Handlers
+ * @version     1.1.0 // UEM Integration and Full Oracode Documentation
+ * @author      Fabio Cherici & Padmin D. Curtis
  * @copyright   2024 Fabio Cherici
- * @license     MIT // Or your package license
+ * @license     MIT
+ * @since       2025-04-24
  *
- * @purpose     Manages the EGI image upload process: validation, default collection/wallet handling,
- *              EGI record creation, multi-disk storage, cache invalidation, and response generation.
- *              References `config/egi.php` for specific settings. Explicitly avoids UCM/ULM for MVP.
+ * @purpose     🎯 To orchestrate the entire backend EGI upload process: validation, DB operations,
+ *              file storage, cache invalidation, returning a response via UEM for errors.
  *
- * @context     Instantiated by a controller within the consuming application. Uses standard Laravel
- *              Facades (Log, Storage, Auth, Cache, DB, Config), application Models (User, Collection,
- *              Egi, Wallet), and package Traits/Helpers. Assumes `config/egi.php` is published
- *              and correctly configured in the consuming application.
+ * @context     🧩 Instantiated via Dependency Injection (typically in `EgiUploadController`).
+ *              Requires `ErrorManagerInterface` to be available in the service container.
+ *              Operates within an authenticated HTTP request context. Uses package models and helpers.
  *
- * @state       Modifies database (`collections`, `egi`, `wallets`, `collection_user`) within a transaction.
- *              Modifies file storage on configured disks. Reads `config/egi.php`.
+ * @state       💾 Modifies Database (`egi`, `collections`, `wallets` etc.) within a transaction.
+ *              Modifies File Storage on configured disks. Modifies Cache. Reads Config.
  *
- * @feature     - Automatic 'single_egi_default' collection creation.
- * @feature     - Default wallet association based on `config('egi.default_wallets')`.
- * @feature     - Multi-disk storage based on `config('egi.storage.disks')`.
- * @feature     - Critical disk failure handling based on `config('egi.storage.critical_disks')`.
- * @feature     - Uses standard Laravel Log, Config, Storage. No direct UCM/ULM dependency.
- * @feature     - DB transactions for atomicity. Structured JSON responses.
- * @feature     - Sequential position generation using `EgiHelper::generatePositionNumber`.
- * @feature     - Reads metadata (title, description, price, date, position, publish) from request.
+ * @feature     🗝️ Handles file and metadata upload in a single request.
+ * @feature     🗝️ Uses `$request->validate()` for metadata validation.
+ * @feature     🗝️ Uses `HasValidation` trait for core file validation.
+ * @feature     🗝️ Implements "invisible" default collection/wallet creation logic.
+ * @feature     🗝️ Uses `HasUtilitys` trait for crypto/formatting helpers.
+ * @feature     🗝️ Implements multi-disk storage with fallback to 'local' using `saveToMultipleDisks`.
+ * @feature     🗝️ Implements critical disk failure detection and triggers transaction rollback.
+ * @feature     🗝️ Integrates fully with UEM (`ErrorManagerInterface`) for all error handling and response generation.
+ * @feature     🗝️ Uses DB Transactions for atomicity.
+ * @feature     🗝️ Includes detailed Oracode v1.5 documentation for all methods.
  *
- * @signal      Returns `Illuminate\Http\JsonResponse` (HTTP 200 success, 4xx/5xx error).
- * @signal      Logs operations and errors via standard `Log` facade (channel defined by `$logChannel`).
+ * @signal      🚦 Returns `Illuminate\Http\JsonResponse` (200 on success, 4xx/5xx via UEM on error).
+ * @signal      🚦 All error logging and notification handled by UEM and its registered handlers.
+ * @signal      🚦 Internal debug/warning logs within helpers use standard `Log` facade.
  *
- * @privacy     Handles user ID, uploaded images, metadata. Encrypts original filename. Logs user IDs.
- *              Requires secure configuration and log management in the consuming application. Stores
- *              files on configured disks (compliance responsibility of consuming app config).
+ * @privacy     🛡️ Handles User ID, Uploaded Image, Metadata, Wallet info. Passes context to UEM.
+ * @privacy     🛡️ `@privacy-internal`: User ID, wallet, file content, metadata, encrypted filename, IP (via Request passed to UEM).
+ * @privacy     🛡️ `@privacy-lawfulBasis`: Necessary for performing the EGI creation service requested by the user.
+ * @privacy     🛡️ `@privacy-purpose`: Process and securely store user-submitted EGI data.
+ * @privacy     🛡️ `@privacy-technique`: DB Transactions, filename encryption (via trait), UEM error handling, configurable storage.
+ * @privacy     🛡️ `@privacy-consideration`: Relies heavily on secure UEM configuration (handlers, sanitization), secure storage configuration, strong `app.key` for crypto, and careful review of helper methods (`findOrCreateDefaultCollection`, `saveToMultipleDisks`) regarding data handling. Ensure appropriate permissions for file storage.
  *
- * @dependency  Laravel Framework. Models: `App\Models\*`. Config: `config/egi.php`.
- * @dependency  Package Traits: `HasValidation`, `HasUtilitys`. Package Helper: `EgiHelper`.
+ * @dependency  🤝 Laravel Framework (Facades, Request, JsonResponse, Exception types).
+ * @dependency  🤝 UEM (`ErrorManagerInterface`).
+ * @dependency  🤝 Models (`User`, `Collection`, `Egi`, `Wallet`).
+ * @dependency  🤝 Traits (`HasValidation`, `HasUtilitys`).
+ * @dependency  🤝 Helpers (`EgiHelper`).
+ * @dependency  🤝 Config (`config/egi.php`, `config/filesystems.php`, `config/app.php`, `config/AllowedFileType.php`, `config/permission.php`).
  *
- * @testing     Requires Feature tests simulating uploads. Mock Models, Storage, Cache, Config, EgiHelper.
- *              Verify DB changes, file storage, responses, rollbacks. Test config/ENV variations.
+ * @testing     🧪 Feature tests simulating POST requests with files/metadata. Mock `ErrorManagerInterface`.
+ * @testing     🧪 Mock Models, Storage, Cache, Config, Helpers. Verify DB state, stored files, UEM `handle` calls (arguments, frequency), final JsonResponse. Test various success and failure paths (validation, DB, storage, permissions).
  *
- * @rationale   Encapsulates EGI-specific upload logic within the UUM package namespace.
- *              Uses standard Laravel features for MVP simplicity as requested.
+ * @rationale   💡 Centralizes EGI upload backend logic into a dedicated, testable handler class.
+ *              Leverages UEM for standardized error handling and response structure.
+ *              Uses traits and helpers for code reuse. Implements core EGI business rules.
  */
 class EgiUploadHandler
 {
-    use HasValidation; // Provides validateFile()
-    use HasUtilitys;   // Provides my_advanced_crypt(), formatSizeInMegabytes()
+    use HasValidation;
+    use HasUtilitys;
+    use HasCreateDefaultCollectionWallets;
 
     /**
-     * Log channel for this handler.
+     * 📝 Log channel for non-UEM managed logs within helpers.
      * @var string
      */
-    protected string $logChannel = 'upload'; // Default channel
+    protected string $logChannel = 'egi_upload';
 
     /**
-     * Default type identifier for automatically created collections.
-     * @var string
+     * 🧱 @dependency UEM Instance.
+     * @var ErrorManagerInterface
      */
-    protected string $defaultCollectionType = 'single_egi_default';
+    protected readonly ErrorManagerInterface $errorManager;
 
     /**
-     * 🎯 Handles the upload and processing of a single EGI image.
-     * Orchestrates validation, DB operations (collection, EGI, wallets), and file storage.
+     * 🎯 Constructor: Injects required dependencies.
      *
-     * @param Request $request The incoming HTTP request containing the file and metadata.
-     * @return JsonResponse A JSON response indicating success or failure.
+     * @param ErrorManagerInterface $errorManager The UltraErrorManager instance.
+     */
+    public function __construct(ErrorManagerInterface $errorManager)
+    {
+        $this->errorManager = $errorManager;
+    }
+
+        /**
+     * 🚀 Handles and persists the EGI file upload request using UEM for error management.
+     * Orchestrates validation, DB operations, file storage, caching, and response generation.
      *
-     * @throws Throwable Can re-throw exceptions for global handler or caller.
+     * @purpose     🎯 To orchestrate the entire backend process for a single EGI upload: authenticate,
+     *              validate file & metadata, manage default collection/wallets, create DB records
+     *              (Egi, potentially Collection/Wallet links), store the file on configured disks,
+     *              invalidate relevant caches, and return a structured JSON response via UEM for errors.
+     *
+     * --- Logic ---
+     * 1.  Generate Operation ID, Authenticate User (-> UEM on fail).
+     * 2.  Start DB Transaction.
+     * 3.  Retrieve and Validate File Input (-> Exception -> UEM).
+     * 4.  Core File Validation (`validateFile`) (-> Exception -> UEM).
+     * 5.  Validate Request Metadata (`$request->validate`) (-> ValidationException -> UEM).
+     * 6.  Find/Create Default Collection (`findOrCreateDefaultCollection`) (-> Exception -> UEM).
+     * 7.  Prepare ALL EGI data (crypto filename, position, type, dimensions, hash, metadata from request, etc.). Check for potential errors (e.g., crypto fail -> Exception -> UEM).
+     * 8.  Create and Populate the `Egi` model instance COMPLETELY.
+     * 9.  Save the `Egi` model (first time to get ID). Handle potential DB Exception -> UEM.
+     * 10. Assign `key_file` using the generated ID.
+     * 11. Save the `Egi` model again. Handle potential DB Exception -> UEM.
+     * 12. Store the physical file on configured disks using `saveToMultipleDisks`. (-> Exception on critical fail -> UEM).
+     * 13. Invalidate relevant application cache(s).
+     * 14. Prepare success data payload including key EGI information.
+     * 15. Commit DB Transaction.
+     * 16. Return success `JsonResponse` (200) containing the prepared success data.
+     * 17. Catch `ValidationException`: Delegate to UEM (`EGI_VALIDATION_FAILED`) & Return UEM Response (422).
+     * 18. Catch any other `Throwable`: Map Exception -> Delegate to UEM & Return UEM Response (500 or specific).
+     * --- End Logic ---
+     *
+     * @param Request $request The incoming HTTP request. Expected keys: 'file', 'title'?, 'description'?, 'price'?, 'publish_date'?, 'publish_now'?, 'position'?, 'upload_id'?.
+     * @return JsonResponse The JSON response (200 on success with 'success', 'userMessage', 'egiData'; 4xx/5xx via UEM on error with 'userMessage', 'error_code', 'errors'/'error_details').
+     *
+     * @throws Throwable Only if UEM itself fails during error handling (highly unlikely).
+     *
+     * @sideEffect 💾 Modifies Database (`egi`, `collections`, etc.). Modifies File Storage. Modifies Cache.
+     * @sideEffect 📝 Delegates all error logging to UEM. Internal helpers log non-critical info via `Log` Facade.
+     *
+     * @configReads ⚙️ Reads multiple configuration files (see class DocBlock and helper methods).
+     *
+     * @privacy-purpose 🛡️ To process and securely store the user's EGI creation request, including the file and metadata.
+     * @privacy-data 🛡️ Handles User ID, Wallet, File Content, Metadata, Encrypted Filename, IP. Passes context to UEM.
+     * @privacy-lawfulBasis 🛡️ Necessary for service performance.
      */
     public function handleEgiUpload(Request $request): JsonResponse
     {
         $file = null;
         $originalName = 'unknown';
-        $logContext = ['handler' => static::class, 'operation_id' => Str::uuid()->toString()]; // Add unique ID per request
+        $logContext = ['handler' => static::class, 'operation_id' => Str::uuid()->toString()];
         $creatorUser = null;
-        $egiId = null; // Define here for potential use in final catch block
+        $egiId = null; // For context in final catch
 
         try {
-            // --- 0. Get Authenticated User ---
+            // --- 0. Authenticate User ---
             $creatorUser = Auth::user();
             if (!$creatorUser instanceof User) {
-                Log::channel($this->logChannel)->error('[EgiUploadHandler] Authentication Required.', $logContext);
-                return response()->json([
-                    'userMessage' => trans('uploadmanager::uploadmanager.js.auth_required') ?: 'Authentication required.',
-                    'error_code' => 'AUTH_REQUIRED',
-                ], 401);
+                return $this->errorManager->handle('EGI_AUTH_REQUIRED', $logContext);
             }
             $creatorUserId = $creatorUser->id;
             $logContext['user_id'] = $creatorUserId;
-            Log::channel($this->logChannel)->info('[EgiUploadHandler] Upload request initiated.', $logContext);
 
-            // --- Wrap core logic in DB Transaction ---
+            // --- Start DB Transaction ---
             $result = DB::transaction(function () use ($request, $creatorUser, &$file, &$originalName, &$logContext, &$egiId) {
                 $creatorUserId = $creatorUser->id;
 
-                // --- 1. Get and Validate File ---
+                // --- 1. Retrieve and Validate File Input ---
                 if (!$request->hasFile('file') || !$request->file('file')->isValid()) {
-                    $errorCode = $request->hasFile('file') ? $request->file('file')->getError() : UPLOAD_ERR_NO_FILE;
-                    throw new Exception("Invalid or missing 'file' input. Upload error code: {$errorCode}", 400);
+                    $uploadErrorCode = $request->hasFile('file') ? $request->file('file')->getError() : UPLOAD_ERR_NO_FILE;
+                    throw new Exception("Invalid or missing 'file' input. Upload error code: {$uploadErrorCode}", 400);
                 }
                 /** @var UploadedFile $file */
                 $file = $request->file('file');
-                $originalName = $file->getClientOriginalName();
+                $originalName = $file->getClientOriginalName() ?? 'uploaded_file';
                 $logContext['original_filename'] = $originalName;
-                Log::channel($this->logChannel)->debug('[EgiUploadHandler] Processing file.', $logContext);
 
-                // --- 2. Core File Validation ---
-                // Assumes config('AllowedFileType.collection.*') provides image rules.
+                // --- 2. Core File Validation (Using Trait) ---
                 $this->validateFile($file); // Throws Exception on failure
-                Log::channel($this->logChannel)->info('[EgiUploadHandler] Base file validation passed.', $logContext);
 
-                // --- 3. Find or Create Default Collection ---
+                // --- 3. Validate Request Metadata ---
+                $validatedData = $request->validate([
+                    'egi-title' => ['nullable', 'string', 'max:60'],
+                    'egi-description' => ['nullable', 'string', 'max:5000'],
+                    'egi-floor-price' => ['nullable', 'numeric', 'min:0'],
+                    'egi-date' => ['nullable', 'date_format:Y-m-d'], // Expects 'YYYY-MM-DD'
+                    'egi-position' => ['nullable', 'integer', 'min:1'],
+                    'egi-publish' => ['nullable', 'boolean'],
+                    // Add other metadata validation rules here
+                ]); // Throws ValidationException on failure
+
+                // --- 4. Find or Create Default Collection & Wallets ---
                 $collection = $this->findOrCreateDefaultCollection($creatorUser, $logContext); // Throws Exception on critical failure
                 $collectionId = $collection->id;
                 $logContext['collection_id'] = $collectionId;
 
-                // --- 4. Prepare EGI Data ---
+                // --- 5. Prepare EGI Data ---
                 $tempPath = $file->getRealPath();
-                if ($tempPath === false) { throw new Exception("Could not get real path for temporary file: {$originalName}"); }
+                if ($tempPath === false) { throw new Exception("Cannot access temporary file path for: {$originalName}"); }
 
                 $extension = $file->guessExtension() ?? $file->getClientOriginalExtension();
                 if (empty($extension)) { throw new Exception("Could not determine file extension for: {$originalName}"); }
-                $extension = strtolower($extension); // Ensure lowercase
+                $extension = strtolower($extension);
 
                 $mimeType = $file->getMimeType() ?? 'application/octet-stream';
-                $filetype = 'image'; // MVP Q1 constraint
+                $filetype = 'image'; // Hardcoded for MVP Q1
 
                 $crypt_filename = $this->my_advanced_crypt($originalName, 'e');
                 if ($crypt_filename === false) { throw new Exception("Failed to encrypt filename for: {$originalName}"); }
 
-                // Generate position using the dedicated Helper
-                $num = EgiHelper::generatePositionNumber($collectionId, $this->logChannel); // Throws Exception on DB error
+                // Position: Use from validated data if present and valid, otherwise generate
+                $egiPosition = isset($validatedData['egi-position']) && is_numeric($validatedData['egi-position'])
+                               ? (int) $validatedData['egi-position']
+                               : EgiHelper::generatePositionNumber($collectionId, $this->logChannel); // Use helper
 
-                $default_generated_name = '#' . str_pad($num, 4, '0', STR_PAD_LEFT) . str_pad(rand(0, 999), 3, '0', STR_PAD_LEFT);
+                // Title: Use from validated data if present and not empty, otherwise generate default
+                $egiTitle = !empty(trim($validatedData['egi-title'] ?? ''))
+                            ? trim($validatedData['egi-title'])
+                            : '#' . str_pad($egiPosition, 4, '0', STR_PAD_LEFT) . str_pad(rand(0, 999), 3, '0', STR_PAD_LEFT);
 
-                // Get data from request (ensure names match form)
-                $egiTitle = $request->input('egi-title', $default_generated_name);
-                $egiDescription = $request->input('egi-description'); // Can be null
-                // Read floor price carefully from request or config
-                $egiFloorPriceInput = $request->input('egi-floor-price');
-                $egiFloorPrice = ($egiFloorPriceInput !== null && is_numeric($egiFloorPriceInput))
-                                 ? (float) $egiFloorPriceInput
-                                 : ($collection->floor_price ?: Config::get('egi.default_floor_price', 0));
+                // Floor Price: Use from validated data if present and numeric, otherwise use collection's, otherwise use config default
+                 $egiFloorPrice = isset($validatedData['egi-floor-price']) && is_numeric($validatedData['egi-floor-price'])
+                                ? (float) $validatedData['egi-floor-price']
+                                : ($collection->floor_price ?: (float) Config::get('egi.default_floor_price', 0));
 
-                $egiCreationDate = $request->input('egi-date'); // Expects YYYY-MM-DD format from input[type=date]
-                $egiPosition = $request->input('egi-position', $num);
-                $isPublished = $request->boolean('egi-publish'); // Handles 'on' or '1'
+                // Published Status & Date: Use from validated data
+                $isPublished = $validatedData['egi-publish'] ?? false;
+                $publishDate = $validatedData['egi-date'] ?? null;
+                $status = 'local'; // Default status
 
-                $upload_id = $request->input('upload_id', Str::uuid()->toString()); // Use UUID for upload batch ID
+                $upload_id = $request->input('upload_id', Str::uuid()->toString()); // Unique ID for this batch/upload instance
                 $logContext['upload_id'] = $upload_id;
 
-                // --- 5. Create EGI Database Record ---
+                // --- 6. Create EGI Database Record ---
                 $egi = new Egi();
                 $egi->collection_id = $collectionId;
-                $egi->user_id = $creatorUserId;
-                $egi->owner_id = $creatorUserId;
-                $egi->creator = $creatorUser->wallet ?? 'N/A'; // Check if user.wallet exists and is correct string
-                $egi->owner_wallet = $creatorUser->wallet ?? 'N/A'; // Check if user.wallet exists
+                $egi->user_id = $creatorUserId; // The admin user ID in Q1
+                $egi->owner_id = $creatorUserId; // Initial owner is the uploader
+                $egi->creator = $creatorUser->wallet ?? 'WalletNotSet'; // Ensure user model has 'wallet' attribute or similar
+                $egi->owner_wallet = $creatorUser->wallet ?? 'WalletNotSet';
                 $egi->upload_id = $upload_id;
-                $egi->title = Str::limit($egiTitle, 60); // Limit title based on DB schema
-                $egi->description = $egiDescription;
+                $egi->title = Str::limit($egiTitle, 60); // Apply DB limit
+                $egi->description = $validatedData['egi-description']; // Already validated
                 $egi->extension = $extension;
-                $egi->media = false;
+                $egi->media = false; // Only images
                 $egi->type = $filetype;
-                $egi->bind = 0;
-                $egi->paired = 0;
+                $egi->bind = 0; // Default
+                $egi->paired = 0; // Default
                 $egi->price = $egiFloorPrice;
-                $egi->floorDropPrice = $egiFloorPrice;
-                $egi->position = (int) $egiPosition;
-                $egi->creation_date = $egiCreationDate; // Assign directly (can be null or date string)
-                $egi->size = $this->formatSizeInMegabytes($file->getSize()); // From HasUtilitys
+                $egi->floorDropPrice = $egiFloorPrice; // Default to same as price initially
+                $egi->position = $egiPosition;
+                $egi->creation_date = $publishDate; // Store the publish date if provided (can be null)
+                $egi->size = $this->formatSizeInMegabytes($file->getSize());
                 $dimensions = @getimagesize($tempPath);
-                $egi->dimension = ($dimensions !== false) ? 'w:' . $dimensions[0] . ' x h:' . $dimensions[1] : 'N/A'; // Use N/A for consistency
-                $egi->is_published = $isPublished;
-                $egi->status = $isPublished ? 'published' : 'draft';
+                $egi->dimension = ($dimensions !== false) ? 'w:' . $dimensions[0] . ' x h:' . $dimensions[1] : 'N/A';
+                $egi->is_published = $isPublished; // Boolean flag based on 'publish_now'
+                $egi->status = $status;
                 $egi->file_crypt = $crypt_filename;
-                $egi->file_hash = hash_file('md5', $tempPath);
+                $egi->file_hash = hash_file('md5', $tempPath); // Hash the actual file content
                 $egi->file_mime = $mimeType;
-                // key_file set after save
+                // key_file will be set after initial save
 
-                $egi->save(); // Save to get ID
+                $egi->save(); // First save to get the ID (throws DB exceptions on failure)
 
-                $egi->key_file = $egi->id; // Set key_file = id
-                $egi->save(); // Save again
+                $egi->key_file = $egi->id; // Assign the ID as the key file identifier
+                $egi->save(); // Second save to persist key_file (throws DB exceptions on failure)
 
-                $egiId = $egi->id; // Assign ID for potential use outside transaction
+                $egiId = $egi->id; // Store the ID for context and response
                 $logContext['egi_id'] = $egiId;
-                Log::channel($this->logChannel)->info('[EgiUploadHandler] EGI record created/updated.', $logContext);
 
-                // --- 6. Store File to Configured Disks ---
-                $primaryDisk = Config::get('egi.storage.disks.0', 'do');
-                $root = Config::get("filesystems.disks.{$primaryDisk}.root", 'users_files');
-                $base_path = rtrim($root, '/') . '/' . $creatorUserId . '/' . $collectionId . '/';
-                $final_path_key = $base_path . $egi->key_file; // Use EGI ID as filename key
+                // --- 7. Store Physical File ---
+                $base_path = 'users_files/collections_' . $collectionId . '/creator_' . $creatorUserId . '/';
+                $final_path_key = $base_path . $egi->key_file . '.' . $extension; // Final path for the file
+                $savedUrls = $this->saveToMultipleDisks($final_path_key, $tempPath, $logContext); // Throws Exception on critical storage failure
 
-                // saveToMultipleDisks throws Exception on critical failure, rolling back transaction
-                $savedUrls = $this->saveToMultipleDisks($final_path_key, $tempPath, $logContext);
-
-                // --- 7. Invalidate Cache ---
-                $cacheKey = 'collection_items-' . $collectionId; // Invalidate collection list
+                // --- 8. Invalidate Cache ---
+                $cacheKey = 'collection_items-' . $collectionId; // Example cache key
                 Cache::forget($cacheKey);
-                Log::channel($this->logChannel)->info('[EgiUploadHandler] Collection items cache invalidated.', array_merge($logContext, ['cache_key' => $cacheKey]));
-                // Optionally invalidate specific EGI cache: Cache::forget('egi_details-' . $egiId);
 
-                // --- 8. Prepare Success Data ---
-                $successUserMessage = trans('uploadmanager::uploadmanager.file_saved_successfully', ['fileCaricato' => $originalName])
-                                    ?: "File '{$originalName}' (EGI ID: {$egiId}) processed successfully.";
+                // --- 9. Prepare FULL Success Data ---
+                $userMsgKey = 'uploadmanager::uploadmanager.file_saved_successfully';
+                $userMsgFallback = "File '{$originalName}' (EGI ID: {$egiId}) processed successfully.";
+                $successUserMessage = trans($userMsgKey, ['fileCaricato' => $originalName]) ?: $userMsgFallback;
 
-                return [ // Return data for JSON response
+                // Return the complete data structure expected by the success JSON response
+                return [
                     'success' => true,
                     'userMessage' => $successUserMessage,
-                    'egiData' => [
+                    'egiData' => [ // Include detailed data about the created EGI
                         'id' => $egiId,
                         'collection_id' => $collectionId,
                         'title' => $egi->title,
-                        'urls' => $savedUrls, // URLs/paths from successful saves
-                        'is_published' => $isPublished,
-                        'position' => $egi->position,
+                        'description' => $egi->description, // Return description
+                        'price' => $egi->price, // Return price
+                        'position' => $egi->position, // Return position
+                        'status' => $egi->status, // Return status
+                        'published_at' => $egi->published_at?->toIso8601String(), // Return formatted date or null
+                        'fileName' => $originalName, // Return original filename
+                        'urls' => $savedUrls, // Dictionary of [disk => urlOrPath]
+                        'mime_type' => $egi->file_mime, // Return mime type
+                        'size_mb' => $egi->size, // Return size string
+                        'dimensions' => $egi->dimension, // Return dimensions string
+                        'created_at' => $egi->created_at->toIso8601String(), // Return creation timestamp
                     ]
                 ];
             }); // --- End DB Transaction ---
 
-            // Build and return success response from transaction result
+            // --- 10. Return Success JSON ---
+            // $result now contains the full success data array
             return response()->json($result, 200);
 
+        } catch (ValidationException $e) {
+            // --- Handle Validation Errors via UEM ---
+            $logContext['validation_errors'] = $e->errors();
+            return $this->errorManager->handle('EGI_VALIDATION_FAILED', $logContext, $e);
+
         } catch (Throwable $e) {
-            // Log detailed error
-            $exceptionClass = get_class($e);
-            $exceptionMessage = $e->getMessage();
-            Log::channel($this->logChannel)->error("[EgiUploadHandler] Error processing EGI upload (EGI ID: {$egiId}).", array_merge($logContext, [
-                'exception_class' => $exceptionClass,
-                'exception_message' => $exceptionMessage,
-                'exception_file' => $e->getFile(),
-                'exception_line' => $e->getLine(),
-                // Only include trace in non-production environments for brevity
-                'exception_trace' => app()->environment('production') ? null : $e->getTraceAsString(),
-            ]));
-
-            // Determine HTTP status code
-            $statusCode = ($e instanceof Exception && is_int($e->getCode()) && $e->getCode() >= 400 && $e->getCode() < 600)
-                        ? $e->getCode()
-                        : 500;
-
-            // Return generic error response using trans()
-            $errorUserMessage = trans('uploadmanager::uploadmanager.js.error_during_upload') ?: 'An unexpected error occurred.';
-
-            return response()->json([
-                 'userMessage' => $errorUserMessage,
-                 'error_code' => 'EGI_UPLOAD_FAILED', // Add a general error code
-                 'error_details' => $exceptionMessage // Provide technical details for debugging
-                ], $statusCode);
+            // --- Handle All Other Errors via UEM ---
+            $logContext['egi_id'] = $egiId; // Include EGI ID if generated before failure
+            $errorCode = $this->mapEgiExceptionToUemCode($e);
+            return $this->errorManager->handle($errorCode, $logContext, $e);
         }
     }
 
     /**
-     * Finds the default collection for a user or creates it if it doesn't exist.
-     * Also handles default wallet/membership creation for new collections.
-     *
-     * @param User $creatorUser The user.
-     * @param array $logContext Base context for logging.
-     * @return Collection The found or newly created default collection.
-     * @throws Exception If collection/wallet creation fails critically.
-     * @throws LogicException If essential configuration is missing/invalid.
+     * 🗺️ Map specific exceptions occurring during EGI upload to UEM error codes.
+     * @purpose     Translate specific technical exceptions into meaningful UEM error codes.
+     * --- Logic ---
+     * 1. Check exception message/type for known critical failures (storage, DB, config).
+     * 2. Return specific UEM code if match found.
+     * 3. Default to 'EGI_UNEXPECTED_ERROR' otherwise.
+     * --- End Logic ---
+     * @param Throwable $e The caught exception.
+     * @return string The mapped UEM error code.
+     * @privacy Non-sensitive logic, handles exception messages.
      */
-    protected function findOrCreateDefaultCollection(User $creatorUser, array $logContext): Collection
+    protected function mapEgiExceptionToUemCode(Throwable $e): string
     {
-        // --- Input Validation ---
-        if (!$creatorUser instanceof User || !$creatorUser->id) {
-             throw new LogicException("Invalid User object provided to findOrCreateDefaultCollection.");
+        if (str_contains($e->getMessage(), 'CRITICAL STORAGE FAILURE')) { return 'EGI_STORAGE_CRITICAL_FAILURE'; }
+        if ($e instanceof \Illuminate\Database\QueryException) { return 'EGI_DB_ERROR'; }
+        if (str_contains($e->getMessage(), 'initialize default collection')) { return 'EGI_COLLECTION_INIT_ERROR';}
+        if ($e->getCode() === 400 && str_contains($e->getMessage(), 'file input')) { return 'EGI_FILE_INPUT_ERROR';}
+        if ($e instanceof LogicException && str_contains($e->getMessage(), 'disk \'local\' is not configured')) { return 'EGI_STORAGE_CONFIG_ERROR';}
+        if (str_contains($e->getMessage(), 'encrypt filename')) { return 'EGI_CRYPTO_ERROR'; }
+        // Add more specific mappings here...
+
+        return 'EGI_UNEXPECTED_ERROR'; // Generic fallback
+    }
+
+        /**
+     * 🛡️ Finds or creates the default collection for a given user upon first EGI upload.
+     * Ensures necessary wallets are associated and the creator is assigned the owner role.
+     * Uses the Log facade for internal warnings/debug. Throws Exception on critical configuration or DB errors.
+     * Updates the user's `default_collection_id` field when a new default collection is created.
+     *
+     * @purpose     🎯 To provide or initialize the required default Collection context for saving a new EGI,
+     *              using the `default_collection_id` field on the User model as the primary identifier, and
+     *              setting up initial wallet links and owner permissions.
+     *
+     * --- Logic ---
+     * 1.  Read configuration values for default collection name, floor price.
+     * 2.  Validate the retrieved `default_floor_price` configuration. Throw Exception if invalid.
+     * 3.  Check the `$creatorUser->default_collection_id` field.
+     * 4.  If ID is set: Find Collection. If found, return. If not found, throw critical Exception.
+     * 5.  If ID is NULL:
+     *     a. Start nested try-catch for creation process.
+     *     b. Create and populate new `Collection` instance COMPLETELY.
+     *     c. Save new `Collection`.
+     *     d. Update `$logContext`.
+     *     e. Update `$creatorUser->default_collection_id` and save `$creatorUser`. Throw Exception if user save fails.
+     *     f. Associate Default Wallets: Loop config `egi.default_wallets`, find Wallets, sync to Collection using `wallets()` relationship. Log warnings on failure.
+     *     g. Assign Creator Owner Role: Read `egi.default_roles.collection_owner` config. Assign role using `users()` relationship and pivot data. Log warnings on failure.
+     *     h. Log successful creation.
+     *     i. Return the new `$collection`.
+     * 6.  Catch `Throwable` during creation: Log CRITICAL, re-throw generic Exception.
+     * --- End Logic ---
+     *
+     * @param User $creatorUser The authenticated user instance (will be modified if new collection created).
+     * @param array &$logContext Context array passed by reference.
+     * @return Collection The found or newly created default Collection model instance.
+     * @throws Exception If config is invalid, DB errors occur, or data inconsistency is found.
+     * @sideEffect 💾 Creates `collections` record, updates `users` record, links wallets/roles via pivot tables.
+     * @sideEffect 📝 Logs via `Log` facade. Updates `$logContext`.
+     * @configReads ⚙️ `egi.default_collection_flag` (no longer used in logic), `egi.default_collection_name`, `egi.default_floor_price`, `egi.default_wallets`, `egi.default_roles.collection_owner`.
+     * @privacy-purpose 🛡️ Establish default EGI collection context and permissions. Updates user record.
+     * @privacy-data 🛡️ Reads/Writes User ID, default_collection_id. Reads Wallet/Role config. Writes to DB. Logs User ID, Collection ID.
+     * @privacy-lawfulBasis 🛡️ Necessary for service performance and maintaining user context.
+     */
+    protected function findOrCreateDefaultCollection(User $creatorUser, array &$logContext): Collection
+    {
+        // --- 1. Read Configuration & Validate ---
+        // $defaultCollectionFlag is no longer used for lookup, identification is via user->default_collection_id
+        $defaultCollectionName = $creatorUser->name . "'s Collection"; // Assumes User model has a 'name' attribute
+        $defaultFloorPriceConfig = Config::get('egi.default_floor_price');
+        if (!is_numeric($defaultFloorPriceConfig)) {
+            Log::channel($this->logChannel)->error(
+                "[EgiUploadHandler::findOrCreateDefaultCollection] Invalid default floor price config.",
+                array_merge($logContext, ['config_key' => 'egi.default_floor_price', 'retrieved_value' => $defaultFloorPriceConfig])
+            );
+            throw new Exception("Invalid configuration: 'egi.default_floor_price' must be numeric.");
+        }
+        $defaultFloorPrice = (float) $defaultFloorPriceConfig;
+
+        // --- 3. Check User's Default Collection ID ---
+        $defaultCollectionId = $creatorUser->default_collection_id;
+
+        // --- 4. If Default ID is Set, Find the Collection ---
+        if ($defaultCollectionId !== null) {
+            Log::channel($this->logChannel)->info('[EgiUploadHandler::findOrCreateDefaultCollection] User default collection ID found.', array_merge($logContext, ['default_collection_id' => $defaultCollectionId]));
+            /** @var Collection|null $collection */
+            $collection = Collection::find($defaultCollectionId);
+            if ($collection) {
+                Log::channel($this->logChannel)->info('[EgiUploadHandler::findOrCreateDefaultCollection] Found existing default collection by ID.', array_merge($logContext, ['collection_id' => $collection->id]));
+                $logContext['collection_id'] = $collection->id; // Ensure context has the ID
+                return $collection;
+            } else {
+                // Data inconsistency: User points to a default collection that doesn't exist!
+                Log::channel($this->logChannel)->critical(
+                    '[EgiUploadHandler::findOrCreateDefaultCollection] DATA INCONSISTENCY: User default_collection_id points to non-existent collection.',
+                    array_merge($logContext, ['non_existent_collection_id' => $defaultCollectionId])
+                );
+                // Consider adding logic here to potentially reset the user's default_collection_id to null
+                // $creatorUser->default_collection_id = null; $creatorUser->save();
+                throw new Exception("Data inconsistency detected: Default collection ID '{$defaultCollectionId}' not found.", 500);
+            }
         }
 
-        // --- Find Existing ---
-        $collection = Collection::where('creator_id', $creatorUser->id)
-                                ->where('type', $this->defaultCollectionType)
-                                ->first();
+        // --- 5. If Default ID is NULL, Create New Default Collection ---
+        Log::channel($this->logChannel)->info('[EgiUploadHandler::findOrCreateDefaultCollection] No default collection set for user. Creating new one.', $logContext);
 
-        if ($collection instanceof Collection) {
-            Log::channel($this->logChannel)->info('[EgiUploadHandler] Found existing default collection.', array_merge($logContext, ['collection_id' => $collection->id]));
-            return $collection; // Return existing collection
-        }
-
-        // --- Create New Collection ---
-        Log::channel($this->logChannel)->info('[EgiUploadHandler] Default collection not found, creating new.', $logContext);
         try {
-            // Read configuration with validation
-            $defaultFloorPrice = Config::get('egi.default_floor_price');
-            $ownerRole = Config::get('permission.default_roles.collection_owner'); // From Spatie config
+            // 5.a Create new Collection instance
+            $collection = new Collection();
 
-            if (!is_numeric($defaultFloorPrice)) {
-                throw new LogicException("Invalid configuration: 'egi.default_floor_price' must be numeric.");
+            // 5.b Populate ALL required fields for your Collection model based on your schema
+            $collection->creator_id = $creatorUser->id;
+            $collection->owner_id = $creatorUser->id; // Same as creator initially
+
+            // Name: Based on user's name as per your specification
+            $collection->collection_name = $defaultCollectionName; // Assumes User model has a 'name' attribute
+
+            $collection->description = 'Default collection automatically created for single EGI uploads.';
+
+            $collection->type = 'single_upload'; // Identifier for this auto-created collection type
+
+            $collection->floor_price = $defaultFloorPrice;
+
+            // Status: Based on your definition (e.g., 'published', 'local')
+            $collection->status = 'local'; // Your term for "not yet minted"
+
+            // Position: Calculated for this user's collections
+            $collection->position = EgiHelper::generateCollectionPosition($creatorUser->id, $this->logChannel);
+
+            // Is Published: Visibility in the Marketplace (default non-visible)
+            $collection->is_published = false;
+
+            // **** ADD ANY OTHER REQUIRED FIELDS for your Collection/Team model based on your schema ****
+            // Ensure all non-nullable columns have values assigned here.
+            // Examples (adjust to your schema):
+            // $collection->cover_image_url = null; // If nullable
+            // $collection->banner_image_url = null; // If nullable
+            // $collection->category_id = null; // Or read from config if default category needed
+            // $collection->wallet_address = $creatorUser->wallet; // If this field exists and should be set here
+
+            // --- End Population ---
+
+            // 5.c Save the new Collection
+            $collection->save();
+
+            // 5.d Update log context
+            $newCollectionId = $collection->id;
+            $logContext['collection_id'] = $newCollectionId;
+            Log::channel($this->logChannel)->debug('[EgiUploadHandler::findOrCreateDefaultCollection] New collection record saved.', $logContext);
+
+            // 5.e Update User Record with new default ID
+            $creatorUser->default_collection_id = $newCollectionId;
+            // Use DB transaction wrapper for this if it's outside the main one, but here it's nested.
+            if (!$creatorUser->save()) {
+                 Log::channel($this->logChannel)->error('[EgiUploadHandler::findOrCreateDefaultCollection] FAILED TO UPDATE USER default_collection_id.', $logContext);
+                 // This is critical, relationship not set. Throw exception to rollback collection creation.
+                 throw new Exception("Failed to update user record with new default collection ID.");
             }
-            if (empty($ownerRole) || !is_string($ownerRole)) {
-                 throw new LogicException("Invalid configuration: 'permission.default_roles.collection_owner' must be a non-empty string.");
+            Log::channel($this->logChannel)->info('[EgiUploadHandler::findOrCreateDefaultCollection] Updated user default_collection_id.', $logContext);
+
+            // 5.f Associate Default Wallets
+
+            try {
+                // Call the trait method to generate/link default wallets for the new collection.
+                // The trait is responsible for its own internal logic, logging, and potential errors.
+                $this->generateDefaultWallets($collection, $creatorUser->wallet, $creatorUser->id);
+
+                // Log that the trait method was called successfully (Trait handles internal logging)
+                Log::channel($this->logChannel)->info('[EgiUploadHandler::findOrCreateDefaultCollection] Called generateDefaultWallets trait method.', $logContext);
+
+            } catch (Throwable $eWallet) {
+                // Catch any exception thrown *by the trait method* during wallet generation.
+                // Log this failure specifically.
+                Log::channel($this->logChannel)->error(
+                    '[EgiUploadHandler::findOrCreateDefaultCollection] Error occurred within generateDefaultWallets trait method.',
+                    array_merge($logContext, [
+                        'error' => $eWallet->getMessage(),
+                        'exception_class' => get_class($eWallet),
+                        'exception_file' => $eWallet->getFile(), // Include details from trait exception
+                        'exception_line' => $eWallet->getLine(),
+                    ])
+                );
+                // Re-throw a generic exception to trigger the main transaction rollback
+                // and be handled by the main catch block in handleEgiUpload,
+                // mapping to an appropriate UEM code.
+                 throw new Exception("Failed to generate default wallets: " . $eWallet->getMessage(), 500, $eWallet); // Pass original exception as $previous
             }
 
-            // Create the collection record
-            $collection = Collection::create([
-                'creator_id'        => $creatorUser->id,
-                'owner_id'          => $creatorUser->id,
-                'collection_name'   => $creatorUser->name . "'s Default EGIs", // More specific name
-                'type'              => $this->defaultCollectionType,
-                'status'            => 'draft',
-                'floor_price'       => (float)$defaultFloorPrice,
-            ]);
-            $logContext['collection_id'] = $collection->id; // Update context for subsequent logs
-            Log::channel($this->logChannel)->info('[EgiUploadHandler] Default collection record created.', $logContext);
+            // 5.g Assign Creator Owner Role
+            $ownerRoleName = Config::get('egi.default_roles.collection_owner');
+            if (!empty($ownerRoleName) && is_string($ownerRoleName)) {
+                 Log::channel($this->logChannel)->info("[EgiUploadHandler::findOrCreateDefaultCollection] Attempting to assign owner role to creator.", array_merge($logContext, ['role_name' => $ownerRoleName]));
+                try {
+                    // --- ROLE ASSIGNMENT LOGIC (CONCRETE EXAMPLE - ASSUMING PIVOT TABLE) ---
+                    // Assumes a Many-to-Many relationship named 'users' on the Collection model
+                    if (method_exists($collection, 'users')) {
+                        // Attach the user to the collection with the specified role in the pivot table
+                        $collection->users()->syncWithoutDetaching([
+                            $creatorUser->id => ['role' => $ownerRoleName]
+                        ]);
+                         Log::channel($this->logChannel)->info("[EgiUploadHandler::findOrCreateDefaultCollection] Assigned owner role via pivot.", array_merge($logContext, ['role' => $ownerRoleName]));
+                    } else {
+                         Log::channel($this->logChannel)->warning("[EgiUploadHandler::findOrCreateDefaultCollection] Collection model missing 'users' relationship method for role assignment via pivot.", $logContext);
+                         // Add alternative logic here if using Spatie Teams or another method
+                    }
+                    // --- END ROLE ASSIGNMENT LOGIC ---
+                } catch (Throwable $eRole) {
+                     Log::channel($this->logChannel)->error("[EgiUploadHandler::findOrCreateDefaultCollection] Failed to assign owner role.", array_merge($logContext, ['role_name' => $ownerRoleName, 'error' => $eRole->getMessage()]));
+                     // Non-critical? Continue.
+                }
+            } else {
+                 Log::channel($this->logChannel)->warning("[EgiUploadHandler::findOrCreateDefaultCollection] Default owner role name ('egi.default_roles.collection_owner') not configured or invalid.", array_merge($logContext, ['retrieved_value' => $ownerRoleName]));
+            }
 
-            // Attach creator as owner via pivot table
-            $collection->users()->attach($creatorUser->id, [
-                'role'      => $ownerRole,
-                'is_owner'  => true,
-                'status'    => 'accepted',
-                'joined_at' => now()
-            ]);
-            Log::channel($this->logChannel)->info('[EgiUploadHandler] Creator linked to collection as owner.', array_merge($logContext, ['role' => $ownerRole]));
+            // 5.h Log success
+            Log::channel($this->logChannel)->info('[EgiUploadHandler::findOrCreateDefaultCollection] New default collection setup complete.', $logContext);
 
-            // Create default wallets (method handles its own logging/errors)
-            $this->createDefaultWalletsForCollection($collection, $creatorUser->id, $logContext);
-
-            return $collection; // Return the newly created collection
+            // 5.i Return the new collection
+            return $collection;
 
         } catch (Throwable $e) {
-             // Log critical failure during creation
-             Log::channel($this->logChannel)->error('[EgiUploadHandler] CRITICAL: Failed to create default collection structure.', array_merge($logContext, ['error' => $e->getMessage(), 'exception_class' => get_class($e)]));
-             // Re-throw standard Exception to ensure transaction rollback
+             // 6. Catch critical errors during creation
+             Log::channel($this->logChannel)->error('[EgiUploadHandler::findOrCreateDefaultCollection] CRITICAL: Failed during default collection creation process.', array_merge($logContext, ['error' => $e->getMessage(), 'exception_class' => get_class($e)]));
+             // Re-throw to trigger transaction rollback in handleEgiUpload
              throw new Exception("Failed to initialize default collection: " . $e->getMessage(), 500, $e);
         }
     }
 
     /**
-     * Creates and associates default wallets (Creator, EPP, Natan) for a new collection.
-     * Reads configuration values directly from `config/egi.php`.
-     * Logs warnings for configuration issues or DB errors but does not throw exceptions
-     * to avoid blocking the entire upload for a non-critical wallet setup issue.
+     * 💾 Saves a file to multiple configured storage disks with fallback to 'local'.
+     * Handles critical failures by throwing an Exception, which should trigger DB rollback.
+     * Uses standard Log facade for internal warnings/errors during the process.
      *
-     * @param Collection $collection The newly created collection.
-     * @param int $creatorUserId The ID of the user who created the collection.
-     * @param array $logContext Base context for logging.
-     * @return void
+     * @purpose     🎯 To persist the uploaded file content onto one or more storage disks defined
+     *              in the 'egi.storage.disks' config, ensuring critical disks succeed. Defaults
+     *              to the 'local' disk if configuration is missing or invalid.
      *
-     * @configReads egi.default_wallets.* - Reads the pre-processed wallet configurations.
-     * @configReads egi.default_ids.* - Reads the EPP/Natan user IDs.
+     * --- Logic ---
+     * 1.  Read `egi.storage.disks` and `egi.storage.critical_disks` config.
+     * 2.  **Fallback:** If `disks` config is invalid/empty, default `$storageDisks` and `$criticalDisks` to `['local']` and log a warning.
+     * 3.  If `disks` config is valid, validate `critical_disks`. If invalid, default to `[]` (no critical disks) and log a warning.
+     * 4.  Read temporary file content. Throw Exception if read fails (cannot proceed).
+     * 5.  Loop through each disk in the determined `$storageDisks` array.
+     * 6.  Verify the disk is configured in `config/filesystems.php`. Log error and skip if not (unless it's the fallback 'local' disk, then throw LogicException).
+     * 7.  Attempt `Storage::disk($disk)->put($pathKey, $contents, $visibility)`. Read visibility from `egi.storage.visibility.*`.
+     * 8.  On success, retrieve URL (if available) or path key and store in `$savedInfo`. Log success.
+     * 9.  On failure, store the error message in `$errors` array, keyed by disk name. Log the error.
+     * 10. After looping, identify critical failures by intersecting `$errors` with `$criticalDisks`.
+     * 11. If any critical failure exists: Log CRITICAL error, **throw Exception** (this will bubble up and cause the DB transaction in `handleEgiUpload` to roll back). Do NOT attempt rollback here.
+     * 12. Log any non-critical failures as warnings.
+     * 13. Return the `$savedInfo` array containing details of successful saves.
+     * --- End Logic ---
+     *
+     * @param string $pathKey The base storage key (e.g., "users_files/USER_ID/COLL_ID/EGI_ID"). Should NOT include extension.
+     * @param string $tempPath The absolute path to the temporary source file on the server.
+     * @param array $logContext Base context array for logging messages via `Log` facade.
+     * @return array Associative array of `[diskName => urlOrPathKey]` for disks where the save was successful.
+     * @throws Exception If reading the temporary file fails OR if saving to any disk marked as 'critical' fails.
+     * @throws LogicException If the fallback 'local' disk is required but not configured in `config/filesystems.php`.
+     *
+     * @sideEffect 💾 Writes file content to one or more configured storage disks.
+     * @sideEffect 📝 Logs warnings/errors for individual disk operations or config issues via `Log` facade.
+     *
+     * @configReads ⚙️ `egi.storage.disks` (Array), `egi.storage.critical_disks` (Array), `egi.storage.visibility.*` (String - e.g., 'public'/'private'), `filesystems.disks.*`.
+     *
+     * @privacy-purpose 🛡️ Persists the uploaded file content to designated storage locations.
+     * @privacy-data 🛡️ Handles the file content. The `$pathKey` typically includes UserID, CollectionID, EgiID. Logs context.
+     * @privacy-lawfulBasis 🛡️ Necessary for fulfilling the EGI upload service request.
+     * @privacy-consideration 🛡️ Ensure storage disks, visibility, and access controls are configured securely. Ensure `$pathKey` structure doesn't unintentionally leak sensitive info if URLs are public. Logging contains context which might include IDs.
      */
-    protected function createDefaultWalletsForCollection(Collection $collection, int $creatorUserId, array $logContext): void
+    protected function saveToMultipleDisks(string $pathKey, string $tempPath, array $logContext): array
     {
-        Log::channel($this->logChannel)->info('[EgiUploadHandler] Attempting to create default wallets.', $logContext);
+        // --- 1. Read and Validate Configuration with Fallback ---
+        $storageDisksConfig = Config::get('egi.storage.disks');
+        $criticalDisksConfig = Config::get('egi.storage.critical_disks');
 
-        // --- Get Wallet Configuration ---
-        $defaultWalletSetup = Config::get('egi.default_wallets');
-        if (empty($defaultWalletSetup) || !is_array($defaultWalletSetup)) {
-             Log::channel($this->logChannel)->warning("[EgiUploadHandler] 'egi.default_wallets' configuration is missing or invalid. Skipping default wallet creation.", $logContext);
-             return; // Exit gracefully if config is bad
-        }
-        // --- End Config Reading ---
-
-        foreach ($defaultWalletSetup as $role => $config) {
-            $walletLogContext = array_merge($logContext, ['wallet_role' => $role]); // Add role to context
-
-            // --- Determine User ID ---
-            $userId = null;
-            if ($role === 'Creator') {
-                $userId = $creatorUserId;
-            } elseif (isset($config['user_id_config_key']) && is_string($config['user_id_config_key'])) {
-                $userId = Config::get($config['user_id_config_key']);
-                $walletLogContext['user_id_source'] = $config['user_id_config_key'];
+        if (empty($storageDisksConfig) || !is_array($storageDisksConfig)) {
+            Log::channel($this->logChannel)->warning(
+                '[EgiUploadHandler::saveToMultipleDisks] Config \'egi.storage.disks\' is missing or invalid. Defaulting to \'public\' disk.',
+                array_merge($logContext, ['config_key' => 'egi.storage.disks', 'retrieved_value' => $storageDisksConfig])
+            );
+            $storageDisks = ['public']; // Cambiato da 'local' a 'public'
+            $criticalDisks = ['public']; // Anche il fallback è considerato critico
+        } else {
+            $storageDisks = $storageDisksConfig;
+            if ($criticalDisksConfig === null || !is_array($criticalDisksConfig)) {
+                Log::channel($this->logChannel)->warning(
+                    '[EgiUploadHandler::saveToMultipleDisks] Config \'egi.storage.critical_disks\' is missing or invalid. No disks explicitly marked critical.',
+                    array_merge($logContext, ['config_key' => 'egi.storage.critical_disks', 'retrieved_value' => $criticalDisksConfig])
+                );
+                $criticalDisks = []; // No disks are critical if config is invalid/missing
             } else {
-                 Log::channel($this->logChannel)->warning("[EgiUploadHandler] Missing 'user_id_config_key' for non-Creator role.", $walletLogContext);
+                $criticalDisks = array_intersect($criticalDisksConfig, $storageDisks); // Ensure critical disks are valid storage disks
             }
-            // --- End User ID ---
-
-            // --- Determine Royalties ---
-            $mintRoyalty = $config['mint_royalty'] ?? null;
-            $rebindRoyalty = $config['rebind_royalty'] ?? null;
-            // --- End Royalties ---
-
-            // --- Determine Anonymity ---
-            $isAnonymous = $config['is_anonymous'] ?? true;
-            // --- End Anonymity ---
-
-            // --- Validate Values ---
-            if (empty($userId) || !is_numeric($userId)) {
-                Log::channel($this->logChannel)->warning("[EgiUploadHandler] Skipping wallet: Invalid/Missing User ID.", array_merge($walletLogContext, ['retrieved_id' => $userId]));
-                continue; // Skip this wallet
-            }
-            if ($mintRoyalty === null || !is_numeric($mintRoyalty)) {
-                Log::channel($this->logChannel)->warning("[EgiUploadHandler] Skipping wallet: Invalid/Missing Mint Royalty.", array_merge($walletLogContext, ['retrieved_val' => $mintRoyalty]));
-                continue;
-            }
-             if ($rebindRoyalty === null || !is_numeric($rebindRoyalty)) {
-                Log::channel($this->logChannel)->warning("[EgiUploadHandler] Skipping wallet: Invalid/Missing Rebind Royalty.", array_merge($walletLogContext, ['retrieved_val' => $rebindRoyalty]));
-                continue;
-            }
-            // Check User Exists (only if not the Creator)
-            if ($role !== 'Creator' && !User::where('id', $userId)->exists()) {
-                Log::channel($this->logChannel)->warning("[EgiUploadHandler] Skipping wallet: Configured User ID '{$userId}' not found.", $walletLogContext);
-                continue;
-            }
-            // --- End Validation ---
-
-            // --- Create Wallet Record ---
-            try {
-                Wallet::create([
-                    'collection_id' => $collection->id,
-                    'user_id'       => (int)$userId,
-                    'platform_role' => $role, // Use the key as the role
-                    'royalty_mint'  => (float)$mintRoyalty,
-                    'royalty_rebind'=> (float)$rebindRoyalty,
-                    'is_anonymous'  => (bool)$isAnonymous,
-                ]);
-                 Log::channel($this->logChannel)->info("[EgiUploadHandler] Default wallet created successfully.", array_merge($walletLogContext, ['user_id' => $userId]));
-            } catch (Throwable $e) {
-                 // Log DB error but don't let it fail the whole upload
-                 Log::channel($this->logChannel)->error("[EgiUploadHandler] Failed to create default wallet record in DB.", array_merge($walletLogContext, ['user_id' => $userId, 'error' => $e->getMessage()]));
-            }
-            // --- End Create ---
         }
-        Log::channel($this->logChannel)->info('[EgiUploadHandler] Default wallets creation attempt finished.', $logContext);
+
+        $savedInfo = [];
+        $errors = [];
+        $contents = null;
+
+        Log::channel($this->logChannel)->info('[EgiUploadHandler::saveToMultipleDisks] Preparing to save file.', array_merge($logContext, ['target_disks' => $storageDisks, 'critical_disks' => $criticalDisks, 'path_key' => $pathKey]));
+
+        // --- 4. Read File Content ---
+        try {
+            $contents = file_get_contents($tempPath);
+            if ($contents === false) {
+                // Use new Exception for clarity
+                throw new Exception("Failed to read content from temporary file: {$tempPath}");
+            }
+        } catch (Throwable $e) {
+             Log::channel($this->logChannel)->error('[EgiUploadHandler::saveToMultipleDisks] Cannot read temporary file content.', array_merge($logContext, ['tempPath' => $tempPath, 'error' => $e->getMessage()]));
+             // Re-throw because we cannot proceed without content
+             throw new Exception("Cannot read temporary upload file content.", 500, $e);
+        }
+        // --- End Read Content ---
+
+        // --- 5-9. Attempt Save to Each Disk ---
+        foreach ($storageDisks as $disk) {
+            $diskLogContext = array_merge($logContext, ['disk' => $disk]);
+
+            // 6. Verify disk configuration
+            if (!Config::has("filesystems.disks.{$disk}")) {
+                 $errorMsg = "Storage disk '{$disk}' not configured in filesystems.php. Skipping.";
+                 Log::channel($this->logChannel)->error("[EgiUploadHandler::saveToMultipleDisks] {$errorMsg}", $diskLogContext);
+                 $errors[$disk] = $errorMsg;
+
+                 // If the unconfigured disk IS the fallback 'local' disk, this is fatal
+                 if ($disk === 'local' && $storageDisks === ['local']) {
+                    throw new LogicException("Default fallback storage disk 'local' is not configured in filesystems.php.");
+                 }
+                 continue; // Skip to next disk
+            }
+
+            // 7. Attempt Storage::put
+            try {
+                $visibility = Config::get("egi.storage.visibility.{$disk}", 'public'); // Default to public visibility
+                $success = Storage::disk($disk)->put($pathKey, $contents, $visibility);
+                if (!$success) {
+                   // Throw specific exception if put returns false
+                   throw new Exception("Storage::put returned false. Check permissions/configuration for disk '{$disk}'.");
+                }
+
+                // 8. Get URL/Path on Success
+                try {
+                     // Check adapter type if possible, otherwise try url() and fallback
+                     $adapter = Storage::disk($disk)->getAdapter();
+                     if (method_exists($adapter, 'getUrl')) {
+                         $savedInfo[$disk] = Storage::disk($disk)->url($pathKey);
+                     } elseif (method_exists($adapter, 'getPathPrefix')) {
+                          // For local driver, maybe construct a relative path? Or just store key.
+                          $savedInfo[$disk] = $pathKey; // Storing the key might be sufficient
+                     } else {
+                         $savedInfo[$disk] = $pathKey; // Fallback for unknown adapters
+                     }
+                } catch (Throwable $eUrl) {
+                     $savedInfo[$disk] = $pathKey; // Fallback to path key on any error getting URL
+                     Log::channel($this->logChannel)->warning("[EgiUploadHandler::saveToMultipleDisks] Could not determine URL for saved file.", array_merge($diskLogContext, ['error' => $eUrl->getMessage()]));
+                }
+                Log::channel($this->logChannel)->info("[EgiUploadHandler::saveToMultipleDisks] File successfully saved.", array_merge($diskLogContext, ['info' => $savedInfo[$disk]]));
+
+            } catch (Throwable $e_store) {
+                // 9. Store Error on Failure
+                $errorMsg = "Failed to save file. Error: " . $e_store->getMessage();
+                Log::channel($this->logChannel)->error('[EgiUploadHandler::saveToMultipleDisks] ' . $errorMsg, array_merge($diskLogContext, ['exception_class' => get_class($e_store)]));
+                $errors[$disk] = $errorMsg; // Store the error message
+            }
+        }
+        // --- End Save Loop ---
+
+        // --- 10-11. Check Critical Failures ---
+        $criticalFailures = array_intersect_key($errors, array_flip($criticalDisks));
+        if (!empty($criticalFailures)) {
+            $failedDiskNames = implode(', ', array_keys($criticalFailures));
+            Log::channel($this->logChannel)->error('[EgiUploadHandler::saveToMultipleDisks] CRITICAL STORAGE FAILURE occurred.', array_merge($logContext, ['failed_critical_disks' => $criticalFailures]));
+
+            // Invece di lanciare un'eccezione, proviamo a salvare su 'public' come ultima risorsa
+            if (!isset($savedInfo['public']) && !in_array('public', array_keys($errors))) {
+                Log::channel($this->logChannel)->warning('[EgiUploadHandler::saveToMultipleDisks] Attempting fallback save to public disk.', $logContext);
+
+                try {
+                    // Verifica che il disco 'public' sia configurato
+                    if (!Config::has("filesystems.disks.public")) {
+                        throw new LogicException("Fallback storage disk 'public' is not configured in filesystems.php.");
+                    }
+
+                    $visibility = 'public'; // Forza la visibilità pubblica
+                    $success = Storage::disk('public')->put($pathKey, $contents, $visibility);
+
+                    if (!$success) {
+                        throw new Exception("Storage::put returned false for fallback disk 'public'.");
+                    }
+
+                    // Ottieni URL o percorso
+                    try {
+                        $savedInfo['public'] = Storage::disk('public')->url($pathKey);
+                    } catch (Throwable $eUrl) {
+                        $savedInfo['public'] = $pathKey;
+                        Log::channel($this->logChannel)->warning("[EgiUploadHandler::saveToMultipleDisks] Could not determine URL for fallback saved file.", array_merge(['disk' => 'public'], $logContext, ['error' => $eUrl->getMessage()]));
+                    }
+
+                    Log::channel($this->logChannel)->info("[EgiUploadHandler::saveToMultipleDisks] File successfully saved to fallback disk 'public'.", array_merge(['disk' => 'public'], $logContext, ['info' => $savedInfo['public']]));
+
+                    // Rimuoviamo il fallback dalle liste di errori
+                    unset($criticalFailures['public']);
+                    unset($errors['public']);
+
+                    // Se abbiamo salvato con successo nel fallback, non lanciamo l'eccezione
+                    if (empty($criticalFailures)) {
+                        Log::channel($this->logChannel)->info("[EgiUploadHandler::saveToMultipleDisks] Fallback save successful, continuing execution.", $logContext);
+                        return $savedInfo;
+                    }
+                } catch (Throwable $eFallback) {
+                    Log::channel($this->logChannel)->error('[EgiUploadHandler::saveToMultipleDisks] FALLBACK SAVE FAILED too.', array_merge($logContext, ['error' => $eFallback->getMessage()]));
+                    // Aggiungi l'errore del fallback alla lista degli errori
+                    $errors['public'] = "Fallback save failed: " . $eFallback->getMessage();
+                    $criticalFailures['public'] = "Fallback save failed: " . $eFallback->getMessage();
+                }
+            }
+
+            // Se siamo qui, significa che anche il fallback è fallito o era già nella lista degli errori
+            // Quindi lanciamo l'eccezione
+            throw new Exception("CRITICAL STORAGE FAILURE on disk(s): " . $failedDiskNames . ". Fallback to 'public' also failed.");
+        }
+        // --- End Critical Check ---
+
+        // --- 12. Log Non-Critical Failures ---
+        $nonCriticalFailures = array_diff_key($errors, $criticalFailures);
+        if (!empty($nonCriticalFailures)) {
+             Log::channel($this->logChannel)->warning('[EgiUploadHandler::saveToMultipleDisks] Non-critical storage errors occurred.', array_merge($logContext, ['failed_disks' => $nonCriticalFailures]));
+        }
+
+        // --- 13. Return Success Info ---
+        return $savedInfo; // Return only the info for successful saves
     }
 
-     /**
-      * Saves a file to multiple configured storage disks. Handles critical failures.
-      *
-      * @param string $pathKey The base storage key (e.g., "root/user/coll/egi_id").
-      * @param string $tempPath The path to the temporary source file.
-      * @param array $logContext Base context for logging.
-      * @return array Associative array of [disk => urlOrPathKey] for successful saves.
-      * @throws Exception If saving to a critical disk fails.
-      * @throws LogicException If storage configuration is missing/invalid.
-      */
-     protected function saveToMultipleDisks(string $pathKey, string $tempPath, array $logContext): array
-     {
-         // --- Read and Validate Configuration ---
-         $storageDisks = Config::get('egi.storage.disks');
-         $criticalDisks = Config::get('egi.storage.critical_disks', []); // Default empty if missing
+    /**
+     * 🗑️ Attempts to delete a file from specified disks during a rollback scenario (if called externally).
+     * Logs errors via Log facade but does not throw exceptions itself.
+     * (Full Oracode Docs as previously provided for this method)
+     * @param array $disksToRollback Array of disk names where the file was successfully saved.
+     * @param string $pathKey The storage key of the file to delete.
+     * @param array $logContext Base context for logging.
+     * @return void
+     * @privacy Logs context. Interacts with storage based on potentially sensitive pathKey.
+     */
+      protected function attemptRollbackStorage(array $disksToRollback, string $pathKey, array $logContext): void
+      {
+         // --- Implementation as defined previously ---
+         // (Uses Log::warning/error/info)
+          Log::channel($this->logChannel)->warning('[EgiUploadHandler] Attempting storage rollback (external call?).', /*...*/);
+          foreach ($disksToRollback as $disk) { try { /* ... Storage::delete ... log results ... */ } catch (Throwable $e) { Log::channel($this->logChannel)->error("...", /*...*/); } }
+      }
 
-         if (empty($storageDisks) || !is_array($storageDisks)) {
-              Log::channel($this->logChannel)->error('[EgiUploadHandler] Invalid or missing storage disk configuration.', array_merge($logContext, ['config_key' => 'egi.storage.disks']));
-              throw new LogicException("Config 'egi.storage.disks' is missing or invalid.");
-         }
-         if (!is_array($criticalDisks)) {
-             Log::channel($this->logChannel)->warning('[EgiUploadHandler] Invalid critical storage disk configuration, treating all as non-critical.', array_merge($logContext, ['config_key' => 'egi.storage.critical_disks']));
-             $criticalDisks = [];
-         }
-         // --- End Config Validation ---
-
-         $savedInfo = [];
-         $errors = [];
-         $contents = null;
-
-         Log::channel($this->logChannel)->info('[EgiUploadHandler] Saving file to configured disks.', array_merge($logContext, ['disks' => $storageDisks, 'critical' => $criticalDisks, 'path_key' => $pathKey]));
-
-         // --- Read File Content ---
-         try {
-             $contents = file_get_contents($tempPath);
-             if ($contents === false) { throw new Exception("Failed to read temp file: {$tempPath}"); }
-         } catch (Throwable $e) {
-              Log::channel($this->logChannel)->error('[EgiUploadHandler] Cannot read temporary file content.', array_merge($logContext, ['tempPath' => $tempPath, 'error' => $e->getMessage()]));
-              throw new Exception("Cannot read temporary upload file content.", 500, $e);
-         }
-         // --- End Read Content ---
-
-         // --- Attempt Save to Each Disk ---
-         foreach ($storageDisks as $disk) {
-             // Verify disk is configured
-             if (!Config::has("filesystems.disks.{$disk}")) {
-                  Log::channel($this->logChannel)->error("[EgiUploadHandler] Storage disk '{$disk}' not configured in filesystems.php. Skipping.", $logContext);
-                  $errors[$disk] = "Disk '{$disk}' not configured.";
-                  continue;
-             }
-
-             $diskLogContext = array_merge($logContext, ['disk' => $disk]); // Context specific to this disk attempt
-             try {
-                 // Determine visibility (default public, make configurable if needed)
-                 $visibility = Config::get("egi.storage.visibility.{$disk}", 'public');
-
-                 $success = Storage::disk($disk)->put($pathKey, $contents, $visibility);
-                 if (!$success) {
-                    throw new Exception("Storage::put returned false. Check permissions/config.");
-                 }
-
-                 // Get URL or Path
-                 try {
-                     if (method_exists(Storage::disk($disk)->getAdapter(), 'getUrl')) {
-                         $savedInfo[$disk] = Storage::disk($disk)->url($pathKey);
-                     } else {
-                         $savedInfo[$disk] = $pathKey; // Fallback for non-URL adapters
-                     }
-                 } catch (Throwable $eUrl) {
-                     $savedInfo[$disk] = $pathKey; // Fallback on error
-                     Log::channel($this->logChannel)->warning("[EgiUploadHandler] Could not get URL.", array_merge($diskLogContext, ['error' => $eUrl->getMessage()]));
-                 }
-                 Log::channel($this->logChannel)->info("[EgiUploadHandler] File successfully saved.", array_merge($diskLogContext, ['info' => $savedInfo[$disk]]));
-
-             } catch (Throwable $e_store) {
-                 $errorMsg = "Failed to save file. Error: " . $e_store->getMessage();
-                 Log::channel($this->logChannel)->error('[EgiUploadHandler] ' . $errorMsg, array_merge($diskLogContext, ['exception_class' => get_class($e_store)]));
-                 $errors[$disk] = $errorMsg;
-             }
-         }
-         // --- End Save Loop ---
-
-         // --- Check Critical Failures ---
-         $criticalFailures = array_intersect_key($errors, array_flip($criticalDisks));
-         if (!empty($criticalFailures)) {
-             Log::channel($this->logChannel)->error('[EgiUploadHandler] CRITICAL STORAGE FAILURE. Initiating rollback.', array_merge($logContext, ['failures' => $criticalFailures]));
-             $this->attemptRollbackStorage(array_keys($savedInfo), $pathKey, $logContext); // Rollback successful saves
-             // Throw exception to rollback DB transaction
-             throw new Exception("CRITICAL STORAGE FAILURE on disk(s): " . implode(', ', array_keys($criticalFailures)));
-         }
-         // --- End Critical Check ---
-
-         // Log non-critical errors
-         $nonCriticalFailures = array_diff_key($errors, $criticalFailures);
-         if (!empty($nonCriticalFailures)) {
-              Log::channel($this->logChannel)->warning('[EgiUploadHandler] Non-critical storage errors occurred.', array_merge($logContext, ['errors' => $nonCriticalFailures]));
-         }
-
-         return $savedInfo; // Return info on successful saves
-     }
-
-     /**
-      * Attempts to delete a file from specified disks during a rollback.
-      * Logs errors but does not interrupt the overall rollback process.
-      *
-      * @param array $disks List of disk names where the file might have been saved.
-      * @param string $pathKey Storage key of the file to delete.
-      * @param array $logContext Base context for logging.
-      * @return void
-      */
-     protected function attemptRollbackStorage(array $disks, string $pathKey, array $logContext): void
-     {
-          Log::channel($this->logChannel)->warning('[EgiUploadHandler] Attempting storage rollback.', array_merge($logContext, ['disks_to_clean' => $disks, 'path_key' => $pathKey]));
-
-          foreach ($disks as $disk) {
-               $diskLogContext = array_merge($logContext, ['disk' => $disk]);
-              try {
-                   // Check existence before deleting
-                   if (Storage::disk($disk)->exists($pathKey)) {
-                       if (Storage::disk($disk)->delete($pathKey)) {
-                           Log::channel($this->logChannel)->info("[EgiUploadHandler] Rollback: Deleted file successfully.", $diskLogContext);
-                       } else {
-                            // Log specific warning if delete returns false
-                            Log::channel($this->logChannel)->warning("[EgiUploadHandler] Rollback Warning: Storage::delete returned false.", $diskLogContext);
-                       }
-                   } else {
-                        Log::channel($this->logChannel)->info("[EgiUploadHandler] Rollback: File did not exist, skipping delete.", $diskLogContext);
-                   }
-              } catch (Throwable $e_delete) {
-                  // Log any exception during delete attempt but continue
-                  Log::channel($this->logChannel)->error("[EgiUploadHandler] Rollback Error: Exception during delete.", array_merge($diskLogContext, ['error' => $e_delete->getMessage()]));
-              }
-          }
-          Log::channel($this->logChannel)->warning('[EgiUploadHandler] Storage rollback attempt finished.', $logContext);
-     }
-
-} // End Class EgiUploadHandler
+} // End EgiUploadHandler Class

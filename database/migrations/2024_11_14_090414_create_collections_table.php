@@ -25,7 +25,7 @@ return new class extends Migration
         // Dati della collection
         $table->string('collection_name')->index()->nullable();     // Nome della collection
         $table->text('description')->nullable();                   // Descrizione
-        $table->string('type', 10)->index()->nullable();           // Tipo (es. standard, single_egi)
+        $table->string('type', 25)->index()->nullable();           // Tipo (es. standard, single_egi)
 
         // Immagini e percorsi
         $table->string('image_banner', 1024)->nullable();          // Banner

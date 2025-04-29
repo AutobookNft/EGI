@@ -394,6 +394,24 @@ return [
                                 </g>
                             </svg>'
             ],
+            [
+                'name' => 'egi',
+                'type' => 'solid',
+                'class' => 'w-12 h-12 text-base-content',
+                'host' => 'svg',
+                'name_on_host' => 'class="w-16 h-16"',
+                'html' => '<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24">
+                            <!-- Palette -->
+                            <path d="M12 2C7.037 2 3 6.037 3 11s4.037 9 9 9c.897 0 1.777-.113 2.62-.325.637-.163.854-.88.44-1.36l-1.26-1.544a.75.75 0 00-1.147.09A5.499 5.499 0 017.5 11 5.5 5.5 0 0113 5.5a5.499 5.499 0 014.341 8.653.75.75 0 10.94 1.16l1.616-1.31c.566-.46.668-1.29.229-1.867C18.087 5.96 15.187 2 12 2z" fill="#4CAF50"/>
+
+                            <!-- Buchi colori -->
+                            <circle cx="9" cy="9" r="1.5" fill="#FFC107"/>
+                            <circle cx="14" cy="8" r="1.5" fill="#2196F3"/>
+                            <circle cx="15" cy="13" r="1.5" fill="#E91E63"/>
+                           </svg>'
+
+            ],
+        ],
 
 
         // [
@@ -434,5 +452,4 @@ return [
         // ],
     ],
     'default' => 'elegant',
-],
 ];

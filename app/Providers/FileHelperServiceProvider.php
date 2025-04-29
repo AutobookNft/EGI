@@ -10,8 +10,8 @@ class FileHelperServiceProvider extends ServiceProvider
 {
     public function register()
     {
-        $this->app->singleton('file-helper', function () {
-            return new FileHelper();
-        });
+        // $this->app->singleton('file-helper', function () {
+        //     return new FileHelper();
+        // });
     }
 }

@@ -79,8 +79,13 @@ class CreateNewUser implements CreatesNewUsers
             ]), function (User $user) {
                 Log::channel('florenceegi')->info('Utente creato con successo', ['user_id' => $user->id]);
 
-                // Crea la collection e i wallet predefiniti
-                $this->createDefaultCollection($user);
+                // 1) creo la collection default e la recupero
+                $collection = $this->createDefaultCollection($user);
+
+                // 2) assegno current_collection_id
+                $user->current_collection_id = $collection->id;
+                $user->save();
+
             });
         });
     }
@@ -88,29 +93,29 @@ class CreateNewUser implements CreatesNewUsers
     /**
      * Crea una collection predefinita per l'utente.
      */
-    protected function createDefaultCollection(User $user): void
+    protected function createDefaultCollection(User $user): Collection
     {
-        tap(Collection::create([
-            'user_id' => $user->id,
-            'epp_id' => config('app.epp_id'),
+        return tap(Collection::create([
+            'user_id'         => $user->id,
+            'epp_id'          => config('app.epp_id'),
             'collection_name' => explode(' ', $user->name, 2)[0] . "'s Collection",
-            'description' => __('collection.default_description'),
-            'creator_id' => $user->id,
-            'type' => 'standard',
-            'position' => 1,
-            'EGI_number' => 1,
-            'floor_price' => 0.0,
-            'is_published' => false,
+            'description'     => __('collection.default_description'),
+            'creator_id'      => $user->id,
+            'type'            => 'standard',
+            'position'        => 1,
+            'EGI_number'      => 1,
+            'floor_price'     => 0.0,
+            'is_published'    => false,
         ]), function (Collection $collection) use ($user) {
             Log::channel('florenceegi')->info('Collection creata con successo', ['collection_id' => $collection->id]);
 
-            // Associa l'utente alla collection nella tabella pivot collection_user
+            // Pivot user–collection
             $collection->users()->attach($user->id, ['role' => 'creator']);
 
-            // Crea i wallet predefiniti per la collection
+            // Wallet default
             $this->attachDefaultWallets($collection, $user);
 
-            // Assegna il ruolo di creator all'utente
+            // Ruolo creator
             $this->assignCreatorRole($user->id);
         });
     }
