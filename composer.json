@@ -71,7 +71,10 @@
     "extra": {
         "laravel": {
             "dont-discover": []
-        }
+        },
+        "providers": [
+            "Ultra\\EgiModule\\Providers\\EgiModuleServiceProvider"
+        ]
     },
     "config": {
         "optimize-autoloader": true,

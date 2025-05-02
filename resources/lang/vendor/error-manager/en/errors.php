@@ -58,6 +58,24 @@ return [
         'egi_storage_critical_failure' => 'Critical failure saving EGI :egi_id file to disk(s): :disks',
         'egi_storage_config_error' => "'local' storage disk required for fallback is not configured.",
         'egi_unexpected_error' => 'Unexpected error during EGI processing for file :original_filename.',
+        'egi_unauthorized_access' => 'Unauthenticated attempt to access the EGI upload page.',
+        // UI Related Errors (developer messages)
+        'egi_page_access_notice' => 'EGI upload page accessed successfully by administrator with ID :user_id.',
+        'egi_page_rendering_error' => 'Exception during EGI upload page rendering: :exception_message',
+
+        // Validation Related Errors (developer messages)
+        'invalid_egi_file' => 'EGI file validation failed with errors: :validation_errors',
+
+        // Processing Related Errors (developer messages)
+        'error_during_egi_processing' => 'Error during EGI file processing at stage ":processing_stage": :exception_message',
+
+        // Wallet Related Errors (user messages)
+        'wallet_creation_failed' => 'Failed to create wallet for collection :collection_id, user :user_id: :error_message',
+        'wallet_quota_check_error' => 'Error checking wallet quota for user :user_id, collection :collection_id: :error_message',
+        'wallet_insufficient_quota' => 'User :user_id has insufficient quota for collection :collection_id. Required: mint=:required_mint_quota, rebind=:required_rebind_quota. Available: mint=:current_mint_quota, rebind=:current_rebind_quota.',
+        'wallet_address_invalid' => 'Invalid wallet address format provided for user :user_id: :wallet_address',
+        'wallet_not_found' => 'Wallet not found for user :user_id and collection :collection_id',
+        'wallet_already_exists' => 'Wallet already exists for user :user_id and collection :collection_id with ID :wallet_id',
 
         // == New Entries ==
         'authorization_error' => 'Authorization denied for the requested action: :action.',
@@ -120,6 +138,23 @@ return [
         'egi_collection_init_error' => 'Could not prepare your collection. Please contact support if the problem persists.',
         'egi_storage_failure' => 'Failed to securely store the EGI file. Please try again or contact support.',
         'egi_unexpected_error' => 'An unexpected error occurred while processing your EGI. Please try again later.',
+        'egi_unauthorized_access' => 'Unauthorized access. Please log in.',
+
+        // UI Related Errors (user messages)
+        'egi_page_rendering_error' => 'We encountered a problem loading the upload page. Please try again later or contact support.',
+
+        // Validation Related Errors (user messages)
+        'invalid_egi_file' => 'The EGI file could not be processed due to validation errors. Please verify the file format and content.',
+
+        // Processing Related Errors (user messages)
+        'error_during_egi_processing' => 'We encountered an error while processing your EGI file. Our team has been notified and will investigate the issue.',
+
+        // Wallet Creation Errors (user messages)
+        'wallet_creation_failed' => 'We encountered a problem setting up the wallet for this collection. Our team has been notified and will resolve this issue.',
+        'wallet_insufficient_quota' => 'You do not have sufficient royalty quota available for this operation. Please adjust your royalty values and try again.',
+        'wallet_address_invalid' => 'The wallet address provided is not valid. Please check the format and try again.',
+        'wallet_not_found' => 'The requested wallet could not be found. Please verify your information and try again.',
+        'wallet_already_exists' => 'A wallet is already configured for this collection. Please use the existing wallet or contact support for assistance.',
 
         // == New Entries ==
         'authorization_error' => 'You do not have permission to perform this action.',

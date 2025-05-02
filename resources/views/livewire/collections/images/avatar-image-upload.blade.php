@@ -1,5 +1,7 @@
 <div class="mb-8 text-center">
-    <h3 class="text-lg font-semibold text-white mb-2">{{ __('collection.avatar_image') }}</h3>
+    <h3 class="text-lg font-semibold text-white mb-2">
+        {{ __('collection.avatar_image') }}
+    </h3>
 
     @php
         // Determina lo stato dell'immagine
@@ -13,8 +15,9 @@
     @endphp
 
     <!-- Cornice con bordo dinamico -->
-    <div class="w-32 h-32 mx-auto bg-gray-900 rounded-full shadow-md flex items-center justify-center overflow-hidden cursor-pointer hover:shadow-lg transition-shadow duration-300 border-4 {{ $borderColor }}"
-         @if(!$imageUrl) onclick="document.getElementById('avatar-image-{{ $collectionId }}').click();" @endif>
+    <div class="{{ $borderColor }} w-32 h-32 mx-auto bg-gray-900 rounded-full shadow-md flex items-center justify-center overflow-hidden cursor-pointer hover:shadow-lg transition-shadow duration-300 border-4"
+        @if(!$imageUrl) onclick="document.getElementById('avatar-image-{{ $collectionId }}').click();" @endif>
+        <!-- Immagine o icona di default -->
         @if($imageUrl)
             <img src="{{ $imageUrl }}" alt="Avatar" class="w-full h-full object-cover" loading="lazy">
         @else

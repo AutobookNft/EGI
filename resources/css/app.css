@@ -317,3 +317,63 @@
     from { box-shadow: 0 0 10px rgba(0, 255, 204, 0.5); }
     to { box-shadow: 0 0 20px rgba(0, 255, 204, 0.8); }
 }
+
+/*
+        ---------------------------------
+        * stili per layout guest
+        ---------------------------------
+        */
+
+        /* Effetto hover per i bottoni */
+        .btn-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Stili per l'animazione Hero Section */
+        #hero-section {
+            position: relative;
+            overflow: hidden;
+            height: 100vh;
+            background-color: #064e3b;
+        }
+        #background-gradient {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, #052e16 0%, #064e3b 100%);
+            z-index: -2;
+        }
+        
+        #backgroundCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+        .hero-content {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+        }
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.75);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            overflow-y: auto;
+        }
+        .modal > div {
+             z-index: 10000;
+             position: relative;
+        }

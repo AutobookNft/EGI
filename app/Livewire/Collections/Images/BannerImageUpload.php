@@ -174,14 +174,25 @@ class BannerImageUpload extends Component
     /**
      * Render the component's view with the appropriate image URL.
      *
-     * @return \Illuminate\View\View The view for the banner image upload component.
+     * @return \Illuminate\View\View The view for the image upload component.
      */
     public function render()
     {
-        // Determine the image URL: temporary URL if the image is in preview, otherwise the existing URL.
-        $imageUrl = ($this->image_banner instanceof TemporaryUploadedFile)
-            ? $this->image_banner->temporaryUrl()
-            : $this->existingImageUrl;
+        // Soluzione alternativa per l'anteprima usando base64 invece di temporaryUrl()
+        if ($this->image_banner instanceof TemporaryUploadedFile) {
+            // Usa il percorso locale invece dell'URL temporaneo
+            $tmpPath = storage_path('app/livewire-tmp/' . $this->image_banner->getFilename());
+            if (file_exists($tmpPath)) {
+                // Converti l'immagine in base64 per il test
+                $imageData = base64_encode(file_get_contents($tmpPath));
+                $mimeType = mime_content_type($tmpPath);
+                $imageUrl = 'data:' . $mimeType . ';base64,' . $imageData;
+            } else {
+                $imageUrl = null;
+            }
+        } else {
+            $imageUrl = $this->existingImageUrl;
+        }
 
         // Return the view with the image URL.
         return view('livewire.collections.images.banner-image-upload', [

@@ -171,7 +171,6 @@ class RequestWalletService
         }
     }
 
-
     public function donationWalletRequest(WalletDonationRequest $request): JsonResponse
     {
         try {

@@ -10,6 +10,8 @@ export default defineConfig({
                 'resources/js/logo3d.js',
                 'resources/css/app.css',
                 'resources/js/app.js',
+                'resources/js/collection.js',
+
                 // --- Input dai Pacchetti Ultra/EGI (Aggiunti) ---
                 // Aggiungi qui gli entry point JS/TS/CSS dei pacchetti che DEVONO essere
                 // compilati direttamente da Vite nell'applicazione principale.
@@ -36,6 +38,7 @@ export default defineConfig({
         }),
     ],
     resolve: {
+
         // --- Alias (Aggiunti dalla Sandbox) ---
         alias: {
             // Alias standard per l'applicazione principale

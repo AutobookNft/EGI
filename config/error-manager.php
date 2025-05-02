@@ -784,6 +784,16 @@ return [
             'notify_slack' => false,
             'msg_to' => 'sweet-alert', // Or redirect to login
         ],
+        'EGI_UNAUTHORIZED_ACCESS' => [
+            'type' => 'error',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.egi_unauthorized_access',
+            'user_message_key' => 'error-manager::errors.user.egi_unauthorized_access',
+            'http_status_code' => 401,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'log-only', // Redirect diretto senza SweetAlert
+        ],
         'EGI_FILE_INPUT_ERROR' => [ // Problem with the 'file' part of the request (missing, invalid upload)
             'type' => 'warning',
             'blocking' => 'blocking', // Stop the process
@@ -794,9 +804,62 @@ return [
             'notify_slack' => false,
             'msg_to' => 'div', // Show near the file input
         ],
+
+          'EGI_PAGE_ACCESS_NOTICE' => [
+            'type' => 'notice',
+            'blocking' => 'not',
+            'dev_message_key' => 'error-manager::errors.dev.egi_page_access_notice',
+            'user_message_key' => null, // No user message needed
+            'http_status_code' => 200,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'log-only', // Solo log, nessuna visualizzazione all'utente
+        ],
+
+        'EGI_PAGE_RENDERING_ERROR' => [
+            'type' => 'critical',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.egi_page_rendering_error',
+            'user_message_key' => 'error-manager::errors.user.egi_page_rendering_error',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true, // Notifica il team via email
+            'notify_slack' => true, // Notifica anche su Slack se configurato
+            'msg_to' => 'sweet-alert', // Mostra un alert all'utente
+        ],
         // Note: Core file validation errors like size, extension, mime type
         // might still use the generic codes like 'MAX_FILE_SIZE', 'INVALID_FILE_EXTENSION'
         // unless you want specific EGI versions like 'EGI_MAX_FILE_SIZE'. Keep it simple for now.
+
+        // ====================================================
+        // Errori specifici per la validazione EGI
+        // ====================================================
+
+        'INVALID_EGI_FILE' => [
+            'type' => 'warning',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.invalid_egi_file',
+            'user_message_key' => 'error-manager::errors.user.invalid_egi_file',
+            'http_status_code' => 422, // Unprocessable Entity
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'div', // Mostra errori di validazione in un div
+        ],
+
+
+        // ====================================================
+        // Errori specifici per l'elaborazione EGI
+        // ====================================================
+
+        'ERROR_DURING_EGI_PROCESSING' => [
+            'type' => 'error',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.error_during_egi_processing',
+            'user_message_key' => 'error-manager::errors.user.error_during_egi_processing',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
 
         'EGI_VALIDATION_FAILED' => [ // Metadata validation failed ($request->validate())
             'type' => 'warning',
@@ -891,6 +954,76 @@ return [
             'devTeam_email_need' => true, // Ops/Dev team needs to adjust server config
             'notify_slack' => true,
             'msg_to' => 'log-only',
+        ],
+
+        // ====================================================
+        // Errori specifici per la creazione e gestione Wallet
+        // ====================================================
+
+        'WALLET_CREATION_FAILED' => [
+            'type' => 'critical',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.wallet_creation_failed',
+            'user_message_key' => 'error-manager::errors.user.wallet_creation_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'WALLET_QUOTA_CHECK_ERROR' => [
+            'type' => 'error',
+            'blocking' => 'not', // Non-blocking, just log
+            'dev_message_key' => 'error-manager::errors.dev.wallet_quota_check_error',
+            'user_message_key' => null, // No user-visible message needed
+            'http_status_code' => 500,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'log-only',
+        ],
+
+        'WALLET_INSUFFICIENT_QUOTA' => [
+            'type' => 'warning',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.wallet_insufficient_quota',
+            'user_message_key' => 'error-manager::errors.user.wallet_insufficient_quota',
+            'http_status_code' => 400,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'div',
+        ],
+
+        'WALLET_ADDRESS_INVALID' => [
+            'type' => 'warning',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.wallet_address_invalid',
+            'user_message_key' => 'error-manager::errors.user.wallet_address_invalid',
+            'http_status_code' => 400,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'div',
+        ],
+
+        'WALLET_NOT_FOUND' => [
+            'type' => 'error',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.wallet_not_found',
+            'user_message_key' => 'error-manager::errors.user.wallet_not_found',
+            'http_status_code' => 404,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'div',
+        ],
+
+        'WALLET_ALREADY_EXISTS' => [
+            'type' => 'warning',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.wallet_already_exists',
+            'user_message_key' => 'error-manager::errors.user.wallet_already_exists',
+            'http_status_code' => 409, // Conflict
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'div',
         ],
     ],
 ];

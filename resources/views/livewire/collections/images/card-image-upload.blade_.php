@@ -1,3 +1,6 @@
+<script>
+    console.log('resources/views/livewire/collections/images/card-image-upload.blade.php');
+</script>
 <div class="w-full sm:max-w-[300px] px-2 flex-shrink-0">
     <h3 class="text-lg font-semibold text-white mb-2"> {{ __('collection.card_image') }}</h3>
 

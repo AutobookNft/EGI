@@ -7,6 +7,7 @@ use App\Traits\HasTeamRoles;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Log;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Jetstream\HasTeams;
@@ -37,7 +38,7 @@ class User extends Authenticatable
         'email',
         'icon_style',
         'password',
-        'default_collection_id',
+        'current_collection_id',
         'language',
         'wallet',
         'wallet_balance',
@@ -129,6 +130,11 @@ class User extends Authenticatable
 
     public function getIconStyleAttribute(): string
     {
+
+        Log::channel('florenceegi')->info('User:getIconStyleAttribute', [
+            'icon_style' => $this->attributes['icon_style'] ?? config('icons.styles.default'),
+        ]);
+
         // Ritorna l'icon_style dall'attributo o un valore di default
         return $this->attributes['icon_style'] ?? config('icons.styles.default');
     }
@@ -152,6 +158,18 @@ class User extends Authenticatable
     public function walletChangeReceiver()
     {
         return $this->hasMany(NotificationPayloadWallet::class, 'receiver_id');
+    }
+
+    public function currentCollection()
+    {
+        $id = session('current_collection_id')
+            ?? $this->current_collection_id;
+
+        Log::channel('florenceegi')->info('User:currentCollection', [
+            'current_collection_id' => $id,
+        ]);
+
+        return \App\Models\Collection::find($id);
     }
 
 }

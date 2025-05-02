@@ -5,7 +5,6 @@ namespace App\Livewire\Collections\Images;
 use App\Models\Collection;
 use App\Services\EGIImageService;
 use App\Traits\HasPermissionTrait;
-use App\Traits\SaveCollectionTraits;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -74,13 +73,13 @@ class AvatarImageUpload extends Component
         // Check if the collection has an avatar image.
         if ($collection->image_avatar) {
             // Retrieve the cached image path for the avatar.
-            // $this->existingImageUrl = EGIImageService::getCachedEGIImagePath(
-            //     $this->collectionId,
-            //     $collection->image_avatar,
-            //     $collection->is_published,
-            //     null,
-            //     'head.avatar' // PathKey for the avatar image.
-            // );
+            $this->existingImageUrl = EGIImageService::getCachedEGIImagePath(
+                $this->collectionId,
+                $collection->image_avatar,
+                $collection->is_published,
+                null,
+                'head.avatar' // PathKey for the avatar image.
+            );
             $this->existingImageUrl = $collection->image_avatar;
         }
 
@@ -179,10 +178,25 @@ class AvatarImageUpload extends Component
      */
     public function render()
     {
-        // Determine the image URL: temporary URL if the image is in preview, otherwise the existing URL.
-        $imageUrl = ($this->image_avatar instanceof TemporaryUploadedFile)
-            ? $this->image_avatar->temporaryUrl()
-            : $this->existingImageUrl;
+
+        Log::channel('florenceegi')->info('AvatarImageUpload, render', ['collectionId' => $this->collectionId]);
+
+        // Soluzione alternativa per l'anteprima usando base64 invece di temporaryUrl()
+        if ($this->image_avatar instanceof TemporaryUploadedFile) {
+            // Usa il percorso locale invece dell'URL temporaneo
+            $tmpPath = storage_path('app/livewire-tmp/' . $this->image_avatar->getFilename());
+            if (file_exists($tmpPath)) {
+                // Converti l'immagine in base64 per il test
+                $imageData = base64_encode(file_get_contents($tmpPath));
+                $mimeType = mime_content_type($tmpPath);
+                $imageUrl = 'data:' . $mimeType . ';base64,' . $imageData;
+            } else {
+                $imageUrl = null;
+            }
+        } else {
+            $imageUrl = $this->existingImageUrl;
+        }
+
 
         // Return the view with the image URL.
         return view('livewire.collections.images.avatar-image-upload', [

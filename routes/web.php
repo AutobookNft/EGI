@@ -30,7 +30,7 @@ use Illuminate\Support\Facades\Request;
 use Livewire\Livewire;
 use Ultra\EgiModule\Http\Controllers\EgiUploadController;
 use Ultra\EgiModule\Http\Controllers\EgiUploadPageController;
-
+use Ultra\UploadManager\Controllers\Config\ConfigController;
 
 // Route::view('/home', 'home')
 //      ->name('home');
@@ -72,15 +72,6 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         Route::get('/api/check-upload-authorization', [Ultra\UploadManager\Controllers\Config\ConfigController::class, 'checkUploadAuthorization'])
             ->name('upload.authorization');
 
-        Route::get('/upload/egi', [EgiUploadPageController::class, 'showUploadPage'])
-            // ->middleware(['auth', 'collection_can:manage_egi']) // Auth qui è ridondante se già nel gruppo app? Meglio solo permessi specifici.
-            ->name('egi.upload.page');
-
-        Route::post('/upload/egi', [EgiUploadController::class, 'handleUpload'])
-            // ->middleware(['auth', 'collection_can:manage_egi']) // Auth qui è ridondante se già nel gruppo app? Meglio solo permessi specifici.
-            ->name('egi.upload.store');
-
-
         // Dashboard
         Route::get('/dashboard', function () {
             return view('dashboard');
@@ -92,6 +83,16 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         Route::get('/debug-context', function () {
             return Route::currentRouteName();
         })->name('debug.context');
+
+        // Raggruppa tutte le route che richiedono 'view_collection_header'
+        Route::middleware('collection_can:manage_egi')->group(function () {
+
+            Route::get('/upload/egi', [EgiUploadPageController::class, 'showUploadPage'])
+                ->name('egi.upload.page');
+
+            Route::post('/upload/egi', [EgiUploadController::class, 'handleUpload'])
+                ->name('egi.upload.store');
+        });
 
         // Admin Routes
         Route::prefix('admin')->name('admin.')->group(function () {
@@ -119,57 +120,62 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         });
 
         Route::prefix('collections')->group(function () {
+            // Raggruppa tutte le route che richiedono 'read_collection'
+            Route::middleware('collection_can:read_collection')->group(function () {
+                Route::get('/carousel', CollectionCarousel::class)
+                    ->name('collections.carousel');
+            });
 
-            // Rotte per visualizzare il carousel delle collezioni, viene usata solamente se il team corrente ha più di una collezione associata
-            Route::get('/carousel', CollectionCarousel::class)
-                ->middleware('collection_can:read_collection')
-                ->name('collections.carousel');
+            // Raggruppa tutte le route che richiedono 'view_collection_header'
+            Route::middleware('collection_can:view_collection_header')->group(function () {
+                Route::get('/{id}/edit', CollectionEdit::class)
+                    ->name('collections.edit');
 
-            // Rotta per aprire vista della collezione
-            Route::get('/{id}/edit', CollectionEdit::class)
-                ->middleware('collection_can:view_collection_header')
-                ->name('collections.edit');
+                Route::get('/open', CollectionOpen::class)
+                    ->name('collections.open');
 
-            // Rotta per discernere se mostrare il carousel o la vista della collezione
-            Route::get('/open', CollectionOpen::class)
-                ->middleware('collection_can:view_collection_header')
-                ->name('collections.open');
+                Route::get('/{id}/head-images', HeadImagesManager::class)
+                    ->name('collections.head_images');
 
-            Route::get('/{id}/head-images', HeadImagesManager::class)
-                ->middleware('collection_can:view_collection_header')
-                ->name('collections.head_images');
+                Route::get('/{id}/members', CollectionUserMember::class)
+                    ->name('collections.collection_user');
+            });
 
-            Route::get('/create', CreateCollection::class)
-                ->middleware('collection_can:create_collection')
-                ->name('collections.create');
+            // Raggruppa le route che richiedono 'create_collection'
+            Route::middleware('collection_can:create_collection')->group(function () {
+                Route::get('/create', CreateCollection::class)
+                    ->name('collections.create');
+            });
 
-            Route::get('/{id}/members', CollectionUserMember::class)
-                ->middleware('collection_can:view_collection_header')
-                ->name('collections.collection_user');
+            // Raggruppa le route che richiedono 'add_team_member'
+            Route::middleware('collection_can:add_team_member')->group(function () {
+                Route::delete('/{id}/invitations/{invitationId}', [CollectionUserMember::class, 'deleteProposalInvitation'])
+                    ->name('invitations.delete');
+            });
 
-            // Rotta per la fetch per eliminare una proposal invitation
-            Route::delete('/{id}/invitations/{invitationId}', [CollectionUserMember::class, 'deleteProposalInvitation'])
-                ->name('invitations.delete')
-                ->middleware(['collection_can:add_team_member']);
+            // Raggruppa le route che richiedono 'delete_wallet'
+            Route::middleware('collection_can:delete_wallet')->group(function () {
+                Route::delete('/{id}/wallets/{walletId}', [CollectionUserMember::class, 'deleteProposalWallet'])
+                    ->name('wallets.delete');
+            });
 
-            // Rotte per fetch, per eliminazione della proposal wallet
-            Route::delete('/{id}/wallets/{walletId}', [CollectionUserMember::class, 'deleteProposalWallet'])
-                ->name('wallets.delete')
-                ->middleware(['collection_can:delete_wallet']);
+            // Raggruppa le route che richiedono 'create_wallet'
+            Route::middleware('collection_can:create_wallet')->group(function () {
+                Route::post('/{id}/wallets/create', [NotificationWalletRequestController::class, 'requestCreateWallet'])
+                    ->name('wallets.create')
+                    ->middleware('check.pending.wallet');
+            });
 
-            // Route per fetch per creare un nuovo wallet
-            Route::post('/{id}/wallets/create', [NotificationWalletRequestController::class, 'requestCreateWallet'])
-                ->name('wallets.create')
-                ->middleware(['collection_can:create_wallet', 'check.pending.wallet']);
+            // Raggruppa le route che richiedono 'update_wallet'
+            Route::middleware('collection_can:update_wallet')->group(function () {
+                Route::post('/{id}/wallets/update', [NotificationWalletRequestController::class, 'requestUpdateWallet'])
+                    ->name('wallets.update')
+                    ->middleware('check.pending.wallet');
 
-            Route::post('/{id}/wallets/update', [NotificationWalletRequestController::class, 'requestUpdateWallet'])
-                ->name('wallets.update')
-                ->middleware(['collection_can:update_wallet', 'check.pending.wallet']);
-
-            Route::post('/{id}/wallets/donation', [NotificationWalletRequestController::class, 'requestDonation'])
-                ->name('wallets.update')
-                ->middleware(['collection_can:update_wallet', 'check.pending.wallet']);
-
+                Route::post('/{id}/wallets/donation', [NotificationWalletRequestController::class, 'requestDonation'])
+                    ->name('wallets.update') // Nota: questo nome è duplicato, potrebbe essere intenzionale
+                    ->middleware('check.pending.wallet');
+            });
         });
 
     // Rotte per la gestione delle notifiche

@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Collection;
 use Illuminate\Support\Facades\Log;
 use Spatie\Permission\Models\Role;
+use App\Models\User;
 
 class CheckCollectionPermission
 {
@@ -23,12 +24,24 @@ class CheckCollectionPermission
     {
         // Recupera l'utente autenticato
         $user = Auth::user();
+        if (!$user) {
+            Log::channel('florenceegi')->error('Utente non autenticato', [
+                'ip' => $request->ip(),
+                'route' => $request->route()->getName(),
+            ]);
+            abort(403, 'Utente non autenticato.');
+        }
 
-        Log::channel('florenceegi')->info('Middleware: CheckCollectionPermission', [
-            'user_id' => $user->id,
-            'permission' => $permission,
-            'user_name' => $user->name,
-        ]);
+        // Verifica se l'utente è un amministratore
+        $userModel = User::find($user->id);
+        if (!$userModel) {
+            Log::channel('florenceegi')->error('Utente non trovato', [
+                'user_id' => $user->id,
+                'ip' => $request->ip(),
+                'route' => $request->route()->getName(),
+            ]);
+            abort(403, 'Utente non trovato.');
+        }
 
         // Verifica se la rotta è 'collections.open'
         $rotta = $request->route()->getName();
@@ -47,19 +60,17 @@ class CheckCollectionPermission
                 return $next($request);
             }
         } else {
-            // Recupera l'ID della collection dalla richiesta per le altre rotte
-            $collectionId = $request->route('id') ?? $request->route('collection');
 
-            Log::channel('florenceegi')->info('Middleware: CheckCollectionPermission', [
-                'collection_id' => $collectionId,
-            ]);
-
-
-            $collection = Collection::find($collectionId);
-
+            // Recupera l'istanza delal collection associata all'utente
+            $collection = $userModel->currentCollection();
 
             // Se la collection non esiste, restituisci un errore 404
             if (!$collection) {
+                Log::channel('florenceegi')->error('Collection non trovata', [
+                    'user_id' => $user->id,
+                    'ip' => $request->ip(),
+                    'route' => $request->route()->getName(),
+                ]);
                 abort(404, 'CheckCollectionPermission: Collection non trovata.');
             }
         }
@@ -68,31 +79,43 @@ class CheckCollectionPermission
         $membership = $collection->users()->where('user_id', $user->id)->first();
 
         if (!$membership) {
+            Log::channel('florenceegi')->error('Utente non membro della collection', [
+                'user_id' => $user->id,
+                'collection_id' => $collection->id,
+            ]);
             abort(403, 'Non sei un membro della collection associata.');
         }
 
         // Recupera il ruolo dell'utente nella collection
         $roleName = $membership->pivot->role;
 
-        // Log::channel('florenceegi')->info('Middleware: CheckCollectionPermission', [
-        //     'collection_id' => $collection->id,
-        //     'role_name' => $roleName,
-        // ]);
-
         // Verifica se il ruolo esiste in Spatie
         $role = Role::where('name', $roleName)->first();
-        // log::channel('florenceegi')->info('Middleware: CheckCollectionPermission', [
-        //     'role' => $role,
-        // ]);
 
         if (!$role) {
+            Log::channel('florenceegi')->error('Ruolo non trovato', [
+                'role_name' => $roleName,
+                'user_id' => $user->id,
+            ]);
             abort(403, 'Ruolo non valido.');
         }
 
         // Verifica se il ruolo ha il permesso richiesto
         if ($permission && !$role->hasPermissionTo($permission)) {
+            Log::channel('florenceegi')->error('Permesso negato', [
+                'user_id' => $user->id,
+                'permission' => $permission,
+                'role_name' => $roleName,
+            ]);
             abort(403, 'Non hai i permessi necessari per eseguire questa azione.');
         }
+
+        Log::channel('florenceegi')->info('Permesso concesso', [
+            'user_id' => $user->id,
+            'collection_id' => $collection->id,
+            'permission' => $permission,
+            'role_name' => $roleName,
+        ]);
 
         return $next($request);
     }

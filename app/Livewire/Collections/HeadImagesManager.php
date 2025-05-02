@@ -5,7 +5,11 @@ namespace App\Livewire\Collections;
 use App\Models\Collection;
 use App\Services\EGIImageService;
 use Illuminate\Support\Facades\Log;
+use Livewire\Attributes\Modelable;
 use Livewire\Component;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use Livewire\WithFileUploads;
+use Livewire\Attributes\Layout;
 
 /**
  * Class HeadImagesManager
@@ -14,14 +18,27 @@ use Livewire\Component;
  * for a specific collection. It initializes the collection and provides a render
  * method to display the associated view.
  */
+#[Layout('layouts.coll')]
 class HeadImagesManager extends Component
+
 {
+
+    use WithFileUploads;
+
     /**
      * The collection instance associated with the header images.
      *
      * @var Collection
      */
     public $collection;
+
+    //  /**
+    //  * The image being uploaded or managed.
+    //  *
+    //  * @var TemporaryUploadedFile|null
+    //  */
+    // #[Modelable]
+    // public $image_card;
 
     /**
      * The unique identifier for the collection.
@@ -82,6 +99,9 @@ class HeadImagesManager extends Component
      */
     public function render()
     {
+
+        log::channel('florenceegi')->info('HeadImagesManager, render', ['collectionId' => $this->collectionId]);
+
         // Return the Livewire view for managing head images.
         return view('livewire.collections.head-images-manager');
     }

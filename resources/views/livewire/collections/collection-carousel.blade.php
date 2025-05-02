@@ -1,3 +1,6 @@
+<script>
+    console.log('resources/views/livewire/collections/collection-carousel.blade.php');
+</script>
 <div x-data="{ activeSlide: @entangle('activeSlide') }" class="relative w-full overflow-hidden">
     <h3 class="mt-6 text-xl">{{ __('collection.collections') }}</h3>
 

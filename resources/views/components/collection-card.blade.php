@@ -2,7 +2,7 @@
 
 <div x-data="{ preview: null }" class="bg-gray-800 rounded-2xl shadow-lg hover:shadow-2xl transition-shadow duration-300 overflow-hidden flex flex-col h-full">
     <!-- Immagine o Placeholder -->
-    <figure class="h-48 w-full overflow-hidden bg-gray-900 flex items-center justify-center cursor-pointer">
+    <figure class="h-48 w-full overflow-hidden bg-gray-900 flex items-center justify-center">
         <!-- Anteprima dell'immagine caricata con Alpine.js -->
         <template x-if="preview">
             <img
@@ -38,14 +38,14 @@
     </figure>
 
     <!-- Input File per il Caricamento dell’Immagine -->
-    <input
+    {{-- <input
         type="file"
         wire:model="uploadedImage"
         id="image-{{ $imageType }}-{{ $id }}"
         class="hidden"
         accept="image/*"
         @change="preview = URL.createObjectURL($event.target.files[0])"
-    >
+    > --}}
 
     <!-- Contenuto della Card -->
     <div class="p-4 flex flex-col justify-between flex-grow">

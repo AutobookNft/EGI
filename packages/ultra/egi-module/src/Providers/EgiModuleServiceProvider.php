@@ -3,7 +3,15 @@
 namespace Ultra\EgiModule\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\Log; // Per debug iniziale
+use Illuminate\Support\Facades\Log;
+use Ultra\EgiModule\Contracts\UserRoleServiceInterface;
+use Ultra\EgiModule\Contracts\WalletServiceInterface;
+use Ultra\EgiModule\Services\CollectionService;
+use Ultra\EgiModule\Services\UserRoleService;
+use Ultra\EgiModule\Services\WalletService;
+use Ultra\ErrorManager\Interfaces\ErrorManagerInterface;
+use Ultra\UltraLogManager\Contracts\UltraLoggerInterface;
+use Ultra\UltraLogManager\UltraLogManager;// Per debug iniziale
 
 class EgiModuleServiceProvider extends ServiceProvider
 {
@@ -22,7 +30,47 @@ class EgiModuleServiceProvider extends ServiceProvider
         // Puoi unire configurazioni qui se crei un file config/egi.php
         // $this->mergeConfigFrom(__DIR__.'/../../config/egi.php', 'egi');
 
-        // Log::channel($this->logChannel)->debug('EgiModuleServiceProvider registered.'); // Log per verifica
+        // 1. Registra il binding per UltraLoggerInterface
+        // $this->app->bind(UltraLoggerInterface::class, UltraLogManager::class);
+
+        // 2. Registra il binding per WalletServiceInterface
+        $this->app->bind(WalletServiceInterface::class, WalletService::class);
+
+        // 3. Registra il binding per UserRoleServiceInterface
+        $this->app->bind(UserRoleServiceInterface::class, UserRoleService::class);
+
+
+        // 4. Registra WalletService con le sue dipendenze
+        $this->app->bind(WalletService::class, function ($app) {
+            return new WalletService(
+                $app->make(ErrorManagerInterface::class),
+                $app->make(UltraLogManager::class)
+            );
+        });
+
+        // 5. Registra CollectionService con le sue dipendenze
+        // Ora possiamo usare le interfacce qui, perché abbiamo i binding
+        $this->app->bind(CollectionService::class, function ($app) {
+            return new CollectionService(
+                $app->make(UltraLoggerInterface::class), // Usa l'interfaccia!
+                $app->make(WalletServiceInterface::class), // Usa l'interfaccia!
+                $app->make(UserRoleServiceInterface::class), // Usa l'interfaccia!
+                'florenceegi'
+            );
+        });
+
+        // Register UserRoleService
+        $this->app->bind(UserRoleServiceInterface::class, function ($app) {
+            return new UserRoleService(
+                $app->make(ErrorManagerInterface::class),
+                $app->make(UltraLoggerInterface::class)
+            );
+        });
+
+        // 6. Crea alias per accesso più semplice
+        $this->app->alias(CollectionService::class, 'egi.collection_service');
+        $this->app->alias(UserRoleServiceInterface::class, 'egi.user_role_service');
+
     }
 
     /**

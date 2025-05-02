@@ -47,7 +47,7 @@ class EgiImageUpload extends Component
     /**
      * Mount the component and initialize the collection ID and image type.
      *
-     * @param int    $collectionId The ID of the collection.
+     * @param int $collectionId The ID of the collection.
      *
      * @return void
      */
@@ -161,8 +161,9 @@ class EgiImageUpload extends Component
      */
     public function removeImage()
     {
+
         try {
-            // Retrieve the collection or fail if not found.
+
             $collection = Collection::findOrFail($this->collectionId);
 
             // Check if the collection has an image to remove.
@@ -186,8 +187,7 @@ class EgiImageUpload extends Component
             Log::error('Error removing the EGI image: ' . $e->getMessage());
             session()->flash('error', 'Error removing the EGI image.');
         }
-    }
-
+   }
 
     /**
      * Render the component's view with the appropriate image URL.
@@ -196,12 +196,29 @@ class EgiImageUpload extends Component
      */
     public function render()
     {
-        // Determine the image URL: temporary URL if the image is in preview, otherwise the existing URL.
-        $imageUrl = ($this->image_EGI instanceof TemporaryUploadedFile)
-            ? $this->image_EGI->temporaryUrl()
-            : $this->existingImageUrl;
 
-        // Return the view with the image URL.
+        Log::channel('florenceegi')->info('EgiImageUpload, render', ['collectionId' => $this->collectionId]);
+
+        // // Soluzione alternativa per il debug
+        if ($this->image_EGI instanceof TemporaryUploadedFile) {
+            // Usa il percorso locale invece dell'URL temporaneo
+            // Solo per debug - NON usare in produzione
+            $tmpPath = storage_path('app/livewire-tmp/' . $this->image_EGI->getFilename());
+            Log::channel('florenceegi')->info('Temporary file path: ' . $tmpPath);
+            if (file_exists($tmpPath)) {
+                // Converti l'immagine in base64 per il test
+                $imageData = base64_encode(file_get_contents($tmpPath));
+                $mimeType = mime_content_type($tmpPath);
+                $imageUrl = 'data:' . $mimeType . ';base64,' . $imageData;
+                Log::channel('florenceegi')->info('Image URL: ' . $imageUrl);
+            } else {
+                $imageUrl = null;
+            }
+        } else {
+            $imageUrl = $this->existingImageUrl;
+            Log::channel('florenceegi')->info('Existing image URL: ' . $imageUrl);
+        }
+
         return view('livewire.collections.images.egi-image-upload', [
             'imageUrl' => $imageUrl,
         ]);

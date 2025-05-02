@@ -29,7 +29,7 @@ use Ultra\EgiModule\Helpers\EgiHelper;
 use Ultra\UploadManager\Traits\HasValidation;
 use App\Traits\HasUtilitys;
 use App\Traits\HasCreateDefaultCollectionWallets;
-
+use Carbon\Carbon;
 // UEM Imports
 use Ultra\ErrorManager\Interfaces\ErrorManagerInterface;
 
@@ -244,7 +244,9 @@ class EgiUploadHandler
 
                 // Published Status & Date: Use from validated data
                 $isPublished = $validatedData['egi-publish'] ?? false;
-                $publishDate = $validatedData['egi-date'] ?? null;
+
+                // Publish Date: Use from validated data if present and valid, otherwise now
+                $publishDate = $validatedData['egi-date'] ?? Carbon::now()->toDateTimeString();
                 $status = 'local'; // Default status
 
                 $upload_id = $request->input('upload_id', Str::uuid()->toString()); // Unique ID for this batch/upload instance
@@ -264,6 +266,8 @@ class EgiUploadHandler
                 $egi->media = false; // Only images
                 $egi->type = $filetype;
                 $egi->bind = 0; // Default
+                $egi->mint = 0; // Default
+                $egi->rebind = 0; // Default
                 $egi->paired = 0; // Default
                 $egi->price = $egiFloorPrice;
                 $egi->floorDropPrice = $egiFloorPrice; // Default to same as price initially
@@ -366,7 +370,7 @@ class EgiUploadHandler
         return 'EGI_UNEXPECTED_ERROR'; // Generic fallback
     }
 
-        /**
+     /**
      * 🛡️ Finds or creates the default collection for a given user upon first EGI upload.
      * Ensures necessary wallets are associated and the creator is assigned the owner role.
      * Uses the Log facade for internal warnings/debug. Throws Exception on critical configuration or DB errors.
@@ -420,29 +424,48 @@ class EgiUploadHandler
         }
         $defaultFloorPrice = (float) $defaultFloorPriceConfig;
 
-        // --- 3. Check User's Default Collection ID ---
-        $defaultCollectionId = $creatorUser->default_collection_id;
+        // --- 3. Check User's Current Collection ---
+        $collection = $creatorUser->currentCollection();
 
-        // --- 4. If Default ID is Set, Find the Collection ---
-        if ($defaultCollectionId !== null) {
-            Log::channel($this->logChannel)->info('[EgiUploadHandler::findOrCreateDefaultCollection] User default collection ID found.', array_merge($logContext, ['default_collection_id' => $defaultCollectionId]));
-            /** @var Collection|null $collection */
-            $collection = Collection::find($defaultCollectionId);
-            if ($collection) {
-                Log::channel($this->logChannel)->info('[EgiUploadHandler::findOrCreateDefaultCollection] Found existing default collection by ID.', array_merge($logContext, ['collection_id' => $collection->id]));
-                $logContext['collection_id'] = $collection->id; // Ensure context has the ID
-                return $collection;
-            } else {
-                // Data inconsistency: User points to a default collection that doesn't exist!
-                Log::channel($this->logChannel)->critical(
-                    '[EgiUploadHandler::findOrCreateDefaultCollection] DATA INCONSISTENCY: User default_collection_id points to non-existent collection.',
-                    array_merge($logContext, ['non_existent_collection_id' => $defaultCollectionId])
-                );
-                // Consider adding logic here to potentially reset the user's default_collection_id to null
-                // $creatorUser->default_collection_id = null; $creatorUser->save();
-                throw new Exception("Data inconsistency detected: Default collection ID '{$defaultCollectionId}' not found.", 500);
-            }
+        // Extract first item if it's an Eloquent Collection
+        if ($collection instanceof \Illuminate\Database\Eloquent\Collection) {
+            $collection = $collection->first();
         }
+
+        if ($collection) {
+            Log::channel($this->logChannel)->info(
+                '[EgiUploadHandler::findOrCreateDefaultCollection] Found existing current collection.',
+                array_merge($logContext, ['collection_id' => $collection->id])
+            );
+            $logContext['collection_id'] = $collection->id; // Ensure context has the ID
+            return $collection;
+        }
+
+        // Se currentCollection() ha restituito null, dobbiamo verificare se c'è un'incoerenza nei dati
+        // (current_collection_id impostato ma collezione non trovata)
+        $currentCollectionIdFromUser = $creatorUser->current_collection_id;
+        $currentCollectionIdFromSession = session('current_collection_id');
+
+        // Verifica incoerenza: ID impostato ma collezione non trovata
+        if ($currentCollectionIdFromUser !== null || $currentCollectionIdFromSession !== null) {
+            $idToReport = $currentCollectionIdFromUser ?? $currentCollectionIdFromSession;
+
+            // Data inconsistency: User points to a current collection that doesn't exist!
+            Log::channel($this->logChannel)->critical(
+                '[EgiUploadHandler::findOrCreateDefaultCollection] DATA INCONSISTENCY: User current_collection_id points to non-existent collection.',
+                array_merge($logContext, ['non_existent_collection_id' => $idToReport])
+            );
+
+            // Consider adding logic here to potentially reset the user's current_collection_id to null
+            // $creatorUser->current_collection_id = null; $creatorUser->save();
+            throw new Exception("Data inconsistency detected: Current collection ID '{$idToReport}' not found.", 500);
+        }
+
+        // If we're here, user simply doesn't have a current collection set
+        Log::channel($this->logChannel)->info(
+            '[EgiUploadHandler::findOrCreateDefaultCollection] No current collection ID found for user.',
+            $logContext
+        );
 
         // --- 5. If Default ID is NULL, Create New Default Collection ---
         Log::channel($this->logChannel)->info('[EgiUploadHandler::findOrCreateDefaultCollection] No default collection set for user. Creating new one.', $logContext);
@@ -463,6 +486,8 @@ class EgiUploadHandler
             $collection->type = 'single_upload'; // Identifier for this auto-created collection type
 
             $collection->floor_price = $defaultFloorPrice;
+
+            $collection->epp_id = Config::get('egi.epp_id', 2); // Optional, set to null if not needed
 
             // Status: Based on your definition (e.g., 'published', 'local')
             $collection->status = 'local'; // Your term for "not yet minted"
@@ -531,6 +556,7 @@ class EgiUploadHandler
 
             // 5.g Assign Creator Owner Role
             $ownerRoleName = Config::get('egi.default_roles.collection_owner');
+
             if (!empty($ownerRoleName) && is_string($ownerRoleName)) {
                  Log::channel($this->logChannel)->info("[EgiUploadHandler::findOrCreateDefaultCollection] Attempting to assign owner role to creator.", array_merge($logContext, ['role_name' => $ownerRoleName]));
                 try {

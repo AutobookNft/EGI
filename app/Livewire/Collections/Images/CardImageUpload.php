@@ -92,9 +92,7 @@ class CardImageUpload extends Component
      */
     public function saveImage()
     {
-
         try {
-
             $collection = Collection::findOrFail($this->collectionId);
 
             // Verifica il permesso "update_collection"
@@ -132,8 +130,8 @@ class CardImageUpload extends Component
     }
 
     #[On('cardImageRemove')]
-    public function cardImageRemove(){
-
+    public function cardImageRemove()
+    {
         $this->removeImage();
     }
 
@@ -178,10 +176,22 @@ class CardImageUpload extends Component
      */
     public function render()
     {
-        // Determine the image URL: temporary URL if the image is in preview, otherwise the existing URL.
-        $imageUrl = ($this->image_card instanceof TemporaryUploadedFile)
-            ? $this->image_card->temporaryUrl()
-            : $this->existingImageUrl;
+
+        // Soluzione alternativa per l'anteprima usando base64 invece di temporaryUrl()
+        if ($this->image_card instanceof TemporaryUploadedFile) {
+            // Usa il percorso locale invece dell'URL temporaneo
+            $tmpPath = storage_path('app/livewire-tmp/' . $this->image_card->getFilename());
+            if (file_exists($tmpPath)) {
+                // Converti l'immagine in base64 per il test
+                $imageData = base64_encode(file_get_contents($tmpPath));
+                $mimeType = mime_content_type($tmpPath);
+                $imageUrl = 'data:' . $mimeType . ';base64,' . $imageData;
+            } else {
+                $imageUrl = null;
+            }
+            } else {
+                $imageUrl = $this->existingImageUrl;
+        }
 
         // Return the view with the image URL.
         return view('livewire.collections.images.card-image-upload', [

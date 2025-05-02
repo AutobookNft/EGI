@@ -30,7 +30,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Ultra\\EgiModule\\Providers\\EgiModuleServiceProvider"
+                "Ultra\\UltraLogManager\\Providers\\UltraLogManagerServiceProvider"
             ]
         }
     },

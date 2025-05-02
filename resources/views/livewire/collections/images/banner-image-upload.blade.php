@@ -14,7 +14,7 @@
 
     <!-- Cornice con bordo dinamico -->
     <div class="max-w-[1200px] max-h-[300px] w-full h-auto mx-auto md:h-64 bg-gray-900 rounded-2xl shadow-md flex items-center justify-center overflow-hidden cursor-pointer hover:shadow-lg transition-shadow duration-300 border-4 {{ $borderColor }}"
-         @if(!$imageUrl) onclick="document.getElementById('banner-image-{{ $collectionId }}').click();" @endif>
+        @if(!$imageUrl) onclick="document.getElementById('banner-image-{{ $collectionId }}').click();" @endif>
         @if($imageUrl)
             <img src="{{ $imageUrl }}" alt="Banner image" class="w-full h-full object-contain" loading="lazy">
         @else

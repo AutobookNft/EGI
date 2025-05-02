@@ -2,22 +2,23 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Collection;
 use Illuminate\Http\Request;
 
 class DropController extends Controller
 {
     public function index()
     {
+       // Collezioni in evidenza (3 items)
+       $collections = Collection::where('is_published', true)
+       ->take(3)
+       ->get();
 
+        // Ultime gallerie (8 items)
+        // $recent = Collection::orderBy('created_at', 'desc')
+        //     ->take(8)
+        //     ->get();
 
-        // Questa riga semplicemente restituisce la vista 'home.blade.php'
-        // Replicando il comportamento di Route::view, ma all'interno del pipeline di un Controller.
-        return view('home');
-
-        // $colori = new ColoriBase('blu', 'verde', 'giallo', 'rosso', 'viola');
-        // $colori->setGiallo('Ikea');
-        // $colore = $colori->getGiallo();
-
-        // return $colore;
+        return view('home', compact('collections'));
     }
 }

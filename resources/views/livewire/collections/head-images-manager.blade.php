@@ -1,3 +1,6 @@
+<script>
+    console.log('resources/views/livewire/collections/head-images-manager.blade.php');
+</script>
 <div class="mx-auto max-w-4xl rounded-2xl border border-gray-700 bg-gray-800 p-6 shadow-lg">
 
     <h2 class="mb-6 text-2xl font-bold text-white">{{ __('collection.manage_head_images') }}</h2>
