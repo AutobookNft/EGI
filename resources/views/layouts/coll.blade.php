@@ -16,11 +16,13 @@
         <script>console.log('resources/views/layouts/coll.blade.php');</script>
 
          {{-- Icone di MaterialIcons --}}
-         <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
 
-         <!-- Styles -->
-         <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@6.6.6/css/flag-icons.min.css"/>
+        <!-- Styles -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@6.6.6/css/flag-icons.min.css"/>
+
+        <!-- file di stile in Public/css/collection-detail.css -->
 
         <!-- Styles -->
         @livewireStyles

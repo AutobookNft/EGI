@@ -1,0 +1,444 @@
+/* collection-styles.css */
+
+/* Container principale */
+.collections-container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+/* Header della sezione collections */
+.collections-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.section-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #333;
+    margin: 0;
+}
+
+/* Filtri */
+.collections-filters {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.filter-select {
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    background-color: #fff;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.filter-select:hover,
+.filter-select:focus {
+    border-color: #3b82f6;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+/* Griglia delle collezioni */
+.collections-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+/* Card della collezione */
+.collection-card {
+    background-color: #fff;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.collection-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+}
+
+/* Immagine della collezione */
+.collection-image {
+    position: relative;
+    height: 180px;
+    overflow: hidden;
+    background-color: #f5f5f5;
+}
+
+.collection-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.collection-card:hover .collection-image img {
+    transform: scale(1.05);
+}
+
+.placeholder-image {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ccc;
+    font-size: 3rem;
+}
+
+/* Badge di stato */
+.status-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    z-index: 2;
+}
+
+.status-badge.draft {
+    background-color: #fef3c7;
+    color: #b45309;
+}
+
+.status-badge.pending_approval {
+    background-color: #e0f2fe;
+    color: #0369a1;
+}
+
+.status-badge.published {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+/* Badge di tipo */
+.type-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    background-color: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    z-index: 2;
+}
+
+/* Informazioni della collezione */
+.collection-info {
+    padding: 1.5rem;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.collection-title {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 700;
+    line-height: 1.4;
+}
+
+.collection-title a {
+    color: #333;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.collection-title a:hover {
+    color: #3b82f6;
+}
+
+/* Creator */
+.collection-creator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.creator-avatar,
+.creator-avatar-placeholder {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    overflow: hidden;
+    background-color: #f5f5f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    color: #999;
+}
+
+.creator-name {
+    font-size: 0.9rem;
+    color: #666;
+    font-weight: 500;
+}
+
+.verified-badge {
+    color: #3b82f6;
+    font-size: 0.8rem;
+}
+
+/* Statistiche */
+.collection-stats {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.stat-value {
+    font-weight: 700;
+    font-size: 1rem;
+    color: #333;
+}
+
+.stat-label {
+    font-size: 0.7rem;
+    color: #666;
+    text-transform: uppercase;
+}
+
+/* EPP Badge */
+.epp-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.8rem;
+    background-color: #f0fdf4;
+    color: #166534;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+/* Floor price */
+.floor-price {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0.8rem;
+    background-color: #f8fafc;
+    border-radius: 8px;
+}
+
+.price-label {
+    font-size: 0.8rem;
+    color: #666;
+}
+
+.price-value {
+    font-weight: 700;
+    color: #333;
+}
+
+/* Footer della card */
+.collection-footer {
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #f0f0f0;
+}
+
+.btn-view {
+    padding: 0.5rem 1rem;
+    background-color: #3b82f6;
+    color: white;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+}
+
+.btn-view:hover {
+    background-color: #2563eb;
+}
+
+.btn-like {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background-color: #f1f5f9;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-like i {
+    color: #94a3b8;
+    transition: color 0.2s ease;
+}
+
+.btn-like:hover i,
+.btn-like.liked i {
+    color: #ef4444;
+}
+
+.btn-like.liked {
+    background-color: #fee2e2;
+}
+
+/* Paginazione */
+.collections-pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+}
+
+.collections-pagination ul {
+    display: flex;
+    list-style: none;
+    gap: 0.5rem;
+    padding: 0;
+    margin: 0;
+}
+
+.collections-pagination li {
+    margin: 0;
+}
+
+.collections-pagination a,
+.collections-pagination span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: #f8fafc;
+    color: #64748b;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.collections-pagination a:hover {
+    background-color: #e0f2fe;
+    color: #0369a1;
+}
+
+.collections-pagination .active span {
+    background-color: #3b82f6;
+    color: white;
+}
+
+/* Stato vuoto */
+.empty-state {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    text-align: center;
+    background-color: #f8fafc;
+    border-radius: 16px;
+    gap: 1rem;
+}
+
+.empty-icon {
+    font-size: 3rem;
+    color: #cbd5e1;
+}
+
+.empty-state h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #334155;
+    margin: 0;
+}
+
+.empty-state p {
+    color: #64748b;
+    margin: 0;
+}
+
+.empty-state .btn-primary {
+    margin-top: 1rem;
+    padding: 0.75rem 1.5rem;
+    background-color: #3b82f6;
+    color: white;
+    border-radius: 8px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+}
+
+.empty-state .btn-primary:hover {
+    background-color: #2563eb;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .collections-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .collections-filters {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .collections-grid {
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .collections-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .collection-footer {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .btn-view,
+    .btn-like {
+        width: 100%;
+        justify-content: center;
+    }
+}

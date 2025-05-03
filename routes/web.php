@@ -2,11 +2,16 @@
 
 use App\Actions\Jetstream\UpdateTeamName;
 use App\Enums\NotificationStatus;
+use App\Http\Controllers\CollectionsController;
+use App\Http\Controllers\EgiController;
+use App\Http\Controllers\EppController;
 use App\Http\Controllers\Formazione;
+use App\Http\Controllers\LikeController;
 use App\Http\Controllers\Notifications\Invitations\NotificationInvitationResponseController;
 use App\Http\Controllers\Notifications\NotificationDetailsController;
 use App\Http\Controllers\Notifications\Wallets\NotificationWalletResponseController;
 use App\Http\Controllers\Notifications\Wallets\NotificationWalletRequestController;
+use App\Http\Controllers\ReservationController;
 use App\Livewire\Collections\CollectionCarousel;
 use App\Livewire\Collections\CollectionEdit;
 use App\Livewire\Collections\CollectionUserMember;
@@ -19,7 +24,7 @@ use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\IconAdminController;
 use App\Http\Controllers\WalletController;
-use App\Http\Controllers\DropController;
+use App\Http\Controllers\HomeController;
 use App\Http\Middleware\SetLanguage;
 use App\Livewire\Collections\CollectionOpen;
 use Illuminate\Support\Facades\Auth;
@@ -35,7 +40,7 @@ use Ultra\UploadManager\Controllers\Config\ConfigController;
 // Route::view('/home', 'home')
 //      ->name('home');
 
-Route::get('/home', [DropController::class, 'index'])->name('home');
+Route::get('/home', [HomeController::class, 'index'])->name('home');
 
 // Rotta per PhotoUploader
 Route::get('/photo-uploader', PhotoUploader::class)->name('photo-uploader');
@@ -63,6 +68,36 @@ Route::get('/debug/livewire/{component}', function ($component) {
 Route::get('/session', function () {
  dd((session()->all()));
 });
+
+
+Route::post('/egis/{egi}/reserve', [ReservationController::class, 'reserve'])->name('egis.reserve');
+Route::post('/egis/{egi}/like', [LikeController::class, 'toggleEgiLike'])->name('egis.like');
+// Rotta per la visualizzazione del singolo EGI
+Route::get('/egis/{egi}', [EgiController::class, 'show'])->name('egis.show');
+
+Route::prefix('home')->name('home.')->group(function () {
+// Public collection viewing (accessible to all authenticated users)
+    Route::get('/collections', [CollectionsController::class, 'index'])->name('collections.index');
+    Route::get('/collections/{collection}', [CollectionsController::class, 'show'])->name('collections.show');
+
+    // Collection management (restricted to creators)
+    Route::middleware(['can:manage-collections'])->group(function () {
+        Route::get('/collections/create', [CollectionsController::class, 'create'])->name('collections.create');
+        Route::post('/collections', [CollectionsController::class, 'store'])->name('collections.store');
+        Route::get('/collections/{collection}/edit', [CollectionsController::class, 'edit'])->name('collections.edit');
+        Route::put('/collections/{collection}', [CollectionsController::class, 'update'])->name('collections.update');
+        Route::delete('/collections/{collection}', [CollectionsController::class, 'destroy'])->name('collections.destroy');
+    });
+
+    // Collection interaction
+    Route::post('/collections/{collection}/like', [LikeController::class, 'toggleCollectionLike'])->name('collections.like');
+    Route::post('/collections/{collection}/report', [CollectionsController::class, 'report'])->name('collections.report');
+});
+
+Route::get('/epps', [EppController::class, 'index'])->name('epps.index');
+Route::get('/epps/{epp}', [EppController::class, 'show'])->name('epps.show');
+Route::get('/epps/dashboard', [EppController::class, 'dashboard'])->name('epps.dashboard');
+
 
 
 // Rotte protette da middleware
@@ -208,6 +243,19 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
 
 
 
+});
+
+// Routes for API/AJAX requests
+Route::middleware(['auth:sanctum'])->prefix('api')->group(function () {
+    // Collection interactions (API)
+    Route::post('/collections/{collection}/like', [LikeController::class, 'apiToggleCollectionLike'])
+        ->name('api.toggle.collection.like');
+
+    // EGI interactions (API)
+    Route::post('/egis/{egi}/reserve', [ReservationController::class, 'apiReserve'])
+        ->name('api.egis.reserve');
+    Route::post('/egis/{egi}/like', [LikeController::class, 'apiToggleEgiLike'])
+        ->name('api.egis.like');
 });
 
 Route::get('/translations.js', function () {

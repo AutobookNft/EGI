@@ -1,4 +1,4 @@
-@props(['id', 'editable' => false, 'imageType' => 'card', 'show_save_button' => true])
+@props(['id', 'editable' => false, 'imageType' => 'card', 'show_save_button' => true, 'collection'])
 
 <div x-data="{ preview: null }" class="bg-gray-800 rounded-2xl shadow-lg hover:shadow-2xl transition-shadow duration-300 overflow-hidden flex flex-col h-full">
     <!-- Immagine o Placeholder -->

@@ -1,0 +1,545 @@
+/* public/css/epp-dashboard.css */
+
+/* Dashboard Container */
+.epp-dashboard-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+    font-family: 'Poppins', sans-serif;
+    color: #333;
+}
+
+/* Dashboard Header */
+.dashboard-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.dashboard-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+    color: #2c3e50;
+}
+
+.dashboard-subtitle {
+    font-size: 1.1rem;
+    color: #7f8c8d;
+    max-width: 700px;
+    margin: 0 auto 2rem;
+}
+
+/* Global Metrics */
+.dashboard-global-metrics {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin: 2rem 0;
+    flex-wrap: wrap;
+}
+
+.global-metric-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 1.5rem;
+    min-width: 200px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.global-metric-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.metric-value {
+    display: block;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+}
+
+.metric-label {
+    display: block;
+    font-size: 1rem;
+    color: #7f8c8d;
+}
+
+/* Filters Section */
+.dashboard-filters {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+    flex-wrap: wrap;
+}
+
+.filter-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.filter-container label {
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    color: #7f8c8d;
+}
+
+.epp-filter {
+    padding: 0.75rem 1.5rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    background-color: #fff;
+    min-width: 200px;
+    color: #2c3e50;
+    cursor: pointer;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.epp-filter:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+/* Charts & Visualizations */
+.impact-visualization {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.chart-container {
+    background: #fff;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.chart-container h2 {
+    font-size: 1.3rem;
+    margin-bottom: 1.5rem;
+    color: #2c3e50;
+    text-align: center;
+}
+
+canvas {
+    width: 100% !important;
+    height: 300px !important;
+}
+
+/* Impact By Type */
+.impact-type-container {
+    background: #fff;
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 3rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.impact-type-header {
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+}
+
+.impact-type-header h2 {
+    font-size: 1.5rem;
+    color: #2c3e50;
+    display: flex;
+    align-items: center;
+}
+
+.impact-icon {
+    display: inline-block;
+    width: 2rem;
+    height: 2rem;
+    margin-right: 0.75rem;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.arf-icon {
+    background-image: url('../img/icons/tree-icon.svg');
+}
+
+.apr-icon {
+    background-image: url('../img/icons/ocean-icon.svg');
+}
+
+.bpe-icon {
+    background-image: url('../img/icons/bee-icon.svg');
+}
+
+.impact-metrics {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.metric-card {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1.25rem;
+    min-width: 180px;
+    text-align: center;
+    flex: 1;
+}
+
+.arf-visualization,
+.apr-visualization,
+.bpe-visualization {
+    margin: 2rem 0;
+    height: 250px;
+}
+
+/* Project Lists */
+.active-projects h3 {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    color: #2c3e50;
+}
+
+.project-list {
+    list-style: none;
+    padding: 0;
+}
+
+.project-item {
+    border-bottom: 1px solid #eee;
+    padding: 1.5rem 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+}
+
+.project-item:last-child {
+    border-bottom: none;
+}
+
+.project-info {
+    flex: 2;
+    min-width: 300px;
+}
+
+.project-info h4 {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    color: #2c3e50;
+}
+
+.project-info p {
+    color: #7f8c8d;
+    font-size: 0.95rem;
+    margin-bottom: 1rem;
+}
+
+.project-metrics {
+    display: flex;
+    gap: 1rem;
+}
+
+.project-metrics span {
+    background: #f1f9fe;
+    color: #3498db;
+    padding: 0.35rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+}
+
+.project-progress {
+    flex: 1;
+    min-width: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.progress-bar {
+    height: 12px;
+    background: #ecf0f1;
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+
+.progress-fill {
+    height: 100%;
+    background: #3498db;
+    border-radius: 6px;
+}
+
+.progress-percentage {
+    font-size: 0.9rem;
+    color: #7f8c8d;
+    text-align: right;
+}
+
+/* Milestone Tracker */
+.milestone-tracker {
+    background: #fff;
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 3rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.milestone-tracker h2 {
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+    color: #2c3e50;
+    text-align: center;
+}
+
+.milestone-timeline {
+    position: relative;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.milestone-timeline::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 2px;
+    height: 100%;
+    background: #3498db;
+}
+
+.milestone-item {
+    position: relative;
+    padding-left: 2.5rem;
+    padding-bottom: 2.5rem;
+}
+
+.milestone-item:last-child {
+    padding-bottom: 0;
+}
+
+.milestone-date {
+    position: absolute;
+    left: 0;
+    top: 0;
+    background: #3498db;
+    color: #fff;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    transform: translateX(-50%);
+    z-index: 2;
+}
+
+.milestone-content {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1.5rem;
+}
+
+.milestone-content h3 {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    color: #2c3e50;
+}
+
+.milestone-content p {
+    color: #7f8c8d;
+    font-size: 0.95rem;
+    margin-bottom: 1rem;
+}
+
+.milestone-metrics {
+    margin-bottom: 1rem;
+}
+
+.milestone-metrics span {
+    background: #ebf5fb;
+    color: #3498db;
+    padding: 0.35rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    display: inline-block;
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.milestone-link {
+    display: inline-block;
+    color: #3498db;
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.milestone-link:hover {
+    color: #2980b9;
+    text-decoration: underline;
+}
+
+/* Call to Action */
+.community-contribution {
+    text-align: center;
+    background: #fff;
+    border-radius: 12px;
+    padding: 3rem 2rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.community-contribution h2 {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+    color: #2c3e50;
+}
+
+.community-contribution p {
+    color: #7f8c8d;
+    max-width: 700px;
+    margin: 0 auto 2rem;
+    font-size: 1.1rem;
+}
+
+.cta-container {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.cta-button {
+    display: inline-block;
+    padding: 1rem 2rem;
+    background: #3498db;
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: background 0.3s ease, transform 0.3s ease;
+}
+
+.cta-button:hover {
+    background: #2980b9;
+    transform: translateY(-3px);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .dashboard-header h1 {
+        font-size: 2rem;
+    }
+
+    .global-metric-card {
+        flex: 1 0 100%;
+    }
+
+    .filter-container {
+        flex: 1 0 100%;
+    }
+
+    .impact-visualization {
+        grid-template-columns: 1fr;
+    }
+
+    .project-info,
+    .project-progress {
+        flex: 1 0 100%;
+    }
+
+    .milestone-date {
+        width: 2rem;
+        height: 2rem;
+        font-size: 0.7rem;
+    }
+}
+
+/* Additional Program-Specific Styling */
+#arf-impact .metric-card {
+    background: #e8f5e9;
+}
+
+#arf-impact .progress-fill {
+    background: #4caf50;
+}
+
+#apr-impact .metric-card {
+    background: #e3f2fd;
+}
+
+#apr-impact .progress-fill {
+    background: #2196f3;
+}
+
+#bpe-impact .metric-card {
+    background: #fff8e1;
+}
+
+#bpe-impact .progress-fill {
+    background: #ffc107;
+}
+
+/* Loading states and spinners */
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 12px;
+    z-index: 10;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(52, 152, 219, 0.2);
+    border-radius: 50%;
+    border-top-color: #3498db;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Hover effects */
+.project-item.hover {
+    background: #f8f9fa;
+    transition: background 0.3s ease;
+}
+
+/* Additional responsive adjustments */
+@media (max-width: 576px) {
+    .dashboard-filters {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filter-container {
+        margin-bottom: 1rem;
+    }
+
+    .milestone-item {
+        padding-left: 2rem;
+    }
+
+    .milestone-date {
+        width: 1.5rem;
+        height: 1.5rem;
+        font-size: 0.6rem;
+    }
+}

@@ -1,4 +1,4 @@
-<?php
+    <?php
 
 return [
 
@@ -33,7 +33,7 @@ return [
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app'),
-            'url' => env('APP_URL').'/storage',  
+            'url' => env('APP_URL').'/storage',
             'permissions' => [
                 'file' => [
                     'public' => 0644,
@@ -51,7 +51,8 @@ return [
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
-            'url' => env('APP_URL').'/storage',
+            // 'url' => env('APP_URL', 'http://localhost:8004').'/storage',
+            'url' => 'http://localhost:8004'.'/storage',
             'visibility' => 'public',
             'throw' => false,
         ],
