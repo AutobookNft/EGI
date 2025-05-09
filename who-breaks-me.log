@@ -1,0 +1,2 @@
+Tried to create request from: 
+Exception: Call to undefined method Illuminate\Container\Container::basePath()

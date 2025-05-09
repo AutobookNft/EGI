@@ -5,6 +5,9 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Traits\HasTeamRoles;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Log;
@@ -139,6 +142,41 @@ class User extends Authenticatable
         return $this->attributes['icon_style'] ?? config('icons.styles.default');
     }
 
+     /**
+     * Get the collections created by the user.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function ownedCollections(): HasMany
+    {
+        return $this->hasMany(Collection::class, 'creator_id');
+    }
+
+    /**
+     * Get the collections the user collaborates on.
+     *
+     * This relationship retrieves collections where the user is listed as a collaborator
+     * in the 'collection_user' pivot table.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function collaborations(): BelongsToMany
+    {
+        return $this->belongsToMany(Collection::class, 'collection_user', 'user_id', 'collection_id')
+                    ->withPivot('role') // Include il campo 'role' dalla tabella pivot
+                    ->withTimestamps(); // Include created_at e updated_at dalla tabella pivot
+    }
+
+    /**
+     * Get the user's current active collection.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function currentCollection(): BelongsTo
+    {
+        return $this->belongsTo(Collection::class, 'current_collection_id');
+    }
+
 
     public function wallets()
     {
@@ -160,7 +198,7 @@ class User extends Authenticatable
         return $this->hasMany(NotificationPayloadWallet::class, 'receiver_id');
     }
 
-    public function currentCollection()
+    public function currentCollectionBySession()
     {
         $id = session('current_collection_id')
             ?? $this->current_collection_id;

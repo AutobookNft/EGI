@@ -12,6 +12,7 @@ use App\Http\Controllers\Notifications\NotificationDetailsController;
 use App\Http\Controllers\Notifications\Wallets\NotificationWalletResponseController;
 use App\Http\Controllers\Notifications\Wallets\NotificationWalletRequestController;
 use App\Http\Controllers\ReservationController;
+use App\Http\Controllers\WalletConnectController;
 use App\Livewire\Collections\CollectionCarousel;
 use App\Livewire\Collections\CollectionEdit;
 use App\Livewire\Collections\CollectionUserMember;
@@ -39,6 +40,10 @@ use Ultra\UploadManager\Controllers\Config\ConfigController;
 
 // Route::view('/home', 'home')
 //      ->name('home');
+
+Route::get('/', function () {
+    return redirect('/home');
+});
 
 Route::get('/home', [HomeController::class, 'index'])->name('home');
 
@@ -69,11 +74,20 @@ Route::get('/session', function () {
  dd((session()->all()));
 });
 
+Route::get('/api/refresh-csrf', function () {
+    return response()->json([
+        'token' => csrf_token(),
+    ]);
+});
+
 
 Route::post('/egis/{egi}/reserve', [ReservationController::class, 'reserve'])->name('egis.reserve');
 Route::post('/egis/{egi}/like', [LikeController::class, 'toggleEgiLike'])->name('egis.like');
 // Rotta per la visualizzazione del singolo EGI
 Route::get('/egis/{egi}', [EgiController::class, 'show'])->name('egis.show');
+Route::post('/wallet/connect', [WalletConnectController::class, 'connect'])->name('wallet.connect');
+Route::post('/api/wallet/disconnect', [WalletConnectController::class, 'disconnect'])->name('wallet.disconnect');
+Route::get('/api/wallet/status', [WalletConnectController::class, 'status'])->name('wallet.status');
 
 Route::prefix('home')->name('home.')->group(function () {
 // Public collection viewing (accessible to all authenticated users)
@@ -98,7 +112,8 @@ Route::get('/epps', [EppController::class, 'index'])->name('epps.index');
 Route::get('/epps/{epp}', [EppController::class, 'show'])->name('epps.show');
 Route::get('/epps/dashboard', [EppController::class, 'dashboard'])->name('epps.dashboard');
 
-
+Route::post('/upload/egi', [EgiUploadController::class, 'handleUpload'])
+            ->name('egi.upload.store');
 
 // Rotte protette da middleware
 Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified'])
@@ -119,14 +134,17 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
             return Route::currentRouteName();
         })->name('debug.context');
 
+
+
+
         // Raggruppa tutte le route che richiedono 'view_collection_header'
         Route::middleware('collection_can:manage_egi')->group(function () {
 
-            Route::get('/upload/egi', [EgiUploadPageController::class, 'showUploadPage'])
-                ->name('egi.upload.page');
+            // Route::get('/upload/egi', [EgiUploadPageController::class, 'showUploadPage'])
+            //     ->name('egi.upload.page');
 
-            Route::post('/upload/egi', [EgiUploadController::class, 'handleUpload'])
-                ->name('egi.upload.store');
+            // Route::post('/upload/egi', [EgiUploadController::class, 'handleUpload'])
+            //     ->name('egi.upload.store');
         });
 
         // Admin Routes

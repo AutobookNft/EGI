@@ -24,6 +24,7 @@ class Collection extends Model
         'creator_id',
         'owner_id',
         'collection_name',
+        'is_default',
         'description',
         'type',
         'status',

@@ -65,6 +65,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Contracts\Auth\Factory as AuthFactory;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class EgiUploadController extends Controller
@@ -139,6 +140,8 @@ class EgiUploadController extends Controller
 
         // Log using injected UltraLogManager
         $this->logger->info('[EgiUploadController] Received EGI upload request.', $logContext);
+
+        // Log::channell('upload')->info('[EgiUploadController] Received EGI upload request.', $logContext);
 
         try {
             // Delegate to the injected EgiUploadHandler

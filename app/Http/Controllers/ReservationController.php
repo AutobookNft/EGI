@@ -2,16 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-
-class ReservationController extends Controller
-{
-    //
-}
-<?php
-
-namespace App\Http\Controllers;
-
 use App\Models\Egi;
 use App\Models\Reservation;
 use Carbon\Carbon;

@@ -50,7 +50,7 @@ aria-label="Random EGIs Showcase">
         {{-- @style: Ogni slide occupa il 100% della larghezza, non si restringe. --}}
         <div class="w-full flex-shrink-0"
              role="group"
-             :aria-label="`Slide ${index + 1} of ${totalSlides}`"
+             aria-label="Slide {{ $index + 1 }} of {{ $validEgis->count() }}"
              aria-roledescription="slide">
 
              {{-- Layout interno della slide (Es: Immagine + Info sotto o sovrapposte) --}}
@@ -103,7 +103,7 @@ aria-label="Random EGIs Showcase">
             <button @click="activeSlide = {{ $index + 1 }}; stopAutoplay(); startAutoplay();"
                     :class="{'bg-white': activeSlide === {{ $index + 1 }}, 'bg-white/40 hover:bg-white/70': activeSlide !== {{ $index + 1 }} }"
                     class="h-2 w-2 rounded-full transition duration-150 ease-in-out"
-                    :aria-label="`Go to slide ${index + 1}`"
+                    :aria-label="`Go to slide {{ $index + 1 }}`"
                     :aria-current="activeSlide === {{ $index + 1 }} ? 'true' : 'false'">
             </button>
         @endforeach

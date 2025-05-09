@@ -1,6 +1,6 @@
 <?php
 
-namespace Ultra\EgiModule\Handlers; // Correct package namespace
+namespace Ultra\EgiModule\Handlers;
 
 // PHP & Laravel Imports
 
@@ -26,6 +26,7 @@ use App\Models\Collection;
 use App\Models\Egi;
 use App\Models\Wallet;
 use Ultra\EgiModule\Helpers\EgiHelper;
+use Ultra\UltraLogManager\UltraLogManager;
 use Ultra\UploadManager\Traits\HasValidation;
 use App\Traits\HasUtilitys;
 use App\Traits\HasCreateDefaultCollectionWallets;
@@ -109,17 +110,27 @@ class EgiUploadHandler
      */
     protected readonly ErrorManagerInterface $errorManager;
 
+     /**
+     * 🧱 @dependency UltraLogManager instance.
+     * Used for standardized logging.
+     * @var UltraLogManager
+     */
+    protected readonly UltraLogManager $logger;
+
     /**
      * 🎯 Constructor: Injects required dependencies.
      *
      * @param ErrorManagerInterface $errorManager The UltraErrorManager instance.
      */
-    public function __construct(ErrorManagerInterface $errorManager)
-    {
+    public function __construct(
+        ErrorManagerInterface $errorManager,
+        UltraLogManager $logger
+    ) {
         $this->errorManager = $errorManager;
+        $this->logger = $logger;
     }
 
-        /**
+     /**
      * 🚀 Handles and persists the EGI file upload request using UEM for error management.
      * Orchestrates validation, DB operations, file storage, caching, and response generation.
      *
@@ -173,12 +184,30 @@ class EgiUploadHandler
 
         try {
             // --- 0. Authenticate User ---
-            $creatorUser = Auth::user();
+            if (Auth::check()) {
+                $creatorUser = Auth::user();
+            }
+            // Se non autenticato completamente, controlla la connessione wallet
+            elseif (session()->has('auth_status') && session()->get('auth_status') === 'connected') {
+                $userId = session()->get('connected_user_id');
+
+                if ($userId) {
+                    $creatorUser = User::find($userId);
+                    // Opzionale: puoi aggiungere un controllo aggiuntivo sul wallet
+                    $wallet = session()->get('connected_wallet');
+                    if ($creatorUser && $creatorUser->wallet !== $wallet) $creatorUser = null;
+                }
+            }
+
             if (!$creatorUser instanceof User) {
                 return $this->errorManager->handle('EGI_AUTH_REQUIRED', $logContext);
             }
+
             $creatorUserId = $creatorUser->id;
             $logContext['user_id'] = $creatorUserId;
+            $logContext['auth_type'] = Auth::check() ? 'full' : 'wallet_connected';
+
+            $this->logger->info('[EGI HandleEgiUpload] User authenticated', $logContext);
 
             // --- Start DB Transaction ---
             $result = DB::transaction(function () use ($request, $creatorUser, &$file, &$originalName, &$logContext, &$egiId) {
@@ -207,6 +236,8 @@ class EgiUploadHandler
                     'egi-publish' => ['nullable', 'boolean'],
                     // Add other metadata validation rules here
                 ]); // Throws ValidationException on failure
+
+                $this->logger->info('[EGI HandleEgiUpload] Metadata validated', $validatedData);
 
                 // --- 4. Find or Create Default Collection & Wallets ---
                 $collection = $this->findOrCreateDefaultCollection($creatorUser, $logContext); // Throws Exception on critical failure
@@ -238,7 +269,7 @@ class EgiUploadHandler
                             : '#' . str_pad($egiPosition, 4, '0', STR_PAD_LEFT) . str_pad(rand(0, 999), 3, '0', STR_PAD_LEFT);
 
                 // Floor Price: Use from validated data if present and numeric, otherwise use collection's, otherwise use config default
-                 $egiFloorPrice = isset($validatedData['egi-floor-price']) && is_numeric($validatedData['egi-floor-price'])
+                $egiFloorPrice = isset($validatedData['egi-floor-price']) && is_numeric($validatedData['egi-floor-price'])
                                 ? (float) $validatedData['egi-floor-price']
                                 : ($collection->floor_price ?: (float) Config::get('egi.default_floor_price', 0));
 
@@ -294,6 +325,7 @@ class EgiUploadHandler
                 // --- 7. Store Physical File ---
                 $base_path = 'users_files/collections_' . $collectionId . '/creator_' . $creatorUserId . '/';
                 $final_path_key = $base_path . $egi->key_file . '.' . $extension; // Final path for the file
+
                 $savedUrls = $this->saveToMultipleDisks($final_path_key, $tempPath, $logContext); // Throws Exception on critical storage failure
 
                 // --- 8. Invalidate Cache ---
@@ -639,6 +671,9 @@ class EgiUploadHandler
      */
     protected function saveToMultipleDisks(string $pathKey, string $tempPath, array $logContext): array
     {
+
+        Log::channel($this->logChannel)->info('[EgiUploadHandler::saveToMultipleDisks] Starting save process.', $logContext);
+
         // --- 1. Read and Validate Configuration with Fallback ---
         $storageDisksConfig = Config::get('egi.storage.disks');
         $criticalDisksConfig = Config::get('egi.storage.critical_disks');

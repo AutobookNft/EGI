@@ -1,36 +1,35 @@
-// /home/fabio/EGI/resources/ts/open-close-modal.ts
+
 
 /**
- * Interface for modal elements used by ModalManager.
- * @interface ModalElements
- */
-interface ModalElements {
-    modal: HTMLElement | null;
-    openButton: HTMLElement | null;
-    returnButton: HTMLElement | null;
-    modalContent: HTMLElement | null;
-}
-
-/**
- * Manages the opening and closing of the upload modal.
- * Handles authorization, accessibility (ARIA), scroll locking, and form reset.
- * Opens the modal only after authorization and closes it via specific controls.
+ * 📜 Oracode TypeScript Class: ModalManager
+ * Manages the opening, closing, and associated logic specifically for the UPLOAD modal (#upload-modal).
+ * Handles authorization checks when opened via dedicated buttons (typically for authenticated users)
+ * and provides public methods for programmatic control (e.g., after guest wallet connection).
  *
  * @class ModalManager
- * @oracode.semantically_coherent Clear and predictable modal management.
- * @oracode.testable Authorization and modal operations are deterministic.
- * @oracode.explicitly_intentional Integrates with UUM's upload flow.
- * @gdpr No personal data is stored beyond setting window.uploadType.
+ * @dependency Fetch API for authorization check.
+ * @dependency DOM API for element manipulation.
+ * @dependency Assumes presence of global `window.fileUploadManager` for form reset.
+ * @dependency Assumes presence of global `window.redirectToURL` (optional).
  */
 class ModalManager {
     private elements: ModalElements;
     private isOpen: boolean;
     private csrfToken: string;
+    private lastFocusedElement: Element | null = null; // Stores element that had focus before modal opened
 
-    constructor(modalId: string, openButtonId: string, returnButtonId: string, contentId: string, csrfToken: string) {
+    /**
+     * Creates an instance of ModalManager.
+     * @param modalId ID of the upload modal element.
+     * @param openButtonSelector CSS selector for buttons that directly trigger this modal (with auth check).
+     * @param returnButtonId ID of the button inside the modal to close it (e.g., "Return").
+     * @param contentId ID of the main content container within the modal (for focus).
+     * @param csrfToken CSRF token for API requests.
+     */
+    constructor(modalId: string, openButtonSelector: string, returnButtonId: string, contentId: string, csrfToken: string) {
         this.elements = {
             modal: document.getElementById(modalId),
-            openButton: document.getElementById(openButtonId),
+            openButtons: document.querySelectorAll(openButtonSelector),
             returnButton: document.getElementById(returnButtonId),
             modalContent: document.getElementById(contentId),
         };
@@ -40,43 +39,56 @@ class ModalManager {
         this.initialize();
     }
 
+    /**
+     * Initializes event listeners and sets up the global instance.
+     * @private
+     */
     private initialize(): void {
-        // Verifica che tutti gli elementi necessari esistano
-        if (!this.elements.modal || !this.elements.openButton || !this.elements.returnButton || !this.elements.modalContent) {
-            console.warn('One or more modal elements not found. Check IDs:', {
-                modal: this.elements.modal,
-                openButton: this.elements.openButton,
-                returnButton: this.elements.returnButton,
-                modalContent: this.elements.modalContent,
-            });
+        // Basic element checks
+        if (!this.elements.modal || !this.elements.returnButton || !this.elements.modalContent) {
+            console.warn('ModalManager: Critical elements (modal, return button, or content) not found. Manager may not function correctly.');
             return;
         }
+        if (this.elements.openButtons.length === 0) {
+            console.warn(`ModalManager: No open buttons found with selector: "${this.elements.openButtons}". Modal can only be opened programmatically.`);
+        }
 
-        // Listener per aprire il modale con autorizzazione
-        this.elements.openButton.addEventListener('click', async (event: Event) => {
-            event.preventDefault();
-            await this.handleOpenModal();
+        // Listener for opening via dedicated AUTHENTICATED buttons
+        this.elements.openButtons.forEach(button => {
+            button.addEventListener('click', async (event: Event) => {
+                event.preventDefault();
+                await this.handleOpenModalWithAuth(button as HTMLElement);
+            });
         });
 
-        // Listener per il bottone "Return to collection"
-        this.elements.returnButton.addEventListener('click', () => this.closeModal());
-
-        // Listener per la fine dell'upload
-        document.addEventListener('upload-completed', () => {
-            console.log('Upload completed, closing modal');
+        // Listener for the return/close button inside the modal
+        this.elements.returnButton.addEventListener('click', (event: Event) => {
+            event.preventDefault(); // Prevent potential form submission if it's a button type submit
             this.closeModal();
         });
+
+        // Listener for custom event indicating upload completion
+        document.addEventListener('upload-completed', () => {
+            console.log('Upload completed event received by ModalManager, closing upload modal.');
+            this.closeModal();
+        });
+
+        // Make this instance globally accessible
+        window.globalModalManager = this;
+        console.log('ModalManager (for #upload-modal) initialized and assigned to window.globalModalManager');
     }
 
     /**
-     * Handles modal opening with authorization check.
-     *
-     * @oracode.explicitly_intentional Authorization check before opening.
+     * Handles opening the modal when triggered by a dedicated button,
+     * performing an authorization check first.
+     * @private
+     * @param button The button element that was clicked.
      */
-    private async handleOpenModal(): Promise<void> {
-        const uploadType = this.elements.openButton?.dataset.uploadType || 'egi';
+    private async handleOpenModalWithAuth(button: HTMLElement): Promise<void> {
+        const uploadType = button?.dataset.uploadType || 'egi';
+        console.log(`Upload button clicked. Type: ${uploadType}. Checking auth...`);
         try {
-            const response = await fetch('/api/check-upload-authorization', {
+            const response = await fetch('/api/check-upload-authorization', { // Ensure this API route exists and works
                 method: 'GET',
                 headers: {
                     'Accept': 'application/json',
@@ -84,91 +96,134 @@ class ModalManager {
                 },
             });
 
-            const result = await response.json();
-            console.log('Authorization response:', result);
+            // Check for non-JSON or error responses
+             if (!response.ok) {
+                 console.error(`Auth check failed with status: ${response.status}`);
+                 throw new Error(`Authorization check failed (${response.statusText})`);
+             }
+
+             const result = await response.json();
+             console.log('Auth check response:', result);
 
             if (result.authorized) {
-                console.log('User authorized, opening modal');
-                this.openModal(uploadType);
-                window.uploadType = uploadType;
+                console.log('Auth check passed, opening upload modal.');
+                this.openModal(uploadType); // Call the public open method
             } else {
-                console.warn('User not authorized, redirecting to:', result.redirect || '/login');
-                window.location.href = result.redirect || '/login';
+                console.warn('Auth check failed (user not authorized), redirecting.', result.redirect);
+                window.location.href = result.redirect || '/login'; // Redirect if not authorized
             }
         } catch (error) {
-            console.error('Error checking authorization:', error);
-            window.location.href = '/login';
+            console.error('Error during authorization check:', error);
+            alert("Could not verify your authorization to upload. Please ensure you are logged in and have the correct permissions.");
+            // Optionally redirect to login: window.location.href = '/login';
         }
     }
 
     /**
-     * Opens the modal with the specified upload type.
+     * Opens the upload modal programmatically (e.g., after wallet connect).
+     * Skips the internal authorization check.
+     * Manages focus, ARIA attributes, and body scroll lock.
      *
-     * @param uploadType - The type of upload (e.g., 'egi', 'epp', 'utility').
-     * @oracode.explicitly_intentional Called after authorization check.
+     * @public
+     * @param uploadType Type of upload ('egi' by default).
      */
-    public openModal(uploadType: string): void {
-        if (this.elements.modal && this.elements.modalContent) {
-            this.elements.modal.classList.remove('hidden');
-            this.elements.modal.classList.add('flex');
-            this.elements.modalContent.dataset.uploadType = uploadType;
-            this.isOpen = true;
-
-            // Imposta ARIA attributes
-            this.elements.modal.setAttribute('aria-hidden', 'false');
-            this.elements.modalContent.focus();
-
-            // Blocca lo scroll della pagina
-            document.body.style.overflow = 'hidden';
-
-            console.log(`Upload modal opened with type: ${uploadType}`);
+    public openModal(uploadType: string = 'egi'): void {
+        if (this.isOpen || !this.elements.modal || !this.elements.modalContent) {
+            console.warn('Attempted to open upload modal when it was already open or elements were missing.');
+            return;
         }
+        console.log(`Opening upload modal programmatically. Type: ${uploadType}`);
+
+        // Store focus and close connect modal if it's open
+        this.lastFocusedElement = document.activeElement;
+        const connectModal = document.getElementById('connect-wallet-modal');
+        if (connectModal && !connectModal.classList.contains('hidden')) {
+            const closeButton = connectModal.querySelector('#close-connect-wallet-modal') as HTMLElement | null;
+            if (closeButton) closeButton.click(); else connectModal.classList.add('hidden'); // Fallback
+            console.log('Connect wallet modal closed before opening upload modal.');
+        }
+
+        // Open this (upload) modal
+        this.elements.modal.classList.remove('hidden');
+        this.elements.modal.classList.add('flex'); // Or appropriate display class
+        this.elements.modalContent.dataset.uploadType = uploadType;
+        this.isOpen = true;
+        window.uploadType = uploadType;
+
+        // Accessibility & UI
+        this.elements.modal.setAttribute('aria-hidden', 'false');
+        this.elements.modalContent.setAttribute('tabindex', '-1'); // Make content focusable
+        this.elements.modalContent.focus();
+        document.body.style.overflow = 'hidden'; // Lock body scroll
     }
 
     /**
-     * Closes the modal and resets the upload form.
+     * Closes the upload modal.
+     * Manages focus restoration, ARIA attributes, body scroll unlock, and form reset.
      *
-     * @oracode.semantically_coherent Resets UI state cleanly.
+     * @public
      */
     public closeModal(): void {
-        if (this.elements.modal && this.elements.modalContent) {
-            this.elements.modal.classList.add('hidden');
-            this.elements.modal.classList.remove('flex');
-            this.isOpen = false;
+        if (!this.isOpen || !this.elements.modal) {
+            console.log('Attempted to close upload modal when it was not open or missing.');
+            return;
+        }
 
-            // Ripristina ARIA attributes
-            this.elements.modal.setAttribute('aria-hidden', 'true');
+        this.elements.modal.classList.add('hidden');
+        this.elements.modal.classList.remove('flex');
+        this.isOpen = false;
 
-            // Ripristina lo scroll della pagina
+        // Accessibility & UI
+        this.elements.modal.setAttribute('aria-hidden', 'true');
+
+        // Unlock body scroll ONLY if the connect modal is also hidden
+        const connectModal = document.getElementById('connect-wallet-modal');
+        if (!connectModal || connectModal.classList.contains('hidden')) {
             document.body.style.overflow = '';
+        }
 
-            // Resetta il form di upload
-            if (window.fileUploadManager) {
-                window.fileUploadManager.resetUploadForm();
-            }
+        // Reset the upload form via the global manager reference
+        if (window.fileUploadManager && typeof window.fileUploadManager.resetUploadForm === 'function') {
+            window.fileUploadManager.resetUploadForm();
+            console.log('Upload form reset via fileUploadManager.');
+        } else {
+            console.warn('window.fileUploadManager or resetUploadForm not found.');
+        }
 
-            console.log('Upload modal closed');
+        // Restore focus to the element that opened the modal
+        if (this.lastFocusedElement instanceof HTMLElement) {
+            console.log('Restoring focus to:', this.lastFocusedElement);
+            this.lastFocusedElement.focus();
+        }
+        this.lastFocusedElement = null; // Clear stored element
 
-            // Esegui redirectToCollection se definita
-            if (typeof window.redirectToURL === 'function') {
-                window.uploadRedirectToUrl();
-            }
+        console.log('Upload modal closed');
+
+        // Optional Redirect (handle with care)
+        if (typeof window.redirectToURL === 'function') {
+             console.warn('window.redirectToURL is defined and will be called after closing upload modal.');
+            window.redirectToURL();
         }
     }
 }
 
+
+
 /**
- * Initializes the upload modal manager.
- *
- * @oracode.explicitly_intentional Initializes modal for application-specific use.
+ * Initializes the *upload* modal manager, making it globally available.
+ * Should be called once when the DOM is ready.
  */
 export function initializeModal(): void {
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+    // Selector for buttons in the AUTHENTICATED layout that open the upload modal directly
+    const openButtonSelector = '#open-connect-modal-or-create-egi, #open-connect-modal-or-create-egi-mobile'; // Use specific IDs/classes for auth layout
+
+    // Create the instance (it self-registers to window.globalModalManager)
     new ModalManager(
         'upload-modal',
-        'open-upload-modal',
-        'returnToCollection', // ID corretto
-        'upload-container',
+        openButtonSelector,
+        'returnToCollection', // ID of the "Return" button inside #upload-modal
+        'upload-container',   // ID of the content area inside #upload-modal
         csrfToken
     );
 }

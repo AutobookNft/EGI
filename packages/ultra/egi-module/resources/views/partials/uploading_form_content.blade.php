@@ -164,7 +164,11 @@
         <!-- Action buttons with EGI style and tooltips -->
         <div class="mt-6 flex justify-center space-x-4">
             {{-- Pulsante Save. Aggiunto aria-disabled per l'accessibilità (ARIA). Lo stato dovrebbe essere aggiornato dal JS. --}}
-            <button type="button" id="uploadBtn" class="relative bg-green-500 text-white px-5 py-2.5 rounded-full font-semibold text-base nft-button opacity-50 cursor-not-allowed disabled:hover:bg-green-500 disabled:hover:shadow-none group" aria-label="{{ trans('uploadmanager::uploadmanager.save_aria') }}" aria-disabled="true">
+            <button type="button"
+                id="uploadBtn"
+                class="relative bg-green-500 text-white px-5 py-2.5 rounded-full font-semibold text-base nft-button opacity-50 cursor-not-allowed disabled:hover:bg-green-500 disabled:hover:shadow-none group"
+                aria-label="{{ trans('uploadmanager::uploadmanager.save_aria') }}"
+                aria-disabled="true">
                 💾 {{ trans('uploadmanager::uploadmanager.save_the_files') }}
                 {{-- Il tooltip è un miglioramento visivo, non necessita di ARIA. --}}
                 <span class="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-[10px] px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 w-32 text-center pointer-events-none">

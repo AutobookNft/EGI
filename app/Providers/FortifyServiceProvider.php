@@ -6,6 +6,7 @@ use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\ResetUserPassword;
 use App\Actions\Fortify\UpdateUserPassword;
 use App\Actions\Fortify\UpdateUserProfileInformation;
+use App\Models\User;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -13,6 +14,10 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Laravel\Fortify\Fortify;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Cookie;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Laravel\Fortify\Http\Responses\LogoutResponse;
 
 class FortifyServiceProvider extends ServiceProvider
 {
@@ -47,6 +52,57 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::redirects('login', function() {
             // Sempre /home oppure logica dinamica
             return Config::get('app.upload_redirect_to_url_after_login').'/home';
+        });
+
+        // Estendi il comportamento di login per gestire il wallet
+        Fortify::authenticateUsing(function (Request $request) {
+            // Usa il metodo di autenticazione standard di Fortify
+            $user = User::where('email', $request->email)->first();
+            Log::channel('upload')->info('Login attempt.', [
+                'user' =>  $user,
+            ]);
+
+            // Verifica le credenziali
+            if ($user && Hash::check($request->password, $user->password)) {
+                // Se l'utente ha un wallet address, salvalo nei cookie
+                Log::channel('upload')->info('Login attempt.', [
+                    'email' => $request->email,
+                    'ip' => $request->ip(),
+                    'session_id' => $request->session()->getId(),
+                    'user_id' => $user->id,
+                    'wallet' => $user->wallet,
+                ]);
+
+                // Imposta dati sessione per lo stato "connected"
+                $request->session()->put([
+                    'auth_status' => 'connected', // Stato specifico per "weak auth"
+                    'connected_wallet' => $user->wallet,
+                    'connected_user_id' => $user->id,
+                ]);
+
+                if (!empty($user->wallet)) {
+                    // Crea un cookie che dura 30 giorni (o il tempo che preferisci)
+                    // Cookie::queue('connected_wallet', $user->wallet, 60 * 24 * 30, '/', null, false, false);
+
+                    Cookie::queue(Cookie::make(
+                        'connected_wallet', // Nome del cookie
+                        $user->wallet, // Valore del cookie
+                        60 * 24 * 30, // Durata: 30 giorni
+                        '/', // Path: accessibile su tutto il sito
+                        null, // Dominio: default
+                        true, // Secure: true per HTTPS (false per test locali HTTP)
+                        false, // HttpOnly: false per accesso da JavaScript
+                        false, // Raw: false per codifica normale
+                        'lax' // SameSite: 'lax' per sicurezza
+                    ));
+                }
+
+                // Log::channel('upload')->info('Cookie wallet impostato', [
+                //     'cookie' => $cookie,
+                // ]);
+
+                return $user;
+            }
         });
 
     }

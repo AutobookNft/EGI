@@ -8,7 +8,7 @@
 
     {{-- Contenuto Testuale Hero: Lasciato vuoto come richiesto --}}
     <x-slot name="heroContent">
-        {{-- Intenzionalmente vuoto per ora --}}
+        
     </x-slot>
 
      {{-- NUOVO Slot Carousel --}}

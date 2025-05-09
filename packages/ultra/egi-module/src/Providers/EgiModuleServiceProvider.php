@@ -2,10 +2,13 @@
 
 namespace Ultra\EgiModule\Providers;
 
+use Illuminate\Contracts\Auth\Factory;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Log;
 use Ultra\EgiModule\Contracts\UserRoleServiceInterface;
 use Ultra\EgiModule\Contracts\WalletServiceInterface;
+use Ultra\EgiModule\Handlers\EgiUploadHandler;
+use Ultra\EgiModule\Http\Controllers\EgiUploadController;
 use Ultra\EgiModule\Services\CollectionService;
 use Ultra\EgiModule\Services\UserRoleService;
 use Ultra\EgiModule\Services\WalletService;
@@ -30,8 +33,22 @@ class EgiModuleServiceProvider extends ServiceProvider
         // Puoi unire configurazioni qui se crei un file config/egi.php
         // $this->mergeConfigFrom(__DIR__.'/../../config/egi.php', 'egi');
 
-        // 1. Registra il binding per UltraLoggerInterface
-        // $this->app->bind(UltraLoggerInterface::class, UltraLogManager::class);
+        // 1. Registra EgiUploadHandler come singleton o istanza nuova per ogni richiesta
+        $this->app->singleton(EgiUploadHandler::class, function ($app) {
+            return new EgiUploadHandler(
+                $app->make(ErrorManagerInterface::class),
+                $app->make(UltraLogManager::class),
+            );
+        });
+
+        $this->app->singleton(EgiUploadController::class, function ($app) {
+            return new EgiUploadController(
+                $app->make(ErrorManagerInterface::class),
+                $app->make(UltraLogManager::class),
+                $app->make(Factory::class),
+
+            );
+        });
 
         // 2. Registra il binding per WalletServiceInterface
         $this->app->bind(WalletServiceInterface::class, WalletService::class);

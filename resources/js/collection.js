@@ -19,6 +19,9 @@ import { fetchTranslations, ensureTranslationsLoaded, getTranslation } from './u
 import { loadEnums, getEnum, isPendingStatus } from './utils/enums';
 console.log('Utils per translations e enums importati.'); // Debugging
 
+// Importa la gestione del modale
+import { initializeModal } from '../ts/open-close-modal';
+
 
 // Importa jQuery
 import $ from 'jquery';
@@ -35,6 +38,10 @@ import {
     RequestWalletDonation,
 } from './modules/notifications/init/request-notification-wallet-init';
 document.addEventListener('DOMContentLoaded', () => {
+
+    // Inizializza il modale
+    initializeModal();
+
     if (!walletCreateInstance) {
         walletCreateInstance = new RequestCreateNotificationWallet({ apiBaseUrl: '/notifications' });
         console.log(`🔍 Inizializzazione unica RequestCreateNotificationWallet (DOMContentLoaded)`);

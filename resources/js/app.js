@@ -16,7 +16,7 @@ console.log('SweetAlert2 importato e globale.'); // Debugging
 
 // Importa la gestione del modale
 import { initializeModal } from '../ts/open-close-modal';
-
+initializeModal();
 
 // Importa utils (translations, enums)
 import { fetchTranslations, ensureTranslationsLoaded, getTranslation } from './utils/translations';
@@ -51,8 +51,6 @@ document.addEventListener('DOMContentLoaded', () => {
       initThreeAnimation();
     }
 
-    // Inizializza il modale
-    initializeModal();
 });
 
 // --- Listener per l'inizializzazione Ultra Upload Manager E la logica Modale ---

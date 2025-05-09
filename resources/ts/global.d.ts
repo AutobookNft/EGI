@@ -27,6 +27,7 @@ interface FileUploadManagerGlobal {
     imagesPath: string;
     assetBaseUrl: string;
     fileUploadManager?: FileUploadManagerGlobal;
+    globalModalManager?: ModalManager; // Aggiunto per gestire le modali
     Swal?: any; // SweetAlert2
     $?: any; // jQuery
     jQuery?: any; // jQuery
@@ -37,3 +38,24 @@ interface FileUploadManagerGlobal {
     Echo: any; // Laravel Echo
     scanvirus: any; // Oggetto scanvirus
   }
+
+  /**
+     * Interface for modal elements used by ModalManager.
+     * @interface ModalElements
+     */
+    interface ModalElements {
+        modal: HTMLElement | null;
+        openButtons: NodeListOf<HTMLElement>; // Modificato per gestire più bottoni
+        returnButton: HTMLElement | null;
+        modalContent: HTMLElement | null;
+    }
+
+    // Estendi l'interfaccia Window per aggiungere globalModalManager
+    declare global {
+        interface Window {
+            globalModalManager?: ModalManager; // Istanza globale (opzionale)
+            uploadType?: string; // Tipo di upload corrente
+            fileUploadManager?: any; // Riferimento al gestore upload (se esiste globalmente)
+            redirectToURL?: () => void; // Funzione redirect (se esiste globalmente)
+        }
+    }

@@ -28,7 +28,7 @@ use Illuminate\Support\Facades\DB;
  * @version 1.0.0
  * @since 1.0.0
  */
-class EppController extends Controller
+class EPPController extends Controller
 {
     /**
      * Display a listing of the EPPs.
@@ -252,119 +252,119 @@ class EppController extends Controller
     }
 
     /**
- * Prepare data for the dashboard charts.
- *
- * Formats the database query results into the structure needed
- * for Chart.js visualization. Prepares distribution data, growth
- * trends, and program-specific metrics for visualization.
- *
- * @param \Illuminate\Support\Collection $eppTypeStats Statistics by EPP type
- * @param \Illuminate\Support\Collection $monthlyFunding Monthly funding data
- * @return array Structured data for charts
- */
-private function prepareChartData($eppTypeStats, $monthlyFunding)
-{
-    // Calculate total funds for percentage calculations
-    $totalAllFunds = DB::table('epp_transactions')->sum('amount');
+     * Prepare data for the dashboard charts.
+     *
+     * Formats the database query results into the structure needed
+     * for Chart.js visualization. Prepares distribution data, growth
+     * trends, and program-specific metrics for visualization.
+     *
+     * @param \Illuminate\Support\Collection $eppTypeStats Statistics by EPP type
+     * @param \Illuminate\Support\Collection $monthlyFunding Monthly funding data
+     * @return array Structured data for charts
+     */
+    private function prepareChartData($eppTypeStats, $monthlyFunding)
+    {
+        // Calculate total funds for percentage calculations
+        $totalAllFunds = DB::table('epp_transactions')->sum('amount');
 
-    // Prepare distribution chart data
-    $distributionLabels = $eppTypeStats->pluck('type')->map(function($type) {
-        switch($type) {
-            case 'ARF': return 'ARF (Reforestation)';
-            case 'APR': return 'APR (Ocean Cleanup)';
-            case 'BPE': return 'BPE (Bee Protection)';
-            default: return $type;
+        // Prepare distribution chart data
+        $distributionLabels = $eppTypeStats->pluck('type')->map(function($type) {
+            switch($type) {
+                case 'ARF': return 'ARF (Reforestation)';
+                case 'APR': return 'APR (Ocean Cleanup)';
+                case 'BPE': return 'BPE (Bee Protection)';
+                default: return $type;
+            }
+        })->toArray();
+
+        $distributionValues = $eppTypeStats->pluck('funds')->toArray();
+
+        // Prepare growth chart data
+        $months = [];
+        $arfGrowth = [];
+        $aprGrowth = [];
+        $bpeGrowth = [];
+        $arfMetrics = [];
+        $aprMetrics = [];
+        $bpeMetrics = [];
+
+        // Group all transaction data by month and EPP type
+        $monthlyTypeData = [];
+
+        // For each month in our data
+        foreach($monthlyFunding as $record) {
+            $yearMonth = "{$record->year}-{$record->month}";
+            $monthName = date('M', mktime(0, 0, 0, $record->month, 1));
+            $months[] = $monthName . ' ' . $record->year;
+
+            // If we don't already have data for this month and EPP types
+            if (!isset($monthlyTypeData[$yearMonth])) {
+                // Query database for this month's data per EPP type
+                $typeData = DB::table('epp_transactions')
+                    ->join('epps', 'epp_transactions.epp_id', '=', 'epps.id')
+                    ->select('epps.type', DB::raw('SUM(epp_transactions.amount) as total'))
+                    ->whereYear('epp_transactions.created_at', $record->year)
+                    ->whereMonth('epp_transactions.created_at', $record->month)
+                    ->groupBy('epps.type')
+                    ->get()
+                    ->keyBy('type');
+
+                $monthlyTypeData[$yearMonth] = $typeData;
+            }
+
+            // Get totals for each EPP type this month, or 0 if none
+            $arfTotal = isset($monthlyTypeData[$yearMonth]['ARF']) ? $monthlyTypeData[$yearMonth]['ARF']->total : 0;
+            $aprTotal = isset($monthlyTypeData[$yearMonth]['APR']) ? $monthlyTypeData[$yearMonth]['APR']->total : 0;
+            $bpeTotal = isset($monthlyTypeData[$yearMonth]['BPE']) ? $monthlyTypeData[$yearMonth]['BPE']->total : 0;
+
+            // Calculate growth percentages (this is simplified - in production would calculate actual growth)
+            // For demonstration, we'll use these values directly as "percent growth"
+            $arfGrowth[] = min(100, round(($arfTotal / max(1, $totalAllFunds)) * 100));
+            $aprGrowth[] = min(100, round(($aprTotal / max(1, $totalAllFunds)) * 100));
+            $bpeGrowth[] = min(100, round(($bpeTotal / max(1, $totalAllFunds)) * 100));
+
+            // Calculate impact metrics for each EPP type by month for specific charts
+            $arfMetric = floor($arfTotal / 10); // Trees planted
+            $aprMetric = floor($aprTotal / 5);  // Plastic removed (kg)
+            $bpeMetric = floor($bpeTotal / 100); // Hives created
+
+            $arfMetrics[] = $arfMetric;
+            $aprMetrics[] = $aprMetric;
+            $bpeMetrics[] = $bpeMetric;
         }
-    })->toArray();
 
-    $distributionValues = $eppTypeStats->pluck('funds')->toArray();
-
-    // Prepare growth chart data
-    $months = [];
-    $arfGrowth = [];
-    $aprGrowth = [];
-    $bpeGrowth = [];
-    $arfMetrics = [];
-    $aprMetrics = [];
-    $bpeMetrics = [];
-
-    // Group all transaction data by month and EPP type
-    $monthlyTypeData = [];
-
-    // For each month in our data
-    foreach($monthlyFunding as $record) {
-        $yearMonth = "{$record->year}-{$record->month}";
-        $monthName = date('M', mktime(0, 0, 0, $record->month, 1));
-        $months[] = $monthName . ' ' . $record->year;
-
-        // If we don't already have data for this month and EPP types
-        if (!isset($monthlyTypeData[$yearMonth])) {
-            // Query database for this month's data per EPP type
-            $typeData = DB::table('epp_transactions')
-                ->join('epps', 'epp_transactions.epp_id', '=', 'epps.id')
-                ->select('epps.type', DB::raw('SUM(epp_transactions.amount) as total'))
-                ->whereYear('epp_transactions.created_at', $record->year)
-                ->whereMonth('epp_transactions.created_at', $record->month)
-                ->groupBy('epps.type')
-                ->get()
-                ->keyBy('type');
-
-            $monthlyTypeData[$yearMonth] = $typeData;
-        }
-
-        // Get totals for each EPP type this month, or 0 if none
-        $arfTotal = isset($monthlyTypeData[$yearMonth]['ARF']) ? $monthlyTypeData[$yearMonth]['ARF']->total : 0;
-        $aprTotal = isset($monthlyTypeData[$yearMonth]['APR']) ? $monthlyTypeData[$yearMonth]['APR']->total : 0;
-        $bpeTotal = isset($monthlyTypeData[$yearMonth]['BPE']) ? $monthlyTypeData[$yearMonth]['BPE']->total : 0;
-
-        // Calculate growth percentages (this is simplified - in production would calculate actual growth)
-        // For demonstration, we'll use these values directly as "percent growth"
-        $arfGrowth[] = min(100, round(($arfTotal / max(1, $totalAllFunds)) * 100));
-        $aprGrowth[] = min(100, round(($aprTotal / max(1, $totalAllFunds)) * 100));
-        $bpeGrowth[] = min(100, round(($bpeTotal / max(1, $totalAllFunds)) * 100));
-
-        // Calculate impact metrics for each EPP type by month for specific charts
-        $arfMetric = floor($arfTotal / 10); // Trees planted
-        $aprMetric = floor($aprTotal / 5);  // Plastic removed (kg)
-        $bpeMetric = floor($bpeTotal / 100); // Hives created
-
-        $arfMetrics[] = $arfMetric;
-        $aprMetrics[] = $aprMetric;
-        $bpeMetrics[] = $bpeMetric;
+        return [
+            'distribution' => [
+                'labels' => $distributionLabels,
+                'values' => $distributionValues
+            ],
+            'growth' => [
+                'labels' => $months,
+                'datasets' => [
+                    ['data' => $arfGrowth],
+                    ['data' => $aprGrowth],
+                    ['data' => $bpeGrowth]
+                ]
+            ],
+            // Add type-specific chart data
+            'arf' => [
+                'labels' => $months,
+                'datasets' => [
+                    ['data' => $arfMetrics]
+                ]
+            ],
+            'apr' => [
+                'labels' => $months,
+                'datasets' => [
+                    ['data' => $aprMetrics]
+                ]
+            ],
+            'bpe' => [
+                'labels' => $months,
+                'datasets' => [
+                    ['data' => $bpeMetrics]
+                ]
+            ]
+        ];
     }
-
-    return [
-        'distribution' => [
-            'labels' => $distributionLabels,
-            'values' => $distributionValues
-        ],
-        'growth' => [
-            'labels' => $months,
-            'datasets' => [
-                ['data' => $arfGrowth],
-                ['data' => $aprGrowth],
-                ['data' => $bpeGrowth]
-            ]
-        ],
-        // Add type-specific chart data
-        'arf' => [
-            'labels' => $months,
-            'datasets' => [
-                ['data' => $arfMetrics]
-            ]
-        ],
-        'apr' => [
-            'labels' => $months,
-            'datasets' => [
-                ['data' => $aprMetrics]
-            ]
-        ],
-        'bpe' => [
-            'labels' => $months,
-            'datasets' => [
-                ['data' => $bpeMetrics]
-            ]
-        ]
-    ];
-}
 }
