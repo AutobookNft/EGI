@@ -457,7 +457,7 @@ class EgiUploadHandler
         $defaultFloorPrice = (float) $defaultFloorPriceConfig;
 
         // --- 3. Check User's Current Collection ---
-        $collection = $creatorUser->currentCollection();
+        $collection = $creatorUser->currentCollection;
 
         // Extract first item if it's an Eloquent Collection
         if ($collection instanceof \Illuminate\Database\Eloquent\Collection) {

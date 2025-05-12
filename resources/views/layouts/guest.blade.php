@@ -1,166 +1,361 @@
 {{-- resources/views/layouts/guest.blade.php --}}
+{{-- 📜 Oracode Blade Layout: Guest Experience Foundation --}}
+{{-- Questa è la base per tutte le viste pubbliche e per gli utenti con "weak auth". --}}
+{{-- Integra la logica TypeScript modulare per interattività dinamica. --}}
+{{-- SEO, ARIA, e Schema.org sono considerati per una comunicazione ottimale. --}}
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ $title ?? 'Frangette | Ecological Goods Invent' }}</title>
-    <meta name="description" content="{{ $metaDescription ?? 'Esplora e crea asset digitali ecologici (EGI) sulla piattaforma FlorenceEGI di Frangette, sostenendo progetti di protezione ambientale.' }}">
+    <meta name="csrf-token" content="{{ csrf_token() }}"> {{-- Fondamentale per le chiamate POST AJAX --}}
+    <title>{{ $title ?? __('FlorenceEGI | Frangette - Ecological Goods Invent') }}</title>
+    <meta name="description" content="{{ $metaDescription ?? __('Esplora, crea e colleziona asset digitali ecologici (EGI) unici su FlorenceEGI. Ogni opera supporta progetti concreti di protezione ambientale. Unisciti al Rinascimento Digitale dell\'arte e della sostenibilità.') }}">
     {!! $headMetaExtra ?? '<meta name="robots" content="index, follow">' !!}
     <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
+
+    {{-- Stylesheets --}}
     @vite(['resources/css/app.css','vendor/ultra/ultra-upload-manager/resources/css/app.css'])
-    <script>console.log('resources/views/layouts/guest.blade.php');</script>
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@6.6.6/css/flag-icons.min.css"/>
+    {{-- <script>console.log('Padmin Blade: resources/views/layouts/guest.blade.php loaded');</script> --}}
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" media="print" onload="this.media='all'">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" media="print" onload="this.media='all'" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@6.6.6/css/flag-icons.min.css" media="print" onload="this.media='all'"/>
+
+    {{-- Stili inline per elementi con background dinamico o posizionamento critico --}}
     <style>
+        /* Stili essenziali per il rendering iniziale corretto */
         #background-image-layer { position: absolute; inset: 0; width: 100%; height: 100%; background-image: url('{{ asset('images/default/random_background/15.jpg') }}'); background-size: cover; background-position: center; opacity: 0.35; z-index: 1; }
-        #background-gradient { position: absolute; inset: 0; z-index: 2; /* Aggiungi stile gradiente se usato */ }
+        #background-gradient { position: absolute; inset: 0; z-index: 2; /* Es: background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.5)); */ }
         #backgroundCanvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 3; }
         .hero-content-overlay { position: relative; z-index: 10; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding-top: 8rem; padding-bottom: 4rem; }
     </style>
-    <script type="application/ld+json"> { "@context": "https://schema.org", "@type": "WebSite", "url": "{{ url('/') }}", "name": "{{ __('FlorenceEGI | Frangette') }}", "description": "{{ $metaDescription ?? '...' }}", "publisher": { "@type": "Organization", "name": "{{ __('Frangette Cultural Promotion Association') }}", "url": "https://frangette.com/", "logo": { "@type": "ImageObject", "url": "{{ asset('images/logo/Frangette_Logo_1000x1000_transparent.png') }}"} }, "potentialAction": { "@type": "SearchAction", "target": "{{ route('home.collections.index') }}?search={search_term_string}", "query-input": "required name=search_term_string" } } </script>
+
+    {{-- Schema.org JSON-LD per il Sito Web --}}
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "{{ __('FlorenceEGI | Frangette') }}",
+        "url": "{{ url('/') }}",
+        "description": "{{ $metaDescription ?? __('Piattaforma per la creazione e lo scambio di Ecological Goods Invent (EGI) che finanziano progetti ambientali.') }}",
+        "publisher": {
+            "@type": "Organization",
+            "name": "{{ __('Frangette Cultural Promotion Association') }}",
+            "url": "https://frangette.com/",
+            "logo": {
+                "@type": "ImageObject",
+                "url": "{{ asset('images/logo/Frangette_Logo_1000x1000_transparent.png') }}",
+                "width": 1000,
+                "height": 1000
+            }
+        },
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": {
+                 "@type": "EntryPoint",
+                 "urlTemplate": "{{ route('home.collections.index') }}?search={search_term_string}"
+            },
+            "query-input": "required name=search_term_string"
+        }
+    }
+    </script>
+    {{-- Placeholder per eventuale Schema.org specifico della pagina (es. Prodotto, Articolo) --}}
     {{ $schemaMarkup ?? '' }}
+    {{-- Placeholder per meta tag extra specifici della pagina --}}
     {{ $headExtra ?? '' }}
-    @stack('styles')
+    @stack('styles') {{-- Per stili specifici della vista pushati dallo stack --}}
+
+    {{-- ⚙️ INIEZIONE CONFIGURAZIONE PER TYPESCRIPT (PRIMA di @vite per main.ts) --}}
+    <script id="app-config" type="application/json">
+    @php
+        // Determine authentication status
+        $isAuthenticatedByBackend = auth()->check();
+        $loggedInUser = $isAuthenticatedByBackend ? auth()->user() : null;
+        // Assume user model has a 'wallet_address' attribute for logged-in users
+        $loggedInUserWallet = $loggedInUser?->wallet_address;
+
+        // Get initial user collection data
+        // This requires backend logic, assuming a method like getCurrentCollectionDetails on the User model
+        $initialUserData = [
+            'current_collection_id' => null,
+            'current_collection_name' => null,
+            'can_edit_current_collection' => false,
+        ];
+        // If user is logged in, try to get their current collection details
+        if ($isAuthenticatedByBackend && method_exists($loggedInUser, 'getCurrentCollectionDetails')) {
+            // Ensure the returned data structure matches the InitialUserData interface
+            $initialUserData = (array) $loggedInUser->getCurrentCollectionDetails();
+             // Provide defaults in case the backend method doesn't return all keys
+            $initialUserData = array_merge([
+                'current_collection_id' => null,
+                'current_collection_name' => null,
+                'can_edit_current_collection' => false,
+            ], $initialUserData); // Ensure it's an array for array_merge
+        }
+
+
+        // Collect frontend translation keys used by TypeScript modules
+        // This is a manual collection based on the provided TS files.
+        // A more robust approach would be needed for larger applications.
+        $frontendTranslationKeys = [
+             'padminGreeting', // main.ts
+             'padminReady', // main.ts
+             // walletConnect.ts
+             'errorModalNotFoundConnectWallet', 'connecting', 'walletAddressRequired',
+             'errorConnectionFailed', 'errorConnectionGeneric', 'registrationRequiredTitle',
+             'registrationRequiredTextCollections', 'registerNowButton', 'laterButton',
+             'errorEgiFormOpen', 'errorUnexpected', 'walletConnectedTitle',
+             // walletDropdown.ts
+             'errorWalletDropdownMissing', 'errorNoWalletToCopy', 'copied',
+             'errorCopyAddress', 'disconnectedTitle', 'disconnectedTextWeak',
+             'errorLogoutFormMissing', 'errorApiDisconnect', 'walletDefaultText',
+             'walletAriaLabelLoggedIn', 'walletAriaLabelConnected', 'loggedInStatus', 'connectedStatusWeak',
+             // collectionUI.ts
+             'errorGalleriesListUIDOM', 'errorFetchCollections', 'errorFetchCollectionsHttp', 'errorFetchCollectionsGeneric',
+             'errorSetCurrentCollectionHttp', 'errorSetCurrentCollectionGeneric',
+             'errorLoadingGalleries', 'byCreator', 'switchingGallery', 'gallerySwitchedTitle',
+             'gallerySwitchedText', 'pageWillReload', 'myGalleriesOwned', 'myGalleriesCollaborations',
+             'editCurrentGalleryTitle', 'viewCurrentGalleryTitle', 'Loading galleries...', 'No galleries found.', 'Error loading galleries.', 'switchingGallery',
+             // mobileMenu.ts
+             'errorMobileMenuElementsMissing', // corrected duplicate key
+             // Add any other keys used directly by appTranslate in other modules
+        ];
+
+        // Fetch the actual translated strings using Laravel's translation system
+        $translations = [];
+        foreach($frontendTranslationKeys as $key) {
+            // Assuming the keys in TS directly map to keys in Laravel translation files
+            // e.g., 'walletConnectedTitle' in TS corresponds to 'walletConnectedTitle' in a Laravel lang file
+             $translations[$key] = __($key);
+        }
+
+         // Include some fallback/generic error messages used by UEM_Client_TS_Placeholder
+         // These might be redundant if all UI messages are explicitly listed above,
+         // but good for safety if UEM placeholder uses a string literal not in the list.
+         $translations['An error occurred.'] = __('An error occurred.'); // Default UEM Placeholder fallback
+         $translations['Client error: :errorCode. See console.'] = __('Client error: :errorCode. See console.'); // UEM Placeholder generic client error
+         $translations['Authorization check failed.'] = __('Authorization check failed.'); // Used in UploadModalManager (deprecated method)
+         $translations['You are not authorized to perform this action.'] = __('You are not authorized to perform this action.'); // Used in UploadModalManager (deprecated method)
+         $translations['Could not verify authorization. Please try again.'] = __('Could not verify authorization. Please try again.'); // Used in UploadModalManager (deprecated method)
+
+
+        // Build the application configuration object for the frontend
+        $appConfig = [
+            'isAuthenticatedByBackend' => $isAuthenticatedByBackend,
+            'loggedInUserWallet' => $loggedInUserWallet,
+            'initialUserData' => $initialUserData,
+            'routes' => [
+                'baseUrl' => url('/'), // Base URL of the application
+                'walletConnect' => route('wallet.connect'), // Route for wallet connection API (POST /wallet/connect)
+                'collectionsCreate' => route('collections.create'), // Route to create a new collection (GET /home/collections/create)
+                'register' => route('register'), // Route to registration page (GET /register)
+                'logout' => route('logout'), // Route for logout POST request (POST /logout)
+                'homeCollectionsIndex' => route('home.collections.index'), // Route to the public collections list page (GET /home/collections)
+                // Routes with parameters: Use :id placeholder as expected by the TS route() helper
+                // Parameter name is {collection} in web.php routes
+                'viewCollectionBase' => route('home.collections.show', ['collection' => ':id']), // GET /home/collections/{collection}
+                // 'editCollectionBase' => route('collections.edit', ['collection' => ':id']), // GET /collections/{collection}/edit
+                'api' => [
+                    'baseUrl' => url('/api'), // Base URL for API calls (prefix /api)
+                    'accessibleCollections' => route('api.user.accessibleCollections'), // API route to fetch user's collections (GET /api/user/accessible-collections)
+                    'setCurrentCollectionBase' => route('api.user.setCurrentCollection', ['collection' => ':id']), // API route to set current collection (POST /api/user/set-current-collection/{collection})
+                    // Include API routes used by TS
+                    'checkUploadAuth' => route('upload.authorization'), // API route for upload authorization check (GET /api/check-upload-authorization), used by UploadModalManager (note: TS interface name 'checkUploadAuth' matches backend route name 'upload.authorization' in web.php's API group)
+                    // 'walletDisconnect' => route('api.wallet.disconnect'), // API route for weak wallet disconnect (POST /api/wallet/disconnect)
+                    // 'uemConfigEndpoint' => route('api.error-definitions'), // API endpoint for UEM config (as per TS analysis) - THIS ROUTE IS NOT DEFINED IN THE PROVIDED web.php. Omitting it.
+                ],
+            ],
+            'translations' => $translations, // Frontend translations
+        ];
+
+        // Add specific translations used within guest.blade.php itself if needed by TS for fallback/init
+         $appConfig['translations']['Open main menu'] = __('Open main menu'); // Example, if toggleMobileMenu needed this explicitly via appTranslate
+         $appConfig['translations']['Close main menu'] = __('Close main menu');
+
+
+    @endphp
+    {{-- Inject the generated config JSON --}}
+    @json($appConfig)
+</script>
 </head>
-<body class="bg-gray-50 text-gray-800 flex flex-col min-h-screen">
+<body class="bg-gray-50 text-gray-800 flex flex-col min-h-screen antialiased">
 
     <!-- Navbar -->
-    <header class="bg-white shadow-md sticky top-0 z-50" role="banner">
+    <header class="bg-white shadow-md sticky top-0 z-50" role="banner" aria-label="{{ __('Site Header') }}">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
                 {{-- Logo --}}
                 <div class="flex-shrink-0 flex items-center">
-                    <a href="{{ url('/home') }}" class="flex items-center gap-2 group" aria-label="{{ __('Frangette Home') }}">
-                        <img src="{{ asset('images/logo/logo_1.webp') }}" alt="Frangette Logo" class="h-8 w-auto">
+                    <a href="{{ url('/home') }}" class="flex items-center gap-2 group" aria-label="{{ __('Navigate to Frangette Homepage') }}">
+                        <img src="{{ asset('images/logo/logo_1.webp') }}" alt="{{ __('Frangette Platform Logo') }}" class="h-8 w-auto">
                         <span class="font-semibold text-lg text-gray-800 group-hover:text-green-600 transition hidden sm:inline">{{ __('Frangette') }}</span>
                     </a>
                 </div>
 
                 {{-- Navigazione Desktop --}}
-                <nav class="hidden md:flex items-center space-x-1" role="navigation" aria-label="{{ __('Main navigation') }}">
+                <nav class="hidden md:flex items-center space-x-1" role="navigation" aria-label="{{ __('Main desktop navigation') }}">
                     @php $navLinkClasses = "text-gray-600 hover:text-green-600 transition px-3 py-2 rounded-md text-sm font-medium"; @endphp
-                    @unless(request()->is('/')) <a href="{{ url('/') }}" class="{{ $navLinkClasses }}">{{ __('Home') }}</a> @endunless
-                    <a href="{{ route('home.collections.index') }}" class="{{ $navLinkClasses }} @if(request()->routeIs('home.collections.*')) text-green-600 font-semibold @endif">{{ __('Collections') }}</a>
-                    <a href="{{ route('epps.index') }}" class="{{ $navLinkClasses }} @if(request()->routeIs('epps.*')) text-green-600 font-semibold @endif">{{ __('EPPs') }}</a>
+                    @unless(request()->routeIs('home') || request()->is('/')) <a href="{{ url('/') }}" class="{{ $navLinkClasses }}" aria-label="{{ __('Navigate to Homepage') }}">{{ __('Home') }}</a> @endunless {{-- Mostra Home se non siamo sulla home --}}
 
-                    {{-- Pulsanti Create (triggerano modal connect per guest) --}}
-                    <button type="button" data-action="open-connect-modal-or-create-egi" class="{{ $navLinkClasses }} flex items-center gap-1"> <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 16 16"><path d="M8.75 3.75a.75.75 0 0 0-1.5 0v3.5h-3.5a.75.75 0 0 0 0 1.5h3.5v3.5a.75.75 0 0 0 1.5 0v-3.5h3.5a.75.75 0 0 0 0-1.5h-3.5v-3.5Z" /></svg> {{ __('Create EGI') }} </button>
-                    <button type="button" data-action="open-connect-modal-or-create-collection" class="{{ $navLinkClasses }} flex items-center gap-1"> <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 16 16"><path d="M8.75 3.75a.75.75 0 0 0-1.5 0v3.5h-3.5a.75.75 0 0 0 0 1.5h3.5v3.5a.75.75 0 0 0 1.5 0v-3.5h3.5a.75.75 0 0 0 0-1.5h-3.5v-3.5Z" /></svg> {{ __('Create Collection') }} </button>
+                    {{-- Link "Collections" Generico (nascosto se utente loggato, gestito da TS) --}}
+                    <a href="{{ route('home.collections.index') }}" id="generic-collections-link-desktop" class="{{ $navLinkClasses }} @if(request()->routeIs('home.collections.*')) text-green-600 font-semibold @endif" aria-label="{{ __('View all public collections') }}">{{ __('Collections') }}</a>
+
+                    {{-- NUOVO: Dropdown "My Galleries" (HTML presente, visibilità gestita da TS) --}}
+                    <div id="collection-list-dropdown-container" class="relative hidden"> {{-- Nascosto di default, TS lo mostra per utenti loggati --}}
+                        <button id="collection-list-dropdown-button" type="button"
+                                class="{{ $navLinkClasses }} inline-flex items-center"
+                                aria-expanded="false" aria-haspopup="true" aria-controls="collection-list-dropdown-menu" aria-label="{{ __('Open my galleries menu') }}">
+                            <span class="material-symbols-outlined mr-1 text-base" aria-hidden="true">view_carousel</span>
+                            <span id="collection-list-button-text">{{ __('My Galleries') }}</span> {{-- Testo che potrebbe cambiare? O fisso? --}}
+                            <svg class="w-4 h-4 ml-1 -mr-1" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" /></svg>
+                        </button>
+                        <div id="collection-list-dropdown-menu"
+                             class="absolute right-0 z-20 mt-2 w-72 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none hidden"
+                             role="menu" aria-orientation="vertical" aria-labelledby="collection-list-dropdown-button" tabindex="-1">
+                            <div id="collection-list-loading" class="px-4 py-3 text-sm text-gray-500 text-center" role="status">{{ __('Loading galleries...') }}</div>
+                            <div id="collection-list-empty" class="px-4 py-3 text-sm text-gray-500 text-center hidden">{{ __('No galleries found.') }} <a href="{{ route('collections.create') }}" class="underline hover:text-green-600">{{ __('Create one?') }}</a></div>
+                            <div id="collection-list-error" class="px-4 py-3 text-sm text-red-600 text-center hidden" role="alert">{{ __('Error loading galleries.') }}</div>
+                            {{-- Voci menu popolate da TS --}}
+                        </div>
+                    </div>
+
+                    <a href="{{ route('epps.index') }}" class="{{ $navLinkClasses }} @if(request()->routeIs('epps.*')) text-green-600 font-semibold @endif" aria-label="{{ __('View Environmental Protection Projects') }}">{{ __('EPPs') }}</a>
+
+                    <button type="button" data-action="open-connect-modal-or-create-egi" class="{{ $navLinkClasses }} flex items-center gap-1" aria-label="{{ __('Create new EGI') }}"> <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path d="M8.75 3.75a.75.75 0 0 0-1.5 0v3.5h-3.5a.75.75 0 0 0 0 1.5h3.5v3.5a.75.75 0 0 0 1.5 0v-3.5h3.5a.75.75 0 0 0 0-1.5h-3.5v-3.5Z" /></svg> {{ __('Create EGI') }} </button>
+                    <button type="button" data-action="open-connect-modal-or-create-collection" class="{{ $navLinkClasses }} flex items-center gap-1" aria-label="{{ __('Create new gallery') }}"> <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path d="M8.75 3.75a.75.75 0 0 0-1.5 0v3.5h-3.5a.75.75 0 0 0 0 1.5h3.5v3.5a.75.75 0 0 0 1.5 0v-3.5h3.5a.75.75 0 0 0 0-1.5h-3.5v-3.5Z" /></svg> {{ __('Create Collection') }} </button>
 
                     <span class="border-l border-gray-300 h-6 mx-2" aria-hidden="true"></span>
 
-                    {{-- Contenitore dinamico per Connect/Dropdown Wallet --}}
-                    <div id="wallet-cta-container">
-                        {{-- Bottone Connect (visibile di default) --}}
-                        <button id="connect-wallet-button" type="button" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"> <svg class="w-5 h-5 mr-2 -ml-1" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a2.25 2.25 0 0 0-2.25-2.25H15a3 3 0 1 1-6 0H5.25A2.25 2.25 0 0 0 3 12m18 0v6a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 18v-6m18 0V9M3 12V9m18 3a2.25 2.25 0 0 0-2.25-2.25H15a3 3 0 1 0-6 0H5.25A2.25 2.25 0 0 0 3 12m15-3a3 3 0 0 0-3-3H6a3 3 0 0 0-3 3m12 6v2.25a2.25 2.25 0 0 1-2.25 2.25H9a2.25 2.25 0 0 1-2.25-2.25V15m3 0a3 3 0 0 0-3-3H6a3 3 0 0 0-3 3m9 0a3 3 0 0 0 3-3h1.5a3 3 0 0 0 3 3" /></svg> {{ __('Connect Wallet') }} </button>
+                    {{-- NUOVO: Badge Collection Corrente (HTML presente, visibilità gestita da TS) --}}
+                    <div id="current-collection-badge-container" class="ml-2 hidden items-center"> {{-- Nascosto di default, TS lo mostra --}}
+                        <a href="#" id="current-collection-badge-link" {{-- href e title impostati da TS --}}
+                           class="flex items-center px-3 py-1.5 border border-sky-300 bg-sky-50 text-sky-700 text-xs font-semibold rounded-full hover:bg-sky-100 hover:border-sky-400 transition"
+                           aria-label="{{ __('Current active gallery') }}"> {{-- aria-label più specifico verrà aggiunto da TS se necessario --}}
+                            <span class="material-symbols-outlined mr-1.5 text-sm leading-none" aria-hidden="true">folder_managed</span>
+                            <span id="current-collection-badge-name"></span>
+                        </a>
+                    </div>
 
-                        {{-- Dropdown Wallet (nascosto di default) --}}
+                    <div id="wallet-cta-container" class="ml-2">
+                        <button id="connect-wallet-button" type="button" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" aria-label="{{ __('Connect your Algorand wallet') }}"> <svg class="w-5 h-5 mr-2 -ml-1" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a2.25 2.25 0 0 0-2.25-2.25H15a3 3 0 1 1-6 0H5.25A2.25 2.25 0 0 0 3 12m18 0v6a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 18v-6m18 0V9M3 12V9m18 3a2.25 2.25 0 0 0-2.25-2.25H15a3 3 0 1 0-6 0H5.25A2.25 2.25 0 0 0 3 12m15-3a3 3 0 0 0-3-3H6a3 3 0 0 0-3 3m12 6v2.25a2.25 2.25 0 0 1-2.25 2.25H9a2.25 2.25 0 0 1-2.25-2.25V15m3 0a3 3 0 0 0-3-3H6a3 3 0 0 0-3 3m9 0a3 3 0 0 0 3-3h1.5a3 3 0 0 0 3 3" /></svg> {{ __('Connect Wallet') }} </button>
                         <div id="wallet-dropdown-container" class="relative hidden">
-                            <button id="wallet-dropdown-button" type="button" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500" aria-expanded="false" aria-haspopup="true">
-                                <svg class="w-5 h-5 mr-2 -ml-1" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a2.25 2.25 0 0 0-2.25-2.25H15a3 3 0 1 1-6 0H5.25A2.25 2.25 0 0 0 3 12m18 0v6a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 18v-6m18 0V9M3 12V9m18 3a2.25 2.25 0 0 0-2.25-2.25H15a3 3 0 1 0-6 0H5.25A2.25 2.25 0 0 0 3 12m15-3a3 3 0 0 0-3-3H6a3 3 0 0 0-3 3m12 6v2.25a2.25 2.25 0 0 1-2.25 2.25H9a2.25 2.25 0 0 1-2.25-2.25V15m3 0a3 3 0 0 0-3-3H6a3 3 0 0 0-3 3m9 0a3 3 0 0 0 3-3h1.5a3 3 0 0 0 3 3" /></svg>
+                            <button id="wallet-dropdown-button" type="button" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500" aria-expanded="false" aria-haspopup="true" aria-controls="wallet-dropdown-menu">
+                                <svg class="w-5 h-5 mr-2 -ml-1" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a2.25 2.25 0 0 0-2.25-2.25H15a3 3 0 1 1-6 0H5.25A2.25 2.25 0 0 0 3 12m18 0v6a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 18v-6m18 0V9M3 12V9m18 3a2.25 2.25 0 0 0-2.25-2.25H15a3 3 0 1 0-6 0H5.25A2.25 2.25 0 0 0 3 12m15-3a3 3 0 0 0-3-3H6a3 3 0 0 0-3 3m12 6v2.25a2.25 2.25 0 0 1-2.25 2.25H9a2.25 2.25 0 0 1-2.25-2.25V15m3 0a3 3 0 0 0-3-3H6a3 3 0 0 0-3 3m9 0a3 3 0 0 0 3-3h1.5a3 3 0 0 0 3 3" /></svg>
                                 <span id="wallet-display-text">Wallet</span>
-                                <svg class="w-4 h-4 ml-1 -mr-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" /></svg>
+                                <svg class="w-4 h-4 ml-1 -mr-1" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" /></svg>
                             </button>
-                            <div id="wallet-dropdown-menu" class="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none hidden" role="menu" aria-orientation="vertical" aria-labelledby="wallet-dropdown-button" tabindex="-1">
-                                <a href="{{ route('dashboard') }}" id="wallet-dashboard-link" class="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" tabindex="-1">
-                                    <svg class="w-5 h-5 mr-2 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                        <path d="M3 4.75A.75.75 0 013.75 4h12.5a.75.75 0 010 1.5H3.75A.75.75 0 013 4.75zM3 9.75A.75.75 0 013.75 9h12.5a.75.75 0 010 1.5H3.75A.75.75 0 013 9.75zM3.75 14a.75.75 0 000 1.5h12.5a.75.75 0 000-1.5H3.75z" />
-                                    </svg>
+                            <div id="wallet-dropdown-menu" class="absolute right-0 z-20 mt-2 w-56 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none hidden" role="menu" aria-orientation="vertical" aria-labelledby="wallet-dropdown-button" tabindex="-1">
+                                <a href="{{ route('dashboard') }}" id="wallet-dashboard-link" class="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" tabindex="-1" aria-label="{{ __('Go to your dashboard') }}">
+                                    <span class="material-symbols-outlined w-5 h-5 mr-2 text-gray-500" aria-hidden="true">dashboard</span>
                                     {{ __('Dashboard') }}
                                 </a>
-                                <button id="wallet-copy-address" class="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" tabindex="-1">
-                                     <svg class="w-5 h-5 mr-2 text-gray-500" viewBox="0 0 20 20" fill="currentColor"><path d="M7 3.5A1.5 1.5 0 018.5 2h3.879a1.5 1.5 0 011.06.44l3.122 3.12A1.5 1.5 0 0117 6.622V12.5a1.5 1.5 0 01-1.5 1.5h-1v-3.379a3 3 0 00-.879-2.121L10.5 5.379A3 3 0 008.379 4.5H7v-1z" /><path d="M4.5 6A1.5 1.5 0 003 7.5v9A1.5 1.5 0 004.5 18h7a1.5 1.5 0 001.5-1.5v-5.879a1.5 1.5 0 00-.44-1.06L9.44 6.439A1.5 1.5 0 008.378 6H4.5z" /></svg>
+                                <button id="wallet-copy-address" class="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" tabindex="-1" aria-label="{{ __('Copy your wallet address') }}">
+                                     <span class="material-symbols-outlined w-5 h-5 mr-2 text-gray-500" aria-hidden="true">content_copy</span>
                                      {{ __('Copy Address') }}
                                  </button>
-                                <button id="wallet-disconnect" class="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" tabindex="-1">
-                                    <svg class="w-5 h-5 mr-2 text-gray-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 4.25A2.25 2.25 0 015.25 2h5.5A2.25 2.25 0 0113 4.25v2a.75.75 0 01-1.5 0v-2a.75.75 0 00-.75-.75h-5.5a.75.75 0 00-.75.75v11.5c0 .414.336.75.75.75h5.5a.75.75 0 00.75-.75v-2a.75.75 0 011.5 0v2A2.25 2.25 0 0110.75 18h-5.5A2.25 2.25 0 013 15.75V4.25z" clip-rule="evenodd" /><path fill-rule="evenodd" d="M19 10a.75.75 0 00-.75-.75H8.704l1.048-.943a.75.75 0 10-1.004-1.114l-2.5 2.25a.75.75 0 000 1.114l2.5 2.25a.75.75 0 101.004-1.114l-1.048-.943h9.546A.75.75 0 0019 10z" clip-rule="evenodd" /></svg>
-                                    {{ __('Disconnect') }}
+                                <button id="wallet-disconnect" class="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" tabindex="-1" aria-label="{{ __('Disconnect your wallet or logout') }}">
+                                    <span class="material-symbols-outlined w-5 h-5 mr-2 text-gray-500" aria-hidden="true">logout</span>
+                                    {{ __('Disconnect') }} {{-- Testo cambierà in Logout se utente è 'logged-in' --}}
                                 </button>
                             </div>
                         </div>
                     </div>
 
-                    <a href="{{ route('login') }}" class="{{ $navLinkClasses }}">{{ __('Login') }}</a>
-                    <a href="{{ route('register') }}" class="ml-2 inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">{{ __('Register') }}</a>
+                    <a href="{{ route('login') }}" id="login-link-desktop" class="{{ $navLinkClasses }}" aria-label="{{ __('Login to your account') }}">{{ __('Login') }}</a>
+                    <a href="{{ route('register') }}" id="register-link-desktop" class="ml-2 inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" aria-label="{{ __('Register a new account') }}">{{ __('Register') }}</a>
                 </nav>
 
                 {{-- Menu Mobile Button --}}
                 <div class="-mr-2 flex md:hidden">
                      <button type="button" class="bg-white inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500" aria-controls="mobile-menu" aria-expanded="false" id="mobile-menu-button">
-                        <span class="sr-only">Open main menu</span>
-                        <svg class="block h-6 w-6" id="hamburger-icon"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" /></svg>
-                        <svg class="hidden h-6 w-6" id="close-icon"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                        <span class="sr-only">{{ __('Open main menu') }}</span>
+                        <svg class="block h-6 w-6" id="hamburger-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
+                        <svg class="hidden h-6 w-6" id="close-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                     </button>
                 </div>
             </div>
         </div>
 
         {{-- Menu Mobile (Contenuto) --}}
-        <div class="md:hidden hidden" id="mobile-menu">
-             @php $mobileNavLinkClasses = "text-gray-600 hover:bg-gray-50 hover:text-green-600 block px-3 py-2 rounded-md text-base font-medium"; @endphp
+        <div class="md:hidden hidden" id="mobile-menu" role="navigation" aria-label="{{ __('Main mobile navigation') }}">
+            @php $mobileNavLinkClasses = "text-gray-600 hover:bg-gray-50 hover:text-green-600 block px-3 py-2 rounded-md text-base font-medium"; @endphp
             <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-                 @unless(request()->is('/')) <a href="{{ url('/') }}" class="{{ $mobileNavLinkClasses }}">Home</a> @endunless
-                 <a href="{{ route('home.collections.index') }}" class="{{ $mobileNavLinkClasses }}">Collections</a>
-                 <a href="{{ route('epps.index') }}" class="{{ $mobileNavLinkClasses }}">EPPs</a>
-                 <button type="button" data-action="open-connect-modal-or-create-egi" class="{{ $mobileNavLinkClasses }} w-full text-left">{{ __('Create EGI') }}</button>
-                 <button type="button" data-action="open-connect-modal-or-create-collection" class="{{ $mobileNavLinkClasses }} w-full text-left">{{ __('Create Collection') }}</button>
+                 @unless(request()->routeIs('home') || request()->is('/')) <a href="{{ url('/') }}" class="{{ $mobileNavLinkClasses }}" aria-label="{{ __('Navigate to Homepage') }}">{{ __('Home') }}</a> @endunless
+                 <a href="{{ route('home.collections.index') }}" id="generic-collections-link-mobile" class="{{ $mobileNavLinkClasses }}" aria-label="{{ __('View all public collections') }}">{{ __('Collections') }}</a> {{-- Visibilità gestita da TS --}}
+                 {{-- Qui TS potrebbe inserire "My Galleries" se utente loggato --}}
+                 <a href="{{ route('epps.index') }}" class="{{ $mobileNavLinkClasses }}" aria-label="{{ __('View Environmental Protection Projects') }}">{{ __('EPPs') }}</a>
+                 <button type="button" data-action="open-connect-modal-or-create-egi" class="{{ $mobileNavLinkClasses }} w-full text-left" aria-label="{{ __('Create new EGI') }}">{{ __('Create EGI') }}</button>
+                 <button type="button" data-action="open-connect-modal-or-create-collection" class="{{ $mobileNavLinkClasses }} w-full text-left" aria-label="{{ __('Create new gallery') }}">{{ __('Create Collection') }}</button>
             </div>
-             <div class="pt-4 pb-3 border-t border-gray-200 px-5 space-y-3">
-                  {{-- Contenitore dinamico mobile --}}
+             <div class="pt-4 pb-3 border-t border-gray-200 px-5 space-y-3" id="mobile-auth-section">
                  <div id="wallet-cta-container-mobile">
-                     <button id="connect-wallet-button-mobile" type="button" class="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"> <svg class="w-5 h-5 mr-2 -ml-1" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a2.25 2.25 0 0 0-2.25-2.25H15a3 3 0 1 1-6 0H5.25A2.25 2.25 0 0 0 3 12m18 0v6a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 18v-6m18 0V9M3 12V9m18 3a2.25 2.25 0 0 0-2.25-2.25H15a3 3 0 1 0-6 0H5.25A2.25 2.25 0 0 0 3 12m15-3a3 3 0 0 0-3-3H6a3 3 0 0 0-3 3m12 6v2.25a2.25 2.25 0 0 1-2.25 2.25H9a2.25 2.25 0 0 1-2.25-2.25V15m3 0a3 3 0 0 0-3-3H6a3 3 0 0 0-3 3m9 0a3 3 0 0 0 3-3h1.5a3 3 0 0 0 3 3" /></svg> {{ __('Connect Wallet') }} </button>
-                      {{-- Il dropdown NON viene replicato qui per semplicità, si usa il bottone standard --}}
+                     <button id="connect-wallet-button-mobile" type="button" class="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" aria-label="{{ __('Connect your Algorand wallet') }}"> <svg class="w-5 h-5 mr-2 -ml-1" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a2.25 2.25 0 0 0-2.25-2.25H15a3 3 0 1 1-6 0H5.25A2.25 2.25 0 0 0 3 12m18 0v6a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 18v-6m18 0V9M3 12V9m18 3a2.25 2.25 0 0 0-2.25-2.25H15a3 3 0 1 0-6 0H5.25A2.25 2.25 0 0 0 3 12m15-3a3 3 0 0 0-3-3H6a3 3 0 0 0-3 3m12 6v2.25a2.25 2.25 0 0 1-2.25 2.25H9a2.25 2.25 0 0 1-2.25-2.25V15m3 0a3 3 0 0 0-3-3H6a3 3 0 0 0-3 3m9 0a3 3 0 0 0 3-3h1.5a3 3 0 0 0 3 3" /></svg> {{ __('Connect Wallet') }} </button>
+                     {{-- Per utenti loggati/connessi, TS potrebbe mostrare qui info wallet e link dashboard/disconnect --}}
                  </div>
-                 <div class="flex justify-center gap-3">
-                       <a href="{{ route('login') }}" class="flex-1 text-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">{{ __('Login') }}</a>
-                       <a href="{{ route('register') }}" class="flex-1 text-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700">{{ __('Register') }}</a>
+                 <div class="flex justify-center gap-3" id="mobile-login-register-buttons">
+                       <a href="{{ route('login') }}" class="flex-1 text-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50" aria-label="{{ __('Login to your account') }}">{{ __('Login') }}</a>
+                       <a href="{{ route('register') }}" class="flex-1 text-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700" aria-label="{{ __('Register a new account') }}">{{ __('Register') }}</a>
                   </div>
              </div>
         </div>
     </header>
 
-    {{-- ... (Hero, Main, Footer, Modals HTML come prima) ... --}}
-    <section id="hero-section" class="relative min-h-screen flex items-center overflow-hidden">
-        <div id="background-gradient" class="absolute inset-0 z-2"></div>
-        <div id="background-image-layer" class="absolute inset-0 z-1"></div>
-        <canvas id="backgroundCanvas" class="absolute inset-0 z-3 w-full h-full"></canvas>
+    {{-- Hero Section --}}
+    <section id="hero-section" class="relative min-h-screen flex items-center overflow-hidden" aria-labelledby="hero-main-title">
+        {{-- Titolo H1 nascosto per screen reader ma presente per SEO e struttura --}}
+        <h1 id="hero-main-title" class="sr-only">{{ $title ?? __('FlorenceEGI | Frangette - Ecological Goods Invent') }}</h1>
+        <div id="background-gradient" class="absolute inset-0 z-2" aria-hidden="true"></div>
+        <div id="background-image-layer" class="absolute inset-0 z-1" aria-hidden="true"></div>
+        <canvas id="backgroundCanvas" class="absolute inset-0 z-3 w-full h-full" aria-hidden="true"></canvas>
         <div class="hero-content-overlay container mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center">
-             <div class="w-full mb-10 md:mb-12 z-10"> {{ $heroCarousel ?? '' }} </div>
-             <div class="hero-text-content max-w-3xl mx-auto text-center text-white mb-12 md:mb-16 z-10"> {{ $heroContent ?? '' }} </div>
-             <div class="below-hero-content w-full max-w-6xl mx-auto"> {{ $belowHeroContent ?? '' }} </div>
+             <div class="w-full mb-10 md:mb-12 z-10" role="region" aria-label="{{ __('Featured EGI Carousel') }}"> {{ $heroCarousel ?? '' }} </div>
+             <div class="hero-text-content max-w-3xl mx-auto text-center text-white mb-12 md:mb-16 z-10" role="region" aria-label="{{ __('Hero Introduction') }}"> {{ $heroContent ?? '' }} </div>
+             <div class="below-hero-content w-full max-w-6xl mx-auto" role="region" aria-label="{{ __('Featured Content Below Hero') }}"> {{ $belowHeroContent ?? '' }} </div>
         </div>
     </section>
+
+    {{-- Main Content Area --}}
     <main id="main-content" role="main" class="flex-grow">
-        {{ $slot }}
+        {{ $slot }} {{-- Contenuto specifico della pagina (es. home.blade.php) --}}
     </main>
-    <footer class="bg-white border-t py-8 mt-auto" role="contentinfo">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center">
-            <p class="text-gray-500 text-sm">© {{ date('Y') }} {{ __('Frangette APS') }}</p>
-            <div class="flex items-center space-x-4 mt-4 md:mt-0">
+
+    {{-- Footer --}}
+    <footer class="bg-white border-t py-8 mt-auto" role="contentinfo" aria-labelledby="footer-heading">
+        <h2 id="footer-heading" class="sr-only">{{ __('Footer content and legal links') }}</h2>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center md:flex md:justify-between md:items-center">
+            <p class="text-gray-500 text-sm mb-4 md:mb-0">© {{ date('Y') }} {{ __('Frangette APS') }}. {{ __('All rights reserved.') }}</p>
+            <div class="flex flex-col md:flex-row items-center justify-center md:justify-end space-y-2 md:space-y-0 md:space-x-4">
+                {{-- Link Privacy e Cookie (DA IMPLEMENTARE) --}}
+                {{-- <a href="{{ route('privacy.policy') }}" class="text-sm text-gray-500 hover:text-gray-700">{{ __('Privacy Policy') }}</a>
+                <a href="{{ route('cookie.settings') }}" class="text-sm text-gray-500 hover:text-gray-700">{{ __('Cookie Settings') }}</a> --}}
                 <span class="text-sm text-gray-500">{{ __('Total CO₂ Offset') }}: <strong class="text-gray-700">123.456 Kg</strong></span>
                 <div class="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-800 border border-green-200">{{ __('Algorand Carbon-Negative') }}</div>
             </div>
         </div>
     </footer>
-    <div id="upload-modal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black bg-opacity-75 hidden" role="dialog" aria-modal="true" aria-hidden="true" tabindex="-1">
-        <div class="relative bg-gray-800 rounded-lg shadow-xl max-w-4xl w-11/12 md:w-3/4 lg:w-1/2 max-h-[90vh] overflow-y-auto p-6 md:p-8">
-            <button id="close-upload-modal" class="absolute top-4 right-4 text-gray-400 hover:text-white text-3xl leading-none" aria-label="{{ __('Close upload modal') }}">×</button>
-            @include('egimodule::partials.uploading_form_content')
+
+    {{-- Modali --}}
+    {{-- Modale Upload EGI (contenuto da egimodule) --}}
+    <div id="upload-modal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black bg-opacity-75 hidden" role="dialog" aria-modal="true" aria-hidden="true" tabindex="-1" aria-labelledby="upload-modal-title">
+        <div class="relative bg-gray-800 rounded-lg shadow-xl max-w-4xl w-11/12 md:w-3/4 lg:w-1/2 max-h-[90vh] overflow-y-auto p-6 md:p-8" role="document">
+            {{-- Il titolo dovrebbe essere dentro uploading_form_content o aggiunto qui se manca --}}
+            {{-- <h2 id="upload-modal-title" class="sr-only">{{ __('Upload EGI Modal') }}</h2> --}}
+            <button id="close-upload-modal" class="absolute top-4 right-4 text-gray-400 hover:text-white text-3xl leading-none" aria-label="{{ __('Close EGI upload modal') }}">×</button>
+            @include('egimodule::partials.uploading_form_content') {{-- Assicurati che questo parziale abbia un titolo h2 appropriato per aria-labelledby --}}
         </div>
     </div>
+
+    {{-- Modale Connessione Wallet --}}
     <div id="connect-wallet-modal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black bg-opacity-75 hidden" role="dialog" aria-modal="true" aria-labelledby="connect-wallet-title" aria-hidden="true" tabindex="-1">
-        <div class="relative bg-white rounded-lg shadow-xl w-11/12 md:w-1/2 lg:w-1/3 max-h-[90vh] overflow-y-auto p-6 md:p-8 text-gray-800">
+        <div class="relative bg-white rounded-lg shadow-xl w-11/12 md:w-1/2 lg:w-1/3 max-h-[90vh] overflow-y-auto p-6 md:p-8 text-gray-800" role="document">
             <button id="close-connect-wallet-modal" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-3xl leading-none" aria-label="{{ __('Close connect wallet modal') }}">×</button>
             <h2 id="connect-wallet-title" class="text-2xl font-semibold mb-6 text-center">{{ __('Connect Your Algorand Wallet') }}</h2>
             <form id="connect-wallet-form" method="POST" action="{{ route('wallet.connect') }}">
                 @csrf
                 <div class="mb-4">
                     <label for="wallet_address" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Paste your Algorand Address') }}</label>
-                    <input type="text" name="wallet_address" id="wallet_address" required class="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="Enter your 58-character Algorand address">
-                    <p id="wallet-error-message" class="text-red-500 text-xs mt-1 hidden"></p>
+                    <input type="text" name="wallet_address" id="wallet_address" required class="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="{{ __('Enter your 58-character Algorand address') }}" aria-describedby="wallet-error-message">
+                    <p id="wallet-error-message" class="text-red-500 text-xs mt-1 hidden" role="alert"></p>
                 </div>
                 <button type="submit" class="w-full inline-flex items-center justify-center px-6 py-3 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">{{ __('Connect') }}</button>
                 <p class="text-xs text-gray-500 mt-3 text-center">{{ __('Connecting allows liking and weak reservations.') }} <a href="{{ route('register') }}" class="underline hover:text-indigo-600">{{ __('Register for full features.') }}</a></p>
@@ -168,402 +363,24 @@
         </div>
     </div>
 
+    {{-- Form di Logout (nascosto) --}}
     <form method="POST" action="{{ route('logout') }}" id="logout-form" style="display: none;">
         @csrf
+        <button type="submit" class="sr-only">{{ __('Logout') }}</button>
     </form>
 
-    {{-- Script layout --}}
-    @include('layouts.guest_script')
+    {{-- LAYOUTS.GUEST_SCRIPT è stato rimosso perché la sua logica è ora nel main.ts o in partials dedicati --}}
+    {{-- Se conteneva script di terze parti (es. Alpine.js CDN), vanno inclusi qui o gestiti via npm e Vite --}}
+    {{-- Esempio se Alpine era lì: <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script> --}}
 
-    {{-- Asset JS (Vite) --}}
-    @vite([
-        'resources/js/app.js', // Contiene ModalManager init e forse Alpine
-        'vendor/ultra/ultra-upload-manager/resources/ts/core/file_upload_manager.ts' // Assicurati sia compilato
-    ])
+    @include('layouts.guest_script') {{-- Includi eventuali script Blade specifici --}}
 
-    @stack('scripts')
+    {{-- Vite per il caricamento degli asset --}}
 
+    {{-- 🔥 INCLUSIONE SCRIPT TYPESCRIPT COMPILATO --}}
+    @vite(['resources/ts/main.ts', 'resources/js/app.js'])
 
-    <script>
-        // {{-- 📜 Oracode-compliant script UNIFICATO per gestire modali e stato wallet in guest.blade.php --}}
-        // {{-- Gestisce #connect-wallet-modal, interazione con #upload-modal via ModalManager, e UI dinamica navbar --}}
-
-        // === VARIABILI DI STATO E HELPER (Scope globale dello script) ===
-        let connectModalLastFocusedElement = null; // Elemento con focus prima di aprire connect modal
-        let pendingActionAfterConnect = null; // Azione da eseguire dopo connessione ('create-egi', 'create-collection')
-        let isDropdownOpen = false; // Stato del dropdown wallet
-
-        // === FUNZIONI HELPER ===
-
-        /**
-         * Apre la modal di connessione wallet.
-         * @param {string|null} pendingAction Azione da ricordare dopo la connessione.
-         */
-        function openConnectWalletModal(pendingAction = null) {
-            const connectWalletModal = document.getElementById('connect-wallet-modal');
-            if (!connectWalletModal) { console.error("Connect wallet modal (#connect-wallet-modal) not found"); return; }
-
-            pendingActionAfterConnect = pendingAction;
-            connectModalLastFocusedElement = document.activeElement; // Salva focus
-
-            connectWalletModal.classList.remove('hidden');
-            connectWalletModal.setAttribute('aria-hidden', 'false');
-            document.body.style.overflow = 'hidden'; // Blocca scroll
-
-            const input = connectWalletModal.querySelector('input[name="wallet_address"]');
-            if (input instanceof HTMLElement) input.focus(); else connectWalletModal.focus();
-            // Aggiungere trap focus specifico se necessario
-            console.log('Connect Wallet Modal Opened. Pending Action:', pendingAction);
-        }
-
-        /**
-         * Chiude la modal di connessione wallet.
-         */
-        function closeConnectWalletModal() {
-            const connectWalletModal = document.getElementById('connect-wallet-modal');
-            const uploadModal = document.getElementById('upload-modal'); // Serve per check scroll
-            if (!connectWalletModal || connectWalletModal.classList.contains('hidden')) return;
-
-            connectWalletModal.classList.add('hidden');
-            connectWalletModal.setAttribute('aria-hidden', 'true');
-
-            // Riabilita scroll SOLO SE uploadModal NON è visibile
-            if (!uploadModal || uploadModal.classList.contains('hidden')) {
-                 document.body.style.overflow = '';
-            }
-
-            if (connectModalLastFocusedElement instanceof HTMLElement) {
-                connectModalLastFocusedElement.focus(); // Ripristina focus
-            }
-            connectModalLastFocusedElement = null;
-            pendingActionAfterConnect = null; // Resetta azione
-            console.log('Connect Wallet Modal Closed.');
-        }
-
-        /**
-         * Controlla lo stato di autenticazione/connessione.
-         * @returns {'logged-in' | 'connected' | 'disconnected'}
-         */
-        function getAuthStatus() {
-            // Priorità allo stato backend (strong auth)
-            const isAuthenticated = {{ auth()->check() ? 'true' : 'false' }};
-            if (isAuthenticated) return 'logged-in';
-            // Altrimenti, controlla localStorage (weak auth)
-            if (localStorage.getItem('connected_wallet')) return 'connected';
-            // Altrimenti disconnesso
-            return 'disconnected';
-        }
-
-        /**
-         * Ottiene l'indirizzo wallet corrente (da backend o localStorage).
-         * @returns {string|null}
-         */
-        function getConnectedWalletAddress() {
-            const isAuthenticated = {{ auth()->check() ? 'true' : 'false' }};
-            const loggedInUserWallet = isAuthenticated ? '{{ auth()->user()?->wallet }}' : null;
-            return loggedInUserWallet || localStorage.getItem('connected_wallet');
-        }
-
-        /**
-         * Salva/Rimuove l'indirizzo wallet da localStorage (SOLO per weak auth).
-         * @param {string|null} address Indirizzo da salvare o null per rimuovere.
-         */
-        function setWeakAuthWallet(address) {
-            if (address) {
-                localStorage.setItem('connected_wallet', address);
-            } else {
-                localStorage.removeItem('connected_wallet');
-            }
-            updateWalletUI(); // Aggiorna sempre dopo cambiamento
-        }
-
-        /**
-         * Aggiorna l'interfaccia della Navbar in base allo stato.
-         */
-        function updateWalletUI() {
-            const walletAddress = getConnectedWalletAddress();
-            const authStatus = getAuthStatus();
-            const shortAddress = walletAddress ? `${walletAddress.substring(0, 6)}...${walletAddress.substring(walletAddress.length - 4)}` : null;
-
-            const connectWalletButtonStd = document.getElementById('connect-wallet-button');
-            const walletDropdownContainer = document.getElementById('wallet-dropdown-container');
-            const walletDisplayText = document.getElementById('wallet-display-text');
-            const walletDropdownButton = document.getElementById('wallet-dropdown-button');
-            const connectWalletButtonMobile = document.getElementById('connect-wallet-button-mobile');
-            const loginLinkDesktop = document.querySelector('nav.hidden.md\\:flex a[href*="login"]');
-            const registerLinkDesktop = document.querySelector('nav.hidden.md\\:flex a[href*="register"]');
-            const mobileAuthButtonsContainer = document.querySelector('#mobile-menu .flex.justify-center.gap-3'); // Contenitore bottoni Login/Reg mobile
-
-            // --- Logica UI Desktop ---
-            if (connectWalletButtonStd && walletDropdownContainer && walletDisplayText && walletDropdownButton) {
-                const showDropdown = authStatus === 'logged-in' || authStatus === 'connected';
-
-                connectWalletButtonStd.classList.toggle('hidden', showDropdown);
-                walletDropdownContainer.classList.toggle('hidden', !showDropdown);
-
-                if (showDropdown) {
-                    walletDisplayText.textContent = shortAddress;
-                    if (authStatus === 'logged-in') {
-                        walletDropdownButton.classList.remove('bg-indigo-600', 'hover:bg-indigo-700');
-                        walletDropdownButton.classList.add('bg-green-600', 'hover:bg-green-700');
-                        walletDropdownButton.setAttribute('aria-label', `Wallet: ${shortAddress}. User logged in.`);
-                    } else { // connected
-                        walletDropdownButton.classList.remove('bg-green-600', 'hover:bg-green-700');
-                        walletDropdownButton.classList.add('bg-indigo-600', 'hover:bg-indigo-700');
-                        walletDropdownButton.setAttribute('aria-label', `Wallet: ${shortAddress}. Connected (weak auth).`);
-                    }
-                }
-                 // Gestione visibilità link Login/Register Desktop
-                 if(loginLinkDesktop) loginLinkDesktop.style.display = authStatus === 'logged-in' ? 'none' : 'inline-flex';
-                 if(registerLinkDesktop) registerLinkDesktop.style.display = authStatus === 'logged-in' ? 'none' : 'inline-flex';
-            }
-
-            // --- Logica UI Mobile ---
-            if (connectWalletButtonMobile) {
-                connectWalletButtonMobile.style.display = authStatus === 'disconnected' ? 'inline-flex' : 'none';
-            }
-             // Gestione visibilità bottoni Login/Register Mobile
-             if (mobileAuthButtonsContainer) {
-                 mobileAuthButtonsContainer.style.display = authStatus === 'logged-in' ? 'none' : 'flex';
-             }
-            console.log(`UI Updated. Status: ${authStatus}`);
-        }
-
-        // --- Funzioni Gestione Dropdown Wallet ---
-        function closeWalletDropdownMenu() {
-            const walletDropdownMenu = document.getElementById('wallet-dropdown-menu');
-            const walletDropdownButton = document.getElementById('wallet-dropdown-button');
-            if (!walletDropdownMenu || !walletDropdownButton || walletDropdownMenu.classList.contains('hidden')) return;
-
-            walletDropdownMenu.classList.add('hidden');
-            walletDropdownButton.setAttribute('aria-expanded', 'false');
-            document.removeEventListener('click', handleOutsideDropdownClick);
-            walletDropdownMenu.removeEventListener('keydown', handleDropdownKeydown);
-            isDropdownOpen = false;
-        }
-
-        function handleOutsideDropdownClick(event) {
-            const walletDropdownButton = document.getElementById('wallet-dropdown-button');
-            const walletDropdownMenu = document.getElementById('wallet-dropdown-menu');
-            if (walletDropdownButton && !walletDropdownButton.contains(event.target) &&
-                walletDropdownMenu && !walletDropdownMenu.contains(event.target)) {
-                closeWalletDropdownMenu();
-            }
-        }
-
-        function toggleWalletDropdownMenu(event) {
-            // Non serve event.stopPropagation() se usiamo il listener globale controllato
-            const walletDropdownMenu = document.getElementById('wallet-dropdown-menu');
-            const walletDropdownButton = document.getElementById('wallet-dropdown-button');
-            if (!walletDropdownButton || !walletDropdownMenu) return;
-
-            const isExpanded = !walletDropdownMenu.classList.contains('hidden'); // Controlla visibilità diretta
-
-            if (isExpanded) {
-                closeWalletDropdownMenu();
-            } else {
-                walletDropdownMenu.classList.remove('hidden');
-                walletDropdownButton.setAttribute('aria-expanded', 'true');
-                isDropdownOpen = true;
-                // Aggiungi listener per chiudere cliccando fuori e per Escape
-                // Rimuoviamo eventuali listener precedenti per sicurezza prima di aggiungerli
-                document.removeEventListener('click', handleOutsideDropdownClick);
-                walletDropdownMenu.removeEventListener('keydown', handleDropdownKeydown);
-                // Aggiungi i listener
-                document.addEventListener('click', handleOutsideDropdownClick);
-                walletDropdownMenu.addEventListener('keydown', handleDropdownKeydown);
-                // Focus sul primo elemento del menu
-                const firstMenuItem = walletDropdownMenu.querySelector('button[role="menuitem"]');
-                if(firstMenuItem instanceof HTMLElement) firstMenuItem.focus();
-            }
-        }
-
-        function handleDropdownKeydown(e) {
-            const walletDropdownButton = document.getElementById('wallet-dropdown-button');
-            if (e.key === 'Escape') {
-                closeWalletDropdownMenu();
-                if(walletDropdownButton) walletDropdownButton.focus();
-            }
-            // Aggiungere logica navigazione frecce se desiderato
-        }
-
-        // --- Funzioni Azioni Dropdown ---
-        function copyWalletAddress() {
-            const walletAddress = getConnectedWalletAddress();
-            const walletCopyAddressButton = document.getElementById('wallet-copy-address');
-            if (!walletAddress || !(walletCopyAddressButton instanceof HTMLElement)) return;
-
-            navigator.clipboard.writeText(walletAddress)
-                .then(() => {
-                    const originalHTML = walletCopyAddressButton.innerHTML;
-                    walletCopyAddressButton.textContent = '✓ Copied!';
-                    walletCopyAddressButton.disabled = true;
-                    setTimeout(() => {
-                        walletCopyAddressButton.innerHTML = originalHTML;
-                        walletCopyAddressButton.disabled = false;
-                    }, 1500); // Ridotto tempo feedback
-                })
-                .catch(err => { console.error('Failed to copy address:', err); alert('Failed to copy.'); });
-            closeWalletDropdownMenu();
-        }
-
-        async function handleDisconnect() {
-             const authStatus = getAuthStatus();
-             closeWalletDropdownMenu(); // Chiudi menu prima di agire
-
-             if (authStatus === 'logged-in') {
-                 // Submit form logout Laravel
-                  const logoutForm = document.getElementById('logout-form');
-                  if (logoutForm && typeof logoutForm.submit === 'function') { logoutForm.submit(); }
-                  else { console.error("Logout form not found!"); alert("Logout error."); }
-             } else if (authStatus === 'connected') {
-                  // Pulisci stato locale per weak auth
-                 try { /* Chiamata API opzionale */ } catch (apiError) { /* Gestisci errore */ }
-                 setWeakAuthWallet(null); // Rimuove da localStorage e aggiorna UI
-                 console.log("Disconnected locally (weak auth).");
-             }
-         }
-
-        // --- Funzione Submit Form Connect ---
-        async function handleConnectWalletSubmit(e) {
-            e.preventDefault();
-            const connectWalletForm = document.getElementById('connect-wallet-form');
-            const walletErrorMessage = document.getElementById('wallet-error-message');
-            const connectSubmitButton = connectWalletForm?.querySelector('button[type="submit"]');
-            if (!connectWalletForm || !walletErrorMessage || !connectSubmitButton) return;
-
-            connectSubmitButton.disabled = true; connectSubmitButton.textContent = 'Connecting...';
-            walletErrorMessage.classList.add('hidden');
-
-            try {
-                const formData = new FormData(connectWalletForm);
-                const walletAddress = formData.get('wallet_address'); // Prendi wallet da form
-                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-
-                const response = await fetch('{{ route("wallet.connect") }}', {
-                     method: 'POST',
-                     body: new URLSearchParams(formData).toString(),
-                     headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json', 'Content-Type': 'application/x-www-form-urlencoded'}
-                 });
-                const data = await response.json();
-                if (!response.ok) throw new Error(data.message || 'Connection failed');
-
-                // SUCCESSO!
-                const action = window.pendingActionAfterConnect; // Leggi azione PENDENTE
-                setWeakAuthWallet(walletAddress); // Salva in localStorage e aggiorna UI
-                closeConnectWalletModal(); // Chiudi modal connect (resetta azione pendente)
-
-                // Esegui azione post-connect
-                if (action === 'create-egi') {
-                     // Chiama ModalManager per aprire la modal upload
-                    if (window.globalModalManager?.openModal) {
-                         console.log('Wallet connesso, apro modal upload EGI...');
-                        setTimeout(() => window.globalModalManager.openModal('egi'), 100); // Leggero ritardo
-                    } else { console.error('globalModalManager non trovato!'); alert('Errore apertura form.'); window.location.reload();}
-                } else if (action === 'create-collection') {
-                     console.log('Wallet connesso, redirect a register per collection...');
-                     alert('Wallet connesso! Completa la registrazione per creare una collezione.');
-                     window.location.href = '{{ route("register") }}';
-                } else {
-                     console.log('Wallet connesso (nessuna azione pendente). UI aggiornata.');
-                     // Non ricaricare per non perdere lo stato locale, l'UI è già aggiornata
-                     // window.location.reload();
-                }
-
-            } catch (error) {
-                console.error("Errore connessione:", error);
-                walletErrorMessage.textContent = error.message || 'Errore.';
-                walletErrorMessage.classList.remove('hidden');
-            } finally {
-                connectSubmitButton.disabled = false; connectSubmitButton.textContent = '{{ __("Connect") }}';
-            }
-        }
-
-
-        // === CODICE ESEGUITO AL CARICAMENTO DEL DOM ===
-        document.addEventListener('DOMContentLoaded', function () {
-            // Riferimenti Elementi DOM (ottenuti qui)
-            const connectWalletModal = document.getElementById('connect-wallet-modal');
-            const closeConnectWalletButton = document.getElementById('close-connect-wallet-modal');
-            const connectWalletForm = document.getElementById('connect-wallet-form');
-            const openConnectWalletButtons = document.querySelectorAll('#connect-wallet-button, #connect-wallet-button-mobile');
-            const createEgiGuestButtons = document.querySelectorAll('[data-action="open-connect-modal-or-create-egi"]');
-            const createCollectionGuestButtons = document.querySelectorAll('[data-action="open-connect-modal-or-create-collection"]');
-            const walletDropdownButton = document.getElementById('wallet-dropdown-button');
-            const walletCopyAddressButton = document.getElementById('wallet-copy-address');
-            const walletDisconnectButton = document.getElementById('wallet-disconnect');
-            const closeUploadButton = document.getElementById('close-upload-modal');
-            const mobileMenuButton = document.getElementById('mobile-menu-button');
-            const mobileMenu = document.getElementById('mobile-menu');
-            const hamburgerIcon = document.getElementById('hamburger-icon');
-            const closeIcon = document.getElementById('close-icon');
-
-            // ---- Associazione Event Listeners ----
-
-            // Apertura Connect Modal (diretta)
-            if (openConnectWalletButtons) {
-                openConnectWalletButtons.forEach(btn => btn.addEventListener('click', () => openConnectWalletModal(null)));
-            }
-
-            // Apertura Connect Modal (da bottoni "Create")
-            if (createEgiGuestButtons) {
-                createEgiGuestButtons.forEach(btn => btn.addEventListener('click', () => {
-                    const authStatus = getAuthStatus();
-                    if (authStatus === 'logged-in' || authStatus === 'connected') {
-                        if(window.globalModalManager?.openModal) window.globalModalManager.openModal('egi');
-                        else console.error('ModalManager non trovato per Create EGI');
-                    } else {
-                        openConnectWalletModal('create-egi');
-                    }
-                }));
-            }
-             if (createCollectionGuestButtons) {
-                 createCollectionGuestButtons.forEach(btn => btn.addEventListener('click', () => {
-                     const authStatus = getAuthStatus();
-                     if (authStatus === 'logged-in') {
-                         window.location.href = '{{ route("collections.create") }}';
-                     } else if (authStatus === 'connected') {
-                         alert('Per creare una collezione è necessario completare la registrazione.');
-                         window.location.href = '{{ route("register") }}';
-                     } else {
-                         openConnectWalletModal('create-collection');
-                     }
-                 }));
-             }
-
-
-            // Chiusura Connect Modal
-            if (closeConnectWalletButton) closeConnectWalletButton.addEventListener('click', closeConnectWalletModal);
-            if (connectWalletModal) connectWalletModal.addEventListener('click', (e) => { if (e.target === connectWalletModal) closeConnectWalletModal(); });
-
-            // Chiusura Upload Modal (via ModalManager globale)
-            if (closeUploadButton && window.globalModalManager) {
-                 closeUploadButton.addEventListener('click', () => window.globalModalManager.closeModal());
-            }
-
-            // Submit Form Connect Wallet
-            if (connectWalletForm) connectWalletForm.addEventListener('submit', handleConnectWalletSubmit);
-
-            // Dropdown Wallet
-            if (walletDropdownButton) walletDropdownButton.addEventListener('click', toggleWalletDropdownMenu);
-            if(walletCopyAddressButton) walletCopyAddressButton.addEventListener('click', copyWalletAddress);
-            if(walletDisconnectButton) walletDisconnectButton.addEventListener('click', handleDisconnect);
-
-            // Menu Mobile
-            if (mobileMenuButton && mobileMenu && hamburgerIcon && closeIcon) {
-                mobileMenuButton.addEventListener('click', () => {
-                    mobileMenu.classList.toggle('hidden');
-                    hamburgerIcon.classList.toggle('hidden');
-                    closeIcon.classList.toggle('hidden');
-                    mobileMenuButton.setAttribute('aria-expanded', !mobileMenu.classList.contains('hidden'));
-                });
-            }
-
-            // === INIZIALIZZAZIONE UI AL CARICAMENTO ===
-            updateWalletUI(); // Imposta stato iniziale navbar
-
-        }); // Fine DOMContentLoaded
-    </script>
+    @stack('scripts') {{-- Per script specifici della vista pushati dallo stack --}}
 
 </body>
 </html>

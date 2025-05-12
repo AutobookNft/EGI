@@ -15,6 +15,7 @@ use App\Policies\CollectionPolicy;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\Channels\CustomDatabaseChannel;
 use App\Services\Notifications\WalletService;
+use Illuminate\Support\Facades\View;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -50,6 +51,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        
+        // dd(View::getFinder()->getHints());
+        
         // Registriamo un driver nominato "custom_database"
         Notification::extend('custom_database', function ($app) {
             return new CustomDatabaseChannel();

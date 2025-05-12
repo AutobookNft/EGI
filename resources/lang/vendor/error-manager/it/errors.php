@@ -91,6 +91,9 @@ return [
         'uem_email_send_failed' => 'EmailNotificationHandler: invio notifica fallito per :errorCode. Motivo: :reason',
         'uem_slack_send_failed' => 'SlackNotificationHandler: invio notifica fallito per :errorCode. Motivo: :reason',
         'uem_recovery_action_failed' => 'Azione di recupero :action fallita per errore :errorCode. Motivo: :reason',
+        'user_unauthenticated_access' => 'Utente non autenticato: Tentativo di accesso a una risorsa protetta senza autenticazione valida. ID Collezione Target (se applicabile): :target_collection_id. IP: :ip_address.',
+        'set_current_collection_forbidden' => 'Accesso Negato: L\'Utente ID :user_id ha tentato di impostare la Collezione ID :collection_id come corrente senza autorizzazione. IP: :ip_address.',
+        'set_current_collection_failed' => 'Errore Database: Impossibile aggiornare la collezione corrente per l\'Utente ID :user_id alla Collezione ID :collection_id. Dettagli: :exception_message.',
     ],
 
     'user' => [
@@ -175,6 +178,9 @@ return [
         'uem_email_send_failed' => null,
         'uem_slack_send_failed' => null,
         'uem_recovery_action_failed' => null,
+        'user_unauthenticated_access' => 'Autenticazione richiesta. Per favore, effettua il login per continuare.',
+        'set_current_collection_forbidden' => 'Non hai i permessi necessari per accedere o impostare questa collezione come corrente.',
+        'set_current_collection_failed' => 'Si è verificato un errore imprevisto durante l_aggiornamento delle tue preferenze. Il nostro team è stato notificato. Riprova più tardi.',
     ],
 
     'generic_error' => 'Si è verificato un errore. Riprova più tardi o contatta l\'assistenza.',

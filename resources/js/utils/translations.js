@@ -1,16 +1,12 @@
 export async function fetchTranslations() {
     try {
-        console.log("🔄 Tentativo di caricare le traduzioni...");
+        console.log("🔄 Caricamento traduzioni...");
 
-        const response = await fetch('/translations.js');
+        const response = await fetch('/translations.json');
         if (!response.ok) throw new Error(`Errore nel caricamento delle traduzioni: ${response.status}`);
 
-        const scriptText = await response.text();
-        eval(scriptText); // Carica window.translations
-
-        if (typeof window.translations === "undefined") {
-            throw new Error("❌ window.translations non è stato definito correttamente!");
-        }
+        const data = await response.json();
+        window.translations = data;
 
         console.log("✅ Traduzioni caricate correttamente:", window.translations);
     } catch (error) {
@@ -25,7 +21,6 @@ export async function ensureTranslationsLoaded() {
     }
 }
 
-// Funzione globale per ottenere una traduzione
 export function getTranslation(key, replacements = {}) {
     let keys = key.split('.');
     let translation = window.translations;
@@ -34,7 +29,7 @@ export function getTranslation(key, replacements = {}) {
         translation = translation?.[keys[i]];
         if (typeof translation === "undefined") {
             console.warn("⚠️ Traduzione non trovata per la chiave:", key);
-            return key; // Restituisce la chiave originale se non trovata
+            return key;
         }
     }
 

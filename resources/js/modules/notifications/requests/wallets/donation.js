@@ -1,5 +1,3 @@
-console.log('🚀 RequestWalletDonation loaded');
-
 export class RequestWalletDonation {
     constructor(options = {}) {
         if (RequestWalletDonation.instance) {

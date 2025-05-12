@@ -152,6 +152,25 @@ class User extends Authenticatable
         return $this->hasMany(Collection::class, 'creator_id');
     }
 
+    // In app/Models/User.php
+    public function getCurrentCollectionDetails()
+    {
+        if (!$this->current_collection_id) {
+            return [
+                'current_collection_id' => null,
+                'current_collection_name' => null,
+                'can_edit_current_collection' => false,
+            ];
+        }
+        
+        $collection = $this->currentCollection;
+        return [
+            'current_collection_id' => $collection->id,
+            'current_collection_name' => $collection->collection_name,
+            'can_edit_current_collection' => $this->can('manage_collection', $collection),
+        ];
+    }
+
     /**
      * Get the collections the user collaborates on.
      *

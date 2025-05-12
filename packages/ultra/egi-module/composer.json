@@ -6,7 +6,7 @@
     "authors": [
         {
             "name": "Fabio Cherici",
-            "email": "tuo_email@example.com"
+            "email": "fabiocherici@gmail.com"
         }
     ],
     "require": {
@@ -30,7 +30,8 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Ultra\\UltraLogManager\\Providers\\UltraLogManagerServiceProvider"
+                "Ultra\\UltraLogManager\\Providers\\UltraLogManagerServiceProvider",
+                "Ultra\\EgiModule\\Providers\\EgiModuleServiceProvider"
             ]
         }
     },

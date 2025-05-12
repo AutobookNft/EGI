@@ -47,10 +47,18 @@
     {{-- Il div centrale con tutto il contenuto del form --}}
     {{-- Aggiunti role="form" e aria-label per l'accessibilità (ARIA). --}}
     {{-- Descrive questo div come una regione/form per le tecnologie assistive. --}}
-    <div class="p-5 bg-gradient-to-br from-gray-800 via-purple-900 to-blue-900 rounded-xl shadow-xl border border-purple-500/30 relative nft-background" id="upload-container" data-upload-type="egi" role="form" aria-label="{{ __('uploadmanager::uploadmanager.mint_your_masterpiece') }}">
+    <div class="p-5 bg-gradient-to-br from-gray-800 via-purple-900 to-blue-900 rounded-xl shadow-xl border border-purple-500/30 relative nft-background" 
+        id="upload-container" 
+        data-upload-type="egi" 
+        role="form" 
+        aria-label="{{ __('uploadmanager::uploadmanager.mint_your_masterpiece') }}">
         <!-- Title with EGI style -->
-        {{-- H2 ha già una buona semantica per il titolo principale. --}}
-        <h2 class="text-2xl font-extrabold text-white mb-4 text-center tracking-wide drop-shadow-md nft-title">
+        {{-- H2 ha già una buona semantica
+                 per il titolo principale. 
+                 --}}
+        <h2 class="text-2
+        xl font-extrabold text-
+        white mb-4 text-center tracking-wide drop-shadow-md nft-title">
             💎 {{ __('uploadmanager::uploadmanager.mint_your_masterpiece') }}
         </h2>
 

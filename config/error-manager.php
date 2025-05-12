@@ -771,6 +771,46 @@ return [
             'msg_to' => 'log-only',
         ],
 
+        'UEM_USER_UNAUTHENTICATED' => [
+            'type' => 'auth', // O 'error' se preferisci
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.user_unauthenticated_access', // Chiave per messaggio tecnico
+            'user_message_key' => 'error-manager::errors.user.user_unauthenticated_access', // Chiave per messaggio utente
+            'http_status_code' => 401, // Unauthorized
+            'devTeam_email_need' => false, // A meno che non sia un fallimento inaspettato del middleware
+            'notify_slack' => false,
+            'msg_to' => 'json', // Solitamente per API
+            // TODO: Implementare in UEM il whitelisting granulare del contesto per DB log
+            // 'sensitive_keys_from_context_for_db_log' => ['ip_address', 'target_collection_id'], // Se vuoi loggare contesto specifico
+        ],
+
+        'UEM_SET_CURRENT_COLLECTION_FORBIDDEN' => [
+            'type' => 'security', // O 'error'
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.set_current_collection_forbidden',
+            'user_message_key' => 'error-manager::errors.user.set_current_collection_forbidden',
+            'http_status_code' => 403, // Forbidden
+            'devTeam_email_need' => true, // Potrebbe indicare un tentativo di accesso anomalo
+            'notify_slack' => true,
+            'msg_to' => 'json',
+            // TODO: Implementare in UEM il whitelisting granulare del contesto per DB log
+            // 'sensitive_keys_from_context_for_db_log' => ['user_id', 'collection_id', 'ip_address'],
+        ],
+
+        'UEM_SET_CURRENT_COLLECTION_FAILED' => [
+            'type' => 'critical', // Un fallimento nel salvare il DB è solitamente critico
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.set_current_collection_failed',
+            'user_message_key' => 'error-manager::errors.user.set_current_collection_failed',
+            'http_status_code' => 500, // Internal Server Error
+            'devTeam_email_need' => true, // Notifica sempre per errori 500
+            'notify_slack' => true,
+            'msg_to' => 'json',
+            // TODO: Implementare in UEM il whitelisting granulare del contesto per DB log
+            //'sensitive_keys_from_context_for_db_log' => ['user_id', 'collection_id', 'exception_message'], // Passa 'exception_message' nel contesto da UEM
+            // 'log_exception_trace_in_db' => true, // Se vuoi che UEM loggi la traccia (potrebbe essere verboso)
+        ],
+
         // ====================================================
         // EGI Upload Specific Errors
         // ====================================================

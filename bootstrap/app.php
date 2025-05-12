@@ -8,28 +8,10 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
+use Dotenv\Dotenv;
 
-
-// 🔥 Laravel/Symfony bugfix: APP_URL viene letto troppo presto (Request::create())
-// Se contiene \x3a (":" encoded male) o backslash, Symfony crasha.
-// Questo fix pulisce la variabile ENV prima che Laravel la legga.$url = $_ENV['APP_URL'] ?? ($_SERVER['APP_URL'] ?? 'http://localhost');
-
-$url = str_replace(['\\x3a', '\x3a'], ':', $url); // fix encoding malato
-$url = str_replace('\\', '/', $url);              // fix backslash grezzi
-
-$_ENV['APP_URL'] = $url;
-$_SERVER['APP_URL'] = $url;
-putenv('APP_URL=' . $url);
-
-$requestUri = $_ENV['APP_URL'] ?? 'undefined';
-try {
-    \Illuminate\Http\Request::create($requestUri);
-} catch (\Throwable $e) {
-    file_put_contents(
-        __DIR__.'/../who-breaks-me.log',
-        "Tried to create request from: $requestUri\nException: " . $e->getMessage() . "\n"
-    );
-}
+// 🔐 Load .env early to avoid "No application encryption key" errors
+Dotenv::createImmutable(dirname(__DIR__))->load();
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -40,8 +22,8 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
-            'collection_can' => CheckCollectionPermission::class,
-            'role_or_permission' => RoleOrPermissionMiddleware::class,
+            'collection_can'       => CheckCollectionPermission::class,
+            'role_or_permission'   => RoleOrPermissionMiddleware::class,
             'check.pending.wallet' => CheckPendingWallet::class,
         ]);
 
@@ -49,12 +31,9 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Cookie\Middleware\EncryptCookies::class => EncryptCookies::class,
         ]);
 
-
-        // Middleware groups per le rotte web
-        $middleware->appendToGroup('web',[SetLanguage::class]);
-
-
+        $middleware->appendToGroup('web', [SetLanguage::class]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-
-    })->create();
+        // definisci eventuali eccezioni qui
+    })
+    ->create();

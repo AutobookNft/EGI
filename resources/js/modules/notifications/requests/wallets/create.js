@@ -1,5 +1,3 @@
-console.log('🚀 RequestCreateNotificationWallet loaded');
-
 export class RequestCreateNotificationWallet {
     constructor(options = {}) {
         if (RequestCreateNotificationWallet.instance) {

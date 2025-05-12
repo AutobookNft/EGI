@@ -15,8 +15,8 @@ window.Swal = Swal; // Sintassi JS standard
 console.log('SweetAlert2 importato e globale.'); // Debugging
 
 // Importa la gestione del modale
-import { initializeModal } from '../ts/open-close-modal';
-initializeModal();
+// import { initializeModal } from '../ts/open-close-modal';
+// initializeModal();
 
 // Importa utils (translations, enums)
 import { fetchTranslations, ensureTranslationsLoaded, getTranslation } from './utils/translations';

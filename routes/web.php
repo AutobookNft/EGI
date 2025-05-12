@@ -4,7 +4,7 @@ use App\Actions\Jetstream\UpdateTeamName;
 use App\Enums\NotificationStatus;
 use App\Http\Controllers\CollectionsController;
 use App\Http\Controllers\EgiController;
-use App\Http\Controllers\EppController;
+use App\Http\Controllers\EPPController;
 use App\Http\Controllers\Formazione;
 use App\Http\Controllers\LikeController;
 use App\Http\Controllers\Notifications\Invitations\NotificationInvitationResponseController;
@@ -12,6 +12,7 @@ use App\Http\Controllers\Notifications\NotificationDetailsController;
 use App\Http\Controllers\Notifications\Wallets\NotificationWalletResponseController;
 use App\Http\Controllers\Notifications\Wallets\NotificationWalletRequestController;
 use App\Http\Controllers\ReservationController;
+use App\Http\Controllers\User\UserCollectionController;
 use App\Http\Controllers\WalletConnectController;
 use App\Livewire\Collections\CollectionCarousel;
 use App\Livewire\Collections\CollectionEdit;
@@ -98,7 +99,7 @@ Route::prefix('home')->name('home.')->group(function () {
     Route::middleware(['can:manage-collections'])->group(function () {
         Route::get('/collections/create', [CollectionsController::class, 'create'])->name('collections.create');
         Route::post('/collections', [CollectionsController::class, 'store'])->name('collections.store');
-        Route::get('/collections/{collection}/edit', [CollectionsController::class, 'edit'])->name('collections.edit');
+        Route::get('/collections/{id}/edit', [CollectionsController::class, 'edit'])->name('collections.edit');
         Route::put('/collections/{collection}', [CollectionsController::class, 'update'])->name('collections.update');
         Route::delete('/collections/{collection}', [CollectionsController::class, 'destroy'])->name('collections.destroy');
     });
@@ -134,7 +135,27 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
             return Route::currentRouteName();
         })->name('debug.context');
 
+        // --- INIZIO NUOVE ROTTE PER USER COLLECTIONS (API per il frontend) ---
+        Route::prefix('api/user')->name('api.user.')->group(function () {
+            /**
+             * 📜 Oracode Route: GET /api/user/accessible-collections
+             * 🎯 Fetches collections owned by and collaborated on by the authenticated user.
+             * 🛡️ Access: Authenticated users.
+             * 🛂 Controller: UserCollectionController@getAccessibleCollections
+             */
+            Route::get('/accessible-collections', [UserCollectionController::class, 'getAccessibleCollections'])
+                 ->name('accessibleCollections');
 
+            /**
+             * 📜 Oracode Route: POST /api/user/set-current-collection/{collection}
+             * 🎯 Sets the specified collection as the authenticated user's current active collection.
+             * 🛡️ Access: Authenticated users. Controller verifies access to collection.
+             * 🛂 Controller: UserCollectionController@setCurrentCollection
+             * 📝 Note: Uses Route Model Binding for {collection}.
+             */
+            Route::post('/set-current-collection/{collection}', [UserCollectionController::class, 'setCurrentCollection'])
+                 ->name('setCurrentCollection');
+        });
 
 
         // Raggruppa tutte le route che richiedono 'view_collection_header'
@@ -276,9 +297,9 @@ Route::middleware(['auth:sanctum'])->prefix('api')->group(function () {
         ->name('api.egis.like');
 });
 
-Route::get('/translations.js', function () {
+Route::get('/translations.json', function () {
     $translations = [
-        'notification' =>[
+        'notification' => [
             'no_notifications' => __('notification.no_notifications'),
             'select_notification' => __('notification.select_notification'),
             'notification_list_error' => __('collection.wallet.notification_list_error'),
@@ -306,24 +327,19 @@ Route::get('/translations.js', function () {
                 'address_placeholder' => __('collection.wallet.address_placeholder'),
                 'royalty_mint_placeholder' => __('collection.wallet.royalty_mint_placeholder'),
                 'royalty_rebind_placeholder' => __('collection.wallet.royalty_rebind_placeholder'),
-
                 'success_title' => __('collection.wallet.success_title'),
                 'creation_success_detail' => __('collection.wallet.creation_success_detail'),
-
                 'validation' => [
                     'address_required' => __('collection.wallet.validation.address_required'),
                     'mint_invalid' => __('collection.wallet.validation.mint_invalid'),
                     'rebind_invalid' => __('collection.wallet.validation.rebind_invalid'),
                 ],
-
                 'error' => [
                     'error_title' => __('errors.error'),
                     'creation_error_generic' => __('collection.wallet.creation_error_generic'),
                     'creation_error' => __('collection.wallet.creation_error'),
                     'permission_denied' => __('collection.wallet.permission_denied'),
-
                 ],
-
                 'creation_success' => __('collection.wallet.creation_success'),
             ],
             'invitation' => [
@@ -338,10 +354,9 @@ Route::get('/translations.js', function () {
         ]
     ];
 
-    return response("window.translations = " . json_encode($translations, JSON_PRETTY_PRINT) . ";")
-        ->header('Content-Type', 'application/javascript')
-        ->header('Cache-Control', 'no-cache, must-revalidate');
+    return response()->json($translations);
 });
+
 
 // Rotte per la gestione delle costanti enum
 Route::get('/js/enums', function (Request $request) {

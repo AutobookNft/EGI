@@ -1,5 +1,3 @@
-console.log('🚀 RequestUpdateNotificationWallet loaded');
-
 export class RequestUpdateNotificationWallet {
     constructor(options = {}) {
         if (RequestUpdateNotificationWallet.instance) {

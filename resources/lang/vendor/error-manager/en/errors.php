@@ -91,7 +91,10 @@ return [
         'uem_email_send_failed' => 'EmailNotificationHandler failed to send notification for :errorCode. Reason: :reason',
         'uem_slack_send_failed' => 'SlackNotificationHandler failed to send notification for :errorCode. Reason: :reason',
         'uem_recovery_action_failed' => 'Recovery action :action failed for error :errorCode. Reason: :reason',
-    ],
+        'user_unauthenticated_access' => 'User unauthenticated: Attempt to access a protected resource without valid authentication. Target Collection ID (if applicable): :target_collection_id. IP: :ip_address.',
+        'set_current_collection_forbidden' => 'Forbidden: User ID :user_id attempted to set Collection ID :collection_id as current without authorization. IP: :ip_address.',
+        'set_current_collection_failed' => 'Database Error: Failed to update current collection for User ID :user_id to Collection ID :collection_id. Details: :exception_message.',
+        ],
 
     'user' => [
         // == Existing Entries ==
@@ -171,6 +174,9 @@ return [
         'uem_email_send_failed' => null, // Use generic_internal_error
         'uem_slack_send_failed' => null, // Use generic_internal_error
         'uem_recovery_action_failed' => null, // Use generic_internal_error
+         'user_unauthenticated_access' => 'Authentication required. Please log in to continue.',
+        'set_current_collection_forbidden' => 'You do not have permission to access or set this collection as your current one.',
+        'set_current_collection_failed' => 'An unexpected error occurred while updating your preferences. Our team has been notified. Please try again later.',
     ],
 
     // Generic message (used by UserInterfaceHandler if no specific message found)
