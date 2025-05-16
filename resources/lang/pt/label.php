@@ -8,6 +8,10 @@
  */
 
 return [
+    'disconnect' => 'Desconectar',
+    'dashboard' => 'Painel de controle',
+    'collection' => 'Coleção',
+    'collection_members' => 'Membros da coleção',
     'message' => 'Messaggio',
     'created_at' => 'Criado em',
     'no_action_available' => 'Nenhuma ação disponível',
@@ -21,7 +25,7 @@ return [
     'unauthorized_action' => 'Você não está autorizado a realizar este tipo de ação',
     'came_to_back' => 'Voltar',
     "file_deleted_successfully" => "Arquivo excluído com sucesso",
-    'extension_not_allowed' => 'Extensão não permitida!',
+    'title_extension_not_allowed' => 'Extensão não permitida!',
     'title_file_type_not_allowed' => 'Tipo de arquivo não permitido!',
     'title_file_size_exceeds' => 'Tamanho de arquivo excessivo!',
     'title_invalid_file_name' => 'Nome de arquivo inválido!',
@@ -121,8 +125,8 @@ return [
     'saved' => 'Salvo!',
     'remember_to_save' => 'Lembre-se de salvar',
     'cancel' => 'Cancelar',
-    'update' => 'Atualizar',
     'cancelled' => 'Cancelado',
+    'update' => 'Atualizar',
     'deleted' => 'Excluído',
     'delete' => 'Excluir',
     'edit' => 'Editar',
@@ -153,6 +157,7 @@ return [
         'title' => 'Editar item',
         'description' => 'Edite as informações do item',
         'back_to_collection' => 'Voltar para a coleção',
+        'write_the_buyers_email' => 'Escreva o e-mail do comprador',
         'this_item_cannot_be_transfered' => 'Este item não pode ser transferido',
         'are_you_sure_you_want_to_transfer_this_item' => 'Tem certeza de que deseja transferir este item de <span class="font-bold"> :collectionNameFrom </span> para <span class="font-bold"> :collectionNameTo </span> ?',
         'personal_collection_for_this_user_not_exists' => 'A coleção pessoal para este usuário não existe, não é possível fazer a transferência',
@@ -191,5 +196,9 @@ return [
         'remove_from_drop' => 'Remover da drop',
         'add_to_drop' => 'Adicionar à drop',
         'are_you_sure_you_would_like_to_remove_this_item_from_drop' => 'Tem certeza de que deseja remover :itemremoved do drop?',
+    ],
+    'utilities' => [
+        'utilities' => 'Utilitários',
+        'upload_file' => 'Carregar arquivo',
     ],
 ];

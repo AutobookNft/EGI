@@ -8,6 +8,10 @@
 
 
 return [
+    'disconnect' => 'Trennen',
+    'dashboard' => 'Instrumententafel',
+    'collection' => 'Sammlung',
+    'collection_members' => 'Sammlungsmitglieder',
     'message' => 'Nachricht',
     'created_at' => 'Erstellt am',
     'no_action_available' => 'Keine Aktion verfügbar',
@@ -21,7 +25,7 @@ return [
     'unauthorized_action' => 'Sie sind nicht berechtigt, diese Art von Aktion auszuführen',
     'came_to_back' => 'Zurück',
     "file_deleted_successfully" => "Datei erfolgreich gelöscht",
-    'extension_not_allowed' => 'Erweiterung nicht erlaubt!',
+    'title_extension_not_allowed' => 'Erweiterung nicht erlaubt!',
     'title_file_type_not_allowed' => 'Dateityp nicht erlaubt!',
     'title_file_size_exceeds' => 'Dateigröße überschreitet das Limit!',
     'title_invalid_file_name' => 'Ungültiger Dateiname!',
@@ -121,8 +125,8 @@ return [
     'saved' => 'Gespeichert!',
     'remember_to_save' => 'Denken Sie daran, zu speichern',
     'cancel' => 'Stornieren',
-    'update' => 'Aktualisieren',
     'cancelled' => 'Abgebrochen',
+    'update' => 'Aktualisieren',
     'delete' => 'Löschen',
     'deleted' => 'Gelöscht',
     'edit' => 'Bearbeiten',
@@ -153,6 +157,7 @@ return [
         'title' => 'Element bearbeiten',
         'description' => 'Elementinformationen bearbeiten',
         'back_to_collection' => 'Zurück zur Sammlung',
+        'write_the_buyers_email' => 'E-Mail des Käufers schreiben',
         'this_item_cannot_be_transfered' => 'Dieser Artikel kann nicht übertragen werden',
         'are_you_sure_you_want_to_transfer_this_item' => 'Möchten Sie diesen Artikel von <span class="font-bold"> :collectionNameFrom </span> nach <span class="font-bold"> :collectionNameTo </span> übertragen?',
         'personal_collection_for_this_user_not_exists' => 'Die persönliche Sammlung für diesen Benutzer existiert nicht, Übertragung unmöglich',
@@ -187,10 +192,13 @@ return [
         'are_you_sure_you_would_like_to_remove_this_chapter' => 'Sind Sie sicher, dass Sie dieses Kapitel entfernen möchten?',
         'are_you_sure_you_would_like_to_remove_this_biography' => 'Sind Sie sicher, dass Sie diese Biografie entfernen möchten?',
     ],
-
     'drop' => [
         'remove_from_drop' => 'Aus der Drop entfernen',
         'add_to_drop' => 'Zur Drop hinzufügen',
         'are_you_sure_you_would_like_to_remove_this_item_from_drop' => 'Sind Sie sicher, dass Sie :itemremoved aus dem Drop entfernen möchten?',
+    ],
+    'utilities' => [
+        'utilities' => 'Dienstprogramme',
+        'upload_file' => 'Datei hochladen',
     ],
 ];

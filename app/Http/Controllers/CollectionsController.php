@@ -133,22 +133,34 @@ class CollectionsController extends Controller
      * @param Collection $collection The collection to display
      * @return \Illuminate\View\View The view with collection details
      */
-    public function show(Collection $collection)
+    public function show($id)
     {
-        // Load necessary relationships
-        $collection->load(['creator', 'owner', 'egis']);
+       $collection = Collection::with([
+            'creator',
+            'epp',
+            'egis.user',
+            'egis.owner',
+            'likes'
+        ])->findOrFail($id);
 
-        // Track view count (optional)
-        // $this->trackView($collection);
+        // Verifica like per utente strong auth
+        if (auth()->check()) {
+            $collection->is_liked = $collection->likes()
+                ->where('user_id', auth()->id())
+                ->exists();
+        }
+        // Verifica like per utente weak auth
+        elseif (session('connected_user_id')) {
+            $collection->is_liked = $collection->likes()
+                ->where('user_id', session('connected_user_id'))
+                ->exists();
+        } else {
+            $collection->is_liked = false;
+        }
 
-        // Get related collections (optional - by same creator or similar topic)
-        $relatedCollections = Collection::where('creator_id', $collection->creator_id)
-            ->where('id', '!=', $collection->id)
-            ->where('status', 'published')
-            ->limit(4)
-            ->get();
+        $collection->likes_count = $collection->likes()->count();
 
-        return view('collections.show', compact('collection', 'relatedCollections'));
+        return view('collections.show', compact('collection'));
     }
 
     /**

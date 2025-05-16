@@ -8,6 +8,10 @@
 
 
 return [
+    'disconnect' => 'Disconnect',
+    'dashboard' => 'Dashboard',
+    'collection' => 'Collection',
+    'collection_members' => 'Collection members',
     'message' => 'Message',
     'created_at' => 'Created at',
     'no_action_available' => 'No action available',
@@ -21,7 +25,7 @@ return [
     'unauthorized_action' => 'You are not authorized to perform this type of action',
     'came_to_back' => 'Back',
     "file_deleted_successfully" => "File deleted successfully",
-    'extension_not_allowed' => 'Extension not allowed!',
+    'title_extension_not_allowed' => 'Extension not allowed!',
     'title_file_type_not_allowed' => 'File type not allowed!',
     'title_file_size_exceeds' => 'File size exceeds the limit!',
     'title_invalid_file_name' => 'Invalid file name!',
@@ -121,8 +125,8 @@ return [
     'saved' => 'Saved!',
     'remember_to_save' => 'Remember to save',
     'cancel' => 'Cancel',
-    'update' => 'Update',
     'cancelled' => 'Cancelled',
+    'update' => 'Update',
     'delete' => 'Delete',
     'deleted' => 'Deleted',
     'edit' => 'Edit',
@@ -153,6 +157,7 @@ return [
         'title' => 'Edit item',
         'description' => 'Edit item information',
         'back_to_collection' => 'Back to collection',
+        'write_the_buyers_email' => 'Write the buyer\'s email',
         'this_item_cannot_be_transfered' => 'This item cannot be transferred',
         'are_you_sure_you_want_to_transfer_this_item' => 'Are you sure you want to transfer this item from <span class="font-bold"> :collectionNameFrom </span> to <span class="font-bold"> :collectionNameTo </span> ?',
         'personal_collection_for_this_user_not_exists' => 'Personal collection for this user does not exist, impossible to transfer',
@@ -187,11 +192,13 @@ return [
         'are_you_sure_you_would_like_to_remove_this_chapter' => 'Are you sure you would like to remove this chapter?',
         'are_you_sure_you_would_like_to_remove_this_biography' => 'Are you sure you would like to remove this biography?',
     ],
-
     'drop' => [
         'remove_from_drop' => 'Remove from the Drop',
         'add_to_drop' => 'Add to the Drop',
         'are_you_sure_you_would_like_to_remove_this_item_from_drop' => 'Are you sure you would like to remove :itemremoved from the drop?',
     ],
-
+    'utilities' => [
+        'utilities' => 'Utilities',
+        'upload_file' => 'Upload file',
+    ],
 ];

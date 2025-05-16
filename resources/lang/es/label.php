@@ -8,6 +8,10 @@
  */
 
 return [
+    'disconnect' => 'Desconectar',
+    'dashboard' => 'Tablero',
+    'collection' => 'Colección',
+    'collection_members' => 'Membresía de la colección',
     'message' => 'Mensaje',
     'created_at' => 'Creado',
     'no_action_available' => 'Ninguna acción disponible',
@@ -21,7 +25,7 @@ return [
     'unauthorized_action' => 'No estás autorizado para realizar este tipo de acción',
     'came_to_back' => 'Volver',
     "file_deleted_successfully" => "Archivo eliminado con éxito",
-    'extension_not_allowed' => '¡Extensión no permitida!',
+    'title_extension_not_allowed' => '¡Extensión no permitida!',
     'title_file_type_not_allowed' => '¡Tipo de archivo no permitido!',
     'title_file_size_exceeds' => '¡Tamaño de archivo excesivo!',
     'title_invalid_file_name' => '¡Nombre de archivo no válido!',
@@ -121,11 +125,11 @@ return [
     'saved' => 'Guardado!',
     'remember_to_save' => 'Recuerda guardar',
     'cancel' => 'Cancelar',
+    'cancelled' => 'Cancelado',
+    'update' => 'Actualizar',
     'delete' => 'Eliminar',
     'deleted' => 'Eliminado',
     'edit' => 'Editar',
-    'update' => 'Actualizar',
-    'cancelled' => 'Cancelado',
     'add' => 'Añadir',
     'confirm' => 'Confirmar',
     'disable' => 'Desactivar',
@@ -188,10 +192,13 @@ return [
         'are_you_sure_you_would_like_to_remove_this_chapter' => '¿Estás seguro de que deseas eliminar este capítulo?',
         'are_you_sure_you_would_like_to_remove_this_biography' => '¿Estás seguro de que deseas eliminar esta biografía?',
     ],
-
     'drop' => [
         'remove_from_drop' => 'Eliminar de la Drop',
         'add_to_drop' => 'Añadir a la Drop',
         'are_you_sure_you_would_like_to_remove_this_item_from_drop' => '¿Estás seguro de que quieres eliminar :itemremoved del drop?',
+    ],
+    'utilities' => [
+        'utilities' => 'Utilidades',
+        'upload_file' => 'Subir archivo',
     ],
 ];

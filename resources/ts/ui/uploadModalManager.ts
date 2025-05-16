@@ -16,6 +16,8 @@
 // import { UEM_Client_TS } from '../services/uemClientService'; // Se UEM client è in un modulo
 // Per ora, assumiamo che CSRF e UEM siano gestiti esternamente o tramite funzioni globali/helper
 
+import { ServerErrorResponse } from "../config/appConfig";
+
 // --- 🔗 INTERFACCIA PER GLI ELEMENTI DOM NECESSARI ---
 export interface UploadModalDomElements {
     modal: HTMLDivElement;

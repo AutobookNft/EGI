@@ -8,9 +8,11 @@
  */
 
 return [
+    'disconnect' => 'Disconnetti',
     'dashboard' => 'Dashboard',
     'collection' => 'Collezione',
     'collection_members' => 'Membri della collezione',
+    'message' => 'Messaggio',
     'created_at' => 'Creato il',
     'no_action_available' => 'Nessuna azione disponibile',
     'accept' => 'Accetta',
@@ -123,8 +125,8 @@ return [
     'saved' => 'Salvato!',
     'remember_to_save' => 'Ricordati di salvare',
     'cancel' => 'Annulla',
-    'update' => 'Aggiorna',
     'cancelled' => 'Cancellato',
+    'update' => 'Aggiorna',
     'delete' => 'Elimina',
     'deleted' => 'Eliminato',
     'edit' => 'Modifica',
@@ -170,7 +172,6 @@ return [
         'publish' => 'Pubblica',
         'unpublish' => 'Non pubblicare',
         'this_item_cannot_be_deleted_because_there_are_any_files_associated_with_it' => 'Questo elemento non può essere eliminato perché ci sono file associati',
-        'remove_biography' => 'Rimuovi biografia',
     ],
     'bio' => [
         'your_biography' => 'La tua biografia',
@@ -199,6 +200,5 @@ return [
     'utilities' => [
         'utilities' => 'Utility',
         'upload_file' => 'Carica file',
-
     ],
 ];

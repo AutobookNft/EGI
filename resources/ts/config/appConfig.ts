@@ -6,10 +6,12 @@
  * e ai dati iniziali iniettati da Blade nell'elemento #app-config.
  * Contiene definizioni di tipo cruciali e utility per traduzioni e routing client-side.
  *
- * @version 1.4.0 (Padmin Stabilized with route() and appTranslate())
- * @date 2025-05-11
+ * @version 2.0.0 (Async API Implementation)
+ * @date 2025-05-13
  * @author Padmin D. Curtis (for Fabio Cherici)
  */
+
+import { UEM_Client_TS_Placeholder as UEM } from '../services/uemClientService';
 
 // --- 💎 INTERFACCE DI CONFIGURAZIONE ---
 
@@ -49,10 +51,29 @@ export interface InitialUserData {
     can_edit_current_collection: boolean;
 }
 
+export interface AppSettings {
+    allowedExtensions: string[];
+    allowedMimeTypes: string[];
+    maxFileSize: number;
+    egiSettings: {
+        minPrice: number;
+        maxPrice: number;
+        commissionRate: number;
+    };
+    features: {
+        walletSecretEnabled: boolean;
+        auctionsEnabled: boolean;
+        reservationsEnabled: boolean;
+    };
+}
+
 export interface AppRoutesApi {
     baseUrl?: string; // Es. https://florenceegi.com/api o solo /api
     accessibleCollections: string; // Path relativo a api.baseUrl o assoluto
     setCurrentCollectionBase: string; // Path relativo o assoluto, con placeholder :id
+    checkUploadAuth: string;
+    appConfig: string;
+    errorDefinitions: string;
     // Aggiungere altre rotte API qui asseconda necessità
     // uemConfigEndpoint?: string;
     // checkUploadAuth?: string;
@@ -81,10 +102,234 @@ export interface AppConfig {
     initialUserData: InitialUserData;
     routes: AppRoutes;
     translations: AppTranslations;
+    appSettings: AppSettings;
+    locale: string;
+    availableLocales: string[];
+    csrf_token: string;
+    env: 'production' | 'development';
 }
 
 // --- ⚙️ ISTANZA DI CONFIGURAZIONE ---
 let loadedConfig: AppConfig | null = null;
+let loadingPromise: Promise<AppConfig> | null = null;
+
+/**
+ * 📜 Oracode Function: loadAppConfigFromAPI
+ * 🎯 Carica la configurazione dal nuovo endpoint unificato
+ *
+ * @returns {Promise<AppConfig>} Promise che risolve con la configurazione
+ * @throws {Error} Se il caricamento fallisce
+ */
+async function loadAppConfigFromAPI(): Promise<AppConfig> {
+    const response = await fetch('/api/app-config', {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content || ''
+        }
+    });
+
+    if (!response.ok) {
+        const errorMsg = `Failed to load app configuration: ${response.status} ${response.statusText}`;
+        console.error(errorMsg);
+
+        // Usa UEM per gestire l'errore se disponibile
+        if (UEM && typeof UEM.handleClientError === 'function') {
+            UEM.handleClientError('APP_CONFIG_LOAD_FAILED', {
+                status: response.status,
+                statusText: response.statusText
+            });
+        }
+
+        throw new Error(errorMsg);
+    }
+
+    const config = await response.json() as AppConfig;
+    console.log('Padmin Config: Application configuration loaded from API successfully.');
+    return config;
+}
+
+/**
+ * 📜 Oracode Function: initializeAppConfig
+ * 🎯 Inizializza la configurazione dell'applicazione (chiamata una sola volta)
+ *
+ * @export
+ * @returns {Promise<AppConfig>} Promise che risolve con la configurazione
+ */
+export async function initializeAppConfig(): Promise<AppConfig> {
+    if (loadedConfig) {
+        return loadedConfig;
+    }
+
+    if (loadingPromise) {
+        return loadingPromise;
+    }
+
+    loadingPromise = loadAppConfigFromAPI()
+        .then(config => {
+            loadedConfig = config;
+            loadingPromise = null;
+            return config;
+        })
+        .catch(error => {
+            loadingPromise = null;
+            throw error;
+        });
+
+    return loadingPromise;
+}
+
+/**
+ * 📜 Oracode Function: getAppConfig
+ * 🎯 Ottiene la configurazione già caricata (sincrono)
+ *
+ * @export
+ * @returns {AppConfig} La configurazione caricata
+ * @throws {Error} Se la configurazione non è stata ancora inizializzata
+ */
+export function getAppConfig(): AppConfig {
+    if (!loadedConfig) {
+        throw new Error('App configuration not initialized. Call initializeAppConfig() first.');
+    }
+    return loadedConfig;
+}
+
+/**
+ * 📜 Oracode Function: appTranslate
+ * 🎯 Purpose: Translates a key using the loaded application configuration
+ * 🧱 Core Logic: Retrieves translation string and replaces placeholders with provided values
+ * 🛡️ Backward Compatibility: Supports both legacy and modern function signatures
+ *
+ * @export
+ * @param {string} key - Translation key to look up in config.translations
+ * @param {any} [secondParam] - Either AppTranslations object (legacy) or replacements object
+ * @param {any} [thirdParam] - Replacements object when using legacy signature
+ * @returns {string} Translated string with placeholders replaced, or key if translation not found
+ *
+ * @oracular-trait Supports dual signature for backward compatibility
+ * @error-boundary Returns untranslated key if config not loaded or translation missing
+ * @tolerance-trait Gracefully handles undefined config or invalid parameters
+ *
+ * @example
+ * // Modern signature (preferred)
+ * appTranslate('errorMessage', { count: 5, name: 'John' })
+ *
+ * @example
+ * // Legacy signature (backward compatibility)
+ * appTranslate('errorMessage', config.translations, { count: 5, name: 'John' })
+ *
+ * @why-dual-signature
+ * During migration, codebase contains calls with both signatures:
+ * - Legacy: appTranslate(key, config.translations, replacements)
+ * - Modern: appTranslate(key, replacements)
+ * This function adapts to either pattern, avoiding mass refactoring
+ *
+ * @implementation-notes
+ * - Uses simple equality check to detect config.translations parameter
+ * - Assumes second param is replacements if not config.translations
+ * - Supports both :placeholder and {placeholder} syntax in translations
+ * - Falls back to key string if translation lookup fails
+ *
+ * @future-migration
+ * Once all legacy calls are updated, remove thirdParam and simplify logic
+ *
+ * @version 2.1.0 - Added backward compatibility
+ * @date 2025-05-13
+ * @author Padmin D. Curtis for Fabio Cherici
+ * @oracode-signature [appTranslate::v2.1] adaptive-signature-handler
+ */
+export function appTranslate(
+    key: string,
+    secondParam?: any,
+    thirdParam?: any
+): string {
+    try {
+        const config = getAppConfig();
+        const translations = config.translations;
+
+        // The second parameter is replacements IF it's not config.translations
+        // This check enables backward compatibility with legacy signature
+        const replacements = (secondParam === config.translations) ? thirdParam : secondParam;
+
+        let translatedString = translations[key] || key;
+
+        if (replacements && typeof translatedString === 'string') {
+            for (const placeholder in replacements) {
+                if (Object.prototype.hasOwnProperty.call(replacements, placeholder)) {
+                    // Support both :placeholder and {placeholder} syntax
+                    const regex = new RegExp(`:${placeholder}|\\{${placeholder}\\}`, 'g');
+                    translatedString = translatedString.replace(regex, String(replacements[placeholder]));
+                }
+            }
+        }
+
+        console.log('Padmin Config: translations called with key:', translatedString);
+
+        return translatedString;
+    } catch (error) {
+        console.warn(`Translation failed for key "${key}". Config not loaded?`);
+        return key; // Fallback to key for debugging
+    }
+}
+/**
+ * 📜 Oracode Function: route
+ * 🎯 Costruisce un URL dalle route configurate
+ *
+ * @export
+ * @param {string} routeKey Chiave della route
+ * @param {{[key: string]: string | number}} [params] Parametri per placeholder
+ * @returns {string} URL costruito
+ */
+export function route(
+    routeKey: string,
+    params?: { [key: string]: string | number }
+): string {
+    try {
+        const config = getAppConfig();
+        let pathTemplate: string;
+        let baseForRoute: string = config.routes.baseUrl;
+
+        // Naviga nell'oggetto routes per trovare il template
+        const routeParts = routeKey.split('.');
+        let currentPath: any = config.routes;
+
+        for (const part of routeParts) {
+            if (currentPath && typeof currentPath === 'object' && part in currentPath) {
+                currentPath = currentPath[part];
+            } else {
+                console.warn(`Route key "${routeKey}" not found in config.`);
+                return `/${routeKey}`;
+            }
+        }
+
+        if (typeof currentPath !== 'string') {
+            console.warn(`Route key "${routeKey}" did not resolve to a string.`);
+            return `/${routeKey}`;
+        }
+
+        pathTemplate = currentPath;
+
+        // Sostituisci parametri
+        if (params) {
+            for (const key in params) {
+                if (Object.prototype.hasOwnProperty.call(params, key)) {
+                    const regex = new RegExp(`:${key}`, 'g');
+                    pathTemplate = pathTemplate.replace(regex, String(params[key]));
+                }
+            }
+        }
+
+        // Costruisci URL completo se necessario
+        if (!pathTemplate.startsWith('http') && !pathTemplate.startsWith('//')) {
+            return baseForRoute.replace(/\/$/, '') + '/' + pathTemplate.replace(/^\//, '');
+        }
+
+        return pathTemplate;
+    } catch (error) {
+        console.warn(`Route generation failed for key "${routeKey}". Config not loaded?`);
+        return `/${routeKey}`;
+    }
+}
 
 /**
  * @private
@@ -133,141 +378,3 @@ function loadAndParseAppConfig(): AppConfig {
     }
 }
 
-/**
- * 📜 Oracode Function: getAppConfig
- * 🎯 Fornisce l'istanza globale della configurazione dell'applicazione.
- * Implementa un pattern singleton "lazy-loaded".
- *
- * 🛡️ Gestione Errori: Propaga errori da `loadAndParseAppConfig`.
- *
- * @export
- * @returns {AppConfig} L'oggetto di configurazione.
- * @throws {Error} Se la configurazione non può essere caricata.
- * @author Padmin D. Curtis (for Fabio Cherici)
- * @version 1.0.0
- */
-export function getAppConfig(): AppConfig {
-    if (!loadedConfig) {
-        loadedConfig = loadAndParseAppConfig();
-    }
-    return loadedConfig;
-}
-
-/**
- * 📜 Oracode Function: appTranslate
- * 🎯 Fornisce una stringa tradotta, con supporto per placeholder.
- *
- * @export
- * @param {string} key Chiave della traduzione.
- * @param {AppTranslations} [translationsObject] Oggetto traduzioni; se omesso, usa `getAppConfig().translations`.
- * @param {{ [placeholder: string]: string | number }} [replacements] Valori per i placeholder.
- * @returns {string} Stringa tradotta o la chiave stessa.
- * @example appTranslate("greeting", config.translations, { name: "Padmin" });
- * @author Padmin D. Curtis (for Fabio Cherici)
- * @version 1.1.0
- */
-export function appTranslate(
-    key: string,
-    translationsObject?: AppTranslations,
-    replacements?: { [placeholder: string]: string | number }
-): string {
-    const effectiveTranslations = translationsObject || getAppConfig()?.translations;
-    if (!effectiveTranslations) {
-        console.warn(`Padmin Translate: Translations object (either provided or global) not available for key "${key}". Returning key.`);
-        return key;
-    }
-    let translatedString = effectiveTranslations[key];
-    if (translatedString === undefined) {
-        // console.warn(`Padmin Translate: Translation key "${key}" not found. Returning key.`);
-        translatedString = key;
-    }
-    if (replacements && typeof translatedString === 'string') {
-        for (const placeholder in replacements) {
-            if (Object.prototype.hasOwnProperty.call(replacements, placeholder)) {
-                const regex = new RegExp(`:${placeholder}|\\{${placeholder}\\}`, 'g');
-                translatedString = translatedString.replace(regex, String(replacements[placeholder]));
-            }
-        }
-    }
-    return translatedString;
-}
-
-/**
- * 📜 Oracode Function: route
- * 🎯 Costruisce un URL completo o un path partendo da una chiave di rotta definita
- *    in `AppConfig.routes` e un oggetto opzionale di parametri.
- *    Sostituisce i placeholder nel template di rotta (es. `:id`) con i valori forniti.
- *    Aggiunge il `baseUrl` appropriato (generale o API) se il path risultante non è assoluto.
- *
- * @export
- * @param {keyof AppRoutes | keyof AppRoutesApi | string} routeKey La chiave della rotta come definita
- *        in `AppConfig.routes` o `AppConfig.routes.api` (es. 'editCollectionBase', 'accessibleCollections').
- *        Può anche essere un path diretto se non si usa una chiave e inizia con '/' o 'http'.
- * @param {{ [key: string]: string | number }} [params] Un oggetto opzionale contenente
- *        i valori per i placeholder nella rotta (es. `{ id: 123 }`).
- * @returns {string} L'URL costruito e completo. Se la chiave non è trovata e non è un path valido,
- *          restituisce un path di fallback basato sulla chiave.
- *
- * @example
- *  // Assumendo config.routes.editCollectionBase = '/collections/:id/edit'
- *  // e config.routes.baseUrl = 'https://florenceegi.com'
- *  route('editCollectionBase', { id: 42 });
- *  // -> "https://florenceegi.com/collections/42/edit"
- *
- *  // Assumendo config.routes.api.accessibleCollections = '/api/user/accessible-collections'
- *  route('accessibleCollections');
- *  // -> "https://florenceegi.com/api/user/accessible-collections" (se api.baseUrl eredita da routes.baseUrl)
- *
- * @author Padmin D. Curtis (for Fabio Cherici)
- * @version 1.0.0
- */
-export function route(
-    routeKey: keyof AppRoutes | keyof AppRoutesApi | string,
-    params?: { [key: string]: string | number }
-): string {
-    const config = getAppConfig(); // Assicura che la configurazione sia caricata
-    let pathTemplate: string;
-    let baseForRoute: string = config.routes.baseUrl; // Default base URL
-
-    // Determina il template del path e il baseUrl corretto
-    if (typeof routeKey === 'string' && routeKey in config.routes) {
-        pathTemplate = (config.routes as any)[routeKey] as string;
-    } else if (typeof routeKey === 'string' && config.routes.api && routeKey in config.routes.api) {
-        pathTemplate = (config.routes.api as any)[routeKey] as string;
-        baseForRoute = config.routes.api.baseUrl || config.routes.baseUrl;
-    } else if (typeof routeKey === 'string' && (routeKey.startsWith('/') || routeKey.startsWith('http'))) {
-        // Se routeKey è già un path relativo che inizia con / o un URL completo
-        pathTemplate = routeKey;
-        // In questo caso, non anteponiamo baseUrl se è già un URL completo
-        if (pathTemplate.startsWith('http')) {
-            baseForRoute = ''; // Non serve baseUrl
-        }
-    } else {
-        console.warn(`Padmin Route: Route key "${String(routeKey)}" not found in appConfig.routes. Returning fallback path.`);
-        // Fallback a un path relativo basato sulla chiave, assicurandosi che inizi con /
-        const fallbackPath = String(routeKey).startsWith('/') ? String(routeKey) : `/${String(routeKey)}`;
-        // Non possiamo costruire un URL completo affidabile qui, quindi restituiamo solo il path relativo
-        // o la chiave stessa se non si vuole un path di fallback. Per ora, path relativo.
-        return fallbackPath;
-    }
-
-    let populatedPath = pathTemplate;
-    if (params) {
-        for (const key in params) {
-            if (Object.prototype.hasOwnProperty.call(params, key)) {
-                const regex = new RegExp(`:${key}|\\{${key}\\}`, 'g');
-                populatedPath = populatedPath.replace(regex, String(params[key]));
-            }
-        }
-    }
-
-    // Aggiungi il baseForRoute solo se populatedPath non è già un URL completo
-    // e baseForRoute non è vuoto (caso in cui pathTemplate era già un URL completo)
-    if (baseForRoute && !populatedPath.startsWith('http') && !/^[a-z]+:/i.test(populatedPath)) {
-        const cleanBase = baseForRoute.endsWith('/') ? baseForRoute.slice(0, -1) : baseForRoute;
-        const cleanPath = populatedPath.startsWith('/') ? populatedPath.slice(1) : populatedPath;
-        return `${cleanBase}/${cleanPath}`;
-    }
-
-    return populatedPath; // Restituisce il path (che potrebbe essere già un URL completo)
-}

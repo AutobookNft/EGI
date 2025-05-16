@@ -1,219 +1,396 @@
-// File: resources/ts/features/auth/walletConnect.ts
+    // File: resources/ts/features/auth/walletConnect.ts
+    /**
+     * 📜 Oracode TypeScript Module: SecureWalletConnectHandler
+     * 🎯 Purpose: Manages wallet connection with Secret Link security
+     * 🛡️ Security: Two-factor authentication (wallet + secret)
+     *
+     * @version 2.0.0
+     * @date 2025-05-13
+     * @author Padmin D. Curtis For Fabio Cherici
+     */
 
-/**
- * 📜 Oracode TypeScript Module: WalletConnectModalHandler
- * Gestisce l'apertura/chiusura della modale di connessione wallet (#connect-wallet-modal)
- * e la logica di submit del form per connettere un wallet, stabilendo una "weak auth".
- * Utilizza authService per gestire lo stato di autenticazione e le azioni pendenti.
- *
- * @version 1.0.1 (Padmin Corrected Translation Calls, No Placeholders)
- * @date 2025-05-11
- * @author Padmin D. Curtis (for Fabio Cherici)
- */
+    import { AppConfig, ServerErrorResponse, appTranslate } from '../../config/appConfig';
+    import * as DOMElements from '../../dom/domElements';
+    import { UEM_Client_TS_Placeholder as UEM } from '../../services/uemClientService';
+    import {
+        setPendingAuthAction,
+        consumePendingAuthAction,
+        setLastFocusedElement,
+        consumeLastFocusedElement,
+        setWeakAuthWallet
+    } from './authService';
+    import { getCsrfTokenTS } from '../../utils/csrf';
 
-import { AppConfig, ServerErrorResponse, appTranslate } from '../../config/appConfig';
-import * as DOMElements from '../../dom/domElements';
-import { UEM_Client_TS_Placeholder as UEM } from '../../services/uemClientService';
-import { UploadModalManager } from '../../ui/uploadModalManager';
-import {
-    setPendingAuthAction,
-    consumePendingAuthAction,
-    setLastFocusedElement,
-    consumeLastFocusedElement,
-    getAuthStatus,
-    setWeakAuthWallet
-} from './authService';
-import { getCsrfTokenTS } from '../../utils/csrf';
-
-/**
- * 📜 Oracode Function: openConnectWalletModal
- * 🎯 Apre la modale di connessione wallet.
- * Salva l'azione pendente e l'elemento con focus precedente.
- *
- * @export
- * @param {AppConfig} config L'oggetto di configurazione dell'applicazione (usato per le traduzioni dei messaggi di errore).
- * @param {typeof DOMElements} DOM Collezione dei riferimenti agli elementi DOM.
- * @param {('create-egi' | 'create-collection' | null)} [pendingAction=null] L'azione che l'utente
- *        intendeva compiere e che ha triggerato l'apertura di questa modale.
- */
-export function openConnectWalletModal(
-    config: AppConfig,
-    DOM: typeof DOMElements,
-    pendingAction: 'create-egi' | 'create-collection' | null = null
-): void {
-    if (!DOM.connectWalletModalEl) {
-        UEM.handleClientError('CLIENT_DOM_MISSING_CONNECT_MODAL', { elementId: 'connect-wallet-modal' }, undefined, appTranslate('errorModalNotFoundConnectWallet', config.translations));
-        return;
+    // --- TYPES ---
+    interface WalletConnectResponse {
+        success: boolean;
+        message: string;
+        requires_secret?: boolean;
+        wallet_address?: string;
+        user_status?: string;
+        user_name?: string;
+        secret?: string;
+        show_secret_warning?: boolean;
     }
 
-    setPendingAuthAction(pendingAction);
-    setLastFocusedElement(document.activeElement as HTMLElement | null);
+    // --- STATE ---
+    let currentWalletAddress: string = '';
+    let isConnecting: boolean = false;
 
-    DOM.connectWalletModalEl.classList.remove('hidden');
-    DOM.connectWalletModalEl.setAttribute('aria-hidden', 'false');
-    document.body.style.overflow = 'hidden';
-
-    if (DOM.connectWalletAddressInputEl) DOM.connectWalletAddressInputEl.focus();
-    else DOM.connectWalletModalEl.focus();
-    console.log('Padmin WalletConnect: Modal Opened. Pending Action:', pendingAction);
-}
-
-/**
- * 📜 Oracode Function: closeConnectWalletModal
- * 🎯 Chiude la modale di connessione wallet.
- * Ripristina il focus sull'elemento precedente, resetta l'azione pendente
- * (se non già consumata) e pulisce i messaggi di errore e l'input.
- *
- * @export
- * @param {typeof DOMElements} DOM Collezione dei riferimenti agli elementi DOM.
- */
-export function closeConnectWalletModal(DOM: typeof DOMElements): void {
-    if (!DOM.connectWalletModalEl || DOM.connectWalletModalEl.classList.contains('hidden')) {
-        return;
-    }
-
-    DOM.connectWalletModalEl.classList.add('hidden');
-    DOM.connectWalletModalEl.setAttribute('aria-hidden', 'true');
-
-    if (!DOM.uploadModalEl || DOM.uploadModalEl.classList.contains('hidden')) {
-        document.body.style.overflow = '';
-    }
-
-    const lastFocused = consumeLastFocusedElement(); // Ottiene e resetta
-    if (lastFocused) {
-        lastFocused.focus();
-    }
-    consumePendingAuthAction(); // Assicura che anche l'azione pendente sia resettata se non usata
-
-    if (DOM.walletErrorMessageEl) DOM.walletErrorMessageEl.classList.add('hidden');
-    if (DOM.connectWalletAddressInputEl) DOM.connectWalletAddressInputEl.value = '';
-    console.log('Padmin WalletConnect: Modal Closed.');
-}
-
-/**
- * 📜 Oracode Function: handleConnectWalletSubmit
- * 🎯 Gestisce l'evento di submit del form di connessione del wallet.
- * Esegue la validazione dell'input, invia la richiesta API per connettere il wallet,
- * gestisce la risposta (successo o errore UEM), e coordina le azioni post-connessione
- * come l'apertura della modale di upload EGI o il redirect alla registrazione.
- *
- * @export
- * @param {Event} event L'evento di submit del form.
- * @param {AppConfig} config L'oggetto di configurazione dell'applicazione.
- * @param {typeof DOMElements} DOM Collezione dei riferimenti agli elementi DOM.
- * @param {(UploadModalManager | null)} uploadModalMgr Istanza del gestore della modale di upload.
- * @param {typeof UEM} uem Istanza del gestore errori client UEM.
- * @param {() => void} uiUpdateCallback Callback per notificare l'UI principale di un cambiamento di stato auth.
- */
-export async function handleConnectWalletSubmit(
-    event: Event,
-    config: AppConfig,
-    DOM: typeof DOMElements,
-    uploadModalMgr: UploadModalManager | null,
-    uem: typeof UEM,
-    uiUpdateCallback: () => void
-): Promise<void> {
-    event.preventDefault();
-    if (!DOM.connectWalletFormEl || !DOM.walletErrorMessageEl || !DOM.connectSubmitButtonEl || !DOM.connectWalletAddressInputEl) {
-        uem.handleClientError('CLIENT_DOM_MISSING_CONNECT_FORM_SUBMIT', {}, undefined, appTranslate('errorConnectWalletFormMissing', config.translations));
-        return;
-    }
-
-    DOM.connectSubmitButtonEl.disabled = true;
-    DOM.connectSubmitButtonEl.textContent = appTranslate('connecting', config.translations);
-    DOM.walletErrorMessageEl.classList.add('hidden');
-
-    try {
-        const formData = new FormData(DOM.connectWalletFormEl);
-        const walletAddressInput = formData.get('wallet_address') as string | null;
-
-        if (!walletAddressInput || walletAddressInput.trim() === '') {
-            const errMsg = appTranslate('walletAddressRequired', config.translations);
-            uem.handleClientError('CLIENT_WALLET_FORM_INVALID_REQUIRED', { field: 'wallet_address' }, undefined, errMsg);
-            if (DOM.walletErrorMessageEl) {
-                DOM.walletErrorMessageEl.textContent = errMsg;
-                DOM.walletErrorMessageEl.classList.remove('hidden');
-            }
-            throw new Error('Validation failed: Wallet address required.'); // Per bloccare il finally e il resto del try
+    /**
+     * 📜 Opens wallet connection modal with Secret Link system
+     */
+    export function openSecureWalletModal(
+        config: AppConfig,
+        DOM: typeof DOMElements,
+        pendingAction: 'create-egi' | 'create-collection' | null = null
+    ): void {
+        if (!DOM.connectWalletModalEl) {
+            UEM.handleClientError('CLIENT_DOM_MISSING_CONNECT_MODAL');
+            return;
         }
-        // TODO: [PADMIN_VALIDATION] Implementare validazione client-side più robusta per il formato dell'indirizzo Algorand (58 caratteri, inizia con A-Z, ecc.)
-        // Esempio base: if (!/^[A-Z2-7]{58}$/.test(walletAddressInput)) { ... }
 
-        const response = await fetch(config.routes.walletConnect, { // Usa la rotta da AppConfig
-            method: 'POST',
-            body: new URLSearchParams(formData as any).toString(),
-            headers: { 'X-CSRF-TOKEN': getCsrfTokenTS(), 'Accept': 'application/json', 'Content-Type': 'application/x-www-form-urlencoded' }
+        setPendingAuthAction(pendingAction);
+        setLastFocusedElement(document.activeElement as HTMLElement);
+
+        // Reset form state
+        resetModalState(DOM);
+
+        // Show modal
+        DOM.connectWalletModalEl.classList.remove('hidden');
+        DOM.connectWalletModalEl.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+
+        // Animate in
+        const content = DOM.connectWalletModalEl.querySelector('#connect-wallet-content');
+        console.log('Modal content element:', content);
+        if (content) {
+            console.log('Classes before animation:', content.className);
+
+            // IMPORTANTE: Prima rimuovi le classi vecchie
+            content.classList.remove('scale-95', 'opacity-0');
+
+            // POI aggiungi le nuove
+            content.classList.add('scale-100', 'opacity-100');
+
+            console.log('Classes after animation:', content.className);
+        }
+
+        DOM.connectWalletAddressInputEl?.focus();
+    }
+
+    /**
+     * 📜 Handles wallet connection form submission
+     */
+    export async function handleSecureWalletSubmit(
+        event: Event,
+        config: AppConfig,
+        DOM: typeof DOMElements,
+        uploadModalMgr: any,
+        uem: typeof UEM,
+        uiUpdateCallback: () => void
+    ): Promise<void> {
+        event.preventDefault();
+
+        if (isConnecting || !DOM.connectWalletFormEl) return;
+
+        isConnecting = true;
+        showLoadingState(DOM, true);
+        hideError(DOM);
+
+        try {
+            const formData = new FormData(DOM.connectWalletFormEl);
+            const walletAddress = formData.get('wallet_address') as string;
+            const secret = formData.get('secret') as string;
+
+            // Check for saved secret
+            const savedSecret = localStorage.getItem(`secret_${walletAddress}`);
+            if (savedSecret && !secret) {
+                formData.set('secret', savedSecret);
+            }
+
+            currentWalletAddress = walletAddress;
+
+            const response = await fetch(config.routes.walletConnect, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': getCsrfTokenTS(),
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams(formData as any)
+            });
+
+            const data: WalletConnectResponse = await response.json();
+
+            if (!response.ok) {
+                showError(DOM, data.message || appTranslate('errorConnectionGeneric', config.translations));
+                return;
+            }
+
+            if (data.requires_secret) {
+                showSecretField(DOM);
+                return;
+            }
+
+            if (data.show_secret_warning && data.secret) {
+                showSecretDisplay(DOM, data.secret, walletAddress, uploadModalMgr, uiUpdateCallback);
+                return;
+            }
+
+            // Success
+            handleConnectionSuccess(data, walletAddress, DOM, uploadModalMgr, uiUpdateCallback);
+
+        } catch (error) {
+            console.error('Connection error:', error);
+            showError(DOM, appTranslate('errorUnexpected', config.translations));
+        } finally {
+            isConnecting = false;
+            showLoadingState(DOM, false);
+        }
+    }
+
+    /**
+     * 📜 Shows secret input field
+     */
+    function showSecretField(DOM: typeof DOMElements): void {
+        const secretField = document.getElementById('secret-field');
+        if (secretField) {
+            secretField.classList.remove('hidden');
+            DOM.connectWalletAddressInputEl?.setAttribute('readonly', 'true');
+            document.getElementById('secret-input')?.focus();
+        }
+    }
+
+    /**
+     * 📜 Completes the connection process
+     */
+    function completeConnection(
+        walletAddress: string,
+        uploadModalMgr: any,
+        uiUpdateCallback: () => void
+    ): void {
+        setWeakAuthWallet(walletAddress, uiUpdateCallback);
+        closeSecureWalletModal(DOMElements);
+
+        const pendingAction = consumePendingAuthAction();
+
+        if (pendingAction === 'create-egi') {
+            uploadModalMgr?.openModal('egi');
+        } else if (pendingAction === 'create-collection') {
+            window.location.href = '/collections/create';
+        }
+
+        // Success notification
+        if (window.Swal) {
+            window.Swal.fire({
+                icon: 'success',
+                title: appTranslate('walletConnectedTitle', {}),
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 2000
+            });
+        }
+    }
+
+    /**
+     * 📜 Displays generated secret for new users
+     */
+    function showSecretDisplay(
+        DOM: typeof DOMElements,
+        secret: string,
+        walletAddress: string,
+        uploadModalMgr: any,        // Aggiungi questo
+        uiUpdateCallback: () => void // e questo
+    ): void {
+        const secretModal = document.getElementById('secret-display-modal');
+        const generatedSecretEl = document.getElementById('generated-secret');
+
+        if (!secretModal || !generatedSecretEl) return;
+
+        generatedSecretEl.textContent = secret;
+        secretModal.classList.remove('hidden');
+
+        // Copy button
+        const copyButton = document.getElementById('copy-secret-button');
+        copyButton?.addEventListener('click', () => {
+            navigator.clipboard.writeText(secret);
+            copyButton.textContent = appTranslate('copied', {}) + ' ✓';
+            setTimeout(() => {
+                copyButton.textContent = appTranslate('wallet_copy_secret', {});
+            }, 2000);
         });
-        // La risposta JSON può essere di successo o un errore UEM formattato
-        const data: ServerErrorResponse | { message: string; wallet_address: string; } = await response.json();
 
-        if (!response.ok) {
-            // Errore UEM dal backend o altro errore HTTP
-            uem.handleServerErrorResponse(data as ServerErrorResponse, appTranslate('errorConnectionFailed', config.translations, { code: response.status }));
-            if (DOM.walletErrorMessageEl) {
-                DOM.walletErrorMessageEl.textContent = (data as ServerErrorResponse).message || appTranslate('errorConnectionGeneric', config.translations);
-                DOM.walletErrorMessageEl.classList.remove('hidden');
+        // Confirm button
+        const confirmButton = document.getElementById('confirm-secret-saved');
+        confirmButton?.addEventListener('click', () => {
+            const saveLocally = (document.getElementById('save-secret-locally') as HTMLInputElement)?.checked;
+
+            if (saveLocally) {
+                localStorage.setItem(`secret_${walletAddress}`, secret);
             }
-            throw new Error((data as ServerErrorResponse).message || `HTTP error ${response.status}`); // Per il blocco catch
-        }
 
-        // SUCCESSO dalla chiamata API
-        const successData = data as { message: string; wallet_address: string; };
-        const actionToPerform = consumePendingAuthAction(); // Ottiene E resetta l'azione pendente da authService
+            secretModal.classList.add('hidden');
 
-        setWeakAuthWallet(successData.wallet_address, uiUpdateCallback); // Salva in localStorage e CHIAMA L'AGGIORNAMENTO UI
-        closeConnectWalletModal(DOM);     // Chiude questa modale
+            // ORA COMPLETA LA CONNESSIONE!
+            setWeakAuthWallet(walletAddress, uiUpdateCallback);
+            closeSecureWalletModal(DOM);
 
-        if (actionToPerform === 'create-egi') {
-            if (uploadModalMgr) {
-                console.log('Padmin WalletConnect: Wallet connected, opening EGI upload modal...');
-                setTimeout(() => uploadModalMgr.openModal('egi'), 100); // Leggero ritardo per transizioni UI
-            } else {
-                uem.handleClientError('CLIENT_MODAL_MANAGER_MISSING_EGI', { manager: 'uploadModalManager' }, undefined, appTranslate('errorEgiFormOpen', config.translations));
+            const pendingAction = consumePendingAuthAction();
+
+            if (pendingAction === 'create-egi') {
+                uploadModalMgr?.openModal('egi');
+            } else if (pendingAction === 'create-collection') {
+                window.location.href = '/collections/create';
             }
-        } else if (actionToPerform === 'create-collection') {
-            const currentAuthStatus = getAuthStatus(config);
-            if (currentAuthStatus === 'logged-in') {
-                window.location.href = config.routes.collectionsCreate; // Usa la rotta da AppConfig
-            } else { // Altrimenti è solo 'connected' (weak auth), quindi serve registrazione completa
-                if (window.Swal) {
-                    window.Swal.fire({
-                        icon: 'info',
-                        title: appTranslate('registrationRequiredTitle', config.translations),
-                        text: appTranslate('registrationRequiredTextCollections', config.translations),
-                        confirmButtonText: appTranslate('registerNowButton', config.translations),
-                        showCancelButton: true,
-                        cancelButtonText: appTranslate('laterButton', config.translations)
-                    }).then((result: { isConfirmed: boolean }) => {
-                        if (result.isConfirmed) window.location.href = config.routes.register; // Usa la rotta da AppConfig
-                    });
-                } else {
-                    alert(appTranslate('registrationRequiredTextCollections', config.translations));
-                    window.location.href = config.routes.register; // Usa la rotta da AppConfig
-                }
-            }
-        } else {
-            console.log('Padmin WalletConnect: Wallet connected successfully (no pending action). UI has been updated.');
+
+            // Success notification
             if (window.Swal) {
                 window.Swal.fire({
-                    icon: 'success', title: appTranslate('walletConnectedTitle', config.translations),
-                    toast: true, position: 'top-end', showConfirmButton: false,
-                    timer: 2000, timerProgressBar: true
+                    icon: 'success',
+                    title: appTranslate('walletConnectedTitle', {}),
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 2000
                 });
             }
+        });
+    }
+
+
+    /**
+     * 📜 Handles successful connection
+     */
+    function handleConnectionSuccess(
+        data: WalletConnectResponse,
+        walletAddress: string,
+        DOM: typeof DOMElements,
+        uploadModalMgr: any,
+        uiUpdateCallback: () => void
+    ): void {
+        setWeakAuthWallet(walletAddress, uiUpdateCallback);
+        closeSecureWalletModal(DOM);
+
+        const pendingAction = consumePendingAuthAction();
+
+        if (pendingAction === 'create-egi') {
+            uploadModalMgr?.openModal('egi');
+        } else if (pendingAction === 'create-collection') {
+            window.location.href = '/collections/create';
         }
-    } catch (error: any) {
-        // Gestisce 'Validation failed' o altri errori JS nel blocco try
-        console.error("Padmin WalletConnect: Error in connect wallet submit flow:", error.message);
-        if (DOM.walletErrorMessageEl && DOM.walletErrorMessageEl.classList.contains('hidden') && error.message !== 'Validation failed: Wallet address required.') {
-             // Mostra messaggio solo se non è già stato mostrato per la validazione o da UEM
-            DOM.walletErrorMessageEl.textContent = error.message || appTranslate('errorUnexpected', config.translations);
-            DOM.walletErrorMessageEl.classList.remove('hidden');
-        }
-    } finally {
-        if (DOM.connectSubmitButtonEl) {
-            DOM.connectSubmitButtonEl.disabled = false;
-            DOM.connectSubmitButtonEl.textContent = appTranslate('connect', config.translations);
+
+        // Success notification
+        if (window.Swal) {
+            window.Swal.fire({
+                icon: 'success',
+                title: appTranslate('walletConnectedTitle', {}),
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 2000
+            });
         }
     }
-}
+
+    /**
+     * 📜 Shows/hides loading state
+     */
+    function showLoadingState(DOM: typeof DOMElements, loading: boolean): void {
+        const button = document.getElementById('connect-wallet-submit') as HTMLButtonElement;
+        const spinner = button?.querySelector('svg');
+        const text = document.getElementById('connect-wallet-button-text');
+
+        if (!button || !spinner || !text) return;
+
+        button.disabled = loading;
+        spinner.classList.toggle('hidden', !loading);
+        text.textContent = loading ?
+            appTranslate('connecting', {}) :
+            appTranslate('wallet_connect_button', {});
+    }
+
+    /**
+     * 📜 Shows error message
+     */
+    function showError(DOM: typeof DOMElements, message: string): void {
+        const errorContainer = document.getElementById('wallet-error-container');
+        const errorMessage = document.getElementById('wallet-error-message');
+
+        if (errorContainer && errorMessage) {
+            errorMessage.textContent = message;
+            errorContainer.classList.remove('hidden');
+        }
+    }
+
+    /**
+     * 📜 Hides error message
+     */
+    function hideError(DOM: typeof DOMElements): void {
+        const errorContainer = document.getElementById('wallet-error-container');
+        if (errorContainer) {
+            errorContainer.classList.add('hidden');
+        }
+    }
+
+    /**
+     * 📜 Resets modal to initial state
+     */
+    function resetModalState(DOM: typeof DOMElements): void {
+        // Reset form
+        (DOM.connectWalletFormEl as HTMLFormElement)?.reset();
+
+        // Hide secret field
+        const secretField = document.getElementById('secret-field');
+        secretField?.classList.add('hidden');
+
+        // Hide errors
+        hideError(DOM);
+
+        // Enable wallet input
+        DOM.connectWalletAddressInputEl?.removeAttribute('readonly');
+
+        // Check for saved secrets
+        DOM.connectWalletAddressInputEl?.addEventListener('blur', checkSavedSecret);
+    }
+
+    /**
+     * 📜 Checks if secret is saved locally
+     */
+    function checkSavedSecret(event: Event): void {
+        const input = event.target as HTMLInputElement;
+        const walletAddress = input.value;
+
+        if (walletAddress && walletAddress.length === 58) {
+            const savedSecret = localStorage.getItem(`secret_${walletAddress}`);
+            if (savedSecret) {
+                const secretInput = document.getElementById('secret-input') as HTMLInputElement;
+                if (secretInput) {
+                    secretInput.value = savedSecret;
+                }
+            }
+        }
+    }
+
+    /**
+     * 📜 Closes wallet connection modal
+     */
+    export function closeSecureWalletModal(DOM: typeof DOMElements): void {
+        if (!DOM.connectWalletModalEl) return;
+
+        const content = DOM.connectWalletModalEl.querySelector('#connect-wallet-content');
+        if (content) {
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+        }
+
+        setTimeout(() => {
+            DOM.connectWalletModalEl?.classList.add('hidden');
+            DOM.connectWalletModalEl?.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = '';
+
+            const lastFocused = consumeLastFocusedElement();
+            lastFocused?.focus();
+        }, 300);
+    }

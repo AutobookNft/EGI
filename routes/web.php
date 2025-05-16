@@ -6,7 +6,7 @@ use App\Http\Controllers\CollectionsController;
 use App\Http\Controllers\EgiController;
 use App\Http\Controllers\EPPController;
 use App\Http\Controllers\Formazione;
-use App\Http\Controllers\LikeController;
+use App\Http\Controllers\Api\LikeController;
 use App\Http\Controllers\Notifications\Invitations\NotificationInvitationResponseController;
 use App\Http\Controllers\Notifications\NotificationDetailsController;
 use App\Http\Controllers\Notifications\Wallets\NotificationWalletResponseController;
@@ -39,8 +39,21 @@ use Ultra\EgiModule\Http\Controllers\EgiUploadController;
 use Ultra\EgiModule\Http\Controllers\EgiUploadPageController;
 use Ultra\UploadManager\Controllers\Config\ConfigController;
 
-// Route::view('/home', 'home')
-//      ->name('home');
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| 📜 Oracode Routes: FlorenceEGI Application Routes
+| Organized by functionality and access level for clarity
+|
+*/
+
+/*
+|--------------------------------------------------------------------------
+| Public Routes - Homepage & Redirects
+|--------------------------------------------------------------------------
+*/
 
 Route::get('/', function () {
     return redirect('/home');
@@ -48,52 +61,15 @@ Route::get('/', function () {
 
 Route::get('/home', [HomeController::class, 'index'])->name('home');
 
-// Rotta per PhotoUploader
-Route::get('/photo-uploader', PhotoUploader::class)->name('photo-uploader');
-
-// Rotta per la home
-// Route::get('/', function () {
-//     return view('welcome');
-// });
-
-// Rotta per phpinfo
-Route::get('/phpinfo', function () {
-    phpinfo();
-});
-
-Route::get('/debug/livewire/{component}', function ($component) {
-    return Livewire::test($component)->render();
-});
-
-//  // Rotte per Drop
-//  Route::post('/drops/{id}/join', [DropController::class, 'join'])
-//  ->name('drops.join')
-//  ->middleware(['can:join_drop']);
-
-// Rotta di debug per visualizzare la sessione
-Route::get('/session', function () {
- dd((session()->all()));
-});
-
-Route::get('/api/refresh-csrf', function () {
-    return response()->json([
-        'token' => csrf_token(),
-    ]);
-});
-
-
-Route::post('/egis/{egi}/reserve', [ReservationController::class, 'reserve'])->name('egis.reserve');
-Route::post('/egis/{egi}/like', [LikeController::class, 'toggleEgiLike'])->name('egis.like');
-// Rotta per la visualizzazione del singolo EGI
-Route::get('/egis/{egi}', [EgiController::class, 'show'])->name('egis.show');
-Route::post('/wallet/connect', [WalletConnectController::class, 'connect'])->name('wallet.connect');
-Route::post('/api/wallet/disconnect', [WalletConnectController::class, 'disconnect'])->name('wallet.disconnect');
-Route::get('/api/wallet/status', [WalletConnectController::class, 'status'])->name('wallet.status');
-
+/*
+|--------------------------------------------------------------------------
+| Public Routes - Collections & EGIs
+|--------------------------------------------------------------------------
+*/
 Route::prefix('home')->name('home.')->group(function () {
-// Public collection viewing (accessible to all authenticated users)
+    // Public collection viewing (accessible to all)
     Route::get('/collections', [CollectionsController::class, 'index'])->name('collections.index');
-    Route::get('/collections/{collection}', [CollectionsController::class, 'show'])->name('collections.show');
+    Route::get('/collections/{id}', [CollectionsController::class, 'show'])->name('collections.show');
 
     // Collection management (restricted to creators)
     Route::middleware(['can:manage-collections'])->group(function () {
@@ -105,21 +81,48 @@ Route::prefix('home')->name('home.')->group(function () {
     });
 
     // Collection interaction
-    Route::post('/collections/{collection}/like', [LikeController::class, 'toggleCollectionLike'])->name('collections.like');
     Route::post('/collections/{collection}/report', [CollectionsController::class, 'report'])->name('collections.report');
 });
 
+// EGI routes
+Route::post('/egis/{egi}/reserve', [ReservationController::class, 'reserve'])->name('egis.reserve');
+Route::get('/egis/{id}', [EgiController::class, 'show'])->name('egis.show');
+
+
+// EPP routes
 Route::get('/epps', [EppController::class, 'index'])->name('epps.index');
 Route::get('/epps/{epp}', [EppController::class, 'show'])->name('epps.show');
 Route::get('/epps/dashboard', [EppController::class, 'dashboard'])->name('epps.dashboard');
 
-Route::post('/upload/egi', [EgiUploadController::class, 'handleUpload'])
-            ->name('egi.upload.store');
+/*
+|--------------------------------------------------------------------------
+| Wallet & Authentication Routes
+|--------------------------------------------------------------------------
+*/
+Route::post('/wallet/connect', [WalletConnectController::class, 'connect'])->name('wallet.connect');
+Route::post('/api/wallet/disconnect', [WalletConnectController::class, 'disconnect'])->name('wallet.disconnect');
+Route::get('/api/wallet/status', [WalletConnectController::class, 'status'])->name('wallet.status');
 
-// Rotte protette da middleware
+/*
+|--------------------------------------------------------------------------
+| Upload Routes
+|--------------------------------------------------------------------------
+*/
+Route::post('/upload/egi', [EgiUploadController::class, 'handleUpload'])
+    ->name('egi.upload.store');
+
+// Photo uploader component
+Route::get('/photo-uploader', PhotoUploader::class)->name('photo-uploader');
+
+/*
+|--------------------------------------------------------------------------
+| Protected Routes (Authenticated Users)
+|--------------------------------------------------------------------------
+*/
 Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified'])
     ->group(function () {
 
+        // Upload authorization check
         Route::get('/api/check-upload-authorization', [Ultra\UploadManager\Controllers\Config\ConfigController::class, 'checkUploadAuthorization'])
             ->name('upload.authorization');
 
@@ -135,40 +138,29 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
             return Route::currentRouteName();
         })->name('debug.context');
 
-        // --- INIZIO NUOVE ROTTE PER USER COLLECTIONS (API per il frontend) ---
+        /*
+        |--------------------------------------------------------------------------
+        | User Collections API
+        |--------------------------------------------------------------------------
+        */
         Route::prefix('api/user')->name('api.user.')->group(function () {
-            /**
-             * 📜 Oracode Route: GET /api/user/accessible-collections
-             * 🎯 Fetches collections owned by and collaborated on by the authenticated user.
-             * 🛡️ Access: Authenticated users.
-             * 🛂 Controller: UserCollectionController@getAccessibleCollections
-             */
             Route::get('/accessible-collections', [UserCollectionController::class, 'getAccessibleCollections'])
-                 ->name('accessibleCollections');
+                ->name('accessibleCollections');
 
-            /**
-             * 📜 Oracode Route: POST /api/user/set-current-collection/{collection}
-             * 🎯 Sets the specified collection as the authenticated user's current active collection.
-             * 🛡️ Access: Authenticated users. Controller verifies access to collection.
-             * 🛂 Controller: UserCollectionController@setCurrentCollection
-             * 📝 Note: Uses Route Model Binding for {collection}.
-             */
             Route::post('/set-current-collection/{collection}', [UserCollectionController::class, 'setCurrentCollection'])
-                 ->name('setCurrentCollection');
+                ->name('setCurrentCollection');
         });
 
-
-        // Raggruppa tutte le route che richiedono 'view_collection_header'
+        // EGI upload routes
         Route::middleware('collection_can:manage_egi')->group(function () {
-
-            // Route::get('/upload/egi', [EgiUploadPageController::class, 'showUploadPage'])
-            //     ->name('egi.upload.page');
-
-            // Route::post('/upload/egi', [EgiUploadController::class, 'handleUpload'])
-            //     ->name('egi.upload.store');
+            // Upload routes are defined here when needed
         });
 
-        // Admin Routes
+        /*
+        |--------------------------------------------------------------------------
+        | Admin Routes
+        |--------------------------------------------------------------------------
+        */
         Route::prefix('admin')->name('admin.')->group(function () {
             Route::resource('roles', RoleController::class)
                 ->middleware(['role_or_permission:manage_roles']);
@@ -193,14 +185,19 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
                 ->middleware(['role_or_permission:manage_roles']);
         });
 
+        /*
+        |--------------------------------------------------------------------------
+        | Collections Management Routes
+        |--------------------------------------------------------------------------
+        */
         Route::prefix('collections')->group(function () {
-            // Raggruppa tutte le route che richiedono 'read_collection'
+            // Read collection permission
             Route::middleware('collection_can:read_collection')->group(function () {
                 Route::get('/carousel', CollectionCarousel::class)
                     ->name('collections.carousel');
             });
 
-            // Raggruppa tutte le route che richiedono 'view_collection_header'
+            // View collection header permission
             Route::middleware('collection_can:view_collection_header')->group(function () {
                 Route::get('/{id}/edit', CollectionEdit::class)
                     ->name('collections.edit');
@@ -215,88 +212,128 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
                     ->name('collections.collection_user');
             });
 
-            // Raggruppa le route che richiedono 'create_collection'
+            // Create collection permission
             Route::middleware('collection_can:create_collection')->group(function () {
                 Route::get('/create', CreateCollection::class)
                     ->name('collections.create');
             });
 
-            // Raggruppa le route che richiedono 'add_team_member'
+            // Add team member permission
             Route::middleware('collection_can:add_team_member')->group(function () {
                 Route::delete('/{id}/invitations/{invitationId}', [CollectionUserMember::class, 'deleteProposalInvitation'])
                     ->name('invitations.delete');
             });
 
-            // Raggruppa le route che richiedono 'delete_wallet'
+            // Delete wallet permission
             Route::middleware('collection_can:delete_wallet')->group(function () {
                 Route::delete('/{id}/wallets/{walletId}', [CollectionUserMember::class, 'deleteProposalWallet'])
                     ->name('wallets.delete');
             });
 
-            // Raggruppa le route che richiedono 'create_wallet'
+            // Create wallet permission
             Route::middleware('collection_can:create_wallet')->group(function () {
                 Route::post('/{id}/wallets/create', [NotificationWalletRequestController::class, 'requestCreateWallet'])
                     ->name('wallets.create')
                     ->middleware('check.pending.wallet');
             });
 
-            // Raggruppa le route che richiedono 'update_wallet'
+            // Update wallet permission
             Route::middleware('collection_can:update_wallet')->group(function () {
                 Route::post('/{id}/wallets/update', [NotificationWalletRequestController::class, 'requestUpdateWallet'])
                     ->name('wallets.update')
                     ->middleware('check.pending.wallet');
 
                 Route::post('/{id}/wallets/donation', [NotificationWalletRequestController::class, 'requestDonation'])
-                    ->name('wallets.update') // Nota: questo nome è duplicato, potrebbe essere intenzionale
+                    ->name('wallets.donation')
                     ->middleware('check.pending.wallet');
             });
         });
 
-    // Rotte per la gestione delle notifiche
-    Route::prefix('notifications')->group(function () {
+        /*
+        |--------------------------------------------------------------------------
+        | Notifications Routes
+        |--------------------------------------------------------------------------
+        */
+        Route::prefix('notifications')->group(function () {
+            Route::get('{id}/details', [NotificationDetailsController::class, 'show'])
+                ->name('notifications.details');
 
-        Route::get('{id}/details', [NotificationDetailsController::class, 'show'])
-            ->name('notifications.details');
+            Route::get('/request', [NotificationWalletResponseController::class, 'fetchHeadThumbnailList'])
+                ->name('head.thumbnails.list');
 
-        Route::get('/request', [NotificationWalletResponseController::class, 'fetchHeadThumbnailList'])->name('head.thumbnails.list');
+            // Wallet notifications
+            Route::prefix('wallet')->group(function () {
+                Route::post('/response', [NotificationWalletResponseController::class, 'response'])
+                    ->name('notifications.wallets.response');
 
+                Route::post('/archive', [NotificationWalletResponseController::class, 'notificationArchive'])
+                    ->name('notifications.wallets.notificationArchive');
+            });
 
-        Route::prefix('wallet')->group(function () {
+            // Invitation notifications
+            Route::prefix('invitation')->group(function () {
+                Route::post('/response', [NotificationInvitationResponseController::class, 'response'])
+                    ->name('notifications.invitations.response');
 
-            Route::post('/response', [NotificationWalletResponseController::class, 'response'])->name('notifications.wallets.response');
-
-            Route::post('/archive', [NotificationWalletResponseController::class, 'notificationArchive'])->name('notifications.wallets.notificationArchive');
-
+                Route::post('/archive', [NotificationInvitationResponseController::class, 'notificationArchive'])
+                    ->name('notifications.invitations.notificationArchive');
+            });
         });
-
-        Route::prefix('invitation')->group(function () {
-
-            // Rotte per le Invitation
-            Route::post('/response', [NotificationInvitationResponseController::class, 'response'])->name('notifications.invitations.response');
-
-            Route::post('/archive', [NotificationInvitationResponseController::class, 'notificationArchive'])->name('notifications.invitations.notificationArchive');
-
-        });
-
     });
 
+/*
+|--------------------------------------------------------------------------
+| API Routes (Authenticated)
+|--------------------------------------------------------------------------
+*/
+
+// Collection interactions (API)
+Route::post('api/collections/{collection}/toggle-like', [LikeController::class, 'toggleCollectionLike'])
+    ->name('api.toggle.collection.like');
+
+Route::post('api/egis/{egi}/toggle-like', [LikeController::class, 'toggleEgiLike'])
+    ->name('api.toggle.egi.like');
+
+// Reservation API
+Route::post('/egis/{egi}/reserve', [ReservationController::class, 'apiReserve'])
+    ->name('api.egis.reserve');
 
 
+Route::prefix('api')->group(function () {
+    // Configuration endpoints
+    Route::get('/app-config', [App\Http\Controllers\Api\AppConfigController::class, 'getAppConfig'])
+        ->name('api.app.config');
+
+    Route::get('/error-definitions', [App\Http\Controllers\Api\AppConfigController::class, 'getErrorDefinitions'])
+        ->name('api.error.definitions');
 });
 
-// Routes for API/AJAX requests
-Route::middleware(['auth:sanctum'])->prefix('api')->group(function () {
-    // Collection interactions (API)
-    Route::post('/collections/{collection}/like', [LikeController::class, 'apiToggleCollectionLike'])
-        ->name('api.toggle.collection.like');
-
-    // EGI interactions (API)
-    Route::post('/egis/{egi}/reserve', [ReservationController::class, 'apiReserve'])
-        ->name('api.egis.reserve');
-    Route::post('/egis/{egi}/like', [LikeController::class, 'apiToggleEgiLike'])
-        ->name('api.egis.like');
+/*
+|--------------------------------------------------------------------------
+| Utility Routes
+|--------------------------------------------------------------------------
+*/
+// Debug routes
+Route::get('/phpinfo', function () {
+    phpinfo();
 });
 
+Route::get('/debug/livewire/{component}', function ($component) {
+    return Livewire::test($component)->render();
+});
+
+Route::get('/session', function () {
+    dd((session()->all()));
+});
+
+// CSRF refresh
+Route::get('/api/refresh-csrf', function () {
+    return response()->json([
+        'token' => csrf_token(),
+    ]);
+});
+
+// Translations JSON endpoint
 Route::get('/translations.json', function () {
     $translations = [
         'notification' => [
@@ -357,12 +394,9 @@ Route::get('/translations.json', function () {
     return response()->json($translations);
 });
 
-
-// Rotte per la gestione delle costanti enum
+// Enums constants endpoint
 Route::get('/js/enums', function (Request $request) {
-
     Log::channel('florenceegi')->info('Richiesta costanti enum', [
-        // 'user' => Auth::user()->id,
         'notificationStatus' => collect(NotificationStatus::cases())->mapWithKeys(fn($enum) => [$enum->name => $enum->value])
     ]);
 
@@ -371,14 +405,10 @@ Route::get('/js/enums', function (Request $request) {
     ]);
 });
 
-// Rotta per le citazioni
+// External API proxy
 Route::get('/api/quote', function () {
     $response = Http::get('https://zenquotes.io/api/random');
     return response($response->body())
-              ->header('Content-Type', 'application/json')
-              ->header('Access-Control-Allow-Origin', '*');
+        ->header('Content-Type', 'application/json')
+        ->header('Access-Control-Allow-Origin', '*');
 });
-
-
-
-

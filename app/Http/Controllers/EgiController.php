@@ -27,39 +27,36 @@ class EgiController extends Controller
      *   4. Return the 'egis.show' view with the data.
      * --- End Logic ---
      */
-    public function show(Egi $egi): View
+    public function show($id): View
     {
-        // 📡 Eager load relationships per evitare N+1 queries nella vista
-        $egi->load([
-            'collection' => function ($query) {
-                $query->with(['creator', 'epp']); // Carica anche creator ed epp della collezione
-            },
-            'user', // Il creatore specifico dell'EGI (se diverso da collection->creator)
-            'owner' // L'utente proprietario attuale dell'EGI
-            // Aggiungi qui altre relazioni se necessarie (es. 'likes', 'reservations', 'audits')
-        ]);
+        $egi = Egi::with([
+            'collection.creator',
+            'collection.epp',
+            'user',
+            'owner',
+            'likes'
+        ])->findOrFail($id);
 
-        // 🛡️ Controllo Visibilità (Opzionale ma consigliato)
-        // Se l'EGI non è pubblicato e l'utente non è il creatore/admin, potresti voler negare l'accesso
-        // if (!$egi->is_published && (!auth()->check() || auth()->id() !== $egi->collection->creator_id)) {
-        //     abort(404); // O 403 Forbidden
-        // }
+        // Verifica like per utente strong auth
+        if (auth()->check()) {
+            $egi->is_liked = $egi->likes()
+                ->where('user_id', auth()->id())
+                ->exists();
+        }
+        // Verifica like per utente weak auth
+        elseif (session('connected_user_id')) {
+            $egi->is_liked = $egi->likes()
+                ->where('user_id', session('connected_user_id'))
+                ->exists();
+        } else {
+            $egi->is_liked = false;
+        }
 
-        // Recupera collezioni correlate (opzionale, esempio)
-        // $relatedCollections = $egi->collection->creator
-        //     ? $egi->collection->creator->collections()
-        //         ->where('id', '!=', $egi->collection_id)
-        //         ->where('is_published', true)
-        //         ->limit(3)
-        //         ->get()
-        //     : collect(); // Collection vuota se non c'è creator
+        $egi->likes_count = $egi->likes()->count();
 
-        // Passa i dati alla vista
-        return view('egis.show', [
-            'egi' => $egi,
-            'collection' => $egi->collection, // Passa anche la collection per comodità
-            // 'relatedCollections' => $relatedCollections, // Se implementato
-        ]);
+        $collection = $egi->collection;
+
+        return view('egis.show', compact('egi', 'collection'));
     }
 
     // ... altri metodi del controller (index, create, store, edit, update, destroy)...

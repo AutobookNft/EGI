@@ -12,7 +12,7 @@
  * @author Padmin D. Curtis (for Fabio Cherici)
  */
 
-import { AppConfig, UserAccessibleCollections, CurrentCollectionDetails, OwnedCollection, CollaboratingCollection, appTranslate } from '../../config/appConfig';
+import { AppConfig, UserAccessibleCollections, CurrentCollectionDetails, OwnedCollection, CollaboratingCollection, appTranslate, route } from '../../config/appConfig';
 import * as DOMElements from '../../dom/domElements';
 import { UEM_Client_TS_Placeholder as UEM } from '../../services/uemClientService';
 import { fetchUserAccessibleCollectionsAPI, setCurrentUserCollectionAPI } from './collectionService';
@@ -97,7 +97,7 @@ function _renderCollectionListMenu(config: AppConfig, DOM: typeof DOMElements, u
     const createItem = (collection: OwnedCollection | CollaboratingCollection, isOwned: boolean): HTMLAnchorElement => {
         const item = document.createElement('a');
         item.href = '#'; // L'azione è gestita dal click, href="#" previene il default
-        item.className = 'collection-list-item block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:bg-gray-200';
+        item.className = 'block px-4 py-2 text-sm text-gray-700 collection-list-item hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:bg-gray-200';
         item.setAttribute('role', 'menuitem');
         item.tabIndex = -1; // Rende l'elemento focusabile programmaticamente ma non con Tab normale
         item.dataset.collectionId = collection.id.toString();
@@ -108,7 +108,7 @@ function _renderCollectionListMenu(config: AppConfig, DOM: typeof DOMElements, u
 
         if (!isOwned && 'creator_email' in collection) {
             const creatorSpan = document.createElement('span');
-            creatorSpan.className = 'text-xs text-gray-400 ml-1';
+            creatorSpan.className = 'ml-1 text-xs text-gray-400';
             creatorSpan.textContent = appTranslate('byCreator', config.translations, { creator: collection.creator_email });
             item.appendChild(creatorSpan);
         }
@@ -121,7 +121,7 @@ function _renderCollectionListMenu(config: AppConfig, DOM: typeof DOMElements, u
 
     const createHeader = (translationKey: string): HTMLDivElement => {
         const header = document.createElement('div');
-        header.className = 'collection-list-header block px-4 pt-2 pb-1 text-xs text-gray-500 uppercase tracking-wider';
+        header.className = 'block px-4 pt-2 pb-1 text-xs tracking-wider text-gray-500 uppercase collection-list-header';
         header.setAttribute('role', 'none');
         header.textContent = appTranslate(translationKey, config.translations);
         return header;
@@ -135,7 +135,7 @@ function _renderCollectionListMenu(config: AppConfig, DOM: typeof DOMElements, u
     if (currentUserCollectionsDataState.collaborating_collections.length > 0) {
         if (currentUserCollectionsDataState.owned_collections.length > 0) {
             const separator = document.createElement('div');
-            separator.className = 'collection-list-separator my-1 border-t border-gray-200';
+            separator.className = 'my-1 border-t border-gray-200 collection-list-separator';
             separator.setAttribute('role', 'separator');
             collectionListDropdownMenuEl.appendChild(separator);
         }
@@ -162,10 +162,16 @@ async function _handleSetCurrentCollection(config: AppConfig, DOM: typeof DOMEle
 
     const newDetails = await setCurrentUserCollectionAPI(config, collectionId);
     if (newDetails) {
+        // Aggiorna lo stato locale
         currentCollectionDetailsState = newDetails;
+
+        // Aggiorna il badge UI
         updateCurrentCollectionBadge(config, DOM);
+
+        // Chiudi il dropdown
         closeCollectionListDropdown(config, DOM, uem);
 
+        // Mostra notifica senza reload
         if (window.Swal) {
             window.Swal.fire({
                 icon: 'success',
@@ -174,15 +180,24 @@ async function _handleSetCurrentCollection(config: AppConfig, DOM: typeof DOMEle
                 timer: 2500,
                 timerProgressBar: true,
                 showConfirmButton: false,
-            }).then(() => { window.location.reload(); });
+            });
+            // RIMUOVI .then(() => { window.location.reload(); })
         } else {
-            alert(appTranslate('gallerySwitchedText', config.translations, { galleryName: newDetails.name }) + " " + appTranslate('pageWillReload', config.translations));
-            window.location.reload();
+            alert(appTranslate('gallerySwitchedText', config.translations, { galleryName: newDetails.name }));
+            // RIMUOVI window.location.reload()
         }
-    } else {
-        // L'errore è già stato gestito da setCurrentUserCollectionAPI via UEM
-        collectionListDropdownButtonEl.innerHTML = originalButtonHTML; // Ripristina testo bottone
+
+        // AGGIORNA CONFIG LOCALE (importante!)
+        config.initialUserData.current_collection_id = newDetails.id;
+        config.initialUserData.current_collection_name = newDetails.name;
+        config.initialUserData.can_edit_current_collection = newDetails.can_edit;
+
+        // Dispatch custom event per altri componenti che potrebbero dipendere da questo
+        document.dispatchEvent(new CustomEvent('collection-changed', {
+            detail: newDetails
+        }));
     }
+
     collectionListDropdownButtonEl.disabled = false;
 }
 
@@ -251,17 +266,16 @@ export function updateCurrentCollectionBadge(config: AppConfig, DOM: typeof DOME
 
     if (id && name) {
         currentCollectionBadgeNameEl.textContent = name;
-        const viewUrl = appTranslate(config.routes.viewCollectionBase, config.translations, { id: id.toString() }); // Usa appTranslate per le rotte se necessario per baseUrl
-        const editUrl = appTranslate(config.routes.editCollectionBase, config.translations, { id: id.toString() });
-
+        const viewUrl = route('viewCollectionBase', { id: id });
+        const editUrl = route('editCollectionBase', { id: id });
         if (can_edit) {
             currentCollectionBadgeLinkEl.href = editUrl; // Dovrebbe essere già un URL completo da appConfig/route helper
-            currentCollectionBadgeLinkEl.title = appTranslate('editCurrentGalleryTitle', config.translations, { galleryName: name });
+            currentCollectionBadgeLinkEl.title = appTranslate('editCurrentGalleryTitle', config.translations);
             currentCollectionBadgeLinkEl.classList.remove('pointer-events-none', 'opacity-60', 'cursor-default');
             currentCollectionBadgeLinkEl.classList.add('hover:bg-sky-100', 'hover:border-sky-400');
         } else {
             currentCollectionBadgeLinkEl.href = viewUrl;
-            currentCollectionBadgeLinkEl.title = appTranslate('viewCurrentGalleryTitle', config.translations, { galleryName: name });
+            currentCollectionBadgeLinkEl.title = appTranslate('viewCurrentGalleryTitle', config.translations);
             currentCollectionBadgeLinkEl.classList.add('opacity-75'); // Meno prominente ma cliccabile per vedere
             currentCollectionBadgeLinkEl.classList.remove('pointer-events-none', 'cursor-default', 'hover:bg-sky-100', 'hover:border-sky-400');
         }

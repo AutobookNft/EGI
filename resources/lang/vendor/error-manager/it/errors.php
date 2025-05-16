@@ -76,6 +76,16 @@ return [
         'wallet_address_invalid' => 'Formato dell\'indirizzo wallet non valido per l\'utente :user_id: :wallet_address',
         'wallet_not_found' => 'Wallet non trovato per l\'utente :user_id e la collezione :collection_id',
         'wallet_already_exists' => 'Il wallet esiste già per l\'utente :user_id e la collezione :collection_id con ID :wallet_id',
+        'wallet_invalid_secret' => 'Chiave segreta non valida fornita per wallet :wallet da IP :ip',
+        'wallet_validation_failed' => 'Validazione wallet fallita. Errori: :errors',
+        'wallet_connection_failed' => 'Impossibile stabilire connessione wallet. Errore: :message',
+        'wallet_disconnect_failed' => 'Impossibile disconnettere il wallet. Errore: :error',
+
+        // COLLECTION_CREATION_FAILED
+        'collection_creation_failed' => 'Impossibile creare la collection predefinita per l\'utente :user_id. Dettagli errore: :error_details',
+
+        // COLLECTION_FIND_CREATE_FAILED
+        'collection_find_create_failed' => 'Impossibile trovare o creare la collection per l\'utente :user_id. Dettagli errore: :error_details',
 
         // == New Entries ==
         'authorization_error' => 'Autorizzazione negata per l\'azione richiesta: :action.',
@@ -146,14 +156,8 @@ return [
         'egi_storage_failure' => 'Fallito il salvataggio sicuro del file EGI. Riprova o contatta il supporto.',
         'egi_unexpected_error' => 'Si è verificato un errore inaspettato durante l\'elaborazione del tuo EGI. Riprova più tardi.',
         'egi_unauthorized_access' => 'Accesso non autorizzato. Effettua il login.',
-
-        // Errori relativi all'interfaccia utente (messaggi per utenti)
         'egi_page_rendering_error' => 'Si è verificato un problema durante il caricamento della pagina. Riprova più tardi o contatta l\'assistenza.',
-
-        // Errori di validazione (messaggi per utenti)
         'invalid_egi_file' => 'Il file EGI non può essere elaborato a causa di errori di validazione. Verifica il formato e il contenuto del file.',
-
-        // Errori di elaborazione (messaggi per utenti)
         'error_during_egi_processing' => 'Si è verificato un errore durante l\'elaborazione del file EGI. Il nostro team è stato avvisato e analizzerà il problema.',
 
         // Errori di creazione Wallet (messaggi per utenti)
@@ -162,6 +166,14 @@ return [
         'wallet_address_invalid' => 'L\'indirizzo del wallet fornito non è valido. Controlla il formato e riprova.',
         'wallet_not_found' => 'Il wallet richiesto non è stato trovato. Verifica le tue informazioni e riprova.',
         'wallet_already_exists' => 'Un wallet è già configurato per questa collezione. Utilizza il wallet esistente o contatta l\'assistenza per aiuto.',
+        'wallet_invalid_secret' => 'La chiave segreta inserita non è corretta. Riprova.',
+        'wallet_validation_failed' => 'Il formato dell\'indirizzo wallet non è valido. Controlla e riprova.',
+        'wallet_connection_failed' => 'Impossibile connettere il tuo wallet in questo momento. Riprova più tardi.',
+        'wallet_disconnect_failed' => 'Si è verificato un problema durante la disconnessione del wallet. Aggiorna la pagina.',
+
+        // COLLECTION
+        'collection_creation_failed' => 'Impossibile creare la tua collezione. Riprova più tardi o contatta il supporto.',
+        'collection_find_create_failed' => 'Impossibile accedere alle tue collezioni. Riprova più tardi.',
 
         // == New Entries ==
         'authorization_error' => 'Non disponi dei permessi necessari per eseguire questa azione.',

@@ -44,6 +44,7 @@ class User extends Authenticatable
         'current_collection_id',
         'language',
         'wallet',
+        'personal_secret',
         'wallet_balance',
         'consent',
         'bio_title',
@@ -162,7 +163,7 @@ class User extends Authenticatable
                 'can_edit_current_collection' => false,
             ];
         }
-        
+
         $collection = $this->currentCollection;
         return [
             'current_collection_id' => $collection->id,
@@ -227,6 +228,42 @@ class User extends Authenticatable
         ]);
 
         return \App\Models\Collection::find($id);
+    }
+
+    // Nel modello User
+    public function canEditCollection(Collection $collection): bool
+    {
+        // È creator o owner
+        if ($collection->creator_id === $this->id || $collection->owner_id === $this->id) {
+            return true;
+        }
+
+        // O ha un ruolo specifico nella pivot
+        $pivot = $this->collaborations()
+            ->where('collection_id', $collection->id)
+            ->first();
+
+        return $pivot && in_array($pivot->pivot->role, ['editor', 'admin']);
+    }
+
+    public function getRouteKeyName(): string
+    {
+        return 'id';
+    }
+
+    public function getRouteKey(): string
+    {
+        return $this->getAttribute($this->getRouteKeyName());
+    }
+
+    public function getRouteKeyNameForCollection(): string
+    {
+        return 'collection_id';
+    }
+
+    public function getRouteKeyForCollection(): string
+    {
+        return $this->getAttribute($this->getRouteKeyNameForCollection());
     }
 
 }

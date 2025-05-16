@@ -1065,5 +1065,100 @@ return [
             'notify_slack' => false,
             'msg_to' => 'div',
         ],
+        'WALLET_INVALID_SECRET' => [
+            'type' => 'warning',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.wallet_invalid_secret',
+            'user_message_key' => 'error-manager::errors.user.wallet_invalid_secret',
+            'http_status_code' => 401,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'WALLET_VALIDATION_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.wallet_validation_failed',
+            'user_message_key' => 'error-manager::errors.user.wallet_validation_failed',
+            'http_status_code' => 422,
+            'msg_to' => 'div',
+        ],
+
+        'WALLET_CONNECTION_FAILED' => [
+            'type' => 'critical',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.wallet_connection_failed',
+            'user_message_key' => 'error-manager::errors.user.wallet_connection_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'WALLET_DISCONNECT_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'not',
+            'dev_message_key' => 'error-manager::errors.dev.wallet_disconnect_failed',
+            'user_message_key' => 'error-manager::errors.user.wallet_disconnect_failed',
+            'http_status_code' => 500,
+            'msg_to' => 'toast',
+        ],
+
+        // ====================================================
+        // Errori specifici per la gestione delle collezioni
+        // ====================================================
+
+        'COLLECTION_CREATION_FAILED' => [
+            'type' => 'critical',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.collection_creation_failed',
+            'user_message_key' => 'error-manager::errors.user.collection_creation_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'COLLECTION_FIND_CREATE_FAILED' => [
+            'type' => 'critical',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.collection_find_create_failed',
+            'user_message_key' => 'error-manager::errors.user.collection_find_create_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'AUTH_REQUIRED' => [
+            'type' => 'warning',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.auth_required',
+            'user_message_key' => 'error-manager::errors.user.auth_required',
+            'http_status_code' => 401,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'AUTH_REQUIRED_FOR_LIKE' => [
+            'type' => 'warning',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.auth_required_for_like',
+            'user_message_key' => 'error-manager::errors.user.auth_required_for_like',
+            'http_status_code' => 401,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'LIKE_TOGGLE_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.like_toggle_failed',
+            'user_message_key' => 'error-manager::errors.user.like_toggle_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'toast',
+        ],
     ],
 ];

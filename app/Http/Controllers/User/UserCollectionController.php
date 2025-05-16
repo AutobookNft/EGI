@@ -10,6 +10,7 @@ use App\Models\Collection;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Cache;
 use Ultra\UltraLogManager\UltraLogManager;         // Import ULM
 use Ultra\ErrorManager\Interfaces\ErrorManagerInterface; // Import Interfaccia UEM
 
@@ -166,6 +167,18 @@ final class UserCollectionController extends Controller
             $user->current_collection_id = $collection->id;
             $user->save();
 
+            $request->session()->put('current_collection_id', $collection->id);
+
+           // CRUCIALE: Invalida la cache dell'app config
+            $lang = app()->getLocale();
+            $cacheKey = "app_config_{$lang}_{$user->id}";
+            Cache::forget($cacheKey);
+
+            // Se ci sono più lingue, invalida tutte
+            foreach (config('app.available_locales', ['it', 'en']) as $locale) {
+                Cache::forget("app_config_{$locale}_{$user->id}");
+            }
+
             $this->logger->info(
                 'Current collection updated successfully.',
                 ['user_id' => $user->id, 'new_current_collection_id' => $collection->id, 'log_category' => 'COLLECTION_UPDATE']
@@ -179,6 +192,7 @@ final class UserCollectionController extends Controller
                 'current_collection_id' => $collection->id,
                 'current_collection_name' => $collection->collection_name,
             ]);
+
         } catch (\Throwable $e) {
             $this->logger->error(
                 'Exception while updating current collection.',

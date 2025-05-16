@@ -8,6 +8,10 @@
 
 
 return [
+    'disconnect' => 'Déconnexion',
+    'dashboard' => 'Tableau de bord',
+    'collection' => 'Collection',
+    'collection_members' => 'Les membres de la collection',
     'message' => 'Message',
     'created_at' => 'Créé à',
     'no_action_available' => 'Aucune action disponible',
@@ -21,7 +25,7 @@ return [
     'unauthorized_action' => 'Vous n\'êtes pas autorisé à effectuer ce type d\'action',
     'came_to_back' => 'Retour',
     "file_deleted_successfully" => "Fichier supprimé avec succès",
-    'extension_not_allowed' => 'Extension non autorisée!',
+    'title_extension_not_allowed' => 'Extension non autorisée!',
     'title_file_type_not_allowed' => 'Type de fichier non autorisé!',
     'title_file_size_exceeds' => 'Taille de fichier excessive!',
     'title_invalid_file_name' => 'Nom de fichier invalide!',
@@ -121,8 +125,8 @@ return [
     'saved' => 'Sauvegardé!',
     'remember_to_save' => 'N\'oubliez pas de sauvegarder',
     'cancel' => 'Annuler',
-    'update' => 'Mettre à jour',
     'cancelled' => 'Annulé',
+    'update' => 'Mettre à jour',
     'delete' => 'Supprimer',
     'deleted' => 'Supprimé',
     'edit' => 'Modifier',
@@ -153,6 +157,7 @@ return [
         'title' => 'Modifier l\'élément',
         'description' => 'Modifiez les informations de l\'élément',
         'back_to_collection' => 'Retour à la collection',
+        'write_the_buyers_email' => 'Écrivez l\'e-mail de l\'acheteur',
         'this_item_cannot_be_transfered' => 'Cet élément ne peut pas être transféré',
         'are_you_sure_you_want_to_transfer_this_item' => 'Êtes-vous sûr de vouloir transférer cet élément de <span class="font-bold"> :collectionNameFrom </span> à <span class="font-bold"> :collectionNameTo </span> ?',
         'personal_collection_for_this_user_not_exists' => 'La collection personnelle pour cet utilisateur n\'existe pas, impossible de transférer',
@@ -187,10 +192,13 @@ return [
         'are_you_sure_you_would_like_to_remove_this_chapter' => 'Êtes-vous sûr de vouloir supprimer ce chapitre ?',
         'are_you_sure_you_would_like_to_remove_this_biography' => 'Êtes-vous sûr de vouloir supprimer cette biographie ?',
     ],
-
     'drop' => [
         'remove_from_drop' => 'Supprimer de la drop',
         'add_to_drop' => 'Ajouter à la drop',
         'are_you_sure_you_would_like_to_remove_this_item_from_drop' => 'Êtes-vous sûr de vouloir supprimer :itemremoved de la drop?',
+    ],
+    'utilities' => [
+        'utilities' => 'Utilitaires',
+        'upload_file' => 'Télécharger le fichier',
     ],
 ];

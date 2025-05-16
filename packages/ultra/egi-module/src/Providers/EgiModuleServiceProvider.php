@@ -69,7 +69,7 @@ class EgiModuleServiceProvider extends ServiceProvider
         // Ora possiamo usare le interfacce qui, perché abbiamo i binding
         $this->app->bind(CollectionService::class, function ($app) {
             return new CollectionService(
-                $app->make(UltraLoggerInterface::class), // Usa l'interfaccia!
+                $app->make(UltraLogManager::class), // Usa l'interfaccia!
                 $app->make(WalletServiceInterface::class), // Usa l'interfaccia!
                 $app->make(UserRoleServiceInterface::class), // Usa l'interfaccia!
                 'florenceegi'
@@ -80,7 +80,7 @@ class EgiModuleServiceProvider extends ServiceProvider
         $this->app->bind(UserRoleServiceInterface::class, function ($app) {
             return new UserRoleService(
                 $app->make(ErrorManagerInterface::class),
-                $app->make(UltraLoggerInterface::class)
+                $app->make(UltraLogManager::class)
             );
         });
 
