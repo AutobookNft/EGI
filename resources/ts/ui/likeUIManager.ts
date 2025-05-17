@@ -111,9 +111,9 @@ export class LikeUIManager {
             if (window.Swal) {
                 window.Swal.fire({
                     icon: 'info',
-                    title: appTranslate('authRequiredTitle', this.config.translations),
-                    text: appTranslate('authRequiredForLike', this.config.translations),
-                    confirmButtonText: appTranslate('connectWallet', this.config.translations),
+                    title: appTranslate('like.auth_required_title', this.config.translations),
+                    text: appTranslate('like.auth_required_for_like', this.config.translations),
+                    confirmButtonText: appTranslate('wallet_connect_button', this.config.translations),
                     confirmButtonColor: '#3085d6'
                 }).then((result) => {
                     if (result.isConfirmed) {

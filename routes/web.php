@@ -24,6 +24,7 @@ use Illuminate\Support\Facades\Route;
 use App\Livewire\PhotoUploader;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\EgiReservationCertificateController;
 use App\Http\Controllers\IconAdminController;
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\HomeController;
@@ -85,7 +86,6 @@ Route::prefix('home')->name('home.')->group(function () {
 });
 
 // EGI routes
-Route::post('/egis/{egi}/reserve', [ReservationController::class, 'reserve'])->name('egis.reserve');
 Route::get('/egis/{id}', [EgiController::class, 'show'])->name('egis.show');
 
 
@@ -145,7 +145,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         */
         Route::prefix('api/user')->name('api.user.')->group(function () {
             Route::get('/accessible-collections', [UserCollectionController::class, 'getAccessibleCollections'])
-                ->name('accessibleCollections');
+                ->name('accessible.collections');
 
             Route::post('/set-current-collection/{collection}', [UserCollectionController::class, 'setCurrentCollection'])
                 ->name('setCurrentCollection');
@@ -281,32 +281,61 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         });
     });
 
+
 /*
 |--------------------------------------------------------------------------
-| API Routes (Authenticated)
+| Reservation, configuration and like routes
 |--------------------------------------------------------------------------
 */
 
-// Collection interactions (API)
-Route::post('api/collections/{collection}/toggle-like', [LikeController::class, 'toggleCollectionLike'])
-    ->name('api.toggle.collection.like');
-
-Route::post('api/egis/{egi}/toggle-like', [LikeController::class, 'toggleEgiLike'])
-    ->name('api.toggle.egi.like');
-
-// Reservation API
-Route::post('/egis/{egi}/reserve', [ReservationController::class, 'apiReserve'])
-    ->name('api.egis.reserve');
-
-
-Route::prefix('api')->group(function () {
-    // Configuration endpoints
-    Route::get('/app-config', [App\Http\Controllers\Api\AppConfigController::class, 'getAppConfig'])
-        ->name('api.app.config');
-
-    Route::get('/error-definitions', [App\Http\Controllers\Api\AppConfigController::class, 'getErrorDefinitions'])
-        ->name('api.error.definitions');
+// Certificate routes
+Route::prefix('egi-certificates')->name('egi-certificates.')->group(function () {
+    Route::get('/{uuid}', [EgiReservationCertificateController::class, 'show'])
+        ->name('show');
+    Route::get('/{uuid}/download', [EgiReservationCertificateController::class, 'download'])
+        ->name('download');
+    Route::get('/{uuid}/verify', [EgiReservationCertificateController::class, 'verify'])
+        ->name('verify');
+    Route::get('/egi/{egiId}', [EgiReservationCertificateController::class, 'listByEgi'])
+        ->name('list-by-egi');
 });
+
+// Protected routes (require authentication)
+Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified'])->group(function () {
+    // User certificates
+    Route::get('/my-certificates', [EgiReservationCertificateController::class, 'listByUser'])
+        ->name('my-certificates');
+});
+
+// API Routes
+Route::prefix('api')->name('api.')->group(function () {
+    // Reservation API endpoints
+    Route::post('/egis/{egiId}/reserve', [ReservationController::class, 'apiReserve'])
+        ->name('egis.reserve');
+    Route::delete('/reservations/{id}', [ReservationController::class, 'cancel'])
+        ->name('reservations.cancel');
+    Route::get('/my-reservations', [ReservationController::class, 'listUserReservations'])
+        ->name('my-reservations');
+    Route::get('/egis/{egiId}/reservation-status', [ReservationController::class, 'getEgiReservationStatus'])
+        ->name('egis.reservation-status');
+
+    // API di configurazione
+    Route::get('/app-config', [App\Http\Controllers\Api\AppConfigController::class, 'getAppConfig'])
+        ->name('app.config');
+
+    // API di configurazione per le definizioni degli errori
+    Route::get('/error-definitions', [App\Http\Controllers\Api\AppConfigController::class, 'getErrorDefinitions'])
+        ->name('error.definitions');
+
+    // Like/Unlike routes
+    Route::post('/collections/{collection}/toggle-like', [LikeController::class, 'toggleCollectionLike'])
+        ->name('toggle.collection.like');
+
+    Route::post('/egis/{egi}/toggle-like', [LikeController::class, 'toggleEgiLike'])
+        ->name('toggle.egi.like');
+});
+
+
 
 /*
 |--------------------------------------------------------------------------

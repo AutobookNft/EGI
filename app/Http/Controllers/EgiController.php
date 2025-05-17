@@ -34,7 +34,8 @@ class EgiController extends Controller
             'collection.epp',
             'user',
             'owner',
-            'likes'
+            'likes',
+            'reservationCertificates'
         ])->findOrFail($id);
 
         // Verifica like per utente strong auth

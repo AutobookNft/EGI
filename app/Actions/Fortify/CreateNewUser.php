@@ -175,6 +175,8 @@ class CreateNewUser implements CreatesNewUsers
     {
         $context = ['action' => 'validate_input'];
 
+        $this->logger->info('Validating user input', $input);
+
         try {
             Validator::make($input, [
                 'name' => ['required', 'string', 'max:255'],

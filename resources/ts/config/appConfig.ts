@@ -78,6 +78,7 @@ export interface AppRoutesApi {
     // uemConfigEndpoint?: string;
     // checkUploadAuth?: string;
     // walletDisconnect?: string;
+    [key: string]: string | undefined; // Allow string indexing for dynamic routes
 }
 
 export interface AppRoutes {
@@ -90,6 +91,7 @@ export interface AppRoutes {
     viewCollectionBase: string; // Path con placeholder :id, es. /home/collections/:id
     editCollectionBase: string; // Path con placeholder :id, es. /collections/:id/edit
     api: AppRoutesApi;
+    [key: string]: string | AppRoutesApi | any; // Support for dynamic property access
 }
 
 export interface AppTranslations {
@@ -271,6 +273,7 @@ export function appTranslate(
         return key; // Fallback to key for debugging
     }
 }
+
 /**
  * 📜 Oracode Function: route
  * 🎯 Costruisce un URL dalle route configurate
@@ -286,50 +289,116 @@ export function route(
 ): string {
     try {
         const config = getAppConfig();
-        let pathTemplate: string;
-        let baseForRoute: string = config.routes.baseUrl;
 
-        // Naviga nell'oggetto routes per trovare il template
-        const routeParts = routeKey.split('.');
-        let currentPath: any = config.routes;
+        // Mappa di conversione dei nomi delle route da stile TypeScript a stile PHP
+        const routeKeyMap: Record<string, string> = {
+            // Mappa route API
+            'api.egis.reservation-status': 'egiReservationStatus',
+            'api.egis.reserve': 'egisReserve',
+            'api.reservations.cancel': 'reservationsCancel',
+            'api.my-reservations': 'myReservations',
+            'api.toggle.collection.like': 'toggleCollectionLike',
+            'api.toggle.egi.like': 'toggleEgiLike',
 
-        for (const part of routeParts) {
-            if (currentPath && typeof currentPath === 'object' && part in currentPath) {
-                currentPath = currentPath[part];
+            // Aggiungi altre mappature qui secondo necessità
+        };
+
+        // Se è una route API, cerchiamo prima nella mappa, poi nell'oggetto config.routes.api
+        if (routeKey.startsWith('api.')) {
+            const apiSubKey = routeKeyMap[routeKey] || routeKey.substring(4); // Rimuovi 'api.'
+
+            if (config.routes.api && config.routes.api[apiSubKey]) {
+                let pathTemplate = config.routes.api[apiSubKey];
+
+                // Sostituisci i parametri
+                if (params) {
+                    for (const key in params) {
+                        if (Object.prototype.hasOwnProperty.call(params, key)) {
+                            // Mappa dei nomi dei parametri (TypeScript -> PHP)
+                            const paramMap: Record<string, string> = {
+                                'egi': 'egiId',      // usato come api.egis.reservation-status con {egi: 123}
+                                'id': 'id',          // generico
+                                // Aggiungi altre mappature dei parametri qui
+                            };
+
+                            const paramKey = paramMap[key] || key;
+
+                            // Cerca sia :paramKey che {paramKey}
+                            const regex1 = new RegExp(`:${paramKey}`, 'g');
+                            const regex2 = new RegExp(`\\{${paramKey}\\}`, 'g');
+
+                            pathTemplate = pathTemplate
+                                .replace(regex1, String(params[key]))
+                                .replace(regex2, String(params[key]));
+                        }
+                    }
+                }
+
+                return pathTemplate;
             } else {
-                console.warn(`Route key "${routeKey}" not found in config.`);
-                return `/${routeKey}`;
+                console.warn(`API route "${routeKey}" not found in config.routes.api`);
+
+                // Fallback: Costruisci un URL basico
+                const urlParts = routeKey.split('.');
+                urlParts.shift(); // Rimuovi 'api'
+
+                let path = urlParts.join('/');
+
+                // Sostituisci parametri nel percorso di fallback
+                if (params) {
+                    for (const key in params) {
+                        if (Object.prototype.hasOwnProperty.call(params, key)) {
+                            path = path.replace(`:${key}`, String(params[key]));
+                        }
+                    }
+                }
+
+                return `/api/${path}`;
             }
-        }
+        } else {
+            // Route non-API (web)
+            const routeParts = routeKey.split('.');
+            let currentPath: any = config.routes;
 
-        if (typeof currentPath !== 'string') {
-            console.warn(`Route key "${routeKey}" did not resolve to a string.`);
-            return `/${routeKey}`;
-        }
-
-        pathTemplate = currentPath;
-
-        // Sostituisci parametri
-        if (params) {
-            for (const key in params) {
-                if (Object.prototype.hasOwnProperty.call(params, key)) {
-                    const regex = new RegExp(`:${key}`, 'g');
-                    pathTemplate = pathTemplate.replace(regex, String(params[key]));
+            for (const part of routeParts) {
+                if (currentPath && typeof currentPath === 'object' && part in currentPath) {
+                    currentPath = currentPath[part];
+                } else {
+                    console.warn(`Route key "${routeKey}" not found in config.routes`);
+                    return `/${routeKey.replace(/\./g, '/')}`;
                 }
             }
+
+            if (typeof currentPath !== 'string') {
+                console.warn(`Route key "${routeKey}" did not resolve to a string`);
+                return `/${routeKey.replace(/\./g, '/')}`;
+            }
+
+            // Sostituisci parametri
+            let pathTemplate = currentPath;
+
+            if (params) {
+                for (const key in params) {
+                    if (Object.prototype.hasOwnProperty.call(params, key)) {
+                        const regex1 = new RegExp(`:${key}`, 'g');
+                        const regex2 = new RegExp(`\\{${key}\\}`, 'g');
+
+                        pathTemplate = pathTemplate
+                            .replace(regex1, String(params[key]))
+                            .replace(regex2, String(params[key]));
+                    }
+                }
+            }
+
+            return pathTemplate;
         }
 
-        // Costruisci URL completo se necessario
-        if (!pathTemplate.startsWith('http') && !pathTemplate.startsWith('//')) {
-            return baseForRoute.replace(/\/$/, '') + '/' + pathTemplate.replace(/^\//, '');
-        }
-
-        return pathTemplate;
     } catch (error) {
-        console.warn(`Route generation failed for key "${routeKey}". Config not loaded?`);
-        return `/${routeKey}`;
+        console.error(`Route generation failed for key "${routeKey}"`, error);
+        return `/${routeKey.replace(/\./g, '/')}`;
     }
 }
+
 
 /**
  * @private

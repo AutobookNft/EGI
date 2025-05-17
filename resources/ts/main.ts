@@ -1,4 +1,4 @@
-// File: resources/ts/main.ts
+// File: resources/ts/main.ts (modifiche per integrare il sistema di prenotazione)
 
 /**
  * 📜 Oracode TypeScript Module: Main Application Entry Point (FlorenceEGI Guest Layout)
@@ -8,8 +8,8 @@
  * e imposta gli event listener principali per gestire le interazioni dell'utente
  * e aggiornare dinamicamente l'interfaccia utente della navbar e delle modali.
  *
- * @version 3.0.0 (Async Config Implementation)
- * @date 2025-05-13
+ * @version 3.1.0 (Reservation System Implementation)
+ * @date 2025-05-16
  * @author Padmin D. Curtis (for Fabio Cherici)
  */
 
@@ -46,6 +46,11 @@ import { updateNavbarUI } from './ui/navbarManager';
 // UEM Client
 import { UEM_Client_TS_Placeholder as UEM } from './services/uemClientService';
 
+// NUOVO: Importazione del sistema di prenotazione
+import reservationFeature from './features/reservations/reservationFeature';
+
+import reservationButtons from './features/reservations/reservationButtons';
+
 // --- ✨ ISTANZE GLOBALI DEL MODULO MAIN ---
 let mainAppConfig: AppConfig;
 let mainUploadModalManager: UploadModalManager | null = null;
@@ -60,8 +65,6 @@ let mainUploadModalManager: UploadModalManager | null = null;
  */
 async function initializeApplication(): Promise<void> {
     try {
-
-
         // 1. Inizializza UEM per gestione errori
         if (UEM && typeof UEM.initialize === 'function') {
             await UEM.initialize();
@@ -70,7 +73,7 @@ async function initializeApplication(): Promise<void> {
 
         // 2. Carica configurazione dal server
         mainAppConfig = await initializeAppConfig();
-        console.log(`${appTranslate('padminGreeting')} Configuration loaded successfully.`);
+        console.log(`${appTranslate('padminGreeting')} Configuration loaded successfully.`, mainAppConfig);
 
         // 3. Conferma riferimenti DOM
         DOMElements.confirmDOMReferencesLoaded();
@@ -100,6 +103,14 @@ async function initializeApplication(): Promise<void> {
         // 7. Inizializza il sistema di like
         likeUIManager.initialize(mainAppConfig);
         console.log('Padmin Main: Like system initialized.');
+
+        // 8. NUOVO: Inizializza il sistema di prenotazione
+        await reservationFeature.initialize();
+        console.log('Padmin Main: Reservation system initialized.');
+
+        // 9. Inizializza il sistema di prenotazione
+        await reservationButtons.initialize();
+        console.log('Padmin Main: Reservation buttons initialized.');
 
         console.log(`${appTranslate('padminReady')} FlorenceEGI client operational.`);
 
@@ -158,7 +169,11 @@ function setupEventListeners(): void {
             DOMElements,
             mainUploadModalManager,
             UEM,
-            () => updateNavbarUI(mainAppConfig, DOMElements)
+            () => {
+                updateNavbarUI(mainAppConfig, DOMElements);
+                // NUOVO: Aggiorna lo stato dei bottoni di prenotazione quando cambia lo stato di autenticazione
+                reservationFeature.updateReservationButtonStates();
+            }
         )
     );
 
@@ -217,9 +232,13 @@ function setupEventListeners(): void {
         copyWalletAddress(mainAppConfig, DOMElements, UEM)
     );
 
-    DOMElements.walletDisconnectButtonEl?.addEventListener('click', () =>
-        handleDisconnect(mainAppConfig, DOMElements, UEM, () => updateNavbarUI(mainAppConfig, DOMElements))
-    );
+    DOMElements.walletDisconnectButtonEl?.addEventListener('click', () => {
+        handleDisconnect(mainAppConfig, DOMElements, UEM, () => {
+            updateNavbarUI(mainAppConfig, DOMElements);
+            // NUOVO: Aggiorna lo stato dei bottoni di prenotazione quando l'utente si disconnette
+            reservationFeature.updateReservationButtonStates();
+        });
+    });
 
     // --- DROPDOWN COLLECTION LIST ---
     DOMElements.collectionListDropdownButtonEl?.addEventListener('click', () =>

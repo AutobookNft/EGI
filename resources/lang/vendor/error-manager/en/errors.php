@@ -107,7 +107,19 @@ return [
         'auth_required' => 'Authentication required to perform this action. User not logged in.',
         'auth_required_for_like' => 'User must be authenticated to like items. Current auth status: :status',
         'like_toggle_failed' => 'Failed to toggle like for :resource_type :resource_id. Error: :error',
-        ],
+
+        // Dev message for reservations sistem
+        'reservation_egi_not_available' => 'The EGI with ID :egi_id is not available for reservation. It may be already minted or not published.',
+        'reservation_amount_too_low' => 'The offer amount of :amount EUR is below the minimum required for this EGI.',
+        'reservation_unauthorized' => 'Unauthorized attempt to reserve EGI :egi_id. User must be authenticated or have a connected wallet.',
+        'reservation_certificate_generation_failed' => 'Failed to generate certificate for reservation :reservation_id. Error: :error',
+        'reservation_certificate_not_found' => 'Certificate with UUID :uuid not found.',
+        'reservation_already_exists' => 'User already has an active reservation for EGI :egi_id.',
+        'reservation_cancel_failed' => 'Failed to cancel reservation :id. Error: :error',
+        'reservation_unauthorized_cancel' => 'Unauthorized attempt to cancel reservation :id. Only the owner can cancel.',
+        'reservation_status_failed' => 'Failed to retrieve reservation status for EGI :egi_id. Error: :error',
+        'reservation_unknown_error' => 'An unknown error occurred during the reservation process. Error: :error',
+    ],
 
     'user' => [
         // == Existing Entries ==
@@ -193,12 +205,24 @@ return [
         'uem_email_send_failed' => null, // Use generic_internal_error
         'uem_slack_send_failed' => null, // Use generic_internal_error
         'uem_recovery_action_failed' => null, // Use generic_internal_error
-         'user_unauthenticated_access' => 'Authentication required. Please log in to continue.',
+        'user_unauthenticated_access' => 'Authentication required. Please log in to continue.',
         'set_current_collection_forbidden' => 'You do not have permission to access or set this collection as your current one.',
         'set_current_collection_failed' => 'An unexpected error occurred while updating your preferences. Our team has been notified. Please try again later.',
         'auth_required' => 'You must be logged in to perform this action.',
         'auth_required_for_like' => 'You must be connected to like items.',
         'like_toggle_failed' => 'Sorry, we could not process your like request. Please try again.',
+
+        // user messages for reservations system
+        'reservation_egi_not_available' => 'This EGI is not available for reservation at the moment.',
+        'reservation_amount_too_low' => 'Your offer amount is too low. Please enter a higher amount.',
+        'reservation_unauthorized' => 'You need to connect your wallet or log in to make a reservation.',
+        'reservation_certificate_generation_failed' => 'We couldn\'t generate your reservation certificate. Our team has been notified.',
+        'reservation_certificate_not_found' => 'The requested certificate could not be found.',
+        'reservation_already_exists' => 'You already have an active reservation for this EGI.',
+        'reservation_cancel_failed' => 'We couldn\'t cancel your reservation. Please try again later.',
+        'reservation_unauthorized_cancel' => 'You don\'t have permission to cancel this reservation.',
+        'reservation_status_failed' => 'Could not retrieve the reservation status. Please try again later.',
+        'reservation_unknown_error' => 'Something went wrong with your reservation. Our team has been notified.'
     ],
 
     // Generic message (used by UserInterfaceHandler if no specific message found)

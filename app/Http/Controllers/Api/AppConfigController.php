@@ -190,6 +190,15 @@ class AppConfigController extends Controller
         // Frontend required translations
         $translations = $this->getFrontendTranslations($lang);
 
+        $this->logger->info('Configuration built successfully', [
+            'user_id' => $user?->id,
+            'language' => $lang,
+            'channel' => $this->channel,
+            'translations' => $translations,
+
+        ]);
+
+
         // General app settings
         $appSettings = $this->getAppSettings();
 
@@ -256,16 +265,28 @@ class AppConfigController extends Controller
             'register' => route('register'),
             'logout' => route('logout'),
             'homeCollectionsIndex' => route('home.collections.index'),
-            'viewCollectionBase' => route('home.collections.show', ':id'),
-            'editCollectionBase' => route('collections.edit', ':id'),
+            'viewCollectionBase' => route('home.collections.show', [':id']), // Parametro con placeholder
+            'editCollectionBase' => route('collections.edit', [':id']), // Parametro con placeholder
+
             'api' => [
                 'baseUrl' => url('/api'),
-                'accessibleCollections' => route('api.user.accessibleCollections'),
-                'setCurrentCollectionBase' => route('api.user.setCurrentCollection', ':id'),
-                'checkUploadAuth' => route('upload.authorization'),
+
+                // Route API esistenti
                 'appConfig' => route('api.app.config'),
                 'errorDefinitions' => route('api.error.definitions'),
-            ],
+
+                // Route di prenotazione e certificati (aggiornate in base alle definizioni reali)
+                'egiReservationStatus' => route('api.egis.reservation-status', ['egiId' => ':egiId']),
+                'egisReserve' => route('api.egis.reserve', ['egiId' => ':egiId']),
+                'reservationsCancel' => route('api.reservations.cancel', ['id' => ':id']),
+                'myReservations' => route('api.my-reservations'),
+
+                // Route per like/unlike
+                'toggleCollectionLike' => route('api.toggle.collection.like', ['collection' => ':collection']),
+                'toggleEgiLike' => route('api.toggle.egi.like', ['egi' => ':egi']),
+
+                // Aggiungi qui altre route API future
+            ]
         ];
     }
 
@@ -555,6 +576,102 @@ class AppConfigController extends Controller
     }
 
     /**
+     * @Oracode Get collection-specific translation keys
+     * 🎯 Purpose: Map collection translation keys to simplified names
+     * 📥 Input: None
+     * 📤 Output: Array of key mappings
+     *
+     * @return array Collection key mappings (simplified => full)
+     */
+    private function getReservationTranslationMappings(): array
+    {
+        return [
+            'reservation.status.active' => 'reservation.status.active',
+            'reservation.status.pending' => 'reservation.status.pending',
+            'reservation.status.cancelled' => 'reservation.status.cancelled',
+            'reservation.status.expired' => 'reservation.status.expired',
+            'reservation.history.view_certificate' => 'reservation.history.view_certificate',
+            'reservation.history.entries' => 'reservation.history.entries',
+            'reservation.history.title' => 'reservation.history.title',
+            'reservation.success' => 'reservation.success',
+            'reservation.cancel_success' => 'reservation.cancel_success',
+            'reservation.unauthorized' => 'reservation.unauthorized',
+            'reservation.validation_failed' => 'reservation.validation_failed',
+            'reservation.auth_required' => 'reservation.auth_required',
+            'reservation.list_failed' => 'reservation.list_failed',
+            'reservation.status_failed' => 'reservation.status_failed',
+            'reservation.unauthorized_cancel' => 'reservation.unauthorized_cancel',
+            'reservation.cancel_failed' => 'reservation.cancel_failed',
+
+            'reservation.form.title' => 'reservation.form.title',
+            'reservation.form.offer_amount_label' => 'reservation.form.offer_amount_label',
+            'reservation.form.offer_amount_placeholder' => 'reservation.form.offer_amount_placeholder',
+            'reservation.form.algo_equivalent' => 'reservation.form.algo_equivalent',
+            'reservation.form.terms_accepted' => 'reservation.form.terms_accepted',
+            'reservation.form.contact_info' => 'reservation.form.contact_info',
+            'reservation.form.submit_button' => 'reservation.form.submit_button',
+            'reservation.form.cancel_button' => 'reservation.form.cancel_button',
+
+            'reservation.button.reserve' => 'reservation.button.reserve',
+            'reservation.button.reserved' => 'reservation.button.reserved',
+            'reservation.button.make_offer' => 'reservation.button.make_offer',
+
+            'reservation.badge.highest' => 'reservation.badge.highest',
+            'reservation.badge.superseded' => 'reservation.badge.superseded',
+            'reservation.badge.has_offers' => 'reservation.badge.has_offers',
+
+            'reservation.already_reserved.title' => 'reservation.already_reserved.title',
+            'reservation.already_reserved.text' => 'reservation.already_reserved.text',
+            'reservation.already_reserved.details' => 'reservation.already_reserved.details',
+            'reservation.already_reserved.type' => 'reservation.already_reserved.type',
+            'reservation.already_reserved.amount' => 'reservation.already_reserved.amount',
+            'reservation.already_reserved.status' => 'reservation.already_reserved.status',
+            'reservation.already_reserved.view_certificate' => 'reservation.already_reserved.view_certificate',
+            'reservation.already_reserved.ok' => 'reservation.already_reserved.ok',
+            'reservation.already_reserved.new_reservation' => 'reservation.already_reserved.new_reservation',
+            'reservation.already_reserved.confirm_new' => 'reservation.already_reserved.confirm_new',
+
+            'reservation.success_title' => 'reservation.success_title',
+            'reservation.view_certificate' => 'reservation.view_certificate',
+            'reservation.close' => 'reservation.close',
+
+            'reservation.type.strong' => 'reservation.type.strong',
+            'reservation.type.weak' => 'reservation.type.weak',
+            'reservation.priority.highest' => 'reservation.priority.highest',
+            'reservation.priority.superseded' => 'reservation.priority.superseded',
+
+            'reservation.errors.button_click_error' => 'reservation.errors.button_click_error',
+            'reservation.errors.form_validation' => 'reservation.errors.form_validation',
+            'reservation.errors.api_error' => 'reservation.errors.api_error',
+            'reservation.errors.unauthorized' => 'reservation.errors.unauthorized',
+        ];
+    }
+
+    /**
+     * @Oracode Get collection-specific translation keys
+     * 🎯 Purpose: Map collection translation keys to simplified names
+     * 📥 Input: None
+     * 📤 Output: Array of key mappings
+     *
+     * @return array Collection key mappings (simplified => full)
+     */
+    private function getLikeTranslationMappings(): array
+    {
+        return [
+            'like.auth_required_title' => 'like.auth_required_title',
+            'like.auth_required_for_like' => 'like.auth_required_for_like',
+            'like.success_title' => 'like.success_title',
+            'like.success_message' => 'like.success_message',
+            'like.error_title' => 'like.error_title',
+            'like.error_message' => 'like.error_message',
+            'like.unlike_success_title' => 'like.unlike_success_title',
+            'like.unlike_success_message' => 'like.unlike_success_message',
+            'like.unlike_error_title' => 'like.unlike_error_title',
+            'like.unlike_error_message' => 'like.unlike_error_message',
+        ];
+    }
+
+    /**
      * @Oracode Collect frontend translations
      * 🎯 Purpose: Aggregate all client-needed translation keys
      * 📥 Input: Current locale
@@ -568,7 +685,9 @@ class AppConfigController extends Controller
         // Merge all mappings
         $mappings = array_merge(
             $this->getGuestLayoutTranslationMappings(),
-            $this->getCollectionTranslationMappings()
+            $this->getCollectionTranslationMappings(),
+            $this->getReservationTranslationMappings(),
+            $this->getLikeTranslationMappings()
         );
 
         $translations = [];
@@ -577,6 +696,7 @@ class AppConfigController extends Controller
         }
 
         return $translations;
+
     }
 
     /**

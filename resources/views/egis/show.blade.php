@@ -163,6 +163,12 @@
                                         Reserve this EGI
                                     </button>
                                 @endif
+                                {{-- Storico delle prenotazioni --}}
+                                @if($egi->reservationCertificates)
+                                    <!-- @dump($egi->reservationCertificates) -->
+                                    <x-egi-reservation-history :egi="$egi" :certificates="$egi->reservationCertificates" />
+                                @endif
+
                             </div>
 
                             {{-- Share buttons --}}

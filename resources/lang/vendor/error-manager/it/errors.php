@@ -104,6 +104,21 @@ return [
         'user_unauthenticated_access' => 'Utente non autenticato: Tentativo di accesso a una risorsa protetta senza autenticazione valida. ID Collezione Target (se applicabile): :target_collection_id. IP: :ip_address.',
         'set_current_collection_forbidden' => 'Accesso Negato: L\'Utente ID :user_id ha tentato di impostare la Collezione ID :collection_id come corrente senza autorizzazione. IP: :ip_address.',
         'set_current_collection_failed' => 'Errore Database: Impossibile aggiornare la collezione corrente per l\'Utente ID :user_id alla Collezione ID :collection_id. Dettagli: :exception_message.',
+        'auth_required' => 'Autenticazione richiesta per eseguire questa azione. Utente non connesso.',
+        'auth_required_for_like' => 'L\'utente deve essere autenticato per mettere "mi piace" agli elementi. Stato autenticazione corrente: :status',
+        'like_toggle_failed' => 'Impossibile attivare/disattivare il "mi piace" per :resource_type :resource_id. Errore: :error',
+
+        // Dev message for reservations system
+        'reservation_egi_not_available' => 'L\'EGI con ID :egi_id non è disponibile per la prenotazione. Potrebbe essere già stato coniato o non pubblicato.',
+        'reservation_amount_too_low' => 'L\'importo offerto di :amount EUR è inferiore al minimo richiesto per questo EGI.',
+        'reservation_unauthorized' => 'Tentativo non autorizzato di prenotare l\'EGI :egi_id. L\'utente deve essere autenticato o avere un wallet connesso.',
+        'reservation_certificate_generation_failed' => 'Impossibile generare il certificato per la prenotazione :reservation_id. Errore: :error',
+        'reservation_certificate_not_found' => 'Certificato con UUID :uuid non trovato.',
+        'reservation_already_exists' => 'L\'utente ha già una prenotazione attiva per l\'EGI :egi_id.',
+        'reservation_cancel_failed' => 'Impossibile annullare la prenotazione :id. Errore: :error',
+        'reservation_unauthorized_cancel' => 'Tentativo non autorizzato di annullare la prenotazione :id. Solo il proprietario può annullare.',
+        'reservation_status_failed' => 'Impossibile recuperare lo stato della prenotazione per l\'EGI :egi_id. Errore: :error',
+        'reservation_unknown_error' => 'Si è verificato un errore sconosciuto durante il processo di prenotazione. Errore: :error',
     ],
 
     'user' => [
@@ -193,7 +208,23 @@ return [
         'user_unauthenticated_access' => 'Autenticazione richiesta. Per favore, effettua il login per continuare.',
         'set_current_collection_forbidden' => 'Non hai i permessi necessari per accedere o impostare questa collezione come corrente.',
         'set_current_collection_failed' => 'Si è verificato un errore imprevisto durante l_aggiornamento delle tue preferenze. Il nostro team è stato notificato. Riprova più tardi.',
-    ],
+        'auth_required' => 'Devi essere connesso per eseguire questa azione.',
+        'auth_required_for_like' => 'Devi essere connesso per mettere "mi piace" agli elementi.',
+        'like_toggle_failed' => 'Ci dispiace, non siamo riusciti a elaborare la tua richiesta di "mi piace". Riprova.',
 
+        // User messages for reservations system
+        'reservation_egi_not_available' => 'Questo EGI non è attualmente disponibile per la prenotazione.',
+        'reservation_amount_too_low' => 'L\'importo offerto è troppo basso. Inserisci un importo più alto.',
+        'reservation_unauthorized' => 'Devi connettere il tuo wallet o accedere per effettuare una prenotazione.',
+        'reservation_certificate_generation_failed' => 'Non siamo riusciti a generare il tuo certificato di prenotazione. Il nostro team è stato informato.',
+        'reservation_certificate_not_found' => 'Il certificato richiesto non è stato trovato.',
+        'reservation_already_exists' => 'Hai già una prenotazione attiva per questo EGI.',
+        'reservation_cancel_failed' => 'Non siamo riusciti ad annullare la tua prenotazione. Riprova più tardi.',
+        'reservation_unauthorized_cancel' => 'Non hai il permesso per annullare questa prenotazione.',
+        'reservation_status_failed' => 'Impossibile recuperare lo stato della prenotazione. Riprova più tardi.',
+        'reservation_unknown_error' => 'Qualcosa è andato storto con la tua prenotazione. Il nostro team è stato informato.',
+    ],
+    
+    // Generic message (used by UserInterfaceHandler if no specific message found)
     'generic_error' => 'Si è verificato un errore. Riprova più tardi o contatta l\'assistenza.',
 ];

@@ -142,7 +142,7 @@ function displayError(message: string, displayMode: string, blocking: string): v
                         icon: blocking === 'blocking' ? 'error' : 'warning',
                         title: message,
                         showConfirmButton: false,
-                        timer: 3000
+                        timer: 5000
                     });
                 } else {
                     console.error('UEM Display: No toast handler available', message);

@@ -1139,6 +1139,10 @@ return [
             'msg_to' => 'sweet-alert',
         ],
 
+        // ====================================================
+        // Errori specifici per la gestione dei like
+        // ====================================================
+
         'AUTH_REQUIRED_FOR_LIKE' => [
             'type' => 'warning',
             'blocking' => 'semi-blocking',
@@ -1160,5 +1164,101 @@ return [
             'notify_slack' => true,
             'msg_to' => 'toast',
         ],
+
+
+        // ====================================================
+        // Errori specifici per la gestione delle prenotazioni
+        // ====================================================
+
+        'RESERVATION_EGI_NOT_AVAILABLE' => [
+            'type' => 'error',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'errors.dev.reservation_egi_not_available',
+            'user_message_key' => 'errors.user.reservation_egi_not_available',
+            'http_status_code' => 400,
+            'notify_slack' => false,
+            'msg_to' => 'sweet-alert'
+        ],
+        'RESERVATION_AMOUNT_TOO_LOW' => [
+            'type' => 'warning',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'errors.dev.reservation_amount_too_low',
+            'user_message_key' => 'errors.user.reservation_amount_too_low',
+            'http_status_code' => 400,
+            'notify_slack' => false,
+            'msg_to' => 'toast'
+        ],
+        'RESERVATION_UNAUTHORIZED' => [
+            'type' => 'error',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'errors.dev.reservation_unauthorized',
+            'user_message_key' => 'errors.user.reservation_unauthorized',
+            'http_status_code' => 401,
+            'notify_slack' => false,
+            'msg_to' => 'sweet-alert'
+        ],
+        'RESERVATION_CERTIFICATE_GENERATION_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'errors.dev.reservation_certificate_generation_failed',
+            'user_message_key' => 'errors.user.reservation_certificate_generation_failed',
+            'http_status_code' => 500,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert'
+        ],
+        'RESERVATION_CERTIFICATE_NOT_FOUND' => [
+            'type' => 'warning',
+            'blocking' => 'not',
+            'dev_message_key' => 'errors.dev.reservation_certificate_not_found',
+            'user_message_key' => 'errors.user.reservation_certificate_not_found',
+            'http_status_code' => 404,
+            'notify_slack' => false,
+            'msg_to' => 'div'
+        ],
+        'RESERVATION_ALREADY_EXISTS' => [
+            'type' => 'warning',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'errors.dev.reservation_already_exists',
+            'user_message_key' => 'errors.user.reservation_already_exists',
+            'http_status_code' => 400,
+            'notify_slack' => false,
+            'msg_to' => 'toast'
+        ],
+        'RESERVATION_CANCEL_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'errors.dev.reservation_cancel_failed',
+            'user_message_key' => 'errors.user.reservation_cancel_failed',
+            'http_status_code' => 500,
+            'notify_slack' => false,
+            'msg_to' => 'toast'
+        ],
+        'RESERVATION_UNAUTHORIZED_CANCEL' => [
+            'type' => 'error',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'errors.dev.reservation_unauthorized_cancel',
+            'user_message_key' => 'errors.user.reservation_unauthorized_cancel',
+            'http_status_code' => 403,
+            'notify_slack' => false,
+            'msg_to' => 'toast'
+        ],
+        'RESERVATION_STATUS_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'not',
+            'dev_message_key' => 'errors.dev.reservation_status_failed',
+            'user_message_key' => 'errors.user.reservation_status_failed',
+            'http_status_code' => 500,
+            'notify_slack' => false,
+            'msg_to' => 'toast'
+        ],
+        'RESERVATION_UNKNOWN_ERROR' => [
+            'type' => 'error',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'errors.dev.reservation_unknown_error',
+            'user_message_key' => 'errors.user.reservation_unknown_error',
+            'http_status_code' => 500,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert'
+        ]
     ],
 ];

@@ -2,38 +2,37 @@
 
 namespace App\Models;
 
+// Assumo che questi use statements siano già presenti
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * Reservation model for storing EGI reservations.
+ * @Oracode Eloquent Model: Reservation (Extended)
+ * 🎯 Purpose: Manages reservations for EGIs with enhanced offering capabilities
+ * 🧱 Core Logic: Tracks reservation status, priority, and certificate generation
+ * 🛡️ GDPR: Minimizes data collection, records only what's needed for the reservation
  *
- * Manages both weak (wallet only, 24-hour expiration) and strong 
- * (wallet + personal info, valid until mint) reservations for EGIs.
- *
- * --- Core Logic ---
- * 1. Stores reservation data with appropriate expiration times
- * 2. Links reservations to users and EGIs
- * 3. Provides methods for checking reservation status
- * 4. Handles expiration logic and status management
- * 5. Stores additional contact data for strong reservations
- * --- End Core Logic ---
- *
- * @package App\Models
- * @author Your Name <your.email@example.com>
- * @version 1.0.0
- * @since 1.0.0
- * 
  * @property int $id
  * @property int $user_id
  * @property int $egi_id
  * @property string $type
  * @property string $status
- * @property \Carbon\Carbon|null $expires_at
+ * @property float|null $offer_amount_eur
+ * @property float|null $offer_amount_algo
+ * @property \Illuminate\Support\Carbon|null $expires_at
+ * @property bool $is_current
+ * @property int|null $superseded_by_id
  * @property json|null $contact_data
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
+ * @property \Illuminate\Support\Carbon $created_at
+ * @property \Illuminate\Support\Carbon $updated_at
+ *
+ * @property-read \App\Models\User $user
+ * @property-read \App\Models\Egi $egi
+ * @property-read \App\Models\Reservation|null $supersededBy
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Reservation[] $supersededReservations
+ * @property-read \App\Models\EgiReservationCertificate|null $certificate
  */
 class Reservation extends Model
 {
@@ -49,7 +48,11 @@ class Reservation extends Model
         'egi_id',
         'type',
         'status',
+        'offer_amount_eur',
+        'offer_amount_algo',
         'expires_at',
+        'is_current',
+        'superseded_by_id',
         'contact_data',
     ];
 
@@ -61,10 +64,13 @@ class Reservation extends Model
     protected $casts = [
         'expires_at' => 'datetime',
         'contact_data' => 'json',
+        'offer_amount_eur' => 'decimal:2',
+        'offer_amount_algo' => 'decimal:8',
+        'is_current' => 'boolean',
     ];
 
     /**
-     * Get the user who made the reservation.
+     * Define relationship to the User model.
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
@@ -74,7 +80,7 @@ class Reservation extends Model
     }
 
     /**
-     * Get the EGI that was reserved.
+     * Define relationship to the Egi model.
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
@@ -82,62 +88,166 @@ class Reservation extends Model
     {
         return $this->belongsTo(Egi::class);
     }
-    
+
     /**
-     * Check if the reservation is expired.
+     * Define relationship to the reservation that superseded this one.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function supersededBy()
+    {
+        return $this->belongsTo(Reservation::class, 'superseded_by_id');
+    }
+
+    /**
+     * Define relationship to all reservations superseded by this one.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function supersededReservations()
+    {
+        return $this->hasMany(Reservation::class, 'superseded_by_id');
+    }
+
+    /**
+     * Define relationship to the certificate.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function certificate()
+    {
+        return $this->hasOne(EgiReservationCertificate::class);
+    }
+
+    /**
+     * Check if this reservation is expired.
      *
      * @return bool
      */
-    public function isExpired()
+    public function isExpired(): bool
     {
         // Strong reservations don't expire
         if ($this->type === 'strong') {
             return false;
         }
-        
-        // Check if the expiration date is in the past
+
+        // Check if expiration date exists and is in the past
         return $this->expires_at && $this->expires_at->isPast();
     }
-    
+
     /**
-     * Check if the reservation is active.
+     * Check if this reservation is active.
      *
      * @return bool
      */
-    public function isActive()
+    public function isActive(): bool
     {
-        return $this->status === 'active' && !$this->isExpired();
+        return $this->status === 'active' && !$this->isExpired() && $this->is_current;
     }
-    
+
     /**
-     * Automatically update expired reservations.
+     * Get the reservation priority value.
+     * Higher value means higher priority.
      *
-     * This method should be called by a scheduled task to
-     * automatically expire reservations that have passed their expiration date.
-     *
-     * @return int Number of reservations updated
+     * @return int
      */
-    public static function updateExpired()
+    public function getReservationPriority(): int
     {
-        $count = 0;
-        
-        // Find all active weak reservations that have expired
-        $expiredReservations = self::where('status', 'active')
-            ->where('type', 'weak')
-            ->where('expires_at', '<', Carbon::now())
-            ->get();
-        
-        foreach ($expiredReservations as $reservation) {
-            $reservation->status = 'expired';
-            $reservation->save();
-            $count++;
-        }
-        
-        return $count;
+        $priority = 0;
+
+        // Type priority: Strong always has higher base priority than weak
+        $priority += ($this->type === 'strong') ? 1000 : 0;
+
+        // Amount priority: Higher offer gets higher priority
+        $priority += (int)($this->offer_amount_eur * 10);
+
+        // Time priority: Earlier reservations get slightly higher priority
+        $ageInDays = Carbon::now()->diffInDays($this->created_at);
+        $priority += min($ageInDays, 10); // Cap at 10 days to prevent very old reservations from having too high priority
+
+        return $priority;
     }
-    
+
     /**
-     * Scope a query to only include active reservations.
+     * Compare priority with another reservation.
+     *
+     * @param Reservation $otherReservation
+     * @return int Positive if this reservation has higher priority, negative if lower, 0 if equal
+     */
+    public function comparePriorityWith(Reservation $otherReservation): int
+    {
+        return $this->getReservationPriority() - $otherReservation->getReservationPriority();
+    }
+
+    /**
+     * Check if this reservation has higher priority than another.
+     *
+     * @param Reservation $otherReservation
+     * @return bool
+     */
+    public function hasHigherPriorityThan(Reservation $otherReservation): bool
+    {
+        return $this->comparePriorityWith($otherReservation) > 0;
+    }
+
+    /**
+     * Mark this reservation as superseded by another.
+     *
+     * @param Reservation $newReservation
+     * @return bool
+     */
+    public function markAsSuperseded(Reservation $newReservation): bool
+    {
+        $this->is_current = false;
+        $this->superseded_by_id = $newReservation->id;
+
+        // Also mark the certificate as superseded if it exists
+        if ($this->certificate) {
+            $this->certificate->markAsSuperseded();
+        }
+
+        return $this->save();
+    }
+
+    /**
+     * Create a certificate for this reservation.
+     *
+     * @param array $additionalData Additional data for the certificate
+     * @return \App\Models\EgiReservationCertificate
+     */
+    public function createCertificate(array $additionalData = []): EgiReservationCertificate
+    {
+        // Create base certificate data
+        $certificateData = [
+            'reservation_id' => $this->id,
+            'egi_id' => $this->egi_id,
+            'user_id' => $this->user_id,
+            'wallet_address' => $this->user->wallet ?? $additionalData['wallet_address'] ?? '',
+            'reservation_type' => $this->type,
+            'offer_amount_eur' => $this->offer_amount_eur,
+            'offer_amount_algo' => $this->offer_amount_algo,
+            'is_current_highest' => $this->is_current,
+        ];
+
+        // Merge with additional data
+        $certificateData = array_merge($certificateData, $additionalData);
+
+        // Create and save the certificate
+        $certificate = new EgiReservationCertificate($certificateData);
+
+        // Generate signature hash
+        if (!isset($certificateData['signature_hash'])) {
+            $verificationData = $certificate->generateVerificationData();
+            $certificate->signature_hash = hash('sha256', $verificationData);
+        }
+
+        $certificate->save();
+
+        return $certificate;
+    }
+
+    /**
+     * Scope query to only include active reservations.
      *
      * @param \Illuminate\Database\Eloquent\Builder $query
      * @return \Illuminate\Database\Eloquent\Builder
@@ -145,6 +255,7 @@ class Reservation extends Model
     public function scopeActive($query)
     {
         return $query->where('status', 'active')
+            ->where('is_current', true)
             ->where(function ($query) {
                 $query->where('type', 'strong')
                     ->orWhere(function ($query) {
@@ -156,9 +267,9 @@ class Reservation extends Model
                     });
             });
     }
-    
+
     /**
-     * Scope a query to only include weak reservations.
+     * Scope query to only include weak reservations.
      *
      * @param \Illuminate\Database\Eloquent\Builder $query
      * @return \Illuminate\Database\Eloquent\Builder
@@ -167,9 +278,9 @@ class Reservation extends Model
     {
         return $query->where('type', 'weak');
     }
-    
+
     /**
-     * Scope a query to only include strong reservations.
+     * Scope query to only include strong reservations.
      *
      * @param \Illuminate\Database\Eloquent\Builder $query
      * @return \Illuminate\Database\Eloquent\Builder
@@ -177,5 +288,16 @@ class Reservation extends Model
     public function scopeStrong($query)
     {
         return $query->where('type', 'strong');
+    }
+
+    /**
+     * Scope query to only include current reservations.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeCurrent($query)
+    {
+        return $query->where('is_current', true);
     }
 }

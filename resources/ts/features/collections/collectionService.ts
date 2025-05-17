@@ -15,7 +15,7 @@ import { UEM_Client_TS_Placeholder as UEM } from '../../services/uemClientServic
 
 export async function fetchUserAccessibleCollectionsAPI(config: AppConfig): Promise<UserAccessibleCollections | null> {
     try {
-        const response = await fetch(config.routes.api.accessibleCollections, {
+        const response = await fetch('/api/user/accessible-collections', {
             method: 'GET',
             headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': getCsrfTokenTS() },
         });
@@ -39,7 +39,9 @@ export async function setCurrentUserCollectionAPI(
     config: AppConfig,
     collectionId: number
 ): Promise<{ id: number; name: string; can_edit: boolean } | null> {
-    const route = config.routes.api.setCurrentCollectionBase.replace(':id', collectionId.toString());
+
+    const route = '/api/user/set-current-collection/' + collectionId.toString();
+
     try {
         const response = await fetch(route, {
             method: 'POST',

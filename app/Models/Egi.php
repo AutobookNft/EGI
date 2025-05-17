@@ -220,6 +220,26 @@ class Egi extends Model
         return $this->morphMany(Like::class, 'likeable');
     }
 
+    /**
+     * Get the reservations associated with the EGI.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function reservations(): HasMany
+    {
+        return $this->hasMany(Reservation::class, 'egi_id', 'id');
+    }
+
+    /**
+     * Get the reservation certificates associated with the EGI.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function reservationCertificates(): HasMany
+    {
+        return $this->hasMany(EgiReservationCertificate::class, 'egi_id', 'id');
+    }
+
 
     // Add other relationships as needed (e.g., with Auction, Drop models later)
 

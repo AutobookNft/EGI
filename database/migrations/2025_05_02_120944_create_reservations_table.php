@@ -13,13 +13,16 @@ return new class extends Migration
     {
         Schema::create('reservations', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('user_id')->nullable()->constrained()->onDelete('cascade');
             $table->foreignId('egi_id')->constrained('egis')->onDelete('cascade');
 
             // Reservation details
             $table->enum('type', ['weak', 'strong'])->default('weak');
             $table->enum('status', ['active', 'expired', 'completed', 'cancelled'])->default('active');
-            $table->timestamp('expires_at')->nullable(); // Null for strong reservations
+            $table->decimal('offer_amount_eur', 10, 2)->nullable();
+            $table->decimal('offer_amount_algo', 18, 8)->nullable();
+            $table->timestamp('expires_at')->nullable();
+
 
             // For strong reservations, store additional contact data
             $table->json('contact_data')->nullable();
