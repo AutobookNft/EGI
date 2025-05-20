@@ -151,6 +151,25 @@ import './modules/notifications/init/notification-response-init'; // Questo modu
 
 console.log('app.js execution finished (initial phase - after imports).'); // Debugging
 
+document.addEventListener('DOMContentLoaded', function() {
+    // Aggiungi classe alla pagina iniziale
+    document.body.classList.add('page-loaded');
+
+    // Aggiungi listener per link interni
+    document.querySelectorAll('a[href^="/"]').forEach(link => {
+        link.addEventListener('click', function(e) {
+            if (this.hostname === window.location.hostname) {
+                e.preventDefault();
+
+                document.body.classList.add('page-transitioning');
+
+                setTimeout(() => {
+                    window.location.href = this.href;
+                }, 300);
+            }
+        });
+    });
+});
 
 // // Documentazione: di window.fetch polyfill
 // Documentazione: https://github.com/github/fetch;

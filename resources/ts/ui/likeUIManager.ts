@@ -66,9 +66,8 @@ export class LikeUIManager {
         const target = event.target as HTMLElement;
         const likeButton = target.closest('.like-button') as LikeButton | null;
 
-        console.log('[LikeUIManager] Document clicked:', target);
-
         if (likeButton) {
+            console.log('[LikeUIManager] Document clicked:', target);
             event.preventDefault();
             event.stopPropagation();
             this.handleLikeClick(likeButton);

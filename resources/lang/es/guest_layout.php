@@ -81,8 +81,8 @@ return [
     'all_rights_reserved' => 'Todos los derechos reservados.',
     'privacy_policy' => 'Política de privacidad',
     'cookie_settings' => 'Configuración de cookies',
-    'total_co2_offset' => 'Compensación total de CO₂',
-    'algorand_carbon_negative' => 'Algorand con huella de carbono negativa',
+    'total_plastic_recovered' => 'Total de Plástico Recuperado',
+    'algorand_blue_mission' => 'Algorand Misión Azul',
 
     // Modal
     'upload_modal_title' => 'Modal de carga de EGI',

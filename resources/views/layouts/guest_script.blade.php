@@ -70,12 +70,20 @@
     }
 
     function resizeCanvas() {
+        // TROVA QUESTE LINEE:
         const rect = heroSection.getBoundingClientRect();
         width = rect.width;
         height = rect.height;
+
+        // SOSTITUISCILA CON QUESTE LINEE per usare le dimensioni della viewport:
+        width = window.innerWidth; // O document.documentElement.clientWidth
+        height = window.innerHeight; // O document.documentElement.clientHeight
+
+        // QUESTE LINEE RIMANGONO LE STESSE:
         canvas.width = width;
         canvas.height = height;
 
+        // QUESTE LINEE RIMANGONO LE STESSE:
         particles.forEach(p => {
             p.x = Math.min(p.x, width);
             p.y = Math.min(p.y, height);

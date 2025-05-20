@@ -4,48 +4,136 @@ namespace App\Http\Controllers;
 
 use App\Models\Collection;
 use App\Models\Egi;
-use App\Models\Epp; // Assicurati di importare Epp
+use App\Models\Epp;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
-// Se stai usando DropController, rinominalo o crea HomeController
-class HomeController extends Controller // o DropController
+/**
+ * HomeController - Gestisce la presentazione della homepage
+ *
+ * @package App\Http\Controllers
+ *
+ * 🎯 Il controller si occupa di recuperare e presentare i dati essenziali per la homepage FlorenceEGI
+ * 🧱 Semanticamente coerente: ogni metodo ha uno scopo chiaro relativo alle entità del dominio
+ * 📡 Interrogabile: i metodi specificano chiaramente cosa presentano e perché
+ * 🛡️ GDPR-friendly: utilizza solo dati pubblici (is_published = true)
+ *
+ * @seo-purpose Fornisce contenuti dinamici rilevanti per la homepage FlorenceEGI
+ * @schema-type WebPage
+ */
+class HomeController extends Controller
 {
+    /**
+     * Visualizza la homepage con contenuti dinamici
+     *
+     * 🎯 Presenta una panoramica dell'ecosistema FlorenceEGI
+     * 📥 Recupera EGI casuali, collezioni in evidenza, ultime gallerie, progetti EPP
+     *     e statistiche di impatto ambientale
+     * 📤 Restituisce la vista home con tutti i dati necessari
+     *
+     * @seo-purpose Pagina principale del sito con showcase delle collezioni NFT e impatto ambientale
+     * @accessibility-trait Contiene contatori e statistiche con etichette esplicative
+     *
+     * @return View La vista home popolata con i dati
+     */
     public function index(): View
     {
-        // EGI Casuali per il Carousel (Es: 5 EGI pubblicati con le loro collezioni)
-        $randomEgis = Egi::where('is_published', true) // Solo EGI pubblicati
-            ->with(['collection']) // Carica la relazione con la collezione
-            ->inRandomOrder() // Ordina casualmente
-            ->take(5) // Prendi un numero limitato (es. 5)
-            ->get();
+        // Recupera dati per la homepage
+        $randomEgis = $this->getRandomEgis();
+        $featuredCollections = $this->getFeaturedCollections();
+        $latestCollections = $this->getLatestCollections($featuredCollections->pluck('id'));
+        $highlightedEpps = $this->getHighlightedEpps();
 
-        // Collezioni "In Evidenza"
-        $featuredCollections = Collection::where('is_published', true)
+        // Dati impatto ambientale - valore hardcoded per MVP
+        // TODO: In futuro, recuperare da database o API dedicata
+        $totalPlasticRecovered = $this->getTotalPlasticRecovered();
+
+        return view('home', [
+            'randomEgis' => $randomEgis,
+            'featuredCollections' => $featuredCollections,
+            'latestCollections' => $latestCollections,
+            'highlightedEpps' => $highlightedEpps,
+            'totalPlasticRecovered' => $totalPlasticRecovered,
+        ]);
+    }
+
+    /**
+     * Ottiene EGI casuali per il carousel
+     *
+     * @privacy-safe Utilizza solo EGI pubblicati pubblicamente
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    private function getRandomEgis()
+    {
+        return Egi::where('is_published', true)
+            ->with(['collection'])
+            ->inRandomOrder()
+            ->take(5)
+            ->get();
+    }
+
+    /**
+     * Ottiene collezioni in evidenza
+     *
+     * @privacy-safe Utilizza solo collezioni pubblicate pubblicamente
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    private function getFeaturedCollections()
+    {
+        return Collection::where('is_published', true)
             ->with(['creator'])
             ->latest()
             ->take(3)
             ->get();
+    }
 
-        // Ultime Gallerie
-        $latestCollections = Collection::where('is_published', true)
-            ->whereNotIn('id', $featuredCollections->pluck('id'))
+    /**
+     * Ottiene le ultime gallerie create
+     *
+     * @privacy-safe Utilizza solo collezioni pubblicate pubblicamente
+     * @param \Illuminate\Support\Collection $excludeIds IDs da escludere (es. collezioni già in evidenza)
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    private function getLatestCollections($excludeIds)
+    {
+        return Collection::where('is_published', true)
+            ->whereNotIn('id', $excludeIds)
             ->with(['creator'])
             ->latest()
             ->take(8)
             ->get();
+    }
 
-        // EPP
-        $highlightedEpps = Epp::where('status', 'active')
+    /**
+     * Ottiene progetti ambientali (EPP) in evidenza
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    private function getHighlightedEpps()
+    {
+        return Epp::where('status', 'active')
             ->orderBy('created_at', 'desc')
             ->take(3)
             ->get();
+    }
 
-        return view('home', [
-            'randomEgis' => $randomEgis, // Passa gli EGI casuali alla vista
-            'featuredCollections' => $featuredCollections,
-            'latestCollections' => $latestCollections,
-            'highlightedEpps' => $highlightedEpps,
-        ]);
+    /**
+     * Ottiene il totale di plastica recuperata in kg
+     *
+     * 📡 Interrogabile: fornisce i dati su impatto ambientale
+     *
+     * @schema-type QuantitativeValue
+     * @return float Quantità in kg di plastica recuperata dagli oceani
+     */
+    private function getTotalPlasticRecovered(): float
+    {
+        // MVP: Valore hardcoded
+        // TODO: In futuro, calcolare somma da transazioni o recuperare da API dedicata
+        return 5241.38;
+
+        // Implementazione futura:
+        // return Transaction::where('type', 'plastic_recovery')
+        //      ->where('status', 'confirmed')
+        //      ->sum('amount');
     }
 }

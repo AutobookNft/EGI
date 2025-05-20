@@ -51,6 +51,9 @@ import reservationFeature from './features/reservations/reservationFeature';
 
 import reservationButtons from './features/reservations/reservationButtons';
 
+import { NatanAssistant } from './components/natan-assistant';
+
+
 // --- ✨ ISTANZE GLOBALI DEL MODULO MAIN ---
 let mainAppConfig: AppConfig;
 let mainUploadModalManager: UploadModalManager | null = null;
@@ -112,7 +115,15 @@ async function initializeApplication(): Promise<void> {
         await reservationButtons.initialize();
         console.log('Padmin Main: Reservation buttons initialized.');
 
-        console.log(`${appTranslate('padminReady')} FlorenceEGI client operational.`);
+        // 10. Inizializza Natan Assistant
+        try {
+            const natanAssistant = new NatanAssistant();
+            console.log('Padmin Main: Natan Assistant initialized.');
+        } catch (error) {
+            console.error('Padmin Main: Error initializing Natan Assistant:', error);
+            // Non bloccare l'inizializzazione dell'app per un errore di Natan
+        }
+
 
     } catch (error) {
         console.error('Padmin Main: Critical initialization error:', error);

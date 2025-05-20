@@ -81,8 +81,8 @@ return [
     'all_rights_reserved' => 'All rights reserved.',
     'privacy_policy' => 'Privacy Policy',
     'cookie_settings' => 'Cookie Settings',
-    'total_co2_offset' => 'Total CO₂ Offset',
-    'algorand_carbon_negative' => 'Algorand Carbon-Negative',
+    'total_plastic_recovered' => 'Total Plastic Recovered',
+    'algorand_blue_mission' => 'Algorand Blue Mission',
 
     // Modal
     'upload_modal_title' => 'EGI Upload Modal',
