@@ -23,7 +23,7 @@ class BreachReportMenu extends MenuItem
     {
         parent::__construct(
             'menu.breach_report',
-            'gdpr.breach.index',
+            'gdpr.breach-report',
             'alert-triangle',
             'view_breach_reports'
         );

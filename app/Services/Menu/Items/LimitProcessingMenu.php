@@ -23,7 +23,7 @@ class LimitProcessingMenu extends MenuItem
     {
         parent::__construct(
             'menu.limit_processing',
-            'gdpr.processing.index',
+            'gdpr.limit-processing',
             'user-minus-circle',
             'limit_data_processing'
         );

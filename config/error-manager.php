@@ -1140,6 +1140,393 @@ return [
         ],
 
         // ====================================================
+        // ENHANCED REGISTRATION ERROR CODES - Add to config/error-manager.php
+        // ====================================================
+
+        // Enhanced Registration with Ecosystem Setup
+        'ENHANCED_REGISTRATION_FAILED' => [
+            'type' => 'critical',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.enhanced_registration_failed',
+            'user_message_key' => 'error-manager::errors.user.enhanced_registration_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'REGISTRATION_USER_CREATION_FAILED' => [
+            'type' => 'critical',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.registration_user_creation_failed',
+            'user_message_key' => 'error-manager::errors.user.registration_user_creation_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'REGISTRATION_COLLECTION_CREATION_FAILED' => [
+            'type' => 'critical',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.registration_collection_creation_failed',
+            'user_message_key' => 'error-manager::errors.user.registration_collection_creation_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'REGISTRATION_WALLET_SETUP_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.registration_wallet_setup_failed',
+            'user_message_key' => 'error-manager::errors.user.registration_wallet_setup_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'REGISTRATION_ROLE_ASSIGNMENT_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.registration_role_assignment_failed',
+            'user_message_key' => 'error-manager::errors.user.registration_role_assignment_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'REGISTRATION_GDPR_CONSENT_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.registration_gdpr_consent_failed',
+            'user_message_key' => 'error-manager::errors.user.registration_gdpr_consent_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'REGISTRATION_ECOSYSTEM_SETUP_INCOMPLETE' => [
+            'type' => 'warning',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.registration_ecosystem_setup_incomplete',
+            'user_message_key' => 'error-manager::errors.user.registration_ecosystem_setup_incomplete',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'REGISTRATION_VALIDATION_ENHANCED_FAILED' => [
+            'type' => 'warning',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.registration_validation_enhanced_failed',
+            'user_message_key' => 'error-manager::errors.user.registration_validation_enhanced_failed',
+            'http_status_code' => 422,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'div',
+        ],
+
+        'REGISTRATION_USER_TYPE_INVALID' => [
+            'type' => 'warning',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.registration_user_type_invalid',
+            'user_message_key' => 'error-manager::errors.user.registration_user_type_invalid',
+            'http_status_code' => 422,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'div',
+        ],
+
+        'REGISTRATION_RATE_LIMIT_EXCEEDED' => [
+            'type' => 'warning',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.registration_rate_limit_exceeded',
+            'user_message_key' => 'error-manager::errors.user.registration_rate_limit_exceeded',
+            'http_status_code' => 429,
+            'devTeam_email_need' => false,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'REGISTRATION_PAGE_LOAD_ERROR' => [
+            'type' => 'error',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.registration_page_load_error',
+            'user_message_key' => 'error-manager::errors.user.registration_page_load_error',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => false,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        // ====================================================
+        // EGI MODULE ERROR CODES - Add to config/error-manager.php in 'errors' array
+        // ====================================================
+
+        // EGI Upload Handler Service-Based Architecture Errors
+        'EGI_COLLECTION_SERVICE_ERROR' => [
+            'type' => 'critical',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.egi_collection_service_error',
+            'user_message_key' => 'error-manager::errors.user.egi_collection_service_error',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'EGI_WALLET_SERVICE_ERROR' => [
+            'type' => 'error',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.egi_wallet_service_error',
+            'user_message_key' => 'error-manager::errors.user.egi_wallet_service_error',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'EGI_ROLE_SERVICE_ERROR' => [
+            'type' => 'error',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.egi_role_service_error',
+            'user_message_key' => 'error-manager::errors.user.egi_role_service_error',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'EGI_SERVICE_INTEGRATION_ERROR' => [
+            'type' => 'critical',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.egi_service_integration_error',
+            'user_message_key' => 'error-manager::errors.user.egi_service_integration_error',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'EGI_ENHANCED_AUTHENTICATION_ERROR' => [
+            'type' => 'error',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.egi_enhanced_authentication_error',
+            'user_message_key' => 'error-manager::errors.user.egi_enhanced_authentication_error',
+            'http_status_code' => 401,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'EGI_FILE_INPUT_VALIDATION_ERROR' => [
+            'type' => 'warning',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.egi_file_input_validation_error',
+            'user_message_key' => 'error-manager::errors.user.egi_file_input_validation_error',
+            'http_status_code' => 400,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'div',
+        ],
+
+        'EGI_METADATA_VALIDATION_ERROR' => [
+            'type' => 'warning',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.egi_metadata_validation_error',
+            'user_message_key' => 'error-manager::errors.user.egi_metadata_validation_error',
+            'http_status_code' => 422,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'div',
+        ],
+
+        'EGI_DATA_PREPARATION_ERROR' => [
+            'type' => 'error',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.egi_data_preparation_error',
+            'user_message_key' => 'error-manager::errors.user.egi_data_preparation_error',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'EGI_RECORD_CREATION_ERROR' => [
+            'type' => 'critical',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.egi_record_creation_error',
+            'user_message_key' => 'error-manager::errors.user.egi_record_creation_error',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'EGI_FILE_STORAGE_ERROR' => [
+            'type' => 'critical',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.egi_file_storage_error',
+            'user_message_key' => 'error-manager::errors.user.egi_file_storage_error',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'EGI_CACHE_INVALIDATION_ERROR' => [
+            'type' => 'warning',
+            'blocking' => 'not',
+            'dev_message_key' => 'error-manager::errors.dev.egi_cache_invalidation_error',
+            'user_message_key' => 'error-manager::errors.user.egi_cache_invalidation_error',
+            'http_status_code' => 500,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'log-only',
+        ],
+
+        // Collection Service Enhanced Errors
+        'COLLECTION_CREATION_ENHANCED_ERROR' => [
+            'type' => 'critical',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.collection_creation_enhanced_error',
+            'user_message_key' => 'error-manager::errors.user.collection_creation_enhanced_error',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'COLLECTION_VALIDATION_ERROR' => [
+            'type' => 'error',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.collection_validation_error',
+            'user_message_key' => 'error-manager::errors.user.collection_validation_error',
+            'http_status_code' => 400,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'COLLECTION_LIMIT_EXCEEDED_ERROR' => [
+            'type' => 'warning',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.collection_limit_exceeded_error',
+            'user_message_key' => 'error-manager::errors.user.collection_limit_exceeded_error',
+            'http_status_code' => 429,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'COLLECTION_WALLET_ATTACHMENT_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'not',
+            'dev_message_key' => 'error-manager::errors.dev.collection_wallet_attachment_failed',
+            'user_message_key' => 'error-manager::errors.user.collection_wallet_attachment_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'log-only',
+        ],
+
+        'COLLECTION_ROLE_ASSIGNMENT_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'not',
+            'dev_message_key' => 'error-manager::errors.dev.collection_role_assignment_failed',
+            'user_message_key' => 'error-manager::errors.user.collection_role_assignment_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'log-only',
+        ],
+
+        'COLLECTION_OWNERSHIP_MISMATCH_ERROR' => [
+            'type' => 'error',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.collection_ownership_mismatch_error',
+            'user_message_key' => 'error-manager::errors.user.collection_ownership_mismatch_error',
+            'http_status_code' => 403,
+            'devTeam_email_need' => false,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'COLLECTION_CURRENT_UPDATE_ERROR' => [
+            'type' => 'critical',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.collection_current_update_error',
+            'user_message_key' => 'error-manager::errors.user.collection_current_update_error',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        // Enhanced Storage Errors
+        'EGI_STORAGE_DISK_CONFIG_ERROR' => [
+            'type' => 'critical',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.egi_storage_disk_config_error',
+            'user_message_key' => 'error-manager::errors.user.egi_storage_disk_config_error',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'EGI_STORAGE_EMERGENCY_FALLBACK_FAILED' => [
+            'type' => 'critical',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.egi_storage_emergency_fallback_failed',
+            'user_message_key' => 'error-manager::errors.user.egi_storage_emergency_fallback_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'EGI_TEMP_FILE_READ_ERROR' => [
+            'type' => 'error',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.egi_temp_file_read_error',
+            'user_message_key' => 'error-manager::errors.user.egi_temp_file_read_error',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        // Enhanced Authentication & Session Errors
+        'EGI_SESSION_AUTH_INVALID' => [
+            'type' => 'error',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.egi_session_auth_invalid',
+            'user_message_key' => 'error-manager::errors.user.egi_session_auth_invalid',
+            'http_status_code' => 401,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'EGI_WALLET_AUTH_MISMATCH' => [
+            'type' => 'error',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.egi_wallet_auth_mismatch',
+            'user_message_key' => 'error-manager::errors.user.egi_wallet_auth_mismatch',
+            'http_status_code' => 401,
+            'devTeam_email_need' => false,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        // ====================================================
         // Errori specifici per la gestione dei like
         // ====================================================
 

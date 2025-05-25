@@ -2,7 +2,7 @@
 
 namespace App\Providers;
 
-
+use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Repositories\IconRepository;
 use App\Services\FileStorageService;
 use Illuminate\Support\ServiceProvider;
@@ -14,11 +14,22 @@ use App\Policies\TeamWalletPolicy as WalletPolicy;
 use App\Policies\CollectionPolicy;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\Channels\CustomDatabaseChannel;
+use App\Services\CollectionService;
+use App\Services\Gdpr\AuditLogService;
+use App\Services\Gdpr\ConsentService;
 use App\Services\Notifications\WalletService;
 use App\View\Components\EppHighlight;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\View;
+use Ultra\EgiModule\Contracts\UserRoleServiceInterface;
+use Ultra\EgiModule\Contracts\WalletServiceInterface;
+use Ultra\ErrorManager\Interfaces\ErrorManagerInterface;
 use Ultra\UltraLogManager\UltraLogManager;
+use Laravel\Fortify\Fortify;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -48,9 +59,31 @@ class AppServiceProvider extends ServiceProvider
             );
         });
 
-        // $this->app->singleton(WalletService::class, function ($app) {
-        //     return new WalletService();
-        // });
+        // Register enhanced RegisteredUserController with complete DI
+        $this->app->bind(RegisteredUserController::class, function ($app) {
+            return new RegisteredUserController(
+                $app->make(ErrorManagerInterface::class),
+                $app->make(UltraLogManager::class),
+                $app->make(ConsentService::class),
+                $app->make(AuditLogService::class),
+                $app->make(CollectionService::class),
+                $app->make(WalletServiceInterface::class),
+                $app->make(UserRoleServiceInterface::class)
+            );
+        });
+
+        // Register enhanced AuthenticatedSessionController with complete DI
+        $this->app->bind(\App\Http\Controllers\Auth\AuthenticatedSessionController::class, function ($app) {
+            return new \App\Http\Controllers\Auth\AuthenticatedSessionController(
+                $app->make(ErrorManagerInterface::class),
+                $app->make(UltraLogManager::class),
+                $app->make(ConsentService::class),
+                $app->make(AuditLogService::class),
+                $app->make(CollectionService::class),
+                $app->make(WalletServiceInterface::class),
+                $app->make(UserRoleServiceInterface::class)
+            );
+        });
 
 
     }
@@ -60,6 +93,21 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+
+        // Override Fortify's default login handling
+        Fortify::authenticateUsing(function ($request) {
+            // Custom authentication logic if needed
+            return null; // Let Fortify handle normally
+        });
+
+        // Use custom views
+        Fortify::loginView(function () {
+            return view('auth.login');
+        });
+
+        Fortify::registerView(function () {
+            return view('auth.register');
+        });
 
         Blade::component('epp-highlight', EppHighlight::class);
         Blade::component('collections-carousel', \App\View\Components\CollectionsCarousel::class);
@@ -72,6 +120,31 @@ class AppServiceProvider extends ServiceProvider
         // Registriamo un driver nominato "custom_database"
         Notification::extend('custom_database', function ($app) {
             return new CustomDatabaseChannel();
+        });
+
+        // Register GDPR middleware
+        $this->app['router']->aliasMiddleware('gdpr.consent', \App\Http\Middleware\GdprConsentMiddleware::class);
+
+        // Configure rate limiters for enhanced registration
+        RateLimiter::for('registration', function (Request $request) {
+            return Limit::perMinute(2)->by($request->ip()); // Stricter for ecosystem setup
+        });
+
+        RateLimiter::for('login', function (Request $request) {
+            return Limit::perMinute(5)->by($request->ip());
+        });
+
+        // Enhanced registration rate limiter
+        RateLimiter::for('enhanced-registration', function (Request $request) {
+            return [
+                Limit::perMinute(2)->by($request->ip()),
+                Limit::perHour(10)->by($request->ip()), // Daily limit for ecosystem creation
+            ];
+        });
+
+        // Collection creation rate limiter
+        RateLimiter::for('collection-creation', function (Request $request) {
+            return Limit::perHour(5)->by($request->user()?->id ?: $request->ip());
         });
     }
 }

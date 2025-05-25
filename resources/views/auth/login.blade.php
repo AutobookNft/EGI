@@ -1,48 +1,519 @@
-<x-guest-layout>
-    <x-authentication-card>
-        <x-slot name="logo">
-            <x-authentication-card-logo />
-        </x-slot>
+<!DOCTYPE html>
+<html lang="it" class="scroll-smooth">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <x-validation-errors class="mb-4" />
+    <!-- SEO Oracode 2.0 Compliant -->
+    <title>{{ __('Accedi al tuo Rinascimento - FlorenceEGI') }}</title>
+    <meta name="description" content="Accedi al tuo account FlorenceEGI e continua il tuo viaggio nel nuovo Rinascimento ecologico digitale.">
 
-        @session('status')
-            <div class="mb-4 font-medium text-sm text-green-600 dark:text-green-400">
-                {{ $value }}
+    <!-- Schema.org -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "Login FlorenceEGI",
+        "description": "Accesso al nuovo Rinascimento ecologico digitale",
+        "url": "{{ url()->current() }}",
+        "isPartOf": {
+            "@type": "WebSite",
+            "name": "FlorenceEGI",
+            "url": "{{ config('app.url') }}"
+        }
+    }
+    </script>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Sans+Pro:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <!-- Scripts -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <style>
+        :root {
+            --oro-fiorentino: #D4A574;
+            --verde-rinascita: #2D5016;
+            --blu-algoritmo: #1B365D;
+            --grigio-pietra: #6B6B6B;
+            --rosso-urgenza: #C13120;
+        }
+
+        .font-rinascimento { font-family: 'Playfair Display', serif; }
+        .font-corpo { font-family: 'Source Sans Pro', sans-serif; }
+
+        .bg-rinascimento-gradient {
+            background: linear-gradient(135deg,
+                rgba(212, 165, 116, 0.1) 0%,
+                rgba(45, 80, 22, 0.05) 50%,
+                rgba(27, 54, 93, 0.1) 100%);
+        }
+
+        .glass-effect {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(212, 165, 116, 0.2);
+        }
+
+        .btn-rinascimento {
+            background: linear-gradient(135deg, var(--oro-fiorentino) 0%, #E6B887 100%);
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .btn-rinascimento:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(212, 165, 116, 0.3);
+        }
+
+        .input-rinascimento {
+            border: 2px solid rgba(212, 165, 116, 0.3);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .input-rinascimento:focus {
+            border-color: var(--oro-fiorentino);
+            box-shadow: 0 0 0 3px rgba(212, 165, 116, 0.1);
+            outline: none;
+        }
+
+        .hero-pattern {
+            background-image:
+                radial-gradient(circle at 25% 25%, rgba(212, 165, 116, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(45, 80, 22, 0.05) 0%, transparent 50%);
+        }
+    </style>
+</head>
+
+<body class="min-h-screen bg-rinascimento-gradient font-corpo hero-pattern">
+    <!-- Accessibility Skip Link -->
+    <a href="#main-content" class="z-50 px-4 py-2 text-white rounded sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-oro-fiorentino">
+        Salta al contenuto principale
+    </a>
+
+    <div class="flex min-h-screen">
+        <!-- Left Side - Welcome Back -->
+        <div class="relative hidden overflow-hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blu-algoritmo via-blu-algoritmo/90 to-verde-rinascita">
+            <div class="absolute inset-0 bg-black/10"></div>
+            <div class="relative z-10 flex flex-col justify-center px-12 text-white">
+                <div class="mb-8">
+                    <div class="flex items-center justify-center w-16 h-16 mb-6 rounded-full bg-oro-fiorentino">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        </svg>
+                    </div>
+
+                    <h1 class="mb-4 text-4xl font-bold font-rinascimento">
+                        Bentornato nel<br>
+                        <span class="text-oro-fiorentino">Rinascimento</span>
+                    </h1>
+
+                    <p class="mb-6 text-xl opacity-90">
+                        Il tuo ecosistema virtuoso ti aspetta
+                    </p>
+                </div>
+
+                <!-- Stats Dashboard -->
+                <div class="p-6 mb-8 bg-white/10 backdrop-blur-sm rounded-xl">
+                    <h3 class="mb-4 font-semibold text-oro-fiorentino">Impatto in Tempo Reale</h3>
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <div class="text-2xl font-bold">€47.2K</div>
+                            <div class="opacity-75">Fondi EPP</div>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-bold">1.847</div>
+                            <div class="opacity-75">Creator Attivi</div>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-bold">3.2%</div>
+                            <div class="opacity-75">Fee Attuale</div>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-bold">₿ 12.4</div>
+                            <div class="opacity-75">Volume Oggi</div>
+                        </div>
+                    </div>
+                </div>
+
+                <blockquote class="pl-4 italic border-l-4 border-oro-fiorentino opacity-90">
+                    "Più la piattaforma cresce, più ogni partecipante guadagna.
+                    Questo è il mercato virtuoso."
+                </blockquote>
             </div>
-        @endsession
+        </div>
 
-        <form method="POST" action="{{ route('login') }}">
-            @csrf
+        <!-- Right Side - Login Form -->
+        <div class="flex items-center justify-center w-full p-8 lg:w-1/2">
+            <div class="w-full max-w-md">
 
-            <div>
-                <x-label for="email" value="{{ __('Email') }}" />
-                <x-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
+                <!-- Mobile Logo -->
+                <div class="mb-8 text-center lg:hidden">
+                    <div class="flex items-center justify-center w-12 h-12 mx-auto mb-4 rounded-full bg-oro-fiorentino">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        </svg>
+                    </div>
+                    <h1 class="text-2xl font-bold font-rinascimento text-blu-algoritmo">
+                        FlorenceEGI
+                    </h1>
+                    <p class="text-grigio-pietra">Il nuovo Rinascimento ecologico digitale</p>
+                </div>
+
+                <main id="main-content" role="main" aria-labelledby="login-title">
+                    <div class="p-8 shadow-xl glass-effect rounded-2xl">
+
+                        <div class="mb-8">
+                            <h2 id="login-title" class="mb-2 text-3xl font-semibold text-center font-rinascimento text-blu-algoritmo">
+                                Accedi
+                            </h2>
+                            <p class="text-center text-grigio-pietra">
+                                Continua il tuo viaggio nel Rinascimento
+                            </p>
+                        </div>
+
+                        <!-- Success Messages -->
+                        @if (session('success'))
+                            <div class="p-4 mb-6 border rounded-lg bg-green-50 border-verde-rinascita" role="alert" aria-live="polite">
+                                <div class="flex">
+                                    <svg class="w-5 h-5 text-verde-rinascita" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                    </svg>
+                                    <div class="ml-3 text-verde-rinascita">
+                                        {{ session('success') }}
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+
+                        <!-- Error Messages -->
+                        @if ($errors->any() || session('error'))
+                            <div class="p-4 mb-6 border rounded-lg bg-red-50 border-rosso-urgenza" role="alert" aria-live="polite">
+                                <div class="flex">
+                                    <svg class="w-5 h-5 text-rosso-urgenza" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                    </svg>
+                                    <div class="ml-3">
+                                        <h3 class="text-sm font-medium text-rosso-urgenza">
+                                            Credenziali non valide
+                                        </h3>
+                                        <div class="mt-2 text-sm text-rosso-urgenza">
+                                            @if(session('error'))
+                                                <p>{{ session('error') }}</p>
+                                            @endif
+                                            @if ($errors->any())
+                                                <ul class="list-disc list-inside">
+                                                    @foreach ($errors->all() as $error)
+                                                        <li>{{ $error }}</li>
+                                                    @endforeach
+                                                </ul>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+
+                        <!-- Two-Factor Challenge Message -->
+                        @if (session('two-factor-challenge'))
+                            <div class="p-4 mb-6 border rounded-lg bg-blue-50 border-blu-algoritmo" role="alert" aria-live="polite">
+                                <div class="flex">
+                                    <svg class="w-5 h-5 text-blu-algoritmo" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                                    </svg>
+                                    <div class="ml-3 text-blu-algoritmo">
+                                        <h3 class="font-medium">Verifica Sicurezza Aggiuntiva</h3>
+                                        <p class="mt-1 text-sm">Inserisci il codice di autenticazione a due fattori</p>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+
+                        <form method="POST" action="{{ route('login') }}" class="space-y-6" novalidate>
+                            @csrf
+
+                            <!-- Email Field -->
+                            <div>
+                                <label for="email" class="block mb-2 text-sm font-medium text-blu-algoritmo">
+                                    Email
+                                </label>
+                                <input id="email" name="email" type="email" autocomplete="email" required
+                                       class="block w-full px-4 py-3 text-lg input-rinascimento font-corpo"
+                                       value="{{ old('email') }}"
+                                       placeholder="La tua email"
+                                       aria-describedby="email-error">
+                                @error('email')
+                                    <p id="email-error" class="mt-1 text-sm text-rosso-urgenza" role="alert">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <!-- Password Field -->
+                            <div>
+                                <label for="password" class="block mb-2 text-sm font-medium text-blu-algoritmo">
+                                    Password
+                                </label>
+                                <div class="relative">
+                                    <input id="password" name="password" type="password" autocomplete="current-password" required
+                                           class="block w-full px-4 py-3 pr-12 text-lg input-rinascimento font-corpo"
+                                           placeholder="La tua password"
+                                           aria-describedby="password-error">
+                                    <button type="button"
+                                            class="absolute inset-y-0 right-0 flex items-center pr-3"
+                                            onclick="togglePasswordVisibility()"
+                                            aria-label="Mostra/Nascondi password">
+                                        <svg id="eye-open" class="w-5 h-5 text-grigio-pietra" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
+                                        <svg id="eye-closed" class="hidden w-5 h-5 text-grigio-pietra" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L12 12m0 0l3.122 3.122M12 12l-3.122-3.122m0 0L3 3m6.878 6.878L12 12" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                @error('password')
+                                    <p id="password-error" class="mt-1 text-sm text-rosso-urgenza" role="alert">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <!-- Two-Factor Code (if needed) -->
+                            @if (session('two-factor-challenge'))
+                                <div>
+                                    <label for="code" class="block mb-2 text-sm font-medium text-blu-algoritmo">
+                                        Codice di Autenticazione
+                                    </label>
+                                    <input id="code" name="code" type="text" autocomplete="one-time-code"
+                                           class="block w-full px-4 py-3 text-lg tracking-widest text-center input-rinascimento font-corpo"
+                                           placeholder="000000"
+                                           maxlength="6"
+                                           aria-describedby="code-help">
+                                    <p id="code-help" class="mt-1 text-xs text-grigio-pietra">
+                                        Inserisci il codice a 6 cifre dalla tua app di autenticazione
+                                    </p>
+                                </div>
+
+                                <div class="text-center">
+                                    <p class="mb-2 text-sm text-grigio-pietra">Non riesci ad accedere alla tua app?</p>
+                                    <label for="recovery_code" class="block mb-2 text-sm font-medium text-blu-algoritmo">
+                                        Codice di Recupero
+                                    </label>
+                                    <input id="recovery_code" name="recovery_code" type="text" autocomplete="one-time-code"
+                                           class="block w-full px-4 py-3 text-lg text-center input-rinascimento font-corpo"
+                                           placeholder="Codice di recupero"
+                                           aria-describedby="recovery-help">
+                                    <p id="recovery-help" class="mt-1 text-xs text-grigio-pietra">
+                                        Usa uno dei codici di recupero salvati durante la configurazione
+                                    </p>
+                                </div>
+                            @endif
+
+                            <!-- Remember Me & Forgot Password -->
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <input id="remember" name="remember" type="checkbox"
+                                           class="w-4 h-4 rounded text-oro-fiorentino border-oro-fiorentino focus:ring-oro-fiorentino"
+                                           {{ old('remember') ? 'checked' : '' }}>
+                                    <label for="remember" class="block ml-2 text-sm cursor-pointer text-grigio-pietra">
+                                        Ricordami
+                                    </label>
+                                </div>
+
+                                @if (Route::has('password.request'))
+                                    <div class="text-sm">
+                                        <a href="{{ route('password.request') }}"
+                                           class="font-medium transition-colors text-oro-fiorentino hover:text-verde-rinascita">
+                                            Password dimenticata?
+                                        </a>
+                                    </div>
+                                @endif
+                            </div>
+
+                            <!-- Submit Button -->
+                            <div>
+                                <button type="submit"
+                                        class="w-full px-6 py-4 text-lg font-semibold btn-rinascimento rounded-xl focus:outline-none focus:ring-4 focus:ring-oro-fiorentino focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        id="submit-btn"
+                                        aria-describedby="submit-help">
+                                    <span id="submit-text">🎯 Accedi al Rinascimento</span>
+                                    <span id="submit-loading" class="hidden">
+                                        <svg class="inline w-5 h-5 mr-3 -ml-1 text-white animate-spin" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Accesso in corso...
+                                    </span>
+                                </button>
+                                <p id="submit-help" class="mt-3 text-xs text-center text-grigio-pietra">
+                                    Accedendo confermi di rispettare i nostri Termini di Servizio
+                                </p>
+                            </div>
+
+                            <!-- Social Login Options (if enabled) -->
+                            @if(config('services.google.client_id') || config('services.github.client_id'))
+                                <div class="mt-6">
+                                    <div class="relative">
+                                        <div class="absolute inset-0 flex items-center">
+                                            <div class="w-full border-t border-oro-fiorentino/20"></div>
+                                        </div>
+                                        <div class="relative flex justify-center text-sm">
+                                            <span class="px-2 bg-white text-grigio-pietra">oppure</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="grid grid-cols-1 gap-3 mt-6">
+                                        @if(config('services.google.client_id'))
+                                            <a href="{{ route('auth.google') }}"
+                                               class="inline-flex justify-center w-full px-4 py-3 text-sm font-medium transition-colors bg-white border border-oro-fiorentino/30 rounded-xl text-grigio-pietra hover:bg-oro-fiorentino/5">
+                                                <svg class="w-5 h-5 mr-2" viewBox="0 0 24 24">
+                                                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                                                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                                                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                                                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                                                </svg>
+                                                Continua con Google
+                                            </a>
+                                        @endif
+                                    </div>
+                                </div>
+                            @endif
+
+                            <!-- Registration Link -->
+                            <div class="pt-4 text-center border-t border-oro-fiorentino/20">
+                                <p class="text-grigio-pietra">
+                                    Non fai ancora parte del Rinascimento?
+                                    <a href="{{ route('register') }}" class="font-medium transition-colors text-oro-fiorentino hover:text-verde-rinascita">
+                                        Unisciti a noi
+                                    </a>
+                                </p>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- GDPR Notice -->
+                    <div class="mt-6 text-center">
+                        <p class="text-xs text-grigio-pietra">
+                            Accedendo accetti la nostra
+                            <a href="{{ route('gdpr.privacy-policy') }}" class="text-oro-fiorentino hover:underline">Informativa Privacy</a>
+                            e i
+                            <a href="{{ route('gdpr.terms') }}" class="text-oro-fiorentino hover:underline">Termini di Servizio</a>
+                        </p>
+                    </div>
+                </main>
             </div>
+        </div>
+    </div>
 
-            <div class="mt-4">
-                <x-label for="password" value="{{ __('Password') }}" />
-                <x-input id="password" class="block mt-1 w-full" type="password" name="password" required autocomplete="current-password" />
-            </div>
+    <!-- JavaScript for Enhanced UX -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Password visibility toggle
+            window.togglePasswordVisibility = function() {
+                const passwordInput = document.getElementById('password');
+                const eyeOpen = document.getElementById('eye-open');
+                const eyeClosed = document.getElementById('eye-closed');
 
-            <div class="block mt-4">
-                <label for="remember_me" class="flex items-center">
-                    <x-checkbox id="remember_me" name="remember" />
-                    <span class="ms-2 text-sm text-gray-600 dark:text-gray-400">{{ __('Remember me') }}</span>
-                </label>
-            </div>
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    eyeOpen.classList.add('hidden');
+                    eyeClosed.classList.remove('hidden');
+                } else {
+                    passwordInput.type = 'password';
+                    eyeOpen.classList.remove('hidden');
+                    eyeClosed.classList.add('hidden');
+                }
+            };
 
-            <div class="flex items-center justify-end mt-4">
-                @if (Route::has('password.request'))
-                    <a class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800" href="{{ route('password.request') }}">
-                        {{ __('Forgot your password?') }}
-                    </a>
-                @endif
+            // Form submission loading state
+            const form = document.querySelector('form');
+            const submitBtn = document.getElementById('submit-btn');
+            const submitText = document.getElementById('submit-text');
+            const submitLoading = document.getElementById('submit-loading');
 
-                <x-button class="ms-4">
-                    {{ __('Log in') }}
-                </x-button>
-            </div>
-        </form>
-    </x-authentication-card>
-</x-guest-layout>
+            if (form && submitBtn) {
+                form.addEventListener('submit', function() {
+                    submitBtn.disabled = true;
+                    submitText.classList.add('hidden');
+                    submitLoading.classList.remove('hidden');
+                });
+            }
+
+            // Auto-format two-factor code
+            const codeInput = document.getElementById('code');
+            if (codeInput) {
+                codeInput.addEventListener('input', function(e) {
+                    // Remove any non-digit characters
+                    e.target.value = e.target.value.replace(/\D/g, '');
+
+                    // Auto-submit when 6 digits are entered
+                    if (e.target.value.length === 6) {
+                        setTimeout(() => {
+                            form.submit();
+                        }, 100);
+                    }
+                });
+
+                // Focus the code input if it exists
+                codeInput.focus();
+            }
+
+            // Enhanced email validation
+            const emailInput = document.getElementById('email');
+            if (emailInput) {
+                emailInput.addEventListener('blur', function() {
+                    const email = this.value;
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+                    if (email && !emailRegex.test(email)) {
+                        this.classList.add('border-rosso-urgenza');
+                        this.classList.remove('border-oro-fiorentino');
+                    } else {
+                        this.classList.remove('border-rosso-urgenza');
+                    }
+                });
+            }
+
+            // Auto-clear error states on input
+            const inputs = document.querySelectorAll('input');
+            inputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    this.classList.remove('border-rosso-urgenza');
+                    const errorElement = document.getElementById(this.id + '-error');
+                    if (errorElement) {
+                        errorElement.style.display = 'none';
+                    }
+                });
+            });
+
+            // Enhanced keyboard navigation
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && e.target.type !== 'submit') {
+                    const formInputs = Array.from(form.querySelectorAll('input:not([type="hidden"])'));
+                    const currentIndex = formInputs.indexOf(e.target);
+                    const nextInput = formInputs[currentIndex + 1];
+
+                    if (nextInput) {
+                        nextInput.focus();
+                        e.preventDefault();
+                    }
+                }
+            });
+        });
+
+        // Real-time stats update (if API available)
+        function updateStats() {
+            // This would connect to your real-time stats API
+            // For now, just simulate the update
+            if (window.location.pathname === '/login') {
+                // Update stats every 30 seconds
+                setTimeout(updateStats, 30000);
+            }
+        }
+
+        // Initialize stats update
+        updateStats();
+    </script>
+</body>
+</html>

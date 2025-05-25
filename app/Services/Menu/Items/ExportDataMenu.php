@@ -23,7 +23,7 @@ class ExportDataMenu extends MenuItem
     {
         parent::__construct(
             'menu.export_data',
-            'gdpr.export.index',
+            'gdpr.export-data',
             'download',
             'export_personal_data'
         );

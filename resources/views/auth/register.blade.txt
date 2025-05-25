@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="it" class="scroll-smooth">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    <!-- SEO Oracode 2.0 Compliant -->
+    <title>{{ __('Unisciti al Nuovo Rinascimento Digitale - FlorenceEGI') }}</title>
+    <meta name="description" content="Registrati su FlorenceEGI e diventa protagonista del nuovo Rinascimento ecologico digitale. Dove la partecipazione trasforma il mercato in virtù.">
+    <meta name="keywords" content="FlorenceEGI, Rinascimento Digitale, NFT sostenibili, arte digitale, mecenati, creator">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Unisciti al Nuovo Rinascimento Digitale - FlorenceEGI">
+    <meta property="og:description" content="Dove la partecipazione trasforma il mercato in virtù">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ url()->current() }}">
+
+    <!-- Schema.org -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "Registrazione FlorenceEGI",
+        "description": "Unisciti al nuovo Rinascimento ecologico digitale",
+        "url": "{{ url()->current() }}",
+        "isPartOf": {
+            "@type": "WebSite",
+            "name": "FlorenceEGI",
+            "url": "{{ config('app.url') }}"
+        }
+    }
+    </script>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Sans+Pro:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <!-- Scripts -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <style>
+        :root {
+            --oro-fiorentino: #D4A574;
+            --verde-rinascita: #2D5016;
+            --blu-algoritmo: #1B365D;
+            --grigio-pietra: #6B6B6B;
+            --rosso-urgenza: #C13120;
+        }
+
+        .font-rinascimento { font-family: 'Playfair Display', serif; }
+        .font-corpo { font-family: 'Source Sans Pro', sans-serif; }
+
+        .bg-rinascimento-gradient {
+            background: linear-gradient(135deg,
+                rgba(212, 165, 116, 0.1) 0%,
+                rgba(45, 80, 22, 0.05) 50%,
+                rgba(27, 54, 93, 0.1) 100%);
+        }
+
+        .glass-effect {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(212, 165, 116, 0.2);
+        }
+
+        .btn-rinascimento {
+            background: linear-gradient(135deg, var(--oro-fiorentino) 0%, #E6B887 100%);
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .btn-rinascimento:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(212, 165, 116, 0.3);
+        }
+
+        .input-rinascimento {
+            border: 2px solid rgba(212, 165, 116, 0.3);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .input-rinascimento:focus {
+            border-color: var(--oro-fiorentino);
+            box-shadow: 0 0 0 3px rgba(212, 165, 116, 0.1);
+            outline: none;
+        }
+
+        .consent-card {
+            border: 1px solid rgba(212, 165, 116, 0.2);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .consent-card:hover {
+            border-color: var(--oro-fiorentino);
+            box-shadow: 0 4px 15px rgba(212, 165, 116, 0.1);
+        }
+    </style>
+</head>
+
+<body class="min-h-screen bg-rinascimento-gradient font-corpo">
+    <!-- Accessibility Skip Link -->
+    <a href="#main-content" class="px-4 py-2 text-white rounded sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-oro-fiorentino">
+        Salta al contenuto principale
+    </a>
+
+    <div class="flex items-center justify-center min-h-screen px-4 py-12 sm:px-6 lg:px-8">
+        <div class="w-full max-w-2xl space-y-8">
+
+            <!-- Header Section -->
+            <header class="text-center" role="banner">
+                <div class="flex items-center justify-center w-16 h-16 mx-auto mb-6 rounded-full bg-oro-fiorentino">
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                </div>
+
+                <h1 class="mb-4 text-4xl font-bold font-rinascimento sm:text-5xl text-blu-algoritmo">
+                    Il nuovo Rinascimento<br>
+                    <span class="text-oro-fiorentino">ecologico digitale</span>
+                </h1>
+
+                <p class="max-w-lg mx-auto text-xl leading-relaxed text-grigio-pietra">
+                    Dove la partecipazione trasforma il mercato in virtù
+                </p>
+
+                <p class="mt-4 font-semibold text-verde-rinascita">
+                    Più la piattaforma cresce, più ogni partecipante guadagna
+                </p>
+            </header>
+
+            <!-- Main Registration Form -->
+            <main id="main-content" role="main" aria-labelledby="registration-title">
+                <div class="p-8 shadow-xl glass-effect rounded-2xl sm:p-10">
+
+                    <div class="mb-8">
+                        <h2 id="registration-title" class="text-2xl font-semibold text-center font-rinascimento text-blu-algoritmo">
+                            Inizia il tuo Rinascimento
+                        </h2>
+                        <p class="mt-2 text-center text-grigio-pietra">
+                            Scegli il tuo ruolo nell'ecosistema virtuoso
+                        </p>
+                    </div>
+
+                    <!-- Error Messages -->
+                    @if ($errors->any() || session('error'))
+                        <div class="p-4 mb-6 border rounded-lg bg-red-50 border-rosso-urgenza" role="alert" aria-live="polite">
+                            <div class="flex">
+                                <svg class="w-5 h-5 text-rosso-urgenza" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                </svg>
+                                <div class="ml-3">
+                                    <h3 class="text-sm font-medium text-rosso-urgenza">
+                                        Attenzione: verifica i dati inseriti
+                                    </h3>
+                                    <div class="mt-2 text-sm text-rosso-urgenza">
+                                        @if(session('error'))
+                                            <p>{{ session('error') }}</p>
+                                        @endif
+                                        @if ($errors->any())
+                                            <ul class="list-disc list-inside">
+                                                @foreach ($errors->all() as $error)
+                                                    <li>{{ $error }}</li>
+                                                @endforeach
+                                            </ul>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
+                    <form method="POST" action="{{ route('register') }}" class="space-y-6" novalidate>
+                        @csrf
+
+                        <!-- User Type Selection -->
+                        <fieldset class="space-y-4">
+                            <legend class="mb-4 text-lg font-semibold text-blu-algoritmo">
+                                Qual è il tuo ruolo nel Rinascimento?
+                            </legend>
+
+                            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                            <div>
+                                <label for="password" class="block mb-2 text-sm font-medium text-blu-algoritmo">
+                                    Password *
+                                </label>
+                                <input id="password" name="password" type="password" autocomplete="new-password" required
+                                       class="block w-full px-4 py-3 input-rinascimento font-corpo"
+                                       aria-describedby="password-error password-help">
+                                <p id="password-help" class="mt-1 text-xs text-grigio-pietra">
+                                    Minimo 8 caratteri, includi maiuscole, minuscole e numeri
+                                </p>
+                                @error('password')
+                                    <p id="password-error" class="mt-1 text-sm text-rosso-urgenza" role="alert">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <label for="password_confirmation" class="block mb-2 text-sm font-medium text-blu-algoritmo">
+                                    Conferma Password *
+                                </label>
+                                <input id="password_confirmation" name="password_confirmation" type="password" autocomplete="new-password" required
+                                       class="block w-full px-4 py-3 input-rinascimento font-corpo"
+                                       aria-describedby="password-confirmation-error">
+                                @error('password_confirmation')
+                                    <p id="password-confirmation-error" class="mt-1 text-sm text-rosso-urgenza" role="alert">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <!-- GDPR Consent Section -->
+                        <fieldset class="pt-6 space-y-4 border-t border-oro-fiorentino/20">
+                            <legend class="mb-4 text-lg font-semibold text-blu-algoritmo">
+                                Privacy e Consensi
+                                <span class="block mt-1 text-sm font-normal text-grigio-pietra">
+                                    La trasparenza è un pilastro del nostro Rinascimento
+                                </span>
+                            </legend>
+
+                            <!-- Required Legal Consents -->
+                            <div class="space-y-4">
+                                <div class="p-4 consent-card bg-green-50">
+                                    <div class="flex items-start">
+                                        <div class="flex items-center h-6">
+                                            <input id="privacy_policy_accepted" name="privacy_policy_accepted" type="checkbox" required
+                                                   class="w-4 h-4 rounded text-oro-fiorentino border-oro-fiorentino focus:ring-oro-fiorentino"
+                                                   {{ old('privacy_policy_accepted') ? 'checked' : '' }}
+                                                   aria-describedby="privacy-policy-description">
+                                        </div>
+                                        <div class="ml-3">
+                                            <label for="privacy_policy_accepted" class="text-sm font-medium cursor-pointer text-blu-algoritmo">
+                                                Accetto l'Informativa sulla Privacy *
+                                            </label>
+                                            <p id="privacy-policy-description" class="mt-1 text-xs text-grigio-pietra">
+                                                Leggi come proteggiamo i tuoi dati nel nostro
+                                                <a href="{{ route('gdpr.privacy-policy') }}" class="text-oro-fiorentino hover:underline" target="_blank" rel="noopener">
+                                                    Informativa Privacy <span class="sr-only">(si apre in una nuova finestra)</span>
+                                                </a>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="p-4 consent-card bg-green-50">
+                                    <div class="flex items-start">
+                                        <div class="flex items-center h-6">
+                                            <input id="terms_accepted" name="terms_accepted" type="checkbox" required
+                                                   class="w-4 h-4 rounded text-oro-fiorentino border-oro-fiorentino focus:ring-oro-fiorentino"
+                                                   {{ old('terms_accepted') ? 'checked' : '' }}
+                                                   aria-describedby="terms-description">
+                                        </div>
+                                        <div class="ml-3">
+                                            <label for="terms_accepted" class="text-sm font-medium cursor-pointer text-blu-algoritmo">
+                                                Accetto i Termini e Condizioni del Servizio *
+                                            </label>
+                                            <p id="terms-description" class="mt-1 text-xs text-grigio-pietra">
+                                                Leggi le regole del nostro ecosistema virtuoso nei
+                                                <a href="{{ route('terms') }}" class="text-oro-fiorentino hover:underline" target="_blank" rel="noopener">
+                                                    Termini di Servizio <span class="sr-only">(si apre in una nuova finestra)</span>
+                                                </a>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="p-4 consent-card bg-green-50">
+                                    <div class="flex items-start">
+                                        <div class="flex items-center h-6">
+                                            <input id="age_confirmation" name="age_confirmation" type="checkbox" required
+                                                   class="w-4 h-4 rounded text-oro-fiorentino border-oro-fiorentino focus:ring-oro-fiorentino"
+                                                   {{ old('age_confirmation') ? 'checked' : '' }}
+                                                   aria-describedby="age-description">
+                                        </div>
+                                        <div class="ml-3">
+                                            <label for="age_confirmation" class="text-sm font-medium cursor-pointer text-blu-algoritmo">
+                                                Confermo di avere almeno 16 anni *
+                                            </label>
+                                            <p id="age-description" class="mt-1 text-xs text-grigio-pietra">
+                                                Requisito GDPR per il consenso autonomo
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Optional Consents -->
+                            <div class="mt-6 space-y-3">
+                                <h4 class="text-sm font-medium text-blu-algoritmo">
+                                    Consensi Opzionali
+                                    <span class="block mt-1 text-xs font-normal text-grigio-pietra">
+                                        Puoi modificarli in qualsiasi momento dal tuo profilo
+                                    </span>
+                                </h4>
+
+                                <div class="p-4 consent-card">
+                                    <div class="flex items-start">
+                                        <div class="flex items-center h-6">
+                                            <input id="consents_analytics" name="consents[analytics]" type="checkbox" value="1"
+                                                   class="w-4 h-4 rounded text-verde-rinascita border-verde-rinascita focus:ring-verde-rinascita"
+                                                   {{ old('consents.analytics') ? 'checked' : '' }}
+                                                   aria-describedby="analytics-description">
+                                        </div>
+                                        <div class="ml-3">
+                                            <label for="consents_analytics" class="text-sm font-medium cursor-pointer text-blu-algoritmo">
+                                                Analisi e Miglioramenti
+                                            </label>
+                                            <p id="analytics-description" class="mt-1 text-xs text-grigio-pietra">
+                                                Aiutaci a capire come usi la piattaforma per migliorare l'esperienza di tutti
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="p-4 consent-card">
+                                    <div class="flex items-start">
+                                        <div class="flex items-center h-6">
+                                            <input id="consents_marketing" name="consents[marketing]" type="checkbox" value="1"
+                                                   class="w-4 h-4 rounded text-verde-rinascita border-verde-rinascita focus:ring-verde-rinascita"
+                                                   {{ old('consents.marketing') ? 'checked' : '' }}
+                                                   aria-describedby="marketing-description">
+                                        </div>
+                                        <div class="ml-3">
+                                            <label for="consents_marketing" class="text-sm font-medium cursor-pointer text-blu-algoritmo">
+                                                Comunicazioni di Marketing
+                                            </label>
+                                            <p id="marketing-description" class="mt-1 text-xs text-grigio-pietra">
+                                                Ricevi aggiornamenti su nuove opere, eventi e opportunità di investimento
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="p-4 consent-card">
+                                    <div class="flex items-start">
+                                        <div class="flex items-center h-6">
+                                            <input id="consents_profiling" name="consents[profiling]" type="checkbox" value="1"
+                                                   class="w-4 h-4 rounded text-verde-rinascita border-verde-rinascita focus:ring-verde-rinascita"
+                                                   {{ old('consents.profiling') ? 'checked' : '' }}
+                                                   aria-describedby="profiling-description">
+                                        </div>
+                                        <div class="ml-3">
+                                            <label for="consents_profiling" class="text-sm font-medium cursor-pointer text-blu-algoritmo">
+                                                Personalizzazione e Raccomandazioni
+                                            </label>
+                                            <p id="profiling-description" class="mt-1 text-xs text-grigio-pietra">
+                                                Consenti contenuti e raccomandazioni personalizzate basate sui tuoi interessi
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+
+                        <!-- Submit Button -->
+                        <div class="pt-6">
+                            <button type="submit"
+                                    class="w-full px-6 py-4 text-lg font-semibold btn-rinascimento rounded-xl focus:outline-none focus:ring-4 focus:ring-oro-fiorentino focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    aria-describedby="submit-help">
+                                🎯 Inizia il tuo Rinascimento
+                            </button>
+                            <p id="submit-help" class="mt-3 text-xs text-center text-grigio-pietra">
+                                Registrandoti entri a far parte del primo ecosistema dove l'arte diventa valore virtuoso
+                            </p>
+                        </div>
+
+                        <!-- Already Registered -->
+                        <div class="pt-4 text-center border-t border-oro-fiorentino/20">
+                            <p class="text-grigio-pietra">
+                                Fai già parte del Rinascimento?
+                                <a href="{{ route('login') }}" class="font-medium transition-colors text-oro-fiorentino hover:text-verde-rinascita">
+                                    Accedi al tuo account
+                                </a>
+                            </p>
+                        </div>
+                    </form>
+                </div>
+            </main>
+
+            <!-- Trust Indicators -->
+            <footer class="space-y-4 text-center" role="contentinfo">
+                <div class="flex items-center justify-center space-x-6 text-sm text-grigio-pietra">
+                    <div class="flex items-center">
+                        <svg class="w-4 h-4 mr-2 text-verde-rinascita" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
+                        </svg>
+                        GDPR Compliant
+                    </div>
+                    <div class="flex items-center">
+                        <svg class="w-4 h-4 mr-2 text-verde-rinascita" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                        </svg>
+                        Dati Protetti
+                    </div>
+                    <div class="flex items-center">
+                        <svg class="w-4 h-4 mr-2 text-verde-rinascita" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" />
+                        </svg>
+                        Impatto Reale
+                    </div>
+                </div>
+
+                <p class="max-w-md mx-auto text-xs text-grigio-pietra">
+                    FlorenceEGI è conforme al GDPR e rispetta i più alti standard di protezione dei dati.
+                    I tuoi dati personali sono trattati con la massima sicurezza e trasparenza.
+                </p>
+            </footer>
+        </div>
+    </div>
+
+    <!-- JavaScript for Enhanced UX -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // User type selection enhancement
+            const userTypeInputs = document.querySelectorAll('input[name="user_type"]');
+            const cards = document.querySelectorAll('.consent-card');
+
+            userTypeInputs.forEach(input => {
+                input.addEventListener('change', function() {
+                    // Remove selection from all cards
+                    cards.forEach(card => {
+                        card.classList.remove('ring-2', 'ring-oro-fiorentino', 'bg-oro-fiorentino/5');
+                    });
+
+                    // Add selection to current card
+                    if (this.checked) {
+                        this.closest('.consent-card').classList.add('ring-2', 'ring-oro-fiorentino', 'bg-oro-fiorentino/5');
+                    }
+                });
+
+                // Check on page load if already selected
+                if (input.checked) {
+                    input.closest('.consent-card').classList.add('ring-2', 'ring-oro-fiorentino', 'bg-oro-fiorentino/5');
+                }
+            });
+
+            // Password strength indicator
+            const passwordInput = document.getElementById('password');
+            const passwordHelp = document.getElementById('password-help');
+
+            if (passwordInput && passwordHelp) {
+                passwordInput.addEventListener('input', function() {
+                    const value = this.value;
+                    const strength = calculatePasswordStrength(value);
+                    updatePasswordHelp(passwordHelp, strength);
+                });
+            }
+
+            function calculatePasswordStrength(password) {
+                let strength = 0;
+                if (password.length >= 8) strength++;
+                if (/[a-z]/.test(password)) strength++;
+                if (/[A-Z]/.test(password)) strength++;
+                if (/[0-9]/.test(password)) strength++;
+                if (/[^A-Za-z0-9]/.test(password)) strength++;
+                return strength;
+            }
+
+            function updatePasswordHelp(element, strength) {
+                const messages = [
+                    'Password troppo debole',
+                    'Password debole',
+                    'Password accettabile',
+                    'Password buona',
+                    'Password forte',
+                    'Password eccellente'
+                ];
+
+                const colors = [
+                    'text-rosso-urgenza',
+                    'text-rosso-urgenza',
+                    'text-yellow-600',
+                    'text-verde-rinascita',
+                    'text-verde-rinascita',
+                    'text-verde-rinascita'
+                ];
+
+                element.className = `mt-1 text-xs ${colors[strength]}`;
+                element.textContent = messages[strength] || messages[0];
+            }
+
+            // Form validation enhancement
+            const form = document.querySelector('form');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    // Check required consents
+                    const requiredConsents = document.querySelectorAll('input[type="checkbox"][required]');
+                    let hasErrors = false;
+
+                    requiredConsents.forEach(input => {
+                        if (!input.checked) {
+                            hasErrors = true;
+                            input.closest('.consent-card').classList.add('ring-2', 'ring-rosso-urgenza');
+                        } else {
+                            input.closest('.consent-card').classList.remove('ring-2', 'ring-rosso-urgenza');
+                        }
+                    });
+
+                    if (hasErrors) {
+                        e.preventDefault();
+                        document.querySelector('.consent-card.ring-rosso-urgenza').scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'center'
+                        });
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>-4">
+                                <label class="p-4 cursor-pointer consent-card group" for="user_type_creator">
+                                    <input type="radio" id="user_type_creator" name="user_type" value="creator"
+                                           class="sr-only" {{ old('user_type') === 'creator' ? 'checked' : '' }}
+                                           aria-describedby="creator-description">
+                                    <div class="text-center">
+                                        <div class="flex items-center justify-center w-12 h-12 mx-auto mb-3 transition-transform rounded-full bg-oro-fiorentino group-hover:scale-110">
+                                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                            </svg>
+                                        </div>
+                                        <h3 class="font-semibold text-blu-algoritmo">Creator</h3>
+                                        <p id="creator-description" class="mt-1 text-sm text-grigio-pietra">
+                                            La tua arte lavora per te, sempre
+                                        </p>
+                                    </div>
+                                </label>
+
+                                <label class="p-4 cursor-pointer consent-card group" for="user_type_mecenate">
+                                    <input type="radio" id="user_type_mecenate" name="user_type" value="mecenate"
+                                           class="sr-only" {{ old('user_type') === 'mecenate' ? 'checked' : '' }}
+                                           aria-describedby="mecenate-description">
+                                    <div class="text-center">
+                                        <div class="flex items-center justify-center w-12 h-12 mx-auto mb-3 transition-transform rounded-full bg-verde-rinascita group-hover:scale-110">
+                                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                                            </svg>
+                                        </div>
+                                        <h3 class="font-semibold text-blu-algoritmo">Mecenate</h3>
+                                        <p id="mecenate-description" class="mt-1 text-sm text-grigio-pietra">
+                                            Diventa protagonista del nuovo Rinascimento
+                                        </p>
+                                    </div>
+                                </label>
+
+                                <label class="p-4 cursor-pointer consent-card group" for="user_type_acquirente">
+                                    <input type="radio" id="user_type_acquirente" name="user_type" value="acquirente"
+                                           class="sr-only" {{ old('user_type') === 'acquirente' ? 'checked' : '' }}
+                                           aria-describedby="acquirente-description">
+                                    <div class="text-center">
+                                        <div class="flex items-center justify-center w-12 h-12 mx-auto mb-3 transition-transform rounded-full bg-blu-algoritmo group-hover:scale-110">
+                                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                                            </svg>
+                                        </div>
+                                        <h3 class="font-semibold text-blu-algoritmo">Acquirente</h3>
+                                        <p id="acquirente-description" class="mt-1 text-sm text-grigio-pietra">
+                                            Entra nel mercato virtuoso
+                                        </p>
+                                    </div>
+                                </label>
+
+                                <label class="p-4 cursor-pointer consent-card group" for="user_type_azienda">
+                                    <input type="radio" id="user_type_azienda" name="user_type" value="azienda"
+                                           class="sr-only" {{ old('user_type') === 'azienda' ? 'checked' : '' }}
+                                           aria-describedby="azienda-description">
+                                    <div class="text-center">
+                                        <div class="flex items-center justify-center w-12 h-12 mx-auto mb-3 transition-transform rounded-full bg-grigio-pietra group-hover:scale-110">
+                                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                            </svg>
+                                        </div>
+                                        <h3 class="font-semibold text-blu-algoritmo">Azienda</h3>
+                                        <p id="azienda-description" class="mt-1 text-sm text-grigio-pietra">
+                                            Trasforma la pubblicità in asset virtuoso
+                                        </p>
+                                    </div>
+                                </label>
+                            </div>
+                        </fieldset>
+
+                        <!-- Personal Information -->
+                        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                            <div>
+                                <label for="name" class="block mb-2 text-sm font-medium text-blu-algoritmo">
+                                    Nome completo *
+                                </label>
+                                <input id="name" name="name" type="text" autocomplete="name" required
+                                       class="block w-full px-4 py-3 input-rinascimento font-corpo"
+                                       value="{{ old('name') }}"
+                                       aria-describedby="name-error">
+                                @error('name')
+                                    <p id="name-error" class="mt-1 text-sm text-rosso-urgenza" role="alert">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <label for="email" class="block mb-2 text-sm font-medium text-blu-algoritmo">
+                                    Email *
+                                </label>
+                                <input id="email" name="email" type="email" autocomplete="email" required
+                                       class="block w-full px-4 py-3 input-rinascimento font-corpo"
+                                       value="{{ old('email') }}"
+                                       aria-describedby="email-error">
+                                @error('email')
+                                    <p id="email-error" class="mt-1 text-sm text-rosso-urgenza" role="alert">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap

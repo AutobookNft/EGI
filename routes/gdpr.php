@@ -85,6 +85,9 @@ Route::middleware(['auth', 'verified'])->prefix('dashboard/gdpr')->name('gdpr.')
         ->name('breach-report.status');
 
     // === PRIVACY POLICY & TRANSPARENCY ===
+    Route::get('/terms-of-service', [GdprController::class, 'termsOfService'])
+        ->name('terms');
+
     Route::get('/privacy-policy', [GdprController::class, 'privacyPolicy'])
         ->name('privacy-policy');
 

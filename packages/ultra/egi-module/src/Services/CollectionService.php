@@ -102,7 +102,7 @@ class CollectionService
 
         try {
             $collection = Collection::create([
-                'user_id'         => $user->id,
+                'creator_id'         => $user->id,
                 'owner_id'        => $user->id,
                 'epp_id'          => config('app.epp_id'),
                 'is_default'      => true,

@@ -25,7 +25,7 @@ class EditPersonalDataMenu extends MenuItem
             'menu.edit_personal_data',
             'profile.edit',
             'user-edit',
-            'edit_personal_data'
+            'gdpr.edit_personal_data'
         );
     }
 }

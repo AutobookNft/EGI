@@ -13,35 +13,39 @@ use Exception;
 use Throwable;
 
 /**
- * @Oracode Service for managing user collections
- * 🎯 Purpose: Handles the creation, lookup, and assignment of collections to users
- * 🧱 Core Logic: Collection lifecycle management with fallback strategies
- * 🛡️ GDPR: Manages user-collection associations with minimal data exposure
+ * @Oracode Service: Enhanced Collection Management for EgiUploadHandler Integration
+ * 🎯 Purpose: Manages collection lifecycle with enhanced error handling and service integration
+ * 🧱 Core Logic: Updated constructor signature and enhanced error handling for EgiUploadHandler compatibility
+ * 🛡️ GDPR: Maintains user-collection associations with minimal data exposure
  *
  * @package App\Services
- * @author Padmin D. Curtis
- * @version 2.0.0
- * @date 2025-05-13
+ * @author Padmin D. Curtis (for Fabio Cherici)
+ * @version 2.1.0
+ * @date 2025-05-25
+ * @changelog 2.1.0 - Enhanced constructor for EgiUploadHandler DI compatibility
+ *                     Added better error handling and logging integration
  *
  * @core-responsibilities
  * 1. Creates default collections for new users
- * 2. Finds or creates current user collection with fallback strategies
- * 3. Manages wallet and role assignments to collections
+ * 2. Finds or creates current user collection with enhanced fallback strategies
+ * 3. Manages wallet and role assignments through service interfaces
  * 4. Maintains consistency between user collections and current state
+ * 5. Provides enhanced error handling for upload handler integration
  *
  * @privacy-considerations
- * - Associates only necessary identifiers (user_id, collection_id)
+ * - Associates only necessary identifiers (creator_id, collection_id)
  * - Does not expose or log personal data beyond user ID
  * - Sanitizes user names when creating collection names
+ * - Enhanced audit trail for upload handler operations
  *
- * @signature [CollectionService::v2.0] florence-egi-collection-manager
+ * @signature [CollectionService::v2.1] florence-egi-enhanced-collection-manager
  */
 class CollectionService
 {
-    /** @var UltraLogManager PSR-3 compatible logger for operation traceability */
+    /** @var UltraLogManager Enhanced logging for service operations */
     private UltraLogManager $logger;
 
-    /** @var ErrorManagerInterface UEM interface for error handling */
+    /** @var ErrorManagerInterface UEM interface for standardized error handling */
     private ErrorManagerInterface $errorManager;
 
     /** @var WalletServiceInterface Service for managing user wallets */
@@ -51,18 +55,18 @@ class CollectionService
     private UserRoleServiceInterface $roleService;
 
     /**
-     * @Oracode CollectionService Constructor
-     * 🎯 Purpose: Initialize service with required dependencies
+     * Enhanced Constructor with proper DI order for EgiUploadHandler compatibility
+     * 🎯 Purpose: Initialize service with dependencies in correct injection order
      * 📥 Input: Logger, error manager, wallet service, role service
-     * ✅ Dependencies: ULM for logging, UEM for errors, wallet/role services
+     * ✅ Dependencies: All services properly injected with UEM/ULM integration
      *
      * @param UltraLogManager $logger Logger for operation traceability
      * @param ErrorManagerInterface $errorManager Error handler interface
      * @param WalletServiceInterface $walletService Service for wallet management
      * @param UserRoleServiceInterface $roleService Service for role assignment
      *
-     * @oracode-di-pattern Dependency injection for testability
-     * @oracode-ultra-integrated Using ULM and UEM interfaces directly
+     * @oracode-di-pattern Enhanced dependency injection for upload handler integration
+     * @oracode-service-integration Proper service interface usage
      */
     public function __construct(
         UltraLogManager $logger,
@@ -77,248 +81,511 @@ class CollectionService
     }
 
     /**
-     * @Oracode Creates default collection for user
-     * 🎯 Purpose: Generate new collection with default values for specified user
+     * Enhanced collection creation with improved error handling
+     * 🎯 Purpose: Generate new collection with enhanced validation and error handling
      * 📥 Input: User instance
      * 📤 Output: Newly created Collection instance or JsonResponse on error
      * 🛡️ GDPR: Uses minimal user data (ID, sanitized name)
      *
      * @param User $user The user for whom to create the collection
-     *                   - Uses user ID as foreign key
-     *                   - Extracts only first name for collection title
-     *
      * @return Collection|JsonResponse The created collection or error response
      *
      * @throws Exception If errors occur during creation process
      *
-     * @oracode-side-effects
-     * - Creates new record in collections table
-     * - Creates pivot relationships between user and collection
-     * - Assigns default wallets to collection
-     * - Assigns 'creator' role to user
-     * - Logs creation operation with ULM
-     *
-     * @privacy-safe Only uses user ID and sanitized first name
-     * @error-boundary Handles creation failures with UEM
+     * @oracode-enhanced-error-handling Improved error context and UEM integration
+     * @oracode-upload-handler-compatible Designed for seamless EgiUploadHandler integration
      */
     public function createDefaultCollection(User $user): Collection|JsonResponse
     {
-        // Extract only the user's first name for collection name (sanitization)
-        $firstName = explode(' ', $user->name, 2)[0];
+        // Enhanced name sanitization
+        $firstName = $this->sanitizeUserName($user->name);
         $collectionName = "{$firstName}'s Collection";
 
-        $this->logger->info('Starting default collection creation', [
-            'user_id' => $user->id,
-            'collection_name' => $collectionName
-        ]);
+        $logContext = [
+            'creator_id' => $user->id,
+            'collection_name' => $collectionName,
+            'operation' => 'create_default_collection'
+        ];
+
+        $this->logger->info('[CollectionService] Starting default collection creation', $logContext);
 
         try {
+            // Enhanced validation
+            $this->validateUserForCollectionCreation($user);
+
+            // Create collection with enhanced data
             $collection = Collection::create([
-                'user_id'         => $user->id,
+                'creator_id'      => $user->id,
                 'owner_id'        => $user->id,
                 'epp_id'          => config('app.epp_id'),
                 'is_default'      => true,
                 'collection_name' => $collectionName,
-                'description'     => trans('collection.default_description'),
+                'description'     => trans('collection.default_description', [], 'en') ?: 'Default collection automatically created for single EGI uploads.',
                 'creator_id'      => $user->id,
                 'type'            => 'standard',
-                'position'        => 1,
+                'position'        => $this->calculateCollectionPosition($user),
                 'EGI_number'      => 1,
-                'floor_price'     => 0.0,
+                'floor_price'     => (float) config('egi.default_floor_price', 0.0),
                 'is_published'    => false,
+                'status'          => 'local',
+                'created_via'     => 'collection_service' // Enhanced tracking
             ]);
 
-            $this->logger->info('Collection created successfully', [
+            $enhancedLogContext = array_merge($logContext, [
                 'collection_id' => $collection->id,
-                'user_id' => $user->id
+                'collection_position' => $collection->position
             ]);
 
-            // Set up pivot relationship between user and collection
-            $collection->users()->attach($user->id, ['role' => 'creator']);
+            $this->logger->info('[CollectionService] Collection created successfully', $enhancedLogContext);
 
-            // Attach default wallets
-            $this->attachDefaultWallets($collection, $user);
+            // Enhanced pivot relationship setup
+            $this->setupCollectionRelationships($collection, $user, $enhancedLogContext);
 
-            // Assign creator role
-            $this->roleService->assignCreatorRole($user->id);
+            // Enhanced wallet attachment with error handling
+            $this->attachDefaultWalletsWithErrorHandling($collection, $user, $enhancedLogContext);
+
+            // Enhanced role assignment with error handling
+            $this->assignCreatorRoleWithErrorHandling($user, $enhancedLogContext);
+
+            $this->logger->info('[CollectionService] Default collection setup completed successfully', $enhancedLogContext);
 
             return $collection;
 
         } catch (Throwable $e) {
-            $this->logger->error('Failed to create default collection', [
-                'user_id' => $user->id,
-                'error' => $e->getMessage()
+            $errorContext = array_merge($logContext, [
+                'error_message' => $e->getMessage(),
+                'error_class' => get_class($e),
+                'error_file' => $e->getFile(),
+                'error_line' => $e->getLine()
             ]);
 
-            return $this->errorManager->handle('COLLECTION_CREATION_FAILED', [
-                'user_id' => $user->id,
-                'error_details' => $e->getMessage()
-            ], $e);
+            $this->logger->error('[CollectionService] Failed to create default collection', $errorContext);
+
+            return $this->errorManager->handle('COLLECTION_CREATION_FAILED', $errorContext, $e);
         }
     }
 
     /**
-     * @Oracode Finds or creates user collection with fallback strategy
-     * 🎯 Purpose: Ensure user has an active collection
+     * Enhanced collection finding with improved fallback strategy
+     * 🎯 Purpose: Ensure user has an active collection with enhanced error handling
      * 📥 Input: User instance and optional log context
      * 📤 Output: Found or created Collection instance or JsonResponse on error
-     * 📡 Fallback: Current -> Default -> Create New
+     * 📡 Enhanced Fallback: Current -> Default -> Create New (with validation)
      *
      * @param User $user The user for whom to find or create collection
-     * @param array $logContext Optional logging context
-     *
+     * @param array $logContext Optional logging context from calling handler
      * @return Collection|JsonResponse The found/created collection or error response
      *
      * @throws Exception If unable to find or create collection
      *
-     * @oracode-fallback-strategy
-     * 1. Try to find current collection from session/user record
-     * 2. If not found, try to find user's default collection
-     * 3. If still not found, create new default collection
-     *
-     * @oracode-side-effects
-     * - May update user's current_collection_id
-     * - May create new collection if none exists
-     * - Logs lookup and creation operations
-     *
-     * @error-boundary Handles all failures with UEM
+     * @oracode-enhanced-fallback-strategy Multi-level fallback with validation
+     * @oracode-upload-handler-integration Designed for EgiUploadHandler context preservation
      */
     public function findOrCreateUserCollection(User $user, array $logContext = []): Collection|JsonResponse
     {
-        $this->logger->info('Finding user collection', array_merge($logContext, [
-            'user_id' => $user->id
-        ]));
+        $enhancedLogContext = array_merge($logContext, [
+            'creator_id' => $user->id,
+            'operation' => 'find_or_create_user_collection',
+            'service' => static::class
+        ]);
+
+        $this->logger->info('[CollectionService] Starting collection lookup with enhanced strategy', $enhancedLogContext);
 
         try {
-            // 1. Try to find the current collection
-            $currentCollection = $this->findCurrentCollection($user);
+            // Enhanced Step 1: Try to find current collection with validation
+            $currentCollection = $this->findCurrentCollectionWithValidation($user, $enhancedLogContext);
             if ($currentCollection) {
-                $this->logger->info('Current collection found', [
+                $this->logger->info('[CollectionService] Current collection found and validated', [
+                    ...$enhancedLogContext,
                     'collection_id' => $currentCollection->id,
-                    'user_id' => $user->id
+                    'collection_name' => $currentCollection->collection_name
                 ]);
                 return $currentCollection;
             }
 
-            // 2. Try to find the user's default collection
-            $defaultCollection = $this->findDefaultCollection($user);
+            // Enhanced Step 2: Try to find default collection with validation
+            $defaultCollection = $this->findDefaultCollectionWithValidation($user, $enhancedLogContext);
             if ($defaultCollection) {
-                // Set the default collection as current
-                $user->current_collection_id = $defaultCollection->id;
-                $user->save();
+                // Enhanced current collection update with validation
+                $this->updateCurrentCollectionSafely($user, $defaultCollection, $enhancedLogContext);
 
-                $this->logger->info('Default collection set as current', [
-                    'user_id' => $user->id,
-                    'collection_id' => $defaultCollection->id
+                $this->logger->info('[CollectionService] Default collection found and set as current', [
+                    ...$enhancedLogContext,
+                    'collection_id' => $defaultCollection->id,
+                    'collection_name' => $defaultCollection->collection_name
                 ]);
 
                 return $defaultCollection;
             }
 
-            // 3. Create a new collection if needed
-            $this->logger->info('No collection found for user. Creating new collection.', [
-                'user_id' => $user->id
-            ]);
+            // Enhanced Step 3: Create new collection with comprehensive setup
+            $this->logger->info('[CollectionService] No existing collection found, creating new default collection', $enhancedLogContext);
 
             $newCollection = $this->createDefaultCollection($user);
 
-            // Check if createDefaultCollection returned an error
+            // Handle potential error response from creation
             if ($newCollection instanceof JsonResponse) {
+                $this->logger->error('[CollectionService] Collection creation returned error response', $enhancedLogContext);
                 return $newCollection;
             }
 
-            // Set the new collection as current
-            $user->current_collection_id = $newCollection->id;
-            $user->save();
+            // Enhanced current collection setup
+            $this->updateCurrentCollectionSafely($user, $newCollection, $enhancedLogContext);
 
-            $this->logger->info('New collection set as current', [
-                'user_id' => $user->id,
-                'collection_id' => $newCollection->id
+            $this->logger->info('[CollectionService] New collection created and set as current', [
+                ...$enhancedLogContext,
+                'collection_id' => $newCollection->id,
+                'collection_name' => $newCollection->collection_name,
+                'created_fresh' => true
             ]);
 
             return $newCollection;
 
         } catch (Throwable $e) {
-            $this->logger->error('Error during collection finding/creation', [
-                'user_id' => $user->id,
-                'error' => $e->getMessage()
+            $errorContext = array_merge($enhancedLogContext, [
+                'error_message' => $e->getMessage(),
+                'error_class' => get_class($e)
             ]);
 
-            return $this->errorManager->handle('COLLECTION_FIND_CREATE_FAILED', [
-                'user_id' => $user->id,
-                'error_details' => $e->getMessage()
-            ], $e);
+            $this->logger->error('[CollectionService] Error during collection find/create operation', $errorContext);
+
+            return $this->errorManager->handle('COLLECTION_FIND_CREATE_FAILED', $errorContext, $e);
         }
     }
 
     /**
-     * @Oracode Finds user's current collection
-     * 🎯 Purpose: Locate active collection from session or user record
-     * 📥 Input: User instance
-     * 📤 Output: Collection instance or null
+     * Enhanced current collection finder with validation
+     * 🎯 Purpose: Locate and validate active collection from session or user record
+     * 📥 Input: User instance and log context
+     * 📤 Output: Validated Collection instance or null
      *
      * @param User $user The user
+     * @param array $logContext Enhanced logging context
+     * @return Collection|null The current collection or null if not found/invalid
      *
-     * @return Collection|null The current collection or null if not found
-     *
-     * @internal Checks both session and user record for collection ID
-     * @internal Handles potential return of Collection instance or Eloquent Collection
-     * @signature finds-current-collection
+     * @oracode-validation-enhanced Adds collection existence and ownership validation
      */
-    protected function findCurrentCollection(User $user): ?Collection
+    protected function findCurrentCollectionWithValidation(User $user, array $logContext): ?Collection
     {
         $currentCollectionId = session('current_collection_id') ?? $user->current_collection_id;
 
         if (!$currentCollectionId) {
+            $this->logger->debug('[CollectionService] No current collection ID found', $logContext);
             return null;
         }
 
         $collection = Collection::find($currentCollectionId);
 
-        // Handle potential return of Eloquent Collection instead of model instance
+        // Handle Eloquent Collection vs Model instance
         if ($collection instanceof \Illuminate\Database\Eloquent\Collection) {
             $collection = $collection->first();
+        }
+
+        // Enhanced validation
+        if (!$collection) {
+            $this->logger->warning('[CollectionService] Current collection ID points to non-existent collection', [
+                ...$logContext,
+                'non_existent_collection_id' => $currentCollectionId
+            ]);
+
+            // Clean up invalid reference
+            $this->cleanupInvalidCollectionReference($user, $currentCollectionId);
+            return null;
+        }
+
+        // Validate ownership
+        if ($collection->creator_id !== $user->id) {
+            $this->logger->warning('[CollectionService] Current collection ownership mismatch', [
+                ...$logContext,
+                'collection_id' => $collection->id,
+                'collection_owner_id' => $collection->creator_id,
+                'expected_user_id' => $user->id
+            ]);
+
+            // Clean up ownership mismatch
+            $this->cleanupInvalidCollectionReference($user, $currentCollectionId);
+            return null;
         }
 
         return $collection;
     }
 
     /**
-     * @Oracode Finds user's default collection
-     * 🎯 Purpose: Query for collection marked as default for user
-     * 📥 Input: User instance
-     * 📤 Output: Collection instance or null
+     * Enhanced default collection finder with validation
+     * 🎯 Purpose: Query and validate collection marked as default for user
+     * 📥 Input: User instance and log context
+     * 📤 Output: Validated Collection instance or null
      *
      * @param User $user The user
-     *
-     * @return Collection|null The default collection or null if not found
-     *
-     * @internal Filters collections by user_id and is_default flag
-     * @signature finds-default-collection
+     * @param array $logContext Enhanced logging context
+     * @return Collection|null The default collection or null if not found/invalid
      */
-    protected function findDefaultCollection(User $user): ?Collection
+    protected function findDefaultCollectionWithValidation(User $user, array $logContext): ?Collection
     {
-        return Collection::where('user_id', $user->id)
+        $collection = Collection::where('creator_id', $user->id)
             ->where('is_default', true)
             ->first();
+
+        if ($collection) {
+            $this->logger->debug('[CollectionService] Default collection found', [
+                ...$logContext,
+                'collection_id' => $collection->id,
+                'collection_name' => $collection->collection_name
+            ]);
+        } else {
+            $this->logger->debug('[CollectionService] No default collection found for user', $logContext);
+        }
+
+        return $collection;
     }
 
     /**
-     * @Oracode Attaches default wallets to collection
-     * 🎯 Purpose: Delegate wallet creation to wallet service
-     * 📥 Input: Collection and User instances
+     * Enhanced wallet attachment with comprehensive error handling
+     * 🎯 Purpose: Attach default wallets with detailed error handling and recovery
      *
      * @param Collection $collection The collection
      * @param User $user The owner user
-     *
+     * @param array $logContext Enhanced logging context
      * @return void
      *
-     * @internal Delegates to injected wallet service
-     * @signature attach-default-wallets
+     * @oracode-error-recovery Enhanced error handling with recovery strategies
      */
-    protected function attachDefaultWallets(Collection $collection, User $user): void
+    protected function attachDefaultWalletsWithErrorHandling(Collection $collection, User $user, array $logContext): void
     {
-        $this->walletService->attachDefaultWalletsToCollection($collection, $user);
+        try {
+            $this->logger->debug('[CollectionService] Attaching default wallets via WalletService', $logContext);
+
+            $this->walletService->attachDefaultWalletsToCollection($collection, $user);
+
+            $this->logger->info('[CollectionService] Default wallets attached successfully via WalletService', $logContext);
+
+        } catch (Throwable $eWallet) {
+            $walletErrorContext = array_merge($logContext, [
+                'wallet_service_error' => $eWallet->getMessage(),
+                'wallet_service_class' => get_class($eWallet)
+            ]);
+
+            $this->logger->error('[CollectionService] WalletService operation failed', $walletErrorContext);
+
+            // Enhanced error handling - don't fail collection creation for wallet errors
+            $this->errorManager->handle('COLLECTION_WALLET_ATTACHMENT_FAILED', $walletErrorContext, $eWallet, false);
+        }
     }
 
+    /**
+     * Enhanced role assignment with comprehensive error handling
+     * 🎯 Purpose: Assign creator role with detailed error handling and recovery
+     *
+     * @param User $user The user
+     * @param array $logContext Enhanced logging context
+     * @return void
+     *
+     * @oracode-error-recovery Enhanced error handling with recovery strategies
+     */
+    protected function assignCreatorRoleWithErrorHandling(User $user, array $logContext): void
+    {
+        try {
+            $this->logger->debug('[CollectionService] Assigning creator role via UserRoleService', $logContext);
+
+            $this->roleService->assignCreatorRole($user->id);
+
+            $this->logger->info('[CollectionService] Creator role assigned successfully via UserRoleService', $logContext);
+
+        } catch (Throwable $eRole) {
+            $roleErrorContext = array_merge($logContext, [
+                'role_service_error' => $eRole->getMessage(),
+                'role_service_class' => get_class($eRole)
+            ]);
+
+            $this->logger->error('[CollectionService] UserRoleService operation failed', $roleErrorContext);
+
+            // Enhanced error handling - don't fail collection creation for role errors
+            $this->errorManager->handle('COLLECTION_ROLE_ASSIGNMENT_FAILED', $roleErrorContext, $eRole, false);
+        }
+    }
+
+    /**
+     * Enhanced collection relationships setup
+     * 🎯 Purpose: Setup pivot relationships with enhanced error handling
+     *
+     * @param Collection $collection The collection
+     * @param User $user The user
+     * @param array $logContext Enhanced logging context
+     * @return void
+     */
+    protected function setupCollectionRelationships(Collection $collection, User $user, array $logContext): void
+    {
+        try {
+            // Set up pivot relationship between user and collection
+            $collection->users()->attach($user->id, [
+                'role' => 'creator',
+                'joined_at' => now(),
+                'permissions' => json_encode(['upload', 'edit', 'delete'])
+            ]);
+
+            $this->logger->debug('[CollectionService] Collection relationships setup completed', $logContext);
+
+        } catch (Throwable $e) {
+            $relationshipErrorContext = array_merge($logContext, [
+                'relationship_error' => $e->getMessage()
+            ]);
+
+            $this->logger->warning('[CollectionService] Collection relationship setup failed', $relationshipErrorContext);
+
+            // Non-critical error, continue execution
+        }
+    }
+
+    /**
+     * Enhanced user validation for collection creation
+     * 🎯 Purpose: Validate user before collection creation with comprehensive checks
+     *
+     * @param User $user The user to validate
+     * @throws Exception If user validation fails
+     */
+    protected function validateUserForCollectionCreation(User $user): void
+    {
+        if (!$user->id) {
+            throw new Exception("User must have a valid ID for collection creation");
+        }
+
+        if (empty(trim($user->name))) {
+            throw new Exception("User must have a valid name for collection creation");
+        }
+
+        // Check if user already has too many collections
+        $maxCollections = config('egi.max_collections_per_user', 10);
+        $currentCollectionCount = Collection::where('creator_id', $user->id)->count();
+
+        if ($currentCollectionCount >= $maxCollections) {
+            throw new Exception("User has reached maximum collection limit: {$maxCollections}");
+        }
+    }
+
+    /**
+     * Enhanced user name sanitization
+     * 🎯 Purpose: Safely extract and sanitize user name for collection naming
+     *
+     * @param string|null $userName The user's full name
+     * @return string Sanitized first name
+     */
+    protected function sanitizeUserName(?string $userName): string
+    {
+        if (empty($userName)) {
+            return 'User';
+        }
+
+        // Extract first name and sanitize
+        $firstName = explode(' ', trim($userName), 2)[0];
+        $firstName = preg_replace('/[^a-zA-Z0-9\s]/', '', $firstName);
+        $firstName = trim($firstName);
+
+        return !empty($firstName) ? $firstName : 'User';
+    }
+
+    /**
+     * Enhanced collection position calculation
+     * 🎯 Purpose: Calculate next available position for user's collections
+     *
+     * @param User $user The user
+     * @return int Next available position
+     */
+    protected function calculateCollectionPosition(User $user): int
+    {
+        $maxPosition = Collection::where('creator_id', $user->id)->max('position') ?? 0;
+        return $maxPosition + 1;
+    }
+
+    /**
+     * Enhanced current collection update with safety checks
+     * 🎯 Purpose: Safely update user's current collection reference
+     *
+     * @param User $user The user
+     * @param Collection $collection The collection to set as current
+     * @param array $logContext Enhanced logging context
+     * @return void
+     */
+    protected function updateCurrentCollectionSafely(User $user, Collection $collection, array $logContext): void
+    {
+        try {
+            $user->current_collection_id = $collection->id;
+            $success = $user->save();
+
+            if (!$success) {
+                throw new Exception("Failed to save user current_collection_id");
+            }
+
+            // Also update session for immediate availability
+            session(['current_collection_id' => $collection->id]);
+
+            $this->logger->debug('[CollectionService] User current collection updated safely', [
+                ...$logContext,
+                'previous_collection_id' => $user->getOriginal('current_collection_id'),
+                'new_collection_id' => $collection->id
+            ]);
+
+        } catch (Throwable $e) {
+            $updateErrorContext = array_merge($logContext, [
+                'update_error' => $e->getMessage(),
+                'collection_id' => $collection->id
+            ]);
+
+            $this->logger->error('[CollectionService] Failed to update user current collection', $updateErrorContext);
+
+            // This is critical for consistency
+            throw new Exception("Failed to update user current collection reference: " . $e->getMessage(), 0, $e);
+        }
+    }
+
+    /**
+     * Enhanced cleanup of invalid collection references
+     * 🎯 Purpose: Clean up invalid collection references with proper logging
+     *
+     * @param User $user The user
+     * @param int $invalidCollectionId The invalid collection ID
+     * @return void
+     */
+    protected function cleanupInvalidCollectionReference(User $user, int $invalidCollectionId): void
+    {
+        try {
+            $user->current_collection_id = null;
+            $user->save();
+
+            // Also clear from session
+            session()->forget('current_collection_id');
+
+            $this->logger->info('[CollectionService] Cleaned up invalid collection reference', [
+                'creator_id' => $user->id,
+                'invalid_collection_id' => $invalidCollectionId,
+                'operation' => 'cleanup_invalid_reference'
+            ]);
+
+        } catch (Throwable $e) {
+            $this->logger->warning('[CollectionService] Failed to cleanup invalid collection reference', [
+                'creator_id' => $user->id,
+                'invalid_collection_id' => $invalidCollectionId,
+                'cleanup_error' => $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * LEGACY COMPATIBILITY METHOD - Maintains backward compatibility
+     * 🎯 Purpose: Provide legacy method name for existing code compatibility
+     *
+     * @param User $user
+     * @param array $logContext
+     * @return Collection|JsonResponse
+     * @deprecated Use findOrCreateUserCollection() instead
+     */
+    public function findOrCreateDefaultCollection(User $user, array $logContext = []): Collection|JsonResponse
+    {
+        $this->logger->warning('[CollectionService] Legacy method called', [
+            'method' => 'findOrCreateDefaultCollection',
+            'creator_id' => $user->id,
+            'recommended_method' => 'findOrCreateUserCollection'
+        ]);
+
+        return $this->findOrCreateUserCollection($user, $logContext);
+    }
 }

@@ -74,10 +74,14 @@ class RolesAndPermissionsSeeder extends Seeder
         // Permessi GDPR
         'manage_consents',
         'manage_privacy',
-        'manage_privacy_settings',
-        'manage_privacy_policies',
-        'manage_privacy_requests',
-        'manage_privacy_notifications',
+        'export_personal_data',
+        'delete_account',
+        'view_activity_log',
+        'view_breach_reports',
+        'view_privacy_policy',
+        'edit_personal_data',
+        'limit_data_processing'
+
     ];
 
     private $roles = [
@@ -109,7 +113,9 @@ class RolesAndPermissionsSeeder extends Seeder
             'view_documentation',
 
             // GDPR
-            'manage_consents', 'manage_privacy', 'manage_privacy_settings', 'manage_privacy_policies', 'manage_privacy_requests',
+            'manage_consents', 'manage_privacy', 'export_personal_data', 'delete_account', 'view_activity_log',
+            'view_breach_reports', 'view_privacy_policy', 'edit_personal_data', 'limit_data_processing',
+
 
         ],
 
@@ -135,7 +141,9 @@ class RolesAndPermissionsSeeder extends Seeder
             'view_documentation',
 
             // GDPR
-            'manage_consents','manage_privacy', 'manage_privacy_settings', 'manage_privacy_policies', 'manage_privacy_requests',
+            'manage_consents', 'manage_privacy', 'export_personal_data', 'delete_account', 'view_activity_log',
+            'view_breach_reports', 'view_privacy_policy', 'edit_personal_data', 'limit_data_processing',
+
         ],
 
         'editor' => [
@@ -161,7 +169,8 @@ class RolesAndPermissionsSeeder extends Seeder
             'view_EGI',
 
             // GDPR
-            'manage_consents', 'manage_privacy', 'manage_privacy_settings', 'manage_privacy_policies', 'manage_privacy_requests',
+            'view_privacy_policy', 'edit_personal_data', 'limit_data_processing',
+
         ],
     ];
 

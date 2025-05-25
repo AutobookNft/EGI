@@ -83,6 +83,13 @@ class ContextMenus
                 $gdprMenu = new MenuGroup(__('menu.gdpr_privacy'), 'shield', [
                     new ConsentMenu(),
                     new DeleteAccountMenu(),
+                    new ExportDataMenu(),
+                    new EditPersonalDataMenu(),
+                    new LimitProcessingMenu(),
+                    new DeleteAccountMenu(),
+                    new ActivityLogMenu(),
+                    new BreachReportMenu(),
+                    new PrivacyPolicyMenu(),
                     new BackToDashboardMenu(),
                 ]);
                 $menus[] = $gdprMenu;

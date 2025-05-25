@@ -126,6 +126,50 @@ return [
         'icon_retrieval_failed' => 'Failed to retrieve icon :icon_name. Error: :error_message. Using fallback icon.',
         'statistics_cache_clear_failed' => 'Failed to clear statistics cache for user :user_id. Error: :error_message',
         'statistics_summary_failed' => 'Failed to calculate statistics summary for user :user_id. Error: :error_message',
+
+        // EGI Upload Handler Service-Based Architecture
+        'egi_collection_service_error' => 'Collection service error during EGI upload: :error_details. Operation: :operation_id',
+        'egi_wallet_service_error' => 'Wallet service error during collection setup: :error_details. Collection ID: :collection_id',
+        'egi_role_service_error' => 'UserRole service error during role assignment: :error_details. User ID: :user_id',
+        'egi_service_integration_error' => 'EGI services integration error: :error_details. Services: :services_involved',
+        'egi_enhanced_authentication_error' => 'Enhanced EGI authentication error: :auth_type failed. Session: :session_data',
+        'egi_file_input_validation_error' => 'EGI file input validation error: :validation_error. File: :original_filename',
+        'egi_metadata_validation_error' => 'EGI metadata validation error: :validation_errors. Request data: :request_data',
+        'egi_data_preparation_error' => 'EGI data preparation error: :error_details. File: :original_filename',
+        'egi_record_creation_error' => 'EGI database record creation error: :error_details. Collection: :collection_id',
+        'egi_file_storage_error' => 'EGI file storage error: :error_details. Storage disks: :failed_disks',
+        'egi_cache_invalidation_error' => 'EGI cache invalidation error: :error_details. Cache keys: :cache_keys',
+
+        // Collection Service Enhanced
+        'collection_creation_enhanced_error' => 'Enhanced collection creation error: :error_details. User: :user_id, Name: :collection_name',
+        'collection_validation_error' => 'Collection validation error: :validation_error. User: :user_id',
+        'collection_limit_exceeded_error' => 'Collection limit exceeded for user :user_id. Current: :current_count, Max: :max_limit',
+        'collection_wallet_attachment_failed' => 'Failed to attach wallets to collection :collection_id: :error_details',
+        'collection_role_assignment_failed' => 'Failed to assign creator role to user :user_id: :error_details',
+        'collection_ownership_mismatch_error' => 'Collection :collection_id ownership mismatch. Owner: :actual_owner, Expected: :expected_owner',
+        'collection_current_update_error' => 'Failed to update current_collection_id for user :user_id: :error_details',
+
+        // Enhanced Storage
+        'egi_storage_disk_config_error' => 'Storage disk :disk_name configuration error: :error_details',
+        'egi_storage_emergency_fallback_failed' => 'Emergency storage fallback failed: :error_details. All disks failed: :failed_disks',
+        'egi_temp_file_read_error' => 'Temporary file :temp_path read error: :error_details',
+
+        // Enhanced Authentication & Session
+        'egi_session_auth_invalid' => 'Invalid EGI session authentication. Session status: :session_status, User ID: :user_id',
+        'egi_wallet_auth_mismatch' => 'Wallet authentication mismatch. Session wallet: :session_wallet, User wallet: :user_wallet',
+
+        // Enhanced Registration Errors
+        'enhanced_registration_failed' => 'Enhanced registration with ecosystem setup failed: :error. User ID: :user_id, Collection ID: :collection_id, Components: :partial_creation',
+        'registration_user_creation_failed' => 'User creation failed during registration: :error. Email: :email, User type: :user_type',
+        'registration_collection_creation_failed' => 'Default collection creation failed during registration: :error. User ID: :user_id, Collection name: :collection_name',
+        'registration_wallet_setup_failed' => 'Wallet setup failed during registration: :error. User: :user_id, Collection: :collection_id',
+        'registration_role_assignment_failed' => 'Role assignment failed during registration: :error. User: :user_id, User type: :user_type',
+        'registration_gdpr_consent_failed' => 'GDPR consent processing failed during registration: :error. User: :user_id, Consents: :consents',
+        'registration_ecosystem_setup_incomplete' => 'Ecosystem setup incomplete during registration: :error. User: :user_id, Completed steps: :completed_steps',
+        'registration_validation_enhanced_failed' => 'Enhanced registration validation failed: :validation_errors. Request data: :request_data',
+        'registration_user_type_invalid' => 'Invalid user type during registration: :user_type. Valid types: creator,mecenate,acquirente,azienda',
+        'registration_rate_limit_exceeded' => 'Registration rate limit exceeded. IP: :ip_address, Attempts: :attempts, Time window: :time_window',
+        'registration_page_load_error' => 'Registration page load error: :error. IP: :ip_address',
     ],
 
     'user' => [
@@ -237,6 +281,50 @@ return [
         'icon_retrieval_failed' => 'Icon temporarily unavailable. Using default icon.',
         'statistics_cache_clear_failed' => 'Unable to refresh statistics cache. Please try again.',
         'statistics_summary_failed' => 'Unable to load statistics summary. Please try again.',
+
+        // EGI Upload Handler Service-Based Architecture
+        'egi_collection_service_error' => 'An error occurred while managing your collection. Our technical team has been notified.',
+        'egi_wallet_service_error' => 'Error during wallet setup for this collection. Please try again in a few minutes.',
+        'egi_role_service_error' => 'Error assigning creator permissions. Contact support if the problem persists.',
+        'egi_service_integration_error' => 'An internal system error occurred. Our technicians are already investigating.',
+        'egi_enhanced_authentication_error' => 'Your session is not valid. Please log in again to your Renaissance.',
+        'egi_file_input_validation_error' => 'The file you uploaded is invalid or corrupted. Check the format and try again.',
+        'egi_metadata_validation_error' => 'Some entered data is incorrect. Check the highlighted fields and try again.',
+        'egi_data_preparation_error' => 'Error processing your file. Verify it\'s a valid image.',
+        'egi_record_creation_error' => 'Error creating your EGI. The technical team has been automatically notified.',
+        'egi_file_storage_error' => 'Error during secure file storage. Please retry the upload.',
+        'egi_cache_invalidation_error' => 'Your EGI has been uploaded, but it may take a few minutes to appear everywhere.',
+
+        // Collection Service Enhanced
+        'collection_creation_enhanced_error' => 'We couldn\'t create your collection. Please try again or contact support.',
+        'collection_validation_error' => 'Collection data is invalid. Please verify and try again.',
+        'collection_limit_exceeded_error' => 'You\'ve reached the maximum collection limit. Contact support to increase it.',
+        'collection_wallet_attachment_failed' => 'Collection created, but with wallet configuration issues. Contact support.',
+        'collection_role_assignment_failed' => 'Collection created, but with permission issues. Contact support.',
+        'collection_ownership_mismatch_error' => 'You don\'t have permission to access this collection.',
+        'collection_current_update_error' => 'Error updating your active collection. Please try again.',
+
+        // Enhanced Storage
+        'egi_storage_disk_config_error' => 'Storage system configuration problem. The technical team has been notified.',
+        'egi_storage_emergency_fallback_failed' => 'Critical storage system error. Technicians are investigating.',
+        'egi_temp_file_read_error' => 'We can\'t read the file you uploaded. Try again with a different file.',
+
+        // Enhanced Authentication & Session
+        'egi_session_auth_invalid' => 'Your session has expired. Reconnect your wallet to continue.',
+        'egi_wallet_auth_mismatch' => 'The connected wallet doesn\'t match your account. Verify the connection.',
+
+        // Enhanced Registration Errors
+        'enhanced_registration_failed' => 'An error occurred while setting up your account in the Digital Renaissance. Our team has been notified.',
+        'registration_user_creation_failed' => 'We couldn\'t create your account. Please verify the entered data and try again.',
+        'registration_collection_creation_failed' => 'Your account was created, but we couldn\'t set up your collection. Please contact support.',
+        'registration_wallet_setup_failed' => 'Registration is almost complete, but there are issues with wallet configuration. Support will contact you soon.',
+        'registration_role_assignment_failed' => 'Registration is almost complete, but there are issues with your account permissions. Support will help you.',
+        'registration_gdpr_consent_failed' => 'Error saving your privacy preferences. Please try again or contact support.',
+        'registration_ecosystem_setup_incomplete' => 'Registration was not completed fully. Our team is checking and will contact you.',
+        'registration_validation_enhanced_failed' => 'Some entered data is incorrect. Check the highlighted fields and try again.',
+        'registration_user_type_invalid' => 'The selected role is not valid. Choose between Creator, Mecenate, Purchaser, or Business.',
+        'registration_rate_limit_exceeded' => 'Too many registration requests. Please try again in a few minutes.',
+        'registration_page_load_error' => 'Error loading the registration page. Please reload the page.',
     ],
 
     // Generic message (used by UserInterfaceHandler if no specific message found)

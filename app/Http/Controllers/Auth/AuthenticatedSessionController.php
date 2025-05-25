@@ -2,49 +2,374 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Http\Controllers\Controller;
+use App\Services\Gdpr\ConsentService;
+use App\Services\Gdpr\AuditLogService;
+use Ultra\ErrorManager\Interfaces\ErrorManagerInterface;
+use Ultra\UltraLogManager\UltraLogManager;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Response;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
-use Laravel\Fortify\Http\Controllers\AuthenticatedSessionController as JetstreamAuthController;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
+use Laravel\Fortify\Fortify;
 use Laravel\Fortify\Contracts\LoginResponse;
 
 /**
- * Estensione del controller di autenticazione Jetstream.
- * Aggiunge funzionalità di connessione automatica del wallet durante il login.
+ * @Oracode Controller: INDEPENDENT Authentication with GDPR Integration (FINAL SOLUTION)
+ * 🎯 Purpose: Independent auth controller with GDPR consent checking
+ * 🛡️ Privacy: Ensures consent compliance during login flow
+ * 🧱 Core Logic: Uses Fortify's logic but with our signature
  *
- * @gdpr-purpose Connette automaticamente il wallet dell'utente al login, se disponibile
+ * @package App\Http\Controllers\Auth
+ * @author Padmin D. Curtis (for Fabio Cherici)
+ * @version 3.0.0 - INDEPENDENT CONTROLLER - NO INHERITANCE
+ * @date 2025-05-25
+ * @solution Independent controller that uses Fortify internally
  */
-class AuthenticatedSessionController extends JetstreamAuthController
+class AuthenticatedSessionController extends Controller
 {
     /**
-     * Sovrascrive il metodo di login standard per aggiungere la connessione wallet
+     * Constructor with full DI
+     */
+    public function __construct(
+        protected ErrorManagerInterface $errorManager,
+        protected UltraLogManager $logger,
+        protected ?ConsentService $consentService = null,
+        protected ?AuditLogService $auditService = null
+    ) {
+        // NO middleware in constructor - handled by routes
+    }
+
+    /**
+     * Show login form
+     *
+     * @param Request $request
+     * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
+     */
+    public function create(Request $request)
+    {
+        if (Auth::check()) {
+            return redirect()->intended(route('dashboard'));
+        }
+
+        return view('auth.login', [
+            'brandColors' => [
+                'oro_fiorentino' => '#D4A574',
+                'verde_rinascita' => '#2D5016',
+                'blu_algoritmo' => '#1B365D',
+                'grigio_pietra' => '#6B6B6B',
+                'rosso_urgenza' => '#C13120'
+            ],
+            'pageTitle' => __('auth.login_page_title'),
+            'welcomeMessage' => __('auth.login_welcome_message')
+        ]);
+    }
+
+    /**
+     * Handle login with GDPR checks
+     *
+     * @param Request $request
+     * @return Response|RedirectResponse|JsonResponse
      */
     public function store(Request $request)
     {
-        // Esegui il login standard di Jetstream
-        $response = parent::store($request);
+        $logContext = [
+            'operation' => 'enhanced_login_attempt',
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'timestamp' => now()->toISOString()
+        ];
 
-        Log::channel('upload')->info('Login attempt.', [
-            'email' => $request->email,
-            'ip' => $request->ip(),
-            'session_id' => $request->session()->getId()
-        ]);
+        try {
+            $this->logger->info('[Auth] Enhanced login attempt started', $logContext);
 
-        // Se il login è riuscito, gestisci la connessione wallet
-        if (auth()->check() && !empty(auth()->user()->wallet)) {
-            // Salva l'indirizzo wallet in sessione
-            session(['connected_wallet' => auth()->user()->wallet]);
+            // Validate login credentials
+            $request->validate([
+                Fortify::username() => 'required|string',
+                'password' => 'required|string',
+            ]);
 
-            // Se la richiesta vuole una risposta JSON, restituisci info aggiuntive
-            if ($request->wantsJson()) {
-                return response()->json([
-                    'success' => true,
-                    'wallet_connected' => true,
-                    'connected_wallet' => auth()->user()->wallet
+            // Attempt authentication using Fortify's logic
+            if ($this->attemptLogin($request)) {
+                $user = Auth::user();
+                $logContext['user_id'] = $user->id;
+                $logContext['user_type'] = $user->user_type ?? 'unknown';
+
+                $this->logger->info('[Auth] Authentication successful, checking GDPR', $logContext);
+
+                // Log successful login
+                $this->logSuccessfulLoginWithGdpr($user, $request);
+
+                // Check if consent review is needed
+                if ($this->userNeedsConsentReview($user)) {
+                    session()->flash('login_success_pending_consent', true);
+                    session()->flash('info', __('auth.gdpr_consent_required'));
+
+                    $this->logger->info('[Auth] Redirecting to GDPR consent', $logContext);
+
+                    return redirect()->route('gdpr.consent')
+                        ->with('post_login_consent_required', true);
+                }
+
+                // Update last login timestamp
+                $user->update(['last_login_at' => now()]);
+
+                // Success message
+                session()->flash('success', __('auth.login_success'));
+
+                $this->logger->info('[Auth] Login completed successfully', $logContext);
+
+                // Return success response (use Fortify's response if available)
+                return app(LoginResponse::class);
+
+            } else {
+                // Authentication failed
+                $this->logger->info('[Auth] Authentication failed - invalid credentials', $logContext);
+
+                throw ValidationException::withMessages([
+                    Fortify::username() => [__('auth.failed')],
                 ]);
             }
+
+        } catch (ValidationException $e) {
+            $this->logger->info('[Auth] Login validation failed', [
+                ...$logContext,
+                'validation_errors' => $e->errors()
+            ]);
+            throw $e;
+
+        } catch (\Exception $e) {
+            $this->logger->error('[Auth] Login process failed', [
+                ...$logContext,
+                'error' => $e->getMessage()
+            ]);
+
+            return $this->errorManager->handle('POST_LOGIN_GDPR_CHECK_ERROR', [
+                'user_id' => Auth::id(),
+                'ip_address' => $request->ip(),
+                'error' => $e->getMessage()
+            ], $e);
+        }
+    }
+
+    /**
+     * Handle logout with GDPR logging
+     *
+     * @param Request $request
+     * @return Response|RedirectResponse
+     */
+    public function destroy(Request $request)
+    {
+        $user = Auth::user();
+        $logContext = [
+            'operation' => 'enhanced_logout',
+            'user_id' => $user?->id,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'timestamp' => now()->toISOString()
+        ];
+
+        try {
+            $this->logger->info('[Auth] Logout initiated', $logContext);
+
+            // Log logout before destroying session
+            if ($user) {
+                $logContext['session_duration_minutes'] = $this->calculateSessionDuration($user);
+
+                // GDPR audit trail
+                if ($this->auditService) {
+                    $this->auditService->logUserAction(
+                        $user,
+                        'user_logged_out_enhanced',
+                        [
+                            'ip_address' => $request->ip(),
+                            'user_agent' => $request->userAgent(),
+                            'logout_method' => 'manual',
+                            'session_duration' => $logContext['session_duration_minutes']
+                        ],
+                        'authentication'
+                    );
+                }
+
+                $this->logger->info('[Auth] User session logged for audit', $logContext);
+            }
+
+            // Perform logout
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            $this->logger->info('[Auth] Logout completed successfully', $logContext);
+
+            // Return logout response with success message
+            return redirect('/')
+                ->with('success', __('auth.logout_success'));
+
+        } catch (\Exception $e) {
+            $this->logger->warning('[Auth] Failed to log user logout', [
+                ...$logContext,
+                'error' => $e->getMessage()
+            ]);
+
+            // Still logout even if logging fails
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect('/')
+                ->with('success', __('auth.logout_success'));
+        }
+    }
+
+    // ===== PRIVATE HELPER METHODS =====
+
+    /**
+     * Attempt to authenticate using Fortify's logic
+     *
+     * @param Request $request
+     * @return bool
+     */
+    private function attemptLogin(Request $request): bool
+    {
+        return Auth::attempt(
+            $request->only(Fortify::username(), 'password'),
+            $request->boolean('remember')
+        );
+    }
+
+    /**
+     * Log successful login using existing GDPR services
+     *
+     * @param \App\Models\User $user
+     * @param Request $request
+     * @return void
+     */
+    private function logSuccessfulLoginWithGdpr($user, Request $request): void
+    {
+        $logContext = [
+            'operation' => 'enhanced_login_with_gdpr_ecosystem',
+            'user_id' => $user->id,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'login_method' => 'enhanced_credentials',
+            'user_type' => $user->user_type ?? 'unknown',
+            'ecosystem_status' => $user->ecosystem_setup_completed ? 'complete' : 'incomplete',
+            'timestamp' => now()->toISOString()
+        ];
+
+        try {
+            // Primary logging via ULM
+            $this->logger->info('[Auth] Enhanced login successful with GDPR check', $logContext);
+
+            // GDPR audit trail via AuditLogService
+            if ($this->auditService) {
+                $this->auditService->logUserAction(
+                    $user,
+                    'user_logged_in_with_gdpr_ecosystem',
+                    [
+                        'ip_address' => $request->ip(),
+                        'user_agent' => $request->userAgent(),
+                        'login_method' => 'enhanced_credentials',
+                        'user_type' => $user->user_type ?? 'unknown',
+                        'ecosystem_status' => $user->ecosystem_setup_completed ? 'complete' : 'incomplete',
+                        'timestamp' => now()->toISOString()
+                    ],
+                    'authentication'
+                );
+            }
+
+        } catch (\Exception $e) {
+            $this->logger->warning('[Auth] Failed to log GDPR-enhanced login', [
+                ...$logContext,
+                'logging_error' => $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * Check if user needs consent review post-login
+     *
+     * @param \App\Models\User $user
+     * @return bool
+     */
+    private function userNeedsConsentReview($user): bool
+    {
+        $logContext = [
+            'operation' => 'post_login_consent_check',
+            'user_id' => $user->id,
+            'gdpr_consents_given_at' => $user->gdpr_consents_given_at?->toISOString()
+        ];
+
+        try {
+            // Skip GDPR check if services not available
+            if (!$this->consentService) {
+                $this->logger->info('[Auth] ConsentService unavailable - skipping consent check', $logContext);
+                return false;
+            }
+
+            // No initial GDPR consent given
+            if (!$user->gdpr_consents_given_at) {
+                $this->logger->info('[Auth] User needs initial GDPR consent', $logContext);
+                return true;
+            }
+
+            // Annual consent renewal required (if older than 1 year)
+            if ($user->gdpr_consents_given_at < now()->subYear()) {
+                $this->logger->info('[Auth] User needs consent renewal (>1 year)', [
+                    ...$logContext,
+                    'consent_age_days' => now()->diffInDays($user->gdpr_consents_given_at)
+                ]);
+                return true;
+            }
+
+            // Check for policy version updates using existing ConsentService
+            $userConsentData = $this->consentService->getUserConsentStatus($user);
+            $currentPolicyVersion = config('gdpr.current_policy_version', '1.0');
+
+            if (isset($userConsentData['consent_version']) &&
+                $userConsentData['consent_version'] !== $currentPolicyVersion) {
+
+                $this->logger->info('[Auth] User needs consent update (policy version changed)', [
+                    ...$logContext,
+                    'user_version' => $userConsentData['consent_version'],
+                    'current_version' => $currentPolicyVersion
+                ]);
+                return true;
+            }
+
+            // All checks passed - no consent review needed
+            $this->logger->info('[Auth] User consent status is current', $logContext);
+            return false;
+
+        } catch (\Exception $e) {
+            $this->logger->warning('[Auth] Failed to check user consent status', [
+                ...$logContext,
+                'error' => $e->getMessage()
+            ]);
+
+            // Don't block login for consent check errors
+            return false;
+        }
+    }
+
+    /**
+     * Calculate session duration for logout logging
+     *
+     * @param \App\Models\User $user
+     * @return int|null Duration in minutes
+     */
+    private function calculateSessionDuration($user): ?int
+    {
+        try {
+            if ($user->last_login_at) {
+                return now()->diffInMinutes($user->last_login_at);
+            }
+        } catch (\Exception $e) {
+            // Ignore errors in duration calculation
         }
 
-        // Ritorna la risposta standard per le richieste non-AJAX
-        return $response;
+        return null;
     }
 }

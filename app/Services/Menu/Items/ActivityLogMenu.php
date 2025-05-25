@@ -23,7 +23,7 @@ class ActivityLogMenu extends MenuItem
     {
         parent::__construct(
             'menu.activity_log',
-            'gdpr.activity.index',
+            'gdpr.activity-log',
             'clock',
             'view_activity_log'
         );

@@ -23,7 +23,7 @@ class PrivacyPolicyMenu extends MenuItem
     {
         parent::__construct(
             'menu.privacy_policy',
-            'legal.privacy',
+            'gdpr.privacy-policy',
             'file-text',
             'view_privacy_policy'
         );

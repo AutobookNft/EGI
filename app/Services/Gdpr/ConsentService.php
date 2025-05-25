@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Cache;
 use Ultra\UltraLogManager\UltraLogManager;
 use Ultra\ErrorManager\Interfaces\ErrorManagerInterface;
 use Carbon\Carbon;
+use PSpell\Config;
 
 /**
  * @Oracode Service: Consent Management System
@@ -111,9 +112,20 @@ class ConsentService
             ]);
 
             $currentConsents = $this->getCurrentUserConsents($user);
+
+            $this->logger->info('Consent Service: consents_count', [
+                'consents_count' => $currentConsents->count(),
+
+            ]);
+
             $consentVersion = $this->getCurrentConsentVersion();
+            $this->logger->info('Consent Service: consent_version', [
+                'consent_version' => $consentVersion->version,
+
+            ]);
 
             $consents = collect();
+
             foreach ($this->consentTypes as $type => $config) {
                 $userConsent = $currentConsents->where('consent_type', $type)->first();
 
@@ -207,7 +219,7 @@ class ConsentService
                     }
 
                     // Check for changes
-                    $previousValue = $previousConsents['consents'][$type]['granted'] ?? $config['default_value'];
+                    $previousValue = $previousConsents['userConsents'][$type]['granted'] ?? $config['default_value'];
                     if ($previousValue !== $granted) {
                         $changes[$type] = [
                             'from' => $previousValue,
@@ -251,9 +263,11 @@ class ConsentService
                 ]);
             }
 
+            $userStatus = $this->getUserConsentStatus($user);
+
             return [
-                'previous' => $previousConsents['consents'],
-                'current' => $this->getUserConsentStatus($user)['consents'],
+                'previous' => $previousConsents['userConsents'],
+                'current' => $userStatus['userConsents'] ?? [],
                 'changes' => $changes,
                 'consent_version' => $consentVersion->version
             ];
@@ -490,7 +504,7 @@ class ConsentService
                 ]);
 
                 // Update user's consent summary
-                $currentConsents = $this->getUserConsentStatus($user)['consents'];
+                $currentConsents = $this->getUserConsentStatus($user)['userConsents'];
                 $currentConsents[$consentType]['granted'] = false;
                 $this->updateUserConsentSummary($user, $currentConsents);
             });
@@ -560,7 +574,7 @@ class ConsentService
      */
     public function getConsentTypes(): array
     {
-        return $this->consentTypes;
+        return config('gdpr.consent.definitions', $this->consentTypes);
     }
 
     /**
