@@ -20,7 +20,7 @@ import { loadEnums, getEnum, isPendingStatus } from './utils/enums';
 console.log('Utils per translations e enums importati.'); // Debugging
 
 // Importa la gestione del modale
-import { initializeModal } from '../ts/open-close-modal';
+// import { initializeModal } from '../ts/open-close-modal';
 
 
 // Importa jQuery
@@ -40,7 +40,7 @@ import {
 document.addEventListener('DOMContentLoaded', () => {
 
     // Inizializza il modale
-    initializeModal();
+    // initializeModal();
 
     if (!walletCreateInstance) {
         walletCreateInstance = new RequestCreateNotificationWallet({ apiBaseUrl: '/notifications' });

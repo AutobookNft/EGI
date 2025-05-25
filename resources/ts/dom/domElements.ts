@@ -4,9 +4,11 @@
  * 📜 Oracode TypeScript Module: DOMElementReferences
  * Centralizza l'acquisizione e l'esportazione dei riferimenti agli elementi DOM
  * utilizzati dall'applicazione client-side di FlorenceEGI.
+ * I riferimenti vengono acquisiti tramite la funzione initializeDOMReferences(),
+ * che DEVE essere chiamata dopo che l'evento DOMContentLoaded è stato emesso.
  *
- * @version 1.1.0
- * @date 2025-05-10
+ * @version 1.2.1 (Padmin - Consistent Robust DOM Initialization)
+ * @date 2025-05-24
  * @author Padmin D. Curtis (for Fabio Cherici)
  */
 
@@ -15,81 +17,110 @@ const getEl = <T extends HTMLElement>(id: string): T | null => document.getEleme
 const queryEl = <T extends HTMLElement>(selector: string): T | null => document.querySelector(selector) as T | null;
 const queryAllEl = <T extends HTMLElement>(selector: string): NodeListOf<T> | null => document.querySelectorAll(selector) as NodeListOf<T> | null;
 
-// --- ESPORTAZIONI DIRETTE DEGLI ELEMENTI ---
-
-// Modale Connessione Wallet
-export const connectWalletModalEl = getEl<HTMLDivElement>('connect-wallet-modal');
-export const closeConnectWalletButtonEl = getEl<HTMLButtonElement>('close-connect-wallet-modal');
-export const connectWalletFormEl = getEl<HTMLFormElement>('connect-wallet-form');
-export const connectWalletAddressInputEl = getEl<HTMLInputElement>('wallet_address');
-export const walletErrorMessageEl = getEl<HTMLParagraphElement>('wallet-error-message');
-export const connectSubmitButtonEl = connectWalletFormEl?.querySelector<HTMLButtonElement>('button[type="submit"]') || null;
-
-// Navbar: Bottoni "Connect Wallet"
-export const connectWalletButtonStdEl = getEl<HTMLButtonElement>('connect-wallet-button');
-export const connectWalletButtonMobileEl = getEl<HTMLButtonElement>('connect-wallet-button-mobile');
-
-// Navbar: Dropdown Wallet (Desktop)
-export const walletDropdownContainerEl = getEl<HTMLDivElement>('wallet-dropdown-container');
-export const walletDisplayTextEl = getEl<HTMLSpanElement>('wallet-display-text');
-export const walletDropdownButtonEl = getEl<HTMLButtonElement>('wallet-dropdown-button');
-export const walletDropdownMenuEl = getEl<HTMLDivElement>('wallet-dropdown-menu');
-export const walletCopyAddressButtonEl = getEl<HTMLButtonElement>('wallet-copy-address');
-export const walletDisconnectButtonEl = getEl<HTMLButtonElement>('wallet-disconnect');
-
-// Navbar: Link Login/Register e Contenitore Mobile
-export const loginLinkDesktopEl = queryEl<HTMLAnchorElement>('header nav.hidden.md\\:flex a[href*="login"]');
-export const registerLinkDesktopEl = queryEl<HTMLAnchorElement>('header nav.hidden.md\\:flex a[href*="register"]');
-export const mobileAuthButtonsContainerEl = queryEl<HTMLDivElement>('#mobile-menu .flex.justify-center.gap-3');
-
-// Navbar: Bottoni "Create EGI" / "Create Collection" (trigger per guest)
-export const createEgiGuestButtonsEl = queryAllEl<HTMLButtonElement>('[data-action="open-connect-modal-or-create-egi"]');
-export const createCollectionGuestButtonsEl = queryAllEl<HTMLButtonElement>('[data-action="open-connect-modal-or-create-collection"]');
-
-// Modale Upload EGI (Elementi per UploadModalManager)
-export const uploadModalEl = getEl<HTMLDivElement>('upload-modal');
-export const uploadModalCloseButtonEl = getEl<HTMLButtonElement>('close-upload-modal'); // Bottone "X"
-export const uploadModalContentEl = getEl<HTMLDivElement>('upload-container'); // ID del contenuto della modale (da verificare)
-
-// Menu Mobile
-export const mobileMenuButtonEl = getEl<HTMLButtonElement>('mobile-menu-button');
-export const mobileMenuEl = getEl<HTMLDivElement>('mobile-menu');
-export const hamburgerIconEl = getEl<HTMLElement>('hamburger-icon');
-export const closeIconEl = getEl<HTMLElement>('close-icon');
-
-// Dropdown "Collection List"
-export const collectionListDropdownContainerEl = getEl<HTMLDivElement>('collection-list-dropdown-container');
-export const collectionListDropdownButtonEl = getEl<HTMLButtonElement>('collection-list-dropdown-button');
-export const collectionListDropdownMenuEl = getEl<HTMLDivElement>('collection-list-dropdown-menu');
-export const collectionListLoadingEl = getEl<HTMLDivElement>('collection-list-loading');
-export const collectionListEmptyEl = getEl<HTMLDivElement>('collection-list-empty');
-export const collectionListErrorEl = getEl<HTMLDivElement>('collection-list-error');
-
-// Badge "Current Collection"
-export const currentCollectionBadgeContainerEl = getEl<HTMLDivElement>('current-collection-badge-container');
-export const currentCollectionBadgeLinkEl = getEl<HTMLAnchorElement>('current-collection-badge-link');
-export const currentCollectionBadgeNameEl = getEl<HTMLSpanElement>('current-collection-badge-name');
-
-// Form Logout (nascosto)
-export const logoutFormEl = getEl<HTMLFormElement>('logout-form');
-
-// Link "Collections" Generico (Desktop e Mobile)
-export const genericCollectionsLinkDesktopEl = queryEl<HTMLAnchorElement>('header nav.hidden.md\\:flex > a[href$="/home/collections"]:not([data-action])');
-export const genericCollectionsLinkMobileEl = queryEl<HTMLAnchorElement>('#mobile-menu > div:nth-child(1) > a[href$="/home/collections"]:not([data-action])'); // Verificare selettore
-
+// --- DICHIARAZIONE DELLE VARIABILI ESPORTATE (inizializzate a null) ---
+export let connectWalletModalEl: HTMLDivElement | null = null;
+export let closeConnectWalletButtonEl: HTMLButtonElement | null = null;
+export let connectWalletFormEl: HTMLFormElement | null = null;
+export let connectWalletAddressInputEl: HTMLInputElement | null = null;
+export let walletErrorMessageEl: HTMLParagraphElement | null = null;
+export let connectSubmitButtonEl: HTMLButtonElement | null = null;
+export let connectWalletButtonStdEl: HTMLButtonElement | null = null;
+export let connectWalletButtonMobileEl: HTMLButtonElement | null = null;
+export let walletDropdownContainerEl: HTMLDivElement | null = null;
+export let walletDisplayTextEl: HTMLSpanElement | null = null;
+export let walletDropdownButtonEl: HTMLButtonElement | null = null;
+export let walletDropdownMenuEl: HTMLDivElement | null = null;
+export let walletCopyAddressButtonEl: HTMLButtonElement | null = null;
+export let walletDisconnectButtonEl: HTMLButtonElement | null = null;
+export let loginLinkDesktopEl: HTMLAnchorElement | null = null;
+export let registerLinkDesktopEl: HTMLAnchorElement | null = null;
+export let mobileAuthButtonsContainerEl: HTMLDivElement | null = null;
+export let createEgiGuestButtonsEl: NodeListOf<HTMLButtonElement> | null = null;
+export let createCollectionGuestButtonsEl: NodeListOf<HTMLButtonElement> | null = null;
+export let uploadModalEl: HTMLDivElement | null = null;
+export let uploadModalCloseButtonEl: HTMLButtonElement | null = null;
+export let uploadModalContentEl: HTMLDivElement | null = null;
+export let mobileMenuButtonEl: HTMLButtonElement | null = null;
+export let mobileMenuEl: HTMLDivElement | null = null;
+export let hamburgerIconEl: HTMLElement | null = null;
+export let closeIconEl: HTMLElement | null = null;
+export let collectionListDropdownContainerEl: HTMLDivElement | null = null;
+export let collectionListDropdownButtonEl: HTMLButtonElement | null = null;
+export let collectionListDropdownMenuEl: HTMLDivElement | null = null;
+export let collectionListLoadingEl: HTMLDivElement | null = null;
+export let collectionListEmptyEl: HTMLDivElement | null = null;
+export let collectionListErrorEl: HTMLDivElement | null = null;
+export let currentCollectionBadgeContainerEl: HTMLDivElement | null = null;
+export let currentCollectionBadgeLinkEl: HTMLAnchorElement | null = null;
+export let currentCollectionBadgeNameEl: HTMLSpanElement | null = null;
+export let logoutFormEl: HTMLFormElement | null = null;
+export let genericCollectionsLinkDesktopEl: HTMLAnchorElement | null = null;
+export let genericCollectionsLinkMobileEl: HTMLAnchorElement | null = null;
 
 /**
- * 🎯 Funzione da chiamare in `main.ts` DOPO `DOMContentLoaded` se si preferisce
- *    un'inizializzazione esplicita invece di esportazioni dirette che si auto-eseguono.
- *    Con le esportazioni dirette come sopra, questa funzione non è strettamente necessaria
- *    a meno che non si voglia un log o un punto di controllo.
+ * 📜 Oracode Function: initializeDOMReferences
+ * 🎯 Acquisisce tutti i riferimenti agli elementi DOM e li assegna
+ *    alle variabili esportate da questo modulo.
+ */
+export function initializeDOMReferences(): void {
+    connectWalletModalEl = getEl<HTMLDivElement>('connect-wallet-modal');
+    closeConnectWalletButtonEl = getEl<HTMLButtonElement>('close-connect-wallet-modal');
+    connectWalletFormEl = getEl<HTMLFormElement>('connect-wallet-form');
+    connectWalletAddressInputEl = getEl<HTMLInputElement>('wallet_address');
+    walletErrorMessageEl = getEl<HTMLParagraphElement>('wallet-error-message');
+    connectSubmitButtonEl = connectWalletFormEl?.querySelector<HTMLButtonElement>('button[type="submit"]') || null;
+    connectWalletButtonStdEl = getEl<HTMLButtonElement>('connect-wallet-button');
+    connectWalletButtonMobileEl = getEl<HTMLButtonElement>('connect-wallet-button-mobile');
+    walletDropdownContainerEl = getEl<HTMLDivElement>('wallet-dropdown-container');
+    walletDisplayTextEl = getEl<HTMLSpanElement>('wallet-display-text');
+    walletDropdownButtonEl = getEl<HTMLButtonElement>('wallet-dropdown-button');
+    walletDropdownMenuEl = getEl<HTMLDivElement>('wallet-dropdown-menu');
+    walletCopyAddressButtonEl = getEl<HTMLButtonElement>('wallet-copy-address');
+    walletDisconnectButtonEl = getEl<HTMLButtonElement>('wallet-disconnect');
+    loginLinkDesktopEl = queryEl<HTMLAnchorElement>('header nav.hidden.md\\:flex a[href*="login"]');
+    registerLinkDesktopEl = queryEl<HTMLAnchorElement>('header nav.hidden.md\\:flex a[href*="register"]');
+    mobileAuthButtonsContainerEl = queryEl<HTMLDivElement>('#mobile-menu .flex.justify-center.gap-3');
+    createEgiGuestButtonsEl = queryAllEl<HTMLButtonElement>('[data-action="open-connect-modal-or-create-egi"]');
+    createCollectionGuestButtonsEl = queryAllEl<HTMLButtonElement>('[data-action="open-connect-modal-or-create-collection"]');
+    uploadModalEl = getEl<HTMLDivElement>('upload-modal');
+    uploadModalCloseButtonEl = getEl<HTMLButtonElement>('close-upload-modal');
+    uploadModalContentEl = getEl<HTMLDivElement>('upload-container');
+    mobileMenuButtonEl = getEl<HTMLButtonElement>('mobile-menu-button');
+    mobileMenuEl = getEl<HTMLDivElement>('mobile-menu');
+    hamburgerIconEl = getEl<HTMLElement>('hamburger-icon');
+    closeIconEl = getEl<HTMLElement>('close-icon');
+    collectionListDropdownContainerEl = getEl<HTMLDivElement>('collection-list-dropdown-container');
+    collectionListDropdownButtonEl = getEl<HTMLButtonElement>('collection-list-dropdown-button');
+    collectionListDropdownMenuEl = getEl<HTMLDivElement>('collection-list-dropdown-menu');
+    collectionListLoadingEl = getEl<HTMLDivElement>('collection-list-loading');
+    collectionListEmptyEl = getEl<HTMLDivElement>('collection-list-empty');
+    collectionListErrorEl = getEl<HTMLDivElement>('collection-list-error');
+    currentCollectionBadgeContainerEl = getEl<HTMLDivElement>('current-collection-badge-container');
+    currentCollectionBadgeLinkEl = getEl<HTMLAnchorElement>('current-collection-badge-link');
+    currentCollectionBadgeNameEl = getEl<HTMLSpanElement>('current-collection-badge-name');
+    logoutFormEl = getEl<HTMLFormElement>('logout-form');
+    genericCollectionsLinkDesktopEl = queryEl<HTMLAnchorElement>('header nav.hidden.md\\:flex > a[href$="/home/collections"]:not([data-action])');
+    genericCollectionsLinkMobileEl = queryEl<HTMLAnchorElement>('#mobile-menu > div:nth-child(1) > a[href$="/home/collections"]:not([data-action])');
+
+    // console.log('Padmin D. Curtis: DOM references acquired/re-acquired via initializeDOMReferences().');
+    // confirmDOMReferencesLoaded(); // La chiamata a confirm è già qui se decommentata
+}
+
+/**
+ * 📜 Oracode Function: confirmDOMReferencesLoaded
+ * 🎯 Esegue un controllo di base su alcuni elementi DOM critici.
  */
 export function confirmDOMReferencesLoaded(): void {
-    // Verifica elementi critici (esempio)
-    if (!connectWalletModalEl || !mobileMenuButtonEl || !uploadModalEl) {
-        console.warn('DOMElementReferences: Alcuni elementi critici non sono stati trovati. Verifica gli ID e i selettori HTML.');
-        // Qui si potrebbe usare UEM_Client se fosse già inizializzato, ma è un problema di dipendenza circolare potenziale.
-        // Per ora, un console.warn è sufficiente.
-    }
-    console.log('Padmin D. Curtis: DOM references acquisition attempted.');
+    const criticalElements: { name: string, element: HTMLElement | NodeListOf<HTMLElement> | null }[] = [
+        { name: 'mobileMenuButtonEl', element: mobileMenuButtonEl },
+        { name: 'mobileMenuEl', element: mobileMenuEl },
+        { name: 'connectWalletModalEl', element: connectWalletModalEl },
+        // Aggiungi altri se necessario
+    ];
+    // console.log('Padmin D. Curtis: Confirming critical DOM references post-initialization...');
+    criticalElements.forEach(item => {
+        if (!item.element || (item.element instanceof NodeList && item.element.length === 0)) {
+            // console.warn(`DOMElementReferences Check: Critical element "${item.name}" NOT FOUND or empty.`);
+        }
+    });
 }

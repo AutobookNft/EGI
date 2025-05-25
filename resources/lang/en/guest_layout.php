@@ -5,19 +5,20 @@ return [
     'hero_right_content_aria_label' => 'Personal impact content',
 
     // Meta and titles
-    'default_title' => 'FlorenceEGI | Frangette - Ecological Goods Invent',
+    'default_title' => 'FlorenceEGI | EGI - Ecological Goods Invent',
     'default_description' => 'Explore, create, and collect unique ecological digital assets (EGI) on FlorenceEGI. Each work supports tangible environmental protection projects. Join the Digital Renaissance of art and sustainability.',
 
     // Schema.org
-    'schema_website_name' => 'FlorenceEGI | Frangette',
+    'schema_website_name' => 'FlorenceEGI | EGI',
     'schema_website_description' => 'Platform for the creation and exchange of Ecological Goods Invent (EGI) that fund environmental projects.',
     'schema_organization_name' => 'Frangette Cultural Promotion Association',
 
     // Header/Navbar
     'header_aria_label' => 'Site header',
-    'logo_aria_label' => 'Go to Frangette Homepage',
-    'logo_alt_text' => 'Frangette platform logo',
-    'brand_name' => 'Frangette',
+    'logo_aria_label' => 'Go to Florence EGI Homepage',
+    'logo_alt_text' => 'Florence EGI platform logo',
+    'brand_name' => 'Florence EGI',
+    'navbar_brand_name' => 'Florence EGI New Digital Renaissance',
     'desktop_nav_aria_label' => 'Desktop main navigation',
 
     // Navigation items
@@ -154,4 +155,69 @@ return [
     'wallet_existing_connection' => 'Wallet connected successfully',
     'wallet_new_connection' => 'New wallet registered successfully',
     'wallet_disconnected_successfully' => 'Wallet disconnected successfully',
+
+    // Default Meta and Titles
+    'default_title' => 'FlorenceEGI',
+    'default_description' => 'FlorenceEGI: The marketplace where digital art meets sustainability and shared value.',
+    'schema_website_name' => 'FlorenceEGI',
+    'schema_website_description' => 'Platform for digital art with environmental impact and a virtuous economic model.',
+    'schema_organization_name' => 'Frangette APS', // Or FlorenceEGI SRL if more appropriate for publisher
+
+    // Header and Navigation
+    'header_aria_label' => 'Main navigation menu',
+    'logo_aria_label' => 'FlorenceEGI Homepage',
+    'navbar_brand_name' => 'FlorenceEGI', // Or empty if you only want the logo
+    'desktop_nav_aria_label' => 'Desktop navigation',
+    'my_galleries' => 'My Galleries',
+    'my_galleries_dropdown_aria_label' => 'Open My Galleries menu',
+    'loading_galleries' => 'Loading galleries...',
+    'no_galleries_found' => 'No galleries found.',
+    'create_one_question' => 'Create one?',
+    'error_loading_galleries' => 'Error loading galleries.',
+    'current_collection_badge_aria_label' => 'Currently selected collection',
+    'connect_wallet' => 'Connect Wallet',
+    'connect_wallet_aria_label' => 'Connect your crypto wallet',
+    'wallet' => 'Wallet', // Short text for connected wallet button
+    'dashboard' => 'Dashboard',
+    'dashboard_link_aria_label' => 'Go to your dashboard',
+    'copy_address' => 'Copy Address',
+    'copy_wallet_address_aria_label' => 'Copy your wallet address',
+    'disconnect' => 'Disconnect',
+    'disconnect_wallet_aria_label' => 'Disconnect your wallet',
+    'login' => 'Login',
+    'login_link_aria_label' => 'Login to your account',
+    'register' => 'Register',
+    'register_link_aria_label' => 'Create a new account',
+    'toggle_mobile_menu_aria_label' => 'Open/Close mobile menu',
+    'open_mobile_menu_sr' => 'Open navigation menu', // Screen reader only
+    'mobile_nav_aria_label' => 'Mobile navigation',
+    'mobile_connect_wallet_aria_label' => 'Connect your crypto wallet (mobile)',
+    'mobile_login_link_aria_label' => 'Login (mobile)',
+    'mobile_register_link_aria_label' => 'Register (mobile)',
+
+    // Hero Section (generic layout texts, if any)
+    'hero_left_content_aria_label' => 'Hero section left informational content',
+    'hero_right_content_aria_label' => 'Hero section right informational content',
+    'hero_carousel_aria_label' => 'Featured collections carousel',
+    'hero_left_content_tablet_aria_label' => 'Informational content left (tablet)',
+    'hero_right_content_tablet_aria_label' => 'Informational content right (tablet)',
+    'hero_featured_content_aria_label' => 'Featured content below the hero',
+    'scroll_down_aria_label' => 'Scroll down',
+
+    // Actors Section (if titles were in layout and not x-actors-section component)
+    'actors_section_title' => 'Join the FlorenceEGI Ecosystem',
+    'actors_section_subtitle' => 'Discover how you can participate and benefit from our shared value model.',
+
+    // Footer
+    'footer_sr_heading' => 'Additional information and useful links', // Screen reader only
+    'copyright_holder' => 'FlorenceEGI',
+    'all_rights_reserved' => 'All rights reserved.',
+    'algorand_blue_mission' => 'Algorand Blue Mission Partner',
+
+    // Modals
+    'close_upload_modal_aria_label' => 'Close upload modal',
+    'logout_sr_button' => 'Logout from account', // Screen reader only
+
+    // Environmental Stats (if "Total plastic recovered" string is generic layout)
+    'total_plastic_recovered' => 'Total Plastic Recovered',
 ];

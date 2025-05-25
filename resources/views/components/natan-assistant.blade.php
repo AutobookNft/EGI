@@ -1,6 +1,6 @@
 {{-- resources/views/components/natan-assistant.blade.php --}}
 
-<div id="natan-assistant-container" class="natan-assistant fixed bottom-6 right-6 z-[100000] flex flex-col items-end">
+<div id="natan-assistant-container">
     {{-- Pulsante principale Natan --}}
     <button
         id="natan-assistant-toggle"

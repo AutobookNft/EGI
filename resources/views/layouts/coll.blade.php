@@ -70,7 +70,7 @@
             window.appConfig = @json(config('app'));
         </script>
 
-        <script src="{{ url('translations.js') }}"></script>
+        {{-- <script src="{{ url('utils/translations.js') }}"></script> --}}
 
     </body>
 

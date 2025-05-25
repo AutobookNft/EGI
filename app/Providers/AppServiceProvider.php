@@ -15,7 +15,10 @@ use App\Policies\CollectionPolicy;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\Channels\CustomDatabaseChannel;
 use App\Services\Notifications\WalletService;
+use App\View\Components\EppHighlight;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\View;
+use Ultra\UltraLogManager\UltraLogManager;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -39,6 +42,12 @@ class AppServiceProvider extends ServiceProvider
             return new FileStorageService();
         });
 
+        $this->app->singleton(IconRepository::class, function ($app) {
+            return new IconRepository(
+                $app->make(UltraLogManager::class)
+            );
+        });
+
         // $this->app->singleton(WalletService::class, function ($app) {
         //     return new WalletService();
         // });
@@ -51,9 +60,15 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        
-        // dd(View::getFinder()->getHints());
-        
+
+        Blade::component('epp-highlight', EppHighlight::class);
+        Blade::component('collections-carousel', \App\View\Components\CollectionsCarousel::class);
+        Blade::component('environmental-stats', \App\View\Components\EnvironmentalStats::class);
+        Blade::component('egi-carousel', \App\View\Components\EgiCarousel::class);
+        Blade::component('egi-stat-card', \App\View\Components\EgiStatCard::class);
+        Blade::component('EgiStatsSection', \App\View\Components\EgiStatsSection::class);
+        Blade::component('gdpr-layout', \App\View\Components\GdprLayout::class);
+
         // Registriamo un driver nominato "custom_database"
         Notification::extend('custom_database', function ($app) {
             return new CustomDatabaseChannel();

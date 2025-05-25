@@ -5,19 +5,20 @@ return [
     'hero_right_content_aria_label' => 'Inhalt der persönlichen Wirkung',
 
     // Meta and titles
-    'default_title' => 'FlorenceEGI | Frangette - Ökologisches Güterinventar',
+    'default_title' => 'FlorenceEGI | EGI - Ökologisches Güterinventar',
     'default_description' => 'Entdecken, erstellen und sammeln Sie einzigartige ökologische digitale Assets (EGI) auf FlorenceEGI. Jedes Werk unterstützt konkrete Umweltschutzprojekte. Schließen Sie sich der digitalen Renaissance von Kunst und Nachhaltigkeit an.',
 
     // Schema.org
-    'schema_website_name' => 'FlorenceEGI | Frangette',
+    'schema_website_name' => 'FlorenceEGI | EGI',
     'schema_website_description' => 'Plattform für die Erstellung und den Austausch von Ökologischen Güterinventaren (EGI), die Umweltprojekte finanzieren.',
     'schema_organization_name' => 'Frangette Verein zur Förderung von Kultur',
 
     // Header/Navbar
     'header_aria_label' => 'Kopfzeile der Website',
-    'logo_aria_label' => 'Zur Homepage von Frangette gehen',
-    'logo_alt_text' => 'Logo der Frangette-Plattform',
-    'brand_name' => 'Frangette',
+    'logo_aria_label' => 'Zur Homepage von Florence EGI gehen',
+    'logo_alt_text' => 'Logo der Florence EGI-Plattform',
+    'brand_name' => 'Florence EGI',
+    'navbar_brand_name' => 'Florence EGI Neue Digitale Renaissance',
     'desktop_nav_aria_label' => 'Hauptnavigation für Desktop',
 
     // Navigation items

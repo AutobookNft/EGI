@@ -119,6 +119,13 @@ return [
         'reservation_unauthorized_cancel' => 'Tentativo non autorizzato di annullare la prenotazione :id. Solo il proprietario può annullare.',
         'reservation_status_failed' => 'Impossibile recuperare lo stato della prenotazione per l\'EGI :egi_id. Errore: :error',
         'reservation_unknown_error' => 'Si è verificato un errore sconosciuto durante il processo di prenotazione. Errore: :error',
+
+        // Dev message for statistics system
+        'statistics_calculation_failed' => 'Calcolo statistiche fallito per utente :user_id. Contesto: :error_context. Errore: :error_message',
+        'icon_not_found' => 'Icona :icon_name con stile :style non trovata nel database. Uso icona di fallback.',
+        'icon_retrieval_failed' => 'Impossibile recuperare icona :icon_name. Errore: :error_message. Uso icona di fallback.',
+        'statistics_cache_clear_failed' => 'Impossibile pulire cache statistiche per utente :user_id. Errore: :error_message',
+        'statistics_summary_failed' => 'Impossibile calcolare riassunto statistiche per utente :user_id. Errore: :error_message',
     ],
 
     'user' => [
@@ -223,8 +230,15 @@ return [
         'reservation_unauthorized_cancel' => 'Non hai il permesso per annullare questa prenotazione.',
         'reservation_status_failed' => 'Impossibile recuperare lo stato della prenotazione. Riprova più tardi.',
         'reservation_unknown_error' => 'Qualcosa è andato storto con la tua prenotazione. Il nostro team è stato informato.',
+
+        // User messages for statistics system
+        'statistics_calculation_failed' => 'Impossibile caricare le tue statistiche al momento. Il nostro team è stato notificato. Riprova più tardi.',
+        'icon_not_found' => 'Icona temporaneamente non disponibile. Uso icona predefinita.',
+        'icon_retrieval_failed' => 'Icona temporaneamente non disponibile. Uso icona predefinita.',
+        'statistics_cache_clear_failed' => 'Impossibile aggiornare cache statistiche. Riprova.',
+        'statistics_summary_failed' => 'Impossibile caricare riassunto statistiche. Riprova.',
     ],
-    
+
     // Generic message (used by UserInterfaceHandler if no specific message found)
     'generic_error' => 'Si è verificato un errore. Riprova più tardi o contatta l\'assistenza.',
 ];

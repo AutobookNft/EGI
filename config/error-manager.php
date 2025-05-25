@@ -1259,6 +1259,695 @@ return [
             'http_status_code' => 500,
             'notify_slack' => true,
             'msg_to' => 'sweet-alert'
-        ]
+        ],
+
+        // --- STATISTICS ERRORS ---
+        'STATISTICS_CALCULATION_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.statistics_calculation_failed',
+            'user_message_key' => 'error-manager::errors.user.statistics_calculation_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'ICON_NOT_FOUND' => [
+            'type' => 'warning',
+            'blocking' => 'not',
+            'dev_message_key' => 'error-manager::errors.dev.icon_not_found',
+            'user_message_key' => 'error-manager::errors.user.icon_not_found',
+            'http_status_code' => 404,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'div',
+        ],
+
+        'ICON_RETRIEVAL_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.icon_retrieval_failed',
+            'user_message_key' => 'error-manager::errors.user.icon_retrieval_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'fallback',
+        ],
+
+        'STATISTICS_CACHE_CLEAR_FAILED' => [
+            'type' => 'warning',
+            'blocking' => 'not',
+            'dev_message_key' => 'error-manager::errors.dev.statistics_cache_clear_failed',
+            'user_message_key' => 'error-manager::errors.user.statistics_cache_clear_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'toast',
+        ],
+
+        'STATISTICS_SUMMARY_FAILED' => [
+            'type' => 'warning',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.statistics_summary_failed',
+            'user_message_key' => 'error-manager::errors.user.statistics_summary_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'toast',
+        ],
+
+        // GDPR Consent errors
+        'GDPR_CONSENT_REQUIRED' => [
+            'msg' => 'gdpr.errors.consent_required',
+            'msg_to' => ['inline', 'toast'],
+            'type' => 'warning',
+            'http_code' => 403,
+            'blocking' => true,
+            'recovery' => 'redirect',
+            'recovery_url' => '/gdpr/consent',
+            'report' => true,
+            'log' => true,
+            'notify' => false,
+        ],
+        'GDPR_CONSENT_UPDATE_ERROR' => [
+            'msg' => 'gdpr.errors.consent_update_error',
+            'msg_to' => ['toast'],
+            'type' => 'error',
+            'http_code' => 500,
+            'blocking' => false,
+            'recovery' => 'retry',
+            'report' => true,
+            'log' => true,
+            'notify' => false,
+        ],
+        'GDPR_CONSENT_SAVE_ERROR' => [
+            'msg' => 'gdpr.errors.consent_save_error',
+            'msg_to' => ['toast', 'console'],
+            'type' => 'error',
+            'http_code' => 500,
+            'blocking' => true,
+            'recovery' => 'retry',
+            'report' => true,
+            'log' => true,
+            'notify' => false,
+        ],
+        'GDPR_CONSENT_LOAD_ERROR' => [
+            'msg' => 'gdpr.errors.consent_load_error',
+            'msg_to' => ['toast', 'inline'],
+            'type' => 'error',
+            'http_code' => 500,
+            'blocking' => false,
+            'recovery' => 'reload',
+            'report' => true,
+            'log' => true,
+            'notify' => false,
+        ],
+
+        // GDPR Data Export errors
+        'GDPR_EXPORT_REQUEST_ERROR' => [
+            'msg' => 'gdpr.errors.export_request_error',
+            'msg_to' => ['toast'],
+            'type' => 'error',
+            'http_code' => 500,
+            'blocking' => false,
+            'recovery' => 'retry',
+            'report' => true,
+            'log' => true,
+            'notify' => false,
+        ],
+        'GDPR_EXPORT_LIMIT_REACHED' => [
+            'msg' => 'gdpr.export.limit_reached',
+            'msg_to' => ['toast', 'inline'],
+            'type' => 'warning',
+            'http_code' => 429,
+            'blocking' => true,
+            'recovery' => 'wait',
+            'report' => false,
+            'log' => true,
+            'notify' => false,
+        ],
+        'GDPR_EXPORT_CREATE_ERROR' => [
+            'msg' => 'gdpr.errors.export_create_error',
+            'msg_to' => ['toast', 'console'],
+            'type' => 'error',
+            'http_code' => 500,
+            'blocking' => true,
+            'recovery' => 'retry',
+            'report' => true,
+            'log' => true,
+            'notify' => true,
+        ],
+        'GDPR_EXPORT_DOWNLOAD_ERROR' => [
+            'msg' => 'gdpr.errors.export_download_error',
+            'msg_to' => ['toast', 'inline'],
+            'type' => 'error',
+            'http_code' => 500,
+            'blocking' => false,
+            'recovery' => 'retry',
+            'report' => true,
+            'log' => true,
+            'notify' => false,
+        ],
+        'GDPR_EXPORT_STATUS_ERROR' => [
+            'msg' => 'gdpr.errors.export_status_error',
+            'msg_to' => ['toast'],
+            'type' => 'error',
+            'http_code' => 500,
+            'blocking' => false,
+            'recovery' => 'retry',
+            'report' => true,
+            'log' => true,
+            'notify' => false,
+        ],
+        'GDPR_EXPORT_PROCESSING_FAILED' => [
+            'msg' => 'gdpr.errors.export_processing_failed',
+            'msg_to' => ['toast', 'inline'],
+            'type' => 'error',
+            'http_code' => 500,
+            'blocking' => false,
+            'recovery' => 'retry',
+            'report' => true,
+            'log' => true,
+            'notify' => true,
+        ],
+
+        // GDPR Processing Restriction errors
+        'GDPR_PROCESSING_RESTRICTED' => [
+            'msg' => 'gdpr.errors.processing_restricted',
+            'msg_to' => ['toast', 'inline'],
+            'type' => 'warning',
+            'http_code' => 403,
+            'blocking' => false,
+            'recovery' => 'none',
+            'report' => false,
+            'log' => true,
+            'notify' => false,
+        ],
+        'GDPR_PROCESSING_LIMIT_VIEW_ERROR' => [
+            'msg' => 'gdpr.errors.processing_limit_view_error',
+            'msg_to' => ['toast'],
+            'type' => 'error',
+            'http_code' => 500,
+            'blocking' => false,
+            'recovery' => 'reload',
+            'report' => true,
+            'log' => true,
+            'notify' => false,
+        ],
+        'GDPR_PROCESSING_RESTRICTION_CREATE_ERROR' => [
+            'msg' => 'gdpr.errors.processing_restriction_create_error',
+            'msg_to' => ['toast'],
+            'type' => 'error',
+            'http_code' => 500,
+            'blocking' => false,
+            'recovery' => 'retry',
+            'report' => true,
+            'log' => true,
+            'notify' => false,
+        ],
+        'GDPR_PROCESSING_RESTRICTION_REMOVE_ERROR' => [
+            'msg' => 'gdpr.errors.processing_restriction_remove_error',
+            'msg_to' => ['toast'],
+            'type' => 'error',
+            'http_code' => 500,
+            'blocking' => false,
+            'recovery' => 'retry',
+            'report' => true,
+            'log' => true,
+            'notify' => false,
+        ],
+        'GDPR_PROCESSING_RESTRICTION_LIMIT_REACHED' => [
+            'msg' => 'gdpr.restriction.limit_reached',
+            'msg_to' => ['toast', 'inline'],
+            'type' => 'warning',
+            'http_code' => 429,
+            'blocking' => true,
+            'recovery' => 'none',
+            'report' => false,
+            'log' => true,
+            'notify' => false,
+        ],
+
+        // GDPR Account Deletion errors
+        'GDPR_DELETION_REQUEST_ERROR' => [
+            'msg' => 'gdpr.errors.deletion_request_error',
+            'msg_to' => ['toast', 'inline'],
+            'type' => 'error',
+            'http_code' => 500,
+            'blocking' => true,
+            'recovery' => 'contact',
+            'report' => true,
+            'log' => true,
+            'notify' => true,
+        ],
+        'GDPR_DELETION_CANCELLATION_ERROR' => [
+            'msg' => 'gdpr.errors.deletion_cancellation_error',
+            'msg_to' => ['toast'],
+            'type' => 'error',
+            'http_code' => 500,
+            'blocking' => false,
+            'recovery' => 'retry',
+            'report' => true,
+            'log' => true,
+            'notify' => false,
+        ],
+        'GDPR_DELETION_PROCESSING_ERROR' => [
+            'msg' => 'gdpr.errors.deletion_processing_error',
+            'msg_to' => ['toast', 'inline'],
+            'type' => 'error',
+            'http_code' => 500,
+            'blocking' => true,
+            'recovery' => 'contact',
+            'report' => true,
+            'log' => true,
+            'notify' => true,
+        ],
+
+        // GDPR Breach Report errors
+        'GDPR_BREACH_REPORT_ERROR' => [
+            'msg' => 'gdpr.errors.breach_report_error',
+            'msg_to' => ['toast', 'console'],
+            'type' => 'error',
+            'http_code' => 500,
+            'blocking' => false,
+            'recovery' => 'retry',
+            'report' => true,
+            'log' => true,
+            'notify' => true,
+        ],
+        'GDPR_BREACH_EVIDENCE_UPLOAD_ERROR' => [
+            'msg' => 'gdpr.errors.breach_evidence_upload_error',
+            'msg_to' => ['toast', 'inline'],
+            'type' => 'error',
+            'http_code' => 500,
+            'blocking' => false,
+            'recovery' => 'retry',
+            'report' => true,
+            'log' => true,
+            'notify' => false,
+        ],
+
+        // GDPR Activity Log errors
+        'GDPR_ACTIVITY_LOG_ERROR' => [
+            'msg' => 'gdpr.errors.activity_log_error',
+            'msg_to' => ['toast'],
+            'type' => 'error',
+            'http_code' => 500,
+            'blocking' => false,
+            'recovery' => 'reload',
+            'report' => true,
+            'log' => true,
+            'notify' => false,
+        ],
+
+        // GDPR Security errors
+        'GDPR_ENHANCED_SECURITY_REQUIRED' => [
+            'msg' => 'gdpr.errors.security_verification_required',
+            'msg_to' => ['toast', 'redirect'],
+            'type' => 'warning',
+            'http_code' => 403,
+            'blocking' => true,
+            'recovery' => 'redirect',
+            'recovery_url' => '/login',
+            'report' => false,
+            'log' => true,
+            'notify' => false,
+        ],
+        'GDPR_CRITICAL_SECURITY_REQUIRED' => [
+            'msg' => 'gdpr.errors.password_confirmation_required',
+            'msg_to' => ['toast', 'redirect'],
+            'type' => 'warning',
+            'http_code' => 403,
+            'blocking' => true,
+            'recovery' => 'redirect',
+            'recovery_url' => '/password/confirm',
+            'report' => false,
+            'log' => true,
+            'notify' => false,
+        ],
+
+        // ====================================================
+        // GDPR Consent Management Errors
+        // ====================================================
+        'GDPR_CONSENT_PAGE_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.gdpr_consent_page_failed',
+            'user_message_key' => 'error-manager::errors.user.gdpr_consent_page_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'GDPR_CONSENT_PREFERENCES_PAGE_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.gdpr_consent_preferences_page_failed',
+            'user_message_key' => 'error-manager::errors.user.gdpr_consent_preferences_page_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'GDPR_CONSENT_UPDATE_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.gdpr_consent_update_failed',
+            'user_message_key' => 'error-manager::errors.user.gdpr_consent_update_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'GDPR_CONSENT_HISTORY_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.gdpr_consent_history_failed',
+            'user_message_key' => 'error-manager::errors.user.gdpr_consent_history_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        // ====================================================
+        // GDPR Data Export Errors
+        // ====================================================
+        'GDPR_EXPORT_PAGE_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.gdpr_export_page_failed',
+            'user_message_key' => 'error-manager::errors.user.gdpr_export_page_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'GDPR_EXPORT_GENERATION_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.gdpr_export_generation_failed',
+            'user_message_key' => 'error-manager::errors.user.gdpr_export_generation_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'GDPR_EXPORT_NOT_FOUND' => [
+            'type' => 'error',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.gdpr_export_not_found',
+            'user_message_key' => 'error-manager::errors.user.gdpr_export_not_found',
+            'http_status_code' => 404,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'GDPR_EXPORT_DOWNLOAD_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.gdpr_export_download_failed',
+            'user_message_key' => 'error-manager::errors.user.gdpr_export_download_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        // ====================================================
+        // GDPR Personal Data Management Errors
+        // ====================================================
+        'GDPR_EDIT_DATA_PAGE_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.gdpr_edit_data_page_failed',
+            'user_message_key' => 'error-manager::errors.user.gdpr_edit_data_page_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'GDPR_PERSONAL_DATA_UPDATE_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.gdpr_personal_data_update_failed',
+            'user_message_key' => 'error-manager::errors.user.gdpr_personal_data_update_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'GDPR_RECTIFICATION_REQUEST_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.gdpr_rectification_request_failed',
+            'user_message_key' => 'error-manager::errors.user.gdpr_rectification_request_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        // ====================================================
+        // GDPR Processing Limitation Errors
+        // ====================================================
+        'GDPR_PROCESSING_LIMITS_UPDATE_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.gdpr_processing_limits_update_failed',
+            'user_message_key' => 'error-manager::errors.user.gdpr_processing_limits_update_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        // ====================================================
+        // GDPR Account Deletion Errors
+        // ====================================================
+        'GDPR_DELETE_ACCOUNT_PAGE_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.gdpr_delete_account_page_failed',
+            'user_message_key' => 'error-manager::errors.user.gdpr_delete_account_page_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'GDPR_DELETION_REQUEST_FAILED' => [
+            'type' => 'critical',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.gdpr_deletion_request_failed',
+            'user_message_key' => 'error-manager::errors.user.gdpr_deletion_request_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'GDPR_ACCOUNT_DELETION_FAILED' => [
+            'type' => 'critical',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.gdpr_account_deletion_failed',
+            'user_message_key' => 'error-manager::errors.user.gdpr_account_deletion_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        // ====================================================
+        // GDPR Activity Log Errors
+        // ====================================================
+        'GDPR_ACTIVITY_LOG_PAGE_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.gdpr_activity_log_page_failed',
+            'user_message_key' => 'error-manager::errors.user.gdpr_activity_log_page_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'GDPR_ACTIVITY_LOG_EXPORT_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.gdpr_activity_log_export_failed',
+            'user_message_key' => 'error-manager::errors.user.gdpr_activity_log_export_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        // ====================================================
+        // GDPR Breach Reporting Errors
+        // ====================================================
+        'GDPR_BREACH_REPORT_PAGE_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.gdpr_breach_report_page_failed',
+            'user_message_key' => 'error-manager::errors.user.gdpr_breach_report_page_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'GDPR_BREACH_REPORT_SUBMISSION_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.gdpr_breach_report_submission_failed',
+            'user_message_key' => 'error-manager::errors.user.gdpr_breach_report_submission_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'GDPR_BREACH_REPORT_ACCESS_DENIED' => [
+            'type' => 'error',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.gdpr_breach_report_access_denied',
+            'user_message_key' => 'error-manager::errors.user.gdpr_breach_report_access_denied',
+            'http_status_code' => 403,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'GDPR_BREACH_REPORT_STATUS_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.gdpr_breach_report_status_failed',
+            'user_message_key' => 'error-manager::errors.user.gdpr_breach_report_status_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        // ====================================================
+        // GDPR Privacy Policy & Transparency Errors
+        // ====================================================
+        'GDPR_PRIVACY_POLICY_PAGE_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.gdpr_privacy_policy_page_failed',
+            'user_message_key' => 'error-manager::errors.user.gdpr_privacy_policy_page_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'GDPR_PRIVACY_POLICY_CHANGELOG_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.gdpr_privacy_policy_changelog_failed',
+            'user_message_key' => 'error-manager::errors.user.gdpr_privacy_policy_changelog_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'GDPR_DATA_PROCESSING_INFO_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.gdpr_data_processing_info_failed',
+            'user_message_key' => 'error-manager::errors.user.gdpr_data_processing_info_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        // ====================================================
+        // GDPR DPO Contact & Support Errors
+        // ====================================================
+        'GDPR_DPO_CONTACT_PAGE_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.gdpr_dpo_contact_page_failed',
+            'user_message_key' => 'error-manager::errors.user.gdpr_dpo_contact_page_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'GDPR_DPO_MESSAGE_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.gdpr_dpo_message_failed',
+            'user_message_key' => 'error-manager::errors.user.gdpr_dpo_message_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        // ====================================================
+        // GDPR API Errors
+        // ====================================================
+        'GDPR_API_CONSENT_STATUS_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'not',
+            'dev_message_key' => 'error-manager::errors.dev.gdpr_api_consent_status_failed',
+            'user_message_key' => 'error-manager::errors.user.gdpr_api_consent_status_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'json',
+        ],
+
+        'GDPR_API_PROCESSING_LIMITS_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'not',
+            'dev_message_key' => 'error-manager::errors.dev.gdpr_api_processing_limits_failed',
+            'user_message_key' => 'error-manager::errors.user.gdpr_api_processing_limits_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'json',
+        ],
+
+        'GDPR_API_EXPORT_STATUS_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'not',
+            'dev_message_key' => 'error-manager::errors.dev.gdpr_api_export_status_failed',
+            'user_message_key' => 'error-manager::errors.user.gdpr_api_export_status_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'json',
+        ],
+
+        // ====================================================
+        // GDPR Legacy Method Errors
+        // ====================================================
+        'GDPR_LEGACY_DATA_DOWNLOAD_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.gdpr_legacy_data_download_failed',
+            'user_message_key' => 'error-manager::errors.user.gdpr_legacy_data_download_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
     ],
 ];

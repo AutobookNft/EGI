@@ -15,7 +15,11 @@ Dotenv::createImmutable(dirname(__DIR__))->load();
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
-        web: __DIR__.'/../routes/web.php',
+        web: [
+            __DIR__.'/../routes/web.php',
+            __DIR__.'/../routes/menu_dashboard.php',
+            __DIR__.'/../routes/gdpr.php',
+        ],
         api: __DIR__.'/../routes/api.php',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',

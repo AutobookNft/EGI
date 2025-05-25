@@ -8,6 +8,7 @@
         'card-stats' => 'flex justify-end w-full gap-4 py-2 mt-3 text-sm border-t border-b',
         'natan-badge' => 'flex items-center justify-center flex-wrap gap-x-4 gap-y-2 mt-2 text-sm',
         'equilibrium' => 'flex items-center justify-center gap-2 mt-4 opacity-90',
+        'banner' => 'w-full py-1 bg-gradient-to-r from-emerald-900/90 to-emerald-800/90 border-b border-emerald-700/50 hidden md:block',
         default => 'flex items-center justify-center gap-2 mt-4 opacity-90',
     };
 
@@ -17,6 +18,7 @@
         'card-stats' => "font-semibold text-{$textColor}-300",
         'natan-badge' => 'text-white/70',
         'equilibrium' => "text-xs text-{$textColor}-300 font-mono",
+        'banner' => "text-{$textColor}-300 tabular-nums",
         default => "text-xs text-{$textColor}-300 font-mono",
     };
 
@@ -90,6 +92,46 @@
         <div class="flex flex-col items-start">
             <span class="text-white/60 text-[11px]">Strong</span>
             <span class="{{ $valueClasses }}">{{ $formattedReservations('strong', $decimals) }} €</span>
+        </div>
+    </div>
+@elseif ($format === 'banner')
+    <div class="{{ $containerClasses }} environmental-stats-banner">
+        <div class="container flex flex-wrap items-center justify-center gap-6 px-4 mx-auto text-xs font-medium sm:gap-8 md:gap-10 lg:gap-12 sm:text-sm">
+            <div class="flex items-center gap-1.5 text-emerald-300">
+                <span class="text-base material-symbols-outlined">waves</span>
+                <span class="{{ $valueClasses }}">{{ $formattedTotal($decimals) }} kg</span>
+                <span class="text-emerald-200/80">plastica rimossa</span>
+            </div>
+
+            <div class="flex items-center gap-1.5 text-emerald-300">
+                <span class="text-base material-symbols-outlined">forest</span>
+                <span class="{{ $valueClasses }}">{{ $activeProjects }}</span>
+                <span class="text-emerald-200/80">progetti attivi</span>
+            </div>
+
+            <div class="flex items-center gap-1.5 text-emerald-300">
+                <span class="text-base material-symbols-outlined">eco</span>
+                <span class="{{ $valueClasses }}">25%</span>
+                <span class="text-emerald-200/80">destinato all'ambiente</span>
+            </div>
+
+            <div class="flex items-center gap-1.5 text-violet-300">
+                <span class="text-base material-symbols-outlined">grid_view</span>
+                <span class="{{ $valueClasses }}">{{ $totalItems }}</span>
+                <span class="text-violet-200/80">EGI creati</span>
+            </div>
+
+            <div class="flex items-center gap-1.5 text-blue-300">
+                <span class="text-base material-symbols-outlined">people</span>
+                <span class="{{ $valueClasses }}">{{ $totalOwners }}</span>
+                <span class="text-blue-200/80">collezionisti</span>
+            </div>
+
+            <div class="flex items-center gap-1.5 text-amber-300">
+                <span class="text-base material-symbols-outlined">account_balance_wallet</span>
+                <span class="{{ $valueClasses }}">{{ $formattedEquilibrium($decimals) }} €</span>
+                <span class="text-amber-200/80">equilibrium generato</span>
+            </div>
         </div>
     </div>
 @endif

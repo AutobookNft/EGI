@@ -17,7 +17,6 @@ class RolesAndPermissionsSeeder extends Seeder
 
         'manage_roles',
         'manage_permissions',
-        'manage_egi',
 
         // Permessi per il Team
         'create_team',
@@ -38,6 +37,7 @@ class RolesAndPermissionsSeeder extends Seeder
         'create_EGI',
         'update_EGI',
         'delete_EGI',
+        'manage_EGI',
 
         // Permessi per i Wallet
         'create_wallet',
@@ -45,6 +45,7 @@ class RolesAndPermissionsSeeder extends Seeder
         'approve_wallet',
         'reject_wallet',
         'delete_wallet',
+        'view_wallet',
 
         // Permessi per le views
         'view_dashboard',
@@ -58,10 +59,30 @@ class RolesAndPermissionsSeeder extends Seeder
         'view_settings',
         'view_notifications',
         'view_logs',
+
+        // Permessi per l'utente
+        'manage_profile',
+        'manage_account',
+        'delete_account',
+
+        // Permessi per la documentazione
+        'view_documentation',
+
+        // Permessi per le statistiche
+        'view_statistics',
+
+        // Permessi GDPR
+        'manage_consents',
+        'manage_privacy',
+        'manage_privacy_settings',
+        'manage_privacy_policies',
+        'manage_privacy_requests',
+        'manage_privacy_notifications',
     ];
 
     private $roles = [
         'superadmin' => ['all'],
+
         'creator' => [
             // Team
             'create_team', 'update_team', 'delete_team',
@@ -71,14 +92,25 @@ class RolesAndPermissionsSeeder extends Seeder
             'create_collection', 'update_collection', 'delete_collection','update_collection_image_header',
 
             // EGI
-            'create_EGI', 'update_EGI', 'delete_EGI', 'manage_egi',
+            'create_EGI', 'update_EGI', 'delete_EGI', 'manage_EGI',
 
             // Wallet
             'create_wallet', 'update_wallet', 'approve_wallet', 'reject_wallet', 'delete_wallet',
 
             // Views
             'view_user', 'view_profile', 'view_team', 'view_dashboard', 'view_bio', 'view_settings',
-            'view_notifications', 'view_logs',  'view_collection', 'view_EGI', 'view_collection_header'
+            'view_notifications', 'view_logs',  'view_collection', 'view_EGI', 'view_collection_header',
+            'view_wallet', 'view_statistics',
+
+            // Profile
+            'manage_profile', 'manage_account', 'delete_account',
+
+            // Documentation
+            'view_documentation',
+
+            // GDPR
+            'manage_consents', 'manage_privacy', 'manage_privacy_settings', 'manage_privacy_policies', 'manage_privacy_requests',
+
         ],
 
         'admin' => [
@@ -89,31 +121,47 @@ class RolesAndPermissionsSeeder extends Seeder
             'update_collection', 'update_collection_image_header',
 
             // EGI
-            'create_EGI', 'update_EGI', 'delete_EGI', 'manage_egi',
+            'create_EGI', 'update_EGI', 'delete_EGI', 'manage_EGI',
 
             // Views
             'view_user', 'view_profile', 'view_team', 'view_dashboard', 'view_bio', 'view_settings',
-            'view_notifications', 'view_logs',  'view_collection', 'view_EGI', 'view_collection_header'
+            'view_notifications', 'view_logs',  'view_collection', 'view_EGI', 'view_collection_header',
+            'view_wallet', 'view_statistics',
+
+            // Profile
+            'manage_profile', 'manage_account', 'delete_account',
+
+            // Documentation
+            'view_documentation',
+
+            // GDPR
+            'manage_consents','manage_privacy', 'manage_privacy_settings', 'manage_privacy_policies', 'manage_privacy_requests',
         ],
 
         'editor' => [
 
             // EGI
-            'update_EGI', 'manage_egi',
+            'update_EGI', 'manage_EGI',
 
             // Collection
             'update_collection_image_header',
 
             // Views
-            'view_profile', 'view_team', 'view_dashboard', 'view_collection', 'view_EGI', 'view_collection_header'
+            'view_profile', 'view_team', 'view_dashboard', 'view_collection', 'view_EGI', 'view_collection_header', 'view_documentation', 'view_statistics',
+
+            // GDPR
+            'manage_consents', 'manage_privacy', 'manage_privacy_settings', 'manage_privacy_policies', 'manage_privacy_requests',
         ],
 
         'guest' => [
-            // Collection
-            'view_collection_header', 'view_dashboard',
+            // Views
+            'view_collection_header', 'view_dashboard', 'view_documentation', 'view_statistics',
 
             // EGI
             'view_EGI',
+
+            // GDPR
+            'manage_consents', 'manage_privacy', 'manage_privacy_settings', 'manage_privacy_policies', 'manage_privacy_requests',
         ],
     ];
 

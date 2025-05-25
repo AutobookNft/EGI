@@ -35,4 +35,67 @@ return [
     'are_you_artist_description' => 'Transform your art into a digital asset with real impact. Join FlorenceEGI and give value to your creations while supporting the environment.',
     'create_your_gallery' => 'Create Your EGI Gallery',
     'create_your_gallery_aria' => 'Register to create your EGI gallery',
+
+    // Footer    // Meta Tags for home.blade.php
+    'page_title' => 'FlorenceEGI – The New Digital Ecological Renaissance',
+    'meta_description' => 'Discover FlorenceEGI, the ecosystem where art generates shared value and actively contributes to environmental protection and restoration. Join the change.',
+
+    // Collection Hero Banner (collection-hero-banner.blade.php)
+    'by' => 'by',
+    'unknown_artist' => 'Unknown Artist',
+    'reserve_this_egi_now' => 'Reserve this EGI Now',
+    'no_egi_available_for_reservation' => 'No EGI available for reservation',
+    'go_to_slide' => 'Go to slide :index',
+    'previous_slide' => 'Previous slide',
+    'next_slide' => 'Next slide',
+    'no_collections_available' => 'No collections available at the moment.',
+
+    // Collections Carousel (collections-carousel.blade.php)
+    'featured_collections_title' => 'Featured Collections',
+    'latest_galleries_title' => 'Latest Galleries',
+    // 'no_collections_available' => 'No collections available.', // Already defined above
+    'previous_collections' => 'Previous collections',
+    'next_collections' => 'Next collections',
+
+    // Actors/Protagonists Section (used in actors-section.blade.php, called from home.blade.php)
+    'ecosystem_actors_title' => 'The New Renaissance Ecosystem',
+    'ecosystem_actors_subtitle' => 'FlorenceEGI connects those who create, support, purchase, innovate, and protect our planet, in a virtuous circle of shared value.',
+
+    // Actor Card: Creator
+    'actor_creator_title' => 'For the Creative Artist',
+    'actor_creator_message' => 'Your art works for you and the planet. On FlorenceEGI, every exchange, resale, and participation increases your earnings and actively supports environmental protection projects.',
+    'actor_creator_cta' => 'Create Your Art',
+
+    // Actor Card: Patron
+    'actor_patron_title' => 'For the Visionary Patron',
+    'actor_patron_message' => 'Become a patron. Start your venture at no cost, support emerging artists, curate unique galleries, earn, and multiply value for yourself and the community.',
+    'actor_patron_cta' => 'Become a Patron',
+
+    // Actor Card: Collector
+    'actor_collector_title' => 'For the Conscious Collector',
+    'actor_collector_message' => 'Purchase an artwork and enter the virtuous market. Every action you take translates into value for you, for the creators, and for the protection of our environment.',
+    'actor_collector_cta' => 'Explore Artworks',
+
+    // Actor Card: Business/Entrepreneur
+    'actor_business_title' => 'For the Innovative Entrepreneur',
+    'actor_business_message' => 'Transform your communication and corporate values into a virtuous asset. Collaborate with artists, promote your brand уникально, and contribute to environmental restoration.',
+    'actor_business_cta' => 'Enhance Your Business',
+
+    // EPP CTA Banner (epp-cta-banner.blade.php)
+    'epp_banner_title' => 'Our Commitment to the Planet',
+    'epp_banner_subtitle' => 'Every artwork on FlorenceEGI actively contributes to environmental protection and restoration, generating tangible resources for a sustainable future.',
+    'epp_banner_message_v2' => 'We partner with carefully selected and verified Environmental Protection Programs (EPPs) to ensure that a significant portion of every transaction generates positive, measurable change. Transparency is at the core of our operations: follow the contribution flow and witness the results of your support.',
+    'epp_banner_cta' => 'Discover Supported Programs',
+
+    // Old EPP Highlight section (epp-highlight.blade.php - if still used or for EPP page)
+    'your_impact_counts_title' => 'Your Participation Matters', // Could be "Our Protection Programs"
+    'your_impact_counts_description' => 'By choosing FlorenceEGI, you not only invest in unique digital art but also become an active part in supporting crucial projects for the safeguarding and recovery of our planet.',
+    'discover_more' => 'Discover More',
+    'view_all_supported_projects' => 'View All Supported Programs',
+
+    // Old Creator CTA (creator-cta.blade.php - if still used or for other pages)
+    'are_you_artist_title_v2' => 'Are You an Artist or Creator?',
+    'are_you_artist_description_v2' => 'Join FlorenceEGI and transform your art into a force for positive change. Offer unique works, reach a global audience, and contribute to environmental protection.',
+    'create_your_gallery_v2' => 'Create Your Gallery Now',
+
 ];

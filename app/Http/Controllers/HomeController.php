@@ -83,7 +83,6 @@ class HomeController extends Controller
         return Collection::where('is_published', true)
             ->with(['creator'])
             ->latest()
-            ->take(3)
             ->get();
     }
 

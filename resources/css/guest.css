@@ -1,0 +1,211 @@
+/* resources/css/guest.css - Versione Pulita per Tema Scuro */
+
+/* ==========================================================================
+   Reset di Base e Impostazioni Globali
+   ========================================================================== */
+
+:root {
+    --app-height: 100%; /* Per gestire altezza viewport su mobile, se necessario */
+    --doc-height: 100%;
+}
+
+html {
+    /* Il font di base sarà gestito da Tailwind tramite la classe .font-body su <body> */
+    /* overflow-x: hidden; /* Già gestito da Tailwind o da app.css se necessario globalmente */
+    scroll-behavior: smooth; /* Mantenuto, utile */
+}
+
+body {
+    /* Colore testo di default e sfondo saranno gestiti da classi Tailwind su <body> in guest.blade.php */
+    /* Esempio: <body class="bg-gray-900 text-gray-300 font-body ..."> */
+    width: 100%; /* Può essere utile per evitare alcuni problemi di layout */
+    /* height: 100vh; */ /* Rimosso, min-h-screen di Tailwind è più flessibile */
+    /* height: var(--app-height); */ /* Valutare se ancora necessario con min-h-screen */
+    -webkit-font-smoothing: antialiased; /* Migliora resa font su WebKit */
+    -moz-osx-font-smoothing: grayscale; /* Migliora resa font su Firefox */
+}
+
+/* Fix altezza per iOS Safari (se ancora rilevante per il tuo layout) */
+@supports (-webkit-touch-callout: none) {
+    .min-h-screen { /* Se usi .min-h-screen di Tailwind */
+        min-height: var(--doc-height);
+    }
+}
+
+/* ==========================================================================
+   Stili di Accessibilità e Usabilità
+   ========================================================================== */
+
+/* Rimuove outline per click del mouse ma lo mantiene per navigazione da tastiera */
+:focus:not(:focus-visible) {
+    outline: none;
+}
+
+/* Stile di focus visibile personalizzato (esempio, da adattare ai colori brand) */
+:focus-visible {
+    outline: 2px solid var(--florence-gold-default, #D4A574); /* Usa una variabile CSS per l'Oro Fiorentino se definita, o il valore HEX */
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(212, 165, 116, 0.3); /* Ombra esterna opzionale per il focus */
+}
+
+/* Per bottoni e link cliccabili su touch, migliora la reattività */
+button,
+a[role="button"],
+[tabindex="0"] { /* Elementi genericamente focusabili */
+    touch-action: manipulation;
+}
+
+/* Per scroll su elementi touch */
+.overflow-y-auto,
+.overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+}
+
+/* ==========================================================================
+   Utility Generiche (Mantenute se utili, altrimenti Tailwind le gestisce)
+   ========================================================================== */
+
+.invisible-until-ready {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.invisible-until-ready.ready {
+    opacity: 1;
+}
+
+/* Classi di testo responsive - Valuta se sono ancora necessarie
+   o se preferisci usare le utility responsive di Tailwind (es. text-lg md:text-xl lg:text-2xl)
+   Se le mantieni, assicurati che non entrino in conflitto. */
+.text-responsive-xl {
+    font-size: clamp(1.5rem, 4vw, 2.5rem); /* Esempio: da 24px a 40px */
+    line-height: 1.2;
+}
+
+.text-responsive-lg {
+    font-size: clamp(1.25rem, 3vw, 2rem); /* Esempio: da 20px a 32px */
+    line-height: 1.3;
+}
+
+.text-responsive-base {
+    font-size: clamp(0.875rem, 2vw, 1rem); /* Esempio: da 14px a 16px */
+    line-height: 1.5;
+}
+
+
+/* ==========================================================================
+   Stili Specifici per Componenti (da rivedere e integrare con Tailwind)
+   ========================================================================== */
+
+/*
+   NOTA: Molti degli stili che erano qui per forzare un tema chiaro
+   (es. per header, footer, #hero-section, card, modal, Natan)
+   sono stati rimossi. Questi componenti ora dovrebbero essere stilizzati
+   principalmente tramite classi Tailwind nel loro markup Blade e,
+   se necessario, con stili specifici e non conflittuali qui o in app.css.
+*/
+
+/* Esempio: Header (se vuoi uno stile base non gestito solo da Tailwind)
+   Ora che il body è scuro, l'header potrebbe essere anch'esso scuro o
+   di un colore leggermente diverso per staccare.
+*/
+/* header {
+    background-color: theme('colors.gray.800'); /* Esempio usando un colore Tailwind */
+    /* border-bottom: 1px solid theme('colors.gray.700'); */
+/* } */
+
+
+/* Hero Section (lo sfondo base sarà applicato via Tailwind o CSS su #hero-section in guest.blade.php) */
+#hero-section {
+    /* min-height: auto !important; */ /* Rimosso, Tailwind min-h-screen è più flessibile */
+    /* padding: 4rem 0 !important; */ /* Gestire con utility Tailwind px-*, py-* nel Blade */
+    /* justify-content: flex-start; */ /* Se necessario, applicare classi flexbox Tailwind */
+}
+
+/* Animazione bounce per icona scroll-down (mantenuta) */
+.animate-bounce-slow {
+    animation: bounce 1.5s infinite;
+}
+
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0) translateX(-50%);
+    }
+    50% {
+        transform: translateY(-10px) translateX(-50%);
+    }
+}
+
+
+/* Gestione 'prefers-reduced-motion' (MOLTO IMPORTANTE per accessibilità) */
+/* Questa regola dovrebbe essere globale, magari in app.css se non già presente */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+        /* Rimuovi o riduci animazioni complesse qui */
+    }
+
+    /* Esempi specifici dal tuo guest.css precedente, ora generalizzati */
+    .nft-rotating-border, .nft-animated-border, .nft-badge-shine,
+    .nft-pulsing-border, .nft-pulse, .nft-3d-float, .nft-text-glow,
+    .nft-shimmering-text, .animate-bounce-slow, .nft-hover-float:hover,
+    .nft-hover-tilt:hover {
+        animation: none !important;
+        transform: none !important; /* Potrebbe essere troppo aggressivo, valutare */
+        /* transition: none !important; */ /* Già coperto da * */
+        /* filter: none !important; */ /* Potrebbe essere troppo aggressivo */
+    }
+}
+
+/* Stili specifici per il layout delle sezioni che erano in guest.css */
+/* È meglio gestire questi con classi Tailwind direttamente nel markup Blade,
+   ma li lascio qui commentati come riferimento se servono aggiustamenti fini. */
+
+/*
+.md\:grid-cols-12 { ... }
+.md\:col-span-3 { ... }
+.md\:col-span-6, .lg\:col-span-6 { ... }
+
+@media (max-width: 768px) {
+    .md\:grid-cols-12 { grid-template-columns: 1fr; }
+    .md\:col-span-3, .md\:col-span-6, .md\:col-span-12, .lg\:col-span-6 { grid-column: span 1 / span 1; }
+    section { margin-bottom: 2rem; }
+}
+
+.below-hero-content {
+    margin: 0 auto;
+    width: 95%;
+    padding: 0 1rem;
+}
+
+.collection-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.section-title {
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem; /* Usa utility Tailwind: text-2xl o text-3xl */
+    /* font-weight: 600; */ /* Usa utility Tailwind: font-semibold */
+    /* color: #111827; */ /* Usa utility Tailwind: text-gray-100 o text-white per tema scuro */
+/* }
+
+section {
+    padding: 3rem 0; /* Usa utility Tailwind: py-12 */
+    /* margin-bottom: 1rem; */ /* Usa utility Tailwind: mb-4 */
+/* } */
+
+/*
+section:nth-child(even) {
+    /* Per un tema scuro, potresti alternare con un grigio leggermente diverso, es. bg-gray-800 */
+    /* background-color: theme('colors.gray.800'); */
+/* }
+*/
+
+/* ... e così via per .stats-container, .stat-card ... */

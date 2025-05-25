@@ -5,19 +5,20 @@ return [
     'hero_right_content_aria_label' => 'Contenuto impatto personale',
 
     // Meta e titoli
-    'default_title' => 'FlorenceEGI | Frangette - Ecological Goods Invent',
+    'default_title' => 'FlorenceEGI | EGI - Ecological Goods Invent',
     'default_description' => 'Esplora, crea e colleziona asset digitali ecologici (EGI) unici su FlorenceEGI. Ogni opera supporta progetti concreti di protezione ambientale. Unisciti al Rinascimento Digitale dell\'arte e della sostenibilità.',
 
     // Schema.org
-    'schema_website_name' => 'FlorenceEGI | Frangette',
+    'schema_website_name' => 'FlorenceEGI | EGI',
     'schema_website_description' => 'Piattaforma per la creazione e lo scambio di Ecological Goods Invent (EGI) che finanziano progetti ambientali.',
     'schema_organization_name' => 'Frangette Associazione Promozione Culturale',
 
     // Header/Navbar
     'header_aria_label' => 'Intestazione del sito',
-    'logo_aria_label' => 'Vai alla Homepage di Frangette',
-    'logo_alt_text' => 'Logo piattaforma Frangette',
-    'brand_name' => 'Frangette',
+    'logo_aria_label' => 'Vai alla Homepage di Florence EGI',
+    'logo_alt_text' => 'Logo piattaforma Florence EGI',
+    'brand_name' => 'Florence EGI',
+    'navbar_brand_name' => 'Florence EGI Nuovo Rinascimento Digitale',
     'desktop_nav_aria_label' => 'Navigazione principale desktop',
 
     // Navigation items
@@ -154,4 +155,72 @@ return [
     'wallet_existing_connection' => 'Wallet connesso con successo',
     'wallet_new_connection' => 'Nuovo wallet registrato con successo',
     'wallet_disconnected_successfully' => 'Wallet disconnesso correttamente',
+
+    // Meta e Titoli di Default
+    'default_title' => 'FlorenceEGI',
+    'default_description' => 'FlorenceEGI: il marketplace dove l\'arte digitale incontra la sostenibilità e il valore condiviso.',
+    'schema_website_name' => 'FlorenceEGI',
+    'schema_website_description' => 'Piattaforma per arte digitale con impatto ambientale e un modello economico virtuoso.',
+    'schema_organization_name' => 'Frangette APS', // O FlorenceEGI SRL se più appropriato per publisher
+
+    // Header e Navigazione
+    'header_aria_label' => 'Menu di navigazione principale',
+    'logo_aria_label' => 'Homepage di FlorenceEGI',
+    'navbar_brand_name' => 'FlorenceEGI', // O vuoto se vuoi solo il logo
+    'desktop_nav_aria_label' => 'Navigazione desktop',
+    'my_galleries' => 'Le Mie Gallerie',
+    'my_galleries_dropdown_aria_label' => 'Apri menu Le Mie Gallerie',
+    'loading_galleries' => 'Caricamento gallerie...',
+    'no_galleries_found' => 'Nessuna galleria trovata.',
+    'create_one_question' => 'Creane una?',
+    'error_loading_galleries' => 'Errore nel caricamento delle gallerie.',
+    'current_collection_badge_aria_label' => 'Collezione attualmente selezionata',
+    'connect_wallet' => 'Connetti Wallet',
+    'connect_wallet_aria_label' => 'Connetti il tuo wallet crypto',
+    'wallet' => 'Wallet', // Testo breve per bottone wallet connesso
+    'dashboard' => 'Dashboard',
+    'dashboard_link_aria_label' => 'Vai alla tua dashboard',
+    'copy_address' => 'Copia Indirizzo',
+    'copy_wallet_address_aria_label' => 'Copia l\'indirizzo del tuo wallet',
+    'disconnect' => 'Disconnetti',
+    'disconnect_wallet_aria_label' => 'Disconnetti il tuo wallet',
+    'login' => 'Accedi',
+    'login_link_aria_label' => 'Accedi al tuo account',
+    'register' => 'Registrati',
+    'register_link_aria_label' => 'Crea un nuovo account',
+    'toggle_mobile_menu_aria_label' => 'Apri/Chiudi menu mobile',
+    'open_mobile_menu_sr' => 'Apri menu di navigazione', // Solo per screen reader
+    'mobile_nav_aria_label' => 'Navigazione mobile',
+    'mobile_connect_wallet_aria_label' => 'Connetti il tuo wallet crypto (mobile)',
+    'mobile_login_link_aria_label' => 'Accedi (mobile)',
+    'mobile_register_link_aria_label' => 'Registrati (mobile)',
+
+    // Hero Section (testi generici del layout, se presenti)
+    'hero_left_content_aria_label' => 'Contenuto informativo sinistro della sezione hero',
+    'hero_right_content_aria_label' => 'Contenuto informativo destro della sezione hero',
+    'hero_carousel_aria_label' => 'Carosello collezioni in evidenza',
+    'hero_left_content_tablet_aria_label' => 'Contenuto informativo sinistro (tablet)',
+    'hero_right_content_tablet_aria_label' => 'Contenuto informativo destro (tablet)',
+    'hero_featured_content_aria_label' => 'Contenuto in evidenza sotto l\'hero',
+    'scroll_down_aria_label' => 'Scorri verso il basso',
+
+    // Sezione Attori (se i titoli fossero nel layout e non nel componente x-actors-section)
+    // Ho messo le chiavi per titolo/sottotitolo sezione in guest_home, ma se fossero più generiche, andrebbero qui.
+    // Per ora, le chiavi delle singole card attore sono in guest_home.php.
+    // Se decidi di avere un titolo/sottotitolo fisso per la <x-actors-section> quando è nel layout:
+    'actors_section_title' => 'Unisciti all\'Ecosistema FlorenceEGI',
+    'actors_section_subtitle' => 'Scopri come puoi partecipare e beneficiare del nostro modello di valore condiviso.',
+
+    // Footer
+    'footer_sr_heading' => 'Informazioni aggiuntive e link utili', // Solo per screen reader
+    'copyright_holder' => 'FlorenceEGI', // O Frangette APS / FlorenceEGI SRL
+    'all_rights_reserved' => 'Tutti i diritti riservati.',
+    'algorand_blue_mission' => 'Missione Algorand Blue Partner', // O simile
+
+    // Modali
+    'close_upload_modal_aria_label' => 'Chiudi modale di caricamento',
+    'logout_sr_button' => 'Esci dall\'account', // Solo per screen reader
+
+    // Environmental Stats (se la stringa "Total plastic recovered" è generica del layout)
+    'total_plastic_recovered' => 'Totale Plastica Recuperata', // Esempio per environmental-stats format="footer"
 ];

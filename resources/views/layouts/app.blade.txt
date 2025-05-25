@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
+
+        {{--
+            @oracode-dimension technical
+            @value-flow Core layout infrastructure - distributes UI value across all platform pages
+            @community-impact Primary navigation and accessibility foundation for all users
+            @transparency-level Full structural transparency - semantic HTML5 landmarks
+            @sustainability-factor High reuse efficiency - single layout serves entire platform
+            @narrative-coherence Embodies FlorenceEGI's commitment to accessible, dignified user experience
+        --}}
+
+        {{-- Oracode 3.0: SEO & Metadata (Pillar #1 - Explicitly Intentional) --}}
+        <title>{{ isset($pageTitle) ? $pageTitle . ' - ' . config('app.name') : config('app.name', 'FlorenceEGI') }}</title>
+        <meta name="description" content="{{ $pageDescription ?? 'FlorenceEGI - Digital Renaissance Platform for Ecological, Goods & Inventive Projects. Transparent marketplace bridging Web2 to Web3 with dignity and sustainability.' }}">
+        <meta name="robots" content="{{ $robotsContent ?? 'index, follow' }}">
+        <meta name="author" content="FlorenceEGI">
+
+        {{-- Open Graph / Social Media Meta Tags --}}
+        <meta property="og:type" content="{{ $ogType ?? 'website' }}">
+        <meta property="og:title" content="{{ isset($pageTitle) ? $pageTitle . ' - ' . config('app.name') : config('app.name') }}">
+        <meta property="og:description" content="{{ $pageDescription ?? 'Digital Renaissance Platform for sustainable innovation' }}">
+        <meta property="og:url" content="{{ url()->current() }}">
+        <meta property="og:site_name" content="{{ config('app.name') }}">
+        @if(isset($ogImage))
+            <meta property="og:image" content="{{ $ogImage }}">
+        @endif
+
+        {{-- Twitter Card Meta Tags --}}
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="{{ isset($pageTitle) ? $pageTitle . ' - ' . config('app.name') : config('app.name') }}">
+        <meta name="twitter:description" content="{{ $pageDescription ?? 'Digital Renaissance Platform for sustainable innovation' }}">
+
+        {{-- Fonts (Performance Optimized) --}}
+        <link rel="preconnect" href="https://fonts.bunny.net">
+        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet">
+
+        {{-- Icon Libraries --}}
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+
+        {{-- Flag Icons for Internationalization --}}
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@6.6.6/css/flag-icons.min.css">
+
+        {{-- Application Assets --}}
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+        {{-- Oracode 3.0: Allow child views to inject custom styles (Pillar #5 - Predisposed to Variation) --}}
+        @stack('styles')
+
+        {{-- Livewire Styles --}}
+        @livewireStyles
+
+        {{-- Schema.org Structured Data (Pillar #2 - Semantically Coherent) --}}
+        @if(isset($schemaData))
+            <script type="application/ld+json">
+                {!! json_encode($schemaData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) !!}
+            </script>
+        @else
+            <script type="application/ld+json">
+                {
+                    "@context": "https://schema.org",
+                    "@type": "WebApplication",
+                    "name": "{{ config('app.name') }}",
+                    "description": "Digital Renaissance Platform for Ecological, Goods & Inventive Projects",
+                    "url": "{{ config('app.url') }}",
+                    "applicationCategory": "BusinessApplication",
+                    "operatingSystem": "Web Browser",
+                    "offers": {
+                        "@type": "Offer",
+                        "price": "0",
+                        "priceCurrency": "EUR"
+                    }
+                }
+            </script>
+        @endif
+    </head>
+
+    {{--
+        Oracode 3.0: Semantic HTML Structure (Pillar #2 - Semantically Coherent)
+        Using proper HTML5 landmarks for accessibility (Pillar #4 - Interpretable by Assistive Tech)
+    --}}
+    <body class="font-sans antialiased bg-base-200" itemscope itemtype="https://schema.org/WebPage">
+        {{-- Skip to main content for accessibility (WCAG 2.1) --}}
+        <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-content focus:rounded-md">
+            Skip to main content
+        </a>
+
+        {{--
+            Main Application Container
+            Oracode 3.0: Maintains existing drawer structure for backward compatibility
+        --}}
+        <div class="drawer lg:drawer-open" role="application" aria-label="FlorenceEGI Application Interface">
+            {{-- Drawer toggle checkbox (DaisyUI pattern) --}}
+            <input id="main-drawer" type="checkbox" class="drawer-toggle" aria-label="Toggle navigation menu">
+
+            {{-- Main Content Area --}}
+            <div class="flex flex-col min-h-screen drawer-content">
+                {{-- Navigation Header --}}
+                <header role="banner" aria-label="Main navigation">
+                    <livewire:navigation-menu />
+                </header>
+
+                {{-- Page Header Section (Optional) --}}
+                @if (isset($header))
+                    <section class="shadow bg-base-100" role="complementary" aria-label="Page header">
+                        <div class="px-4 py-6 mx-auto max-w-7xl sm:px-6 lg:px-8">
+                            {{ $header }}
+                        </div>
+                    </section>
+                @endif
+
+                {{--
+                    Main Content Area
+                    Oracode 3.0: Semantic main landmark with proper ARIA labeling
+                --}}
+                <main id="main-content" class="flex-1 p-4 lg:p-8" role="main" aria-label="Main content" tabindex="-1">
+                    {{--
+                        Content Slot - All page content goes here
+                        Oracode 3.0: Preserves existing slot mechanism for backward compatibility
+                    --}}
+                    {{ $slot }}
+                </main>
+            </div>
+
+            {{--
+                Navigation Sidebar
+                Oracode 3.0: Semantic navigation landmark (DaisyUI drawer structure preserved)
+            --}}
+            <livewire:sidebar />
+
+            {{-- Modal Stack (for Livewire/Alpine modals) --}}
+            @stack('modals')
+
+            {{-- Development Debug Info (Local Environment Only) --}}
+            @if(app()->environment('local'))
+                <aside role="complementary" aria-label="Debug information" class="debug-info">
+                    {!! $debugInfo ?? '' !!}
+                </aside>
+            @endif
+        </div>
+
+        {{--
+            Application Configuration
+            Oracode 3.0: Contextually autonomous - provides necessary config to client-side
+        --}}
+        <script>
+            // Global app configuration for client-side scripts
+            window.appConfig = @json(config('app'));
+
+            // Accessibility enhancement: Focus management
+            document.addEventListener('DOMContentLoaded', function() {
+                // Enhance keyboard navigation
+                const skipLink = document.querySelector('a[href="#main-content"]');
+                if (skipLink) {
+                    skipLink.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const mainContent = document.getElementById('main-content');
+                        if (mainContent) {
+                            mainContent.focus();
+                        }
+                    });
+                }
+            });
+        </script>
+
+        {{-- Oracode 3.0: Allow child views to inject custom scripts --}}
+        @stack('scripts')
+
+        {{-- Livewire Scripts --}}
+        @livewireScripts
+    </body>
+</html>

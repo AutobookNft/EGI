@@ -1,0 +1,524 @@
+<?php
+// resources/lang/it/gdpr.php
+
+return [
+    /*
+    |--------------------------------------------------------------------------
+    | Linee di Lingua GDPR
+    |--------------------------------------------------------------------------
+    |
+    | Le seguenti linee di lingua sono utilizzate per funzionalità relative al GDPR.
+    |
+    */
+
+    // Generale
+    'gdpr' => 'GDPR',
+    'gdpr_center' => 'Centro di Controllo Dati GDPR',
+    'dashboard' => 'Bacheca',
+    'back_to_dashboard' => 'Torna alla Bacheca',
+    'save' => 'Salva',
+    'submit' => 'Invia',
+    'cancel' => 'Annulla',
+    'continue' => 'Continua',
+    'loading' => 'Caricamento...',
+    'success' => 'Successo',
+    'error' => 'Errore',
+    'warning' => 'Avviso',
+    'info' => 'Informazioni',
+    'enabled' => 'Abilitato',
+    'disabled' => 'Disabilitato',
+    'active' => 'Attivo',
+    'inactive' => 'Inattivo',
+    'pending' => 'In attesa',
+    'completed' => 'Completato',
+    'failed' => 'Fallito',
+    'processing' => 'In elaborazione',
+    'retry' => 'Riprova',
+    'required_field' => 'Campo obbligatorio',
+    'required_consent' => 'Consenso obbligatorio',
+    'select_all_categories' => 'Seleziona tutte le categorie',
+    'no_categories_selected' => 'Nessuna categoria selezionata',
+    'compliance_badge' => 'Distintivo di conformità',
+
+    // Breadcrumb
+    'breadcrumb' => [
+        'dashboard' => 'Bacheca',
+        'gdpr' => 'Privacy e GDPR',
+    ],
+
+    // Messaggi di Allerta
+    'alerts' => [
+        'success' => 'Operazione completata!',
+        'error' => 'Errore:',
+        'warning' => 'Avviso:',
+        'info' => 'Informazioni:',
+    ],
+
+    // Elementi del Menu
+    'menu' => [
+        'gdpr_center' => 'Centro di Controllo Dati GDPR',
+        'consent_management' => 'Gestione dei Consensi',
+        'data_export' => 'Esporta i Miei Dati',
+        'processing_restrictions' => 'Limita l\'Elaborazione dei Dati',
+        'delete_account' => 'Elimina il Mio Account',
+        'breach_report' => 'Segnala una Violazione dei Dati',
+        'activity_log' => 'Registro delle Mie Attività GDPR',
+        'privacy_policy' => 'Informativa sulla Privacy',
+    ],
+
+    // Gestione dei Consensi
+    'consent' => [
+        'title' => 'Gestisci le Tue Preferenze di Consenso',
+        'description' => 'Controlla come vengono utilizzati i tuoi dati all\'interno della nostra piattaforma. Puoi aggiornare le tue preferenze in qualsiasi momento.',
+        'update_success' => 'Le tue preferenze di consenso sono state aggiornate.',
+        'update_error' => 'Si è verificato un errore durante l\'aggiornamento delle tue preferenze di consenso. Riprova.',
+        'save_all' => 'Salva Tutte le Preferenze',
+        'last_updated' => 'Ultimo aggiornamento:',
+        'never_updated' => 'Mai aggiornato',
+        'privacy_notice' => 'Informativa sulla Privacy',
+        'not_given' => 'Non Fornito',
+        'given_at' => 'Fornito il',
+        'your_consents' => 'I Tuoi Consensi',
+        'subtitle' => 'Gestisci le tue preferenze sulla privacy e visualizza lo stato dei tuoi consensi.',
+        'breadcrumb' => 'Consensi',
+        'history_title' => 'Cronologia dei Consensi',
+        'back_to_consents' => 'Torna ai Consensi',
+        'preferences_title' => 'Gestione Preferenze Consensi',
+        'preferences_subtitle' => 'Configura le tue preferenze di privacy dettagliate',
+        'preferences_breadcrumb' => 'Preferenze',
+        'preferences_info_title' => 'Gestione Granulare dei Consensi',
+        'preferences_info_description' => 'Qui puoi configurare in dettaglio ogni tipo di consenso...',
+        'required' => 'Obbligatorio',
+        'optional' => 'Opzionale',
+        'toggle_label' => 'Attiva/Disattiva',
+        'always_enabled' => 'Sempre Attivo',
+        'benefits_title' => 'Vantaggi per Te',
+        'consequences_title' => 'Se Disattivi',
+        'third_parties_title' => 'Servizi Terzi',
+        'save_preferences' => 'Salva Preferenze',
+        'back_to_overview' => 'Torna alla Panoramica',
+        'never_updated' => 'Mai aggiornato',
+
+        // Dettagli del Consenso
+        'given_at' => 'Fornito il',
+        'withdrawn_at' => 'Revocato il',
+        'not_given' => 'Non fornito',
+        'method' => 'Metodo',
+        'version' => 'Versione',
+        'unknown_version' => 'Versione sconosciuta',
+
+        // Azioni
+        'withdraw' => 'Revoca il Consenso',
+        'withdraw_confirm' => 'Sei sicuro di voler revocare questo consenso? Questa azione potrebbe limitare alcune funzionalità.',
+        'renew' => 'Rinnova il Consenso',
+        'view_history' => 'Visualizza Cronologia',
+
+        // Stati Vuoti
+        'no_consents' => 'Nessun Consenso Presente',
+        'no_consents_description' => 'Non hai ancora fornito alcun consenso per l\'elaborazione dei dati. Puoi gestire le tue preferenze utilizzando il pulsante qui sotto.',
+
+        // Gestione Preferenze
+        'manage_preferences' => 'Gestisci le Tue Preferenze',
+        'update_preferences' => 'Aggiorna le Preferenze sulla Privacy',
+
+        // Dashboard di Riepilogo
+        'summary' => [
+            'active' => 'Consensi Attivi',
+            'total' => 'Consensi Totali',
+            'compliance' => 'Punteggio di Conformità',
+        ],
+
+        // Metodi di Consenso
+        'methods' => [
+            'web' => 'Interfaccia Web',
+            'api' => 'API',
+            'import' => 'Importazione',
+            'admin' => 'Amministratore',
+        ],
+
+        // Scopi del Consenso
+        'purposes' => [
+            'functional' => 'Consensi Funzionali',
+            'analytics' => 'Consensi Analitici',
+            'marketing' => 'Consensi di Marketing',
+            'profiling' => 'Consensi di Profilazione',
+        ],
+
+        // Descrizioni dei Consensi
+        'descriptions' => [
+            'functional' => 'Necessari per il funzionamento di base della piattaforma e per fornire i servizi richiesti.',
+            'analytics' => 'Utilizzati per analizzare l\'uso del sito e migliorare l\'esperienza utente.',
+            'marketing' => 'Utilizzati per inviarti comunicazioni promozionali e offerte personalizzate.',
+            'profiling' => 'Utilizzati per creare profili personalizzati e suggerire contenuti pertinenti.',
+        ],
+
+        // Stato del Consenso
+        'status' => [
+            'granted' => 'Concesso',
+            'denied' => 'Negato',
+            'active' => 'Attivo',
+            'withdrawn' => 'Revocato',
+            'expired' => 'Scaduto',
+        ],
+
+        'essential' => [
+            'label' => 'Cookie Essenziali',
+            'description' => 'Questi cookie sono necessari per il funzionamento del sito web e non possono essere disattivati nei nostri sistemi.',
+        ],
+        'functional' => [
+            'label' => 'Cookie Funzionali',
+            'description' => 'Questi cookie consentono al sito web di fornire funzionalità avanzate e personalizzazione.',
+        ],
+        'analytics' => [
+            'label' => 'Cookie Analitici',
+            'description' => 'Questi cookie ci permettono di contare le visite e le fonti di traffico per misurare e migliorare le prestazioni del nostro sito.',
+        ],
+        'marketing' => [
+            'label' => 'Cookie di Marketing',
+            'description' => 'Questi cookie possono essere impostati tramite il nostro sito dai nostri partner pubblicitari per creare un profilo dei tuoi interessi.',
+        ],
+        'profiling' => [
+            'label' => 'Profilazione',
+            'description' => 'Utilizziamo la profilazione per comprendere meglio le tue preferenze e personalizzare i nostri servizi in base alle tue esigenze.',
+        ],
+        'saving_consent' => 'Salvataggio...',
+        'consent_saved' => 'Salvato',
+        'saving_all_consents' => 'Salvataggio di tutte le preferenze...',
+        'all_consents_saved' => 'Tutte le preferenze di consenso sono state salvate con successo.',
+        'all_consents_save_error' => 'Si è verificato un errore nel salvare tutte le preferenze di consenso.',
+        'consent_save_error' => 'Si è verificato un errore nel salvare questa preferenza di consenso.',
+
+        // Processing Purposes (Scopi del Trattamento)
+        'processing_purposes' => [
+            'functional' => 'Operazioni essenziali della piattaforma: autenticazione, sicurezza, erogazione servizi, memorizzazione preferenze utente',
+            'analytics' => 'Miglioramento della piattaforma: analisi utilizzo, monitoraggio performance, ottimizzazione esperienza utente',
+            'marketing' => 'Comunicazione: newsletter, aggiornamenti prodotto, offerte promozionali, notifiche eventi',
+            'profiling' => 'Personalizzazione: raccomandazioni contenuti, analisi comportamento utente, suggerimenti mirati',
+        ],
+
+        // Retention Periods (Periodi di Conservazione)
+        'retention_periods' => [
+            'functional' => 'Durata dell\'account + 1 anno per conformità legale',
+            'analytics' => '2 anni dall\'ultima attività',
+            'marketing' => '3 anni dall\'ultima interazione o revoca consenso',
+            'profiling' => '1 anno dall\'ultima attività o revoca consenso',
+        ],
+
+        // User Benefits (Vantaggi Utente)
+        'user_benefits' => [
+            'functional' => [
+                'Accesso sicuro al tuo account',
+                'Impostazioni utente personalizzate',
+                'Performance affidabile della piattaforma',
+                'Protezione contro frodi e abusi',
+            ],
+            'analytics' => [
+                'Performance migliorata della piattaforma',
+                'Design esperienza utente ottimizzato',
+                'Tempi di caricamento più veloci',
+                'Sviluppo funzionalità potenziate',
+            ],
+            'marketing' => [
+                'Aggiornamenti prodotto pertinenti',
+                'Offerte e promozioni esclusive',
+                'Inviti eventi e annunci',
+                'Contenuti educativi e suggerimenti',
+            ],
+            'profiling' => [
+                'Raccomandazioni contenuti personalizzate',
+                'Esperienza utente su misura',
+                'Suggerimenti progetti rilevanti',
+                'Dashboard e funzionalità personalizzate',
+            ],
+        ],
+
+        // Third Parties (Servizi Terzi)
+        'third_parties' => [
+            'functional' => [
+                'Fornitori CDN (distribuzione contenuti statici)',
+                'Servizi sicurezza (prevenzione frodi)',
+                'Fornitori infrastruttura (hosting)',
+            ],
+            'analytics' => [
+                'Piattaforme analytics (dati utilizzo anonimizzati)',
+                'Servizi monitoraggio performance',
+                'Servizi tracking errori',
+            ],
+            'marketing' => [
+                'Fornitori servizi email',
+                'Piattaforme automazione marketing',
+                'Piattaforme social media (per pubblicità)',
+            ],
+            'profiling' => [
+                'Motori raccomandazione',
+                'Servizi analisi comportamentale',
+                'Piattaforme personalizzazione contenuti',
+            ],
+        ],
+
+        // Withdrawal Consequences (Conseguenze Revoca)
+        'withdrawal_consequences' => [
+            'functional' => [
+                'Non può essere revocato - essenziale per funzionamento piattaforma',
+                'L\'accesso all\'account verrebbe compromesso',
+                'Le funzionalità di sicurezza verrebbero disabilitate',
+            ],
+            'analytics' => [
+                'I miglioramenti della piattaforma potrebbero non riflettere i tuoi pattern di utilizzo',
+                'Esperienza generica invece di performance ottimizzata',
+                'Nessun impatto sulle funzionalità core',
+            ],
+            'marketing' => [
+                'Nessuna email promozionale o aggiornamento',
+                'Potresti perdere annunci importanti',
+                'Nessun impatto sulla funzionalità della piattaforma',
+                'Può essere riattivato in qualsiasi momento',
+            ],
+            'profiling' => [
+                'Contenuti generici invece di raccomandazioni personalizzate',
+                'Layout dashboard standard',
+                'Suggerimenti progetti meno rilevanti',
+                'Nessun impatto sulle funzionalità core della piattaforma',
+            ],
+        ],
+    ],
+
+    // Esportazione dei Dati
+    'export' => [
+        'title' => 'Esporta i Tuoi Dati',
+        'description' => 'Richiedi una copia dei tuoi dati personali. L\'elaborazione potrebbe richiedere alcuni minuti.',
+        'request_button' => 'Richiedi Esportazione Dati',
+        'format' => 'Formato di Esportazione',
+        'format_json' => 'JSON (consigliato per sviluppatori)',
+        'format_csv' => 'CSV (compatibile con fogli di calcolo)',
+        'format_pdf' => 'PDF (documento leggibile)',
+        'include_metadata' => 'Includi metadati',
+        'include_timestamps' => 'Includi timestamp',
+        'password_protection' => 'Proteggi l\'esportazione con password',
+        'password' => 'Password di esportazione',
+        'confirm_password' => 'Conferma password',
+        'data_categories' => 'Categorie di dati da esportare',
+        'request_success' => 'La tua richiesta di esportazione dati è stata inviata.',
+        'request_error' => 'Si è verificato un errore nella richiesta di esportazione dati. Riprova.',
+        'recent_exports' => 'Esportazioni Recenti',
+        'no_recent_exports' => 'Non hai esportazioni recenti.',
+        'export_status' => 'Stato Esportazione',
+        'export_date' => 'Data Esportazione',
+        'export_size' => 'Dimensione Esportazione',
+        'export_id' => 'ID Esportazione',
+        'download' => 'Scarica',
+        'download_export' => 'Scarica Esportazione',
+        'export_preparing' => 'Preparazione della tua esportazione dati...',
+        'export_queued' => 'La tua esportazione è in coda e inizierà presto...',
+        'export_processing' => 'Elaborazione della tua esportazione dati...',
+        'export_ready' => 'La tua esportazione dati è pronta per il download.',
+        'export_failed' => 'La tua esportazione dati è fallita.',
+        'export_failed_details' => 'Si è verificato un errore durante l\'elaborazione della tua esportazione dati. Riprova o contatta il supporto.',
+        'export_unknown_status' => 'Stato dell\'esportazione sconosciuto.',
+        'check_status' => 'Controlla Stato',
+        'retry_export' => 'Riprova Esportazione',
+        'export_download_error' => 'Si è verificato un errore durante il download della tua esportazione.',
+        'export_status_error' => 'Errore durante il controllo dello stato dell\'esportazione.',
+        'categories' => [
+            'profile' => 'Informazioni sul Profilo',
+            'account' => 'Dettagli Account',
+            'preferences' => 'Preferenze e Impostazioni',
+            'activity' => 'Cronologia Attività',
+            'consents' => 'Cronologia Consensi',
+            'collections' => 'Collezioni e Contenuti',
+            'purchases' => 'Acquisti e Transazioni',
+            'comments' => 'Commenti e Recensioni',
+            'messages' => 'Messaggi e Comunicazioni',
+        ],
+        'limit_reached' => 'Hai raggiunto il numero massimo di esportazioni consentite al giorno.',
+        'existing_in_progress' => 'Hai già un\'esportazione in corso. Attendi che sia completata.',
+    ],
+
+    // Restrizioni di Elaborazione
+    'restriction' => [
+        'title' => 'Limita l\'Elaborazione dei Dati',
+        'description' => 'Puoi richiedere di limitare il modo in cui elaboriamo i tuoi dati in determinate circostanze.',
+        'active_restrictions' => 'Restrizioni Attive',
+        'no_active_restrictions' => 'Non hai restrizioni di elaborazione attive.',
+        'request_new' => 'Richiedi Nuova Restrizione',
+        'restriction_type' => 'Tipo di Restrizione',
+        'restriction_reason' => 'Motivo della Restrizione',
+        'data_categories' => 'Categorie di Dati',
+        'notes' => 'Note Aggiuntive',
+        'notes_placeholder' => 'Fornisci eventuali dettagli aggiuntivi per aiutarci a comprendere la tua richiesta...',
+        'submit_button' => 'Invia Richiesta di Restrizione',
+        'remove_button' => 'Rimuovi Restrizione',
+        'processing_restriction_success' => 'La tua richiesta di restrizione di elaborazione è stata inviata.',
+        'processing_restriction_failed' => 'Si è verificato un errore nell\'invio della tua richiesta di restrizione di elaborazione.',
+        'processing_restriction_system_error' => 'Si è verificato un errore di sistema durante l\'elaborazione della tua richiesta.',
+        'processing_restriction_removed' => 'La restrizione di elaborazione è stata rimossa.',
+        'processing_restriction_removal_failed' => 'Si è verificato un errore nella rimozione della restrizione di elaborazione.',
+        'unauthorized_action' => 'Non sei autorizzato a eseguire questa azione.',
+        'date_submitted' => 'Data di Invio',
+        'expiry_date' => 'Scade il',
+        'never_expires' => 'Mai Scade',
+        'status' => 'Stato',
+        'limit_reached' => 'Hai raggiunto il numero massimo di restrizioni attive consentite.',
+        'categories' => [
+            'profile' => 'Informazioni sul Profilo',
+            'activity' => 'Tracciamento Attività',
+            'preferences' => 'Preferenze e Impostazioni',
+            'collections' => 'Collezioni e Contenuti',
+            'purchases' => 'Acquisti e Transazioni',
+            'comments' => 'Commenti e Recensioni',
+            'messages' => 'Messaggi e Comunicazioni',
+        ],
+        'types' => [
+            'restrict_processing' => 'Limita Tutta l\'Elaborazione',
+            'restrict_automated_decisions' => 'Limita le Decisioni Automatizzate',
+            'restrict_marketing' => 'Limita l\'Elaborazione di Marketing',
+            'restrict_analytics' => 'Limita l\'Elaborazione Analitica',
+            'restrict_third_party' => 'Limita la Condivisione con Terze Parti',
+        ],
+        'reasons' => [
+            'accuracy_dispute' => 'Contesto l\'accuratezza dei miei dati',
+            'processing_unlawful' => 'L\'elaborazione è illecita',
+            'no_longer_needed' => 'Non hai più bisogno dei miei dati, ma io ne ho bisogno per rivendicazioni legali',
+            'objection_pending' => 'Ho obiettato all\'elaborazione e sono in attesa di verifica',
+            'legitimate_interest' => 'Motivi legittimi impellenti',
+            'other' => 'Altro motivo (specificare nelle note)',
+        ],
+    ],
+
+    // Eliminazione Account
+    'deletion' => [
+        'title' => 'Elimina il Mio Account',
+        'description' => 'Questo avvierà il processo per eliminare il tuo account e tutti i dati associati.',
+        'warning' => 'Attenzione: L\'eliminazione dell\'account è permanente e non può essere annullata.',
+        'processing_delay' => 'Il tuo account sarà programmato per l\'eliminazione tra :days giorni.',
+        'confirm_deletion' => 'Comprendo che questa azione è permanente e non può essere annullata.',
+        'password_confirmation' => 'Inserisci la tua password per confermare',
+        'reason' => 'Motivo dell\'eliminazione (facoltativo)',
+        'additional_comments' => 'Commenti aggiuntivi (facoltativi)',
+        'submit_button' => 'Richiedi Eliminazione Account',
+        'request_submitted' => 'La tua richiesta di eliminazione account è stata inviata.',
+        'request_error' => 'Si è verificato un errore nell\'invio della tua richiesta di eliminazione account.',
+        'pending_deletion' => 'Il tuo account è programmato per l\'eliminazione il :date.',
+        'cancel_deletion' => 'Annulla Richiesta di Eliminazione',
+        'cancellation_success' => 'La tua richiesta di eliminazione account è stata annullata.',
+        'cancellation_error' => 'Si è verificato un errore nell\'annullamento della tua richiesta di eliminazione account.',
+        'reasons' => [
+            'no_longer_needed' => 'Non ho più bisogno di questo servizio',
+            'privacy_concerns' => 'Preoccupazioni sulla privacy',
+            'moving_to_competitor' => 'Passaggio a un altro servizio',
+            'unhappy_with_service' => 'Insoddisfatto del servizio',
+            'other' => 'Altro motivo',
+        ],
+        'confirmation_email' => [
+            'subject' => 'Conferma Richiesta di Eliminazione Account',
+            'line1' => 'Abbiamo ricevuto la tua richiesta di eliminazione del tuo account.',
+            'line2' => 'Il tuo account è programmato per l\'eliminazione il :date.',
+            'line3' => 'Se non hai richiesto questa azione, contattaci immediatamente.',
+        ],
+        'data_retention_notice' => 'Nota che alcuni dati anonimizzati potrebbero essere conservati per scopi legali e analitici.',
+        'blockchain_data_notice' => 'I dati memorizzati su blockchain non possono essere completamente eliminati a causa della natura immutabile della tecnologia.',
+    ],
+
+    // Segnalazione Violazione
+    'breach' => [
+        'title' => 'Segnala una Violazione dei Dati',
+        'description' => 'Se ritieni che ci sia stata una violazione dei tuoi dati personali, segnalala qui.',
+        'reporter_name' => 'Il Tuo Nome',
+        'reporter_email' => 'La Tua Email',
+        'incident_date' => 'Quando si è verificato l\'incidente?',
+        'breach_description' => 'Descrivi la potenziale violazione',
+        'breach_description_placeholder' => 'Fornisci il maggior numero di dettagli possibile sulla potenziale violazione dei dati...',
+        'affected_data' => 'Quali dati ritieni siano stati compromessi?',
+        'affected_data_placeholder' => 'Ad esempio, informazioni personali, dati finanziari, ecc.',
+        'discovery_method' => 'Come hai scoperto questa potenziale violazione?',
+        'supporting_evidence' => 'Prove a Supporto (facoltativo)',
+        'upload_evidence' => 'Carica Prove',
+        'file_types' => 'Tipi di file accettati: PDF, JPG, JPEG, PNG, TXT, DOC, DOCX',
+        'max_file_size' => 'Dimensione massima del file: 10MB',
+        'consent_to_contact' => 'Acconsento a essere contattato in merito a questa segnalazione',
+        'submit_button' => 'Invia Segnalazione di Violazione',
+        'report_submitted' => 'La tua segnalazione di violazione è stata inviata.',
+        'report_error' => 'Si è verificato un errore nell\'invio della tua segnalazione di violazione.',
+        'thank_you' => 'Grazie per la tua segnalazione',
+        'thank_you_message' => 'Grazie per aver segnalato questa potenziale violazione. Il nostro team di protezione dei dati indagherà e potrebbe contattarti per ulteriori informazioni.',
+        'breach_description_min' => 'Fornisci almeno 20 caratteri per descrivere la potenziale violazione.',
+    ],
+
+    // Registro Attività
+    'activity' => [
+        'title' => 'Registro delle Mie Attività GDPR',
+        'description' => 'Visualizza un registro di tutte le tue attività e richieste relative al GDPR.',
+        'no_activities' => 'Nessuna attività trovata.',
+        'date' => 'Data',
+        'activity' => 'Attività',
+        'details' => 'Dettagli',
+        'ip_address' => 'Indirizzo IP',
+        'user_agent' => 'User Agent',
+        'download_log' => 'Scarica Registro Attività',
+        'filter' => 'Filtra Attività',
+        'filter_all' => 'Tutte le Attività',
+        'filter_consent' => 'Attività di Consenso',
+        'filter_export' => 'Attività di Esportazione Dati',
+        'filter_restriction' => 'Attività di Restrizione Elaborazione',
+        'filter_deletion' => 'Attività di Eliminazione Account',
+        'types' => [
+            'consent_updated' => 'Preferenze di Consenso Aggiornate',
+            'data_export_requested' => 'Esportazione Dati Richiesta',
+            'data_export_completed' => 'Esportazione Dati Completata',
+            'data_export_downloaded' => 'Esportazione Dati Scaricata',
+            'processing_restricted' => 'Restrizione di Elaborazione Richiesta',
+            'processing_restriction_removed' => 'Restrizione di Elaborazione Rimossa',
+            'account_deletion_requested' => 'Eliminazione Account Richiesta',
+            'account_deletion_cancelled' => 'Eliminazione Account Annullata',
+            'account_deletion_completed' => 'Eliminazione Account Completata',
+            'breach_reported' => 'Violazione Dati Segnalata',
+        ],
+    ],
+
+    // Validazione
+    'validation' => [
+        'consents_required' => 'Le preferenze di consenso sono obbligatorie.',
+        'consents_format' => 'Il formato delle preferenze di consenso non è valido.',
+        'consent_value_required' => 'Il valore del consenso è obbligatorio.',
+        'consent_value_boolean' => 'Il valore del consenso deve essere un booleano.',
+        'format_required' => 'Il formato di esportazione è obbligatorio.',
+        'data_categories_required' => 'È necessario selezionare almeno una categoria di dati.',
+        'data_categories_format' => 'Il formato delle categorie di dati non è valido.',
+        'data_categories_min' => 'È necessario selezionare almeno una categoria di dati.',
+        'data_categories_distinct' => 'Le categorie di dati devono essere distinte.',
+        'export_password_required' => 'La password è obbligatoria quando la protezione con password è abilitata.',
+        'export_password_min' => 'La password deve essere lunga almeno 8 caratteri.',
+        'restriction_type_required' => 'Il tipo di restrizione è obbligatorio.',
+        'restriction_reason_required' => 'Il motivo della restrizione è obbligatorio.',
+        'notes_max' => 'Le note non possono superare i 500 caratteri.',
+        'reporter_name_required' => 'Il tuo nome è obbligatorio.',
+        'reporter_email_required' => 'La tua email è obbligatoria.',
+        'reporter_email_format' => 'Inserisci un indirizzo email valido.',
+        'incident_date_required' => 'La data dell\'incidente è obbligatoria.',
+        'incident_date_format' => 'La data dell\'incidente deve essere una data valida.',
+        'incident_date_past' => 'La data dell\'incidente deve essere nel passato o oggi.',
+        'breach_description_required' => 'La descrizione della violazione è obbligatoria.',
+        'breach_description_min' => 'La descrizione della violazione deve essere lunga almeno 20 caratteri.',
+        'affected_data_required' => 'Le informazioni sui dati compromessi sono obbligatorie.',
+        'discovery_method_required' => 'Il metodo di scoperta è obbligatorio.',
+        'supporting_evidence_format' => 'Le prove devono essere un file PDF, JPG, JPEG, PNG, TXT, DOC o DOCX.',
+        'supporting_evidence_max' => 'Il file di prove non può superare i 10MB.',
+        'consent_to_contact_required' => 'Il consenso al contatto è obbligatorio.',
+        'consent_to_contact_accepted' => 'Il consenso al contatto deve essere accettato.',
+        'required_consent_message' => 'Questo consenso è necessario per utilizzare la piattaforma.',
+        'confirm_deletion_required' => 'Devi confermare di comprendere le conseguenze dell\'eliminazione dell\'account.',
+        'form_error_title' => 'Correggi gli errori qui sotto',
+        'form_error_message' => 'Ci sono uno o più errori nel modulo che devono essere corretti.',
+    ],
+
+    // Messaggi di Errore
+    'errors' => [
+        'general' => 'Si è verificato un errore imprevisto.',
+        'unauthorized' => 'Non sei autorizzato a eseguire questa azione.',
+        'forbidden' => 'Questa azione è vietata.',
+        'not_found' => 'La risorsa richiesta non è stata trovata.',
+        'validation_failed' => 'I dati inviati non sono validi.',
+        'rate_limited' => 'Troppe richieste. Riprova più tardi.',
+        'service_unavailable' => 'Il servizio non è attualmente disponibile. Riprova più tardi.',
+    ],
+];

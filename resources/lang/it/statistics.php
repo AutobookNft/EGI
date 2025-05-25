@@ -1,0 +1,33 @@
+<?php
+// resources/lang/en/statistics.php
+return [
+    'dashboard_subtitle' => 'Analisi complete per le tue collezioni EGI',
+    'refresh' => 'Aggiorna',
+    'loading' => 'Caricamento',
+    'calculating' => 'Calcolo statistiche',
+    'error_loading' => 'Errore nel caricamento delle statistiche. Riprova.',
+    'last_updated' => 'Ultimo aggiornamento',
+
+    // KPI Labels
+    'total_likes' => 'Like Totali',
+    'total_reservations' => 'Prenotazioni Totali',
+    'total_amount' => 'Importo Totale',
+    'epp_quota' => 'Quota EPP',
+
+    // Section Titles
+    'likes_by_collection' => 'Like per Collezione',
+    'reservations_by_collection' => 'Prenotazioni per Collezione',
+    'top_egis' => 'Top 3 EGI più Apprezzati',
+    'epp_breakdown' => 'Ripartizione Quota EPP',
+
+    // Empty States
+    'no_data' => 'Nessun dato disponibile',
+    'no_collections' => 'Nessuna collezione con like al momento',
+    'no_reservations' => 'Nessuna prenotazione attiva',
+    'no_top_egis' => 'Nessun EGI con like al momento',
+    'no_epp_data' => 'Nessun dato EPP disponibile',
+
+    // GDPR
+    'gdpr_check' => 'Controllo Conformità GDPR',
+    'gdpr_coming_soon' => 'Gli alert sulla privacy arriveranno nella prossima fase MVP',
+];

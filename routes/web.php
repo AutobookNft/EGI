@@ -168,7 +168,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
             Route::resource('icons', IconAdminController::class)
                 ->middleware(['role_or_permission: manage_icons']);
 
-            Route::get('/assign-role', [RoleController::class, 'showAssignRoleForm'])
+            Route::get('/assign-role/form', [RoleController::class, 'showAssignRoleForm'])
                 ->name('assign.role.form')
                 ->middleware(['role_or_permission:manage_roles']);
 

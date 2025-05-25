@@ -119,6 +119,13 @@ return [
         'reservation_unauthorized_cancel' => 'Unauthorized attempt to cancel reservation :id. Only the owner can cancel.',
         'reservation_status_failed' => 'Failed to retrieve reservation status for EGI :egi_id. Error: :error',
         'reservation_unknown_error' => 'An unknown error occurred during the reservation process. Error: :error',
+
+        // Dev message for statistics
+        'statistics_calculation_failed' => 'Statistics calculation failed for user :user_id. Context: :error_context. Error: :error_message',
+        'icon_not_found' => 'Icon :icon_name with style :style not found in database. Using fallback icon.',
+        'icon_retrieval_failed' => 'Failed to retrieve icon :icon_name. Error: :error_message. Using fallback icon.',
+        'statistics_cache_clear_failed' => 'Failed to clear statistics cache for user :user_id. Error: :error_message',
+        'statistics_summary_failed' => 'Failed to calculate statistics summary for user :user_id. Error: :error_message',
     ],
 
     'user' => [
@@ -222,7 +229,14 @@ return [
         'reservation_cancel_failed' => 'We couldn\'t cancel your reservation. Please try again later.',
         'reservation_unauthorized_cancel' => 'You don\'t have permission to cancel this reservation.',
         'reservation_status_failed' => 'Could not retrieve the reservation status. Please try again later.',
-        'reservation_unknown_error' => 'Something went wrong with your reservation. Our team has been notified.'
+        'reservation_unknown_error' => 'Something went wrong with your reservation. Our team has been notified.',
+
+        // user messages for statistics
+        'statistics_calculation_failed' => 'Unable to load your statistics at the moment. Our team has been notified. Please try again later.',
+        'icon_not_found' => 'Icon temporarily unavailable. Using default icon.',
+        'icon_retrieval_failed' => 'Icon temporarily unavailable. Using default icon.',
+        'statistics_cache_clear_failed' => 'Unable to refresh statistics cache. Please try again.',
+        'statistics_summary_failed' => 'Unable to load statistics summary. Please try again.',
     ],
 
     // Generic message (used by UserInterfaceHandler if no specific message found)

@@ -1,0 +1,563 @@
+/* Reset altezza viewport e overflow per hero section */
+#hero-section {
+    height: auto !important;
+    width: 100%; /* Usa % invece di vw per ora */
+    max-height: none !important;
+    overflow: visible !important;
+    position: relative !important;
+    padding: 80px 0 0 0 !important; /* Garantisce spazio per l'header fisso */
+    margin: 0 !important;
+    width: 100vw !important; /* Forza larghezza viewport */
+    max-width: 100vw !important;
+    /* background-color: #064e3b; */
+}
+.hero-content {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+}
+
+/* Fix per container principale */
+.container,
+.max-w-7xl,
+.mx-auto {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    overflow: visible !important;
+}
+
+/* Assicuriamo che il hero content sia visibile */
+.hero-content-overlay {
+    position: relative !important;
+    z-index: 10 !important;
+    width: 100% !important;
+}
+
+/* Forzatura background fisso */
+#background-image-layer,
+#background-gradient,
+#backgroundCanvas {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important; /* Usa vw invece di % */
+    height: 100vh !important; /* Usa vh invece di % */
+    z-index: 0 !important;
+}
+/* Fix per il main content */
+main#main-content {
+    overflow: visible !important;
+    position: relative !important;
+    z-index: 5 !important;
+    margin-top: 0 !important;
+}
+
+/* Forzatura visibilità sezione statistiche */
+.nft-stats-section {
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
+    margin-top: 1rem !important;
+    position: relative !important;
+    z-index: 15 !important;
+}
+
+html,
+body {
+    overflow-x: hidden !important;
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+/* Grid aggressivo */
+.grid {
+    width: 100% !important;
+    max-width: 100% !important;
+    display: grid !important;
+}
+
+
+/* Forza la visualizzazione di tutti gli elementi principali */
+section, .section, .py-16, .py-20 {
+    display: block !important;
+    height: auto !important;
+    min-height: unset !important;
+    overflow: visible !important;
+    position: relative !important;
+}
+
+/* Fix per il footer */
+footer {
+    position: relative !important;
+    z-index: 5 !important;
+    margin-top: 2rem !important;
+    width: 100% !important;
+}
+
+/* Colonne flessibili su schermi grandi */
+@media (min-width: 1024px) {
+    .lg\:grid-cols-3 {
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)) !important;
+    }
+
+    .lg\:grid-cols-4 {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)) !important;
+    }
+}
+
+/* Fix per avatar images */
+.collection-card .w-4.h-4 {
+    width: 1rem !important;
+    height: 1rem !important;
+    max-width: 1rem !important;
+    max-height: 1rem !important;
+    min-width: 1rem !important;
+    min-height: 1rem !important;
+}
+
+/* Griglia collezioni migliorata */
+.grid-cols-1.gap-6.md\:grid-cols-2.lg\:grid-cols-3.lg\:gap-8,
+.grid-cols-1.gap-6.sm\:grid-cols-2.md\:grid-cols-3.lg\:grid-cols-4.lg\:gap-8 {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+    gap: 2rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 2rem !important;
+}
+
+/* Card NFT con proporzioni migliori */
+.collection-card-nft {
+    height: 100% !important;
+    min-height: 280px !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.collection-card-nft .nft-glass-card {
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    /* background: radial-gradient(ellipse at center, transparent 60%, rgba(0, 0, 0, 0.4) 100%); */
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Migliora il canvas per l'effetto a tutto schermo */
+#backgroundCanvas {
+    animation: fadeIn 1s ease-in-out;
+    opacity: 0.8 !important;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 0.8; }
+}
+
+/* Effetto di caricamento pagina */
+.page-transition {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.page-loaded {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Stili dal secondo blocco <style> */
+main#main-content {
+    padding-top: 6rem; /* Padding superiore per evitare sovrapposizioni */
+    position: relative; /* Assicura posizionamento corretto */
+    z-index: 5; /* Mantiene sopra i background */
+}
+
+
+/* Spazio per la prima sezione in main */
+main#main-content > section:first-child {
+    margin-top: 4rem; /* Spazio aggiuntivo specifico per la prima sezione */
+    position: relative;
+    z-index: 6;
+}
+
+/* Spazio tra sezioni consecutive */
+main#main-content section + section {
+    margin-top: 3rem;
+}
+
+/* Migliorare lo spazio sotto belowHeroContent */
+.hero-content-overlay .below-hero-content {
+    padding-bottom: 4rem;
+    margin-bottom: 2rem;
+    position: relative;
+    z-index: 10;
+}
+
+/* Stili da <x-slot name="headExtra"> */
+@keyframes natan-pulse-only {
+
+    0%,
+    100% {
+        filter: brightness(1) contrast(1.02) drop-shadow(0 0 2px #fff);
+        opacity: 1;
+    }
+
+    40% {
+        filter: brightness(1.14) contrast(1.13) drop-shadow(0 0 6px #fff);
+        opacity: 1;
+    }
+
+    50% {
+        filter: brightness(1.18) contrast(1.18) drop-shadow(0 0 8px #fff);
+        opacity: 0.97;
+    }
+
+    60% {
+        filter: brightness(1.14) contrast(1.13) drop-shadow(0 0 6px #fff);
+        opacity: 1;
+    }
+}
+
+.natan-pulse-only {
+    animation: natan-pulse-only 3.4s cubic-bezier(.68, 0, .41, 1) infinite;
+}
+
+#hero-section .hero-content-overlay>div {
+    position: relative;
+    z-index: 10;
+}
+
+/* Assicura che il carousel sia visibile */
+.hero-content-overlay .lg\:col-span-6 {
+    position: relative;
+    z-index: 12;
+}
+
+/* NFT Glassmorphism Effects */
+.nft-glass-card {
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nft-glass-card:hover {
+    transform: translateY(-4px);
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2),
+        0 0 20px rgba(147, 51, 234, 0.4);
+}
+
+/* NFT Glow Button */
+.nft-glow-button {
+    position: relative;
+    overflow: hidden;
+}
+
+.nft-glow-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(147, 51, 234, 0.4), transparent);
+    transition: left 0.5s;
+}
+
+.nft-glow-button:hover::before {
+    left: 100%;
+}
+
+/* NFT Stat Card */
+.nft-stat-card {
+    background: linear-gradient(135deg, rgba(147, 51, 234, 0.1) 0%, rgba(79, 70, 229, 0.15) 100%);
+    backdrop-filter: blur(10px);
+}
+
+/* Collection Card NFT Style */
+.collection-card-nft {
+    position: relative;
+    overflow: hidden;
+    border-radius: 1rem;
+}
+
+.collection-card-nft::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    background: linear-gradient(45deg, #f39c12, #e74c3c, #9b59b6, #3498db, #2ecc71);
+    background-size: 300% 300%;
+    border-radius: 1rem;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    animation: gradient-shift 4s ease infinite;
+    z-index: -1;
+}
+
+.collection-card-nft:hover::before {
+    opacity: 1;
+}
+
+@keyframes gradient-shift {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* Pulsing badge */
+.pulse-badge {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* Effetti NFT specifici (quelli in fondo al file) */
+/* =========== Effetti base NFT =========== */
+/* Effetto pulsazione originale (già presente sopra come natan-pulse-only, ma lo lascio per completezza se era leggermente diverso) */
+
+/* Effetto gradiente radiale (questo è commentato nel file originale)*/
+/* .bg-gradient-radial {
+    background-image: radial-gradient(var(--tw-gradient-stops));
+} */
+
+/* =========== Effetti specifici NFT =========== */
+
+/* Effetto testo brillante NFT style */
+.nft-text-glow {
+    text-shadow: 0 0 15px currentColor;
+}
+
+/* Pulsazione NFT */
+@keyframes nft-pulse {
+
+    0%,
+    100% {
+        opacity: 0.7;
+    }
+
+    50% {
+        opacity: 1;
+    }
+}
+
+.nft-pulse {
+    animation: nft-pulse 2s ease-in-out infinite;
+}
+
+/* Testo shimmmering NFT */
+@keyframes nft-shimmer {
+    0% {
+        filter: brightness(0.8) drop-shadow(0 0 2px rgba(255, 255, 255, 0.3));
+    }
+
+    20% {
+        filter: brightness(1.2) drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));
+    }
+
+    40% {
+        filter: brightness(0.9) drop-shadow(0 0 3px rgba(255, 255, 255, 0.4));
+    }
+
+    60% {
+        filter: brightness(1.1) drop-shadow(0 0 4px rgba(255, 255, 255, 0.5));
+    }
+
+    80% {
+        filter: brightness(0.9) drop-shadow(0 0 2px rgba(255, 255, 255, 0.3));
+    }
+
+    100% {
+        filter: brightness(0.8) drop-shadow(0 0 2px rgba(255, 255, 255, 0.3));
+    }
+}
+
+.nft-shimmering-text {
+    animation: nft-shimmer 4s ease-in-out infinite;
+}
+
+/* Badge shine NFT */
+@keyframes nft-badge-shine {
+    0% {
+        background-position: 200% center;
+    }
+
+    100% {
+        background-position: -200% center;
+    }
+}
+
+.nft-badge-shine {
+    background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0) 100%);
+    background-size: 200% auto;
+    animation: nft-badge-shine 3s linear infinite;
+    animation-fill-mode: forwards;
+}
+
+/* Rotating border NFT */
+@keyframes nft-rotating-border {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.nft-rotating-border {
+    background: conic-gradient(from 0deg, transparent, #f59e0b, transparent, transparent);
+    animation: nft-rotating-border 8s linear infinite;
+    border-radius: 50%;
+}
+
+.nft-rotating-border-container {
+    position: relative;
+    overflow: hidden;
+    border-radius: 50%;
+}
+
+/* Hover float NFT */
+.nft-hover-float {
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.nft-hover-float:hover {
+    transform: translateY(-8px) scale(1.02);
+}
+
+/* NFT 3D effect on hover */
+.nft-hover-tilt {
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.nft-hover-tilt:hover {
+    transform: perspective(1000px) rotateX(2deg) rotateY(5deg);
+}
+
+/* 3D Float Animation */
+@keyframes nft-3d-float {
+
+    0%,
+    100% {
+        transform: translateY(0) rotateY(0);
+    }
+
+    25% {
+        transform: translateY(-5px) rotateY(2deg);
+    }
+
+    75% {
+        transform: translateY(5px) rotateY(-2deg);
+    }
+}
+
+.nft-3d-float {
+    animation: nft-3d-float 6s ease-in-out infinite;
+    transform-style: preserve-3d;
+}
+
+/* NFT Glass Card Effect (leggermente diverso da .nft-glass-card sopra, mantengo entrambi per ora) */
+.nft-glass-effect { /* .nft-glass-card è già definito, questo potrebbe essere per altro uso */
+    backdrop-filter: blur(4px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+/* NFT Border Animation */
+@keyframes nft-border-flow {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+.nft-animated-border {
+    background: linear-gradient(270deg, #4ade80, #22d3ee, #818cf8, #4ade80);
+    background-size: 300% 300%;
+    animation: nft-border-flow 3s ease infinite;
+}
+
+/* NFT Holographic Effect */
+.nft-holographic-effect {
+    background: linear-gradient(125deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.05) 25%, rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0.05) 75%, rgba(255, 255, 255, 0) 100%);
+    background-size: 200% 200%;
+    animation: nft-border-flow 3s ease infinite; /* Usa la stessa animazione nft-border-flow */
+    z-index: 5;
+    pointer-events: none;
+}
+
+/* NFT CTA Button Pulse */
+@keyframes nft-border-pulse {
+
+    0%,
+    100% {
+        opacity: 0.25;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.4;
+        transform: scale(1.05);
+    }
+}
+
+.nft-pulsing-border {
+    animation: nft-border-pulse 2s ease-in-out infinite;
+}
+
+.nft-cta-button {
+    box-shadow: 0 0 15px rgba(45, 212, 191, 0.3);
+}
+
+.nft-cta-button:hover {
+    box-shadow: 0 0 25px rgba(45, 212, 191, 0.4);
+}
+
+/* NFT Card Container */
+.nft-card-container {
+    transition: transform 0.3s ease;
+}
+
+.nft-card-container:hover {
+    transform: translateY(-4px) scale(1.01);
+}
