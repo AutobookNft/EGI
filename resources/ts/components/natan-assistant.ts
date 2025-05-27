@@ -120,7 +120,7 @@ export class NatanAssistant {
      */
     private debug(...args: any[]): void {
         if (this.debugMode) {
-            console.log('[NatanAssistant]', ...args);
+            // console.log('[NatanAssistant]', ...args);
         }
     }
 

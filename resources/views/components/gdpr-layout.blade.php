@@ -1,154 +1,112 @@
-<x-app-layout>
-    {{-- Propaga gli stili delle viste GDPR --}}
-    @stack('styles')
+{{-- resources/views/components/gdpr-layout.blade.php --}}
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <x-slot name="header">
-        {{-- Breadcrumb Navigation --}}
-        <nav class="text-sm breadcrumbs">
-            <ul>
-                <li><a href="{{ route('dashboard') }}">{{ __('gdpr.breadcrumb.dashboard') }}</a></li>
-                <li><a href="{{ route('gdpr.consent') }}">{{ __('gdpr.breadcrumb.gdpr') }}</a></li>
-                @if(isset($breadcrumbItems) && count($breadcrumbItems) > 0)
-                    @foreach($breadcrumbItems as $item)
-                        @if($loop->last)
-                            <li>{{ $item['label'] }}</li>
-                        @else
-                            <li><a href="{{ $item['url'] }}">{{ $item['label'] }}</a></li>
-                        @endif
-                    @endforeach
-                @endif
-            </ul>
-        </nav>
+        {{-- SEO & Metadata --}}
+        <title>{{ $pageTitle . ' - ' . config('app.name') }}</title>
+        <meta name="description" content="{{ $pageDescription }}">
+        <meta name="robots" content="noindex, nofollow">{{-- Privacy pages should not be indexed --}}
 
-        {{-- Page Title and Info --}}
-        <div class="flex items-center justify-between">
-            <div>
-                <h2 class="text-xl font-semibold leading-tight text-gray-800">
-                    {{ $pageTitle }}
-                </h2>
-                @if($pageSubtitle)
-                    <p class="mt-1 text-sm text-gray-600">{{ $pageSubtitle }}</p>
-                @endif
+        {{-- Fonts (FlorenceEGI Brand Guidelines) --}}
+        <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700&family=Source+Sans+Pro:ital,wght@0,300;0,400;0,600;0,700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+        {{-- Application Assets --}}
+        @vite(['resources/css/app.css', 'resources/css/gdpr.css', 'resources/js/app.js'])
+
+        @stack('styles')
+
+        {{-- Livewire Styles --}}
+        @livewireStyles
+    </head>
+
+    <body class="antialiased gdpr-container font-body">
+        {{-- Skip to main content for accessibility --}}
+        <a href="#gdpr-main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 gdpr-btn-primary focus:rounded-md">
+            {{ __('Skip to main content') }}
+        </a>
+
+        {{-- GDPR Header --}}
+        <header class="sticky top-0 z-40 gdpr-header" role="banner" aria-label="{{ __('gdpr.navigation_label') }}">
+            <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-16">
+                    {{-- Logo/Brand --}}
+                    <div class="flex items-center">
+                        <a href="{{ route('dashboard') }}" class="flex items-center space-x-3 gdpr-link">
+                            <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                            </svg>
+                            <span class="text-lg gdpr-title">{{ config('app.name') }}</span>
+                        </a>
+                    </div>
+
+                    {{-- User Info --}}
+                    <div class="flex items-center space-x-4">
+                        <span class="text-sm gdpr-text">{{ auth()->user()->name }}</span>
+                        <a href="{{ route('dashboard') }}" class="px-3 py-1 text-sm rounded-lg gdpr-btn-secondary">
+                            {{ __('gdpr.back_to_dashboard') }}
+                        </a>
+                    </div>
+                </div>
             </div>
+        </header>
 
-            {{-- GDPR Compliance Badge --}}
-            <div class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-green-800 bg-green-100 rounded-lg">
-                <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001z" clip-rule="evenodd"/>
-                    <path fill-rule="evenodd" d="M13.707 7.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                </svg>
-                {{ __('gdpr.compliance_badge') }}
-            </div>
-        </div>
-    </x-slot>
-
-    <div class="gdpr-layout">
-        {{-- Mobile sidebar toggle --}}
-        <button class="gdpr-mobile-toggle" onclick="toggleGdprSidebar()">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-            </svg>
-        </button>
-
-        <div class="gdpr-container">
-            {{-- Main GDPR Content Area --}}
-            <div class="gdpr-main-content">
-                {{-- Flash Messages & Alerts --}}
-                @if(session('gdpr_success'))
-                    <div class="gdpr-alert success">
-                        <strong>{{ __('gdpr.alerts.success') }}</strong>
-                        {{ session('gdpr_success') }}
+        {{-- Main Content --}}
+        <main id="gdpr-main-content" class="flex-1" role="main" aria-label="{{ __('gdpr.main_content_label') }}" tabindex="-1">
+            {{-- Page Header --}}
+            @isset($header)
+                <section class="px-4 py-6 sm:px-6 lg:px-8" role="complementary" aria-label="Page header">
+                    <div class="mx-auto max-w-7xl">
+                        {{ $header }}
                     </div>
-                @endif
+                </section>
+            @endisset
 
-                @if(session('gdpr_error'))
-                    <div class="gdpr-alert error">
-                        <strong>{{ __('gdpr.alerts.error') }}</strong>
-                        {{ session('gdpr_error') }}
-                    </div>
-                @endif
-
-                @if(session('gdpr_warning'))
-                    <div class="gdpr-alert warning">
-                        <strong>{{ __('gdpr.alerts.warning') }}</strong>
-                        {{ session('gdpr_warning') }}
-                    </div>
-                @endif
-
-                @if(session('gdpr_info'))
-                    <div class="gdpr-alert info">
-                        <strong>{{ __('gdpr.alerts.info') }}</strong>
-                        {{ session('gdpr_info') }}
-                    </div>
-                @endif
-
-                {{-- Main Content Card --}}
-                <div class="gdpr-content-card">
+            {{-- Content Slot --}}
+            <div class="px-4 pb-8 sm:px-6 lg:px-8">
+                <div class="mx-auto max-w-7xl">
                     {{ $slot }}
                 </div>
             </div>
-        </div>
-    </div>
+            <livewire:sidebar />
+        </main>
 
-    {{-- Propaga gli script delle viste GDPR --}}
-    @stack('scripts')
+        {{-- Footer --}}
+        <footer class="mt-auto border-t gdpr-header border-gray-200/50" role="contentinfo">
+            <div class="px-4 py-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between text-sm gdpr-subtitle">
+                    <p>&copy; {{ date('Y') }} {{ config('app.name') }}. {{ __('gdpr.all_rights_reserved') }}</p>
+                    <div class="flex space-x-4">
+                        <a href="{{ route('gdpr.privacy-policy') }}" class="gdpr-link">{{ __('gdpr.privacy_policy') }}</a>
+                        <a href="{{ route('gdpr.terms') }}" class="gdpr-link">{{ __('gdpr.terms_of_service') }}</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
 
-    @push('scripts')
-        {{-- GDPR Layout JavaScript --}}
+        {{-- Application Configuration --}}
         <script>
-            /**
-             * Toggle mobile GDPR sidebar
-             */
-            function toggleGdprSidebar() {
-                const sidebar = document.getElementById('gdprSidebar');
-                if (sidebar) {
-                    sidebar.classList.toggle('open');
+            window.appConfig = @json(config('app'));
+
+            // GDPR specific configuration
+            window.gdprConfig = {
+                locale: '{{ app()->getLocale() }}',
+                csrfToken: '{{ csrf_token() }}',
+                routes: {
+                    consent: '{{ route("gdpr.consent") }}',
+                    export: '{{ route("gdpr.export-data") }}',
+                    restrict: '{{ route("gdpr.limit-processing") }}',
+                    delete: '{{ route("gdpr.delete-account") }}'
                 }
-            }
-
-            /**
-             * Close sidebar when clicking outside on mobile
-             */
-            document.addEventListener('click', function(event) {
-                const sidebar = document.getElementById('gdprSidebar');
-                const toggle = document.querySelector('.gdpr-mobile-toggle');
-
-                if (window.innerWidth <= 768 && sidebar && sidebar.classList.contains('open')) {
-                    if (!sidebar.contains(event.target) && !toggle.contains(event.target)) {
-                        sidebar.classList.remove('open');
-                    }
-                }
-            });
-
-            /**
-             * Handle window resize
-             */
-            window.addEventListener('resize', function() {
-                const sidebar = document.getElementById('gdprSidebar');
-                if (sidebar && window.innerWidth > 768) {
-                    sidebar.classList.remove('open');
-                }
-            });
-
-            /**
-             * Initialize GDPR layout
-             */
-            document.addEventListener('DOMContentLoaded', function() {
-                console.log('[GDPR Layout] Initialized successfully');
-
-                // Auto-hide alerts after 5 seconds
-                const alerts = document.querySelectorAll('.gdpr-alert');
-                alerts.forEach(alert => {
-                    setTimeout(() => {
-                        alert.style.opacity = '0';
-                        alert.style.transform = 'translateY(-10px)';
-                        setTimeout(() => {
-                            alert.remove();
-                        }, 300);
-                    }, 5000);
-                });
-            });
+            };
         </script>
-    @endpush
-
-</x-app-layout>
+        {{-- Livewire Scripts --}}
+        @livewireScripts
+        @stack('scripts')
+    </body>
+</html>

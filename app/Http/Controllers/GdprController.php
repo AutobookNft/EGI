@@ -109,6 +109,64 @@ class GdprController extends Controller
 
     }
 
+    /**
+     * Show GDPR-compliant profile management (replaces Jetstream profile)
+     *
+     * @return \Illuminate\View\View
+     * @seo-purpose Provide comprehensive GDPR profile management interface
+     * @accessibility-trait Full ARIA tablist navigation and landmark structure
+     */
+    public function showProfile()
+    {
+        try {
+            $user = auth()->user();
+
+            // Get user consent status for privacy settings tab
+            $consentStatus = null;
+            if ($this->consentService) {
+                try {
+                    $consentStatus = $this->consentService->getUserConsentStatus($user);
+                } catch (\Exception $e) {
+                    // Log but don't fail - privacy tab will show fallback message
+                    if ($this->logger) {
+                        $this->logger->warning('[GDPR Profile] Failed to load consent status', [
+                            'user_id' => $user->id,
+                            'error' => $e->getMessage()
+                        ]);
+                    }
+                }
+            }
+
+            return view('gdpr.profile', [
+                'user' => $user,
+                'consentStatus' => $consentStatus,
+                'pageTitle' => __('gdpr.profile_management_title'),
+                'brandColors' => [
+                    'oro_fiorentino' => '#D4A574',
+                    'verde_rinascita' => '#2D5016',
+                    'blu_algoritmo' => '#1B365D',
+                    'grigio_pietra' => '#6B6B6B',
+                    'rosso_urgenza' => '#C13120'
+                ],
+                // Feature flags for conditional rendering
+                'features' => [
+                    'password_updates' => \Laravel\Fortify\Features::enabled(\Laravel\Fortify\Features::updatePasswords()),
+                    'two_factor_auth' => \Laravel\Fortify\Features::canManageTwoFactorAuthentication(),
+                    'browser_sessions' => true,
+                    'account_deletion' => \Laravel\Jetstream\Jetstream::hasAccountDeletionFeatures(),
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            return $this->errorManager->handle('GDPR_PROFILE_PAGE_LOAD_ERROR', [
+                'user_id' => auth()->id(),
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+                'error' => $e->getMessage()
+            ], $e);
+        }
+    }
+
 
     /**
      * Store a new processing limitation request.
@@ -515,83 +573,263 @@ class GdprController extends Controller
     // ===================================================================
 
     /**
-     * Display personal data editing page
+     * Show the form for editing personal data
      *
-     * @return View
-     * @privacy-safe Shows authenticated user's data only
+     * @return \Illuminate\View\View
+     * @seo-purpose Personal data editing form for authenticated users
+     * @accessibility-trait Form validation, field descriptions, error handling
      */
-    public function editPersonalData(): View
+    public function editPersonalData()
     {
         try {
-            $user = Auth::user();
+            $user = auth()->user();
 
-            $this->logger->info('GDPR: Accessing personal data edit page', [
+            // Get countries list for the country dropdown
+            $countries = $this->getCountriesList();
+
+            // Get editable fields based on user permissions
+            $editableFields = $this->getEditableFieldsForUser($user);
+
+            // Get on-chain data if user has wallet integrations
+            $onChainData = $this->getOnChainData($user);
+
+            $this->logger->info('[GDPR] Personal data edit form accessed', [
                 'user_id' => $user->id,
-                'log_category' => 'GDPR_ACCESS'
+                'user_type' => $user->user_type,
+                'has_wallet' => !empty($user->wallet),
+                'editable_fields_count' => count($editableFields)
             ]);
-
-            $editableFields = $this->gdprService->getEditableUserFields();
-            $onChainData = $this->gdprService->getOnChainDataSummary($user);
-
-            $this->auditService->logUserAction($user, 'edit_data_page_viewed');
 
             return view('gdpr.edit-personal-data', [
                 'user' => $user,
+                'countries' => $countries,
                 'editableFields' => $editableFields,
-                'onChainData' => $onChainData
+                'onChainData' => $onChainData,
+                'pageTitle' => __('profile.edit_personal_data'),
+                'pageDescription' => __('profile.edit_personal_data_description'),
             ]);
 
         } catch (\Exception $e) {
+            $this->logger->error('[GDPR] Failed to load personal data edit form', [
+                'user_id' => auth()->id(),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
             return $this->errorManager->handle('GDPR_EDIT_DATA_PAGE_FAILED', [
-                'user_id' => Auth::id(),
-                'error_message' => $e->getMessage()
+                'user_id' => auth()->id(),
+                'error' => $e->getMessage()
             ], $e);
         }
     }
 
     /**
-     * Update user personal data
-     *
-     * @param Request $request
-     * @return RedirectResponse
-     * @privacy-safe Updates only authenticated user's data
-     */
-    public function updatePersonalData(Request $request): RedirectResponse
+    * Update personal data
+    *
+    * @param \App\Http\Requests\UpdatePersonalDataRequest $request
+    * @return \Illuminate\Http\RedirectResponse
+    */
+    public function updatePersonalData(\App\Http\Requests\UpdatePersonalDataRequest $request)
     {
         try {
-            $validated = $request->validate([
-                'name' => 'sometimes|string|max:255',
-                'email' => 'sometimes|email|unique:users,email,' . Auth::id(),
-                'bio' => 'sometimes|string|max:1000',
-                'notification_preferences' => 'sometimes|array'
-            ]);
+            $user = auth()->user();
+            $validated = $request->validated();
 
-            $user = Auth::user();
-            $originalData = $user->toArray();
-
-            $this->logger->info('GDPR: Updating personal data', [
+            // Log the update attempt
+            $this->logger->info('[GDPR] Personal data update initiated', [
                 'user_id' => $user->id,
-                'fields_updated' => array_keys($validated),
-                'log_category' => 'GDPR_DATA_UPDATE'
+                'fields_to_update' => array_keys($validated),
+                'ip_address' => $request->ip()
             ]);
 
-            $result = $this->gdprService->updateUserPersonalData($user, $validated);
+            // Filter out non-editable fields for this user
+            $editableFields = $this->getEditableFieldsForUser($user);
+            $filteredData = array_intersect_key($validated, array_flip($editableFields));
 
-            $this->auditService->logUserAction($user, 'personal_data_updated', [
-                'fields_changed' => $result['changes'],
-                'previous_values' => $result['previous']
+            // Update user data
+            $user->update($filteredData);
+
+            // Log the successful update via GDPR audit service
+            if ($this->auditService) {
+                $this->auditService->logUserAction(
+                    $user,
+                    'personal_data_updated',
+                    [
+                        'updated_fields' => array_keys($filteredData),
+                        'ip_address' => $request->ip(),
+                        'user_agent' => $request->userAgent(),
+                    ],
+                    'data_modification'
+                );
+            }
+
+            $this->logger->info('[GDPR] Personal data updated successfully', [
+                'user_id' => $user->id,
+                'updated_fields' => array_keys($filteredData)
             ]);
 
-            return redirect()->route('gdpr.edit-personal-data')
-                ->with('success', __('gdpr.personal_data_updated_successfully'));
+            return redirect()
+                ->route('profile.show')
+                ->with('success', __('profile.personal_data_updated_successfully'));
 
         } catch (\Exception $e) {
-            return $this->errorManager->handle('GDPR_PERSONAL_DATA_UPDATE_FAILED', [
-                'user_id' => Auth::id(),
-                'error_message' => $e->getMessage()
+            $this->logger->error('[GDPR] Failed to update personal data', [
+                'user_id' => auth()->id(),
+                'error' => $e->getMessage(),
+                'request_data' => $request->safe()->except(['password', 'password_confirmation'])
+            ]);
+
+            return $this->errorManager->handle('GDPR_UPDATE_PERSONAL_DATA_FAILED', [
+                'user_id' => auth()->id(),
+                'error' => $e->getMessage()
             ], $e);
         }
     }
+
+    /**
+     * Get list of countries for dropdown
+     *
+     * @return array
+     */
+    private function getCountriesList(): array
+    {
+        // You can replace this with a more comprehensive list or use a package
+        return [
+            'IT' => 'Italia',
+            'US' => 'United States',
+            'GB' => 'United Kingdom',
+            'FR' => 'France',
+            'DE' => 'Germany',
+            'ES' => 'Spain',
+            'PT' => 'Portugal',
+            'NL' => 'Netherlands',
+            'BE' => 'Belgium',
+            'CH' => 'Switzerland',
+            'AT' => 'Austria',
+            'SE' => 'Sweden',
+            'NO' => 'Norway',
+            'DK' => 'Denmark',
+            'FI' => 'Finland',
+            'IE' => 'Ireland',
+            'PL' => 'Poland',
+            'CZ' => 'Czech Republic',
+            'HU' => 'Hungary',
+            'GR' => 'Greece',
+            'HR' => 'Croatia',
+            'SI' => 'Slovenia',
+            'SK' => 'Slovakia',
+            'EE' => 'Estonia',
+            'LV' => 'Latvia',
+            'LT' => 'Lithuania',
+            'MT' => 'Malta',
+            'CY' => 'Cyprus',
+            'LU' => 'Luxembourg',
+            'BG' => 'Bulgaria',
+            'RO' => 'Romania',
+            // Add more countries as needed
+        ];
+    }
+
+    /**
+     * Get editable fields based on user type and permissions
+     *
+     * @param \App\Models\User $user
+     * @return array
+     */
+    private function getEditableFieldsForUser(\App\Models\User $user): array
+    {
+        $baseFields = [
+            'name',
+            'email',
+            'phone',
+            'date_of_birth',
+            'address',
+            'city',
+            'state',
+            'postal_code',
+            'country',
+            'bio'
+        ];
+
+        // Add fields based on user type
+        switch ($user->user_type) {
+            case 'creator':
+            case 'mecenate':
+                $baseFields = array_merge($baseFields, [
+                    'bio_title',
+                    'bio_story',
+                    'site_url',
+                    'instagram',
+                    'facebook',
+                    'linkedin'
+                ]);
+                break;
+
+            case 'azienda':
+                $baseFields = array_merge($baseFields, [
+                    'org_name',
+                    'org_email',
+                    'org_street',
+                    'org_city',
+                    'org_region',
+                    'org_state',
+                    'org_zip',
+                    'org_site_url',
+                    'org_phone_1',
+                    'rea',
+                    'org_fiscal_code',
+                    'org_vat_number'
+                ]);
+                break;
+
+            case 'epp_entity':
+                $baseFields = array_merge($baseFields, [
+                    'org_name',
+                    'org_email',
+                    'org_street',
+                    'org_city',
+                    'org_region',
+                    'org_state',
+                    'org_zip',
+                    'org_site_url',
+                    'org_phone_1'
+                ]);
+                break;
+        }
+
+        return $baseFields;
+    }
+
+    /**
+     * Get on-chain data if available
+     *
+     * @param \App\Models\User $user
+     * @return array|null
+     */
+    private function getOnChainData(\App\Models\User $user): ?array
+    {
+        if (empty($user->wallet)) {
+            return null;
+        }
+
+        try {
+            // If you have wallet integration, fetch on-chain data here
+            return [
+                'wallet_address' => $user->wallet,
+                'wallet_balance' => $user->wallet_balance,
+                // Add more on-chain data as needed
+            ];
+        } catch (\Exception $e) {
+            $this->logger->warning('[GDPR] Failed to fetch on-chain data', [
+                'user_id' => $user->id,
+                'wallet' => $user->wallet,
+                'error' => $e->getMessage()
+            ]);
+
+            return null;
+        }
+    }
+
 
     /**
      * Request data rectification for incorrect information

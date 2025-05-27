@@ -62,15 +62,15 @@ async function initializeApplication(): Promise<void> {
         DOMElements.initializeDOMReferences();
         // console.log('Padmin Main: DOM references acquired via initializeDOMReferences().');
 
-        // 3. Carica configurazione dal server (era il tuo punto 2)
+        // 3. Carica configurazione dal server
         mainAppConfig = await initializeAppConfig();
         console.log(`${appTranslate('padminGreeting', mainAppConfig?.translations || {padminGreeting:'Padmin'})} Configuration loaded successfully.`);
         // console.debug('Padmin Main: AppConfig:', mainAppConfig);
 
 
         // 4. Conferma riferimenti DOM (era il tuo punto 3 - ora è più un check opzionale)
-        // DOMElements.confirmDOMReferencesLoaded(); // Puoi commentare/decommentare per debug
-        // console.log('Padmin Main: DOM references confirmation check complete.');
+        DOMElements.confirmDOMReferencesLoaded(); // Puoi commentare/decommentare per debug
+        console.log('Padmin Main: DOM references confirmation check complete.');
 
 
         // 5. Inizializza UploadModalManager (era il tuo punto 4)
@@ -176,8 +176,42 @@ function setupEventListeners(): void {
     );
 
     // --- AZIONI CREATE EGI/COLLECTION ---
-    DOMElements.createEgiGuestButtonsEl?.forEach(btn => btn.addEventListener('click', () => { /* ... (come nel tuo originale) ... */ }));
-    DOMElements.createCollectionGuestButtonsEl?.forEach(btn => btn.addEventListener('click', () => { /* ... (come nel tuo originale) ... */ }));
+    DOMElements.createEgiGuestButtonsEl?.forEach(btn => btn.addEventListener('click', () => { const authStatus = getAuthStatus(mainAppConfig);
+            if (authStatus === 'logged-in' || authStatus === 'connected') {
+                mainUploadModalManager?.openModal('egi');
+            } else {
+                openSecureWalletModal(mainAppConfig, DOMElements, 'create-egi');
+            }
+        }));
+
+    DOMElements.createCollectionGuestButtonsEl?.forEach(btn => btn.addEventListener('click', () => { const authStatus = getAuthStatus(mainAppConfig);
+            if (authStatus === 'logged-in') {
+                window.location.href = mainAppConfig.routes.collectionsCreate;
+            } else if (authStatus === 'connected') {
+                // Mostra messaggio per registrazione completa
+                if (window.Swal) {
+                    window.Swal.fire({
+                        icon: 'info',
+                        title: appTranslate('registrationRequiredTitle', mainAppConfig.translations),
+                        text: appTranslate('registrationRequiredTextCollections', mainAppConfig.translations),
+                        confirmButtonText: appTranslate('registerNowButton', mainAppConfig.translations),
+                        showCancelButton: true,
+                        cancelButtonText: appTranslate('laterButton', mainAppConfig.translations),
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#aaa'
+                    }).then((result: { isConfirmed: boolean }) => {
+                        if (result.isConfirmed) {
+                            window.location.href = mainAppConfig.routes.register;
+                        }
+                    });
+                } else {
+                    alert(appTranslate('registrationRequiredTextCollections', mainAppConfig.translations));
+                    window.location.href = mainAppConfig.routes.register;
+                }
+            } else {
+                openSecureWalletModal(mainAppConfig, DOMElements, 'create-collection');
+            }
+        }));
 
     // --- DROPDOWN WALLET ---
     DOMElements.walletDropdownButtonEl?.addEventListener('click', () => toggleWalletDropdownMenu(mainAppConfig, DOMElements, UEM));

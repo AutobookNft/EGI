@@ -6,7 +6,9 @@
 <x-guest-layout :title="__('guest_home.page_title')" :metaDescription="__('guest_home.meta_description')">
 
     <x-slot name="heroFullWidth">
+
         <x-collection-hero-banner :collections="$featuredCollections" id="mainHeroCarousel"/>
+
     </x-slot>
 
     {{-- Contenuto SOTTO il testo hero: Collezioni in Evidenza NFT Style --}}
@@ -52,6 +54,8 @@
         heightClass="min-h-[50vh] md:min-h-[65vh]"
         overlayColor="bg-gradient-to-br from-gray-900/80 via-verde-rinascita/50 to-gray-900/80" {{-- Overlay più brandizzato --}}
     />
+
+
 
 
 </x-guest-layout>

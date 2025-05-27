@@ -16,6 +16,7 @@ export default defineConfig(({ mode }) => {
                     'resources/js/logo3d.js',
                     'resources/css/app.css',
                     'resources/css/guest.css',
+                    'resources/css/gdpr.css',
                     'home-nft.css',
                     'resources/js/app.js',
                     'resources/js/collection.js',

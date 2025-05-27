@@ -150,6 +150,7 @@ export class UploadModalManager {
             console.warn('UploadModalManager: Attempted to open modal when already open or elements missing.');
             return;
         }
+
         console.log(`Padmin D. Curtis: Opening upload modal programmatically. Type: ${uploadType}`);
 
         this.lastFocusedElement = document.activeElement as HTMLElement | null;

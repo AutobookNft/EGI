@@ -50,6 +50,32 @@
     <!-- Stili Principali dell'Applicazione (Vite) -->
     @vite(['resources/css/app.css', 'resources/css/guest.css', 'vendor/ultra/ultra-upload-manager/resources/css/app.css'])
 
+    <style>
+/* DEBUG: Previeni QUALSIASI comportamento di scroll */
+* {
+    scroll-behavior: auto !important;
+}
+
+html, body {
+    scroll-behavior: auto !important;
+    overflow-anchor: none !important;
+}
+
+/* DEBUG: Forza positioning delle modali */
+#connect-wallet-modal,
+#upload-modal,
+#secret-display-modal {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    width: auto !important;
+    height: auto !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+    z-index: 999999 !important;
+}
+    </style>
 
     <!-- Schema.org -->
     <script type="application/ld+json">
@@ -314,9 +340,6 @@
         {{ $slot }}
     </main>
 
-
-
-
     <!-- Footer -->
     <footer class="py-6 mt-auto bg-gray-900 border-t border-gray-800 md:py-8" role="contentinfo" aria-labelledby="footer-heading">
         <h2 id="footer-heading" class="sr-only">{{ __('guest_layout.footer_sr_heading') }}</h2>
@@ -330,7 +353,7 @@
     </footer>
 
     <!-- Modals -->
-    <div id="upload-modal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black bg-opacity-75 hidden" role="dialog" aria-modal="true" aria-hidden="true" tabindex="-1" aria-labelledby="upload-modal-title">
+    <div id="upload-modal" class="fixed inset-0 z-[10000] flex items-center justify-center bg-black bg-opacity-75 hidden" role="dialog" aria-modal="true" aria-hidden="true" tabindex="-1" aria-labelledby="upload-modal-title">
         <div class="relative bg-gray-800 rounded-lg shadow-xl w-[95%] max-w-4xl max-h-[90vh] overflow-y-auto p-4 md:p-6 lg:p-8" role="document">
             <button id="close-upload-modal" class="absolute text-2xl leading-none text-gray-400 md:text-3xl top-2 right-3 md:top-4 md:right-4 hover:text-white" aria-label="{{ __('guest_layout.close_upload_modal_aria_label') }}">×</button>
             @include('egimodule::partials.uploading_form_content')
@@ -343,6 +366,7 @@
         @csrf
         <button type="submit" class="sr-only">{{ __('guest_layout.logout_sr_button') }}</button>
     </form>
+
 
     <!-- Scripts -->
     @include('layouts.guest_script')

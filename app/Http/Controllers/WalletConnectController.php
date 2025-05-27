@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Ultra\UltraLogManager\UltraLogManager;
 use Ultra\ErrorManager\Interfaces\ErrorManagerInterface;
+use App\Rules\AlgorandAddress;
 
 /**
  * @Oracode Controller for wallet connection with Secret Link system
@@ -96,21 +97,24 @@ class WalletConnectController extends Controller
     {
         $this->logger->info('Wallet Connect attempt initiated', [
             'ip' => $request->ip(),
-            'user_agent' => $request->userAgent()
+            'user_agent' => $request->userAgent(),
+            'has_secret' => $request->has('secret')
         ]);
 
         try {
             // 1. Input validation with Algorand format
             $validated = $request->validate([
-                'wallet_address' => ['required', 'string', 'size:58', 'regex:/^[A-Z2-7]{58}$/'],
-                'secret' => ['nullable', 'string', 'min:10', 'max:50']
+                'wallet_address' => ['required', 'string', new AlgorandAddress()],
+                'secret' => 'nullable|string|min:10|max:50'
             ]);
 
-            $walletAddress = $validated['wallet_address'];
-            $providedSecret = $validated['secret'] ?? null;
+            // Cast esplicito a stringa
+            $walletAddress = (string) $validated['wallet_address'];
+            $providedSecret = isset($validated['secret']) ? (string) $validated['secret'] : null;
 
-            $this->logger->info('Wallet address received for connection', [
-                'address_prefix' => substr($walletAddress, 0, 6) . '...',
+            $this->logger->info('Wallet address validated', [
+                'address_prefix' => Str::substr($walletAddress, 0, 6) . '...',
+                'address_suffix' => '...' . Str::substr($walletAddress, -4),
                 'has_secret' => !is_null($providedSecret)
             ]);
 

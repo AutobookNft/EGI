@@ -18,7 +18,7 @@ class AccountDataMenu extends MenuItem
     {
         parent::__construct(
             'menu.account_data',
-            'personal-data.account',
+            'profile.show',
             'user-cog',
             'manage_account'
         );

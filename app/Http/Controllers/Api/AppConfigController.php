@@ -194,7 +194,7 @@ class AppConfigController extends Controller
             'user_id' => $user?->id,
             'language' => $lang,
             'channel' => $this->channel,
-            'translations' => $translations,
+            // 'translations' => $translations,
 
         ]);
 

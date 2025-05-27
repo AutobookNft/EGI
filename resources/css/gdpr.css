@@ -1,0 +1,270 @@
+/* public/css/gdpr.css - FlorenceEGI GDPR Styles */
+
+:root {
+    /* FlorenceEGI Brand Colors */
+    --oro-fiorentino: #D4A574;
+    --verde-rinascita: #2D5016;
+    --blu-algoritmo: #1B365D;
+    --grigio-pietra: #6B6B6B;
+    --rosso-urgenza: #C13120;
+    --arancio-energia: #E67E22;
+    --viola-innovazione: #8E44AD;
+}
+
+/* Container and Layout */
+.gdpr-container {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    min-height: 100vh;
+    font-family: 'Source Sans Pro', sans-serif;
+}
+
+.gdpr-header {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(212, 165, 116, 0.2);
+}
+
+.gdpr-card {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(212, 165, 116, 0.2);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Tab Navigation */
+.gdpr-tab-button {
+    color: var(--grigio-pietra);
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s ease-in-out;
+    font-weight: 500;
+    padding: 1rem 1.5rem;
+}
+
+.gdpr-tab-button:hover {
+    color: #374151;
+    border-bottom-color: #D1D5DB;
+}
+
+.gdpr-tab-button.active {
+    color: var(--oro-fiorentino);
+    border-bottom-color: var(--oro-fiorentino);
+}
+
+/* Form Elements */
+.gdpr-input {
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(212, 165, 116, 0.3);
+    color: #1f2937;
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    transition: all 0.2s ease-in-out;
+}
+
+.gdpr-input:focus {
+    border-color: var(--oro-fiorentino);
+    box-shadow: 0 0 0 3px rgba(212, 165, 116, 0.1);
+    outline: none;
+}
+
+/* Buttons */
+.gdpr-btn-primary {
+    background-color: var(--oro-fiorentino);
+    color: white;
+    border: none;
+    transition: all 0.2s ease-in-out;
+    font-weight: 500;
+}
+
+.gdpr-btn-primary:hover {
+    background-color: rgba(212, 165, 116, 0.9);
+    transform: translateY(-1px);
+}
+
+.gdpr-btn-secondary {
+    background-color: transparent;
+    color: var(--oro-fiorentino);
+    border: 1px solid var(--oro-fiorentino);
+    transition: all 0.2s ease-in-out;
+    font-weight: 500;
+}
+
+.gdpr-btn-secondary:hover {
+    background-color: var(--oro-fiorentino);
+    color: white;
+}
+
+.gdpr-btn-danger {
+    background-color: var(--rosso-urgenza);
+    color: white;
+    border: none;
+    transition: all 0.2s ease-in-out;
+    font-weight: 500;
+}
+
+.gdpr-btn-danger:hover {
+    background-color: rgba(193, 49, 32, 0.9);
+    transform: translateY(-1px);
+}
+
+/* Status badges */
+.gdpr-badge-success {
+    background-color: rgba(45, 80, 22, 0.1);
+    color: var(--verde-rinascita);
+    border: 1px solid rgba(45, 80, 22, 0.2);
+}
+
+.gdpr-badge-warning {
+    background-color: rgba(230, 126, 34, 0.1);
+    color: var(--arancio-energia);
+    border: 1px solid rgba(230, 126, 34, 0.2);
+}
+
+.gdpr-badge-info {
+    background-color: rgba(27, 54, 93, 0.1);
+    color: var(--blu-algoritmo);
+    border: 1px solid rgba(27, 54, 93, 0.2);
+}
+
+.gdpr-badge-danger {
+    background-color: rgba(193, 49, 32, 0.1);
+    color: var(--rosso-urgenza);
+    border: 1px solid rgba(193, 49, 32, 0.2);
+}
+
+/* Alert messages */
+.gdpr-alert {
+    border-radius: 0.75rem;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.gdpr-alert-success {
+    background-color: rgba(45, 80, 22, 0.1);
+    border: 1px solid rgba(45, 80, 22, 0.2);
+    color: var(--verde-rinascita);
+}
+
+.gdpr-alert-error {
+    background-color: rgba(193, 49, 32, 0.1);
+    border: 1px solid rgba(193, 49, 32, 0.2);
+    color: var(--rosso-urgenza);
+}
+
+.gdpr-alert-warning {
+    background-color: rgba(230, 126, 34, 0.1);
+    border: 1px solid rgba(230, 126, 34, 0.2);
+    color: var(--arancio-energia);
+}
+
+/* Typography */
+.gdpr-title {
+    font-family: 'Playfair Display', serif;
+    color: var(--blu-algoritmo);
+    font-weight: 600;
+}
+
+.gdpr-subtitle {
+    color: var(--grigio-pietra);
+    font-weight: 400;
+}
+
+.gdpr-text {
+    color: #374151;
+    line-height: 1.6;
+}
+
+/* Link colors */
+.gdpr-link {
+    color: var(--oro-fiorentino);
+    text-decoration: none;
+    transition: color 0.2s ease-in-out;
+}
+
+.gdpr-link:hover {
+    color: rgba(212, 165, 116, 0.8);
+    text-decoration: underline;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .gdpr-tab-button {
+        padding: 0.75rem 1rem;
+        font-size: 0.875rem;
+    }
+
+    .gdpr-container {
+        padding: 0;
+    }
+}
+
+/* Dark mode compatibility */
+@media (prefers-color-scheme: dark) {
+    .gdpr-container {
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    }
+
+    .gdpr-card {
+        background: rgba(30, 41, 59, 0.8);
+        border-color: rgba(212, 165, 116, 0.3);
+    }
+
+    .gdpr-text {
+        color: #e2e8f0;
+    }
+
+    .gdpr-input {
+        background: rgba(30, 41, 59, 0.9);
+        color: #e2e8f0;
+        border-color: rgba(212, 165, 116, 0.4);
+    }
+
+    .gdpr-header {
+        background: rgba(30, 41, 59, 0.95);
+        border-bottom-color: rgba(212, 165, 116, 0.3);
+    }
+}
+
+/* Accessibility enhancements */
+.gdpr-tab-button:focus {
+    outline: 2px solid var(--oro-fiorentino);
+    outline-offset: 2px;
+}
+
+.gdpr-btn-primary:focus,
+.gdpr-btn-secondary:focus,
+.gdpr-btn-danger:focus {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+}
+
+/* Animation for smooth transitions */
+.tab-panel {
+    transition: opacity 0.3s ease-in-out;
+}
+
+.tab-panel.hidden {
+    opacity: 0;
+}
+
+.tab-panel:not(.hidden) {
+    opacity: 1;
+}
+
+/* Custom scrollbar for consistency */
+.gdpr-container ::-webkit-scrollbar {
+    width: 8px;
+}
+
+.gdpr-container ::-webkit-scrollbar-track {
+    background: rgba(212, 165, 116, 0.1);
+    border-radius: 4px;
+}
+
+.gdpr-container ::-webkit-scrollbar-thumb {
+    background: var(--oro-fiorentino);
+    border-radius: 4px;
+}
+
+.gdpr-container ::-webkit-scrollbar-thumb:hover {
+    background: rgba(212, 165, 116, 0.8);
+}

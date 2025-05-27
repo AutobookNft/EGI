@@ -101,6 +101,7 @@ export function initializeDOMReferences(): void {
     logoutFormEl = getEl<HTMLFormElement>('logout-form');
     genericCollectionsLinkDesktopEl = queryEl<HTMLAnchorElement>('header nav.hidden.md\\:flex > a[href$="/home/collections"]:not([data-action])');
     genericCollectionsLinkMobileEl = queryEl<HTMLAnchorElement>('#mobile-menu > div:nth-child(1) > a[href$="/home/collections"]:not([data-action])');
+    
 
     // console.log('Padmin D. Curtis: DOM references acquired/re-acquired via initializeDOMReferences().');
     // confirmDOMReferencesLoaded(); // La chiamata a confirm è già qui se decommentata

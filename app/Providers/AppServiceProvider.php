@@ -73,15 +73,12 @@ class AppServiceProvider extends ServiceProvider
         });
 
         // Register enhanced AuthenticatedSessionController with complete DI
-        $this->app->bind(\App\Http\Controllers\Auth\AuthenticatedSessionController::class, function ($app) {
-            return new \App\Http\Controllers\Auth\AuthenticatedSessionController(
+        $this->app->bind(AuthenticatedSessionController::class, function ($app) {
+            return new AuthenticatedSessionController(
                 $app->make(ErrorManagerInterface::class),
                 $app->make(UltraLogManager::class),
                 $app->make(ConsentService::class),
-                $app->make(AuditLogService::class),
-                $app->make(CollectionService::class),
-                $app->make(WalletServiceInterface::class),
-                $app->make(UserRoleServiceInterface::class)
+                $app->make(AuditLogService::class)
             );
         });
 

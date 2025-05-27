@@ -25,6 +25,7 @@ use App\Livewire\PhotoUploader;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\EgiReservationCertificateController;
+use App\Http\Controllers\GdprController;
 use App\Http\Controllers\IconAdminController;
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\HomeController;
@@ -121,6 +122,15 @@ Route::get('/photo-uploader', PhotoUploader::class)->name('photo-uploader');
 */
 Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified'])
     ->group(function () {
+
+
+        // Override Jetstream profile route with our GDPR-compliant version
+        Route::get('/user/profile', [GdprController::class, 'showProfile'])
+            ->name('profile.show');
+
+        // Alternative route for direct access
+        Route::get('/profile', [GdprController::class, 'showProfile'])              
+            ->name('gdpr.profile');
 
         // Upload authorization check
         Route::get('/api/check-upload-authorization', [Ultra\UploadManager\Controllers\Config\ConfigController::class, 'checkUploadAuthorization'])

@@ -160,6 +160,25 @@ a[role="button"],
         /* transition: none !important; */ /* Già coperto da * */
         /* filter: none !important; */ /* Potrebbe essere troppo aggressivo */
     }
+
+}
+
+/* Fix comportamento modale su desktop */
+@media (min-width: 768px) {
+    .modal,
+    #connect-wallet-modal,
+    #upload-modal,
+    #secret-display-modal {
+        align-items: center !important;
+        justify-content: center !important;
+        overflow-y: hidden !important;
+    }
+
+    /* Previeni lo scroll automatico del body su desktop */
+    body.modal-open {
+        position: static !important;
+        overflow: hidden !important;
+    }
 }
 
 /* Stili specifici per il layout delle sezioni che erano in guest.css */
