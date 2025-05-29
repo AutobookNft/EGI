@@ -74,9 +74,10 @@ class CollectionOpen extends Component
 
         $user = $this->user; // Nella callback non si puù usare $this per questo motivo si crea una variabile locale
 
+
         // Recupera tutte le collection associate all'utente
         $this->collections = Collection::whereHas('users', function ($query) use ($user) {
-            $query->where('user_id', $user->id);
+            $query->where('creator_id', $user->id);
         })->get();
 
         // Verifica se c'è una sola collection

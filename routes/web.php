@@ -115,6 +115,11 @@ Route::post('/upload/egi', [EgiUploadController::class, 'handleUpload'])
 // Photo uploader component
 Route::get('/photo-uploader', PhotoUploader::class)->name('photo-uploader');
 
+// Dashboard
+    Route::get('/dashboard', function () {
+        return view('dashboard');
+    })->name('dashboard');
+
 /*
 |--------------------------------------------------------------------------
 | Protected Routes (Authenticated Users)
@@ -129,17 +134,12 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
             ->name('profile.show');
 
         // Alternative route for direct access
-        Route::get('/profile', [GdprController::class, 'showProfile'])              
+        Route::get('/profile', [GdprController::class, 'showProfile'])
             ->name('gdpr.profile');
 
         // Upload authorization check
         Route::get('/api/check-upload-authorization', [Ultra\UploadManager\Controllers\Config\ConfigController::class, 'checkUploadAuthorization'])
             ->name('upload.authorization');
-
-        // Dashboard
-        Route::get('/dashboard', function () {
-            return view('dashboard');
-        })->name('dashboard');
 
         // Dashboard statica temporanea per test
         Route::get('/dashboard-static', [App\Http\Controllers\DashboardStaticController::class, 'index'])->name('dashboard.static');

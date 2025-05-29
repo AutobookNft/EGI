@@ -77,4 +77,14 @@ interface UserRoleServiceInterface
      * @privacy-purpose Access multiple users for administrative operations
      */
     public function getCreators();
+
+    /**
+     * Undocumented function
+     *
+     * @param integer $userId
+     * @param integer $collectionId
+     * @param string $role
+     * @return boolean
+     */
+    public function createCollectionUserRecord(int $userId, int $collectionId, string $role): bool;
 }

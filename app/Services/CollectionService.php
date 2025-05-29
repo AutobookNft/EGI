@@ -405,7 +405,7 @@ class CollectionService
     }
 
     /**
-     * Enhanced collection relationships setup
+     * Enhanced collection relationships setup - VERSIONE SEMPLIFICATA
      * 🎯 Purpose: Setup pivot relationships with enhanced error handling
      *
      * @param Collection $collection The collection
@@ -416,23 +416,33 @@ class CollectionService
     protected function setupCollectionRelationships(Collection $collection, User $user, array $logContext): void
     {
         try {
-            // Set up pivot relationship between user and collection
-            $collection->users()->attach($user->id, [
-                'role' => 'creator',
-                'joined_at' => now(),
-                'permissions' => json_encode(['upload', 'edit', 'delete'])
-            ]);
+            $this->logger->debug('[CollectionService] Setting up collection relationships via UserRoleService', $logContext);
 
-            $this->logger->debug('[CollectionService] Collection relationships setup completed', $logContext);
+            // 🎯 USA IL NUOVO METODO UserRoleService invece del vecchio attach()
+            $success = $this->roleService->createCollectionUserRecord(
+                $user->id,
+                $collection->id,
+                'creator'
+            );
+
+            if ($success) {
+                $this->logger->debug('[CollectionService] Collection relationships setup completed successfully', $logContext);
+            } else {
+                $this->logger->warning('[CollectionService] UserRoleService returned false, trying fallback', $logContext);
+
+                // Fallback al vecchio metodo se necessario
+                $this->fallbackToDirectAttach($collection, $user, $logContext);
+            }
 
         } catch (Throwable $e) {
             $relationshipErrorContext = array_merge($logContext, [
                 'relationship_error' => $e->getMessage()
             ]);
 
-            $this->logger->warning('[CollectionService] Collection relationship setup failed', $relationshipErrorContext);
+            $this->logger->warning('[CollectionService] UserRoleService failed, trying fallback', $relationshipErrorContext);
 
-            // Non-critical error, continue execution
+            // Fallback al vecchio metodo
+            $this->fallbackToDirectAttach($collection, $user, $relationshipErrorContext);
         }
     }
 
@@ -459,6 +469,30 @@ class CollectionService
 
         if ($currentCollectionCount >= $maxCollections) {
             throw new Exception("User has reached maximum collection limit: {$maxCollections}");
+        }
+    }
+
+    /**
+     * 🚨 Fallback method using direct attach if UserRoleService fails
+     */
+    protected function fallbackToDirectAttach(Collection $collection, User $user, array $logContext): void
+    {
+        try {
+            // Vecchio metodo come fallback
+            $collection->users()->attach($user->id, [
+                'role' => 'creator',
+                'joined_at' => now(),
+                'permissions' => json_encode(['upload', 'edit', 'delete'])
+            ]);
+
+            $this->logger->info('[CollectionService] Fallback attach method successful', $logContext);
+
+        } catch (Throwable $e) {
+            $this->logger->error('[CollectionService] Even fallback method failed', array_merge($logContext, [
+                'fallback_error' => $e->getMessage()
+            ]));
+
+            // Non-critical error, continue execution
         }
     }
 

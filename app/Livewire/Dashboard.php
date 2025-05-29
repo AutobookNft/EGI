@@ -129,9 +129,9 @@ class Dashboard extends Component
     #[On('load-notifications')]
     public function loadNotifications()
     {
-        $this->pendingNotifications = Auth::user()
-            ->customNotifications()
-            ->where(function ($query) {
+        // Usa optional() per evitare errori se user è null
+        $this->pendingNotifications = optional(Auth::user())->customNotifications()
+            ?->where(function ($query) {
                 $query->where('outcome', 'LIKE', '%pending%')
                     ->orWhere(function ($subQuery) {
                         $subQuery->whereIn('outcome', ['accepted', 'rejected', 'expired'])
@@ -140,7 +140,7 @@ class Dashboard extends Component
             })
             ->orderBy('created_at', 'desc')
             ->with('model')
-            ->get();
+            ->get() ?? collect();
 
         Log::channel('florenceegi')->info('🔍 loadNotifications() - Pending Notifications:', [
             'pendingNotifications' => $this->pendingNotifications,
@@ -148,12 +148,11 @@ class Dashboard extends Component
         ]);
 
         // Notifiche storiche
-        $this->historicalNotifications = Auth::user()
-            ->customNotifications()
-            ->whereNotNull('read_at')
+        $this->historicalNotifications = optional(Auth::user())->customNotifications()
+            ?->whereNotNull('read_at')
             ->with('model')
             ->orderBy('read_at', 'desc')
-            ->get();
+            ->get() ?? collect();
 
         Log::channel('florenceegi')->info('🔍 loadNotifications() - Historical Notifications:', [
             'historicalNotifications' => $this->historicalNotifications->pluck('id')->toArray(),
@@ -163,7 +162,6 @@ class Dashboard extends Component
             'activeNotification' => $this->historicalNotifications,
         ]);
     }
-
 
     public function handleNotificationAction($notificationId, $action)
     {

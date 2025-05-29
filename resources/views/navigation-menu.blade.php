@@ -1,11 +1,11 @@
-<nav x-data="{ open: false }" class="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<nav x-data="{ open: false }" class="bg-white border-b border-gray-100 dark:bg-gray-800 dark:border-gray-700">
+    <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
             <div class="flex">
                 <!-- Logo -->
-                <div class="shrink-0 flex items-center">
+                <div class="flex items-center shrink-0">
                     <a href="{{ route('dashboard') }}">
-                        <x-application-mark class="block h-9 w-auto" />
+                        <x-application-mark class="block w-auto h-9" />
                     </a>
                 </div>
 
@@ -26,8 +26,8 @@
             </div>
 
             <div class="flex">
-                <div class="shrink-0 flex items-center text-4xl text-gray-700 dark:text-gray-500">
-                    {{ Auth::user()->name }}
+                <div class="flex items-center text-4xl text-gray-700 shrink-0 dark:text-gray-500">
+                    {{ Auth::user()?->name ?? '' }}
                 </div>
             </div>
 
@@ -35,12 +35,12 @@
             <div class="hidden sm:flex sm:items-center sm:ms-6">
                 <!-- Teams Dropdown (se abilitato) -->
                 {{-- @if (Laravel\Jetstream\Jetstream::hasTeamFeatures())
-                    <div class="ms-3 relative">
+                    <div class="relative ms-3">
                         <x-dropdown align="right" width="60">
                             <x-slot name="trigger">
                                 <span class="inline-flex rounded-md">
                                     <button type="button"
-                                            class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none focus:bg-gray-50 dark:focus:bg-gray-700 active:bg-gray-50 dark:active:bg-gray-700 transition ease-in-out duration-150">
+                                            class="inline-flex items-center px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out bg-white border border-transparent rounded-md dark:text-gray-400 dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none focus:bg-gray-50 dark:focus:bg-gray-700 active:bg-gray-50 dark:active:bg-gray-700">
                                         {{ Auth::user()?->currentTeam?->name ?? 'Nessun team assegnato' }}
 
                                         <svg class="ms-2 -me-0.5 size-4" xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -88,20 +88,20 @@
                 @endif --}}
 
                 <!-- Settings Dropdown -->
-                <div class="ms-3 relative">
+                <div class="relative ms-3">
                     <x-dropdown align="right" width="48">
                         <x-slot name="trigger">
                             @if (Laravel\Jetstream\Jetstream::managesProfilePhotos())
                                 <button
-                                    class="flex text-sm border-2 border-transparent rounded-full focus:outline-none focus:border-gray-300 transition">
-                                    <img class="size-8 rounded-full object-cover" src="{{ Auth::user()->profile_photo_url }}"
-                                         alt="{{ Auth::user()->name }}"/>
+                                    class="flex text-sm transition border-2 border-transparent rounded-full focus:outline-none focus:border-gray-300">
+                                    <img class="object-cover rounded-full size-8" src="{{ Auth::user()?->profile_photo_url ?? null }}"
+                                         alt="{{ Auth::user()?->name ?? '' }}"/>
                                 </button>
                             @else
                                 <span class="inline-flex rounded-md">
                                     <button type="button"
-                                            class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none focus:bg-gray-50 dark:focus:bg-gray-700 active:bg-gray-50 dark:active:bg-gray-700 transition ease-in-out duration-150">
-                                        {{ Auth::user()->name }}
+                                            class="inline-flex items-center px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out bg-white border border-transparent rounded-md dark:text-gray-400 dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none focus:bg-gray-50 dark:focus:bg-gray-700 active:bg-gray-50 dark:active:bg-gray-700">
+                                        {{ Auth::user()?->name ?? '' }}
 
                                         <svg class="ms-2 -me-0.5 size-4" xmlns="http://www.w3.org/2000/svg" fill="none"
                                              viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -146,10 +146,10 @@
             </div>
 
             <!-- Sezione mobile (schermi piccoli) con due pulsanti: uno per la navbar, uno per la sidebar -->
-            <div class="-me-2 flex items-center sm:hidden">
+            <div class="flex items-center -me-2 sm:hidden">
                 <!-- Pulsante per togglare la SIDEBAR (Drawer DaisyUI) -->
                 <!-- Usa un'icona diversa per distinguere questo dal menu navbar -->
-                <label for="main-drawer" class="inline-flex items-center justify-center p-2 ms-2 rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900 focus:outline-none transition duration-150 ease-in-out">
+                <label for="main-drawer" class="inline-flex items-center justify-center p-2 text-gray-400 transition duration-150 ease-in-out rounded-md ms-2 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900 focus:outline-none">
                     <svg class="size-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                         <!-- Ad esempio puntini che simboleggiano la sidebar -->
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -158,7 +158,7 @@
                 </label>
 
                 <!-- Pulsante per togglare il menu della NAVBAR (Alpine) -->
-                <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900 focus:outline-none transition duration-150 ease-in-out">
+                <button @click="open = ! open" class="inline-flex items-center justify-center p-2 text-gray-400 transition duration-150 ease-in-out rounded-md dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900 focus:outline-none">
                     <svg class="size-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                         <!-- Icona hamburger (visibile quando open = false) -->
                         <path :class="{'inline-flex': ! open, 'hidden': open }" class="inline-flex"
@@ -189,14 +189,14 @@
             <div class="flex items-center px-4">
                 @if (Laravel\Jetstream\Jetstream::managesProfilePhotos())
                     <div class="shrink-0 me-3">
-                        <img class="size-10 rounded-full object-cover" src="{{ Auth::user()->profile_photo_url }}"
-                             alt="{{ Auth::user()->name }}" />
+                        <img class="object-cover rounded-full size-10" src="{{ Auth::user()?->profile_photo_url ?? null }}"
+                             alt="{{ Auth::user()?->name ?? '' }}" />
                     </div>
                 @endif
 
                 <div>
-                    <div class="font-medium text-base text-gray-800 dark:text-gray-200">{{ Auth::user()->name }}</div>
-                    <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
+                    <div class="text-base font-medium text-gray-800 dark:text-gray-200">{{ Auth::user()?->name ?? '' }}</div>
+                    <div class="text-sm font-medium text-gray-500">{{ Auth::user()?->email ?? '' }}</div>
                 </div>
             </div>
 
@@ -215,7 +215,7 @@
                 <form method="POST" action="{{ route('logout') }}" x-data>
                     @csrf
                     <x-responsive-nav-link href="{{ route('logout') }}"
-                                   @click.prevent="$root.submit();">
+                        @click.prevent="$root.submit();">
                         {{ __('Log Out') }}
                     </x-responsive-nav-link>
                 </form>

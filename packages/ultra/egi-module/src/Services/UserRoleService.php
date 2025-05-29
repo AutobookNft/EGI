@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Ultra\EgiModule\Services;
 
+use App\Models\Collection;
+use App\Models\CollectionUser;
 use App\Models\User;
 use Spatie\Permission\Models\Role;
 use Ultra\EgiModule\Contracts\UserRoleServiceInterface;
@@ -97,6 +99,7 @@ class UserRoleService implements UserRoleServiceInterface
 
         // Define custom error codes if not already defined in config
         $this->defineRoleErrorCodes();
+        $this->defineCollectionUserErrorCodes();
     }
 
     /**
@@ -346,6 +349,366 @@ class UserRoleService implements UserRoleServiceInterface
             'user_message' => 'Unable to load user list. Please try again later.',
             'http_status_code' => 500,
             'msg_to' => 'div',
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+        ]);
+    }
+
+    /**
+     * 🎯 Enhanced UserRoleService Method: Collection User Record Creation
+     *
+     * Adds collection-user pivot record creation with proper role assignment
+     * following Oracode 3.0 principles and UEM integration patterns.
+     *
+     * @oracode-dimension technical
+     * @value-flow Creates association records enabling creator permissions in collections
+     * @community-impact Enables proper access control for collection management
+     * @transparency-level Full audit trail of user-collection associations
+     * @sustainability-factor Maintains data integrity through proper relationship management
+     * @narrative-coherence Aligns with FlorenceEGI creator empowerment vision
+     */
+
+    /**
+     * 🎯 Creates a collection-user pivot record with proper role assignment
+     *
+     * Establishes the relationship between a user and collection in the pivot table
+     * with appropriate role, permissions, and metadata for FlorenceEGI operations.
+     *
+     * @param int $userId The ID of the user to associate with the collection
+     * @param int $collectionId The ID of the collection to associate the user with
+     * @param string $role The role to assign ('creator', 'collaborator', 'viewer', etc.)
+     * @param array $permissions Optional array of specific permissions for this association
+     * @param array $metadata Optional metadata for the relationship
+     * @return bool True if the record was created successfully, false otherwise
+     *
+     * @throws \InvalidArgumentException If invalid role or missing required data
+     *
+     * @oracode-dimension technical|governance
+     * @value-flow Enables access control and permission management for collections
+     * @community-impact Facilitates collaborative collection management
+     * @transparency-level Full logging of permission assignments
+     * @sustainability-factor Maintains referential integrity and audit trails
+     * @narrative-coherence Supports FlorenceEGI collaborative creation model
+     *
+     * @privacy-purpose Collection access control and permission management
+     * @privacy-data Creates association records with role and permission data
+     * @privacy-consideration Role assignments affect user data access capabilities
+     */
+    public function createCollectionUserRecord(
+        int $userId,
+        int $collectionId,
+        string $role = 'creator',
+        array $permissions = [],
+        array $metadata = []
+    ): bool {
+        // Create comprehensive context for logging and error handling
+        $context = [
+            'user_id' => $userId,
+            'collection_id' => $collectionId,
+            'role' => $role,
+            'operation' => 'create_collection_user_record',
+            'service' => static::class
+        ];
+
+        // Enhanced logging for operation start
+        $this->logger->info('[UserRoleService] Starting collection-user record creation', $context);
+
+        try {
+            // Enhanced validation with specific error contexts
+            $this->validateCollectionUserCreation($userId, $collectionId, $role, $context);
+
+            // Set default permissions based on role if none provided
+            if (empty($permissions)) {
+                $permissions = $this->getDefaultPermissionsForRole($role);
+            }
+
+            // Check for existing record to prevent duplicates
+            $existingRecord = CollectionUser::where('user_id', $userId)
+                ->where('collection_id', $collectionId)
+                ->first();
+
+            if ($existingRecord) {
+                // Update existing record if found
+                $updateResult = $this->updateExistingCollectionUserRecord(
+                    $existingRecord,
+                    $role,
+                    $permissions,
+                    $metadata,
+                    $context
+                );
+
+                if ($updateResult) {
+                    $this->logger->info('[UserRoleService] Updated existing collection-user record', [
+                        ...$context,
+                        'record_id' => $existingRecord->id,
+                        'action' => 'updated_existing'
+                    ]);
+                }
+
+                return $updateResult;
+            }
+
+            // Prepare enhanced record data
+            $recordData = [
+                'user_id' => $userId,
+                'collection_id' => $collectionId,
+                'role' => $role,
+                'is_owner' => $role === 'creator',
+                'joined_at' => now(),
+                'metadata' => array_merge([
+                    'created_via' => 'user_role_service',
+                    'permissions_assigned' => $permissions,
+                    'creation_timestamp' => now()->toISOString(),
+                    'created_by_service' => static::class
+                ], $metadata),
+                'status' => 'active'
+            ];
+
+            // Create the collection-user record
+            $collectionUser = CollectionUser::create($recordData);
+
+            if (!$collectionUser) {
+                throw new \Exception("Failed to create CollectionUser record - database operation returned false");
+            }
+
+            // Enhanced success logging
+            $successContext = array_merge($context, [
+                'collection_user_id' => $collectionUser->id,
+                'permissions_count' => count($permissions),
+                'is_owner' => $recordData['is_owner'],
+                'status' => 'created_successfully'
+            ]);
+
+            $this->logger->info('[UserRoleService] Collection-user record created successfully', $successContext);
+
+            // Optional: Also ensure Spatie role assignment for consistency
+            if ($role === 'creator') {
+                $this->assignCreatorRole($userId);
+            }
+
+            return true;
+
+        } catch (\InvalidArgumentException $e) {
+            // Handle validation errors
+            $validationContext = array_merge($context, [
+                'validation_error' => $e->getMessage(),
+                'error_type' => 'validation'
+            ]);
+
+            $this->logger->warning('[UserRoleService] Validation failed for collection-user record creation', $validationContext);
+
+            $this->errorManager->handle(
+                'COLLECTION_USER_VALIDATION_FAILED',
+                $validationContext,
+                $e,
+                false // Don't throw
+            );
+
+            return false;
+
+        } catch (\Throwable $e) {
+            // Handle all other errors
+            $errorContext = array_merge($context, [
+                'error_message' => $e->getMessage(),
+                'error_class' => get_class($e),
+                'error_file' => $e->getFile(),
+                'error_line' => $e->getLine()
+            ]);
+
+            $this->logger->error('[UserRoleService] Error creating collection-user record', $errorContext);
+
+            $this->errorManager->handle(
+                'COLLECTION_USER_CREATION_FAILED',
+                $errorContext,
+                $e,
+                false // Don't throw
+            );
+
+            return false;
+        }
+    }
+
+    /**
+     * 🛡️ Enhanced validation for collection-user record creation
+     *
+     * @param int $userId The user ID to validate
+     * @param int $collectionId The collection ID to validate
+     * @param string $role The role to validate
+     * @param array $context Logging context
+     * @throws \InvalidArgumentException If validation fails
+     *
+     * @oracode-dimension technical
+     * @value-flow Ensures data integrity for collection associations
+     * @transparency-level Validation rules are explicitly defined and logged
+     */
+    protected function validateCollectionUserCreation(int $userId, int $collectionId, string $role, array $context): void
+    {
+        // Validate user exists
+        $user = User::find($userId);
+        if (!$user) {
+            throw new \InvalidArgumentException("User with ID {$userId} not found");
+        }
+
+        // Validate collection exists
+        $collection = Collection::find($collectionId);
+        if (!$collection) {
+            throw new \InvalidArgumentException("Collection with ID {$collectionId} not found");
+        }
+
+        // Validate role is in allowed list
+        $allowedRoles = $this->getAllowedCollectionRoles();
+        if (!in_array($role, $allowedRoles)) {
+            throw new \InvalidArgumentException("Role '{$role}' is not allowed. Allowed roles: " . implode(', ', $allowedRoles));
+        }
+
+        // Log successful validation
+        $this->logger->debug('[UserRoleService] Collection-user creation validation passed', array_merge($context, [
+            'user_exists' => true,
+            'collection_exists' => true,
+            'role_valid' => true,
+            'allowed_roles' => $allowedRoles
+        ]));
+    }
+
+    /**
+     * 🎯 Get default permissions based on role
+     *
+     * @param string $role The role to get permissions for
+     * @return array Array of default permissions for the role
+     *
+     * @oracode-dimension governance
+     * @value-flow Defines standard permission sets for different roles
+     * @transparency-level Permission mappings are explicitly defined
+     */
+    protected function getDefaultPermissionsForRole(string $role): array
+    {
+        $permissionMap = [
+            'creator' => ['upload', 'edit', 'delete', 'publish', 'manage_collaborators', 'view_analytics'],
+            'collaborator' => ['upload', 'edit', 'view'],
+            'viewer' => ['view'],
+            'admin' => ['upload', 'edit', 'delete', 'publish', 'manage_collaborators', 'view_analytics', 'admin']
+        ];
+
+        return $permissionMap[$role] ?? ['view'];
+    }
+
+    /**
+     * 🔄 Update existing collection-user record
+     *
+     * @param CollectionUser $existingRecord The existing record to update
+     * @param string $role The new role
+     * @param array $permissions The new permissions
+     * @param array $metadata The new metadata
+     * @param array $context Logging context
+     * @return bool True if update successful
+     *
+     * @oracode-dimension technical
+     * @value-flow Updates association records maintaining audit trail
+     * @transparency-level All updates are logged with before/after states
+     */
+    protected function updateExistingCollectionUserRecord(
+        CollectionUser $existingRecord,
+        string $role,
+        array $permissions,
+        array $metadata,
+        array $context
+    ): bool {
+        try {
+            // Prepare update data
+            $updateData = [
+                'role' => $role,
+                'is_owner' => $role === 'creator',
+                'metadata' => array_merge($existingRecord->metadata ?? [], [
+                    'updated_via' => 'user_role_service',
+                    'permissions_updated' => $permissions,
+                    'last_update_timestamp' => now()->toISOString(),
+                    'updated_by_service' => static::class,
+                    'previous_role' => $existingRecord->role
+                ], $metadata),
+                'status' => 'active'
+            ];
+
+            // Log the update attempt
+            $this->logger->debug('[UserRoleService] Updating existing collection-user record', array_merge($context, [
+                'existing_record_id' => $existingRecord->id,
+                'previous_role' => $existingRecord->role,
+                'new_role' => $role,
+                'previous_is_owner' => $existingRecord->is_owner,
+                'new_is_owner' => $updateData['is_owner']
+            ]));
+
+            // Perform the update
+            $updateResult = $existingRecord->update($updateData);
+
+            if ($updateResult) {
+                $this->logger->info('[UserRoleService] Collection-user record updated successfully', array_merge($context, [
+                    'record_id' => $existingRecord->id,
+                    'update_successful' => true
+                ]));
+            }
+
+            return $updateResult;
+
+        } catch (\Throwable $e) {
+            $this->logger->error('[UserRoleService] Failed to update existing collection-user record', array_merge($context, [
+                'record_id' => $existingRecord->id,
+                'update_error' => $e->getMessage()
+            ]));
+
+            return false;
+        }
+    }
+
+    /**
+     * 📋 Get allowed collection roles
+     *
+     * @return array Array of allowed role names for collections
+     *
+     * @oracode-dimension governance
+     * @value-flow Defines valid roles for collection access control
+     * @transparency-level Role definitions are explicitly listed
+     */
+    protected function getAllowedCollectionRoles(): array
+    {
+        return [
+            'creator',
+            'collaborator',
+            'viewer',
+            'admin'
+        ];
+    }
+
+    /**
+     * 🧱 Define additional error codes for collection-user operations
+     *
+     * @return void
+     *
+     * @oracode-dimension technical
+     * @value-flow Enables standardized error handling for collection operations
+     * @transparency-level Error definitions are explicit and documented
+     */
+    protected function defineCollectionUserErrorCodes(): void
+    {
+        // Define error for collection-user validation failures
+        $this->errorManager->defineError('COLLECTION_USER_VALIDATION_FAILED', [
+            'type' => 'error',
+            'blocking' => 'not',
+            'dev_message' => 'Validation failed for collection-user record creation: :validation_error',
+            'user_message' => 'Unable to create collection association due to invalid data.',
+            'http_status_code' => 400,
+            'msg_to' => 'div',
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+        ]);
+
+        // Define error for collection-user creation failures
+        $this->errorManager->defineError('COLLECTION_USER_CREATION_FAILED', [
+            'type' => 'error',
+            'blocking' => 'semi-blocking',
+            'dev_message' => 'Failed to create collection-user record for user :user_id and collection :collection_id: :error_message',
+            'user_message' => 'There was a problem setting up collection access. Please try again or contact support.',
+            'http_status_code' => 500,
+            'msg_to' => 'sweet-alert',
             'devTeam_email_need' => false,
             'notify_slack' => false,
         ]);
