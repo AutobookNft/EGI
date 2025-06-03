@@ -240,20 +240,23 @@ class CollectionsController extends Controller
             $operationContext['creator_id'] = $user->id;
 
             // 🎯 OS1 Enhanced Validation with Semantic Coherence
-            $validated = $request->validate([
-                'collection_name' => [
-                    'required',
-                    'string',
-                    'min:2',
-                    'max:100',
-                    'regex:/^[a-zA-Z0-9\s\-_\'\"À-ÿ]+$/u' // Supports international chars
+            $validated = $request->validate(
+                [
+                    'collection_name' => [
+                        'required',
+                        'string',
+                        'min:2',
+                        'max:100',
+                        'regex:/^[a-zA-Z0-9\s\-_\'\"À-ÿ]+$/u' // Supports international chars
+                    ]
+                ],
+                [
+                    'collection_name.required' => __('validation.collection_name_required'),
+                    'collection_name.min' => __('validation.collection_name_min_length'),
+                    'collection_name.max' => __('validation.collection_name_max_length'),
+                    'collection_name.regex' => __('validation.collection_name_invalid_characters')
                 ]
-            ], [
-                'collection_name.required' => __('validation.collection_name_required'),
-                'collection_name.min' => __('validation.collection_name_min_length'),
-                'collection_name.max' => __('validation.collection_name_max_length'),
-                'collection_name.regex' => __('validation.collection_name_invalid_characters')
-            ]);
+            );
 
             $collectionName = trim($validated['collection_name']);
             $operationContext['collection_name'] = $collectionName;

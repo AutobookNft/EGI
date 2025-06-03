@@ -143,6 +143,11 @@ return [
     'url' => 'The :attribute must be a valid URL.',
     'uuid' => 'The :attribute must be a valid UUID.',
 
+    'collection_name_required' => 'Il nome della collezione è obbligatorio.',
+    'collection_name_min_length' => 'Il nome della collezione deve avere almeno 2 caratteri.',
+    'collection_name_max_length' => 'Il nome della collezione non può superare i 100 caratteri.',
+    'collection_name_invalid_characters' => 'Il nome della collezione contiene caratteri non validi.',
+
     /*
     |--------------------------------------------------------------------------
     | Custom Validation Language Lines
