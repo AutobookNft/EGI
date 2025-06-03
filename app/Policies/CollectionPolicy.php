@@ -21,7 +21,7 @@ class CollectionPolicy
      */
     public function view(User $user, Collection $collection): bool
     {
-        return $user->can('read_collection');
+        return $user->can('view_collection');
     }
 
     /**

@@ -21,7 +21,7 @@
         <!-- Sezione dei dati della collection -->
         @include('livewire.collection-manager-includes.data_section')
 
-        <div class="mt-6 bg-gray-900 p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 flex items-center justify-center">
+        <div class="flex items-center justify-center p-4 mt-6 transition-shadow duration-300 bg-gray-900 shadow-md rounded-xl hover:shadow-lg">
             <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
                 <!-- Bottone per aprire la vista per la gestione delle immagini di testata -->
                 <a href="{{ route('collections.head_images', ['id' => $collectionId]) }}" class="btn btn-primary btn-lg">
@@ -29,9 +29,11 @@
                 </a>
 
                 <!-- Bottone per aprire la vista dei membri della collection -->
-                <a href="{{ route('collections.collection_user', ['id' => $collectionId]) }}" class="btn btn-primary btn-lg">
-                    {{ __('collection.collection_members') }}
-                </a>
+                @if(App\Helpers\FegiAuth::can('update_team'))
+                    <a href="{{ route('collections.collection_user', ['id' => $collectionId]) }}" class="btn btn-primary btn-lg">
+                        {{ __('collection.collection_members') }}
+                    </a>
+                @endif
                 <!-- Bottone per il salvataggio -->
                 <div class="flex justify-end">
                     <x-form-button type="submit" style="primary" class="px-6">

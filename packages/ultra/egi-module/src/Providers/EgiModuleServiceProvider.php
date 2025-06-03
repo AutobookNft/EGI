@@ -33,7 +33,7 @@ class EgiModuleServiceProvider extends ServiceProvider
      * Log channel for this provider
      * @var string
      */
-    protected string $logChannel = 'egi_module';
+    protected string $logChannel = 'upload';
 
     /**
      * Register any application services.
@@ -99,15 +99,15 @@ class EgiModuleServiceProvider extends ServiceProvider
 
         // 8. Log successful registration in development
         if ($this->app->environment('local', 'testing')) {
-            Log::channel($this->logChannel)->info('EgiModule services registered with enhanced DI', [
-                'services' => [
-                    'EgiUploadHandler' => 'service-based architecture',
-                    'CollectionService' => 'full DI integration',
-                    'WalletService' => 'interface-based',
-                    'UserRoleService' => 'interface-based'
-                ],
-                'error_handling' => 'config/error-manager.php compliant'
-            ]);
+            // Log::channel($this->logChannel)->info('EgiModule services registered with enhanced DI', [
+            //     'services' => [
+            //         'EgiUploadHandler' => 'service-based architecture',
+            //         'CollectionService' => 'full DI integration',
+            //         'WalletService' => 'interface-based',
+            //         'UserRoleService' => 'interface-based'
+            //     ],
+            //     'error_handling' => 'config/error-manager.php compliant'
+            // ]);
         }
     }
 
@@ -189,21 +189,21 @@ class EgiModuleServiceProvider extends ServiceProvider
 
         // Log configuration in development
         if ($this->app->environment('local', 'testing')) {
-            Log::channel($this->logChannel)->debug('EgiModule service configurations booted', [
-                'storage_disks' => $this->app['config']->get('egi.storage.disks'),
-                'critical_disks' => $this->app['config']->get('egi.storage.critical_disks'),
-                'default_floor_price' => $this->app['config']->get('egi.default_floor_price'),
-                'max_collections_per_user' => $this->app['config']->get('egi.max_collections_per_user'),
-                'services_enabled' => [
-                    'collection_auto_create' => $this->app['config']->get('egi.services.collection.auto_create_default'),
-                    'wallet_auto_attach' => $this->app['config']->get('egi.services.wallet.auto_attach_defaults'),
-                    'role_auto_assign' => $this->app['config']->get('egi.services.role.auto_assign_creator')
-                ],
-                'error_handling' => [
-                    'localized_messages' => $this->app['config']->get('egi.error_handling.use_localized_messages'),
-                    'fallback_locale' => $this->app['config']->get('egi.error_handling.fallback_locale')
-                ]
-            ]);
+            // Log::channel($this->logChannel)->debug('EgiModule service configurations booted', [
+            //     'storage_disks' => $this->app['config']->get('egi.storage.disks'),
+            //     'critical_disks' => $this->app['config']->get('egi.storage.critical_disks'),
+            //     'default_floor_price' => $this->app['config']->get('egi.default_floor_price'),
+            //     'max_collections_per_user' => $this->app['config']->get('egi.max_collections_per_user'),
+            //     'services_enabled' => [
+            //         'collection_auto_create' => $this->app['config']->get('egi.services.collection.auto_create_default'),
+            //         'wallet_auto_attach' => $this->app['config']->get('egi.services.wallet.auto_attach_defaults'),
+            //         'role_auto_assign' => $this->app['config']->get('egi.services.role.auto_assign_creator')
+            //     ],
+            //     'error_handling' => [
+            //         'localized_messages' => $this->app['config']->get('egi.error_handling.use_localized_messages'),
+            //         'fallback_locale' => $this->app['config']->get('egi.error_handling.fallback_locale')
+            //     ]
+            // ]);
         }
     }
 

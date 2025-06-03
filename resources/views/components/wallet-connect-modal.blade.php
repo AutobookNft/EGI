@@ -1,7 +1,7 @@
-{{-- 📜 Oracode Component: NFT-Style Wallet Connection Modal with Secret Link --}}
-{{-- 🎯 Purpose: Enable weak authentication through wallet address + secret key --}}
-{{-- 🛡️ Security: Two-factor approach for secure wallet connection --}}
-{{-- 🎨 Design: NFT-themed with glassmorphism and gradients --}}
+{{-- 📜 Oracode Component: Unified FEGI Wallet Connection Modal --}}
+{{-- 🎯 Purpose: Single modal with multiple sections for FEGI flow --}}
+{{-- 🛡️ Security: FEGI-key based weak authentication --}}
+{{-- 🎨 Design: NFT-themed with glassmorphism and unified UX --}}
 
 <div id="connect-wallet-modal"
      class="fixed inset-0 z-[100] flex items-center justify-center hidden"
@@ -19,7 +19,7 @@
     <div class="relative transition-all duration-300 transform scale-95 opacity-0"
          id="connect-wallet-content"
          role="document">
-        <div class="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl w-11/12 md:w-[480px] border border-white/20 overflow-hidden">
+        <div class="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl w-11/12 md:w-[520px] border border-white/20 overflow-hidden">
 
             {{-- Header --}}
             <div class="relative p-6 bg-gradient-to-r from-purple-600 to-indigo-600">
@@ -32,194 +32,245 @@
                     </svg>
                 </button>
 
-                {{-- Icona animata --}}
-                <div class="flex justify-center mb-4" aria-hidden="true">
-                    <div class="flex items-center justify-center w-20 h-20 rounded-full bg-white/20 animate-pulse">
-                        <svg class="w-12 h-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                        </svg>
-                    </div>
-                </div>
-
-                <h2 id="connect-wallet-title"
-                    class="text-2xl font-bold text-center text-white">
-                    {{ __('collection.wallet.wallet_connect_title') }}
-                </h2>
-                <p id="connect-wallet-description"
-                   class="mt-2 text-center text-white/80">
-                    {{ __('collection.wallet.wallet_modal_subtitle') }}
-                </p>
-            </div>
-
-            {{-- Form --}}
-            <form id="connect-wallet-form"
-                  method="POST"
-                  action="{{ route('wallet.connect') }}"
-                  class="p-6"
-                  aria-labelledby="connect-wallet-title">
-                @csrf
-
-                {{-- Wallet address --}}
-                <div class="mb-6">
-                    <label for="wallet_address"
-                           class="block mb-2 text-sm font-medium text-white/90">
-                        {{ __('collection.wallet.wallet_address_label') }}
-                    </label>
-                    <div class="relative group">
-                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none"
-                             aria-hidden="true">
-                            <svg class="w-5 h-5 text-purple-400 group-focus-within:text-purple-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                {{-- Dynamic Header Content --}}
+                <div class="text-center">
+                    {{-- Icon container --}}
+                    <div class="flex justify-center mb-4" aria-hidden="true">
+                        <div id="header-icon" class="flex items-center justify-center w-20 h-20 rounded-full bg-white/20 animate-pulse">
+                            {{-- Default: Key icon --}}
+                            <svg id="icon-key" class="w-12 h-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
                             </svg>
-                        </div>
-                        <input type="text"
-                               name="wallet_address"
-                               id="wallet_address"
-                               required
-                               maxlength="58"
-                               class="w-full py-3 pl-10 pr-3 font-mono text-white transition border rounded-lg bg-white/10 border-purple-500/30 placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                               placeholder="{{ __('collection.wallet.wallet_address_placeholder') }}"
-                               aria-describedby="wallet-address-help wallet-error-message"
-                               aria-required="true">
-                    </div>
-                    <p id="wallet-address-help"
-                       class="mt-2 text-xs text-white/60">
-                        <span class="inline-flex items-center">
-                            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                            {{-- Plus icon for create --}}
+                            <svg id="icon-plus" class="hidden w-12 h-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                             </svg>
-                            {{ __('collection.wallet.wallet_address_help') }}
-                        </span>
+                            {{-- Check icon for success --}}
+                            <svg id="icon-check" class="hidden w-12 h-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                            {{-- Warning icon for credentials --}}
+                            <svg id="icon-warning" class="hidden w-12 h-12 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                            </svg>
+                        </div>
+                    </div>
+
+                    {{-- Dynamic Title --}}
+                    <h2 id="connect-wallet-title" class="text-2xl font-bold text-center text-white">
+                        {{ __('collection.wallet.fegi_connect_title') }}
+                    </h2>
+                    <p id="connect-wallet-description" class="mt-2 text-center text-white/80">
+                        {{ __('collection.wallet.fegi_modal_subtitle') }}
                     </p>
                 </div>
+            </div>
 
-                {{-- Secret field (hidden) --}}
-                <div id="secret-field" class="hidden mb-6">
-                    <label for="secret-input"
-                           class="block mb-2 text-sm font-medium text-white/90">
-                        {{ __('collection.wallet.wallet_secret_label') }}
-                    </label>
-                    <input type="text"
-                           name="secret"
-                           id="secret-input"
-                           maxlength="50"
-                           class="w-full px-3 py-3 font-mono text-white transition border rounded-lg bg-white/10 border-purple-500/30 placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                           placeholder="{{ __('collection.wallet.wallet_secret_placeholder') }}"
-                           aria-describedby="secret-help secret-error-message">
-                    <p id="secret-help"
-                       class="mt-2 text-xs text-white/60">
-                        {{ __('collection.wallet.wallet_secret_help') }}
-                    </p>
+            {{-- Main Content Area --}}
+            <div class="p-6">
+
+                {{-- SECTION 1: Mode Selection (Initial State) --}}
+                <div id="section-mode-selection" class="modal-section">
+                    <div class="mb-6 text-center">
+                        <p class="text-sm text-white/90">
+                            {{ __('collection.wallet.fegi_choose_option') }}
+                        </p>
+                    </div>
+
+                    <div class="space-y-4">
+                        {{-- Existing FEGI Key Option --}}
+                        <button id="btn-use-existing-fegi"
+                                type="button"
+                                class="w-full p-4 transition-all border rounded-lg border-white/20 bg-white/5 hover:bg-white/10 group">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 mr-4">
+                                    <svg class="w-8 h-8 text-blue-400 group-hover:text-blue-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1 1 21 9z" />
+                                    </svg>
+                                </div>
+                                <div class="text-left">
+                                    <h3 class="font-semibold text-white">{{ __('collection.wallet.fegi_use_existing') }}</h3>
+                                    <p class="text-sm text-white/70">{{ __('collection.wallet.fegi_use_existing_desc') }}</p>
+                                </div>
+                            </div>
+                        </button>
+
+                        {{-- Create New Account Option --}}
+                        <button id="btn-create-new-account"
+                                type="button"
+                                class="w-full p-4 transition-all border rounded-lg border-emerald-500/30 bg-emerald-900/20 hover:bg-emerald-800/30 group">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 mr-4">
+                                    <svg class="w-8 h-8 text-emerald-400 group-hover:text-emerald-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                    </svg>
+                                </div>
+                                <div class="text-left">
+                                    <h3 class="font-semibold text-white">{{ __('collection.wallet.fegi_create_new') }}</h3>
+                                    <p class="text-sm text-white/70">{{ __('collection.wallet.fegi_create_new_desc') }}</p>
+                                </div>
+                            </div>
+                        </button>
+                    </div>
                 </div>
 
-                {{-- Error container --}}
-                <div id="wallet-error-container"
-                     class="hidden mb-4"
-                     role="alert"
-                     aria-live="polite">
-                    <p id="wallet-error-message"
-                       class="text-sm text-red-400"></p>
+                {{-- SECTION 2: FEGI Input Form --}}
+                <div id="section-fegi-input" class="hidden modal-section">
+                    <form id="fegi-input-form" method="POST" action="{{ route('wallet.connect') }}">
+                        @csrf
+
+                        <div class="mb-6">
+                            <label for="fegi_key_input" class="block mb-2 text-sm font-medium text-white/90">
+                                {{ __('collection.wallet.fegi_key_label') }}
+                            </label>
+                            <div class="relative group">
+                                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none" aria-hidden="true">
+                                    <svg class="w-5 h-5 text-purple-400 group-focus-within:text-purple-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1 1 21 9z" />
+                                    </svg>
+                                </div>
+                                <input type="text"
+                                       name="fegi_key"
+                                       id="fegi_key_input"
+                                       required
+                                       pattern="FEGI-\d{4}-[A-Z0-9]{15}"
+                                       maxlength="25"
+                                       class="w-full py-3 pl-10 pr-3 font-mono text-white transition border rounded-lg bg-white/10 border-purple-500/30 placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                       placeholder="FEGI-2025-ABC123DEF456GHI"
+                                       aria-describedby="fegi-key-help"
+                                       aria-required="true">
+                            </div>
+                            <p id="fegi-key-help" class="mt-2 text-xs text-white/60">
+                                {{ __('collection.wallet.fegi_key_help') }}
+                            </p>
+                        </div>
+
+                        <div class="flex gap-3">
+                            <button id="btn-back-to-selection"
+                                    type="button"
+                                    class="flex-1 px-4 py-3 text-sm font-medium transition-all border rounded-lg text-white/70 hover:text-white border-white/20 hover:bg-white/10">
+                                ← {{ __('collection.wallet.fegi_back_to_options') }}
+                            </button>
+                            <button type="submit"
+                                    id="fegi-submit-button"
+                                    class="flex-1 px-6 py-3 font-semibold text-white transition-all duration-300 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                                <span id="fegi-submit-text">{{ __('collection.wallet.fegi_connect_button') }}</span>
+                            </button>
+                        </div>
+                    </form>
                 </div>
 
-                {{-- Submit button --}}
-                <button type="submit"
-                        id="connect-wallet-submit"
-                        class="relative w-full px-6 py-3 overflow-hidden font-semibold text-white transition-all duration-300 rounded-lg group bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
-                        aria-busy="false"
-                        aria-disabled="false">
-                    <svg class="hidden w-5 h-5 mr-3 -ml-1 text-white animate-spin"
-                         xmlns="http://www.w3.org/2000/svg"
-                         fill="none"
-                         viewBox="0 0 24 24"
-                         aria-hidden="true">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    <span id="connect-wallet-button-text">{{ __('collection.wallet.wallet_connect_button') }}</span>
-                </button>
+                {{-- SECTION 3: Create Account Loading --}}
+                <div id="section-create-loading" class="hidden modal-section">
+                    <div class="py-8 text-center">
+                        <div class="inline-flex items-center justify-center w-16 h-16 mb-6 rounded-full bg-emerald-500/20">
+                            <svg class="w-8 h-8 text-emerald-400 animate-spin" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="m15.84 10.02l1.42-1.42a6 6 0 00-8.52 0l1.42 1.42a4 4 0 015.68 0zM12 6a6 6 0 016 6h-2a4 4 0 00-4-4V6z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="mb-2 text-xl font-semibold text-white">{{ __('collection.wallet.fegi_creating_account') }}</h3>
+                        <p class="text-sm text-white/70">{{ __('collection.wallet.fegi_creating_account_desc') }}</p>
+                    </div>
+                </div>
+
+                {{-- SECTION 4: Credentials Display --}}
+                <div id="section-credentials-display" class="hidden modal-section">
+                    <div class="mb-6 text-center">
+                        <h3 class="mb-2 text-xl font-semibold text-white">{{ __('collection.wallet.fegi_credentials_generated_title') }}</h3>
+                        <p class="text-sm text-white/70">{{ __('collection.wallet.fegi_credentials_success_desc') }}</p>
+                    </div>
+
+                    {{-- Algorand Address Display --}}
+                    <div class="p-4 mb-4 border rounded-lg bg-white/10 backdrop-blur-sm border-white/20">
+                        <p class="mb-2 text-xs tracking-wider uppercase text-white/60">
+                            {{ __('collection.wallet.fegi_your_algorand_address') }}
+                        </p>
+                        <p id="display-algorand-address" class="font-mono text-sm font-bold text-blue-300 break-all select-all"></p>
+                    </div>
+
+                    {{-- FEGI Key Display --}}
+                    <div class="p-4 mb-6 border rounded-lg bg-white/10 backdrop-blur-sm border-white/20">
+                        <p class="mb-2 text-xs tracking-wider uppercase text-white/60">
+                            {{ __('collection.wallet.fegi_your_fegi_key') }}
+                        </p>
+                        <p id="display-fegi-key" class="font-mono text-lg font-bold break-all select-all text-emerald-300"></p>
+                    </div>
+
+                    {{-- Warning Message --}}
+                    <div class="p-4 mb-6 border rounded-lg bg-red-900/30 border-red-400/30 backdrop-blur-sm">
+                        <p class="text-sm text-red-300">
+                            <strong>{{ __('collection.wallet.fegi_credentials_warning_title') }}</strong><br>
+                            {{ __('collection.wallet.fegi_credentials_warning_text') }}
+                        </p>
+                    </div>
+
+                    {{-- Actions --}}
+                    <div class="space-y-3">
+                        <button id="btn-copy-credentials"
+                                type="button"
+                                class="inline-flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-white transition border rounded-md shadow-sm border-purple-400/30 bg-white/10 backdrop-blur-sm hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-4M16 3h4v4m0-4L10 13"/>
+                            </svg>
+                            <span id="copy-credentials-text">{{ __('collection.wallet.fegi_copy_credentials') }}</span>
+                        </button>
+
+                        <label class="flex items-center text-white">
+                            <input type="checkbox"
+                                   id="save-fegi-locally"
+                                   class="text-purple-600 rounded border-purple-400/30 focus:ring-purple-500 bg-white/10">
+                            <span class="ml-2 text-sm text-white/80">
+                                {{ __('collection.wallet.fegi_save_locally') }}
+                            </span>
+                        </label>
+
+                        <button id="btn-confirm-credentials-saved"
+                                type="button"
+                                class="inline-flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-white transition border border-transparent rounded-md shadow-sm bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                            {{ __('collection.wallet.fegi_confirm_saved') }}
+                        </button>
+                    </div>
+                </div>
+
+                {{-- Error container (sempre visibile se necessario) --}}
+                <div id="wallet-error-container" class="hidden mt-4" role="alert" aria-live="polite">
+                    <div class="p-4 border rounded-lg bg-red-900/30 border-red-400/30 backdrop-blur-sm">
+                        <p id="wallet-error-message" class="text-sm text-red-300"></p>
+                    </div>
+                </div>
 
                 {{-- Registration link --}}
-                <p class="mt-4 text-xs text-center text-white/60">
-                    {{ __('collection.wallet.wallet_weak_auth_info') }}
-                    <a href="{{ route('register') }}"
-                       class="text-purple-400 underline transition-colors hover:text-purple-300">
-                        {{ __('collection.wallet.wallet_register_full') }}
+                <p class="mt-6 text-xs text-center text-white/60">
+                    {{ __('collection.wallet.fegi_weak_auth_info') }}
+                    <a href="{{ route('register') }}" class="text-purple-400 underline transition-colors hover:text-purple-300">
+                        {{ __('collection.wallet.fegi_register_full') }}
                     </a>
                 </p>
-            </form>
-        </div>
-    </div>
-</div>
-
-{{-- Secret Display Modal (for new users) --}}
-<div id="secret-display-modal"
-     class="fixed inset-0 z-[101] flex items-center justify-center hidden"
-     role="dialog"
-     aria-modal="true"
-     aria-labelledby="secret-display-title">
-
-    <div class="absolute inset-0 bg-gradient-to-br from-purple-900/90 via-black/95 to-indigo-900/90 backdrop-blur-sm"
-         aria-hidden="true"></div>
-
-    <div class="relative bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl w-11/12 md:w-[480px] border border-white/20 overflow-hidden p-6">
-
-        {{-- Important Icon --}}
-        <div class="flex justify-center mb-4">
-            <div class="p-4 rounded-full bg-yellow-400/20 backdrop-blur-sm">
-                <svg class="w-10 h-10 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                </svg>
             </div>
         </div>
-
-        {{-- Title --}}
-        <h3 id="secret-display-title"
-            class="mb-4 text-2xl font-bold text-center text-white">
-            {{ __('collection.wallet.wallet_secret_generated_title') }}
-        </h3>
-
-        {{-- Secret Display --}}
-        <div class="p-4 mb-4 border rounded-lg bg-white/10 backdrop-blur-sm border-white/20">
-            <p class="mb-2 text-xs tracking-wider uppercase text-white/60">
-                {{ __('collection.wallet.wallet_your_secret_key') }}
-            </p>
-            <p id="generated-secret"
-               class="font-mono text-lg font-bold text-white break-all select-all"></p>
-        </div>
-
-        {{-- Warning Message --}}
-        <div class="p-4 mb-6 border rounded-lg bg-red-900/30 border-red-400/30 backdrop-blur-sm">
-            <p class="text-sm text-red-300">
-                <strong>{{ __('collection.wallet.wallet_secret_warning_title') }}</strong><br>
-                {{ __('collection.wallet.wallet_secret_warning_text') }}
-            </p>
-        </div>
-
-        {{-- Actions --}}
-        <div class="space-y-3">
-            <button id="copy-secret-button"
-                    type="button"
-                    class="inline-flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-white transition border rounded-md shadow-sm border-purple-400/30 bg-white/10 backdrop-blur-sm hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-4M16 3h4v4m0-4L10 13"/>
-                </svg>
-                {{ __('collection.wallet.wallet_copy_secret') }}
-            </button>
-
-            <label class="flex items-center text-white">
-                <input type="checkbox"
-                       id="save-secret-locally"
-                       class="text-purple-600 rounded border-purple-400/30 focus:ring-purple-500 bg-white/10">
-                <span class="ml-2 text-sm text-white/80">
-                    {{ __('collection.wallet.wallet_save_secret_locally') }}
-                </span>
-            </label>
-
-            <button id="confirm-secret-saved"
-                    type="button"
-                    class="inline-flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-white transition border border-transparent rounded-md shadow-sm bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-                {{ __('collection.wallet.wallet_confirm_saved') }}
-            </button>
-        </div>
     </div>
 </div>
+
+<style>
+/* Transizioni smooth per le sezioni */
+.modal-section {
+    transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+
+.modal-section.hidden {
+    opacity: 0;
+    transform: translateY(10px);
+    pointer-events: none;
+}
+
+.modal-section:not(.hidden) {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Animazione icone header */
+#header-icon svg {
+    transition: all 0.3s ease-in-out;
+}
+</style>

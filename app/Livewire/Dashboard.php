@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Helpers\FegiAuth;
 use App\Models\CustomDatabaseNotification;
 use App\Models\User;
 use App\Services\Notifications\NotificationHandlerFactory;
@@ -27,36 +28,93 @@ class Dashboard extends Component
     public $historicalNotifications = [];
 
     public $activeNotificationId = null;
+    protected $user_id;
 
     public function mount()
     {
+        $user = FegiAuth::user();
 
-        Log::channel('florenceegi')->info('Dashboard: mount');
+        $this->user_id = $user?->id; // Salva l'ID utente se esiste, altrimenti sarà null
 
-        $this->loadStats();
-        $this->loadNotifications();
+        // Log lo stato finale dell'utente recuperato in mount
+        Log::channel('florenceegi')->info('>>> DASHBOARD USER STATUS IN MOUNT', [
+            'user_id' => $user?->id, // Usa l'operatore nullsafe per evitare errori se $user è null
+            'auth_type' => FegiAuth::getAuthType(),
+            'user_is_null' => $user === null, // Log esplicitamente se $user è null
+            'is_strong_auth' => FegiAuth::isStrongAuth(), // Log lo stato del flag forte
+            'is_weak_auth' => FegiAuth::isWeakAuth(),     // Log lo stato del flag debole
+        ]);
 
-        // Se ci sono notifiche pendenti, seleziona automaticamente la prima
-        if ($this->pendingNotifications->isNotEmpty()) {
-            $this->activeNotificationId = $this->pendingNotifications->first()->id;
+        // *** LOGICA DEL COMPONENTE CHE DIPENDE DALL'UTENTE ***
+
+        // Ora puoi usare la variabile $user e i flag $isStrongAuth o $isWeakAuth
+        // per decidere cosa mostrare o caricare.
+
+        // Carica stats e notifiche SOLO se un utente è autenticato (forte o debole)
+        if ($user) { // $user conterrà l'istanza User se trovata dalla logica sopra
+            // Chiama loadStats passandogli solo l'ID utente
+            $this->loadStats(); // <-- Modifica QUI (passa solo l'ID utente)
+
+            // loadNotifications probabilmente ha bisogno almeno dell'ID utente.
+            // Assicurati che loadNotifications sia adattato per accettare $user->id se necessario.
+            $this->loadNotifications();
+
+            // Se ci sono notifiche pendenti...
+            if (isset($this->pendingNotifications) && $this->pendingNotifications->isNotEmpty()) {
+                $this->activeNotificationId = $this->pendingNotifications->first()->id;
+            }
+        } else {
+            // Gestisci il caso ospite (utente è null)
+            Log::channel('florenceegi')->info('Dashboard: mount - User is guest, skipping privileged actions.');
+            // Inizializza *tutte* le proprietà rilevanti per evitare errori nelle viste.
+            $this->collectionsCount = 0;
+            $this->collectionMembersCount = 0; // <-- Inizializza la nuova proprietà qui!
+            $this->pendingNotifications = collect();
+            $this->historicalNotifications = collect();
+            $this->activeNotificationId = null;
+            // ... potresti voler reindirizzare o mostrare un messaggio ...
         }
+
+        // IMPORTANTISSIMO: Per estrema sicurezza, inizializza le proprietà anche fuori dai blocchi if/else
+        // per garantire che esistano sempre per la vista.
+        if (!isset($this->collectionsCount)) $this->collectionsCount = 0;
+        if (!isset($this->collectionMembersCount)) $this->collectionMembersCount = 0;
+        // if (!isset($this->collectionMembersCount)) $this->collectionMembersCount = 0; // Se usi ancora questa property
+        if (!isset($this->pendingNotifications)) $this->pendingNotifications = collect();
+        if (!isset($this->historicalNotifications)) $this->historicalNotifications = collect();
+        if (!isset($this->activeNotificationId)) $this->activeNotificationId = null;
     }
 
+    /**
+     * @Oracode Load Dashboard Stats
+     * 🎯 Purpose: Load collection count for the user and member count for a specific collection
+     * 🧱 Core Logic: Query database based on provided user ID and collection ID
+     * @param int $userId The ID of the user (for created collections count)
+     * @param int $collectionId The ID of the specific collection to count members for
+     */
     public function loadStats()
     {
-        $this->collectionsCount = Collection::where('creator_id', Auth::id())->count();
+        Log::channel('florenceegi')->info('Dashboard: loadStats - Started', ['for_user_id' => $this->user_id]);
 
-        $this->collectionMembersCount = CollectionUser::whereHas('collection', function ($query) {
-            $query->where('creator_id', Auth::id());
+        // Conta le collection create da questo utente (Usa $userId)
+        $this->collectionsCount = Collection::where('creator_id', $this->user_id)->count();
+
+            // Conta il numero TOTALE di membri UNICI presenti nelle collection create da questo utente.
+        // Questa query filtra CollectionUser entries dove:
+        // 1. L'entry CollectionUser appartiene a una Collection...
+        // 2. ...la quale Collection è stata creata da $userId.
+        // 3. Contiamo gli user_id distinti tra questi risultati.
+        // Questo conteggio INCLUDE il creatore stesso se è presente nella tabella collection_user
+        // per una delle sue collection.
+
+        $userId = $this->user_id; // Assicurati di usare l'ID utente corretto (non posso usare $this->user_id perché la closer non lo riconosce)
+        $this->collectionMembersCount = CollectionUser::whereHas('collection', function ($query) use ($userId) {
+            // Dentro whereHas, $query si riferisce al builder per il modello Collection.
+            $query->where('creator_id', $userId);
         })
-        ->where('user_id', '!=', Auth::id())
+        ->distinct('user_id') // <-- Conta solo i user_id unici tra le entry filtrate
         ->count();
 
-
-        Log::channel('florenceegi')->info('Dashboard: loadStats', [
-            'collectionsCount' => $this->collectionsCount,
-            'collectionMembersCount' => $this->collectionMembersCount,
-        ]);
     }
 
     /**
@@ -118,10 +176,13 @@ class Dashboard extends Component
     #[On('deleteNotification')]
     public function deleteNotification($notificationId)
     {
+
+        $user = FegiAuth::user();
+
         Log::channel('florenceegi')->info('🗑 deleteNotificationAction() - Deleting notification:', [
             'notificationId' => $notificationId,
         ]);
-        $notification = Auth::user()->notifications()->findOrFail($notificationId);
+        $notification = $user->notifications()->findOrFail($notificationId);
         $notification->delete();
 
         $this->loadNotifications();
@@ -129,8 +190,9 @@ class Dashboard extends Component
     #[On('load-notifications')]
     public function loadNotifications()
     {
+        $user = FegiAuth::user();
         // Usa optional() per evitare errori se user è null
-        $this->pendingNotifications = optional(Auth::user())->customNotifications()
+        $this->pendingNotifications = optional($user)->customNotifications()
             ?->where(function ($query) {
                 $query->where('outcome', 'LIKE', '%pending%')
                     ->orWhere(function ($subQuery) {
@@ -148,7 +210,7 @@ class Dashboard extends Component
         ]);
 
         // Notifiche storiche
-        $this->historicalNotifications = optional(Auth::user())->customNotifications()
+        $this->historicalNotifications = optional($user)->customNotifications()
             ?->whereNotNull('read_at')
             ->with('model')
             ->orderBy('read_at', 'desc')
@@ -166,8 +228,14 @@ class Dashboard extends Component
     public function handleNotificationAction($notificationId, $action)
     {
 
+        $user = FegiAuth::user();
+        Log::channel('florenceegi')->info('🔔 handleNotificationAction() - Handling notification action:', [
+            'notificationId' => $notificationId,
+            'action' => $action,
+        ]);
+
         // crea il record della notifica corrente, per trovare i dati necessari alla risposta
-        $notification = Auth::user()->notifications()->findOrFail($notificationId);
+        $notification = $user->notifications()->findOrFail($notificationId);
 
         $type = $notification->type;
 
@@ -212,7 +280,13 @@ class Dashboard extends Component
             return null;
         }
 
-        $notification = Auth::user()
+        $user = FegiAuth::user();
+        if (!$user) {
+            Log::channel('florenceegi')->error('❌ getActiveNotification() - User not authenticated!');
+            return null;
+        }
+
+        $notification = $user
             ->customNotifications()
             ->where('id', $this->activeNotificationId)
             ->with('model')
@@ -243,8 +317,8 @@ class Dashboard extends Component
     public function render()
     {
         return view('livewire.dashboard', [
-            'pendingNotifications' => $this->pendingNotifications ?? [],
-            'historicalNotifications' => $this->historicalNotifications ?? [],
+            'pendingNotifications' => $this->pendingNotifications ?? collect(),
+            'historicalNotifications' => $this->historicalNotifications ?? collect(),
         ]);
     }
 }

@@ -68,7 +68,7 @@
                                 {{-- MODIFICA 7: Stile per il contenuto del sottomenu --}}
                                 <div class="pt-2 pb-1 pl-6 pr-2 space-y-1 collapse-content">
                                     @foreach ($menu['items'] as $item)
-                                        @if (empty($item['permission']) || Gate::allows($item['permission']))
+                                        @if (!empty($item['permission']))
                                             @php
                                                 $isItemActive = ($currentRouteName == $item['route']);
                                             @endphp

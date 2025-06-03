@@ -132,6 +132,13 @@ return [
             'days' => 7,  // Numero di giorni per cui conservare i log
         ],
 
+        'egi_upload' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/egi_upload.log'),
+            'level' => 'debug',
+            'days' => 7,  // Numero di giorni per cui conservare i log
+        ],
+
         'javascript' => [
             'driver' => 'daily',
             'path' => storage_path('logs/javascript.log'),

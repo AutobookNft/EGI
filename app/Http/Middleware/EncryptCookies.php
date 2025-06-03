@@ -18,7 +18,7 @@ class EncryptCookies extends Middleware
 
     public function handle($request, \Closure $next)
     {
-        Log::channel('upload')->info('EncryptCookies: except array', ['except' => $this->except]);
+        // Log::channel('upload')->info('EncryptCookies: except array', ['except' => $this->except]);
         return parent::handle($request, $next);
     }
 }

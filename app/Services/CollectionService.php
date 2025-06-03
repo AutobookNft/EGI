@@ -95,11 +95,15 @@ class CollectionService
      * @oracode-enhanced-error-handling Improved error context and UEM integration
      * @oracode-upload-handler-compatible Designed for seamless EgiUploadHandler integration
      */
-    public function createDefaultCollection(User $user): Collection|JsonResponse
+    public function createDefaultCollection(User $user, ?bool $isDefault = true, ?string $collectionName = ''): Collection|JsonResponse
     {
         // Enhanced name sanitization
         $firstName = $this->sanitizeUserName($user->name);
-        $collectionName = "{$firstName}'s Collection";
+
+        if (empty($collectionName)) {
+            // Use sanitized first name if no collection name provided
+            $collectionName = "{$firstName}'s Collection";
+        }
 
         $logContext = [
             'creator_id' => $user->id,
@@ -118,7 +122,7 @@ class CollectionService
                 'creator_id'      => $user->id,
                 'owner_id'        => $user->id,
                 'epp_id'          => config('app.epp_id'),
-                'is_default'      => true,
+                'is_default'      => $isDefault,
                 'collection_name' => $collectionName,
                 'description'     => trans('collection.default_description', [], 'en') ?: 'Default collection automatically created for single EGI uploads.',
                 'creator_id'      => $user->id,

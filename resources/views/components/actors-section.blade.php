@@ -19,7 +19,7 @@
             </p>
         </div>
 
-        <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4 md:gap-10">
+        <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-5 md:gap-10">
 
             {{-- Card 1: Artisti / Creator --}}
             <x-actor-card
@@ -79,6 +79,21 @@
                 ctaBgColorClass="bg-arancio-energia"
                 ctaTextColorClass="text-white"
                 ctaHoverBgColorClass="hover:bg-orange-600"
+            />
+
+            {{-- Card 5: Trader Pro EGI pt --}}
+            <x-actor-card
+                icon="monitoring"
+                :title="__('guest_home.actor_trader_pro_title')"
+                :message="__('guest_home.actor_trader_pro_message')"
+                :ctaText="__('guest_home.actor_trader_pro_cta')"
+                ctaLink="{{ route('register') }}?role=trader_pro"
+                ctaIcon="trending_up"
+                accentColorClass="border-t-4 border-verde-trading"
+                iconColorClass="text-verde-trading"
+                ctaBgColorClass="bg-verde-trading"
+                ctaTextColorClass="text-white"
+                ctaHoverBgColorClass="hover:bg-green-600"
             />
         </div>
     </div>

@@ -1,0 +1,39 @@
+/* OS1 Context-Aware Styling for Create Collection Modal */
+
+/* Dashboard Theme Adjustments */
+.modal-context-dashboard #create-collection-modal-container.dashboard-theme {
+    @apply bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700;
+}
+
+.modal-context-dashboard #create-collection-modal-container.dashboard-theme header {
+    @apply bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600;
+}
+
+.modal-context-dashboard #create-collection-modal-container.dashboard-theme h2 {
+    @apply text-gray-900 dark:text-gray-100;
+}
+
+.modal-context-dashboard #create-collection-modal-container.dashboard-theme p {
+    @apply text-gray-600 dark:text-gray-400;
+}
+
+.modal-context-dashboard #create-collection-modal-container.dashboard-theme input {
+    @apply bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100;
+}
+
+.modal-context-dashboard #create-collection-modal-container.dashboard-theme footer {
+    @apply bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600;
+}
+
+/* Guest Theme (Default - preserved as is) */
+.modal-context-guest #create-collection-modal-container {
+    /* Uses existing dark theme styling */
+}
+
+/* Responsive Enhancements */
+@media (max-width: 640px) {
+    .modal-context-dashboard #create-collection-modal-container,
+    .modal-context-guest #create-collection-modal-container {
+        @apply w-full mx-2 max-w-none;
+    }
+}

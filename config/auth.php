@@ -40,6 +40,11 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+
+        'fegi' => [
+            'driver' => 'fegi',
+            'provider' => 'users',
+        ],
     ],
 
     /*

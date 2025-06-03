@@ -49,7 +49,7 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@6.6.6/css/flag-icons.min.css" media="print" onload="this.media='all'">
 
         {{-- Application Assets --}}
-        @vite(['resources/css/app.css', 'resources/css/gdpr.css', 'resources/js/app.js'])
+        @vite(['resources/css/app.css', 'resources/css/gdpr.css', 'resources/js/app.js','resources/js/components/create-collection-modal.js'])
 
         {{-- Oracode 3.0: Allow child views to inject custom styles (Pillar #5 - Predisposed to Variation) --}}
         @stack('styles')
@@ -188,6 +188,20 @@
                 }
             });
         </script>
+
+         <!-- OS1 Modals Section -->
+        @include('components.create-collection-modal')
+
+        <!-- OS1 User Collection Data for Dashboard Context -->
+        @auth
+        <script type="application/json" id="user-collection-data">
+        {
+            "total_collections": {{ auth()->user()->collections()->count() }},
+            "max_allowed": {{ config('egi.max_collections_per_user', 10) }},
+            "context": "dashboard"
+        }
+        </script>
+        @endauth
 
         {{-- Oracode 3.0: Allow child views to inject custom scripts --}}
         @stack('scripts')

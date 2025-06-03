@@ -141,6 +141,7 @@ html, body {
                             <div id="collection-list-error" class="hidden px-4 py-3 text-sm text-center text-red-400" role="alert">{{ __('guest_layout.error_loading_galleries') }}</div>
                         </div>
                     </div>
+
                     <!-- Wallet e Auth -->
                     <span class="h-6 mx-2 border-l border-gray-700" aria-hidden="true"></span>
                     <div id="current-collection-badge-container" class="items-center hidden ml-2">
@@ -149,6 +150,7 @@ html, body {
                             <span id="current-collection-badge-name"></span>
                         </a>
                     </div>
+
                     <div id="wallet-cta-container" class="ml-2">
                         <button id="connect-wallet-button" type="button" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" aria-label="{{ __('guest_layout.connect_wallet_aria_label') }}">
                             <svg class="w-5 h-5 mr-2 -ml-1" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a2.25 2.25 0 0 0-2.25-2.25H15a3 3 0 1 1-6 0H5.25A2.25 2.25 0 0 0 3 12m18 0v6a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 18v-6m18 0V9M3 12V9m18 3a2.25 2.25 0 0 0-2.25-2.25H15a3 3 0 1 0-6 0H5.25A2.25 2.25 0 0 0 3 12m15-3a3 3 0 0 0-3-3H6a3 3 0 0 0-3 3m12 6v2.25a2.25 2.25 0 0 1-2.25 2.25H9a2.25 2.25 0 0 1-2.25-2.25V15m3 0a3 3 0 0 0-3-3H6a3 3 0 0 0-3 3m9 0a3 3 0 0 0 3-3h1.5a3 3 0 0 0 3 3" /></svg>
@@ -223,6 +225,17 @@ html, body {
                             </button>
                         </div>
                     </div>
+                </div>
+                <!-- Create Collection CTA (OS1 Guest Integration) -->
+                <div class="ml-2">
+                    <button type="button"
+                            data-action="open-create-collection-modal"
+                            class="inline-flex items-center px-4 py-2 text-sm font-medium font-semibold text-gray-900 transition-all duration-200 border border-transparent rounded-md shadow-sm bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 focus:ring-offset-gray-900 font-source-sans"
+                            aria-label="{{ __('collection.create_new_collection') }}">
+                        <span class="mr-2 text-sm material-symbols-outlined" aria-hidden="true">add</span>
+                        <span class="hidden sm:inline">{{ __('collections.create') }}</span>
+                        <span class="sm:hidden">{{ __('collection.new') }}</span>
+                    </button>
                 </div>
                 <div class="flex justify-center gap-3" id="mobile-login-register-buttons">
                     <a href="{{ route('login') }}" class="flex-1 px-4 py-2.5 text-sm font-medium text-center text-gray-300 bg-gray-800 border border-gray-700 rounded-md hover:bg-gray-700 hover:text-white" aria-label="{{ __('guest_layout.mobile_login_link_aria_label') }}">{{ __('guest_layout.login') }}</a>
@@ -367,10 +380,17 @@ html, body {
         <button type="submit" class="sr-only">{{ __('guest_layout.logout_sr_button') }}</button>
     </form>
 
+    <!-- Create Collection Modal (OS1 Integration) -->
+    @include('components.create-collection-modal')
 
     <!-- Scripts -->
     @include('layouts.guest_script')
-    @vite(['resources/js/guest.js', 'resources/js/polyfills.js', 'resources/ts/main.ts', 'resources/js/app.js'])
+    @vite([
+        'resources/js/guest.js',
+        'resources/js/polyfills.js',
+        'resources/ts/main.ts',
+        'resources/js/app.js',
+        'resources/js/components/create-collection-modal.js'])
     @stack('scripts')
 </body>
 </html>

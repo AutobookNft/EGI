@@ -19,7 +19,7 @@ class OpenCollectionMenu extends MenuItem
             'menu.open_collection',
             'collections.open',
             'open_collection',
-            'view_collection'
+            'open_collection'
         );
     }
 }

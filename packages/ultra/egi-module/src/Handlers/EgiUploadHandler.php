@@ -634,6 +634,12 @@ class EgiUploadHandler
             $criticalDisks = array_intersect($criticalDisksConfig, $storageDisks);
         }
 
+        Log::channel($this->logChannel)->info('[EGI Upload] Storage disks configured', [
+            ...$logContext,
+            'disks' => $storageDisks,
+            'critical_disks' => $criticalDisks
+        ]);
+
         $savedInfo = [];
         $errors = [];
 
@@ -686,6 +692,14 @@ class EgiUploadHandler
         // Check critical failures with enhanced fallback
         $criticalFailures = array_intersect_key($errors, array_flip($criticalDisks));
 
+        Log::channel($this->logChannel)->debug('[EGI Upload] DEBUG SUMMARY', [
+            'saved_info' => $savedInfo,
+            'errors' => $errors,
+            'critical_disks' => $criticalDisks,
+            'critical_failures' => $criticalFailures
+        ]);
+
+
         if (!empty($criticalFailures) && empty($savedInfo)) {
             // All disks failed including critical ones, try emergency fallback
             if (!isset($errors['public'])) {
@@ -717,6 +731,11 @@ class EgiUploadHandler
                 'failed_disks' => array_keys($errors)
             ]);
         }
+
+        Log::channel($this->logChannel)->info('[EGI Upload] Upload completed. Returning saved info.', [
+            'saved_info' => $savedInfo,
+            'errors' => $errors
+        ]);
 
         return $savedInfo;
     }

@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Collections;
 
+use App\Helpers\FegiAuth;
 use App\Models\Collection;
 use App\Repositories\IconRepository;
 use Illuminate\Support\Facades\Auth;
@@ -70,7 +71,7 @@ class CollectionOpen extends Component
     public function loadCollections()
     {
         // Recupera l'utente autenticato
-        $this->user = Auth::user();
+        $this->user = FegiAuth::user();
 
         $user = $this->user; // Nella callback non si puù usare $this per questo motivo si crea una variabile locale
 

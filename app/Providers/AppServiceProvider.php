@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Auth\Guards\FegiGuard;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Repositories\IconRepository;
 use App\Services\FileStorageService;
@@ -30,6 +31,8 @@ use Ultra\ErrorManager\Interfaces\ErrorManagerInterface;
 use Ultra\UltraLogManager\UltraLogManager;
 use Laravel\Fortify\Fortify;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -46,6 +49,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+
         $this->app->singleton(IconRepository::class);
 
         // Registra il servizio di storage dei file
@@ -90,6 +94,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+
+        // Debug log (only in local environment)
+        // if (app()->environment('local')) {
+        //     Log::channel('florenceegi')->info('FEGI Guard registered early in AppServiceProvider::register() with FIXED session access');
+        // }
 
         // Override Fortify's default login handling
         Fortify::authenticateUsing(function ($request) {

@@ -17,11 +17,23 @@
     @endunless
     {{ __('guest_layout.create_egi') }}
 </button>
-<button type="button" data-action="open-connect-modal-or-create-collection" class="{{ $navLinkClasses }} {{ $isMobile ? 'w-full text-left' : 'flex items-center gap-1' }}" aria-label="{{ __('guest_layout.' . ($isMobile ? 'mobile_' : '') . 'create_collection_aria_label') }}">
+{{-- <button type="button" data-action="open-connect-modal-or-create-collection" class="{{ $navLinkClasses }} {{ $isMobile ? 'w-full text-left' : 'flex items-center gap-1' }}" aria-label="{{ __('guest_layout.' . ($isMobile ? 'mobile_' : '') . 'create_collection_aria_label') }}">
     @unless($isMobile)
         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
             <path d="M8.75 3.75a.75.75 0 0 0-1.5 0v3.5h-3.5a.75.75 0 0 0 0 1.5h3.5v3.5a.75.75 0 0 0 1.5 0v-3.5h3.5a.75.75 0 0 0 0-1.5h-3.5v-3.5Z" />
         </svg>
     @endunless
     {{ __('guest_layout.create_collection') }}
-</button>
+</button> --}}
+
+<!-- Create Collection CTA (OS1 Guest Integration) -->
+<div class="ml-2">
+    <button type="button"
+            data-action="open-create-collection-modal"
+            class="inline-flex items-center px-4 py-2 text-sm font-medium font-semibold text-gray-900 transition-all duration-200 border border-transparent rounded-md shadow-sm bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 focus:ring-offset-gray-900 font-source-sans"
+            aria-label="{{ __('collection.create_new_collection') }}">
+        <span class="mr-2 text-sm material-symbols-outlined" aria-hidden="true">add</span>
+        <span class="hidden sm:inline">{{ __('collection.create_new_collection') }}</span>
+        <span class="sm:hidden">{{ __('collection.new') }}</span>
+    </button>
+</div>

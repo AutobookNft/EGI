@@ -97,4 +97,9 @@ return [
     'are_you_artist_title_v2' => 'Sei un Artista o un Creativo?', // Mantenuto per flessibilità
     'are_you_artist_description_v2' => 'Unisciti a FlorenceEGI e trasforma la tua arte in una forza per il cambiamento positivo. Offri opere uniche, raggiungi un pubblico globale e contribuisci alla protezione ambientale.',
     'create_your_gallery_v2' => 'Crea la Tua Galleria Ora',
+
+    // Actor trader pro for EGI pt Cards (used in actors-section.blade.php)
+    'actor_trader_pro_title' => 'Per il Trader Pro',
+    'actor_trader_pro_message' => 'Trading EGI pt ad alta frequenza con fee ultra-basse (1.5%) e liquidità garantita. Ogni trade contribuisce automaticamente ai progetti EPP. Guadagna velocemente facendo del bene al pianeta.',
+    'actor_trader_pro_cta' => 'Inizia Trading Virtuoso',
 ];

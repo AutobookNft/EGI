@@ -8,6 +8,82 @@
 
 return [
 
+    // SEO & Metadata
+    'seo_title' => 'Accedi al tuo Rinascimento - FlorenceEGI',
+    'seo_description' => 'Accedi al tuo account FlorenceEGI e continua il tuo viaggio nel nuovo Rinascimento ecologico digitale.',
+    'seo_keywords' => 'login, accesso, FlorenceEGI, rinascimento digitale, sostenibilità, marketplace ecologico',
+
+    'og_title' => 'Accedi a FlorenceEGI - Il tuo Rinascimento Digitale',
+    'og_description' => 'Accedi al tuo account e continua il viaggio nel nuovo Rinascimento ecologico digitale',
+
+    'schema_page_name' => 'Login FlorenceEGI',
+    'schema_page_description' => 'Accesso al nuovo Rinascimento ecologico digitale',
+
+    // Navigation & Structure
+    'skip_to_main' => 'Salta al contenuto principale',
+    'mobile_tagline' => 'Il nuovo Rinascimento ecologico digitale',
+
+    // Welcome Panel (Left Side)
+    'welcome_title_line1' => 'Bentornato nel',
+    'welcome_title_line2' => 'Rinascimento',
+    'welcome_subtitle' => 'Il tuo ecosistema virtuoso ti aspetta',
+    'welcome_quote' => '"Più la piattaforma cresce, più ogni partecipante guadagna. Questo è il mercato virtuoso."',
+
+    'stats_title' => 'Impatto in Tempo Reale',
+    'stats_epp_funds' => 'Fondi EPP',
+    'stats_active_creators' => 'Creator Attivi',
+    'stats_current_fee' => 'Fee Attuale',
+    'stats_daily_volume' => 'Volume Oggi',
+
+    // Form Interface
+    'form_title' => 'Accedi',
+    'form_subtitle' => 'Continua il tuo viaggio nel Rinascimento',
+    'error_title' => 'Credenziali non valide',
+    'two_factor_title' => 'Verifica Sicurezza Aggiuntiva',
+    'two_factor_subtitle' => 'Inserisci il codice di autenticazione a due fattori',
+
+    // Form Fields
+    'label_email' => 'Email',
+    'placeholder_email' => 'La tua email',
+    'help_email' => 'L\'email usata durante la registrazione',
+
+    'label_password' => 'Password',
+    'placeholder_password' => 'La tua password',
+    'help_password' => 'Usa la password scelta durante la registrazione',
+    'toggle_password_visibility' => 'Mostra/Nascondi password',
+
+    // Two-Factor Authentication
+    'label_2fa_code' => 'Codice di Autenticazione',
+    'placeholder_2fa_code' => '000000',
+    'help_2fa_code' => 'Inserisci il codice a 6 cifre dalla tua app di autenticazione',
+    '2fa_trouble_text' => 'Non riesci ad accedere alla tua app?',
+
+    'label_recovery_code' => 'Codice di Recupero',
+    'placeholder_recovery_code' => 'Codice di recupero',
+    'help_recovery_code' => 'Usa uno dei codici di recupero salvati durante la configurazione',
+
+    // Actions & Navigation
+    'remember_me' => 'Ricordami',
+    'forgot_password' => 'Password dimenticata?',
+    'submit_button' => '🎯 Accedi al Rinascimento',
+    'submit_loading' => 'Accesso in corso...',
+    'submit_help' => 'Accedendo confermi di rispettare i nostri Termini di Servizio',
+
+    'social_divider' => 'oppure',
+    'google_login_text' => 'Continua con Google',
+
+    'no_account_text' => 'Non fai ancora parte del Rinascimento?',
+    'register_link' => 'Unisciti a noi',
+
+    // GDPR & Legal
+    'gdpr_notice_text' => 'Accedendo accetti la nostra',
+    'privacy_policy_link' => 'Informativa Privacy',
+    'gdpr_and_text' => 'e i',
+    'terms_link' => 'Termini di Servizio',
+
+    // JavaScript Notifications
+    'validation_error_notification' => 'Per favore controlla i campi evidenziati',
+
     'please_login' => 'Per favore, accedi al tuo account',
     'email' => 'Indirizzo email',
     'password' => 'Password',

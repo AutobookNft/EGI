@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Ultra\EgiModule\Services;
 
+use App\Helpers\FegiAuth;
 use App\Models\Collection;
 use App\Models\CollectionUser;
 use App\Models\User;
@@ -122,65 +123,31 @@ class UserRoleService implements UserRoleServiceInterface
      */
     public function assignCreatorRole(int $userId): bool
     {
-        // Create context for logging and error handling
         $context = [
             'user_id' => $userId,
             'role' => 'creator'
         ];
 
         try {
-            // Find the user by ID
-            $user = User::find($userId);
+            $result = FegiAuth::assignRoleToUser($userId, 'creator');
 
-            // Verify the user exists
-            if (!$user) {
-                $this->logger->error('User not found during role assignment', $context);
-
-                // Handle the error with UEM without throwing (return false)
-                $this->errorManager->handle(
-                    'ROLE_USER_NOT_FOUND',
-                    $context,
-                    null,
-                    false // Don't throw
-                );
-
-                return false;
+            if ($result) {
+                $this->logger->info('Creator role assigned to user', $context);
+            } else {
+                $this->logger->error('User not found or role assignment failed', $context);
+                $this->errorManager->handle('ROLE_ASSIGNMENT_FAILED', $context, null, false);
             }
 
-            // Find or create the 'creator' role
-            $creatorRole = Role::firstOrCreate(['name' => 'creator']);
-
-            // Check if role already assigned
-            if ($user->hasRole('creator')) {
-                $this->logger->info('User already has creator role, no action needed', $context);
-                return true; // Already assigned, consider it success
-            }
-
-            // Assign the role to the user
-            $user->assignRole($creatorRole);
-
-            // Log successful assignment
-            $this->logger->info('Creator role assigned to user', $context);
-
-            return true;
+            return $result;
 
         } catch (Throwable $e) {
-            // Log the error
             $this->logger->error('Error during role assignment', array_merge($context, [
                 'error_message' => $e->getMessage(),
                 'error_class' => get_class($e)
             ]));
-
-            // Handle the error with UEM without throwing
-            $this->errorManager->handle(
-                'ROLE_ASSIGNMENT_FAILED',
-                array_merge($context, [
-                    'error_message' => $e->getMessage()
-                ]),
-                $e,
-                false // Don't throw
-            );
-
+            $this->errorManager->handle('ROLE_ASSIGNMENT_FAILED', array_merge($context, [
+                'error_message' => $e->getMessage()
+            ]), $e, false);
             return false;
         }
     }

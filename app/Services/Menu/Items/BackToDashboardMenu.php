@@ -23,7 +23,7 @@ class BackToDashboardMenu extends MenuItem
     {
         parent::__construct(
             'menu.back_to_dashboard',
-            'dashboard.index',
+            'dashboard',
             'arrow-left',
             'access_dashboard'
         );

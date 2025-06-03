@@ -8,8 +8,39 @@
  */
 
 return [
+    // OS1 Modal Content
+    'create_new_collection' => 'Create New Collection',
+    'create_modal_subtitle' => 'Start your artistic journey with a new collection',
+    'close_modal' => 'Close modal',
+    'collection_name' => 'Collection Name',
+    'enter_collection_name' => 'Enter your collection name...',
+    'name_help_text' => '2-100 characters, letters, numbers, spaces, and basic punctuation allowed',
+    'minimum_2_characters' => 'Minimum 2 characters',
+    'create_collection' => 'Create Collection',
+    'creating' => 'Creating...',
+    'create' => 'Create',
+    'new' => 'New',
+
+    // Success States
+    'creation_success_title' => 'Collection Created!',
+    'redirecting_shortly' => 'Redirecting to collection management...',
+    'redirecting_to_management' => 'Opening collection management interface',
+
+    // Error States
+    'creation_failed' => 'Creation Failed',
+    'creation_unexpected_error' => 'An unexpected error occurred while creating your collection',
+
+    // Validation Messages
+    'limit_exceeded' => 'You have reached the maximum limit of :max collections',
+    'created_successfully' => 'Collection ":name" created successfully!',
+
+    // Stats and Info
+    'loading_stats' => 'Loading collection statistics...',
+
+    // Accessibility
+    'create_new_collection_mobile' => 'Create new collection (mobile)',
+
     'create_new_egi' => 'Create a new EGI',
-    'create_new_collection' => 'Create a new collection',
     'create_new_gallery' => 'Create a new gallery',
     'invite_collection_member' => 'Invite a member to the collection',
     'came_back_to_collection' => 'Back to the collection',
@@ -44,8 +75,11 @@ return [
     'manage_collection' => 'Manage collection',
     'collection' => 'Collection',
     'collections' => 'Collections',
+    'collection_type' => 'Collection type',
+    'collection_type_suggest' => 'Suggestion: choose a collection type that best represents the content you are creating. You can create collections for images, ebooks, audio, or video.',
     'collection_data' => 'Header data of the collection',
     'collection_name' => 'Name of the collection',
+    'collection_name_suggestion' => 'A good name is essential for your collection. It should be unique, memorable, and reflect the content of the collection.',
     'collection_id' => 'ID of the collection',
     'collection_description_placeholder' => 'Enter a description of the collection',
     'collection_description_suggest' => 'A clear and engaging description helps users better understand your collection and increases its appeal. Tell what makes it unique!',
@@ -75,6 +109,7 @@ return [
     'type_audio' => 'Audio',
     'type_video' => 'Video',
     'EGI_number' => 'EGI Number',
+    'EGI_number_suggest' => 'Enter the number of EGIs you want to create for this collection',
     'position' => 'Position',
     'updated_successfully' => 'Collection saved successfully',
     'save_failed' => 'Save failed',
@@ -187,6 +222,86 @@ return [
         'creation_success' => 'Wallet created successfully.',
         'creation_success_detail' => 'The wallet was created successfully.',
         'permission_denied' => 'You do not have permission to perform this action.',
+
+        // === FEGI SYSTEM TRANSLATIONS ===
+
+        // Modal Title and Descriptions
+        'fegi_connect_title' => 'Connect to the Platform',
+        'fegi_modal_subtitle' => 'Sign in with your FEGI key or create a new account',
+        'fegi_choose_option' => 'Choose how you want to proceed:',
+
+        // Mode Selection Options
+        'fegi_use_existing' => 'I already have a FEGI key',
+        'fegi_use_existing_desc' => 'Enter your existing FEGI key to sign in',
+        'fegi_create_new' => 'Create new account',
+        'fegi_create_new_desc' => 'Automatically generate a new account with an Algorand address',
+
+        // FEGI Input Form
+        'fegi_key_label' => 'FEGI Key',
+        'fegi_key_help' => 'Enter your FEGI key in the format FEGI-YEAR-CODE',
+        'fegi_back_to_options' => 'Back to options',
+        'fegi_connect_button' => 'Connect with FEGI',
+
+        // Create Account Form
+        'fegi_creating_account' => 'Create New Account',
+        'fegi_creating_account_desc' => 'We will automatically generate an Algorand address and a FEGI key for you',
+        'fegi_create_account_button' => 'Create Account Automatically',
+
+        // Credentials Display Modal
+        'fegi_credentials_generated_title' => 'Account Created Successfully!',
+        'fegi_your_algorand_address' => 'Your Algorand Address (automatically generated)',
+        'fegi_your_fegi_key' => 'Your FEGI Key (save it for future sign-ins)',
+        'fegi_credentials_warning_title' => 'IMPORTANT: Save these credentials!',
+        'fegi_credentials_warning_text' => 'These credentials will not be shown again. Store them securely or use the local save option.',
+        'fegi_copy_credentials' => 'Copy Credentials',
+        'fegi_save_locally' => 'Save FEGI key locally for future sign-ins',
+        'fegi_confirm_saved' => 'I Have Saved the Credentials',
+
+        // Success/Error Messages
+        'wallet_account_created' => 'Account created successfully! Save your credentials.',
+        'wallet_fegi_authenticated' => 'FEGI authentication completed successfully.',
+        'fegi_weak_auth_info' => 'This is a temporary connection for testing the platform.',
+        'fegi_register_full' => 'Register a full account',
+
+        // Loading States
+        'connecting' => 'Connecting...',
+        'creating' => 'Creating account...',
+
+        // Error Messages
+        'errorInvalidFegiFormat' => 'Invalid FEGI key format. Use the format FEGI-YEAR-CODE.',
+        'errorAccountCreationFailed' => 'Error creating account. Please try again.',
+        'errorConnectionGeneric' => 'Connection error. Verify your FEGI key.',
+        'errorUnexpected' => 'Unexpected error. Try again later.',
+
+        // Wallet Connection Messages
+        'walletConnectedTitle' => 'Connected!',
+        'walletConnectedText' => 'You have successfully connected to the FlorenceEGI platform.',
+        'copied' => 'Copied',
+
+        // Close Modal
+        'wallet_close_modal' => 'Close connection window',
+
+        // Modal Descriptions
+        'fegi_input_subtitle' => 'Enter your existing FEGI key to sign in',
+        'fegi_please_wait' => 'We are generating your account, please wait a moment...',
+        'fegi_save_credentials' => 'Save these credentials in a secure location',
+        'fegi_credentials_success_desc' => 'Your account has been created successfully!',
+
+        // Error messages
+        'errorCopyFailed' => 'Unable to copy credentials. Please copy manually.',
+        'errorAccountCreationFailed' => 'Error creating account. Please try again.',
+
+        // Loading states
+        'connecting' => 'Connecting...',
+        'creating' => 'Creating account...',
+
+        // Button texts
+        'fegi_connect_button' => 'Connect',
+        'copied' => 'Copied',
+
+        // Success messages
+        'walletConnectedTitle' => 'Connected!',
+        'walletConnectedText' => 'You have successfully connected to the platform.',
     ],
     'invitation' => [
         'proposal_collaboration' => 'You have been invited to collaborate on the collection',

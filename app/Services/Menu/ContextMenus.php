@@ -114,6 +114,7 @@ class ContextMenus
                 $collectionsMenu = new MenuGroup(__('menu.collections'), 'folder_collection', [
                     new OpenCollectionMenu(),
                     new NewCollectionMenu(),
+                    new BackToDashboardMenu(),
                 ]);
                 $menus[] = $collectionsMenu;
                 break;
@@ -139,6 +140,7 @@ class ContextMenus
 
                 $statisticsMenu = new MenuGroup(__('menu.statistics'), 'chart-bar', [
                     new StatisticsMenu(),
+                    new BackToDashboardMenu(),
                 ]);
                 $menus[] = $statisticsMenu;
                 break;

@@ -67,6 +67,8 @@ export default {
                     DEFAULT: '#8E44AD', // (Era #8E44AD) Simile a Tailwind purple-600
                     text: '#FFFFFF',
                 },
+                'verde-trading': '#10B981', // Emerald-500
+                'verde-trading-dark': '#059669', // Emerald-600
 
                 // --- COLORI DI STATO STANDARD (per DaisyUI e utility Tailwind) ---
                 // Questi dovrebbero avere buon contrasto sul nostro "base-100" scuro

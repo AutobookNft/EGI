@@ -13,10 +13,14 @@ class RolesAndPermissionsSeeder extends Seeder
      * Permessi e ruoli predefiniti.
      */
     private $permissions = [
+
         // Permessi Generali
 
         'manage_roles',
         'manage_permissions',
+
+        // Permessi per il Dashboard
+        'access_dashboard',
 
         // Permessi per il Team
         'create_team',
@@ -32,6 +36,9 @@ class RolesAndPermissionsSeeder extends Seeder
         'update_collection_image_header',
         'delete_collection',
         'read_collection_header',
+        'open_collection',
+        'view_collection',
+        'view_collection_header',
 
         // Permessi per gli EGI
         'create_EGI',
@@ -50,8 +57,6 @@ class RolesAndPermissionsSeeder extends Seeder
         // Permessi per le views
         'view_dashboard',
         'view_team',
-        'view_collection',
-        'view_collection_header',
         'view_EGI',
         'view_user',
         'view_profile',
@@ -93,7 +98,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'add_team_member', 'remove_team_member', 'modify_team_roles',
 
             // Collection
-            'create_collection', 'update_collection', 'delete_collection','update_collection_image_header',
+            'create_collection', 'update_collection', 'delete_collection','update_collection_image_header', 'open_collection',
 
             // EGI
             'create_EGI', 'update_EGI', 'delete_EGI', 'manage_EGI',
@@ -116,6 +121,8 @@ class RolesAndPermissionsSeeder extends Seeder
             'manage_consents', 'manage_privacy', 'export_personal_data', 'delete_account', 'view_activity_log',
             'view_breach_reports', 'view_privacy_policy', 'edit_personal_data', 'limit_data_processing',
 
+            // Dashboard
+            'access_dashboard'
 
         ],
 
@@ -124,7 +131,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'add_team_member', 'remove_team_member', 'modify_team_roles',
 
             // Collection
-            'update_collection', 'update_collection_image_header',
+            'update_collection', 'update_collection_image_header', 'open_collection',
 
             // EGI
             'create_EGI', 'update_EGI', 'delete_EGI', 'manage_EGI',
@@ -144,6 +151,9 @@ class RolesAndPermissionsSeeder extends Seeder
             'manage_consents', 'manage_privacy', 'export_personal_data', 'delete_account', 'view_activity_log',
             'view_breach_reports', 'view_privacy_policy', 'edit_personal_data', 'limit_data_processing',
 
+            // Dashboard
+            'access_dashboard'
+
         ],
 
         'editor' => [
@@ -152,13 +162,16 @@ class RolesAndPermissionsSeeder extends Seeder
             'update_EGI', 'manage_EGI',
 
             // Collection
-            'update_collection_image_header',
+            'update_collection_image_header', 'open_collection',
 
             // Views
             'view_profile', 'view_team', 'view_dashboard', 'view_collection', 'view_EGI', 'view_collection_header', 'view_documentation', 'view_statistics',
 
             // GDPR
             'manage_consents', 'manage_privacy', 'manage_privacy_settings', 'manage_privacy_policies', 'manage_privacy_requests',
+
+            // Dashboard
+            'access_dashboard'
         ],
 
         'guest' => [
@@ -170,6 +183,9 @@ class RolesAndPermissionsSeeder extends Seeder
 
             // GDPR
             'view_privacy_policy', 'edit_personal_data', 'limit_data_processing',
+
+            // Dashboard
+            'access_dashboard'
 
         ],
     ];

@@ -11,6 +11,16 @@ use App\Http\Controllers\DocumentationController;
 use App\Http\Controllers\CollectionsController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\EgiController;
+use App\Livewire\Collections\CreateCollection;
+
+Route::prefix('collections')->name('collections.')->group(function () {
+        Route::get('/', [CollectionsController::class, 'index'])->name('index');
+
+        Route::post('/store', [CollectionsController::class, 'store'])->name('store');
+
+        // Altre rotte per le collezioni...
+    });
+
 
 // Dashboard e sezioni principali (tutte protette da autenticazione)
 Route::middleware(['auth:sanctum', 'verified'])->group(function () {
@@ -19,9 +29,7 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
 
     // Collections routes
     Route::prefix('collections')->name('collections.')->group(function () {
-        Route::get('/', [CollectionsController::class, 'index'])->name('index');
-        Route::get('/create', [CollectionsController::class, 'create'])->name('create');
-        Route::post('/store', [CollectionsController::class, 'store'])->name('store');
+        Route::get('/create', [CreateCollection::class, 'create'])->name('create');
         Route::get('/{collection}/staff', [CollectionsController::class, 'staff'])->name('staff');
         // Altre rotte per le collezioni...
     });

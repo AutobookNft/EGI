@@ -2,11 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\FegiAuth;
 use App\Models\Collection;
 use App\Models\Epp;
+use Illuminate\Support\Str;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use App\Services\CollectionService;
+use Illuminate\Validation\ValidationException;
+use Throwable;
+use Ultra\ErrorManager\Interfaces\ErrorManagerInterface;
+use Ultra\UltraLogManager\UltraLogManager;
 
 /**
  * Controller for managing collections display and interaction.
@@ -185,5 +193,169 @@ class CollectionsController extends Controller
         //     'user_id' => auth()->id(),
         //     'ip_address' => request()->ip()
         // ]);
+    }
+
+
+    /**
+     * @Oracode OS1: Enhanced Collection Creation Endpoint
+     * 🎯 Purpose: Create new collection via AJAX with robust validation and UEM error handling
+     * 🧱 Core Logic: Validates input, uses CollectionService, handles both success and error scenarios
+     * 🛡️ GDPR: Minimal data processing, user consent implied by authentication
+     * 📥 Input: Request with collection_name (required, string, 2-100 chars)
+     * 📤 Output: JSON response with collection data or standardized error
+     * 🔄 Flow: Validate -> Create via Service -> Handle Response -> Return JSON
+     *
+     * @param Request $request HTTP request containing collection_name
+     * @return JsonResponse Standardized JSON response for AJAX consumption
+     *
+     * @oracode-enhanced-validation Multi-layer input validation with meaningful errors
+     * @oracode-ajax-optimized Designed for seamless frontend integration
+     * @oracode-ux-feedback Rich feedback for superior user experience
+     *
+     * @since OS1-v1.0
+     * @author Padmin D. Curtis (for Fabio Cherici)
+     */
+    public function create(Request $request): JsonResponse
+    {
+        try {
+            // 🎯 OS1 Pillar 1: Explicit Intention - Log operation start
+            $operationContext = [
+                'operation' => 'collection_create_request',
+                'ip' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'timestamp' => now()->toISOString()
+            ];
+
+            // Enhanced Authentication Check with UEM
+            $user = FegiAuth::user();
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'AUTHENTICATION_REQUIRED',
+                    'message' => __('authentication.required_for_collection_creation'),
+                    'redirect' => route('login')
+                ], 401);
+            }
+
+            $operationContext['creator_id'] = $user->id;
+
+            // 🎯 OS1 Enhanced Validation with Semantic Coherence
+            $validated = $request->validate([
+                'collection_name' => [
+                    'required',
+                    'string',
+                    'min:2',
+                    'max:100',
+                    'regex:/^[a-zA-Z0-9\s\-_\'\"À-ÿ]+$/u' // Supports international chars
+                ]
+            ], [
+                'collection_name.required' => __('validation.collection_name_required'),
+                'collection_name.min' => __('validation.collection_name_min_length'),
+                'collection_name.max' => __('validation.collection_name_max_length'),
+                'collection_name.regex' => __('validation.collection_name_invalid_characters')
+            ]);
+
+            $collectionName = trim($validated['collection_name']);
+            $operationContext['collection_name'] = $collectionName;
+
+            // 🎯 OS1 Pillar 4: Virtuous Circularity - Check user collection limits
+            $existingCollectionsCount = Collection::where('creator_id', $user->id)->count();
+            $maxCollections = config('egi.max_collections_per_user', 10);
+
+            if ($existingCollectionsCount >= $maxCollections) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'COLLECTION_LIMIT_EXCEEDED',
+                    'message' => __('collections.limit_exceeded', ['max' => $maxCollections]),
+                    'current_count' => $existingCollectionsCount,
+                    'max_allowed' => $maxCollections
+                ], 422);
+            }
+
+            // 🎯 OS1 Service Integration with Enhanced Error Handling
+            $collectionService = app(CollectionService::class);
+            $result = $collectionService->createDefaultCollection(
+                $user,
+                false, // Non-default collection (user created)
+                $collectionName
+            );
+
+            // Handle CollectionService response types
+            if ($result instanceof JsonResponse) {
+                // Service returned error - forward with enhanced context
+                $errorData = $result->getData(true);
+                return response()->json([
+                    'success' => false,
+                    'error' => $errorData['error'] ?? 'COLLECTION_SERVICE_ERROR',
+                    'message' => $errorData['message'] ?? __('collections.creation_failed'),
+                    'service_context' => $operationContext
+                ], $result->getStatusCode());
+            }
+
+            // 🎯 OS1 Success Path - Collection Created Successfully
+            $collection = $result; // It's a Collection model
+
+            // 🎯 OS1 Pillar 5: Recursive Evolution - Success logging for optimization
+            $successContext = array_merge($operationContext, [
+                'collection_id' => $collection->id,
+                'collection_position' => $collection->position,
+                'success' => true,
+                'creation_duration_ms' => (microtime(true) - ($_SERVER['REQUEST_TIME_FLOAT'] ?? 0)) * 1000
+            ]);
+
+            // Log success for analytics and system improvement
+            app(UltraLogManager::class)->info('[CollectionsController] Collection created successfully via create()', $successContext);
+
+            // 🎯 OS1 Virtuous Response - Rich feedback for frontend
+            return response()->json([
+                'success' => true,
+                'message' => __('collections.created_successfully', ['name' => $collection->collection_name]),
+                'collection' => [
+                    'id' => $collection->id,
+                    'name' => $collection->collection_name,
+                    'creator_id' => $collection->creator_id,
+                    'position' => $collection->position,
+                    'is_default' => $collection->is_default,
+                    'created_at' => $collection->created_at->toISOString()
+                ],
+                'next_action' => [
+                    'type' => 'redirect',
+                    'url' => route('collections.open', ['collection' => $collection->id]),
+                    'message' => __('collections.redirecting_to_management')
+                ],
+                'user_stats' => [
+                    'total_collections' => $existingCollectionsCount + 1,
+                    'remaining_slots' => max(0, $maxCollections - $existingCollectionsCount - 1)
+                ]
+            ], 201);
+
+        } catch (ValidationException $e) {
+            // 🎯 OS1 Validation Error Handling
+            return response()->json([
+                'success' => false,
+                'error' => 'VALIDATION_FAILED',
+                'message' => __('validation.failed'),
+                'errors' => $e->errors()
+            ], 422);
+
+        } catch (Throwable $e) {
+            // 🎯 OS1 Comprehensive Error Boundary
+            $errorContext = array_merge($operationContext ?? [], [
+                'error_class' => get_class($e),
+                'error_message' => $e->getMessage(),
+                'error_file' => $e->getFile(),
+                'error_line' => $e->getLine()
+            ]);
+
+            // Use UEM for standardized error handling
+            app(ErrorManagerInterface::class)->handle('COLLECTION_CREATION_UNEXPECTED_ERROR', $errorContext, $e);
+
+            return response()->json([
+                'success' => false,
+                'error' => 'UNEXPECTED_ERROR',
+                'message' => __('collections.creation_unexpected_error'),
+                'support_reference' => Str::uuid()->toString() // For support tracking
+            ], 500);
+        }
     }
 }

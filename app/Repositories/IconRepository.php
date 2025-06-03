@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Helpers\FegiAuth;
 use App\Models\Icon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -53,13 +54,13 @@ class IconRepository
             // Build cache key
             $cacheKey = $this->buildCacheKey($name, $style, $customClass);
 
-            $this->logger->debug('Icon retrieval attempt', [
-                'icon_name' => $name,
-                'style' => $style,
-                'custom_class' => $customClass,
-                'cache_key' => $cacheKey,
-                'log_category' => 'ICON_RETRIEVAL'
-            ]);
+            // $this->logger->debug('Icon retrieval attempt', [
+            //     'icon_name' => $name,
+            //     'style' => $style,
+            //     'custom_class' => $customClass,
+            //     'cache_key' => $cacheKey,
+            //     'log_category' => 'ICON_RETRIEVAL'
+            // ]);
 
             // Check cache first (PERFORMANCE CRITICAL)
             return Cache::tags(['icons'])->remember($cacheKey, $this->cacheTime, function () use ($name, $style, $customClass) {
@@ -135,12 +136,12 @@ class IconRepository
         $finalClass = $customClass ?? $icon->class;
         $htmlContent = str_replace('%class%', $finalClass, $icon->html);
 
-        $this->logger->debug('Icon retrieved from database', [
-            'icon_name' => $name,
-            'style' => $style,
-            'final_class' => $finalClass,
-            'log_category' => 'ICON_SUCCESS'
-        ]);
+        // $this->logger->debug('Icon retrieved from database', [
+        //     'icon_name' => $name,
+        //     'style' => $style,
+        //     'final_class' => $finalClass,
+        //     'log_category' => 'ICON_SUCCESS'
+        // ]);
 
         return $htmlContent;
     }
@@ -153,8 +154,11 @@ class IconRepository
      */
     private function getUserIconStyle(): string
     {
-        if (Auth::check()) {
-            $userStyle = Auth::user()->icon_style;
+
+        $user = FegiAuth::user();
+
+        if (FegiAuth::check()) {
+            $userStyle = $user->icon_style;
             if ($userStyle) {
                 return $userStyle;
             }
@@ -208,19 +212,19 @@ class IconRepository
                 $cacheKey = $this->buildCacheKey($name, $style, $customClass);
                 Cache::forget($cacheKey);
 
-                $this->logger->info('Specific icon cache cleared', [
-                    'icon_name' => $name,
-                    'style' => $style,
-                    'cache_key' => $cacheKey,
-                    'log_category' => 'CACHE_CLEAR'
-                ]);
+                // $this->logger->info('Specific icon cache cleared', [
+                //     'icon_name' => $name,
+                //     'style' => $style,
+                //     'cache_key' => $cacheKey,
+                //     'log_category' => 'CACHE_CLEAR'
+                // ]);
             } else {
                 // Clear all icon cache
                 if (config('cache.default') === 'redis') {
                     Cache::tags(['icons'])->flush();
-                    $this->logger->info('All icon cache cleared via Redis tags', [
-                        'log_category' => 'CACHE_CLEAR'
-                    ]);
+                    // $this->logger->info('All icon cache cleared via Redis tags', [
+                    //     'log_category' => 'CACHE_CLEAR'
+                    // ]);
                 } else {
                     Cache::flush();
                     $this->logger->warning('Full cache cleared (Redis not available)', [

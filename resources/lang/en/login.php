@@ -9,6 +9,82 @@
 
 return [
 
+    // SEO & Metadata
+    'seo_title' => 'Access Your Renaissance - FlorenceEGI',
+    'seo_description' => 'Access your FlorenceEGI account and continue your journey in the new digital ecological Renaissance.',
+    'seo_keywords' => 'login, access, FlorenceEGI, digital renaissance, sustainability, ecological marketplace',
+
+    'og_title' => 'Access FlorenceEGI - Your Digital Renaissance',
+    'og_description' => 'Access your account and continue the journey in the new digital ecological Renaissance',
+
+    'schema_page_name' => 'FlorenceEGI Login',
+    'schema_page_description' => 'Access to the new digital ecological Renaissance',
+
+    // Navigation & Structure
+    'skip_to_main' => 'Skip to main content',
+    'mobile_tagline' => 'The new digital ecological Renaissance',
+
+    // Welcome Panel (Left Side)
+    'welcome_title_line1' => 'Welcome back to the',
+    'welcome_title_line2' => 'Renaissance',
+    'welcome_subtitle' => 'Your virtuous ecosystem awaits you',
+    'welcome_quote' => '"The more the platform grows, the more every participant gains. This is the virtuous market."',
+
+    'stats_title' => 'Real-Time Impact',
+    'stats_epp_funds' => 'EPP Funds',
+    'stats_active_creators' => 'Active Creators',
+    'stats_current_fee' => 'Current Fee',
+    'stats_daily_volume' => 'Daily Volume',
+
+    // Form Interface
+    'form_title' => 'Sign In',
+    'form_subtitle' => 'Continue your Renaissance journey',
+    'error_title' => 'Invalid credentials',
+    'two_factor_title' => 'Additional Security Verification',
+    'two_factor_subtitle' => 'Enter your two-factor authentication code',
+
+    // Form Fields
+    'label_email' => 'Email',
+    'placeholder_email' => 'Your email',
+    'help_email' => 'The email used during registration',
+
+    'label_password' => 'Password',
+    'placeholder_password' => 'Your password',
+    'help_password' => 'Use the password chosen during registration',
+    'toggle_password_visibility' => 'Show/Hide password',
+
+    // Two-Factor Authentication
+    'label_2fa_code' => 'Authentication Code',
+    'placeholder_2fa_code' => '000000',
+    'help_2fa_code' => 'Enter the 6-digit code from your authentication app',
+    '2fa_trouble_text' => 'Can\'t access your app?',
+
+    'label_recovery_code' => 'Recovery Code',
+    'placeholder_recovery_code' => 'Recovery code',
+    'help_recovery_code' => 'Use one of the recovery codes saved during setup',
+
+    // Actions & Navigation
+    'remember_me' => 'Remember me',
+    'forgot_password' => 'Forgot password?',
+    'submit_button' => '🎯 Access the Renaissance',
+    'submit_loading' => 'Signing in...',
+    'submit_help' => 'By signing in you confirm to respect our Terms of Service',
+
+    'social_divider' => 'or',
+    'google_login_text' => 'Continue with Google',
+
+    'no_account_text' => 'Not part of the Renaissance yet?',
+    'register_link' => 'Join us',
+
+    // GDPR & Legal
+    'gdpr_notice_text' => 'By signing in you accept our',
+    'privacy_policy_link' => 'Privacy Policy',
+    'gdpr_and_text' => 'and',
+    'terms_link' => 'Terms of Service',
+
+    // JavaScript Notifications
+    'validation_error_notification' => 'Please check the highlighted fields',
+
     'please_login' => 'Please login to your account',
     'email' => 'Email address',
     'password' => 'Password',

@@ -20,7 +20,22 @@
                     <x-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
-                    <!-- Altri link desktop se vuoi -->
+                    <div class="ml-2">
+                        <button type="button"
+                                data-action="open-create-collection-modal"
+                                class="inline-flex items-center px-4 py-2 text-sm font-medium font-semibold text-gray-900 transition-all duration-200 border border-transparent rounded-md shadow-sm bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 focus:ring-offset-gray-900 font-source-sans"
+                                aria-label="{{ __('collection.create_new_collection') }}">
+                            <span class="mr-2 text-sm material-symbols-outlined" aria-hidden="true">add</span>
+                            <span class="hidden sm:inline">{{ __('collection.create_new_collection') }}</span>
+                            <span class="sm:hidden">{{ __('collection.new') }}</span>
+                        </button>
+                    </div>
+                    <x-nav-link href="{{ route('home.collections.index') }}" :active="request()->routeIs('home.collections.*')">
+                        {{ __('Collections') }}
+                    </x-nav-link>
+                    <x-nav-link href="{{ route('epps.index') }}" :active="request()->routeIs('epps.*')">
+                        {{ __('EPPS') }}
+                    </x-nav-link>
                 </div>
 
             </div>
@@ -170,6 +185,8 @@
                               d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
+
+
             </div>
         </div>
     </div>
@@ -181,6 +198,13 @@
             <x-responsive-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
+            <button type="button"
+                    data-action="open-create-collection-modal"
+                    class="flex items-center w-full py-2 pl-3 pr-4 text-base font-medium text-left text-gray-600 transition duration-150 ease-in-out border-l-4 border-transparent dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600 focus:outline-none focus:text-gray-800 dark:focus:text-gray-200 focus:bg-gray-50 dark:focus:bg-gray-700 focus:border-gray-300 dark:focus:border-gray-600"
+                    aria-label="{{ __('collections.create_new_collection_mobile') }}">
+                <span class="mr-3 text-sm material-symbols-outlined" aria-hidden="true">add</span>
+                {{ __('collection.create_collection') }}
+            </button>
             <!-- Altri link responsive se vuoi -->
         </div>
 

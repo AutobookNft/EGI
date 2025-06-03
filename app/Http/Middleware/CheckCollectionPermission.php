@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Helpers\FegiAuth;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -23,8 +24,8 @@ class CheckCollectionPermission
     public function handle(Request $request, Closure $next, $permission = null)
     {
         // Recupera l'utente autenticato
-        $user = Auth::user();
-        
+        $user = FegiAuth::user();
+
         if (!$user) {
             Log::channel('florenceegi')->error('Utente non autenticato', [
                 'ip' => $request->ip(),
@@ -61,14 +62,14 @@ class CheckCollectionPermission
                 return $next($request);
             }
         } else {
-            
+
             Log::channel('florenceegi')->info('User:currentCollection', [
                 'user_id' => $user->id,
                 'current_collection_id' => $userModel->current_collection_id,
             ]);
 
             $collection = $userModel->currentCollection;
-          
+
             // Se la collection non esiste, restituisci un errore 404
             if (!$collection) {
                 Log::channel('florenceegi')->error('Collection non trovata', [
@@ -125,5 +126,5 @@ class CheckCollectionPermission
         return $next($request);
     }
 
-    
+
 }

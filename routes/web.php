@@ -51,6 +51,94 @@ use Ultra\UploadManager\Controllers\Config\ConfigController;
 |
 */
 
+Route::get('/debug-fegi', function() {
+    return [
+        'session' => [
+            'auth_status' => session('auth_status'),
+            'connected_wallet' => session('connected_wallet'),
+            'connected_user_id' => session('connected_user_id'),
+            'is_weak_auth' => session('is_weak_auth'),
+        ],
+        'auth' => [
+            'check' => Auth::check(),
+            'id' => Auth::id(),
+            'user' => Auth::user()?->name,
+            'guard_class' => get_class(Auth::guard()),
+        ],
+        'fegi_guard' => [
+            'check' => Auth::guard('fegi')->check(),
+            'user' => Auth::guard('fegi')->user()?->name,
+            'auth_type' => method_exists(Auth::guard('fegi'), 'getAuthType')
+                ? Auth::guard('fegi')->getAuthType()
+                : 'method_missing'
+        ]
+    ];
+});
+
+Route::get('/test-loadstats', function() {
+    Log::channel('florenceegi')->info('Direct auth test', [
+        'auth_check' => Auth::check(),
+        'auth_id' => Auth::id(),
+        'auth_user' => Auth::user()?->name,
+        'session_auth_status' => session('auth_status'),
+        'session_user_id' => session('connected_user_id'),
+    ]);
+
+    return 'Check the logs!';
+});
+
+Route::get('/test-create-fegi', function() {
+    $request = request();
+    $request->merge(['create_new' => true]);
+
+    $controller = new \App\Http\Controllers\WalletConnectController(
+        app(\Ultra\UltraLogManager\UltraLogManager::class),
+        app(\Ultra\ErrorManager\Interfaces\ErrorManagerInterface::class),
+        app(\App\Services\CollectionService::class)
+    );
+
+    return $controller->connect($request);
+});
+
+// Aggiungi questa route in web.php per debug
+Route::get('/debug-user-lookup', function() {
+    $userId = session('connected_user_id');
+
+    if (!$userId) {
+        return ['error' => 'No user ID in session'];
+    }
+
+    $user = \App\Models\User::find($userId);
+
+    return [
+        'session_user_id' => $userId,
+        'user_found' => $user ? true : false,
+        'user_data' => $user ? [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'is_weak_auth' => $user->is_weak_auth,
+            'wallet' => $user->wallet,
+            'created_at' => $user->created_at
+        ] : null,
+        'users_count' => \App\Models\User::count(),
+        'weak_auth_users' => \App\Models\User::where('is_weak_auth', true)->get(['id', 'name', 'email'])
+    ];
+});
+
+Route::get('/debug-session-direct', function() {
+    return [
+        'session_direct' => [
+            'auth_status' => session('auth_status'),
+            'user_id' => session('connected_user_id'),
+        ],
+        'fegi_guard_debug' => [
+            'user_resolved' => Auth::guard('fegi')->user(),
+            'check' => Auth::guard('fegi')->check(),
+        ]
+    ];
+});
+
 /*
 |--------------------------------------------------------------------------
 | Public Routes - Homepage & Redirects
@@ -68,22 +156,36 @@ Route::get('/home', [HomeController::class, 'index'])->name('home');
 | Public Routes - Collections & EGIs
 |--------------------------------------------------------------------------
 */
+
+ Route::middleware('collection_can:view_collection_header')->group(function () {
+    Route::get('collections/{id}/edit', CollectionEdit::class)
+        ->name('collections.edit');
+
+    Route::get('collections/open', CollectionOpen::class)
+        ->name('collections.open');
+
+    Route::get('/{id}/head-images', HeadImagesManager::class)
+        ->name('collections.head_images');
+
+});
+
+
 Route::prefix('home')->name('home.')->group(function () {
     // Public collection viewing (accessible to all)
     Route::get('/collections', [CollectionsController::class, 'index'])->name('collections.index');
     Route::get('/collections/{id}', [CollectionsController::class, 'show'])->name('collections.show');
 
     // Collection management (restricted to creators)
-    Route::middleware(['can:manage-collections'])->group(function () {
-        Route::get('/collections/create', [CollectionsController::class, 'create'])->name('collections.create');
-        Route::post('/collections', [CollectionsController::class, 'store'])->name('collections.store');
-        Route::get('/collections/{id}/edit', [CollectionsController::class, 'edit'])->name('collections.edit');
-        Route::put('/collections/{collection}', [CollectionsController::class, 'update'])->name('collections.update');
-        Route::delete('/collections/{collection}', [CollectionsController::class, 'destroy'])->name('collections.destroy');
-    });
+    // Route::middleware(['can:manage-collections'])->group(function () {
+    //     Route::get('/collections/create', [CollectionsController::class, 'create'])->name('collections.create');
+    //     Route::post('/collections', [CollectionsController::class, 'store'])->name('collections.store');
+    //     Route::get('/collections/{id}/edit', [CollectionsController::class, 'edit'])->name('collections.edit');
+    //     Route::put('/collections/{collection}', [CollectionsController::class, 'update'])->name('collections.update');
+    //     Route::delete('/collections/{collection}', [CollectionsController::class, 'destroy'])->name('collections.destroy');
+    // });
 
-    // Collection interaction
-    Route::post('/collections/{collection}/report', [CollectionsController::class, 'report'])->name('collections.report');
+    // // Collection interaction
+    // Route::post('/collections/{collection}/report', [CollectionsController::class, 'report'])->name('collections.report');
 });
 
 // EGI routes
@@ -209,14 +311,6 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
 
             // View collection header permission
             Route::middleware('collection_can:view_collection_header')->group(function () {
-                Route::get('/{id}/edit', CollectionEdit::class)
-                    ->name('collections.edit');
-
-                Route::get('/open', CollectionOpen::class)
-                    ->name('collections.open');
-
-                Route::get('/{id}/head-images', HeadImagesManager::class)
-                    ->name('collections.head_images');
 
                 Route::get('/{id}/members', CollectionUserMember::class)
                     ->name('collections.collection_user');
@@ -224,7 +318,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
 
             // Create collection permission
             Route::middleware('collection_can:create_collection')->group(function () {
-                Route::get('/create', CreateCollection::class)
+                Route::get('/create', [CollectionsController::class, 'create'])
                     ->name('collections.create');
             });
 
@@ -435,9 +529,9 @@ Route::get('/translations.json', function () {
 
 // Enums constants endpoint
 Route::get('/js/enums', function (Request $request) {
-    Log::channel('florenceegi')->info('Richiesta costanti enum', [
-        'notificationStatus' => collect(NotificationStatus::cases())->mapWithKeys(fn($enum) => [$enum->name => $enum->value])
-    ]);
+    // Log::channel('florenceegi')->info('Richiesta costanti enum', [
+    //     'notificationStatus' => collect(NotificationStatus::cases())->mapWithKeys(fn($enum) => [$enum->name => $enum->value])
+    // ]);
 
     return response()->json([
         'NotificationStatus' => collect(NotificationStatus::cases())->mapWithKeys(fn($enum) => [$enum->name => $enum->value])
