@@ -29,7 +29,7 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
 
     // Collections routes
     Route::prefix('collections')->name('collections.')->group(function () {
-        Route::get('/create', [CreateCollection::class, 'create'])->name('create');
+        // Route::post('/create', [CreateCollection::class, 'create'])->name('create');
         Route::get('/{collection}/staff', [CollectionsController::class, 'staff'])->name('staff');
         // Altre rotte per le collezioni...
     });

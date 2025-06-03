@@ -318,7 +318,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
 
             // Create collection permission
             Route::middleware('collection_can:create_collection')->group(function () {
-                Route::get('/create', [CollectionsController::class, 'create'])
+                Route::post('/create', [CollectionsController::class, 'create'])
                     ->name('collections.create');
             });
 
