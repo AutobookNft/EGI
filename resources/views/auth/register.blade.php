@@ -1,7 +1,6 @@
 {{-- resources/views/auth/register.blade.php --}}
 {{-- 📜 Oracode OS1 View: User Registration Page (GDPR Compliant) --}}
-{{-- Page for new user registration, designed with FlorenceEGI's "Rinascimento" theme. --}}
-{{-- Emphasizes clarity, user role selection, and GDPR consent management. --}}
+{{-- Updated with new user types: patron, collector, enterprise, trader_pro --}}
 {{-- Full OS1 Implementation: Zero Placeholder, Complete JavaScript, Optimized UX --}}
 
 <!DOCTYPE html>
@@ -21,7 +20,6 @@
     <meta property="og:description" content="{{ __('register.og_description') }}">
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ url()->current() }}">
-    {{-- <meta property="og:image" content="{{ asset('images/og_florenceegi_rinascimento.jpg') }}"> --}}
 
     <!-- Schema.org -->
     <script type="application/ld+json">
@@ -55,6 +53,7 @@
             --blu-algoritmo: #1B365D;   /* Blu Algoritmo Profondo */
             --grigio-pietra: #6B6B6B;  /* Grigio Pietra Serena */
             --rosso-urgenza: #C13120;  /* Rosso Urgenza Segnaletica */
+            --amber-500: #f59e0b;      /* Amber per Trader Pro */
         }
 
         .font-rinascimento { font-family: 'Playfair Display', serif; }
@@ -179,12 +178,13 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Color dynamic classes fix */
+        /* Color dynamic classes fix - Updated */
         .bg-oro-fiorentino { background-color: var(--oro-fiorentino); }
         .bg-verde-rinascita { background-color: var(--verde-rinascita); }
         .bg-blu-algoritmo { background-color: var(--blu-algoritmo); }
         .bg-grigio-pietra { background-color: var(--grigio-pietra); }
         .bg-teal-500 { background-color: #14b8a6; }
+        .bg-amber-500 { background-color: var(--amber-500); }
     </style>
 </head>
 
@@ -253,27 +253,31 @@
                     <form method="POST" action="{{ route('register') }}" class="space-y-6" novalidate id="registration-form">
                         @csrf
 
-                        {{-- User Type Selection --}}
+                        {{-- User Type Selection - Updated with new types --}}
                         <fieldset class="space-y-4">
                             <legend class="mb-4 text-lg font-semibold text-blu-algoritmo">{{ __('register.user_type_legend') }}</legend>
-                            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                                @php
                                     $userTypes = [
                                         'creator' => [
                                             'icon_svg_path' => 'M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z',
                                             'color' => 'oro-fiorentino'
                                         ],
-                                        'mecenate' => [
+                                        'patron' => [
                                             'icon_svg_path' => 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1',
                                             'color' => 'verde-rinascita'
                                         ],
-                                        'acquirente' => [
-                                            'icon_svg_path' => 'M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z',
+                                        'collector' => [
+                                            'icon_svg_path' => 'M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z',
                                             'color' => 'blu-algoritmo'
                                         ],
-                                        'azienda' => [
+                                        'enterprise' => [
                                             'icon_svg_path' => 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4',
                                             'color' => 'grigio-pietra'
+                                        ],
+                                        'trader_pro' => [
+                                            'icon_svg_path' => 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6',
+                                            'color' => 'amber-500'
                                         ],
                                         'epp_entity' => [
                                             'icon_svg_path' => 'M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c1.483 0 2.795-.298 3.996-.786M12 21c-1.483 0-2.795-.298-3.996-.786M3.786 15.004A9.004 9.004 0 0112 3c4.032 0 7.406 2.226 8.716 5.253M3.786 15.004A9.004 9.004 0 0012 21m-2.284-5.253A2.998 2.998 0 0012 15a2.998 2.998 0 002.284-1.253M12 12a2.998 2.998 0 01-2.284-1.253A2.998 2.998 0 0112 9a2.998 2.998 0 012.284 1.253A2.998 2.998 0 0112 12Z',
@@ -460,7 +464,7 @@
         </div>
     </div>
 
-    {{-- OS1 Complete JavaScript Implementation --}}
+    {{-- OS1 Complete JavaScript Implementation - Updated for new user types --}}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize form state
@@ -485,7 +489,7 @@
                 progressBar.style.width = `${formProgress}%`;
             }
 
-            // User type selection enhancement
+            // User type selection enhancement - Updated for new user types
             const userTypeInputs = document.querySelectorAll('input[name="user_type"]');
             const userTypeCards = document.querySelectorAll('label[data-user-type]');
 

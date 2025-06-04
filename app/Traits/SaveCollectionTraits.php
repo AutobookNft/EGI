@@ -4,6 +4,7 @@ namespace App\Traits;
 
 use App\Models\Collection;
 use Illuminate\Support\Facades\Log;
+use App\Traits\HasPermissionTrait;
 
 trait SaveCollectionTraits
 {
@@ -22,6 +23,8 @@ trait SaveCollectionTraits
 
             // Recupera la collection
             $collection = Collection::findOrFail($collectionId);
+
+            Log::channel('florenceegi')->info('SaveCollectionTraits: save', ['collection' => $collection]);
 
             // Verifica il permesso "update_collection"
             $this->hasPermission($collection, 'update_collection');

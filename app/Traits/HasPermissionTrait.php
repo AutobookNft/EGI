@@ -2,6 +2,7 @@
 
 namespace App\Traits;
 
+use App\Helpers\FegiAuth;
 use App\Models\CollectionUser;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -20,7 +21,7 @@ trait HasPermissionTrait
     public function hasPermission($collection, string $permission): bool
     {
         // Recupera l'utente autenticato
-        $user = Auth::user();
+        $user = FegiAuth::user();
 
         Log::channel('florenceegi')->info('HasPermissionTraits: User: ' . $user->id);
 
@@ -58,7 +59,7 @@ trait HasPermissionTrait
 
     public function userHasPermissionInCollection($collectionId, $permission)
     {
-        $userId = Auth::id();
+        $userId = FegiAuth::id();
 
         // Recupera il ruolo dell'utente nella collection
         $role = CollectionUser::where('collection_id', $collectionId)

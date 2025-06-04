@@ -3,10 +3,12 @@
 namespace Ultra\EgiModule\Handlers;
 
 // PHP & Laravel Imports
+
+use App\Helpers\FegiAuth;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Auth;
+
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
@@ -74,7 +76,7 @@ use Ultra\EgiModule\Contracts\UserRoleServiceInterface;
  * @privacy     🛡️ All user data handling delegated to privacy-aware services
  * @privacy     🛡️ Audit trail maintained through service interactions
  *
- * @dependency  🤝 CollectionService - Collection lifecycle management
+ * @dependency  🤝 App\Services\CollectionService - Collection lifecycle management
  * @dependency  🤝 WalletServiceInterface - Wallet operations and royalty management
  * @dependency  🤝 UserRoleServiceInterface - User role assignment
  * @dependency  🤝 ErrorManagerInterface - Centralized error handling
@@ -216,7 +218,7 @@ class EgiUploadHandler
 
             $creatorUserId = $creatorUser->id;
             $logContext['user_id'] = $creatorUserId;
-            $logContext['auth_type'] = Auth::check() ? 'full' : 'wallet_connected';
+            $logContext['auth_type'] = FegiAuth::check() ? 'full' : 'wallet_connected';
 
             $this->logger->info('[EGI HandleEgiUpload] User authenticated', $logContext);
 
@@ -280,8 +282,8 @@ class EgiUploadHandler
     protected function authenticateUser(): ?User
     {
         // Full Laravel authentication
-        if (Auth::check()) {
-            return Auth::user();
+        if (FegiAuth::check()) {
+            return FegiAuth::user();
         }
 
         // Session-based wallet authentication

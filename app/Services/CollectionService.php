@@ -124,13 +124,12 @@ class CollectionService
                 'epp_id'          => config('app.epp_id'),
                 'is_default'      => $isDefault,
                 'collection_name' => $collectionName,
-                'description'     => trans('collection.default_description', [], 'en') ?: 'Default collection automatically created for single EGI uploads.',
-                'creator_id'      => $user->id,
-                'type'            => 'standard',
+                'description'     => trans('collection.collection_description_placeholder', [], 'en') ?: 'Default collection automatically created for single EGI uploads.',
+                'type'            => config('egi.default_type', 'image'),
                 'position'        => $this->calculateCollectionPosition($user),
                 'EGI_number'      => 1,
                 'floor_price'     => (float) config('egi.default_floor_price', 0.0),
-                'is_published'    => false,
+                'is_published'    => true,
                 'status'          => 'local',
                 'created_via'     => 'collection_service' // Enhanced tracking
             ]);
@@ -151,7 +150,15 @@ class CollectionService
             // Enhanced role assignment with error handling
             $this->assignCreatorRoleWithErrorHandling($user, $enhancedLogContext);
 
-            $this->logger->info('[CollectionService] Default collection setup completed successfully', $enhancedLogContext);
+            // Enhanced current collection setup
+            $this->updateCurrentCollectionSafely($user, $collection, $enhancedLogContext);
+
+            $this->logger->info('[CollectionService] New collection created and set as current', [
+                ...$enhancedLogContext,
+                'collection_id' => $collection->id,
+                'collection_name' => $collection->collection_name,
+                'created_fresh' => true
+            ]);
 
             return $collection;
 
@@ -210,10 +217,7 @@ class CollectionService
             // Enhanced Step 2: Try to find default collection with validation
             $defaultCollection = $this->findDefaultCollectionWithValidation($user, $enhancedLogContext);
             if ($defaultCollection) {
-                // Enhanced current collection update with validation
-                $this->updateCurrentCollectionSafely($user, $defaultCollection, $enhancedLogContext);
-
-                $this->logger->info('[CollectionService] Default collection found and set as current', [
+                $this->logger->info('[CollectionService] Default collection found', [
                     ...$enhancedLogContext,
                     'collection_id' => $defaultCollection->id,
                     'collection_name' => $defaultCollection->collection_name
@@ -232,16 +236,6 @@ class CollectionService
                 $this->logger->error('[CollectionService] Collection creation returned error response', $enhancedLogContext);
                 return $newCollection;
             }
-
-            // Enhanced current collection setup
-            $this->updateCurrentCollectionSafely($user, $newCollection, $enhancedLogContext);
-
-            $this->logger->info('[CollectionService] New collection created and set as current', [
-                ...$enhancedLogContext,
-                'collection_id' => $newCollection->id,
-                'collection_name' => $newCollection->collection_name,
-                'created_fresh' => true
-            ]);
 
             return $newCollection;
 
@@ -535,43 +529,82 @@ class CollectionService
     }
 
     /**
-     * Enhanced current collection update with safety checks
-     * 🎯 Purpose: Safely update user's current collection reference
+     * Enhanced current collection update with safety checks and proper service delegation
+     * 🎯 Purpose: Safely update user's current collection reference via UserRoleService
      *
      * @param User $user The user
      * @param Collection $collection The collection to set as current
      * @param array $logContext Enhanced logging context
      * @return void
+     *
+     * @oracode-service-delegation Delegates user updates to UserRoleService for proper separation
+     * @oracode-session-management Maintains session state as CollectionService responsibility
      */
     protected function updateCurrentCollectionSafely(User $user, Collection $collection, array $logContext): void
     {
         try {
-            $user->current_collection_id = $collection->id;
-            $success = $user->save();
+            $enhancedLogContext = array_merge($logContext, [
+                'method' => 'updateCurrentCollectionSafely',
+                'user_id' => $user->id,
+                'collection_id' => $collection->id,
+                'operation' => 'update_current_collection_safely'
+            ]);
 
-            if (!$success) {
-                throw new Exception("Failed to save user current_collection_id");
+            $this->logger->debug('[CollectionService] Starting safe current collection update', $enhancedLogContext);
+
+            // STEP 1: Delegate user database update to UserRoleService (proper separation of concerns)
+            $this->logger->debug('[CollectionService] Delegating user current collection update to UserRoleService', $enhancedLogContext);
+
+            $updateSuccess = $this->roleService->updateUserCurrentCollection(
+                $user->id,
+                $collection->id,
+                $enhancedLogContext
+            );
+
+            // NOTE: If UserRoleService fails, UEM will handle the BLOCKING error and stop execution
+            // This point should only be reached if the update was successful
+            if (!$updateSuccess) {
+                // This is a fallback scenario that should rarely occur
+                $this->logger->error('[CollectionService] UserRoleService returned false unexpectedly', $enhancedLogContext);
+
+                throw new \Exception("UserRoleService updateUserCurrentCollection returned false for user {$user->id}");
             }
 
-            // Also update session for immediate availability
+            // STEP 2: Update session state (CollectionService responsibility)
+            $this->logger->debug('[CollectionService] Updating session current collection reference', $enhancedLogContext);
+
             session(['current_collection_id' => $collection->id]);
 
-            $this->logger->debug('[CollectionService] User current collection updated safely', [
-                ...$logContext,
+            // STEP 3: Success logging
+            $successContext = array_merge($enhancedLogContext, [
+                'database_update_successful' => true,
+                'session_update_successful' => true,
                 'previous_collection_id' => $user->getOriginal('current_collection_id'),
                 'new_collection_id' => $collection->id
             ]);
 
-        } catch (Throwable $e) {
+            $this->logger->info('[CollectionService] Current collection updated safely via service delegation', $successContext);
+
+        } catch (\Throwable $e) {
+            // Enhanced error context for this specific operation
             $updateErrorContext = array_merge($logContext, [
                 'update_error' => $e->getMessage(),
-                'collection_id' => $collection->id
+                'update_error_class' => get_class($e),
+                'collection_id' => $collection->id,
+                'user_id' => $user->id,
+                'method' => 'updateCurrentCollectionSafely'
             ]);
 
-            $this->logger->error('[CollectionService] Failed to update user current collection', $updateErrorContext);
+            $this->logger->error('[CollectionService] Failed to update user current collection safely', $updateErrorContext);
 
-            // This is critical for consistency
-            throw new Exception("Failed to update user current collection reference: " . $e->getMessage(), 0, $e);
+            // NOTE: If the error came from UserRoleService, it will already be handled by UEM as BLOCKING
+            // If it's a different error (like session issues), we handle it here as CRITICAL
+            $this->errorManager->handle(
+                'COLLECTION_CURRENT_UPDATE_ERROR',
+                $updateErrorContext,
+                $e,
+                true // This is critical for consistency, so throw
+            );
         }
     }
 

@@ -627,6 +627,175 @@ class UserRoleService implements UserRoleServiceInterface
     }
 
     /**
+     * 🎯 Updates user's current collection ID with enhanced validation and error handling
+     *
+     * This method is responsible for safely updating the current_collection_id field
+     * in the users table. It provides comprehensive validation, error handling, and
+     * audit logging following Oracode OS1 principles.
+     *
+     * @param int $userId The ID of the user to update
+     * @param int $collectionId The ID of the collection to set as current
+     * @param array $logContext Optional context for enhanced logging
+     * @return bool True if update successful, method will throw/block on errors
+     *
+     * @throws \Exception Via UEM error handling for critical failures
+     *
+     * @oracode-dimension technical|governance
+     * @value-flow Maintains user-collection state consistency for FlorenceEGI operations
+     * @community-impact Ensures users maintain proper collection context for uploads
+     * @transparency-level Full audit trail of current collection changes
+     * @sustainability-factor Maintains data integrity through proper validation
+     * @narrative-coherence Supports FlorenceEGI user experience continuity
+     *
+     * @privacy-purpose Collection association management for user experience
+     * @privacy-data Updates user table with collection reference only
+     * @privacy-consideration Collection changes affect user's default context
+     */
+    public function updateUserCurrentCollection(int $userId, int $collectionId, array $logContext = []): bool
+    {
+        // Enhanced context for comprehensive logging
+        $context = array_merge($logContext, [
+            'user_id' => $userId,
+            'collection_id' => $collectionId,
+            'operation' => 'update_user_current_collection',
+            'service' => static::class
+        ]);
+
+        $this->logger->info('[UserRoleService] Starting user current collection update', $context);
+
+        try {
+            // VALIDATION PHASE: Critical validations that must pass
+            $this->validateUserCurrentCollectionUpdate($userId, $collectionId, $context);
+
+            // BUSINESS LOGIC PHASE: Perform the actual update
+            $user = User::find($userId);
+
+            // Log the previous state for audit trail
+            $previousCollectionId = $user->current_collection_id;
+            $enhancedContext = array_merge($context, [
+                'previous_collection_id' => $previousCollectionId,
+                'new_collection_id' => $collectionId
+            ]);
+
+            // Perform atomic update
+            $user->current_collection_id = $collectionId;
+            $updateResult = $user->save();
+
+            if (!$updateResult) {
+                throw new \Exception("User model save() returned false for user {$userId}");
+            }
+
+            // SUCCESS LOGGING
+            $this->logger->info('[UserRoleService] User current collection updated successfully', array_merge($enhancedContext, [
+                'update_successful' => true,
+                'database_save_result' => $updateResult
+            ]));
+
+            return true;
+
+        } catch (\Throwable $e) {
+            // CRITICAL ERROR HANDLING
+            $errorContext = array_merge($context, [
+                'error_message' => $e->getMessage(),
+                'error_class' => get_class($e),
+                'error_file' => $e->getFile(),
+                'error_line' => $e->getLine()
+            ]);
+
+            $this->logger->error('[UserRoleService] Failed to update user current collection', $errorContext);
+
+            // Use UEM for BLOCKING error handling
+            // This will stop the entire flow and show appropriate user message
+            $this->errorManager->handle(
+                'USER_CURRENT_COLLECTION_UPDATE_FAILED',
+                $errorContext,
+                $e,
+                true // Throw exception to block execution
+            );
+
+            // This return should never be reached due to UEM throwing
+            return false;
+        }
+    }
+
+    /**
+     * 🛡️ Enhanced validation for user current collection update
+     *
+     * Validates that both user and collection exist and that the operation is valid.
+     * Throws exceptions with specific error codes for different validation failures.
+     *
+     * @param int $userId The user ID to validate
+     * @param int $collectionId The collection ID to validate
+     * @param array $context Logging context
+     * @throws \InvalidArgumentException If validation fails
+     *
+     * @oracode-dimension technical
+     * @value-flow Ensures data integrity before database operations
+     * @transparency-level All validation rules are explicitly defined and logged
+     */
+    protected function validateUserCurrentCollectionUpdate(int $userId, int $collectionId, array $context): void
+    {
+        // Validate user exists
+        $user = User::find($userId);
+        if (!$user) {
+            $this->logger->warning('[UserRoleService] User not found during current collection update', $context);
+
+            $this->errorManager->handle(
+                'USER_CURRENT_COLLECTION_VALIDATION_FAILED',
+                array_merge($context, [
+                    'validation_error' => "User with ID {$userId} not found",
+                    'validation_type' => 'user_existence'
+                ]),
+                new \InvalidArgumentException("User with ID {$userId} not found"),
+                true // Throw to block execution
+            );
+        }
+
+        // Validate collection exists
+        $collection = Collection::find($collectionId);
+        if (!$collection) {
+            $this->logger->warning('[UserRoleService] Collection not found during current collection update', $context);
+
+            $this->errorManager->handle(
+                'USER_CURRENT_COLLECTION_VALIDATION_FAILED',
+                array_merge($context, [
+                    'validation_error' => "Collection with ID {$collectionId} not found",
+                    'validation_type' => 'collection_existence'
+                ]),
+                new \InvalidArgumentException("Collection with ID {$collectionId} not found"),
+                true // Throw to block execution
+            );
+        }
+
+        // Validate ownership (optional business rule)
+        if ($collection->creator_id !== $userId) {
+            $this->logger->warning('[UserRoleService] Collection ownership mismatch during current collection update', array_merge($context, [
+                'collection_creator_id' => $collection->creator_id,
+                'user_id' => $userId
+            ]));
+
+            $this->errorManager->handle(
+                'USER_CURRENT_COLLECTION_VALIDATION_FAILED',
+                array_merge($context, [
+                    'validation_error' => "User {$userId} cannot set collection {$collectionId} as current (not owner)",
+                    'validation_type' => 'ownership_mismatch',
+                    'collection_creator_id' => $collection->creator_id
+                ]),
+                new \InvalidArgumentException("User {$userId} cannot set collection {$collectionId} as current (not owner)"),
+                true // Throw to block execution
+            );
+        }
+
+        // Log successful validation
+        $this->logger->debug('[UserRoleService] User current collection update validation passed', array_merge($context, [
+            'user_exists' => true,
+            'collection_exists' => true,
+            'ownership_valid' => true,
+            'validation_status' => 'passed'
+        ]));
+    }
+
+    /**
      * 📋 Get allowed collection roles
      *
      * @return array Array of allowed role names for collections

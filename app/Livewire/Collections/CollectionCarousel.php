@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Collections;
 
+use App\Helpers\FegiAuth;
 use Livewire\Component;
 use App\Models\Collection;
 use App\Repositories\IconRepository;
@@ -22,7 +23,7 @@ class CollectionCarousel extends Component
     public function mount()
     {
 
-        $team_id = Auth::user()->currentTeam->id;
+        $team_id = FegiAuth::user()->currentTeam->id;
         $this->collections = Collection::where('team_id', $team_id)->get();
 
         Log::channel('florenceegi')->info('Collections for team', [

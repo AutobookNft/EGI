@@ -1473,6 +1473,28 @@ return [
             'msg_to' => 'sweet-alert',
         ],
 
+        'USER_CURRENT_COLLECTION_UPDATE_FAILED' => [
+            'type' => 'critical',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.user_current_collection_update_failed',
+            'user_message_key' => 'error-manager::errors.user.user_current_collection_update_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'USER_CURRENT_COLLECTION_VALIDATION_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.user_current_collection_validation_failed',
+            'user_message_key' => 'error-manager::errors.user.user_current_collection_validation_failed',
+            'http_status_code' => 400,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'sweet-alert',
+        ],
+
         // Enhanced Storage Errors
         'EGI_STORAGE_DISK_CONFIG_ERROR' => [
             'type' => 'critical',

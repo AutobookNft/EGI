@@ -75,18 +75,16 @@ class CollectionOpen extends Component
 
         $user = $this->user; // Nella callback non si puù usare $this per questo motivo si crea una variabile locale
 
-
         // Recupera tutte le collection associate all'utente
         $this->collections = Collection::whereHas('users', function ($query) use ($user) {
-            $query->where('creator_id', $user->id);
+            $query->where('user_id', $user->id);
         })->get();
 
         // Verifica se c'è una sola collection
         if ($this->collections->count() === 1) {
 
-            Log::channel('florenceegi')->info('CollectionEdit:mount', ['collection' => $this->collection]);
-
             $this->collection = $this->collections->first();
+            Log::channel('florenceegi')->info('CollectionOpen: loadCollections', ['collection' => $this->collection]);
 
         }
     }
@@ -94,7 +92,7 @@ class CollectionOpen extends Component
     public function render()
     {
 
-        Log::channel('florenceegi')->info('CollectionOpen', [
+        Log::channel('florenceegi')->info('CollectionOpen: render', [
             'collection' => $this->collection,
         ]);
 

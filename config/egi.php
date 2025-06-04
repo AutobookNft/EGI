@@ -56,6 +56,8 @@ return [
         'collection_owner' => 'creator', // <-- Esempio: Usa 'creator' come ruolo owner di default
     ],
 
+    'default_type' => 'image',
+
     /**
      * 🏷️ System User IDs for predefined platform roles (Natan, EPP).
      * These IDs MUST correspond to valid records in the `users` table.

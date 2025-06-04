@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Collections;
 
+use App\Helpers\FegiAuth;
 use App\Models\Collection;
 use App\Models\TeamWallet;
 use Illuminate\Support\Facades\Auth;
@@ -32,7 +33,7 @@ class Show extends Component
     public function render()
     {
 
-        $user = Auth::user();
+        $user = FegiAuth::user();
 
         // Recupera la collection selezionata
         $collection = Collection::find($this->collectionId);

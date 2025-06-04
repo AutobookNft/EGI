@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Collections;
 
+use App\Helpers\FegiAuth;
 use App\Helpers\FileHelper;
 use App\Livewire\Traits\HandlesCollectionUpdate;
 use App\Models\Collection;
@@ -86,7 +87,7 @@ class CollectionEdit extends Component
     public function render()
     {
         return view('livewire.collections.collection-manager', [
-            'userId' => Auth::id(),
+            'userId' => FegiAuth::id(),
             'collectionId' => $this->collectionId,
         ]);
     }

@@ -87,6 +87,10 @@ return [
         // COLLECTION_FIND_CREATE_FAILED
         'collection_find_create_failed' => 'Impossibile trovare o creare la collection per l\'utente :user_id. Dettagli errore: :error_details',
 
+         // Errori aggiornamento collezione corrente utente
+        'user_current_collection_update_failed' => 'Errore critico durante aggiornamento current_collection_id per utente :user_id verso collezione :collection_id. Operazione database fallita: :error_message. Questo impedisce la corretta associazione user-collection nel workflow FlorenceEGI.',
+        'user_current_collection_validation_failed' => 'Validazione fallita durante aggiornamento collezione corrente per utente :user_id e collezione :collection_id. Tipo validazione: :validation_type. Errore: :validation_error. Questo indica problemi di integrità dati che devono essere risolti.',
+
         // == New Entries ==
         'authorization_error' => 'Autorizzazione negata per l\'azione richiesta: :action.',
         'csrf_token_mismatch' => 'Token CSRF non valido o scaduto.',
@@ -303,6 +307,10 @@ return [
         'collection_role_assignment_failed' => 'La collezione è stata creata, ma con problemi nei permessi. Contatta il supporto.',
         'collection_ownership_mismatch_error' => 'Non hai i permessi per accedere a questa collezione.',
         'collection_current_update_error' => 'Errore durante l\'aggiornamento della tua collezione attiva. Riprova.',
+
+        // Errori aggiornamento collezione corrente utente
+        'user_current_collection_update_failed' => 'Abbiamo riscontrato un problema critico durante la configurazione della tua collezione. Il nostro team tecnico è stato avvisato e risolverà la questione immediatamente. Ti invitiamo a riprovare tra qualche momento o contattare il supporto se il problema persiste.',
+        'user_current_collection_validation_failed' => 'Si è verificato un problema con la selezione della tua collezione. Assicurati di avere i permessi appropriati per questa collezione e riprova. Se continui ad avere difficoltà, contatta il nostro team di supporto.',
 
         // Enhanced Storage
         'egi_storage_disk_config_error' => 'Problema di configurazione del sistema di storage. Il team tecnico è stato avvisato.',

@@ -87,6 +87,10 @@ return [
         // COLLECTION_FIND_CREATE_FAILED
         'collection_find_create_failed' => 'Failed to find or create collection for user :user_id. Error details: :error_details',
 
+        // User Current Collection Update Errors
+        'user_current_collection_update_failed' => 'Critical failure updating current_collection_id for user :user_id to collection :collection_id. Database operation failed: :error_message. This prevents proper user-collection association in FlorenceEGI workflow.',
+        'user_current_collection_validation_failed' => 'Validation failed during current collection update for user :user_id and collection :collection_id. Validation type: :validation_type. Error: :validation_error. This indicates data integrity issues that must be resolved.',
+
         // == New Entries ==
         'authorization_error' => 'Authorization denied for the requested action: :action.',
         'csrf_token_mismatch' => 'CSRF token mismatch detected.',
@@ -303,6 +307,10 @@ return [
         'collection_role_assignment_failed' => 'Collection created, but with permission issues. Contact support.',
         'collection_ownership_mismatch_error' => 'You don\'t have permission to access this collection.',
         'collection_current_update_error' => 'Error updating your active collection. Please try again.',
+
+        // User Current Collection Update Errors
+        'user_current_collection_update_failed' => 'We encountered a critical issue while setting up your collection. Our technical team has been notified and will resolve this immediately. Please try again in a few moments or contact support if the problem persists.',
+        'user_current_collection_validation_failed' => 'There was an issue with your collection selection. Please ensure you have the proper permissions for this collection and try again. If you continue to experience problems, please contact our support team.',
 
         // Enhanced Storage
         'egi_storage_disk_config_error' => 'Storage system configuration problem. The technical team has been notified.',

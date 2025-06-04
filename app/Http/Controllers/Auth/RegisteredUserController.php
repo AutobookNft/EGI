@@ -384,12 +384,12 @@ class RegisteredUserController extends Controller
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
-            'user_type' => $validated['user_type'],
+            'usertype' => $validated['user_type'],
             'email_verified_at' => null,
             'gdpr_consents_given_at' => now(),
             'registration_ip' => request()->ip(),
             'registration_user_agent' => request()->userAgent(),
-            'registration_method' => 'web_form_gdpr_integrated',
+            'created_via' => 'web_form_gdpr_integrated',
             'ecosystem_setup_completed' => false,
         ]);
     }
@@ -427,9 +427,8 @@ class RegisteredUserController extends Controller
 
         $typeNames = [
             'creator' => "{$firstName}'s Arte",
-            'mecenate' => "{$firstName}'s Collection",
-            'azienda' => "{$firstName} Corporate Gallery",
-            'acquirente' => "{$firstName}'s Collection"
+            'patron' => "{$firstName}'s Collection",
+            'enterprise' => "{$firstName} Corporate Gallery",
         ];
 
         return $typeNames[$userType] ?? "{$firstName}'s Collection";
@@ -441,7 +440,7 @@ class RegisteredUserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'user_type' => ['required', 'string', 'in:creator,mecenate,acquirente,azienda'],
+            'user_type' => ['required', 'in:creator,patron,collector,enterprise,trader_pro,epp_entity'],
             'privacy_policy_accepted' => ['required', 'accepted'],
             'terms_accepted' => ['required', 'accepted'],
             'consents' => ['sometimes', 'array'],
@@ -459,12 +458,16 @@ class RegisteredUserController extends Controller
         switch ($validated['user_type']) {
             case 'creator':
                 return 'dashboard'; // Route esistente, gestita da DashboardController
-            case 'mecenate':
+            case 'patron':
                 return 'dashboard';
-            case 'acquirente':
+            case 'collector':
                 return 'marketplace.index'; // Se esiste
-            case 'azienda':
+            case 'enterprise':
                 return 'dashboard';
+            case 'trader_pro':
+                return 'dashboard';
+            case 'epp_entity':
+                return 'dashboard'; // Route esistente, gestita da DashboardController
             default:
                 return 'dashboard';
         }

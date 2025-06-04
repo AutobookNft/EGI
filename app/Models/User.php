@@ -46,6 +46,7 @@ class User extends Authenticatable
         'email',
         'icon_style',
         'password',
+        'created_via',
         'current_collection_id',
         'language',
         'wallet',

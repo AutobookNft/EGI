@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Collections;
 
+use App\Helpers\FegiAuth;
 use Livewire\Component;
 use App\Models\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -77,7 +78,7 @@ class CreateCollection extends Component
 
     private function prepareCollectionData()
     {
-        $this->collection['creator_id'] = Auth::id();
+        $this->collection['creator_id'] = FegiAuth::id();
         $this->collection['epp_id'] = config('app.epp_id');
         $this->collection['type'] = $this->collection['type'] ?? 'image';
         $this->collection['status'] = 'draft';

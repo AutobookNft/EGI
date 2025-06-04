@@ -15,12 +15,15 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('last_name')->nullable();
+            $table->string('username', 40)->nullable()->unique();
+            $table->string('usertype', 20)->default('creator');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();
             $table->foreignId('current_collection_id')->nullable();
             $table->string('profile_photo_path', 2048)->nullable();
+            $table->string('created_via', 100)->nullable();
 
             // Add language and wallet fields
             $table->string('language', 2)->nullable();
@@ -39,8 +42,7 @@ return new class extends Migration
             // Job fields
             $table->string('title', 50)->nullable();
             $table->string('job_role', 40)->nullable();
-            $table->string('username', 40)->nullable()->unique();
-            $table->string('usertype', 10)->default('creator');
+
 
             // Address fields
             $table->string('street')->nullable();
