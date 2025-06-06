@@ -37,6 +37,7 @@ class RolesAndPermissionsSeeder extends Seeder
         'open_collection',
         'view_collection',
         'view_collection_header',
+        'edit_own_collection',
         'create_EGI',
         'update_EGI',
         'delete_EGI',
@@ -69,52 +70,86 @@ class RolesAndPermissionsSeeder extends Seeder
         'view_privacy_policy',
         'edit_personal_data',
         'limit_data_processing',
+        'like_EGI',
+        'reserve_EGI',                    // Permesso per weak di riservare EGI con priorità bassa
 
         // ═══ NUOVI PERMESSI (AGGIUNGERE) ═══
-        
+
         // Patron specifici
         'support_creators',
         'view_creator_projects',
         'make_donations',
         'patronage_management',
-        
+
         // Collector specifici
         'buy_egi',
         'manage_personal_collection',
         'trade_egi',
         'collection_wishlist',
-        
+
         // Enterprise specifici
         'manage_corporate_data',
         'issue_invoices',
         'bulk_operations',
         'corporate_analytics',
         'manage_business_profile',
-        
+
         // Trader Pro specifici
         'advanced_trading',
         'view_trading_analytics',
         'bulk_trade_operations',
         'access_pro_tools',
         'trading_algorithms',
-        
+
         // EPP Entity specifici
         'create_epp_projects',
         'manage_epp_projects',
         'allocate_epp_points',
         'certify_sustainability',
         'environmental_reporting',
-        
+
         // Marketplace generici (per tutti i user types che possono comprare/vendere)
         'view_marketplace',
         'browse_marketplace',
         'make_offers',
         'accept_offers',
         'rate_transactions',
+
+        // ✅ NUOVI: Permessi domini dati utente
+        'edit_own_profile_data',
+        'edit_own_personal_data',
+        'edit_own_organization_data',
+        'manage_own_documents',
+        'manage_own_invoice_preferences',
+
+        // ✅ NUOVI: Permessi documenti specifici
+        'upload_identity_documents',
+        'verify_document_status',
+        'download_own_documents',
+
+        // ✅ NUOVI: Permessi fatturazione
+        'configure_invoice_preferences',
+        'view_own_invoices',
+        'download_own_invoices',
+
+        // Accesso weak/strong differenziato
+        'access_weak_dashboard',           // Dashboard limitata per weak
+        'access_full_dashboard',           // Dashboard completa per strong
+        'view_own_wallet_address',         // Vedere wallet address
+        'upgrade_account_to_strong',       // Processo upgrade weak→strong
+        'view_own_profile',                // Vedere il proprio profilo
+        'edit_own_EGI',
+        'delete_own_EGI',
+
+        // Permessi avanzati strong-only
+        'create_multiple_collections',     // Solo strong può creare più collection
+        'priority_reservations',          // Strong ha priorità su prenotazioni
+        'full_auction_access',            // Strong ha accesso completo alle aste
+        'manage_advanced_settings',       // Impostazioni avanzate solo strong
     ];
 
     private $roles = [
-        
+
         // ═══ RUOLI ESISTENTI (NON TOCCARE) ═══
         'superadmin' => ['all'],
 
@@ -132,7 +167,23 @@ class RolesAndPermissionsSeeder extends Seeder
             'view_documentation',
             'manage_consents', 'manage_privacy', 'export_personal_data', 'delete_account', 'view_activity_log',
             'view_breach_reports', 'view_privacy_policy', 'edit_personal_data', 'limit_data_processing',
-            'access_dashboard'
+            'access_dashboard', 'edit_own_profile_data',
+            'edit_own_personal_data',
+            'edit_own_organization_data',  // ✅ Creator può gestire org data
+            'manage_own_documents',
+            'manage_own_invoice_preferences',
+            'upload_identity_documents',
+            'verify_document_status',
+            'download_own_documents',
+            'configure_invoice_preferences',
+            'view_own_invoices',
+            'download_own_invoices',
+            'access_full_dashboard',
+            'view_own_wallet_address',
+            'create_multiple_collections',
+            'priority_reservations',
+            'full_auction_access',
+            'manage_advanced_settings',
         ],
 
         'admin' => [
@@ -155,7 +206,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'update_EGI', 'manage_EGI',
             'update_collection_image_header', 'open_collection',
             'view_profile', 'view_team', 'view_dashboard', 'view_collection', 'view_EGI', 'view_collection_header', 'view_documentation', 'view_statistics',
-            'manage_consents', 'manage_privacy', 'manage_privacy_settings', 'manage_privacy_policies', 'manage_privacy_requests',
+            'manage_consents', 'manage_privacy',
             'access_dashboard'
         ],
 
@@ -168,118 +219,228 @@ class RolesAndPermissionsSeeder extends Seeder
         ],
 
         // ═══ NUOVI RUOLI (AGGIUNGERE) ═══
-        
+
         'patron' => [
             // ✅ HA create_collection (può creare per supportare creators)
             'create_collection', 'update_collection', 'open_collection',
-            
+
             // Base permissions
             'access_dashboard', 'view_dashboard', 'view_collection', 'view_EGI',
             'view_statistics', 'view_documentation', 'view_collection_header',
-            
+
             // Patron specific
             'support_creators', 'view_creator_projects', 'make_donations', 'patronage_management',
-            
+
             // Marketplace (può comprare per supportare)
             'view_marketplace', 'browse_marketplace', 'buy_egi', 'make_offers', 'accept_offers', 'rate_transactions',
-            
-            // Profile & GDPR
-            'manage_profile', 'manage_account', 'view_profile',
-            'manage_consents', 'manage_privacy', 'export_personal_data', 'delete_account', 
-            'view_activity_log', 'view_privacy_policy', 'edit_personal_data', 'limit_data_processing',
-        ],
 
-        'collector' => [
-            // ❌ NON HA create_collection (solo colleziona, non crea)
-            
-            // Base permissions
-            'access_dashboard', 'view_dashboard', 'view_collection', 'view_EGI',
-            'view_statistics', 'view_documentation', 'view_collection_header',
-            
-            // Collector specific
-            'buy_egi', 'manage_personal_collection', 'trade_egi', 'collection_wishlist',
-            
-            // Marketplace (focus principale)
-            'view_marketplace', 'browse_marketplace', 'make_offers', 'accept_offers', 'rate_transactions',
-            
             // Profile & GDPR
             'manage_profile', 'manage_account', 'view_profile',
             'manage_consents', 'manage_privacy', 'export_personal_data', 'delete_account',
             'view_activity_log', 'view_privacy_policy', 'edit_personal_data', 'limit_data_processing',
+            'edit_own_profile_data',
+            'edit_own_personal_data',
+            // ❌ Patron NON ha organization data
+            'manage_own_documents',
+            'manage_own_invoice_preferences',
+            'upload_identity_documents',
+            'verify_document_status',
+            'download_own_documents',
+            'configure_invoice_preferences',
+            'view_own_invoices',
+            'download_own_invoices',
+            'access_full_dashboard',
+            'view_own_wallet_address',
+            'priority_reservations',
+            'full_auction_access',
+        ],
+
+        'collector' => [
+            // ❌ NON HA create_collection (solo colleziona, non crea)
+
+            // Base permissions
+            'access_dashboard', 'view_dashboard', 'view_collection', 'view_EGI',
+            'view_statistics', 'view_documentation', 'view_collection_header',
+
+            // Collector specific
+            'buy_egi', 'manage_personal_collection', 'trade_egi', 'collection_wishlist',
+
+            // Marketplace (focus principale)
+            'view_marketplace', 'browse_marketplace', 'make_offers', 'accept_offers', 'rate_transactions',
+
+            // Profile & GDPR
+            'manage_profile', 'manage_account', 'view_profile',
+            'manage_consents', 'manage_privacy', 'export_personal_data', 'delete_account',
+            'view_activity_log', 'view_privacy_policy', 'edit_personal_data', 'limit_data_processing',
+            'edit_own_profile_data',
+            'edit_own_personal_data',
+            // ❌ Collector NON ha organization data
+            'manage_own_documents',
+            'manage_own_invoice_preferences',
+            'upload_identity_documents',
+            'verify_document_status',
+            'download_own_documents',
+            'configure_invoice_preferences',
+            'view_own_invoices',
+            'download_own_invoices',
+            'access_full_dashboard',
+            'view_own_wallet_address',
+            'priority_reservations',
+            'full_auction_access',
         ],
 
         'enterprise' => [
             // ✅ HA create_collection (può creare per business)
             'create_collection', 'update_collection', 'delete_collection', 'open_collection',
-            
+
             // Team management (come creator)
             'create_team', 'update_team', 'delete_team',
             'add_team_member', 'remove_team_member', 'modify_team_roles',
-            
+
             // EGI management (può creare EGI aziendali)
             'create_EGI', 'update_EGI', 'delete_EGI', 'manage_EGI',
-            
+
             // Wallet management
             'create_wallet', 'update_wallet', 'view_wallet',
-            
+
             // Base permissions
             'access_dashboard', 'view_dashboard', 'view_collection', 'view_EGI',
             'view_statistics', 'view_documentation', 'view_collection_header',
             'view_user', 'view_team', 'view_notifications', 'view_logs',
-            
+
             // Enterprise specific
-            'manage_corporate_data', 'issue_invoices', 'bulk_operations', 
+            'manage_corporate_data', 'issue_invoices', 'bulk_operations',
             'corporate_analytics', 'manage_business_profile',
-            
+
             // Marketplace
             'view_marketplace', 'browse_marketplace', 'buy_egi', 'make_offers', 'accept_offers', 'rate_transactions',
-            
+
             // Profile & GDPR
             'manage_profile', 'manage_account', 'view_profile',
             'manage_consents', 'manage_privacy', 'export_personal_data', 'delete_account',
             'view_activity_log', 'view_privacy_policy', 'edit_personal_data', 'limit_data_processing',
+            'edit_own_profile_data',
+            'edit_own_personal_data',
+            'edit_own_organization_data',  // ✅ Enterprise può gestire org data
+            'manage_own_documents',
+            'manage_own_invoice_preferences',
+            'upload_identity_documents',
+            'verify_document_status',
+            'download_own_documents',
+            'configure_invoice_preferences',
+            'view_own_invoices',
+            'download_own_invoices',
+            'access_full_dashboard',
+            'view_own_wallet_address',
+            'create_multiple_collections',
+            'priority_reservations',
+            'full_auction_access',
+            'manage_advanced_settings',
         ],
 
         'trader_pro' => [
             // ❌ NON HA create_collection (solo trading)
-            
+
             // Base permissions
             'access_dashboard', 'view_dashboard', 'view_collection', 'view_EGI',
             'view_statistics', 'view_documentation', 'view_collection_header',
-            
+
             // Trading specific (focus principale)
-            'advanced_trading', 'view_trading_analytics', 'bulk_trade_operations', 
+            'advanced_trading', 'view_trading_analytics', 'bulk_trade_operations',
             'access_pro_tools', 'trading_algorithms',
-            
+
             // Marketplace (con strumenti avanzati)
             'view_marketplace', 'browse_marketplace', 'buy_egi', 'trade_egi',
             'make_offers', 'accept_offers', 'rate_transactions',
-            
+
             // Profile & GDPR
             'manage_profile', 'manage_account', 'view_profile',
             'manage_consents', 'manage_privacy', 'export_personal_data', 'delete_account',
             'view_activity_log', 'view_privacy_policy', 'edit_personal_data', 'limit_data_processing',
+            'edit_own_profile_data',
+            'edit_own_personal_data',
+            // ❌ Trader Pro NON ha organization data
+            'manage_own_documents',
+            'manage_own_invoice_preferences',
+            'upload_identity_documents',
+            'verify_document_status',
+            'download_own_documents',
+            'configure_invoice_preferences',
+            'view_own_invoices',
+            'download_own_invoices',
+            'access_full_dashboard',
+            'view_own_wallet_address',
+            'priority_reservations',
+            'full_auction_access',
+            'manage_advanced_settings',
         ],
 
         'epp_entity' => [
             // ❌ NON HA create_collection (solo progetti EPP)
-            
+
             // Base permissions
-            'access_dashboard', 'view_dashboard', 'view_EGI', 
+            'access_dashboard', 'view_dashboard', 'view_EGI',
             'view_statistics', 'view_documentation',
-            
+
             // EPP specific (focus principale)
-            'create_epp_projects', 'manage_epp_projects', 'allocate_epp_points', 
+            'create_epp_projects', 'manage_epp_projects', 'allocate_epp_points',
             'certify_sustainability', 'environmental_reporting',
-            
+
             // Può vedere collections per certificare sostenibilità
             'view_collection', 'view_collection_header',
-            
+
             // Profile & GDPR
             'manage_profile', 'manage_account', 'view_profile',
             'manage_consents', 'manage_privacy', 'export_personal_data', 'delete_account',
             'view_activity_log', 'view_privacy_policy', 'edit_personal_data', 'limit_data_processing',
+            'edit_own_profile_data',
+            'edit_own_personal_data',
+            'edit_own_organization_data',  // ✅ EPP Entity può gestire org data
+            'manage_own_documents',
+            'manage_own_invoice_preferences',
+            'upload_identity_documents',
+            'verify_document_status',
+            'download_own_documents',
+            'configure_invoice_preferences',
+            'view_own_invoices',
+            'download_own_invoices',
+            'access_full_dashboard',
+            'view_own_wallet_address',
+            'create_multiple_collections',
+            'priority_reservations',
+            'full_auction_access',
+            'manage_advanced_settings',
         ],
+
+        'weak_connect' => [
+                // Accesso base
+                'view_own_profile',
+                'view_own_wallet_address',
+                'access_weak_dashboard',
+
+                // Interazioni limitate
+                'view_EGI',
+                'like_EGI',
+                'reserve_EGI',                    // Con priorità bassa
+
+                // Collection di default (solo 1)
+                'view_collection',
+                'edit_own_collection',           // Solo la sua collection default
+                'create_EGI',                     // Solo nella sua collection
+                'edit_own_EGI',
+                'delete_own_EGI',
+
+                // Processo di upgrade
+                'upgrade_account_to_strong',
+
+                // Base profile management
+                'edit_own_profile_data',
+
+                // NO: create_multiple_collections
+                // NO: priority_reservations
+                // NO: full_auction_access
+                // NO: organization_data, documents, invoice_preferences
+            ],
     ];
 
     public function run(): void

@@ -46,10 +46,15 @@ return new class extends Migration
             $table->string('region')->nullable();
             $table->string('state')->nullable();
             $table->string('zip')->nullable();
+            $table->string('country', 2)->nullable();
+            $table->string('province', 10)->nullable();
             $table->string('home_phone')->nullable();
             $table->string('cell_phone')->nullable();
             $table->string('work_phone')->nullable();
+            $table->string('emergency_contact')->nullable();
             $table->date('birth_date')->nullable();
+            $table->string('birth_place')->nullable();
+            $table->enum('gender', ['male', 'female', 'other', 'prefer_not_say'])->nullable();
             $table->string('fiscal_code')->nullable();
             $table->string('tax_id_number')->nullable();
             $table->boolean('allow_personal_data_processing')->default(false);

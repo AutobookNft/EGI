@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * 🛡️ Privacy: Business invoice data with moderate sensitivity
  * 🧱 Core Logic: Handles buyer/seller invoice capabilities and settings
  */
-class UserInvoicePreferences extends Model
+class UserInvoicePreference extends Model
 {
     protected $fillable = [
         'user_id', 'invoice_name', 'invoice_fiscal_code', 'invoice_vat_number',

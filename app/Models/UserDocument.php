@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * 🛡️ Privacy: Ultra-sensitive documents with encryption and access tracking
  * 🧱 Core Logic: Handles document verification and compliance retention
  */
-class UserDocuments extends Model
+class UserDocument extends Model
 {
     protected $fillable = [
         'user_id', 'doc_typo', 'doc_num', 'doc_issue_date', 'doc_expired_date',

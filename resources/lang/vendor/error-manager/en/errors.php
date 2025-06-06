@@ -174,6 +174,12 @@ return [
         'registration_user_type_invalid' => 'Invalid user type during registration: :user_type. Valid types: creator,mecenate,acquirente,azienda',
         'registration_rate_limit_exceeded' => 'Registration rate limit exceeded. IP: :ip_address, Attempts: :attempts, Time window: :time_window',
         'registration_page_load_error' => 'Registration page load error: :error. IP: :ip_address',
+        'permission_based_registration_failed' => 'Error during permission-based registration. Details: :error',
+        'algorand_wallet_generation_failed' => 'Unable to generate valid Algorand wallet address. Error: :error',
+        'ecosystem_setup_failed' => 'Error during user ecosystem creation (collection, wallets, relationships). Details: :error',
+        'user_domain_initialization_failed' => 'Error during user domain initialization (profile, personal_data, etc.). Details: :error',
+        'gdpr_consent_processing_failed' => 'Error during GDPR consent processing. Details: :error',
+        'role_assignment_failed' => 'Error during role assignment based on user_type. Details: :error',
     ],
 
     'user' => [
@@ -333,6 +339,12 @@ return [
         'registration_user_type_invalid' => 'The selected role is not valid. Choose between Creator, Mecenate, Purchaser, or Business.',
         'registration_rate_limit_exceeded' => 'Too many registration requests. Please try again in a few minutes.',
         'registration_page_load_error' => 'Error loading the registration page. Please reload the page.',
+        'permission_based_registration_failed_user' => 'An error occurred during registration. Please try again or contact support if the problem persists.',
+        'algorand_wallet_generation_failed_user' => 'Error creating digital wallet. Please try registration again.',
+        'ecosystem_setup_failed_user' => 'Registration completed, but there was an error in initial setup. You can complete setup from your profile.',
+        'user_domain_initialization_failed_user' => 'Registration completed successfully! Some profile sections may require additional configuration.',
+        'gdpr_consent_processing_failed_user' => 'Error processing privacy consents. Please verify your choices and try again.',
+        'role_assignment_failed_user' => 'Error in account type configuration. Please contact support.',
     ],
 
     // Generic message (used by UserInterfaceHandler if no specific message found)

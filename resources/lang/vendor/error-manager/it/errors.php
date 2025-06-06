@@ -174,6 +174,13 @@ return [
         'registration_user_type_invalid' => 'Tipo utente non valido durante registrazione: :user_type. Valid types: creator,mecenate,acquirente,azienda',
         'registration_rate_limit_exceeded' => 'Rate limit registrazione superato. IP: :ip_address, Attempts: :attempts, Time window: :time_window',
         'registration_page_load_error' => 'Errore caricamento pagina registrazione: :error. IP: :ip_address',
+        'permission_based_registration_failed' => 'Errore durante la registrazione basata sui permessi. Dettagli: :error',
+        'algorand_wallet_generation_failed' => 'Impossibile generare indirizzo wallet Algorand valido. Errore: :error',
+        'ecosystem_setup_failed' => 'Errore durante la creazione dell\'ecosistema utente (collection, wallet, relazioni). Dettagli: :error',
+        'user_domain_initialization_failed' => 'Errore durante l\'inizializzazione dei domini utente (profile, personal_data, etc.). Dettagli: :error',
+        'gdpr_consent_processing_failed' => 'Errore durante l\'elaborazione dei consensi GDPR. Dettagli: :error',
+        'role_assignment_failed' => 'Errore durante l\'assegnazione del ruolo basato su user_type. Dettagli: :error',
+
     ],
 
     'user' => [
@@ -333,6 +340,12 @@ return [
         'registration_user_type_invalid' => 'Il ruolo selezionato non è valido. Scegli tra Creator, Mecenate, Acquirente o Azienda.',
         'registration_rate_limit_exceeded' => 'Troppe richieste di registrazione. Riprova tra qualche minuto.',
         'registration_page_load_error' => 'Errore nel caricamento della pagina di registrazione. Ricarica la pagina.',
+        'permission_based_registration_failed_user' => 'Si è verificato un errore durante la registrazione. Ti preghiamo di riprovare o contattare il supporto se il problema persiste.',
+        'algorand_wallet_generation_failed_user' => 'Errore nella creazione del wallet digitale. Ti preghiamo di riprovare la registrazione.',
+        'ecosystem_setup_failed_user' => 'La registrazione è stata completata, ma si è verificato un errore nella configurazione iniziale. Puoi completare la configurazione dal tuo profilo.',
+        'user_domain_initialization_failed_user' => 'Registrazione completata con successo! Alcune sezioni del profilo potrebbero richiedere configurazione aggiuntiva.',
+        'gdpr_consent_processing_failed_user' => 'Errore nell\'elaborazione dei consensi privacy. Ti preghiamo di verificare le tue scelte e riprovare.',
+        'role_assignment_failed_user' => 'Errore nella configurazione del tipo account. Ti preghiamo di contattare il supporto.',
     ],
 
     // Generic message (used by UserInterfaceHandler if no specific message found)

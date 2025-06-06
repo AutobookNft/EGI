@@ -21,4 +21,10 @@ return [
     'assign_permissions' => 'Assegna Permessi',
     'collection_staff' => 'Staff Collezione',
     'general' => 'Generale',
+    'my_data_management' => 'Gestione Dati Personali',
+    'my_profile' => 'Il Mio Profilo',
+    'my_personal_data' => 'Dati Personali',
+    'my_organization' => 'La Mia Organizzazione',
+    'my_documents' => 'I Miei Documenti',
+    'my_invoice_preferences' => 'Preferenze Fatturazione',
 ];

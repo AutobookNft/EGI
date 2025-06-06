@@ -754,7 +754,7 @@ class GdprController extends Controller
         // Add fields based on user type
         switch ($user->user_type) {
             case 'creator':
-            case 'mecenate':
+            case 'patron':
                 $baseFields = array_merge($baseFields, [
                     'bio_title',
                     'bio_story',
@@ -765,7 +765,7 @@ class GdprController extends Controller
                 ]);
                 break;
 
-            case 'azienda':
+            case 'enterprise':
                 $baseFields = array_merge($baseFields, [
                     'org_name',
                     'org_email',
@@ -792,9 +792,41 @@ class GdprController extends Controller
                     'org_state',
                     'org_zip',
                     'org_site_url',
-                    'org_phone_1'
+                    'org_phone_1',
+                    'rea',
+                    'org_fiscal_code',
+                    'org_vat_number'
                 ]);
                 break;
+            case 'collector':
+                $baseFields = array_merge($baseFields, [
+                    'site_url',
+                    'instagram',
+                    'facebook',
+                    'linkedin'
+                ]);
+                break;
+            case 'trader_pro':
+                $baseFields = array_merge($baseFields, [
+                    'site_url',
+                    'instagram',
+                    'facebook',
+                    'linkedin',
+                    'org_name',
+                    'org_email',
+                    'org_street',
+                    'org_city',
+                    'org_region',
+                    'org_state',
+                    'org_zip',
+                    'org_site_url',
+                    'org_phone_1',
+                    'rea',
+                    'org_fiscal_code',
+                    'org_vat_number'
+                ]);
+                break;
+
         }
 
         return $baseFields;

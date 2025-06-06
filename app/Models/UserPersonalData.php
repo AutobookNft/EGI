@@ -16,8 +16,9 @@ class UserPersonalData extends Model
     protected $table = 'user_personal_data';
 
     protected $fillable = [
-        'user_id', 'street', 'city', 'region', 'state', 'zip',
-        'home_phone', 'cell_phone', 'work_phone', 'birth_date',
+        'user_id',
+        'street', 'city', 'region', 'state', 'zip','country',  'province',
+        'home_phone', 'cell_phone', 'work_phone', 'birth_date', 'birth_place', 'gender',
         'fiscal_code', 'tax_id_number', 'allow_personal_data_processing',
         'processing_purposes', 'consent_updated_at'
     ];
@@ -51,7 +52,7 @@ class UserPersonalData extends Model
         return !empty($this->street) && !empty($this->city) && !empty($this->zip);
     }
 
-    public function isDataProcessingAllowed(string $purpose = null): bool
+    public function isDataProcessingAllowed(?string $purpose = null): bool
     {
         if (!$this->allow_personal_data_processing) {
             return false;

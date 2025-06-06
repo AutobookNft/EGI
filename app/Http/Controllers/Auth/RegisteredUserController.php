@@ -4,11 +4,15 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\UserProfile;
+use App\Models\UserPersonalData;
+use App\Models\UserOrganizationData;
+use App\Models\UserDocument;
+use App\Models\UserInvoicePreference;
 use App\Services\Gdpr\ConsentService;
 use App\Services\Gdpr\AuditLogService;
 use App\Services\CollectionService;
 use Ultra\EgiModule\Contracts\WalletServiceInterface;
-use Ultra\EgiModule\Contracts\UserRoleServiceInterface;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -20,104 +24,40 @@ use Ultra\ErrorManager\Interfaces\ErrorManagerInterface;
 use Ultra\UltraLogManager\UltraLogManager;
 
 /**
- * @Oracode Controller: Enhanced User Registration USANDO IL SISTEMA GDPR ESISTENTE
- * 🎯 Purpose: Handle user registration integrandosi con l'ecosistema GDPR già implementato
- * 🛡️ Privacy: USA ConsentService e AuditLogService già esistenti
- * 🧱 Core Logic: Estende Jetstream SENZA duplicare funzionalità GDPR
+ * @Oracode Controller: Permission-Based Registration with Domain Separation
+ * 🎯 Purpose: Handle complete user registration with conditional ecosystem setup
+ * 🛡️ Privacy: Full GDPR compliance with domain-separated data initialization
+ * 🧱 Core Logic: Permission-based ecosystem creation (not hardcoded user types)
  *
  * @package App\Http\Controllers\Auth
  * @author Padmin D. Curtis (for Fabio Cherici)
- * @version 2.1.0 - CORRECTED per evitare duplicazioni
- * @date 2025-05-25
- * @integration-note USA SOLO servizi GDPR esistenti, no duplicazioni
+ * @version 4.0.0 - CLEAN COMPLETE REWRITE
+ * @date 2025-06-04
+ * @solution Permission-based ecosystem setup + domain separation + Algorand integration
  */
 class RegisteredUserController extends Controller
 {
     /**
-     * Error manager (ESISTENTE)
-     * @var ErrorManagerInterface
-     */
-    protected ErrorManagerInterface $errorManager;
-
-    /**
-     * Ultra log manager (ESISTENTE)
-     * @var UltraLogManager
-     */
-    protected UltraLogManager $logger;
-
-    /**
-     * GDPR consent service (GIÀ IMPLEMENTATO nel sistema GDPR)
-     * @var ConsentService
-     */
-    protected ConsentService $consentService;
-
-    /**
-     * GDPR audit service (GIÀ IMPLEMENTATO nel sistema GDPR)
-     * @var AuditLogService
-     */
-    protected AuditLogService $auditService;
-
-    /**
-     * Collection service (ESISTENTE per EGI)
-     * @var CollectionService
-     */
-    protected CollectionService $collectionService;
-
-    /**
-     * Wallet service (ESISTENTE per EGI)
-     * @var WalletServiceInterface
-     */
-    protected WalletServiceInterface $walletService;
-
-    /**
-     * User role service (ESISTENTE per EGI)
-     * @var UserRoleServiceInterface
-     */
-    protected UserRoleServiceInterface $userRoleService;
-
-    /**
-     * Constructor - USA SOLO servizi esistenti
-     *
-     * @param ErrorManagerInterface $errorManager
-     * @param UltraLogManager $logger
-     * @param ConsentService $consentService [ESISTENTE - sistema GDPR]
-     * @param AuditLogService $auditService [ESISTENTE - sistema GDPR]
-     * @param CollectionService $collectionService [ESISTENTE - sistema EGI]
-     * @param WalletServiceInterface $walletService [ESISTENTE - sistema EGI]
-     * @param UserRoleServiceInterface $userRoleService [ESISTENTE - sistema EGI]
-     *
-     * @integration-safety Tutti i servizi sono già implementati e testati
+     * Constructor with complete dependency injection
      */
     public function __construct(
-        ErrorManagerInterface $errorManager,
-        UltraLogManager $logger,
-        ConsentService $consentService,
-        AuditLogService $auditService,
-        CollectionService $collectionService,
-        WalletServiceInterface $walletService,
-        UserRoleServiceInterface $userRoleService
-    ) {
-        $this->errorManager = $errorManager;
-        $this->logger = $logger;
-        $this->consentService = $consentService;
-        $this->auditService = $auditService;
-        $this->collectionService = $collectionService;
-        $this->walletService = $walletService;
-        $this->userRoleService = $userRoleService;
-    }
+        protected ErrorManagerInterface $errorManager,
+        protected UltraLogManager $logger,
+        protected ConsentService $consentService,
+        protected AuditLogService $auditService,
+        protected CollectionService $collectionService,
+        protected WalletServiceInterface $walletService
+    ) {}
 
     /**
-     * Display registration view - USA configurazione GDPR esistente
+     * Display registration view with GDPR context
      *
-     * @return \Illuminate\View\View
+     * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
      */
     public function create()
     {
         try {
-            // USA il ConsentService ESISTENTE per ottenere i tipi
             $consentTypes = $this->consentService->getConsentTypes();
-
-            // USA configurazione GDPR esistente (non creare config/gdpr.php duplicato!)
             $privacyPolicyVersion = config('gdpr.current_policy_version', '1.0.0');
 
             $this->logger->info('[Registration] Registration page loaded', [
@@ -125,7 +65,6 @@ class RegisteredUserController extends Controller
                 'user_agent' => request()->userAgent(),
                 'timestamp' => now()->toISOString()
             ]);
-            // Render registration view with existing services
 
             return view('auth.register', [
                 'consentTypes' => $consentTypes,
@@ -138,7 +77,6 @@ class RegisteredUserController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            // USA error manager esistente con codici UEM esistenti
             return $this->errorManager->handle('REGISTRATION_PAGE_LOAD_ERROR', [
                 'error' => $e->getMessage(),
                 'ip_address' => request()->ip()
@@ -147,7 +85,7 @@ class RegisteredUserController extends Controller
     }
 
     /**
-     * Handle registration USANDO solo servizi esistenti
+     * Handle complete permission-based registration with ecosystem setup
      *
      * @param Request $request
      * @return RedirectResponse
@@ -158,67 +96,81 @@ class RegisteredUserController extends Controller
         $collectionId = null;
 
         $logContext = [
-            'operation' => 'enhanced_user_registration_with_existing_services',
+            'operation' => 'permission_based_user_registration',
             'ip_address' => request()->ip(),
             'user_agent' => request()->userAgent(),
             'timestamp' => now()->toISOString()
         ];
 
         try {
-            // Validation con regole standard (non duplicare quelle GDPR)
+            // ═══ VALIDATION ═══
             $validated = $this->validateRegistration($request);
             $logContext['user_type'] = $validated['user_type'];
 
-            $this->logger->info('[Registration] Starting registration using EXISTING GDPR services', $logContext);
+            $this->logger->info('[Registration] Starting permission-based registration', $logContext);
 
-            // Transaction per ecosystem setup
+            // ═══ MAIN TRANSACTION ═══
             $result = DB::transaction(function () use ($validated, $logContext, &$userId, &$collectionId) {
 
-                // 1. CREATE USER (standard)
-                $user = $this->createUser($validated, $logContext);
+                // 1. CREATE USER WITH ALGORAND WALLET
+                $user = $this->createUserWithAlgorandWallet($validated);
                 $userId = $user->id;
                 $logContext['user_id'] = $userId;
+                $logContext['algorand_wallet'] = $user->wallet;
 
-                $this->logger->info('[Registration] User created successfully', [
-                    ...$logContext,
-                    'user_email' => $user->email,
-                    'user_type' => $user->user_type
-                ]);
+                $this->logger->info('[Registration] User created with Algorand wallet', $logContext);
 
-                // 2. USA ConsentService ESISTENTE (non duplicare!)
-                $this->processGdprConsentsWithExistingService($user, $validated['consents'] ?? [], $logContext);
+                // 2. ASSIGN ROLE AND CHECK ECOSYSTEM PERMISSIONS
+                $canCreateEcosystem = $this->assignRoleAndCheckPermissions($user, $validated['user_type']);
+                $logContext['can_create_ecosystem'] = $canCreateEcosystem;
 
-                // 3. USA CollectionService ESISTENTE
-                $collection = $this->createCollectionWithExistingService($user, $validated, $logContext);
-                $collectionId = $collection->id;
-                $logContext['collection_id'] = $collectionId;
+                // 3. CONDITIONAL ECOSYSTEM SETUP
+                $collection = null;
+                if ($canCreateEcosystem) {
+                    $collection = $this->createFullEcosystem($user, $validated, $logContext);
+                    $collectionId = $collection->id;
+                    $logContext['collection_id'] = $collectionId;
+                    $logContext['ecosystem_created'] = true;
+                } else {
+                    $logContext['ecosystem_created'] = false;
+                    $this->logger->info('[Registration] User type does not require ecosystem setup', $logContext);
+                }
 
-                // 4. USA WalletService ESISTENTE
-                $this->setupWalletsWithExistingService($collection, $user, $logContext);
+                // 4. INITIALIZE USER DOMAINS (always)
+                $this->initializeUserDomains($user, $validated, $logContext);
 
-                // 5. USA UserRoleService ESISTENTE
-                $this->assignRolesWithExistingService($user, $validated['user_type'], $logContext);
+                // 5. PROCESS GDPR CONSENTS
+                $this->processGdprConsents($user, $validated, $logContext);
 
-                // 6. Finalize
-                $this->finalizeUserSetup($user, $collection, $validated, $logContext);
+                // 6. CREATE AUDIT RECORD
+                $this->createRegistrationAuditRecord($user, $collection, $validated, $logContext);
 
                 return [
                     'user' => $user,
                     'collection' => $collection,
-                    'redirect_route' => $this->determinePostRegistrationRoute($validated)
+                    'ecosystem_created' => $canCreateEcosystem,
                 ];
             });
 
-            // 7. USA AuditLogService ESISTENTE per logging
-            $this->logRegistrationWithExistingService($result, $logContext);
-
-            // Fire Jetstream event
+            // ═══ SUCCESS FLOW ═══
             event(new Registered($result['user']));
             Auth::login($result['user']);
 
-            return redirect()->route($result['redirect_route'])
-                ->with('success', __('Benvenuto nel tuo Rinascimento Digitale!'))
-                ->with('collection_created', $result['collection']->collection_name);
+            $successMessage = $result['ecosystem_created']
+                ? __('Welcome to your Digital Renaissance! Your creative ecosystem is ready.')
+                : __('Welcome to FlorenceEGI! Complete your profile to get started.');
+
+            $this->logger->info('[Registration] Registration completed successfully', [
+                ...$logContext,
+                'success' => true,
+                'ecosystem_created' => $result['ecosystem_created']
+            ]);
+
+            return redirect()->route('dashboard')
+                ->with('success', $successMessage)
+                ->with('user_type', $validated['user_type'])
+                ->with('ecosystem_created', $result['ecosystem_created'])
+                ->with('algorand_wallet', $result['user']->wallet);
 
         } catch (\Exception $e) {
             $errorContext = [
@@ -228,212 +180,21 @@ class RegisteredUserController extends Controller
                 'error' => $e->getMessage()
             ];
 
-            return $this->errorManager->handle('ENHANCED_REGISTRATION_FAILED', $errorContext, $e);
+            // Determine specific error code based on exception message
+            $errorCode = $this->determineErrorCode($e->getMessage());
+
+            return $this->errorManager->handle($errorCode, $errorContext, $e);
         }
     }
+
+    // ═══════════════════════════════════════════════════════════════
+    // PRIVATE METHODS
+    // ═══════════════════════════════════════════════════════════════
 
     /**
-     * USA ConsentService ESISTENTE - no duplicazioni
+     * Validate registration form with GDPR consents
+     * @oracode-pillar: Interrogabilità Totale
      */
-    protected function processGdprConsentsWithExistingService(User $user, array $consents, array $logContext): void
-    {
-        try {
-            // Log what we received for debugging
-            $this->logger->info('[Registration] Processing GDPR consents - Raw input', [
-                ...$logContext,
-                'consents_received' => $consents,
-                'consents_empty' => empty($consents),
-                'consents_count' => count($consents)
-            ]);
-
-            // Build processed consents with explicit defaults
-            // This ensures we always have a complete structure
-            $processedConsents = [
-                'functional' => true, // Always required for platform operation
-                'analytics' => isset($consents['analytics']) && $consents['analytics'] === '1',
-                'marketing' => isset($consents['marketing']) && $consents['marketing'] === '1',
-                'profiling' => isset($consents['profiling']) && $consents['profiling'] === '1',
-            ];
-
-            $this->logger->info('[Registration] Processed consents for ConsentService', [
-                ...$logContext,
-                'processed_consents' => $processedConsents,
-                'functional_consent' => $processedConsents['functional'],
-                'optional_consents_given' => array_filter(array_slice($processedConsents, 1))
-            ]);
-
-            // Call ConsentService with processed structure
-            $result = $this->consentService->updateUserConsents($user, $processedConsents);
-
-            if (!$result) {
-                throw new \Exception('ConsentService returned false - update failed');
-            }
-
-            $this->logger->info('[Registration] GDPR consents successfully processed via ConsentService', [
-                ...$logContext,
-                'result' => $result
-            ]);
-
-        } catch (\Exception $e) {
-            $this->logger->error('[Registration] CRITICAL: Failed to process consents via ConsentService', [
-                ...$logContext,
-                'consents_received' => $consents,
-                'error_message' => $e->getMessage(),
-                'error_trace' => $e->getTraceAsString()
-            ]);
-
-            throw new \Exception('Failed to process GDPR consents: ' . $e->getMessage(), 0, $e);
-        }
-    }
-
-    /**
-     * USA CollectionService ESISTENTE - no duplicazioni
-     */
-    protected function createCollectionWithExistingService(User $user, array $validated, array $logContext): \App\Models\Collection
-    {
-        try {
-            // USA il metodo ESISTENTE findOrCreateUserCollection
-            $collection = $this->collectionService->findOrCreateUserCollection($user, $logContext);
-
-            if ($collection instanceof \Illuminate\Http\JsonResponse) {
-                throw new \Exception('CollectionService returned error response');
-            }
-
-            // Enhance con dati registration-specific
-            $this->enhanceCollectionForRegistration($collection, $validated, $logContext);
-
-            return $collection;
-
-        } catch (\Exception $e) {
-            throw new \Exception('Failed to create collection via existing CollectionService: ' . $e->getMessage(), 0, $e);
-        }
-    }
-
-    /**
-     * USA WalletService ESISTENTE - no duplicazioni
-     */
-    protected function setupWalletsWithExistingService(\App\Models\Collection $collection, User $user, array $logContext): void
-    {
-        try {
-            // USA il metodo ESISTENTE attachDefaultWalletsToCollection
-            $this->walletService->attachDefaultWalletsToCollection($collection, $user);
-
-            $this->logger->info('[Registration] Wallets setup via EXISTING WalletService', $logContext);
-
-        } catch (\Exception $e) {
-            throw new \Exception('Failed to setup wallets via existing WalletService: ' . $e->getMessage(), 0, $e);
-        }
-    }
-
-    /**
-     * USA UserRoleService ESISTENTE - no duplicazioni
-     */
-    protected function assignRolesWithExistingService(User $user, string $userType, array $logContext): void
-    {
-        try {
-            // USA il metodo ESISTENTE assignCreatorRole
-            $this->userRoleService->assignCreatorRole($user->id);
-
-            // Assign additional roles if needed
-            $this->assignTypeSpecificRoles($user, $userType, $logContext);
-
-            $this->logger->info('[Registration] Roles assigned via EXISTING UserRoleService', $logContext);
-
-        } catch (\Exception $e) {
-            throw new \Exception('Failed to assign roles via existing UserRoleService: ' . $e->getMessage(), 0, $e);
-        }
-    }
-
-    /**
-     * USA AuditLogService ESISTENTE - no duplicazioni
-     */
-    protected function logRegistrationWithExistingService(array $result, array $logContext): void
-    {
-        try {
-            $user = $result['user'];
-            $collection = $result['collection'];
-
-            // USA il metodo ESISTENTE logUserAction
-            $this->auditService->logUserAction(
-                $user,
-                'enhanced_user_registration_completed',
-                [
-                    'registration_method' => 'web_form_with_existing_gdpr_services',
-                    'user_type' => $user->user_type,
-                    'collection_id' => $collection->id,
-                    'collection_name' => $collection->collection_name,
-                    'ecosystem_setup' => 'complete',
-                    'ip_address' => request()->ip()
-                ],
-                'authentication'
-            );
-
-        } catch (\Exception $e) {
-            $this->logger->warning('[Registration] Audit logging failed', [
-                ...$logContext,
-                'audit_error' => $e->getMessage()
-            ]);
-        }
-    }
-
-    // ===== HELPER METHODS (unchanged) =====
-
-    protected function createUser(array $validated, array $logContext): User
-    {
-        return User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-            'usertype' => $validated['user_type'],
-            'email_verified_at' => null,
-            'gdpr_consents_given_at' => now(),
-            'registration_ip' => request()->ip(),
-            'registration_user_agent' => request()->userAgent(),
-            'created_via' => 'web_form_gdpr_integrated',
-            'ecosystem_setup_completed' => false,
-        ]);
-    }
-
-    protected function enhanceCollectionForRegistration(\App\Models\Collection $collection, array $validated, array $logContext): void
-    {
-        // Basic enhancement without duplicating Collection logic
-        $typeSpecificName = $this->getTypeSpecificCollectionName($validated['user_type'], $validated['name']);
-
-        $collection->update([
-            'collection_name' => $typeSpecificName,
-            'created_via' => 'registration_enhanced',
-            'user_type_context' => $validated['user_type']
-        ]);
-    }
-
-    protected function assignTypeSpecificRoles(User $user, string $userType, array $logContext): void
-    {
-        // Implementation depends on existing UserRoleService capabilities
-        // Only add if methods exist in the existing service
-    }
-
-    protected function finalizeUserSetup(User $user, \App\Models\Collection $collection, array $validated, array $logContext): void
-    {
-        $user->update([
-            'current_collection_id' => $collection->id,
-            'ecosystem_setup_completed' => true,
-            'onboarding_step' => 'collection_created'
-        ]);
-    }
-
-    protected function getTypeSpecificCollectionName(string $userType, string $userName): string
-    {
-        $firstName = explode(' ', trim($userName), 2)[0];
-
-        $typeNames = [
-            'creator' => "{$firstName}'s Arte",
-            'patron' => "{$firstName}'s Collection",
-            'enterprise' => "{$firstName} Corporate Gallery",
-        ];
-
-        return $typeNames[$userType] ?? "{$firstName}'s Collection";
-    }
-
     protected function validateRegistration(Request $request): array
     {
         return $request->validate([
@@ -441,35 +202,445 @@ class RegisteredUserController extends Controller
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'user_type' => ['required', 'in:creator,patron,collector,enterprise,trader_pro,epp_entity'],
+
+            // ═══ GDPR REQUIRED ═══
             'privacy_policy_accepted' => ['required', 'accepted'],
             'terms_accepted' => ['required', 'accepted'],
-            'consents' => ['sometimes', 'array'],
-            'consents.functional' => ['sometimes', 'boolean'],
-            'consents.analytics' => ['sometimes', 'boolean'],
-            'consents.marketing' => ['sometimes', 'boolean'],
-            'consents.profiling' => ['sometimes', 'boolean'],
             'age_confirmation' => ['required', 'accepted'],
+
+            // ═══ GDPR OPTIONAL ═══
+            'consents' => ['sometimes', 'array'],
+            'consents.analytics' => ['sometimes', 'string', 'in:1,0'],
+            'consents.marketing' => ['sometimes', 'string', 'in:1,0'],
+            'consents.profiling' => ['sometimes', 'string', 'in:1,0'],
         ]);
     }
 
-    protected function determinePostRegistrationRoute(array $validated): string
+    /**
+     * Create user with valid Algorand wallet address
+     * @oracode-pillar: Esplicitamente Intenzionale
+     */
+    protected function createUserWithAlgorandWallet(array $validated): User
     {
-        // USA le route esistenti del sistema
-        switch ($validated['user_type']) {
-            case 'creator':
-                return 'dashboard'; // Route esistente, gestita da DashboardController
-            case 'patron':
-                return 'dashboard';
-            case 'collector':
-                return 'marketplace.index'; // Se esiste
-            case 'enterprise':
-                return 'dashboard';
-            case 'trader_pro':
-                return 'dashboard';
-            case 'epp_entity':
-                return 'dashboard'; // Route esistente, gestita da DashboardController
-            default:
-                return 'dashboard';
+        try {
+            $algorandAddress = $this->generateValidAlgorandAddress();
+
+            return User::create([
+                // ═══ CORE FIELDS ═══
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'password' => Hash::make($validated['password']),
+                'usertype' => $validated['user_type'],
+
+                // ═══ ALGORAND INTEGRATION ═══
+                'wallet' => $algorandAddress,
+                'wallet_balance' => 0.0000,
+
+                // ═══ SYSTEM FIELDS ═══
+                'language' => app()->getLocale(),
+                'email_verified_at' => null,
+                'terms' => $validated['terms_accepted'] ? 1 : 0,
+
+                // ═══ GDPR COMPLIANCE ═══
+                'gdpr_consents_given_at' => now(),
+                'gdpr_compliant' => true,
+                'consent_summary' => $this->buildConsentSummary($validated),
+
+                'created_via' => 'web_form_permission_based',
+            ]);
+
+        } catch (\Exception $e) {
+            $this->logger->error('[Registration] Failed to create user with Algorand wallet', [
+                'error' => $e->getMessage(),
+                'user_type' => $validated['user_type'],
+                'email' => $validated['email']
+            ]);
+
+            throw new \Exception('Failed to create user with Algorand wallet: ' . $e->getMessage(), 0, $e);
         }
+    }
+
+    /**
+     * Generate valid Algorand address format (58 chars, Base32 [A-Z2-7])
+     * @oracode-pillar: Semplicità Potenziante
+     */
+    private function generateValidAlgorandAddress(): string
+    {
+        try {
+            // Algorand addresses: 58 chars, Base32 alphabet [A-Z2-7]
+            $base32Chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+            $address = '';
+
+            for ($i = 0; $i < 58; $i++) {
+                $address .= $base32Chars[random_int(0, 31)];
+            }
+
+            // Validate our generated address
+            if (!preg_match('/^[A-Z2-7]{58}$/', $address)) {
+                throw new \Exception('Generated address does not match Algorand format validation');
+            }
+
+            return $address;
+
+        } catch (\Exception $e) {
+            $this->logger->error('[Registration] Failed to generate Algorand address', [
+                'error' => $e->getMessage(),
+                'validation_pattern' => '^[A-Z2-7]{58}$'
+            ]);
+
+            throw new \Exception('Failed to generate valid Algorand address: ' . $e->getMessage(), 0, $e);
+        }
+    }
+
+    /**
+     * Build consent summary for user record
+     * @oracode-pillar: Coerenza Semantica
+     */
+    private function buildConsentSummary(array $validated): string
+    {
+        return json_encode([
+            'privacy_policy' => $validated['privacy_policy_accepted'] ?? false,
+            'terms' => $validated['terms_accepted'] ?? false,
+            'age_confirmed' => $validated['age_confirmation'] ?? false,
+            'registration_ip' => request()->ip(),
+            'registration_user_agent' => request()->userAgent(),
+            'registration_method' => 'web_form_permission_based',
+            'consent_timestamp' => now()->toISOString(),
+        ]);
+    }
+
+    /**
+     * Assign role and check ecosystem creation permissions
+     * @oracode-pillar: Coerenza Semantica
+     */
+    protected function assignRoleAndCheckPermissions(User $user, string $userType): bool
+    {
+        try {
+            // Map user type to Spatie role
+            $roleMapping = [
+                'creator' => 'creator',
+                'patron' => 'patron',
+                'collector' => 'collector',
+                'enterprise' => 'enterprise',
+                'trader_pro' => 'trader_pro',
+                'epp_entity' => 'epp_entity',
+            ];
+
+            $roleName = $roleMapping[$userType] ?? 'guest';
+            $user->assignRole($roleName);
+
+            // Refresh user to load role permissions
+            $user->refresh();
+
+            // Check if user can create ecosystem (permission-based, not hardcoded)
+            $canCreateEcosystem = $user->can('create_collection');
+
+            $this->logger->info('[Registration] Role assigned and permissions checked', [
+                'user_id' => $user->id,
+                'user_type' => $userType,
+                'assigned_role' => $roleName,
+                'can_create_ecosystem' => $canCreateEcosystem
+            ]);
+
+            return $canCreateEcosystem;
+
+        } catch (\Exception $e) {
+            $this->logger->error('[Registration] Failed to assign role and check permissions', [
+                'user_id' => $user->id,
+                'user_type' => $userType,
+                'error' => $e->getMessage()
+            ]);
+
+            throw new \Exception('Failed to assign role and check permissions: ' . $e->getMessage(), 0, $e);
+        }
+    }
+
+    /**
+     * Create complete ecosystem: collection + wallets + relationships
+     * @oracode-pillar: Circolarità Virtuosa
+     */
+    protected function createFullEcosystem(User $user, array $validated, array $logContext): \App\Models\Collection
+    {
+        try {
+            // 1. Create Collection using existing CollectionService
+            $collectionName = $this->getCollectionNameForUserType($validated['user_type'], $validated['name']);
+
+            $this->logger->info('[Registration] Creating ecosystem collection', [
+                ...$logContext,
+                'collection_name' => $collectionName
+            ]);
+
+            $collection = $this->collectionService->findOrCreateUserCollection($user, [
+                ...$logContext,
+                'custom_name' => $collectionName,
+                'created_via' => 'user_registration',
+                'user_type_context' => $validated['user_type'],
+            ]);
+
+            if ($collection instanceof \Illuminate\Http\JsonResponse) {
+                throw new \Exception('CollectionService returned error response instead of Collection model');
+            }
+
+            // 2. Link User to Collection as Admin (SAFE - usa syncWithoutDetaching)
+            // CollectionService potrebbe aver già fatto il link, quindi usiamo sync invece di attach
+            $collection->users()->syncWithoutDetaching([
+                $user->id => [
+                    'role' => 'admin',
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]
+            ]);
+
+            $this->logger->info('[Registration] User linked to collection as admin', [
+                ...$logContext,
+                'collection_id' => $collection->id
+            ]);
+
+            // 3. Setup Wallets for Collection using existing WalletService
+            $this->walletService->attachDefaultWalletsToCollection($collection, $user);
+
+            $this->logger->info('[Registration] Wallets attached to collection', [
+                ...$logContext,
+                'collection_id' => $collection->id
+            ]);
+
+            // 4. Set as Current Collection
+            $user->update(['current_collection_id' => $collection->id]);
+
+            $this->logger->info('[Registration] Full ecosystem created successfully', [
+                ...$logContext,
+                'collection_id' => $collection->id,
+                'collection_name' => $collection->collection_name,
+                'user_role_in_collection' => 'admin'
+            ]);
+
+            return $collection;
+
+        } catch (\Exception $e) {
+            $this->logger->error('[Registration] Failed to create ecosystem', [
+                'user_id' => $user->id,
+                'user_type' => $validated['user_type'],
+                'step_failed' => $this->determineEcosystemFailureStep($e),
+                'error' => $e->getMessage()
+            ]);
+
+            throw new \Exception('Failed to create ecosystem: ' . $e->getMessage(), 0, $e);
+        }
+    }
+
+    /**
+     * Generate collection name based on user type and name
+     * @oracode-pillar: Semplicità Potenziante
+     */
+    private function getCollectionNameForUserType(string $userType, string $userName): string
+    {
+        $firstName = explode(' ', trim($userName), 2)[0];
+
+        $typeNames = [
+            'creator' => "{$firstName}'s Arte",
+            'enterprise' => "{$firstName} Corporate Gallery",
+            'patron' => "Patronato di {$firstName}",
+            'collector' => "Collezione di {$firstName}",
+        ];
+
+        return $typeNames[$userType] ?? "{$firstName}'s Collection";
+    }
+
+    /**
+     * Initialize all user domain tables
+     * @oracode-pillar: Evoluzione Ricorsiva
+     */
+    protected function initializeUserDomains(User $user, array $validated, array $logContext): void
+    {
+        try {
+            // User Profile (always)
+            UserProfile::create(['user_id' => $user->id]);
+
+            // Personal Data (always, GDPR-sensitive)
+            UserPersonalData::create([
+                'user_id' => $user->id,
+                'allow_personal_data_processing' => true,
+                'processing_purposes' => json_encode(['platform_operation']),
+                'consent_updated_at' => now(),
+            ]);
+
+            // Organization Data (only for enterprise)
+            if ($validated['user_type'] === 'enterprise') {
+                UserOrganizationData::create([
+                    'user_id' => $user->id,
+                    'business_type' => 'enterprise',
+                    'is_seller_verified' => false,
+                    'can_issue_invoices' => true,
+                ]);
+            }
+
+            // Documents (always)
+            UserDocument::create([
+                'user_id' => $user->id,
+                'verification_status' => 'pending',
+            ]);
+
+            // Invoice Preferences (always)
+            UserInvoicePreference::create([
+                'user_id' => $user->id,
+                'can_issue_invoices' => true,
+            ]);
+
+            $this->logger->info('[Registration] User domains initialized successfully', [
+                ...$logContext,
+                'domains_created' => ['profiles', 'personal_data', 'documents', 'invoice_preferences'],
+                'enterprise_domain' => $validated['user_type'] === 'enterprise' ? 'created' : 'skipped'
+            ]);
+
+        } catch (\Exception $e) {
+            $this->logger->error('[Registration] Failed to initialize user domains', [
+                'user_id' => $user->id,
+                'user_type' => $validated['user_type'],
+                'error' => $e->getMessage()
+            ]);
+
+            throw new \Exception('Failed to initialize user domains: ' . $e->getMessage(), 0, $e);
+        }
+    }
+
+    /**
+     * Process GDPR consents using existing ConsentService
+     * @oracode-pillar: Dignità Preservata
+     */
+    protected function processGdprConsents(User $user, array $validated, array $logContext): void
+    {
+        try {
+            // ═══ REQUIRED CONSENTS VALIDATION ═══
+            $requiredConsents = [
+                'privacy_policy' => $validated['privacy_policy_accepted'] ?? false,
+                'terms_of_service' => $validated['terms_accepted'] ?? false,
+                'age_confirmation' => $validated['age_confirmation'] ?? false,
+            ];
+
+            foreach ($requiredConsents as $consentType => $granted) {
+                if (!$granted) {
+                    throw new \Exception("Required consent not granted: {$consentType}");
+                }
+            }
+
+            // ═══ PREPARE INITIAL CONSENTS FOR CONSENTSERVICE ═══
+            $initialConsents = [
+                'functional' => true, // Always required for platform operation
+                'analytics' => ($validated['consents']['analytics'] ?? false) === '1',
+                'marketing' => ($validated['consents']['marketing'] ?? false) === '1',
+                'profiling' => ($validated['consents']['profiling'] ?? false) === '1',
+            ];
+
+            $this->logger->info('[Registration] Processing GDPR consents', [
+                ...$logContext,
+                'required_consents' => $requiredConsents,
+                'initial_consents' => $initialConsents
+            ]);
+
+            // ═══ USE EXISTING CONSENTSERVICE - createDefaultConsents ═══
+            $createdConsents = $this->consentService->createDefaultConsents($user, $initialConsents);
+
+            if (empty($createdConsents)) {
+                throw new \Exception('ConsentService createDefaultConsents returned empty result');
+            }
+
+            $this->logger->info('[Registration] GDPR consents processed successfully', [
+                ...$logContext,
+                'consents_created' => array_keys($createdConsents)
+            ]);
+
+        } catch (\Exception $e) {
+            $this->logger->error('[Registration] Failed to process GDPR consents', [
+                'user_id' => $user->id,
+                'consents_received' => $validated['consents'] ?? [],
+                'error' => $e->getMessage()
+            ]);
+
+            throw new \Exception('Failed to process GDPR consents: ' . $e->getMessage(), 0, $e);
+        }
+    }
+
+    /**
+     * Create comprehensive audit record for registration
+     * @oracode-pillar: Trasparenza Operativa
+     */
+    protected function createRegistrationAuditRecord(User $user, ?\App\Models\Collection $collection, array $validated, array $logContext): void
+    {
+        try {
+            $this->auditService->logUserAction(
+                $user,
+                'user_registration_completed_with_domains',
+                [
+                    'registration_method' => 'web_form_permission_based',
+                    'user_type' => $validated['user_type'],
+                    'ecosystem_created' => !is_null($collection),
+                    'collection_id' => $collection?->id,
+                    'collection_name' => $collection?->collection_name,
+                    'algorand_wallet' => $user->wallet,
+                    'ip_address' => request()->ip(),
+                    'user_agent' => request()->userAgent(),
+                    'privacy_consents' => [
+                        'privacy_policy' => $validated['privacy_policy_accepted'] ?? false,
+                        'terms' => $validated['terms_accepted'] ?? false,
+                        'age_confirmed' => $validated['age_confirmation'] ?? false,
+                    ],
+                    'optional_consents' => $validated['consents'] ?? [],
+                    'domains_initialized' => true,
+                ],
+                'registration'
+            );
+
+        } catch (\Exception $e) {
+            $this->logger->warning('[Registration] Failed to create audit record (non-blocking)', [
+                ...$logContext,
+                'audit_error' => $e->getMessage()
+            ]);
+            // Don't fail registration for audit errors - it's non-blocking
+        }
+    }
+
+    /**
+     * Determine which step of ecosystem setup failed
+     */
+    private function determineEcosystemFailureStep(\Exception $e): string
+    {
+        $message = $e->getMessage();
+
+        if (str_contains($message, 'Collection')) return 'collection_creation';
+        if (str_contains($message, 'attach') || str_contains($message, 'wallet')) return 'wallet_attachment';
+        if (str_contains($message, 'link') || str_contains($message, 'users')) return 'user_collection_linking';
+        if (str_contains($message, 'current_collection_id')) return 'current_collection_assignment';
+
+        return 'unknown_ecosystem_step';
+    }
+
+    /**
+     * Determine appropriate UEM error code based on exception message
+     */
+    private function determineErrorCode(string $errorMessage): string
+    {
+        // Check for specific error patterns to map to appropriate UEM codes
+        if (str_contains($errorMessage, 'Algorand')) {
+            return 'ALGORAND_WALLET_GENERATION_FAILED';
+        }
+
+        if (str_contains($errorMessage, 'role') || str_contains($errorMessage, 'permission')) {
+            return 'ROLE_ASSIGNMENT_FAILED';
+        }
+
+        if (str_contains($errorMessage, 'ecosystem') || str_contains($errorMessage, 'collection') || str_contains($errorMessage, 'wallet')) {
+            return 'ECOSYSTEM_SETUP_FAILED';
+        }
+
+        if (str_contains($errorMessage, 'domain') || str_contains($errorMessage, 'UserProfile') || str_contains($errorMessage, 'UserPersonalData')) {
+            return 'USER_DOMAIN_INITIALIZATION_FAILED';
+        }
+
+        if (str_contains($errorMessage, 'consent') || str_contains($errorMessage, 'GDPR')) {
+            return 'GDPR_CONSENT_PROCESSING_FAILED';
+        }
+
+        // Default fallback
+        return 'PERMISSION_BASED_REGISTRATION_FAILED';
     }
 }
