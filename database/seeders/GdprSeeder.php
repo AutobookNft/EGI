@@ -15,10 +15,11 @@ use App\Models\PrivacyPolicy;
 use App\Models\PrivacyPolicyAcceptance;
 use App\Models\ProcessingRestriction;
 use App\Models\DataRetentionPolicy;
-use App\Enums\ConsentStatus;
 use App\Enums\GdprRequestType;
 use App\Enums\GdprRequestStatus;
 use App\Enums\DataExportStatus;
+use App\Enums\Gdpr\ConsentStatus;
+use App\Models\UserActivity;
 use Carbon\Carbon;
 
 class GdprSeeder extends Seeder
@@ -185,7 +186,7 @@ class GdprSeeder extends Seeder
             }
 
             // Activity Logs
-            UserActivityLog::factory()
+            UserActivity::factory()
                 ->count(rand(5, 20))
                 ->create(['user_id' => $user->id]);
 

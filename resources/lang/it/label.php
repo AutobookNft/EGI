@@ -8,6 +8,7 @@
  */
 
 return [
+    'select_option' => 'Seleziona un\'opzione',
     'disconnect' => 'Disconnetti',
     'dashboard' => 'Dashboard',
     'collection' => 'Collezione',

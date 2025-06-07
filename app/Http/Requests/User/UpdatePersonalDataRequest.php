@@ -344,6 +344,9 @@ class UpdatePersonalDataRequest extends FormRequest
      */
     protected function getFiscalCodeValidationRules(): array
     {
+
+        $this->initializeValidationContext();
+
         try {
             $validator = FiscalValidatorFactory::create($this->userCountry);
 
@@ -470,6 +473,9 @@ class UpdatePersonalDataRequest extends FormRequest
      */
     protected function logGdprViolationAttempt(string $violationType): void
     {
+
+        $this->initializeValidationContext();
+
         $this->errorManager->handle('GDPR_VIOLATION_ATTEMPT', [
             'violation_type' => $violationType,
             'user_id' => FegiAuth::id(),

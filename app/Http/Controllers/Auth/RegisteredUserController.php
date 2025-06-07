@@ -529,6 +529,7 @@ class RegisteredUserController extends Controller
                 'analytics' => ($validated['consents']['analytics'] ?? false) === '1',
                 'marketing' => ($validated['consents']['marketing'] ?? false) === '1',
                 'profiling' => ($validated['consents']['profiling'] ?? false) === '1',
+                'allow_personal_data_processing' => true, // ✅ AGGIUNTO - Required for personal data management. è un consenso tecnico, senza il quale non possiamo procedere
             ];
 
             $this->logger->info('[Registration] Processing GDPR consents', [

@@ -67,7 +67,6 @@ class User extends Authenticatable
         'wallet_balance',
         'personal_secret',
         'is_weak_auth',
-        'consent',
         'icon_style',
     ];
 
@@ -923,7 +922,7 @@ class User extends Authenticatable
      */
     public function hasConsentFor(string $purpose): bool
     {
-        return $this->userConsents()
+        return $this->consents()
             ->where('consent_type', $purpose)
             ->where('status', ConsentStatus::ACTIVE->value)
             ->whereNull('withdrawn_at')

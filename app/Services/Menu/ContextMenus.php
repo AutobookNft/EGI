@@ -74,12 +74,12 @@ class ContextMenus
                 // Personal data menu
                 $personalDataMenu = new MenuGroup(__('menu.personal_data'), 'user-cog', [
                     new AccountDataMenu(),
-                    new MyProfileMenu(),           // permission: 'edit_own_profile_data'
-                    new MyPersonalDataMenu(),      // permission: 'edit_own_personal_data'
-                    new MyOrganizationMenu(),      // permission: 'edit_own_organization_data'
-                    new MyDocumentsMenu(),         // permission: 'manage_own_documents'
-                    new MyInvoicePreferencesMenu(), // permission: 'manage_own_invoice_preferences'
-                    new BioProfileMenu(),
+                    // new MyProfileMenu(),            // permission: 'edit_own_profile_data'
+                    new MyPersonalDataMenu(),       // permission: 'edit_own_personal_data'
+                    // new MyOrganizationMenu(),       // permission: 'edit_own_organization_data'
+                    // new MyDocumentsMenu(),          // permission: 'manage_own_documents'
+                    // new MyInvoicePreferencesMenu(), // permission: 'manage_own_invoice_preferences'
+                    // new BioProfileMenu(),
                 ]);
                 $menus[] = $personalDataMenu;
 

@@ -180,7 +180,12 @@ return [
         'user_domain_initialization_failed' => 'Errore durante l\'inizializzazione dei domini utente (profile, personal_data, etc.). Dettagli: :error',
         'gdpr_consent_processing_failed' => 'Errore durante l\'elaborazione dei consensi GDPR. Dettagli: :error',
         'role_assignment_failed' => 'Errore durante l\'assegnazione del ruolo basato su user_type. Dettagli: :error',
-
+        'personal_data_view_failed' => 'Errore nel caricamento della vista Personal Data. Verifica controller PersonalDataController::index(), model UserPersonalData e view user.domains.personal-data.index.',
+        'personal_data_update_failed' => 'Errore nell\'aggiornamento dati personali. Verifica UpdatePersonalDataRequest validation, database UserPersonalData, e fiscal validator per paese specifico.',
+        'personal_data_export_failed' => 'Errore nella generazione export GDPR dati personali. Verifica PersonalDataController::export(), format handler e permissions GDPR.',
+        'personal_data_deletion_failed' => 'Errore critico nella richiesta cancellazione dati personali GDPR. Verifica PersonalDataController::destroy(), audit trail e strong authentication.',
+        'gdpr_export_rate_limit' => 'Rate limit GDPR export superato. Verifica logica canRequestDataExport(), timestamp ultimo export e configurazione limite 30 giorni.',
+        'gdpr_violation_attempt' => 'Tentativo di violazione GDPR rilevato. Verifica logica consent nel PersonalDataController, status consenso utente e validation UpdatePersonalDataRequest.',
     ],
 
     'user' => [
@@ -346,6 +351,13 @@ return [
         'user_domain_initialization_failed_user' => 'Registrazione completata con successo! Alcune sezioni del profilo potrebbero richiedere configurazione aggiuntiva.',
         'gdpr_consent_processing_failed_user' => 'Errore nell\'elaborazione dei consensi privacy. Ti preghiamo di verificare le tue scelte e riprovare.',
         'role_assignment_failed_user' => 'Errore nella configurazione del tipo account. Ti preghiamo di contattare il supporto.',
+        'personal_data_view_failed' => 'Si è verificato un errore nel caricamento dei tuoi dati personali. Per favore riprova tra qualche minuto o contatta il supporto se il problema persiste.',
+        'personal_data_update_failed' => 'Non è stato possibile salvare le modifiche ai tuoi dati personali. Verifica che tutti i campi siano compilati correttamente e riprova.',
+        'personal_data_export_failed' => 'Si è verificato un errore durante l\'esportazione dei tuoi dati. Riprova più tardi o contatta il supporto per assistenza.',
+        'personal_data_deletion_failed' => 'Non è stato possibile elaborare la richiesta di cancellazione dei tuoi dati. Ti preghiamo di contattare il nostro supporto per ricevere assistenza immediata.',
+        'gdpr_export_rate_limit' => 'Puoi richiedere un\'esportazione dei tuoi dati una volta ogni 30 giorni. La prossima esportazione sarà disponibile tra qualche giorno.',
+        'gdpr_violation_attempt' => 'Non puoi aggiornare i tuoi dati personali senza aver fornito il consenso appropriato. Accetta i termini di elaborazione dei dati per continuare.',
+
     ],
 
     // Generic message (used by UserInterfaceHandler if no specific message found)

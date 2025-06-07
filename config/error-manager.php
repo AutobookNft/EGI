@@ -2426,6 +2426,17 @@ return [
             'sensitive_keys' => ['consents', 'ip_address', 'user_agent'],
         ],
 
+        'GDPR_VIOLATION_ATTEMPT' => [
+            'type' => 'critical',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.gdpr_violation_attempt',
+            'user_message_key' => 'error-manager::errors.user.gdpr_violation_attempt',
+            'http_status_code' => 403,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
         'ROLE_ASSIGNMENT_FAILED' => [
             'type' => 'server_error',
             'blocking' => true,
@@ -2448,6 +2459,61 @@ return [
             'msg_to' => 'toast',
             'log_level' => 'warning',
             'category' => 'ui',
+        ],
+
+        'PERSONAL_DATA_VIEW_ERROR' => [
+            'type' => 'error',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.personal_data_view_failed',
+            'user_message_key' => 'error-manager::errors.user.personal_data_view_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'PERSONAL_DATA_UPDATE_ERROR' => [
+            'type' => 'error',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.personal_data_update_failed',
+            'user_message_key' => 'error-manager::errors.user.personal_data_update_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'PERSONAL_DATA_EXPORT_ERROR' => [
+            'type' => 'error',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.personal_data_export_failed',
+            'user_message_key' => 'error-manager::errors.user.personal_data_export_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'PERSONAL_DATA_DELETION_ERROR' => [
+            'type' => 'error',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.personal_data_deletion_failed',
+            'user_message_key' => 'error-manager::errors.user.personal_data_deletion_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'GDPR_EXPORT_RATE_LIMIT' => [
+            'type' => 'warning',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.gdpr_export_rate_limit',
+            'user_message_key' => 'error-manager::errors.user.gdpr_export_rate_limit',
+            'http_status_code' => 429,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'toast',
         ],
     ],
 ];

@@ -34,7 +34,9 @@ class UserConsent extends Model
         'withdrawal_method',
         'ip_address',
         'user_agent',
-        'metadata'
+        'metadata',
+        'status',
+        'withdrawn_at',
     ];
 
     /**

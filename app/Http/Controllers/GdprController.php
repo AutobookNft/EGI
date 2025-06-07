@@ -78,6 +78,7 @@ class GdprController extends Controller
 
     protected ProcessingRestrictionService $processingRestrictionService;
 
+
     /**
      * Constructor with dependency injection
      *

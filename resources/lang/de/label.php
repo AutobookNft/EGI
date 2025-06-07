@@ -8,6 +8,7 @@
 
 
 return [
+    'select_option' => 'Wählen Sie eine Option',
     'disconnect' => 'Trennen',
     'dashboard' => 'Instrumententafel',
     'collection' => 'Sammlung',

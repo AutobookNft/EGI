@@ -10,7 +10,7 @@ class MyPersonalDataMenu extends MenuItem
     {
         parent::__construct(
             'menu.my_personal_data',
-            'gdpr.edit-personal-data',
+            'user.domains.personal-data',
             'shield-check',
             'edit_own_personal_data'
         );

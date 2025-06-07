@@ -5,7 +5,7 @@ namespace App\Services\Gdpr;
 use App\Models\User;
 use App\Models\UserConsent;
 use App\Models\ConsentVersion;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 use Ultra\UltraLogManager\UltraLogManager;
@@ -78,7 +78,16 @@ class ConsentService
             'required' => false,
             'default_value' => false,
             'can_withdraw' => true
-        ]
+        ],
+        'allow_personal_data_processing' => [
+            'name' => 'Allow Personal Data Processing',
+            'description' => 'Consent to process your personal data for service improvement',
+            'category' => 'data_processing',
+            'legal_basis' => 'consent',
+            'required' => false,
+            'default_value' => false,
+            'can_withdraw' => true
+        ],
     ];
 
     /**
@@ -409,6 +418,14 @@ class ConsentService
                     if ($config['required']) {
                         $granted = true;
                     }
+
+                    $this->logger->debug('Consent Service: Creating consent', [
+                        'user_id' => $user->id,
+                        'consent_type' => $type,
+                        'granted' => $granted,
+                        'version' => $consentVersion->version,
+                        'log_category' => 'CONSENT_SERVICE_OPERATION'
+                    ]);
 
                     $consent = UserConsent::create([
                         'user_id' => $user->id,

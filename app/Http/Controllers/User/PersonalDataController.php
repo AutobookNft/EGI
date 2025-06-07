@@ -50,14 +50,15 @@ class PersonalDataController extends BaseUserDomainController
 
     /**
      * @Oracode Method: Display Personal Data Management Page
-     * 🎯 Purpose: Show user's personal data with edit capabilities
+     * 🎯 Purpose: Show user's personal data with edit capabilities and GDPR consent integration
      * 📥 Input: HTTP request
-     * 📤 Output: View with personal data or redirect if access denied
-     * 🛡️ Privacy: Access control and audit logging
-     * 🧱 Core Logic: Load personal data with GDPR context
+     * 📤 Output: View with personal data and GDPR consent status or redirect if access denied
+     * 🛡️ Privacy: Access control, audit logging, and ConsentService integration
+     * 🧱 Core Logic: Load personal data from UserPersonalData + consent status from GDPR ConsentService
+     * 🔗 Integration: Bridges User Domains with existing GDPR system for unified consent management
      *
      * @param Request $request HTTP request instance
-     * @return View|RedirectResponse Personal data view or redirect
+     * @return View|RedirectResponse Personal data view with GDPR consent integration or redirect
      */
     public function index(Request $request): View|RedirectResponse
     {
@@ -78,8 +79,17 @@ class PersonalDataController extends BaseUserDomainController
                 'user_agent' => $request->userAgent()
             ]);
 
-            // Load or create personal data record
+            // Load or create personal data record (non-consent data)
             $personalData = $this->getOrCreatePersonalData($user);
+
+            // Get GDPR consent status from ConsentService (integrated with existing GDPR system)
+            $consentService = app(\App\Services\Gdpr\ConsentService::class);
+            $gdprConsents = [
+                'personal_data_processing' => $consentService->hasConsent($user, 'personal_data_processing'),
+                'marketing' => $consentService->hasConsent($user, 'marketing'),
+                'analytics' => $consentService->hasConsent($user, 'analytics'),
+                'cookies' => $consentService->hasConsent($user, 'cookies'),
+            ];
 
             // Get user's country for form configuration
             $userCountry = $this->getUserCountry();
@@ -87,31 +97,37 @@ class PersonalDataController extends BaseUserDomainController
             // Get available countries (MVP only)
             $availableCountries = $this->getMvpCountries();
 
-            // Prepare view data
+            // Prepare view data with GDPR integration
             $viewData = [
                 'user' => $user,
                 'personalData' => $personalData,
+                'gdprConsents' => $gdprConsents, // ✅ GDPR consent status from ConsentService
                 'userCountry' => $userCountry,
                 'availableCountries' => $availableCountries,
                 'authType' => $this->authType,
                 'canEdit' => $this->canEditPersonalData($user),
-                'gdprSummary' => $this->getGdprSummary($user),
+                'gdprSummary' => $this->getGdprSummary($user, $gdprConsents),
                 'lastUpdate' => $personalData->updated_at,
-                'validationConfig' => $this->getValidationConfig($userCountry)
+                'validationConfig' => $this->getValidationConfig($userCountry),
+                'consentHistory' => $consentService->getConsentHistory($user, 10),
             ];
 
-            $this->logger->info('Personal data page displayed successfully', [
+            // Log successful page load with consent integration info
+            $this->logger->info('Personal data page displayed successfully with GDPR integration', [
                 'user_id' => $user->id,
                 'auth_type' => $this->authType,
-                'country' => $userCountry
+                'country' => $userCountry,
+                'has_data_processing_consent' => $gdprConsents['personal_data_processing'],
+                'gdpr_consents_loaded' => count($gdprConsents)
             ]);
 
-            return view('user.domains.personal-data.index', $viewData);
+            return view('users.domains.personal-data.index', $viewData);
 
         } catch (\Exception $e) {
             return $this->respondError('PERSONAL_DATA_VIEW_ERROR', $e, [
                 'user_id' => FegiAuth::id(),
-                'requested_page' => 'personal_data_index'
+                'requested_page' => 'personal_data_index',
+                'integration_point' => 'gdpr_consent_service'
             ]);
         }
     }
@@ -143,7 +159,7 @@ class PersonalDataController extends BaseUserDomainController
 
         try {
             $user = FegiAuth::user();
-            $validatedData = $request->getValidatedData();
+            $validatedData = $request->validated();
 
             $this->auditDataAccess('personal_data_update_requested', [
                 'user_id' => $user->id,

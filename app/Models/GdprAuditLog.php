@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\DB;
+use const JSON_SORT_KEYS;
 
 /**
  * @Oracode GDPR Audit Log Model
@@ -204,7 +205,7 @@ class GdprAuditLog extends Model
             'created_at' => $this->created_at?->toISOString(),
         ];
 
-        return hash('sha256', json_encode($data, JSON_SORT_KEYS));
+        return hash('sha256', json_encode($data));
     }
 
     /**

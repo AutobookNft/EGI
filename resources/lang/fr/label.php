@@ -8,6 +8,7 @@
 
 
 return [
+    'select_option' => 'Sélectionnez une option',
     'disconnect' => 'Déconnexion',
     'dashboard' => 'Tableau de bord',
     'collection' => 'Collection',

@@ -25,6 +25,80 @@ return [
     'deletion_title' => 'Data Deletion Request',
     'deletion_subtitle' => 'Request permanent deletion of your personal data',
 
+    // --- General & Utility ---
+    'read_only_notice' => 'This data is read-only. Upgrade your account to edit.',
+    'weak_auth_notice' => 'You have limited permissions. Upgrade to unlock all features.',
+    'processing_update' => 'Processing update, please wait...',
+    'validation_checking' => 'Checking your data, please wait...',
+    'validation_status' => 'Validation Status',
+    'validation_info_title' => 'Data Validation & Help',
+    'validation_country_detected' => 'Detected country based on your profile',
+    'help_resources' => 'Help & Resources',
+    'documentation' => 'Documentation',
+    'privacy_policy' => 'Privacy Policy',
+    'contact_support' => 'Contact DPO or Support',
+
+    // --- Deletion ---
+    'delete_account' => 'Delete Account',
+    'delete_account_description' => 'Permanently delete your account and all personal data.',
+    'deletion_not_available' => 'Account deletion is currently unavailable.',
+    'request_deletion' => 'Request Deletion',
+
+    // --- Upgrade Auth ---
+    'upgrade_for_full_access' => 'Upgrade for Full Access',
+    'upgrade_description' => 'Upgrade your authentication to manage all personal data features.',
+    'upgrade_account' => 'Upgrade Account',
+
+    // --- GDPR Notices/Sections ---
+    'gdpr_actions_title' => 'GDPR Quick Actions',
+    'last_updated' => 'Last updated',
+    'gdpr_requirements' => 'GDPR Requirements',
+    'gdpr_req_consent' => 'Consent required for data processing',
+    'gdpr_req_purposes' => 'Must specify processing purposes',
+    'gdpr_req_accuracy' => 'Data must be accurate and up-to-date',
+
+    // --- Section Headers ---
+    'format' => 'Format',
+    'length' => 'Length',
+    'characters' => 'characters',
+
+    // --- GDPR Consent Status ---
+    'consent_given' => 'Consent Given',
+    'consent_review_required' => 'Consent Review Required',
+    'processing_purposes' => 'Processing Purposes',
+
+    // --- Purposes (checkboxes) ---
+    'purpose_account_management' => 'Account Management',
+    'purpose_service_delivery' => 'Service Delivery',
+    'purpose_legal_compliance' => 'Legal Compliance',
+    'purpose_marketing' => 'Marketing',
+    'purpose_analytics' => 'Analytics',
+    'purpose_customer_support' => 'Customer Support',
+
+    // --- Real-time Validation ---
+    'validation_checking' => 'Validating your data…',
+
+    // --- Other UI bits ---
+    'cancel_changes' => 'Cancel Changes',
+    'read_only_notice' => 'Your data is read-only. Please upgrade your account for editing.',
+    'processing_update' => 'Processing, please wait...',
+
+    // --- Data Summary Section ---
+    'data_summary_title' => 'Personal Data Summary',
+    'data_completeness' => 'Data Completeness',
+    'profile_complete' => 'Your profile is complete!',
+    'profile_partial' => 'Your profile is partially complete.',
+    'profile_incomplete' => 'Your profile is incomplete. Fill all required fields to improve your security and access.',
+    'complete' => 'Complete',
+    'missing' => 'Missing',
+    'partial' => 'Partial',
+    'available' => 'Available',
+    'not_provided' => 'Not Provided',
+    'validated' => 'Validated',
+    'pending' => 'Pending Validation',
+    'gdpr_consent' => 'GDPR Consent',
+
+
     // FORM SECTIONS
     'basic_information' => 'Basic Information',
     'basic_description' => 'Key identification data',
@@ -36,6 +110,11 @@ return [
     'contact_description' => 'Phone and other contact details',
     'identity_verification' => 'Identity Verification',
     'identity_description' => 'Verify your identity for sensitive changes',
+    'manage_consent' => 'Manage Consent',
+    'manage_consent_action' => 'Manage your consent',
+    'activity_log' => 'Activity Log',
+    'activity_log_description' => 'View all changes and access to your personal data',
+    'view_activity_log' => 'View Activity Log',
 
     // FORM FIELDS
     'first_name' => 'First Name',
@@ -118,6 +197,12 @@ return [
     'export_started' => 'Data export started. You will receive an email when it is ready.',
     'export_ready' => 'Your data export is ready for download',
     'deletion_requested' => 'Deletion request submitted. It will be processed within 30 days.',
+
+    // --- Export & Rate Limits ---
+    'export_description' => 'Download a complete copy of your personal data.',
+    'export_now' => 'Export Now',
+    'export_rate_limit' => 'Please wait before requesting another export.',
+    'export_ready' => 'Your data export is ready for download',
 
     // VALIDATION MESSAGES
     'validation' => [

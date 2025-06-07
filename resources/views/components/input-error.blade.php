@@ -1,5 +1,9 @@
-@props(['for'])
-
-@error($for)
-    <p {{ $attributes->merge(['class' => 'text-sm text-red-600 dark:text-red-400']) }}>{{ $message }}</p>
-@enderror
+@props([
+    'messages' => [],
+    'class' => '',
+])
+@if ($messages)
+    <span {{ $attributes->merge(['class' => 'text-xs text-red-500 ' . $class]) }}>
+        {{ is_array($messages) ? implode(', ', $messages) : $messages }}
+    </span>
+@endif

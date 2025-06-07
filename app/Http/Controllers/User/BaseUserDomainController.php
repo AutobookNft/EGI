@@ -183,14 +183,28 @@ abstract class BaseUserDomainController extends Controller
 
         // Store in database for long-term compliance if needed
         if (config('gdpr.store_audit_database', true)) {
-            \App\Models\GdprAuditLog::create([
+
+            // Prepare data using MODEL FILLABLE fields
+            $recordData = [
                 'user_id' => FegiAuth::id(),
-                'action' => $action,
-                'domain' => static::class,
-                'context' => json_encode($context),
+                'action_type' => $action, // Usa action_type invece di action
+                'category' => 'user_data_access',
+                'description' => "Access to {$action} via " . static::class,
+                'legal_basis' => 'user_request',
+                'data_subject_id' => FegiAuth::id(),
+                'data_controller' => 'FlorenceEGI Platform',
+                'purpose_of_processing' => 'User data management',
+                'context_data' => $context, // Usa context_data invece di details
                 'ip_address' => request()->ip(),
-                'created_at' => now()
-            ]);
+                'user_agent' => request()->userAgent(),
+                'retention_period' => '7 years', // Usa retention_period invece di retention_until
+            ];
+
+            // Create checksum for existing model
+            $checksum = hash('sha256', json_encode($recordData));
+            $recordData['checksum'] = $checksum;
+
+            \App\Models\GdprAuditLog::create($recordData);
         }
     }
 

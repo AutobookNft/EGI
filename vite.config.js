@@ -26,6 +26,19 @@ export default defineConfig(({ mode }) => {
                     'resources/js/polyfills.js',
                     'home-nft.js',
                     'resources/js/components/create-collection-modal.js',
+                    // 🎯 USER DOMAINS - Personal Data
+                    'resources/css/domains/personal-data.css',
+                    'resources/js/domains/personal-data.ts',
+                    // 🎯 USER DOMAINS - Organization Data (future)
+                    'resources/css/domains/organization-data.css',
+                    'resources/js/domains/organization-data.ts',
+                    // 🎯 USER DOMAINS - Documents (future)
+                    'resources/css/domains/documents.css',
+                    'resources/js/domains/documents.ts',
+                    // 🎯 USER DOMAINS - Invoice Preferences (future)
+                    'resources/css/domains/invoice-preferences.css',
+                    'resources/js/domains/invoice-preferences.ts',
+                    // Ultra Upload Manager
                     'vendor/ultra/ultra-upload-manager/resources/ts/core/file_upload_manager.ts',
                     'vendor/ultra/ultra-upload-manager/resources/css/app.css',
                 ],
@@ -47,6 +60,7 @@ export default defineConfig(({ mode }) => {
             alias: {
                 '@': path.resolve(__dirname, './resources/js'),
                 '@ts': path.resolve(__dirname, './resources/ts'),
+                '@domains': path.resolve(__dirname, './resources/js/domains'),
                 '@ultra-images': path.resolve(__dirname, './vendor/ultra/ultra-upload-manager/resources/ts/assets/images'),
             },
             preserveSymlinks: true,

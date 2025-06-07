@@ -180,6 +180,12 @@ return [
         'user_domain_initialization_failed' => 'Error during user domain initialization (profile, personal_data, etc.). Details: :error',
         'gdpr_consent_processing_failed' => 'Error during GDPR consent processing. Details: :error',
         'role_assignment_failed' => 'Error during role assignment based on user_type. Details: :error',
+        'personal_data_view_failed' => 'Si è verificato un errore nel caricamento dei tuoi dati personali. Per favore riprova tra qualche minuto o contatta il supporto se il problema persiste.',
+        'personal_data_update_failed' => 'Non è stato possibile salvare le modifiche ai tuoi dati personali. Verifica che tutti i campi siano compilati correttamente e riprova.',
+        'personal_data_export_failed' => 'Si è verificato un errore durante l\'esportazione dei tuoi dati. Riprova più tardi o contatta il supporto per assistenza.',
+        'personal_data_deletion_failed' => 'Non è stato possibile elaborare la richiesta di cancellazione dei tuoi dati. Ti preghiamo di contattare il nostro supporto per ricevere assistenza immediata.',
+        'gdpr_export_rate_limit' => 'Puoi richiedere un\'esportazione dei tuoi dati una volta ogni 30 giorni. La prossima esportazione sarà disponibile tra qualche giorno.',
+        'gdpr_violation_attempt' => 'GDPR violation attempt detected. Check consent logic in PersonalDataController, user consent status and UpdatePersonalDataRequest validation.',
     ],
 
     'user' => [
@@ -345,6 +351,12 @@ return [
         'user_domain_initialization_failed_user' => 'Registration completed successfully! Some profile sections may require additional configuration.',
         'gdpr_consent_processing_failed_user' => 'Error processing privacy consents. Please verify your choices and try again.',
         'role_assignment_failed_user' => 'Error in account type configuration. Please contact support.',
+        'personal_data_view_failed' => 'An error occurred while loading your personal data. Please try again in a few minutes or contact support if the problem persists.',
+        'personal_data_update_failed' => 'Unable to save changes to your personal data. Please verify that all fields are filled correctly and try again.',
+        'personal_data_export_failed' => 'An error occurred while exporting your data. Please try again later or contact support for assistance.',
+        'personal_data_deletion_failed' => 'Unable to process your data deletion request. Please contact our support team for immediate assistance.',
+        'gdpr_export_rate_limit' => 'You can request a data export once every 30 days. Your next export will be available in a few days.',
+        'gdpr_violation_attempt' => 'You cannot update your personal data without providing appropriate consent. Please accept the data processing terms to continue.',
     ],
 
     // Generic message (used by UserInterfaceHandler if no specific message found)
