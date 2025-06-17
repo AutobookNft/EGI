@@ -29,4 +29,75 @@ return [
     'proposed_change_to_a_wallet' => 'Hai proposto la modifica a un portafoglio',
     'no_historical_notifications' => 'Nessuna notifica storica',
     'notification_list_error' => 'Errore durante il recupero delle notifiche',
+
+    'status' => [
+        'read' => 'Letto',
+        'pending_ack' => 'Da leggere',
+    ],
+
+    'label' => [
+        'status' => 'Stato',
+        'from' => 'Da',
+        'created_at' => 'Creato il',
+        'archived' => 'Archivia',
+        'additional_details' => 'Dettagli Aggiuntivi',
+    ],
+
+    'actions' => [
+        'done' => 'Fatto',
+        'learn_more' => 'Scopri di più',
+    ],
+
+    'aria' => [
+        'details_label' => 'Dettagli della notifica',
+        'actions_label' => 'Azioni per la notifica',
+        'mark_as_read' => 'Segna la notifica come letta',
+        'learn_more' => 'Apri il link per maggiori informazioni',
+    ],
+
+    'gdpr' => [
+        'disavow_button_label' => 'Non riconosco questa azione',
+        'confirm_button_label' => 'Conferma questa azione',
+        'confirm_action_prompt' => 'Sei sicuro di voler confermare questa azione?',
+        'unknown'=>[
+            'content' => 'Hai ricevuto una notifica sconosciuta.',
+            'title' => 'Notifica sconosciuta',
+        ],
+        'consent_updated' => [
+            'content' => 'Il tuo consenso è stato aggiornato.',
+            'title' => 'Consenso aggiornato',
+        ],
+        'breach_report_received' => [
+            'content' => 'Hai ricevuto un rapporto di violazione dei dati.',
+            'title' => 'Rapporto di violazione dei dati ricevuto',
+        ],
+        'data_deletion_request' => [
+            'content' => 'Hai ricevuto una richiesta di cancellazione dei dati.',
+            'title' => 'Richiesta di cancellazione dei dati ricevuta',
+        ],
+        'data_access_request' => [
+            'content' => 'Hai ricevuto una richiesta di accesso ai dati.',
+            'title' => 'Richiesta di accesso ai dati ricevuta',
+        ],
+        'data_portability_request' => [
+            'content' => 'Hai ricevuto una richiesta di portabilità dei dati.',
+            'title' => 'Richiesta di portabilità dei dati ricevuta',
+        ],
+        'data_processing_objection' => [
+            'content' => 'Hai ricevuto un\'obiezione al trattamento dei dati.',
+            'title' => 'Obiezione al trattamento dei dati ricevuta',
+        ],
+        'data_processing_restriction' => [
+            'content' => 'Hai ricevuto una richiesta di restrizione del trattamento dei dati.',
+            'title' => 'Richiesta di restrizione del trattamento dei dati ricevuta',
+        ],
+        'data_processing_notification' => [
+            'content' => 'Hai ricevuto una notifica di trattamento dei dati.',
+            'title' => 'Notifica di trattamento dei dati ricevuta',
+        ],
+        'data_processing_consent' => [
+            'content' => 'Hai ricevuto una richiesta di consenso al trattamento dei dati.',
+            'title' => 'Richiesta di consenso al trattamento dei dati ricevuta',
+        ],
+    ]
 ];

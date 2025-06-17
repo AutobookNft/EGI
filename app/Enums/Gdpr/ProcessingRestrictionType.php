@@ -16,31 +16,34 @@ enum ProcessingRestrictionType: string
     case THIRD_PARTY = 'third_party';
     case AUTOMATED_DECISIONS = 'automated_decisions';
     case DATA_SHARING = 'data_sharing';
+    case REMOVED = 'removed';
     case ALL = 'all';
 
     public function label(): string
     {
         return match($this) {
-            self::MARKETING => __('gdpr.restriction_types.marketing'),
-            self::PROFILING => __('gdpr.restriction_types.profiling'),
-            self::ANALYTICS => __('gdpr.restriction_types.analytics'),
-            self::THIRD_PARTY => __('gdpr.restriction_types.third_party'),
-            self::AUTOMATED_DECISIONS => __('gdpr.restriction_types.automated_decisions'),
-            self::DATA_SHARING => __('gdpr.restriction_types.data_sharing'),
-            self::ALL => __('gdpr.restriction_types.all'),
+            self::MARKETING => __('gdpr.restriction.types.marketing'),
+            self::PROFILING => __('gdpr.restriction.types.profiling'),
+            self::ANALYTICS => __('gdpr.restriction.types.analytics'),
+            self::THIRD_PARTY => __('gdpr.restriction.types.third_party'),
+            self::AUTOMATED_DECISIONS => __('gdpr.restriction.types.automated_decisions'),
+            self::DATA_SHARING => __('gdpr.restriction.types.data_sharing'),
+            self::REMOVED => __('gdpr.restriction.types.removed'),
+            self::ALL => __('gdpr.restriction.types.all'),
         };
     }
 
     public function description(): string
     {
         return match($this) {
-            self::MARKETING => __('gdpr.restriction_descriptions.marketing'),
-            self::PROFILING => __('gdpr.restriction_descriptions.profiling'),
-            self::ANALYTICS => __('gdpr.restriction_descriptions.analytics'),
-            self::THIRD_PARTY => __('gdpr.restriction_descriptions.third_party'),
-            self::AUTOMATED_DECISIONS => __('gdpr.restriction_descriptions.automated_decisions'),
-            self::DATA_SHARING => __('gdpr.restriction_descriptions.data_sharing'),
-            self::ALL => __('gdpr.restriction_descriptions.all'),
+            self::MARKETING => __('gdpr.restriction.descriptions.marketing'),
+            self::PROFILING => __('gdpr.restriction.descriptions.profiling'),
+            self::ANALYTICS => __('gdpr.restriction.descriptions.analytics'),
+            self::THIRD_PARTY => __('gdpr.restriction.descriptions.third_party'),
+            self::AUTOMATED_DECISIONS => __('gdpr.restriction.descriptions.automated_decisions'),
+            self::DATA_SHARING => __('gdpr.restriction.descriptions.data_sharing'),
+            self::REMOVED => __('gdpr.restriction.descriptions.removed'),
+            self::ALL => __('gdpr.restriction.descriptions.all'),
         };
     }
 }

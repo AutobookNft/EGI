@@ -29,6 +29,7 @@ use App\Http\Controllers\GdprController;
 use App\Http\Controllers\IconAdminController;
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\Notifications\Gdpr\GdprNotificationResponseController;
 use App\Http\Middleware\SetLanguage;
 use App\Livewire\Collections\CollectionOpen;
 use Illuminate\Support\Facades\Auth;
@@ -439,7 +440,22 @@ Route::prefix('api')->name('api.')->group(function () {
         ->name('toggle.egi.like');
 });
 
+Route::prefix('notifications/{notification}/gdpr')
+    ->name('notifications.gdpr.')
+    ->group(function () {
 
+        // // Rotta per la conferma semplice (rate limit standard)
+        Route::patch('/confirm', [GdprNotificationResponseController::class, 'confirm'])->name('confirm');
+
+        // Rotta per la revoca semplice (rate limit standard)
+        Route::patch('/revoke', [GdprNotificationResponseController::class, 'revoke'])->name('revoke');
+
+        // Fortino Digitale #2: Rate Limiting restrittivo per l'azione di sicurezza
+        // Permette massimo 3 chiamate ogni ora per prevenire abusi del protocollo di allerta.
+        Route::patch('/disavow', [GdprNotificationResponseController::class, 'disavow'])
+            ->name('disavow')
+            ->middleware('throttle:3,60');
+    });
 
 /*
 |--------------------------------------------------------------------------

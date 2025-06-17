@@ -5,35 +5,45 @@ declare(strict_types=1);
 namespace App\Enums;
 
 /**
- * Enum NotificationHandlerType
+ * @package   App\Enums
+ * @author    Padmin D. Curtis (for Fabio Cherici)
+ * @version   1.1.0
+ * @date      2025-06-11
+ * @solution  Provides a centralized, type-safe enumeration for all available notification handlers, driving the NotificationHandlerFactory.
  *
- * Rappresenta i tipi di handler disponibili per le notifiche.
- * Utilizzato dal NotificationHandlerFactory per istanziare l'handler corretto.
- *
- * @package App\Enums
+ * --- OS1 DOCUMENTATION ---
+ * @oracode-intent: To create a single source of truth for all notification handler types, ensuring type safety and facilitating the factory pattern for handler instantiation.
+ * @oracode-value-flow: This enum provides the `key` (e.g., 'gdpr') and maps it to a concrete `value` (the handler's class string), which is then used by the factory to create the correct handler instance.
+ * @os1-compliance: Full.
  */
 enum NotificationHandlerType: string
 {
     /**
-     * Handler per le notifiche relative ai wallet
+     * Handler per le notifiche relative ai wallet.
      */
     case WALLET = 'wallet';
 
     /**
-     * Handler per le notifiche di invito
+     * Handler per le notifiche di invito.
      */
     case INVITATION = 'invitation';
 
     /**
-     * Ottiene il nome della classe handler associata al tipo
+     * Handler per le notifiche relative al GDPR.
+     */
+    case GDPR = 'gdpr';
+
+    /**
+     * Ottiene il nome della classe handler associata al tipo.
      *
-     * @return class-string La classe dell'handler
+     * @return class-string La classe dell'handler.
      */
     public function getHandlerClass(): string
     {
         return match($this) {
             self::WALLET => \App\Services\Notifications\WalletNotificationHandler::class,
             self::INVITATION => \App\Services\Notifications\InvitationNotificationHandler::class,
+            self::GDPR => \App\Services\Notifications\GdprNotificationHandler::class,
         };
     }
 }

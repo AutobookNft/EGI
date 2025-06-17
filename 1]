@@ -1,0 +1,10 @@
+                >> FlorenceEGI - GDPR Notification Test Sender <<
+--------------------------------------------------
+Context: []
+Channels: database
+User ID: 7, Email: fabiocherici@gmail.com
+Notification Type: breach_report_received
+--------------------------------------------------
+Dispatching 'breach_report_received' notification to user: fabiocherici@gmail.com (ID: 7)...
+Invoking GdprNotificationService->dispatchNotification...
+❌ An unexpected exception occurred: mb_substr(): Argument #1 ($string) must be of type string, array given

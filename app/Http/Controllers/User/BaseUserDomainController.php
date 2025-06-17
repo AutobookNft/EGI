@@ -220,6 +220,9 @@ abstract class BaseUserDomainController extends Controller
      */
     protected function requireIdentityVerification(): bool|RedirectResponse
     {
+
+        $this->logger->critical('🔍 DETECTIVE: Inside requireIdentityVerification() - START');
+
         // Strong auth users may need re-verification for sensitive data
         if (!FegiAuth::isStrongAuth()) {
             return true; // Weak auth users have limited access anyway
@@ -241,7 +244,7 @@ abstract class BaseUserDomainController extends Controller
         ]);
 
         return redirect()
-            ->route('user.identity-verification')
+            ->route('user.domains.identity-verification')
             ->with('return_url', request()->fullUrl())
             ->with('verification_reason', __('user_domains.identity_verification_sensitive_data'));
     }

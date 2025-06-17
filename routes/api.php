@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Notifications\Gdpr\GdprNotificationResponseController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -9,3 +10,38 @@ Route::get('/user', function (Request $request) {
 
 // Currency routes
 Route::get('/algo-exchange-rate', [App\Http\Controllers\Api\CurrencyController::class, 'getAlgoExchangeRate']);
+
+Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
+    // ... altre rotte autenticate
+
+    // Notification Status Routes
+    Route::get('/notifications/unread-count', [\App\Http\Controllers\Notifications\NotificationStatusController::class, 'getUnreadCount'])->name('notifications.unread-count');
+
+    // Rotta per marcare come letta (già esistente)
+    Route::patch('/notifications/{notification}/mark-as-read', [\App\Http\Controllers\Notifications\NotificationDetailsController::class, 'markAsRead'])->name('notifications.mark-as-read');
+
+    // Rotta per marcare come letta (per notifiche semplici)
+    Route::patch('/notifications/{notification}/mark-as-read', [App\Http\Controllers\Notifications\NotificationDetailsController::class, 'markAsRead'])->name('notifications.mark-as-read');
+
+    // // === GDPR Interactive Notification Routes ===
+    // Route::prefix('notifications/{notification}/gdpr')
+    //     ->name('notifications.gdpr.')
+    //     ->group(function () {
+
+    //         // // Rotta per la conferma semplice (rate limit standard)
+    //         Route::patch('/confirm', [GdprNotificationResponseController::class, 'confirm'])->name('confirm');
+
+    //         // Rotta per la revoca semplice (rate limit standard)
+    //         Route::patch('/revoke', [GdprNotificationResponseController::class, 'revoke'])->name('revoke');
+
+    //         // Fortino Digitale #2: Rate Limiting restrittivo per l'azione di sicurezza
+    //         // Permette massimo 3 chiamate ogni ora per prevenire abusi del protocollo di allerta.
+    //         Route::patch('/disavow', [GdprNotificationResponseController::class, 'disavow'])
+    //             ->name('disavow')
+    //             ->middleware('throttle:3,60');
+    //     });
+});
+
+// === GDPR Interactive Notification Routes ===
+    
+

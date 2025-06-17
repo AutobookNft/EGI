@@ -42,7 +42,7 @@
     </x-slot>
 
     {{-- Vite Assets --}}
-    @vite(['resources/css/domains/personal-data.css', 'resources/js/domains/personal-data.ts'])
+    @vite(['resources/css/domains/personal-data.css', 'resources/ts/domains/personal-data.ts'])
 
     <div class="py-12">
         <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">

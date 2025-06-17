@@ -31,6 +31,7 @@ return new class extends Migration
             $table->string('version', 20)->unique(); // e.g., "1.0", "1.1", "2.0"
             $table->json('consent_types'); // Definition of consent types for this version
             $table->json('changes')->nullable(); // Summary of changes from previous version
+            $table->json('configuration')->nullable(); // Additional configuration settings for this version
 
             // Lifecycle
             $table->timestamp('effective_date');

@@ -16,7 +16,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\User\PersonalDataController;
-use App\Http\Controllers\User\OrganizationDataController;
+// use App\Http\Controllers\User\OrganizationDataController;
 use App\Http\Controllers\User\DocumentsController;
 use App\Http\Controllers\User\InvoicePreferencesController;
 
@@ -73,28 +73,28 @@ Route::middleware(['auth', 'verified'])->group(function () {
     | - EPP Entity accounts
     |
     */
-    Route::prefix('user/domains/organization-data')->name('user.domains.organization-data.')->group(function () {
+    // Route::prefix('user/domains/organization-data')->name('user.domains.organization-data.')->group(function () {
 
-        // Main organization data management page
-        Route::get('/', [OrganizationDataController::class, 'index'])
-            ->name('index')
-            ->middleware('can:edit_own_organization_data');
+    //     // Main organization data management page
+    //     Route::get('/', [OrganizationDataController::class, 'index'])
+    //         ->name('index')
+    //         ->middleware('can:edit_own_organization_data');
 
-        // Update organization data
-        Route::put('/', [OrganizationDataController::class, 'update'])
-            ->name('update')
-            ->middleware('can:edit_own_organization_data');
+    //     // Update organization data
+    //     Route::put('/', [OrganizationDataController::class, 'update'])
+    //         ->name('update')
+    //         ->middleware('can:edit_own_organization_data');
 
-        // Verify business information (for seller verification)
-        Route::post('/verify-business', [OrganizationDataController::class, 'verifyBusiness'])
-            ->name('verify-business')
-            ->middleware(['can:edit_own_organization_data', 'strong_auth_required']);
+    //     // Verify business information (for seller verification)
+    //     Route::post('/verify-business', [OrganizationDataController::class, 'verifyBusiness'])
+    //         ->name('verify-business')
+    //         ->middleware(['can:edit_own_organization_data', 'strong_auth_required']);
 
-        // Upload business documents
-        Route::post('/upload-documents', [OrganizationDataController::class, 'uploadDocuments'])
-            ->name('upload-documents')
-            ->middleware(['can:edit_own_organization_data', 'strong_auth_required']);
-    });
+    //     // Upload business documents
+    //     Route::post('/upload-documents', [OrganizationDataController::class, 'uploadDocuments'])
+    //         ->name('upload-documents')
+    //         ->middleware(['can:edit_own_organization_data', 'strong_auth_required']);
+    // });
 
     /*
     |--------------------------------------------------------------------------
@@ -108,38 +108,38 @@ Route::middleware(['auth', 'verified'])->group(function () {
     | - Custom user documents
     |
     */
-    Route::prefix('user/domains/documents')->name('user.domains.documents.')->group(function () {
+    // Route::prefix('user/domains/documents')->name('user.domains.documents.')->group(function () {
 
-        // Main documents management page
-        Route::get('/', [DocumentsController::class, 'index'])
-            ->name('index')
-            ->middleware('can:manage_own_documents');
+    //     // Main documents management page
+    //     Route::get('/', [DocumentsController::class, 'index'])
+    //         ->name('index')
+    //         ->middleware('can:manage_own_documents');
 
-        // Upload new document
-        Route::post('/upload', [DocumentsController::class, 'upload'])
-            ->name('upload')
-            ->middleware('can:manage_own_documents');
+    //     // Upload new document
+    //     Route::post('/upload', [DocumentsController::class, 'upload'])
+    //         ->name('upload')
+    //         ->middleware('can:manage_own_documents');
 
-        // Update document metadata
-        Route::put('/{document}', [DocumentsController::class, 'update'])
-            ->name('update')
-            ->middleware('can:manage_own_documents');
+    //     // Update document metadata
+    //     Route::put('/{document}', [DocumentsController::class, 'update'])
+    //         ->name('update')
+    //         ->middleware('can:manage_own_documents');
 
-        // Download document
-        Route::get('/{document}/download', [DocumentsController::class, 'download'])
-            ->name('download')
-            ->middleware('can:manage_own_documents');
+    //     // Download document
+    //     Route::get('/{document}/download', [DocumentsController::class, 'download'])
+    //         ->name('download')
+    //         ->middleware('can:manage_own_documents');
 
-        // Delete document
-        Route::delete('/{document}', [DocumentsController::class, 'destroy'])
-            ->name('destroy')
-            ->middleware('can:manage_own_documents');
+    //     // Delete document
+    //     Route::delete('/{document}', [DocumentsController::class, 'destroy'])
+    //         ->name('destroy')
+    //         ->middleware('can:manage_own_documents');
 
-        // Verify document authenticity
-        Route::post('/{document}/verify', [DocumentsController::class, 'verify'])
-            ->name('verify')
-            ->middleware(['can:manage_own_documents', 'strong_auth_required']);
-    });
+    //     // Verify document authenticity
+    //     Route::post('/{document}/verify', [DocumentsController::class, 'verify'])
+    //         ->name('verify')
+    //         ->middleware(['can:manage_own_documents', 'strong_auth_required']);
+    // });
 
     /*
     |--------------------------------------------------------------------------
@@ -153,28 +153,28 @@ Route::middleware(['auth', 'verified'])->group(function () {
     | - Payment method preferences
     |
     */
-    Route::prefix('user/domains/invoice-preferences')->name('user.domains.invoice-preferences.')->group(function () {
+    // Route::prefix('user/domains/invoice-preferences')->name('user.domains.invoice-preferences.')->group(function () {
 
-        // Main invoice preferences page
-        Route::get('/', [InvoicePreferencesController::class, 'index'])
-            ->name('index')
-            ->middleware('can:manage_own_invoice_preferences');
+    //     // Main invoice preferences page
+    //     Route::get('/', [InvoicePreferencesController::class, 'index'])
+    //         ->name('index')
+    //         ->middleware('can:manage_own_invoice_preferences');
 
-        // Update invoice preferences
-        Route::put('/', [InvoicePreferencesController::class, 'update'])
-            ->name('update')
-            ->middleware('can:manage_own_invoice_preferences');
+    //     // Update invoice preferences
+    //     Route::put('/', [InvoicePreferencesController::class, 'update'])
+    //         ->name('update')
+    //         ->middleware('can:manage_own_invoice_preferences');
 
-        // Preview invoice format
-        Route::post('/preview', [InvoicePreferencesController::class, 'preview'])
-            ->name('preview')
-            ->middleware('can:manage_own_invoice_preferences');
+    //     // Preview invoice format
+    //     Route::post('/preview', [InvoicePreferencesController::class, 'preview'])
+    //         ->name('preview')
+    //         ->middleware('can:manage_own_invoice_preferences');
 
-        // Export invoice history
-        Route::post('/export-history', [InvoicePreferencesController::class, 'exportHistory'])
-            ->name('export-history')
-            ->middleware('can:manage_own_invoice_preferences');
-    });
+    //     // Export invoice history
+    //     Route::post('/export-history', [InvoicePreferencesController::class, 'exportHistory'])
+    //         ->name('export-history')
+    //         ->middleware('can:manage_own_invoice_preferences');
+    // });
 
     /*
     |--------------------------------------------------------------------------
@@ -194,10 +194,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
             return redirect()->route('profile.show');
         })->name('index');
 
-        // Identity verification for sensitive operations
-        Route::get('/identity-verification', function () {
-            return view('user.domains.identity-verification');
-        })->name('identity-verification');
+
+        Route::get('/user/identity-verification', function() {
+            return view('users.domains.personal-data.identity-verification', [
+                'return_url' => request()->get('return_url', '/'),
+                'verification_reason' => request()->get('verification_reason', 'Identity verification required')
+            ]);
+        })->name('identity-verification')->middleware('auth');
 
         // Process identity verification
         Route::post('/identity-verification', function () {
@@ -246,32 +249,32 @@ Route::middleware(['auth:sanctum', 'verified'])->prefix('api/user/domains')->nam
     });
 
     // Organization Data API endpoints
-    Route::prefix('organization-data')->name('organization-data.')->group(function () {
+    // Route::prefix('organization-data')->name('organization-data.')->group(function () {
 
-        // Validate business information
-        Route::post('/validate-business', [OrganizationDataController::class, 'validateBusiness'])
-            ->name('validate-business')
-            ->middleware('can:edit_own_organization_data');
+    //     // Validate business information
+    //     Route::post('/validate-business', [OrganizationDataController::class, 'validateBusiness'])
+    //         ->name('validate-business')
+    //         ->middleware('can:edit_own_organization_data');
 
-        // Check seller verification status
-        Route::get('/seller-status', [OrganizationDataController::class, 'getSellerStatus'])
-            ->name('seller-status')
-            ->middleware('can:edit_own_organization_data');
-    });
+    //     // Check seller verification status
+    //     Route::get('/seller-status', [OrganizationDataController::class, 'getSellerStatus'])
+    //         ->name('seller-status')
+    //         ->middleware('can:edit_own_organization_data');
+    // });
 
     // Documents API endpoints
-    Route::prefix('documents')->name('documents.')->group(function () {
+    // Route::prefix('documents')->name('documents.')->group(function () {
 
-        // Get document list
-        Route::get('/', [DocumentsController::class, 'apiIndex'])
-            ->name('index')
-            ->middleware('can:manage_own_documents');
+    //     // Get document list
+    //     Route::get('/', [DocumentsController::class, 'apiIndex'])
+    //         ->name('index')
+    //         ->middleware('can:manage_own_documents');
 
-        // Check document verification status
-        Route::get('/{document}/status', [DocumentsController::class, 'getVerificationStatus'])
-            ->name('status')
-            ->middleware('can:manage_own_documents');
-    });
+    //     // Check document verification status
+    //     Route::get('/{document}/status', [DocumentsController::class, 'getVerificationStatus'])
+    //         ->name('status')
+    //         ->middleware('can:manage_own_documents');
+    // });
 });
 
 /*
@@ -283,15 +286,15 @@ Route::middleware(['auth:sanctum', 'verified'])->prefix('api/user/domains')->nam
 | business verification, etc.)
 |
 */
-Route::prefix('webhooks/user-domains')->name('webhooks.user-domains.')->group(function () {
+// Route::prefix('webhooks/user-domains')->name('webhooks.user-domains.')->group(function () {
 
-    // Document verification webhook
-    Route::post('/document-verification', [DocumentsController::class, 'handleVerificationWebhook'])
-        ->name('document-verification')
-        ->middleware('webhook_signature');
+//     // Document verification webhook
+//     Route::post('/document-verification', [DocumentsController::class, 'handleVerificationWebhook'])
+//         ->name('document-verification')
+//         ->middleware('webhook_signature');
 
-    // Business verification webhook
-    Route::post('/business-verification', [OrganizationDataController::class, 'handleVerificationWebhook'])
-        ->name('business-verification')
-        ->middleware('webhook_signature');
-});
+//     // Business verification webhook
+//     Route::post('/business-verification', [OrganizationDataController::class, 'handleVerificationWebhook'])
+//         ->name('business-verification')
+//         ->middleware('webhook_signature');
+// });

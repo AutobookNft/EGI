@@ -7,7 +7,6 @@
 |
  */
 
-// English
 return [
     'proposal_declined_subject' => 'Your proposal has been declined',
     'proposal_declined_line' => 'Your proposal has been declined.',
@@ -30,5 +29,78 @@ return [
     'proposed_change_to_a_wallet' => 'You have proposed a change to a wallet',
     'no_historical_notifications' => 'No historical notifications',
     'notification_list_error' => 'Error loading the notification list',
+
+    'status' => [
+        'read' => 'Read',
+        'pending_ack' => 'Unread',
+    ],
+
+    'label' => [
+        'status' => 'Status',
+        'from' => 'From',
+        'created_at' => 'Created on',
+        'archived' => 'Archive',
+        'additional_details' => 'Additional Details',
+    ],
+
+    'actions' => [
+        'done' => 'Done',
+        'learn_more' => 'Learn more',
+    ],
+
+    'aria' => [
+        'details_label' => 'Notification details',
+        'actions_label' => 'Notification actions',
+        'mark_as_read' => 'Mark notification as read',
+        'learn_more' => 'Open link for more information',
+    ],
+
+    'gdpr' => [
+        'disavow_button_label' => 'I do not recognize this action',
+        'confirm_button_label' => 'Confirm this action',
+        'confirm_action_prompt' => 'Are you sure you want to confirm this action?',
+        'unknown' => [
+            'content' => 'You have received an unknown notification.',
+                'title' => 'Unknown Notification',
+            ],
+        'consent_updated' => [
+                'content' => 'Your consent has been updated.',
+                'title' => 'Consent Updated',
+            ],
+        'breach_report_received' => [
+            'content' => 'You have received a data breach report.',
+            'title' => 'Data Breach Report Received',
+        ],
+        'data_deletion_request' => [
+            'content' => 'You have received a data deletion request.',
+            'title' => 'Data Deletion Request Received',
+        ],
+        'data_access_request' => [
+            'content' => 'You have received a data access request.',
+            'title' => 'Data Access Request Received',
+        ],
+        'data_portability_request' => [
+            'content' => 'You have received a data portability request.',
+            'title' => 'Data Portability Request Received',
+        ],
+        'data_processing_objection' => [
+            'content' => 'You have received an objection to data processing.',
+            'title' => 'Data Processing Objection Received',
+        ],
+        'data_processing_restriction' => [
+            'content' => 'You have received a data processing restriction request.',
+            'title' => 'Data Processing Restriction Request Received',
+        ],
+        'data_processing_notification' => [
+            'content' => 'You have received a data processing notification.',
+            'title' => 'Data Processing Notification Received',
+        ],
+        'data_processing_consent' => [
+            'content' => 'You have received a data processing consent request.',
+            'title' => 'Data Processing Consent Request Received',
+        ],
+
+    ],
+
 ];
 

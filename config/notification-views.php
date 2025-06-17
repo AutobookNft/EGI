@@ -57,4 +57,44 @@ return [
             'render'=>'include',
         ],
     ],
+    'gdpr' => [
+        // Interactive notifications (require user action)
+        'consent_updated' => [
+            'view' => 'notifications.gdpr.generic_alert',
+            'render' => 'include',
+            'type' => 'interactive', // ← Extra metadata
+        ],
+
+        // Informational notifications (read-only)
+        'data_exported' => [
+            'view' => 'notifications.gdpr.informational',
+            'render' => 'include',
+            'type' => 'informational',
+        ],
+        'processing_restricted' => [
+            'view' => 'notifications.gdpr.informational',
+            'render' => 'include',
+            'type' => 'informational',
+        ],
+        'account_deletion_requested' => [
+            'view' => 'notifications.gdpr.informational',
+            'render' => 'include',
+            'type' => 'informational',
+        ],
+        'account_deletion_processed' => [
+            'view' => 'notifications.gdpr.informational',
+            'render' => 'include',
+            'type' => 'informational',
+        ],
+        'breach_report_received' => [
+            'view' => 'notifications.gdpr.informational',
+            'render' => 'include',
+            'type' => 'informational',
+        ],
+        'default' => [
+            'view' => 'notifications.gdpr.default',
+            'render' => 'include',
+            'type' => 'informational',
+        ],
+    ],
 ];

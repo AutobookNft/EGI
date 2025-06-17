@@ -21,9 +21,9 @@ enum ConsentStatus: string
     public function label(): string
     {
         return match($this) {
-            self::ACTIVE => __('gdpr.consent_status.active'),
-            self::WITHDRAWN => __('gdpr.consent_status.withdrawn'),
-            self::EXPIRED => __('gdpr.consent_status.expired'),
+            self::ACTIVE => __('gdpr.status.active'),
+            self::WITHDRAWN => __('gdpr.status.withdrawn'),
+            self::EXPIRED => __('gdpr.status.expired'),
         };
     }
 

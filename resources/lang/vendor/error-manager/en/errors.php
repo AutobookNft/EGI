@@ -179,15 +179,17 @@ return [
         'ecosystem_setup_failed' => 'Error during user ecosystem creation (collection, wallets, relationships). Details: :error',
         'user_domain_initialization_failed' => 'Error during user domain initialization (profile, personal_data, etc.). Details: :error',
         'gdpr_consent_processing_failed' => 'Error during GDPR consent processing. Details: :error',
-        'role_assignment_failed' => 'Error during role assignment based on user_type. Details: :error',
-        'personal_data_view_failed' => 'Si è verificato un errore nel caricamento dei tuoi dati personali. Per favore riprova tra qualche minuto o contatta il supporto se il problema persiste.',
-        'personal_data_update_failed' => 'Non è stato possibile salvare le modifiche ai tuoi dati personali. Verifica che tutti i campi siano compilati correttamente e riprova.',
-        'personal_data_export_failed' => 'Si è verificato un errore durante l\'esportazione dei tuoi dati. Riprova più tardi o contatta il supporto per assistenza.',
-        'personal_data_deletion_failed' => 'Non è stato possibile elaborare la richiesta di cancellazione dei tuoi dati. Ti preghiamo di contattare il nostro supporto per ricevere assistenza immediata.',
-        'gdpr_export_rate_limit' => 'Puoi richiedere un\'esportazione dei tuoi dati una volta ogni 30 giorni. La prossima esportazione sarà disponibile tra qualche giorno.',
-        'gdpr_violation_attempt' => 'GDPR violation attempt detected. Check consent logic in PersonalDataController, user consent status and UpdatePersonalDataRequest validation.',
+        'role_assignment_failed' => 'Error during role assignment for user :user_id. Details: :error',
+        'personal_data_view_failed' => 'Error loading Personal Data view. Check PersonalDataController::index(), UserPersonalData model, and user.domains.personal-data.index view.',
+        'personal_data_update_failed' => 'Error updating personal data. Check UpdatePersonalDataRequest validation, UserPersonalData database, and fiscal validator for specific country.',
+        'personal_data_export_failed' => 'Error generating GDPR personal data export. Check PersonalDataController::export(), format handler, and GDPR permissions.',
+        'personal_data_deletion_failed' => 'Critical error in GDPR personal data deletion request. Check PersonalDataController::destroy(), audit trail, and strong authentication.',
+        'gdpr_export_rate_limit' => 'GDPR export rate limit exceeded. Check canRequestDataExport() logic, last export timestamp, and 30-day limit configuration.',
+        'gdpr_violation_attempt' => 'GDPR violation attempt detected. Check consent logic in PersonalDataController, user consent status, and UpdatePersonalDataRequest validation.',
+        'gdpr_notification_send_failed' => 'Critical error while sending a GDPR notification. Check notification service configuration and logs for details.',
+        'gdpr_notification_dispatch_failed' => 'Critical error during GDPR notification dispatch. Check handler configuration and input data validity.',
+        'gdpr_notification_persistence_failed' => 'Critical error during GDPR notification persistence to database. Transaction failed, possible data integrity issue.',
     ],
-
     'user' => [
         // == Existing Entries ==
         'authentication_error' => 'You are not authorized to perform this operation.',
@@ -357,6 +359,9 @@ return [
         'personal_data_deletion_failed' => 'Unable to process your data deletion request. Please contact our support team for immediate assistance.',
         'gdpr_export_rate_limit' => 'You can request a data export once every 30 days. Your next export will be available in a few days.',
         'gdpr_violation_attempt' => 'You cannot update your personal data without providing appropriate consent. Please accept the data processing terms to continue.',
+        'gdpr_notification_send_failed_user' => 'We\'re sorry, a technical issue occurred and an important notification could not be sent. Our team has been notified.',
+        'gdpr_notification_dispatch_failed' => 'A problem occurred while processing your privacy-related request. Our team has been notified and will resolve the issue as soon as possible.',
+        'gdpr_notification_persistence_failed' => 'We were unable to complete the requested operation for your data management. Please try again later or contact support.',
     ],
 
     // Generic message (used by UserInterfaceHandler if no specific message found)

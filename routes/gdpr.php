@@ -29,6 +29,9 @@ Route::middleware(['auth', 'verified'])->prefix('dashboard/gdpr')->name('gdpr.')
     Route::get('/consent/preferences', [GdprController::class, 'consentPreferences'])
         ->name('consent.preferences');
 
+    Route::post('/gdpr/consent/withdraw', [App\Http\Controllers\GdprController::class, 'withdraw'])->name('consent.withdraw');
+    Route::post('/gdpr/consent/renew', [App\Http\Controllers\GdprController::class, 'renew'])->name('consent.renew');
+
     // === DATA EXPORT & PORTABILITY ===
     Route::get('/export-data', [GdprController::class, 'exportData'])
         ->name('export-data');
@@ -40,14 +43,14 @@ Route::middleware(['auth', 'verified'])->prefix('dashboard/gdpr')->name('gdpr.')
         ->name('export-data.download');
 
     // === PERSONAL DATA MANAGEMENT ===
-    Route::get('/edit-personal-data', [GdprController::class, 'editPersonalData'])
-        ->name('edit-personal-data');
+    // Route::get('/edit-personal-data', [GdprController::class, 'editPersonalData'])
+    //     ->name('edit-personal-data');
 
-    Route::put('/edit-personal-data/update', [GdprController::class, 'updatePersonalData'])
-        ->name('edit-personal-data.update');
+    // Route::put('/edit-personal-data/update', [GdprController::class, 'updatePersonalData'])
+    //     ->name('edit-personal-data.update');
 
-    Route::post('/edit-personal-data/request-rectification', [GdprController::class, 'requestRectification'])
-        ->name('edit-personal-data.rectification');
+    // Route::post('/edit-personal-data/request-rectification', [GdprController::class, 'requestRectification'])
+    //     ->name('edit-personal-data.rectification');
 
     // === PROCESSING LIMITATION ===
     Route::get('/limit-processing', [GdprController::class, 'limitProcessing'])

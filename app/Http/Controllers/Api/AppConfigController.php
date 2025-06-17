@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Helpers\FegiAuth;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Ultra\ErrorManager\Interfaces\ErrorManagerInterface;
@@ -88,7 +89,7 @@ class AppConfigController extends Controller
 
 
         try {
-            $user = Auth::user();
+            $user = FegiAuth::user();
             $lang = app()->getLocale();
 
             // Cache configuration for performance
@@ -672,22 +673,47 @@ class AppConfigController extends Controller
     }
 
     /**
-     * @Oracode Collect frontend translations
-     * 🎯 Purpose: Aggregate all client-needed translation keys
-     * 📥 Input: Current locale
-     * 📤 Output: Translations array with simplified keys
+     * @Oracode Get notification translation keys
+     * 🎯 Purpose: Map notification translation keys to simplified names
+     * 📥 Input: None
+     * 📤 Output: Array of key mappings
+     *
+     * @return array Notification key mappings (simplified => full)
+     *
+     * @os1-compliance: Full - Centralizes notification translation management
+     */
+    private function getNotificationTranslationMappings(): array
+    {
+        return [
+            'notificationLabelAdditionalDetails' => 'notification.label.additional_details',
+            'notificationAriaActionsLabel' => 'notification.aria.actions_label',
+            'notificationActionsLearnMore' => 'notification.actions.learn_more',
+            'notificationActionsDone' => 'notification.actions.done',
+        ];
+    }
+
+    /**
+     * @Oracode Get frontend translations
+     * 🎯 Purpose: Provide all frontend-needed translations in simplified format
+     * 📥 Input: Locale string
+     * 📤 Output: Array of simplified translation keys
      *
      * @param string $lang Current locale
-     * @return array Translation key-value pairs
+     * @return array Simplified translations (key => translated_value)
+     *
+     * @os1-compliance: Full - Centralizes frontend translation management
+     * @performance: Cached at app-config level for 300 seconds
      */
     private function getFrontendTranslations(string $lang): array
     {
-        // Merge all mappings
+        // Merge all mappings - PATTERN CORRETTO
         $mappings = array_merge(
             $this->getGuestLayoutTranslationMappings(),
             $this->getCollectionTranslationMappings(),
             $this->getReservationTranslationMappings(),
-            $this->getLikeTranslationMappings()
+            $this->getLikeTranslationMappings(),
+            $this->getGdprTranslationMappings(),
+            $this->getNotificationTranslationMappings()
         );
 
         $translations = [];
@@ -695,8 +721,78 @@ class AppConfigController extends Controller
             $translations[$simplifiedKey] = __($laravelKey);
         }
 
-        return $translations;
+        // === LOG TRADUZIONI CARICATE ===
+        $this->logger->info('Frontend translations loaded', [
+            'language' => $lang,
+            'total_mappings' => count($mappings),
+            'total_translations' => count($translations),
+            'channel' => $this->channel
+        ]);
 
+        return $translations;
+    }
+
+    /**
+     * @Oracode Get GDPR translation keys
+     * 🎯 Purpose: Map GDPR notification translation keys to simplified names
+     * 📥 Input: None
+     * 📤 Output: Array of key mappings
+     *
+     * @return array GDPR key mappings (simplified => full)
+     * @os1-compliance: Full - Centralizes GDPR translation management
+     */
+    private function getGdprTranslationMappings(): array
+    {
+        return [
+                        // === AZIONI E STATI GLOBALI ===
+            'gdprSuccess' => 'gdpr.success',
+            'gdprError' => 'gdpr.error',
+            'gdprWarning' => 'gdpr.warning',
+            'gdprCancel' => 'gdpr.cancel',
+            'gdprContinue' => 'gdpr.continue',
+            'gdprSubmit' => 'gdpr.submit',
+            'gdprSave' => 'gdpr.save',
+            'notificationAcknowledged' => 'gdpr.notifications.acknowledged', // Spostato e centralizzato
+
+
+            'gdprConsentUpdateSuccess' => 'gdpr.consent.update_success',
+            'gdprConsentUpdateError' => 'gdpr.consent.update_error',
+            'gdprConsentWithdraw' => 'gdpr.consent.withdraw',
+            'gdprConsentWithdrawConfirm' => 'gdpr.consent.withdraw_confirm',
+
+
+            'gdprStatusGranted' => 'gdpr.status.granted',
+            'gdprStatusWithdrawn' => 'gdpr.status.withdrawn',
+            'gdprStatusRejected' => 'gdpr.status.rejected',
+            'gdprStatusActive' => 'gdpr.status.active',
+            'gdprStatusPending' => 'gdpr.status.pending',
+
+
+            'gdprErrorGeneral' => 'gdpr.errors.general',
+            'gdprErrorUnauthorized' => 'gdpr.errors.unauthorized',
+            'gdprErrorValidationFailed' => 'gdpr.errors.validation_failed',
+
+            'gdprModalClarificationTitle' => 'gdpr.modal.clarification.title',
+            'gdprModalClarificationExplanation' => 'gdpr.modal.clarification.explanation',
+            'gdprModalRevokeButtonText' => 'gdpr.modal.revoke_button_text',
+            'gdprModalRevokeDescription' => 'gdpr.modal.revoke_description',
+            'gdprModalDisavowButtonText' => 'gdpr.modal.disavow_button_text',
+            'gdprModalDisavowDescription' => 'gdpr.modal.disavow_description',
+
+            'gdprModalConfirmationTitle' => 'gdpr.modal.confirmation.title',
+            'gdprModalConfirmationWarning' => 'gdpr.modal.confirmation.warning',
+            'gdprModalConfirmDisavow' => 'gdpr.modal.confirm_disavow',
+            'gdprModalFinalWarning' => 'gdpr.modal.final_warning',
+
+            'gdprModalConsequenceConsentRevocation' => 'gdpr.modal.consequences.consent_revocation',
+            'gdprModalConsequenceSecurityNotification' => 'gdpr.modal.consequences.security_notification',
+            'gdprModalConsequenceAccountReview' => 'gdpr.modal.consequences.account_review',
+            'gdprModalConsequenceEmailConfirmation' => 'gdpr.modal.consequences.email_confirmation',
+            'gdprModalSecurityTitle' => 'gdpr.modal.security.title',
+            'gdprModalSecurityUnderstood' => 'gdpr.modal.security.understood',
+
+
+        ];
     }
 
     /**

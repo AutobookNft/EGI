@@ -284,7 +284,17 @@ class GdprController extends Controller
             $consentData = $this->consentService->getUserConsentStatus($user);
             $consentHistory = $this->consentService->getConsentHistory($user);
 
+            // ✅ OS1.5 FIX: Get consent types from ConsentService for view compatibility
+            $availableConsentTypes = $this->consentService->getAvailableConsentTypes();
+
             $this->auditService->logUserAction($user, 'consent_page_viewed');
+
+            $this->logger->info('GDPR: Consent data retrieved', [
+                'user_id' => $user->id,
+                'consent_count' => count($consentData['userConsents']),
+                'consent_summary' => $consentData['consentSummary'],
+                'log_category' => 'GDPR_CONSENT_DATA'
+            ]);
 
             return view('gdpr.consent', [
                 'user' => $user,
@@ -292,7 +302,8 @@ class GdprController extends Controller
                 'consentHistory' => $consentHistory,
                 'lastUpdate' => $consentHistory->first()?->created_at,
                 'userConsents' => $consentData['userConsents'],
-                'consentSummary' => $consentData['consentSummary']
+                'consentSummary' => $consentData['consentSummary'],
+                'consentTypes' => $availableConsentTypes, // ✅ MISSING! View needs this
             ]);
 
         } catch (\Exception $e) {
@@ -401,6 +412,118 @@ class GdprController extends Controller
         } catch (\Exception $e) {
             return $this->errorManager->handle('GDPR_CONSENT_UPDATE_FAILED', [
                 'user_id' => Auth::id(),
+                'error_message' => $e->getMessage()
+            ], $e);
+        }
+    }
+
+    /**
+     * Withdraw user consent for a specific purpose.
+     *
+     * @param Request $request
+     * @return RedirectResponse
+     * @privacy-safe Withdraws only the authenticated user's own consent
+     *
+     * @package App\Http\Controllers\User
+     * @author Padmin D. Curtis (AI Partner OS1.5.1-Compliant) for Fabio Cherici
+     * @version 1.1.0 (FlorenceEGI MVP - Personal Data Domain)
+     * @deadline 2025-06-30
+     */
+    public function withdraw(Request $request): RedirectResponse
+    {
+        try {
+            $validated = $request->validate([
+                'consent_id' => 'required|integer|exists:user_consents,id'
+            ]);
+
+            $user = Auth::user();
+            $consentId = $validated['consent_id'];
+
+            // 1. Trova il consenso specifico
+            $consent = \App\Models\UserConsent::findOrFail($consentId);
+
+            // 2. 🛡️ CONTROLLO DI SICUREZZA FONDAMENTALE
+            if ($consent->user_id !== $user->id) {
+                throw new \Illuminate\Auth\Access\AuthorizationException('Unauthorized action.');
+            }
+
+            // 3. Chiama il service con il 'consent_type'
+            $this->consentService->withdrawConsent($user, $consent->consent_type);
+
+            $this->auditService->logUserAction($user, 'consent_withdrawn', [
+                'consent_id' => $consentId,
+                'consent_type' => $consent->consent_type
+            ]);
+
+            return redirect()->route('gdpr.consent')
+                ->with('success', __('gdpr.consent.withdrawn_successfully'));
+
+        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+             return $this->errorManager->handle('GDPR_CONSENT_WITHDRAW_AUTH_FAILED', [
+                'user_id' => Auth::id(),
+                'consent_id' => $request->input('consent_id'),
+                'error_message' => 'User attempted to withdraw a consent not belonging to them.'
+            ], $e);
+        } catch (\Exception $e) {
+            return $this->errorManager->handle('GDPR_CONSENT_WITHDRAW_FAILED', [
+                'user_id' => Auth::id(),
+                'consent_id' => $request->input('consent_id'),
+                'error_message' => $e->getMessage()
+            ], $e);
+        }
+    }
+
+    /**
+     * Renew a previously withdrawn user consent.
+     *
+     * @param Request $request
+     * @return RedirectResponse
+     * @privacy-safe Renews only the authenticated user's own consent
+     *
+     * @package App\Http\Controllers\User
+     * @author Padmin D. Curtis (AI Partner OS1.5.1-Compliant) for Fabio Cherici
+     * @version 1.1.0 (FlorenceEGI MVP - Personal Data Domain)
+     * @deadline 2025-06-30
+     */
+    public function renew(Request $request): RedirectResponse
+    {
+        try {
+            $validated = $request->validate([
+                'consent_id' => 'required|integer|exists:user_consents,id'
+            ]);
+
+            $user = Auth::user();
+            $consentId = $validated['consent_id'];
+
+            // 1. Trova il consenso specifico
+            $consent = \App\Models\UserConsent::findOrFail($consentId);
+
+            // 2. 🛡️ CONTROLLO DI SICUREZZA FONDAMENTALE
+            if ($consent->user_id !== $user->id) {
+                throw new \Illuminate\Auth\Access\AuthorizationException('Unauthorized action.');
+            }
+
+            // 3. Chiama il service con il 'consent_type'
+            $this->consentService->renewConsent($user, $consent->consent_type);
+
+            $this->auditService->logUserAction($user, 'consent_renewed', [
+                'consent_id' => $consentId,
+                'consent_type' => $consent->consent_type
+            ]);
+
+            return redirect()->route('gdpr.consent')
+                ->with('success', __('gdpr.consent.renewed_successfully'));
+
+        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+             return $this->errorManager->handle('GDPR_CONSENT_RENEW_AUTH_FAILED', [
+                'user_id' => Auth::id(),
+                'consent_id' => $request->input('consent_id'),
+                'error_message' => 'User attempted to renew a consent not belonging to them.'
+            ], $e);
+        } catch (\Exception $e) {
+            return $this->errorManager->handle('GDPR_CONSENT_RENEW_FAILED', [
+                'user_id' => Auth::id(),
+                'consent_id' => $request->input('consent_id'),
                 'error_message' => $e->getMessage()
             ], $e);
         }

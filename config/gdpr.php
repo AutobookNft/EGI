@@ -151,6 +151,90 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Processing Restriction Settings
+    |--------------------------------------------------------------------------
+    */
+    'processing_restriction' => [
+        // Maximum active restrictions per user
+        'max_active_restrictions' => 5,
+
+        // Auto-expiry time for restrictions in days (null = never expire)
+        'auto_expiry_days' => null, // Se vuoi un default, ad esempio 90 giorni, metti 90
+
+        // Whether to enable processing restriction notifications
+        'enable_notifications' => true,
+
+        // Data categories available for restriction
+        'data_categories' => [
+            'profile' => 'gdpr.restriction.categories.profile',
+            'activity' => 'gdpr.restriction.categories.activity',
+            'preferences' => 'gdpr.restriction.categories.preferences',
+            'collections' => 'gdpr.restriction.categories.collections',
+            'purchases' => 'gdpr.restriction.categories.purchases',
+            'comments' => 'gdpr.restriction.categories.comments',
+            'messages' => 'gdpr.restriction.categories.messages',
+        ],
+
+        /*
+        |----------------------------------------------------------------------
+        | Processing Restriction Type Mapping
+        |----------------------------------------------------------------------
+        |
+        | Maps specific ProcessingRestrictionType enum values to an array of
+        | granular application-level processing activities (strings) that
+        | should be restricted when that restriction type is active.
+        |
+        | The `ProcessingRestrictionType::ALL` (general)
+        | is handled directly in the service and applies to all processing.
+        |
+        */
+        'type_mapping' => [
+            // Utilizzo dei case effettivi dell'Enum ProcessingRestrictionType
+            \App\Enums\Gdpr\ProcessingRestrictionType::AUTOMATED_DECISIONS->value => [
+                'automated_profile_scoring',
+                'automated_credit_assessment',
+                'algorithmic_content_ranking',
+            ],
+            \App\Enums\Gdpr\ProcessingRestrictionType::MARKETING->value => [
+                'marketing_emails',
+                'newsletter_subscriptions',
+                'on_platform_targeted_ads',
+                'sms_marketing_campaigns',
+            ],
+            \App\Enums\Gdpr\ProcessingRestrictionType::ANALYTICS->value => [
+                'website_usage_tracking',
+                'product_interaction_analysis',
+                'user_behavior_monitoring',
+                'heatmaps_and_session_recording',
+            ],
+            \App\Enums\Gdpr\ProcessingRestrictionType::THIRD_PARTY->value => [
+                // Nota: Questo potrebbe sovrapporsi o essere più specifico di DATA_SHARING.
+                // Valuta se mantenere entrambi o consolidare.
+                'third_party_analytics_pixels',
+                'external_ad_network_integration',
+                // Se THIRD_PARTY implica anche una forma di condivisione, aggiungila qui
+                // o assicurati che la logica di DATA_SHARING copra questi casi.
+            ],
+            \App\Enums\Gdpr\ProcessingRestrictionType::DATA_SHARING->value => [
+                'data_sharing_with_partners', // Condivisione esplicita con partner
+                'social_login_data_synchronization', // Sincronizzazione dati con login social
+                // Aggiungere altri tipi specifici di data sharing
+            ],
+            // Nota: ProcessingRestrictionType::ALL è gestito come "blocca tutto" nel service
+            // e non necessita di una mappatura qui, a meno di requisiti molto specifici.
+            // Se ProcessingRestrictionType::PROFILING dovesse avere trattamenti specifici
+            // non coperti da AUTOMATED_DECISIONS o MARKETING, andrebbe aggiunto qui.
+            // Esempio se PROFILING fosse un tipo di restrizione a sé stante con trattamenti specifici:
+            // \App\Enums\Gdpr\ProcessingRestrictionType::PROFILING->value => [
+            //     'manual_user_segmentation_for_offers',
+            //     'behavioral_analysis_for_content_personalization',
+            // ],
+        ],
+        // ***** FINE SEZIONE CORRETTA *****
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Account Deletion Settings
     |--------------------------------------------------------------------------
     */
@@ -283,17 +367,17 @@ return [
         'send_slack' => true,
 
         // Slack webhook URL for notifications
-        'slack_webhook_url' => env('GDPR_SLACK_WEBHOOK_URL'),
+        'slack_webhook_url' => env('GDPR_SLACK_WEBHOOK_URL', null),
 
-        // Email notification classes
-        // 'email_classes' => [
-        //     'consent_updated' => \App\Notifications\Gdpr\ConsentUpdatedNotification::class,
-        //     'data_exported' => \App\Notifications\Gdpr\DataExportedNotification::class,
-        //     'processing_restricted' => \App\Notifications\Gdpr\ProcessingRestrictedNotification::class,
-        //     'account_deletion_requested' => \App\Notifications\Gdpr\AccountDeletionRequestedNotification::class,
-        //     'account_deletion_processed' => \App\Notifications\Gdpr\AccountDeletionProcessedNotification::class,
-        //     'breach_report_received' => \App\Notifications\Gdpr\BreachReportReceivedNotification::class,
-        // ],
+        // Notification class to database mapping
+        'classes' => [
+            'consent_updated' => \App\Notifications\Gdpr\ConsentUpdatedNotification::class,
+            'data_exported' => \App\Notifications\Gdpr\DataExportedNotification::class,
+            'processing_restricted' => \App\Notifications\Gdpr\ProcessingRestrictedNotification::class,
+            'account_deletion_requested' => \App\Notifications\Gdpr\AccountDeletionRequestedNotification::class,
+            'account_deletion_processed' => \App\Notifications\Gdpr\AccountDeletionProcessedNotification::class,
+            'breach_report_received' => \App\Notifications\Gdpr\BreachReportReceivedNotification::class,
+        ],
     ],
 
     /*

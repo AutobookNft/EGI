@@ -2,9 +2,7 @@
 
 namespace App\Notifications\Channels;
 
-use App\Enums\InvitationStatus;
 use App\Enums\NotificationStatus;
-use App\Enums\WalletStatus;
 use App\Models\CustomDatabaseNotification;
 use App\Models\Notification as ModelsNotification;
 use Illuminate\Notifications\Notification;
@@ -18,12 +16,16 @@ class CustomDatabaseChannel
         // Recupera i dati dal metodo "toCustomDatabase()" della notifica
         $data = $notification->toCustomDatabase($notifiable);
 
+        /**
+         *  Legge l'ID della notifica precedente, se presente
+         *  Questo ID viene utilizzato per aggiornare lo stato della notifica precedente
+         *  quando l'azione è ACCEPTED o REJECTED.
+         */
         $notification_prevId = $data['prev_id'] ?? null;
 
         Log::channel('florenceegi')->info('CustomDatabaseChannel:send', [
             'data' => $data,
         ]);
-
 
         // Ottieni il nome della classe della notifica
         $action = get_class($notification);
@@ -34,8 +36,8 @@ class CustomDatabaseChannel
             // 'data' => $data,
         ]);
 
-        // Mappatura delle classi di notifica agli stati di InvitationStatus. SOLO RESPONSE
-        $actionMap = [
+        // Mappatura delle classi di notifica alle sole azioni di risposta
+        $actionResponseMap = [
             'App\\Notifications\\Invitations\\InvitationAccepted' => NotificationStatus::ACCEPTED,
             'App\\Notifications\\Invitations\\InvitationRejection' => NotificationStatus::REJECTED,
             'App\\Notifications\\Wallets\\WalletRejection' => NotificationStatus::REJECTED,
@@ -43,15 +45,16 @@ class CustomDatabaseChannel
         ];
 
         // Controlla se l'azione corrisponde a una chiave nella mappatura
-        if (isset($actionMap[$action])) {
-            $action = $actionMap[$action];
+        if (isset($actionResponseMap[$action])) {
+            $action = $actionResponseMap[$action];
         }
 
         // Se l'azione è ACCEPTED o REJECTED, aggiorna la notifica precedente
-        if ($action === NotificationStatus::ACCEPTED || $action === NotificationStatus  ::REJECTED) {
+        if ($action === NotificationStatus::ACCEPTED || $action === NotificationStatus::REJECTED) {
             Log::channel('florenceegi')->info('Notifica precedente aggiornata', [
                 'notification->id' => $notification->id,
             ]);
+            // Aggiorna la notifica precedente con lo stato di risposta
             $this->updatePreviousNotification($notification_prevId, $action);
         }
 

@@ -193,6 +193,7 @@ export function getAppConfig(): AppConfig {
     if (!loadedConfig) {
         throw new Error('App configuration not initialized. Call initializeAppConfig() first.');
     }
+    console.log('Padmin Config: translations called with key:', 'getAppConfig');
     return loadedConfig;
 }
 
@@ -247,6 +248,7 @@ export function appTranslate(
 ): string {
     try {
         const config = getAppConfig();
+
         const translations = config.translations;
 
         // The second parameter is replacements IF it's not config.translations

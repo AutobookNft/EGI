@@ -310,20 +310,44 @@
                     description="{{ __('user_personal_data.consent_description') }}"
                     icon="shield-check" />
 
+                {{-- Debug Information (only in development) --}}
+                @if(config('app.debug'))
+                    <div class="p-4 mb-4 text-xs border border-yellow-200 rounded bg-yellow-50">
+                        <strong>🔍 Consent Debug Info (ConsentService Only):</strong><br>
+                        ConsentService Says: {{ var_export($gdprConsents['allow_personal_data_processing'] ?? 'NOT_SET') }}<br>
+                        Old Consents Array: {{ var_export(old('consents')) }}<br>
+                        Checkbox Should Be: {{ ($gdprConsents['allow_personal_data_processing'] ?? false) ? 'CHECKED' : 'UNCHECKED' }}<br>
+                        @if(isset($gdprConsents['_debug']))
+                            User Consents Count: {{ $gdprConsents['_debug']['user_consents_count'] }}<br>
+                            Available Consent Types: {{ implode(', ', $gdprConsents['_debug']['consent_types_defined'] ?? []) }}<br>
+                        @endif
+                    </div>
+                @endif
+
                 <div class="mt-4 space-y-4">
                     {{-- Data Processing Consent --}}
                     <div class="flex items-start space-x-3">
+                        @php
+                            // ✅ CORRETTO: Controllo consent dal ConsentService + old() su array consents
+                            $currentConsentStatus = $gdprConsents['allow_personal_data_processing'] ?? false;
+                            $oldConsentValue = old('consents.allow_personal_data_processing', $currentConsentStatus);
+                            $isChecked = (bool) $oldConsentValue;
+                        @endphp
+
                         <input
                             type="checkbox"
-                            id="allow_personal_data_processing"
-                            name="allow_personal_data_processing"
+                            id="consent_allow_personal_data_processing"
+                            name="consents[allow_personal_data_processing]" {{-- ✅ ARRAY di consensi --}}
                             value="1"
-                            {{ old('allow_personal_data_processing', $gdprConsents['allow_personal_data_processing']) ? 'checked' : '' }}
-                            :disabled="!$canEdit"
-                            class="mt-1 text-indigo-600 border-gray-300 rounded shadow-sm focus:ring-indigo-500" />
+                            {{ $isChecked ? 'checked' : '' }}
+                            @if(!$canEdit) disabled @endif
+                            class="mt-1 text-indigo-600 border-gray-300 rounded shadow-sm focus:ring-indigo-500"
+                            onchange="toggleProcessingPurposes(this.checked)" />
+
                         <div>
-                            <label for="allow_personal_data_processing" class="text-sm font-medium text-gray-700">
+                            <label for="consent_allow_personal_data_processing" class="text-sm font-medium text-gray-700">
                                 {{ __('user_personal_data.consent_required') }}
+                                <span class="text-red-500">*</span>
                             </label>
                             <p class="mt-1 text-sm text-gray-500">
                                 {{ __('user_personal_data.gdpr_notices.data_processing_info') }}
@@ -331,12 +355,27 @@
                         </div>
                     </div>
 
-                    {{-- Processing Purposes --}}
-                    <div id="processing-purposes" class="ml-6 space-y-2" style="display: {{ old('allow_personal_data_processing', $gdprConsents['allow_personal_data_processing']) ? 'block' : 'none' }}">
+                    {{-- Processing Purposes - Metadata per il consenso --}}
+                    <div id="processing-purposes"
+                        class="ml-6 space-y-2"
+                        style="display: {{ $isChecked ? 'block' : 'none' }}">
                         <p class="mb-2 text-sm font-medium text-gray-700">{{ __('user_personal_data.processing_purposes') }}:</p>
 
                         @php
-                            $currentPurposes = old('processing_purposes', $personalData->processing_purposes ?: []);
+                            // ✅ Get processing purposes from ConsentService metadata
+                            $currentPurposes = old('consent_metadata.processing_purposes', []);
+
+                            // If we have existing consent, extract purposes from ConsentService
+                            if (isset($gdprConsents['_debug']['user_consents_raw'])) {
+                                foreach ($gdprConsents['_debug']['user_consents_raw'] as $consent) {
+                                    if ($consent->consent_key === 'allow_personal_data_processing' && !empty($consent->metadata)) {
+                                        $metadata = json_decode($consent->metadata, true);
+                                        $currentPurposes = $metadata['processing_purposes'] ?? [];
+                                        break;
+                                    }
+                                }
+                            }
+
                             $availablePurposes = [
                                 'account_management' => __('user_personal_data.purpose_account_management'),
                                 'service_delivery' => __('user_personal_data.purpose_service_delivery'),
@@ -352,10 +391,10 @@
                                 <input
                                     type="checkbox"
                                     id="purpose_{{ $purpose }}"
-                                    name="processing_purposes[]"
+                                    name="consent_metadata[processing_purposes][]" {{-- ✅ Metadata per il consenso --}}
                                     value="{{ $purpose }}"
                                     {{ in_array($purpose, $currentPurposes) ? 'checked' : '' }}
-                                    :disabled="!$canEdit"
+                                    @if(!$canEdit) disabled @endif
                                     class="text-indigo-600 border-gray-300 rounded shadow-sm focus:ring-indigo-500" />
                                 <label for="purpose_{{ $purpose }}" class="text-sm text-gray-600">
                                     {{ $label }}
@@ -364,10 +403,65 @@
                         @endforeach
                     </div>
 
-                    <x-input-error :messages="$errors->get('allow_personal_data_processing')" class="mt-2" />
-                    <x-input-error :messages="$errors->get('processing_purposes')" class="mt-2" />
+                    {{-- Altri consensi GDPR --}}
+                    <div class="grid grid-cols-1 gap-4 mt-6 md:grid-cols-2">
+                        {{-- Marketing Consent --}}
+                        <div class="flex items-start space-x-3">
+                            @php
+                                $marketingConsent = old('consents.marketing', $gdprConsents['marketing'] ?? false);
+                            @endphp
+
+                            <input
+                                type="checkbox"
+                                id="consent_marketing"
+                                name="consents[marketing]"
+                                value="1"
+                                {{ $marketingConsent ? 'checked' : '' }}
+                                @if(!$canEdit) disabled @endif
+                                class="mt-1 text-indigo-600 border-gray-300 rounded shadow-sm focus:ring-indigo-500" />
+
+                            <div>
+                                <label for="consent_marketing" class="text-sm font-medium text-gray-700">
+                                    {{ __('user_personal_data.consent_marketing') }}
+                                </label>
+                                <p class="mt-1 text-xs text-gray-500">
+                                    {{ __('user_personal_data.consent_marketing_description') }}
+                                </p>
+                            </div>
+                        </div>
+
+                        {{-- Analytics Consent --}}
+                        <div class="flex items-start space-x-3">
+                            @php
+                                $analyticsConsent = old('consents.analytics', $gdprConsents['analytics'] ?? false);
+                            @endphp
+
+                            <input
+                                type="checkbox"
+                                id="consent_analytics"
+                                name="consents[analytics]"
+                                value="1"
+                                {{ $analyticsConsent ? 'checked' : '' }}
+                                @if(!$canEdit) disabled @endif
+                                class="mt-1 text-indigo-600 border-gray-300 rounded shadow-sm focus:ring-indigo-500" />
+
+                            <div>
+                                <label for="consent_analytics" class="text-sm font-medium text-gray-700">
+                                    {{ __('user_personal_data.consent_analytics') }}
+                                </label>
+                                <p class="mt-1 text-xs text-gray-500">
+                                    {{ __('user_personal_data.consent_analytics_description') }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <x-input-error :messages="$errors->get('consents.allow_personal_data_processing')" class="mt-2" />
+                    <x-input-error :messages="$errors->get('consent_metadata.processing_purposes')" class="mt-2" />
                 </div>
             </div>
+
+            {{-- Debug Information --}}
 
             {{-- Form Actions --}}
             @if($canEdit)
@@ -402,3 +496,20 @@
         </form>
     </div>
 </div>
+{{-- JavaScript for Dynamic Show/Hide --}}
+<script>
+function toggleProcessingPurposes(isChecked) {
+    const purposesDiv = document.getElementById('processing-purposes');
+    if (purposesDiv) {
+        purposesDiv.style.display = isChecked ? 'block' : 'none';
+    }
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const checkbox = document.getElementById('consent_allow_personal_data_processing');
+    if (checkbox) {
+        toggleProcessingPurposes(checkbox.checked);
+    }
+});
+</script>

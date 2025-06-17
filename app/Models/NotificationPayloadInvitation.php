@@ -52,7 +52,7 @@ class NotificationPayloadInvitation extends Model implements NotifiablePayload
 
     public function getRecipient(): User
     {
-        // return User::where('email', $this->email)->firstOrFail();
+        return User::where('email', $this->email)->firstOrFail();
     }
 
     public function getModelType(): string

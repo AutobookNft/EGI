@@ -73,7 +73,7 @@ class ContextMenus
 
                 // Personal data menu
                 $personalDataMenu = new MenuGroup(__('menu.personal_data'), 'user-cog', [
-                    new AccountDataMenu(),
+
                     // new MyProfileMenu(),            // permission: 'edit_own_profile_data'
                     new MyPersonalDataMenu(),       // permission: 'edit_own_personal_data'
                     // new MyOrganizationMenu(),       // permission: 'edit_own_organization_data'
@@ -92,6 +92,7 @@ class ContextMenus
                 // GDPR menu
                 $gdprMenu = new MenuGroup(__('menu.gdpr_privacy'), 'shield', [
                     new ConsentMenu(),
+                    new AccountDataMenu(),
                     new ExportDataMenu(),
                     new EditPersonalDataMenu(),
                     new LimitProcessingMenu(),

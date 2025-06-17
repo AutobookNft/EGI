@@ -18,7 +18,7 @@ use Ultra\ErrorManager\Facades\UltraError;
  * @version 1.0.0
  * @date 2025-05-21
  */
-class PersonalDataController extends Controller
+class PersonalDataController_old extends Controller
 {
     /**
      * Logger instance

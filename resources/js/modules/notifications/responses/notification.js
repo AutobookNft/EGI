@@ -33,17 +33,28 @@ export default class Notification {
     async getOrCreateHandler(payload) {
         if (!this.handlersCache.has(payload)) {
             const handler = PayloadHandlerFactory.create(payload, this);
+
+            if (!handler) {
+                console.warn(`Factory ha restituito null per payload: ${payload}`);
+                return null;
+            }
+
+            // ✅ INIZIALIZZA SOLO SE ESISTE IL METODO
             if (typeof handler.initialize === 'function') {
                 try {
                     await handler.initialize();
+                    console.log(`Handler per ${payload} inizializzato`);
                 } catch (error) {
                     console.error(`Errore inizializzazione handler per ${payload}:`, error);
                     return null;
                 }
-                this.handlersCache.set(payload, handler);
-                console.log(`Handler per ${payload} inizializzato e cachato`);
             }
+
+            // ✅ CACHA SEMPRE, ANCHE SENZA initialize()
+            this.handlersCache.set(payload, handler);
+            console.log(`Handler per ${payload} cachato`);
         }
+
         return this.handlersCache.get(payload);
     }
 
@@ -202,7 +213,7 @@ export default class Notification {
         thumbnail.classList.add('bg-gray-700');
         this.setThumbnailActiveState(notificationId);
 
-        console.log("🔍 Carico dettagli per notifica:", notificationId);
+        console.log("🔍 Carico dettagli per notifica:", notificationId, thumbnails);
         const url = `/notifications/${notificationId}/details`;
         try {
             const response = await fetch(url);

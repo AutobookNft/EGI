@@ -21,7 +21,4 @@ interface NotificationDataInterface
     public function getModelType(): string;
     public function getModelId(): int;
     public function getSenderId(): ?int;
-
-
-
 }

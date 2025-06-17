@@ -11,6 +11,12 @@ namespace App\Enums\Gdpr;
  */
 enum GdprRequestType: string
 {
+    case CONSENT_UPDATE = 'consent_update';
+    case DATA_EXPORT = 'data_export';
+    case DATA_BREACH = 'data_breach';
+    case PROCESSING_RESTRICTION = 'processing_restriction';
+    case ACCOUNT_DELETION = 'account_deletion';
+    case BREACH_REPORT = 'breach_report';
     case ERASURE = 'erasure';
     case ACCESS = 'access';
     case RECTIFICATION = 'rectification';
@@ -24,12 +30,18 @@ enum GdprRequestType: string
     public function label(): string
     {
         return match($this) {
-            self::ERASURE => __('gdpr.request_types.erasure'),
-            self::ACCESS => __('gdpr.request_types.access'),
-            self::RECTIFICATION => __('gdpr.request_types.rectification'),
-            self::PORTABILITY => __('gdpr.request_types.portability'),
-            self::RESTRICTION => __('gdpr.request_types.restriction'),
-            self::OBJECTION => __('gdpr.request_types.objection'),
+            self::CONSENT_UPDATE => __('gdpr.requests.types.consent_update'),
+            self::DATA_EXPORT => __('gdpr.requests.types.data_export'),
+            self::DATA_BREACH => __('gdpr.requests.types.data_breach'),
+            self::PROCESSING_RESTRICTION => __('gdpr.requests.types.processing_restriction'),
+            self::ACCOUNT_DELETION => __('gdpr.requests.types.account_deletion'),
+            self::BREACH_REPORT => __('gdpr.requests.types.breach_report'),
+            self::ERASURE => __('gdpr.requests.types.erasure'),
+            self::ACCESS => __('gdpr.requests.types.access'),
+            self::RECTIFICATION => __('gdpr.requests.types.rectification'),
+            self::PORTABILITY => __('gdpr.requests.types.portability'),
+            self::RESTRICTION => __('gdpr.requests.types.restriction'),
+            self::OBJECTION => __('gdpr.requests.types.objection'),
         };
     }
 

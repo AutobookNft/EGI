@@ -70,13 +70,13 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     });
 
     // Personal data routes
-    Route::prefix('personal-data')->name('personal-data.')->group(function () {
-        Route::get('/account', [PersonalDataController::class, 'account'])->name('account');
-        Route::get('/bio', [PersonalDataController::class, 'bio'])->name('bio');
-        Route::put('/update-account', [PersonalDataController::class, 'updateAccount'])->name('update-account');
-        Route::put('/update-bio', [PersonalDataController::class, 'updateBio'])->name('update-bio');
-        // Altre rotte dati personali...
-    });
+    // Route::prefix('personal-data')->name('personal-data.')->group(function () {
+    //     Route::get('/account', [PersonalDataController::class, 'account'])->name('account');
+    //     Route::get('/bio', [PersonalDataController::class, 'bio'])->name('bio');
+    //     Route::put('/update-account', [PersonalDataController::class, 'updateAccount'])->name('update-account');
+    //     Route::put('/update-bio', [PersonalDataController::class, 'updateBio'])->name('update-bio');
+    //     // Altre rotte dati personali...
+    // });
 
     // Wallet routes
     Route::prefix('wallet')->name('wallet.')->group(function () {

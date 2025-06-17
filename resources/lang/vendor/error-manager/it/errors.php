@@ -179,13 +179,58 @@ return [
         'ecosystem_setup_failed' => 'Errore durante la creazione dell\'ecosistema utente (collection, wallet, relazioni). Dettagli: :error',
         'user_domain_initialization_failed' => 'Errore durante l\'inizializzazione dei domini utente (profile, personal_data, etc.). Dettagli: :error',
         'gdpr_consent_processing_failed' => 'Errore durante l\'elaborazione dei consensi GDPR. Dettagli: :error',
-        'role_assignment_failed' => 'Errore durante l\'assegnazione del ruolo basato su user_type. Dettagli: :error',
-        'personal_data_view_failed' => 'Errore nel caricamento della vista Personal Data. Verifica controller PersonalDataController::index(), model UserPersonalData e view user.domains.personal-data.index.',
-        'personal_data_update_failed' => 'Errore nell\'aggiornamento dati personali. Verifica UpdatePersonalDataRequest validation, database UserPersonalData, e fiscal validator per paese specifico.',
-        'personal_data_export_failed' => 'Errore nella generazione export GDPR dati personali. Verifica PersonalDataController::export(), format handler e permissions GDPR.',
-        'personal_data_deletion_failed' => 'Errore critico nella richiesta cancellazione dati personali GDPR. Verifica PersonalDataController::destroy(), audit trail e strong authentication.',
-        'gdpr_export_rate_limit' => 'Rate limit GDPR export superato. Verifica logica canRequestDataExport(), timestamp ultimo export e configurazione limite 30 giorni.',
-        'gdpr_violation_attempt' => 'Tentativo di violazione GDPR rilevato. Verifica logica consent nel PersonalDataController, status consenso utente e validation UpdatePersonalDataRequest.',
+        'role_assignment_failed' => 'Impossibile assegnare il ruolo :role al nuovo utente. Dettagli: :error',
+        'personal_data_view_failed' => 'Si è verificato un errore nel caricamento dei tuoi dati personali. Per favore riprova tra qualche minuto o contatta il supporto se il problema persiste.',
+        'personal_data_update_failed' => 'Non è stato possibile salvare le modifiche ai tuoi dati personali. Verifica che tutti i campi siano compilati correttamente e riprova.',
+        'personal_data_export_failed' => 'Si è verificato un errore durante l\'esportazione dei tuoi dati. Riprova più tardi o contatta il supporto per assistenza.',
+        'personal_data_deletion_failed' => 'Non è stato possibile elaborare la richiesta di cancellazione dei tuoi dati. Ti preghiamo di contattare il nostro supporto per ricevere assistenza immediata.',
+        'gdpr_export_rate_limit' => 'Puoi richiedere un\'esportazione dei tuoi dati una volta ogni 30 giorni. La prossima esportazione sarà disponibile tra qualche giorno.',
+        'gdpr_violation_attempt' => 'GDPR violation attempt detected. Check consent logic in PersonalDataController, user consent status and UpdatePersonalDataRequest validation.',
+        'gdpr_notification_send_failed' => 'Errore critico durante l\'invio di una notifica GDPR. Controllare la configurazione del servizio di notifica e i log per dettagli.',
+        'gdpr_notification_dispatch_failed' => 'Errore critico durante l\'invio della notifica GDPR. Verifica la configurazione dei handler e la validità dei dati di input.',
+        'gdpr_notification_persistence_failed' => 'Errore critico durante la persistenza della notifica GDPR nel database. Transazione fallita, possibile problema di integrità dei dati.',
+        'gdpr_service_unavailable' => 'ConsentService GDPR o dipendenze correlate non disponibili. Verificare database, DTO e traduzioni.',
+
+        // GDPR Consent Errors - Developer Messages IT
+        'gdpr_consent_required' => 'Consenso GDPR richiesto ma non fornito. Verificare ConsentService::hasConsent() e middleware consent.',
+        'gdpr_consent_update_error' => 'Errore aggiornamento consensi utente. Controllare ConsentService::updateUserConsents() e validazione form.',
+        'gdpr_consent_save_error' => 'Fallimento salvataggio consensi in database. Verificare transazione DB e constraints UserConsent model.',
+        'gdpr_consent_load_error' => 'Errore caricamento stato consensi utente. Controllare ConsentService::getUserConsentStatus() e relazioni model.',
+
+        // GDPR Export Errors - Developer Messages IT
+        'gdpr_export_request_error' => 'Errore richiesta esportazione dati GDPR. Verificare DataExportService e validazione request.',
+        'gdpr_export_limit_reached' => 'Limite esportazioni GDPR raggiunto. Controllare rate limiting e politiche esportazione.',
+        'gdpr_export_create_error' => 'Fallimento creazione file esportazione. Verificare DataExportService::processExport() e storage permissions.',
+        'gdpr_export_download_error' => 'Errore download file esportazione. Controllare file existence, permissions e URL generation.',
+        'gdpr_export_status_error' => 'Errore verifica stato esportazione. Verificare DataExport model e status tracking.',
+        'gdpr_export_processing_failed' => 'Fallimento elaborazione dati esportazione. Controllare background jobs e data serialization.',
+
+        // GDPR Processing Restriction Errors - Developer Messages IT
+        'gdpr_processing_restricted' => 'Operazione bloccata da restrizione processing GDPR. Verificare ProcessingRestrictionService.',
+        'gdpr_processing_limit_view_error' => 'Errore caricamento vista limitazioni processing. Controllare middleware e view data.',
+        'gdpr_processing_restriction_create_error' => 'Fallimento creazione restrizione processing. Verificare ProcessingRestrictionService::createRestriction().',
+        'gdpr_processing_restriction_remove_error' => 'Errore rimozione restrizione processing. Controllare permissions e validation logic.',
+        'gdpr_processing_restriction_limit_reached' => 'Limite restrizioni processing raggiunto. Verificare business rules e rate limiting.',
+
+        // GDPR Deletion Errors - Developer Messages IT
+        'gdpr_deletion_request_error' => 'Errore richiesta cancellazione account GDPR. Controllare AccountDeletionService e validazione.',
+        'gdpr_deletion_cancellation_error' => 'Fallimento cancellazione richiesta deletion. Verificare status transitions e business logic.',
+        'gdpr_deletion_processing_error' => 'Errore elaborazione cancellazione account. Controllare background jobs e data cleanup.',
+
+        // GDPR Breach Report Errors - Developer Messages IT
+        'gdpr_breach_report_error' => 'Errore segnalazione violazione GDPR. Verificare BreachReportService e form validation.',
+        'gdpr_breach_evidence_upload_error' => 'Fallimento upload evidenze breach. Controllare file upload service e storage.',
+
+        // GDPR Activity Log Errors - Developer Messages IT
+        'gdpr_activity_log_error' => 'Errore registrazione attività GDPR. Verificare ActivityLogService e database logging.',
+
+        // GDPR Security Errors - Developer Messages IT
+        'gdpr_enhanced_security_required' => 'Autenticazione potenziata richiesta per operazione GDPR. Verificare security middleware.',
+        'gdpr_critical_security_required' => 'Conferma password richiesta per operazione critica GDPR. Controllare auth verification.',
+
+        // My Added Errors - Developer Messages IT
+        'gdpr_consent_page_failed' => 'Errore caricamento pagina consensi GDPR. Verificare ConsentService, DTO integration e view data structure.',
+        'gdpr_service_unavailable' => 'ConsentService GDPR o dipendenze non disponibili. Controllare database connection, DTO files e traduzioni.',
     ],
 
     'user' => [
@@ -357,7 +402,12 @@ return [
         'personal_data_deletion_failed' => 'Non è stato possibile elaborare la richiesta di cancellazione dei tuoi dati. Ti preghiamo di contattare il nostro supporto per ricevere assistenza immediata.',
         'gdpr_export_rate_limit' => 'Puoi richiedere un\'esportazione dei tuoi dati una volta ogni 30 giorni. La prossima esportazione sarà disponibile tra qualche giorno.',
         'gdpr_violation_attempt' => 'Non puoi aggiornare i tuoi dati personali senza aver fornito il consenso appropriato. Accetta i termini di elaborazione dei dati per continuare.',
+        'gdpr_notification_send_failed_user' => 'Spiacenti, si è verificato un problema tecnico e non è stato possibile inviare una notifica importante. Il nostro team è stato avvisato.',
+        'gdpr_notification_dispatch_failed' => 'Si è verificato un problema durante l\'elaborazione della tua richiesta relativa alla privacy. Il nostro team è stato informato e risolverà il problema al più presto.',
+        'gdpr_notification_persistence_failed' => 'Non è stato possibile completare l\'operazione richiesta per la gestione dei tuoi dati. Ti invitiamo a riprovare più tardi o contattare il supporto.',
+        'gdpr_service_unavailable' => 'Il servizio di gestione consensi non è al momento disponibile. Ti preghiamo di riprovare più tardi.',
 
+        
     ],
 
     // Generic message (used by UserInterfaceHandler if no specific message found)

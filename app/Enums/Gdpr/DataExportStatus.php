@@ -23,11 +23,11 @@ enum DataExportStatus: string
     public function label(): string
     {
         return match($this) {
-            self::PENDING => __('gdpr.export_status.pending'),
-            self::PROCESSING => __('gdpr.export_status.processing'),
-            self::COMPLETED => __('gdpr.export_status.completed'),
-            self::FAILED => __('gdpr.export_status.failed'),
-            self::EXPIRED => __('gdpr.export_status.expired'),
+            self::PENDING => __('gdpr.status.pending'),
+            self::PROCESSING => __('gdpr.status.processing'),
+            self::COMPLETED => __('gdpr.status.completed'),
+            self::FAILED => __('gdpr.status.failed'),
+            self::EXPIRED => __('gdpr.status.expired'),
         };
     }
 
