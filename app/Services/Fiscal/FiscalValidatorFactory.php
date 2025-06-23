@@ -36,7 +36,7 @@ class FiscalValidatorFactory
      * MVP Country code to validator class mapping - ONLY 6 NATIONS
      * @var array<string, class-string<FiscalValidatorInterface>>
      */
-    private static array $validatorMap = [
+    public static array $validatorMap = [
         'IT' => ItalyFiscalValidator::class,        // Italy - Primary market
         'PT' => PortugalFiscalValidator::class,     // Portugal
         'FR' => FranceFiscalValidator::class,       // France
@@ -44,6 +44,30 @@ class FiscalValidatorFactory
         'EN' => EnglandFiscalValidator::class,      // England
         'DE' => GermanyFiscalValidator::class,      // Germany
     ];
+
+    /**
+     * @Oracode Method: Get Supported Countries Translated
+     * 🎯 Purpose: Act as the Single Source of Truth for the list of supported countries,
+     * returning a localized, dropdown-ready associative array.
+     * 📤 Output: An associative array [country_code => translated_name].
+     * 🧱 Core Logic: Iterates over its own validator map and uses Laravel's
+     * localization system to retrieve the country names.
+     *
+     * @return array
+     */
+    public static function getSupportedCountriesTranslated(): array
+    {
+        $supportedCodes = array_keys(self::$validatorMap);
+        $translatedList = [];
+
+        foreach ($supportedCodes as $code) {
+            // Genera la chiave di traduzione in modo programmatico. Es: 'countries.it'
+            $translationKey = 'countries.' . strtolower($code);
+            $translatedList[$code] = __($translationKey);
+        }
+
+        return $translatedList;
+    }
 
     /**
      * @Oracode Method: Create Country-Specific Fiscal Validator

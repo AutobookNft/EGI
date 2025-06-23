@@ -7,7 +7,9 @@
 
 namespace Database\Seeders;
 
+use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\PermissionRegistrar;
@@ -71,7 +73,7 @@ class RolesAndPermissionsSeeder extends Seeder
         'edit_personal_data',
         'limit_data_processing',
         'like_EGI',
-        'reserve_EGI',                    // Permesso per weak di riservare EGI con priorità bassa
+        'reserve_EGI',
 
         // ═══ NUOVI PERMESSI (AGGIUNGERE) ═══
 
@@ -146,6 +148,40 @@ class RolesAndPermissionsSeeder extends Seeder
         'priority_reservations',          // Strong ha priorità su prenotazioni
         'full_auction_access',            // Strong ha accesso completo alle aste
         'manage_advanced_settings',       // Impostazioni avanzate solo strong
+
+        // ═══ NUOVI PERMESSI LEGAL SYSTEM (AGGIUNGERE) ═══
+
+        // Legal Dashboard Access
+        'legal.dashboard.access',
+
+        // Legal Terms Management
+        'legal.terms.view',
+        'legal.terms.edit',
+        'legal.terms.create_version',
+        'legal.terms.approve_version',
+        'legal.terms.publish_version',
+
+        // Legal Content Management
+        'legal.content.validate',
+        'legal.content.backup',
+        'legal.content.restore',
+
+        // Legal Audit & History
+        'legal.history.view',
+        'legal.history.export',
+        'legal.audit.access',
+
+        // Legal Translations (future)
+        'legal.translations.view',
+        'legal.translations.manage',
+
+        // Legal Jurisdiction Management
+        'legal.jurisdiction.manage',
+        'legal.jurisdiction.review',
+
+        // Legal Compliance Monitoring
+        'legal.compliance.monitor',
+        'legal.compliance.report',
     ];
 
     private $roles = [
@@ -413,34 +449,81 @@ class RolesAndPermissionsSeeder extends Seeder
         ],
 
         'weak_connect' => [
-                // Accesso base
-                'view_own_profile',
-                'view_own_wallet_address',
-                'access_weak_dashboard',
+            // Accesso base
+            'view_own_profile',
+            'view_own_wallet_address',
+            'access_weak_dashboard',
 
-                // Interazioni limitate
-                'view_EGI',
-                'like_EGI',
-                'reserve_EGI',                    // Con priorità bassa
+            // Interazioni limitate
+            'view_EGI',
+            'like_EGI',
+            'reserve_EGI',                    // Con priorità bassa
 
-                // Collection di default (solo 1)
-                'view_collection',
-                'edit_own_collection',           // Solo la sua collection default
-                'create_EGI',                     // Solo nella sua collection
-                'edit_own_EGI',
-                'delete_own_EGI',
+            // Collection di default (solo 1)
+            'view_collection',
+            'edit_own_collection',           // Solo la sua collection default
+            'create_EGI',                     // Solo nella sua collection
+            'edit_own_EGI',
+            'delete_own_EGI',
 
-                // Processo di upgrade
-                'upgrade_account_to_strong',
+            // Processo di upgrade
+            'upgrade_account_to_strong',
 
-                // Base profile management
-                'edit_own_profile_data',
+            // Base profile management
+            'edit_own_profile_data',
 
-                // NO: create_multiple_collections
-                // NO: priority_reservations
-                // NO: full_auction_access
-                // NO: organization_data, documents, invoice_preferences
-            ],
+            // NO: create_multiple_collections
+            // NO: priority_reservations
+            // NO: full_auction_access
+            // NO: organization_data, documents, invoice_preferences
+        ],
+
+        // ═══ NUOVO RUOLO LEGAL (AGGIUNGERE) ═══
+        'legal' => [
+            // Dashboard access
+            'access_dashboard',
+            'legal.dashboard.access',
+
+            // Legal terms management (core functionality)
+            'legal.terms.view',
+            'legal.terms.edit',
+            'legal.terms.create_version',
+            'legal.terms.approve_version',
+            'legal.terms.publish_version',
+
+            // Content management
+            'legal.content.validate',
+            'legal.content.backup',
+            'legal.content.restore',
+
+            // History and audit access
+            'legal.history.view',
+            'legal.history.export',
+            'legal.audit.access',
+
+            // Jurisdiction management
+            'legal.jurisdiction.manage',
+            'legal.jurisdiction.review',
+
+            // Compliance monitoring
+            'legal.compliance.monitor',
+            'legal.compliance.report',
+
+            // Basic platform access
+            'view_dashboard',
+            'view_documentation',
+            'view_profile',
+            'manage_profile',
+
+            // GDPR rights (for legal team members)
+            'manage_consents',
+            'view_privacy_policy',
+            'view_activity_log',
+
+            // Translation management (future feature)
+            'legal.translations.view',
+            'legal.translations.manage',
+        ],
     ];
 
     public function run(): void
@@ -464,9 +547,27 @@ class RolesAndPermissionsSeeder extends Seeder
                 $role->syncPermissions($rolePermissions);
             }
         }
+        $this->createLegalUser();
 
         $this->command->info('Ruoli e permessi creati/aggiornati con successo.');
         $this->command->info('Nuovi ruoli aggiunti: patron, collector, enterprise, trader_pro, epp_entity');
         $this->command->info('create_collection permission assegnato a: creator, patron, enterprise');
+    }
+
+    private function createLegalUser(): void
+    {
+        $legalUser = User::firstOrCreate(
+            ['email' => 'legal@florenceegi.com'],
+            [
+                'name' => 'Legal Editor',
+                'email' => 'legal@florenceegi.com',
+                'password' => Hash::make('legal2025!FEG'),
+                'email_verified_at' => now(),
+                'created_via' => 'seeder'
+            ]
+        );
+
+        $legalUser->assignRole('legal');
+        $this->command->info("Legal user created: legal@florenceegi.com");
     }
 }

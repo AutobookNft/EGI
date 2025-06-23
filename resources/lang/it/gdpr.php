@@ -40,6 +40,40 @@ return [
     'no_categories_selected' => 'Nessuna categoria selezionata',
     'compliance_badge' => 'Distintivo di conformità',
 
+    'consent_types' => [
+        'terms-of-service' => [
+            'name' => 'Termini di Servizio',
+            'description' => 'Accettazione delle condizioni per l\'utilizzo della piattaforma.',
+        ],
+        'privacy-policy' => [
+            'name' => 'Informativa sulla Privacy',
+            'description' => 'Presa visione di come vengono trattati i dati personali.',
+        ],
+        'age-confirmation' => [
+            'name' => 'Conferma Età',
+            'description' => 'Conferma di avere almeno 18 anni.',
+        ],
+        'analytics' => [
+            'name' => 'Analisi e miglioramento piattaforma',
+            'description' => 'Aiutaci a migliorare FlorenceEGI condividendo dati anonimi di utilizzo.',
+        ],
+        'marketing' => [
+            'name' => 'Comunicazioni promozionali',
+            'description' => 'Ricevi aggiornamenti su nuove funzionalità, eventi e opportunità.',
+        ],
+        'personalization' => [
+            'name' => 'Personalizzazione contenuti',
+            'description' => 'Consenti la personalizzazione di contenuti e raccomandazioni.',
+        ],
+        'purposes' => [
+            'account_management' => 'Gestione dell\'Account Utente',
+            'service_delivery'   => 'Erogazione dei Servizi Richiesti',
+            'legal_compliance'   => 'Conformità Legale e Normativa',
+            'customer_support'   => 'Supporto Clienti e Assistenza',
+        ],
+
+    ],
+
     // Breadcrumb
     'breadcrumb' => [
         'dashboard' => 'Bacheca',
@@ -64,22 +98,6 @@ return [
         'breach_report' => 'Segnala una Violazione dei Dati',
         'activity_log' => 'Registro delle Mie Attività GDPR',
         'privacy_policy' => 'Informativa sulla Privacy',
-    ],
-
-    // Stato del Consenso
-    'status' => [
-        'granted' => 'Concesso',
-        'denied' => 'Negato',
-        'active' => 'Attivo',
-        'withdrawn' => 'Revocato',
-        'expired' => 'Scaduto',
-        'pending' => 'In attesa',
-        'in_progress' => 'In corso',
-        'completed' => 'Completato',
-        'failed' => 'Fallito',
-        'rejected' => 'Respinto',
-        'verification_required' => 'Verifica richiesta',
-        'cancelled' => 'Annullato',
     ],
 
     // Gestione dei Consensi
@@ -137,6 +155,22 @@ return [
         'manage_preferences' => 'Gestisci le Tue Preferenze',
         'update_preferences' => 'Aggiorna le Preferenze sulla Privacy',
 
+        // Stato del Consenso
+        'status' => [
+            'granted' => 'Concesso',
+            'denied' => 'Negato',
+            'active' => 'Attivo',
+            'withdrawn' => 'Revocato',
+            'expired' => 'Scaduto',
+            'pending' => 'In attesa',
+            'in_progress' => 'In corso',
+            'completed' => 'Completato',
+            'failed' => 'Fallito',
+            'rejected' => 'Respinto',
+            'verification_required' => 'Verifica richiesta',
+            'cancelled' => 'Annullato',
+        ],
+
         // Dashboard di Riepilogo
         'summary' => [
             'active' => 'Consensi Attivi',
@@ -158,6 +192,12 @@ return [
             'analytics' => 'Consensi Analitici',
             'marketing' => 'Consensi di Marketing',
             'profiling' => 'Consensi di Profilazione',
+            'platform-services' => 'Servizi della Piattaforma',
+            'terms-of-service' => 'Termini di Servizio',
+            'privacy-policy' => 'Informativa sulla Privacy',
+            'age-confirmation' => 'Conferma Età',
+            'personalization' => 'Personalizzazione dei Contenuti',
+            'allow-personal-data-processing' => 'Consenti Trattamento Dati Personali',
         ],
 
         // Descrizioni dei Consensi
@@ -166,6 +206,13 @@ return [
             'analytics' => 'Utilizzati per analizzare l\'uso del sito e migliorare l\'esperienza utente.',
             'marketing' => 'Utilizzati per inviarti comunicazioni promozionali e offerte personalizzate.',
             'profiling' => 'Utilizzati per creare profili personalizzati e suggerire contenuti pertinenti.',
+            'platform-services' => 'Consensi necessari per la gestione dell\'account, la sicurezza e il supporto clienti.',
+            'terms-of-service' => 'Accettazione dei Termini di Servizio per l\'utilizzo della piattaforma.',
+            'privacy-policy' => 'Accettazione della nostra Informativa sulla Privacy e del trattamento dei dati personali.',
+            'age-confirmation' => 'Conferma di avere la maggiore età per l\'utilizzo della piattaforma.',
+            'personalization' => 'Consenti la personalizzazione dei contenuti e delle raccomandazioni in base alle tue preferenze.',
+            'allow-personal-data-processing' => 'Consenti l\'elaborazione dei tuoi dati personali per migliorare i nostri servizi e fornirti un\'esperienza personalizzata.',
+
         ],
 
         'essential' => [
@@ -193,7 +240,7 @@ return [
             'label' => 'Consenso Trattamento Dati Personali',
             'description' => 'Consenti l\'elaborazione dei tuoi dati personali per migliorare i nostri servizi e fornirti un\'esperienza personalizzata.',
         ],
-        
+
         'saving_consent' => 'Salvataggio...',
         'consent_saved' => 'Salvato',
         'saving_all_consents' => 'Salvataggio di tutte le preferenze...',

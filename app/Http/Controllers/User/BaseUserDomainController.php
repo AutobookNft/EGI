@@ -345,16 +345,22 @@ abstract class BaseUserDomainController extends Controller
     }
 
     /**
-     * @Oracode Method: Handle Error Response with UEM Integration
-     * 🎯 Purpose: Process errors through UEM and provide user-friendly responses
-     * 📥 Input: Error code, exception, and optional context
-     * 📤 Output: JsonResponse for API | RedirectResponse for web
-     * 🧱 Core Logic: UEM integration with automatic error handling and logging
+     * @Oracode Method: Robust Domain-Specific Error Responder
+     * 🎯 Purpose: To provide a consistent, centralized way of handling exceptions
+     * within a domain controller, ensuring a valid HTTP response is always returned.
+     * 📥 Input: A UEM error code, the original Throwable exception, and optional context.
+     * 📤 Output: A guaranteed JsonResponse or RedirectResponse, never null.
+     * 🛡️ Privacy: Enriches context with safe, domain-specific data before passing
+     * it to the central error manager.
+     * 🧱 Core Logic: Delegates handling to the UltraErrorManager (UEM). If the UEM
+     * returns a valid response, it is returned directly. If the UEM returns `null`,
+     * this method generates a standard fallback `JsonResponse` to prevent fatal
+     * TypeErrors and ensure a graceful failure.
      *
-     * @param string $errorCode UEM error code for consistent error handling
-     * @param \Throwable $exception Original exception for debugging context
-     * @param array<string, mixed> $context Additional context for error analysis
-     * @return JsonResponse|RedirectResponse Error response in appropriate format
+     * @param string $errorCode The unique code for this error type.
+     * @param \Throwable $exception The original exception that was caught.
+     * @param array $context Additional context for logging.
+     * @return JsonResponse|RedirectResponse
      */
     protected function respondError(
         string $errorCode,
@@ -366,8 +372,26 @@ abstract class BaseUserDomainController extends Controller
         $context['user_id'] = FegiAuth::id();
         $context['auth_type'] = $this->authType;
 
-        // Use UEM for consistent error handling
-        return $this->errorManager->handle($errorCode, $context, $exception);
+        // 1. Eseguiamo l'handler ma non facciamo subito il return, salviamo la risposta.
+        $response = $this->errorManager->handle($errorCode, $context, $exception);
+
+        // 2. Controlliamo se la risposta è nulla.
+        if (!$response) {
+            // 3. Se è nulla, creiamo noi una risposta JSON di emergenza.
+            $this->logger->warning('Error manager returned null. Creating fallback response.', [
+                'uem_error_code' => $errorCode
+            ]);
+
+            return response()->json([
+                'error' => true,
+                'error_code' => $errorCode,
+                'message' => 'An unexpected error occurred while handling another error.',
+                'details' => $exception->getMessage(),
+            ], 500);
+        }
+
+        // 4. Se la risposta non è nulla, la restituiamo come previsto.
+        return $response;
     }
 
     /**

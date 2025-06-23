@@ -35,6 +35,8 @@ class PersonalDataController extends BaseUserDomainController
 
     protected GdprNotificationService $gdprNotificationService;
 
+    protected UltraLogManager $logger;
+
     /**
     * @Oracode Constructor: Initialize Personal Data Controller with GDPR Notification Integration
     * 🎯 Purpose: Add GDPR notification triggering capability to personal data management
@@ -55,17 +57,15 @@ class PersonalDataController extends BaseUserDomainController
         $this->gdprNotificationService = $gdprNotificationService;
     }
 
+    // In app/Http/Controllers/User/PersonalDataController.php
+
+    // In app/Http/Controllers/User/PersonalDataController.php
+
     /**
-     * @Oracode Method: Display Personal Data Management Page
-     * 🎯 Purpose: Show user's personal data with edit capabilities and GDPR consent integration
-     * 📥 Input: HTTP request
-     * 📤 Output: View with personal data and GDPR consent status or redirect if access denied
-     * 🛡️ Privacy: Access control, audit logging, and ConsentService integration
-     * 🧱 Core Logic: Load personal data from UserPersonalData + consent status from GDPR ConsentService
-     * 🔗 Integration: Bridges User Domains with existing GDPR system for unified consent management
-     *
-     * @param Request $request HTTP request instance
-     * @return View|RedirectResponse Personal data view with GDPR consent integration or redirect
+     * @Oracode Method: Display Personal Data Management Page (Refactored)
+     * 🎯 Purpose: Show user's personal data, dynamically loading all consent definitions
+     * and their current status from a central, database-driven source.
+     * ... (il resto della documentazione rimane valido) ...
      */
     public function index(Request $request): View|RedirectResponse
     {
@@ -76,7 +76,7 @@ class PersonalDataController extends BaseUserDomainController
         }
 
         try {
-            $user = FegiAuth::user();
+            $user = \App\Helpers\FegiAuth::user();
 
             // Audit access attempt
             $this->auditDataAccess('personal_data_view_requested', [
@@ -89,16 +89,38 @@ class PersonalDataController extends BaseUserDomainController
             // Load or create personal data record (non-consent data)
             $personalData = $this->getOrCreatePersonalData($user);
 
-            // Get GDPR consent status from ConsentService (integrated with existing GDPR system)
+            // ===================================================================
+            // === INIZIO BLOCCO MODIFICATO ===
+            // ===================================================================
             $consentService = app(\App\Services\Gdpr\ConsentService::class);
-            $gdprConsents = [
-                'allow_personal_data_processing' => $consentService->hasConsent($user, 'allow_personal_data_processing'),
-                'marketing' => $consentService->hasConsent($user, 'marketing'),
-                'analytics' => $consentService->hasConsent($user, 'analytics'),
-                'cookies' => $consentService->hasConsent($user, 'cookies'),
-            ];
 
-            // Get user's country for form configuration
+            // 1. Recupera la DEFINIZIONE di tutti i tipi di consenso/accettazione
+            //    dal nostro metodo refattorizzato che legge dal DB e usa la cache.
+            //    Questo ci dà una collezione di DTO intelligenti.
+            $allConsentDtos = $consentService->getConsentTypes();
+
+            // 2. Costruiamo l'array con lo STATO (true/false) per l'utente corrente,
+            //    mantenendo la struttura `$gdprConsents` che la vista si aspetta.
+            $gdprConsents = [];
+            foreach ($allConsentDtos as $consentDto) {
+                $gdprConsents[$consentDto->key] = $consentService->hasConsent($user, $consentDto->key);
+            }
+
+            $this->logger->info('Loaded all consent definitions and user consent states', [
+                'user_id' => $user->id,
+                'consent_count' => count($allConsentDtos),
+                'gdpr_consents' => $gdprConsents
+            ]);
+
+            // 3. Dalla collezione di DTO che abbiamo già, troviamo quello
+            //    "contenitore" per i "processing purposes" da passare alla vista.
+            $platformServicesDto = $allConsentDtos->firstWhere('key', 'platform-services');
+            // ===================================================================
+            // === FINE BLOCCO MODIFICATO ===
+            // ===================================================================
+
+
+            // Get user's country for form configuration (TUTTO IL RESTO È IDENTICO AL TUO CODICE)
             $userCountry = $this->getUserCountry();
 
             // Get available countries (MVP only)
@@ -108,7 +130,11 @@ class PersonalDataController extends BaseUserDomainController
             $viewData = [
                 'user' => $user,
                 'personalData' => $personalData,
-                'gdprConsents' => $gdprConsents, // ✅ GDPR consent status from ConsentService
+                'gdprConsents' => $gdprConsents, // ✅ Ora è dinamico ma ha la stessa struttura di prima
+
+                // ✅ Passiamo il DTO corretto alla vista
+                'platformServicesConsent' => $platformServicesDto,
+
                 'userCountry' => $userCountry,
                 'availableCountries' => $availableCountries,
                 'authType' => $this->authType,
@@ -120,19 +146,21 @@ class PersonalDataController extends BaseUserDomainController
             ];
 
             // Log successful page load with consent integration info
-            $this->logger->info('Personal data page displayed successfully with GDPR integration', [
+            $this->logger->info('Personal data page displayed successfully with DYNAMIC GDPR integration', [
                 'user_id' => $user->id,
                 'auth_type' => $this->authType,
                 'country' => $userCountry,
-                'has_data_processing_consent' => $gdprConsents['allow_personal_data_processing'],
-                'gdpr_consents_loaded' => count($gdprConsents)
+                // Aggiorniamo il log per usare la chiave corretta
+                'has_data_processing_consent' => $gdprConsents['allow_personal_data_processing'] ?? false,
+                'gdpr_consents_loaded' => count($gdprConsents),
+                'platformServicesConsent' => $platformServicesDto
             ]);
 
             return view('users.domains.personal-data.index', $viewData);
 
         } catch (\Exception $e) {
             return $this->respondError('PERSONAL_DATA_VIEW_ERROR', $e, [
-                'user_id' => FegiAuth::id(),
+                'user_id' => \App\Helpers\FegiAuth::id(),
                 'requested_page' => 'personal_data_index',
                 'integration_point' => 'gdpr_consent_service'
             ]);
@@ -187,10 +215,12 @@ class PersonalDataController extends BaseUserDomainController
 
             // Process update in transaction
             $this->logger->critical('🔍 DETECTIVE: About to start DB::transaction');
+
             $result = DB::transaction(function () use ($user, $validatedData, $request) {
                 $this->logger->critical('🔍 DETECTIVE: Inside transaction - about to call processPersonalDataUpdate()');
                 return $this->processPersonalDataUpdate($user, $validatedData, $request);
             });
+
             $this->logger->critical('🔍 DETECTIVE: Transaction completed successfully');
 
             if ($result['success']) {
@@ -486,37 +516,29 @@ class PersonalDataController extends BaseUserDomainController
         }
     }
 
+    // In app/Http/Controllers/User/PersonalDataController.php
+// SOSTITUISCI L'INTERO METODO con questa versione finale.
+
     /**
-     * @Oracode Method: Process Personal Data Update (Consent Array Processing)
-     * 🎯 Purpose: Update personal data and process consents array via ConsentService
-     * 📥 Input: User, validated data with consents array, and request
-     * 📤 Output: Array with update results
-     * 🛡️ Privacy: GDPR consent updates via ConsentService array processing
-     * 🧱 Core Logic: Correct consent type processing, not field processing
+     * @Oracode Method: Process Personal Data Update with Guarded Consent Logic
+     * 🎯 Purpose: Atomically update personal data and related consents, but only
+     * process consent changes if a user's choice has actually been modified.
+     * 📥 Input: User, validated data with consents array, and request.
+     * 📤 Output: Array with update results, including only actual changes.
+     * 🛡️ Privacy: Prevents redundant GDPR consent records by comparing new and
+     * old states before invoking the ConsentService.
+     * 🧱 Core Logic: Implements an in-loop "Guard Clause" to ensure consent
+     * processing is intentional and not a side-effect of other data updates.
      */
     private function processPersonalDataUpdate(User $user, array $validatedData, UpdatePersonalDataRequest $request): array
     {
         $personalData = $this->getOrCreatePersonalData($user);
-        $originalData = $personalData->toArray();
-
-        // Track changes - ONLY for personal data fields
         $changes = [];
         $consentUpdated = false;
 
-        // ✅ OS1.5 EXPLICITLY INTENTIONAL: Capture consent state BEFORE modifications
-        // This enables change detection for GDPR notification requirements
-        $oldConsentState = null;
-        if (isset($validatedData['consents']) && is_array($validatedData['consents'])) {
-            $oldConsentState = $this->captureCurrentConsentState($user);
-
-            $this->logger->info('Captured consent state before modifications', [
-                'user_id' => $user->id,
-                'consent_types_captured' => array_keys($oldConsentState),
-                'operation' => 'consent_change_detection'
-            ]);
-        }
-
-        // Update personal data fields (NO consent fields)
+        // ===================================================================
+        // 1. GESTIONE DEI DATI PERSONALI
+        // ===================================================================
         $personalDataFields = [
             'first_name', 'last_name', 'birth_date', 'birth_place', 'gender',
             'street', 'city', 'zip', 'province', 'country', 'region',
@@ -526,101 +548,98 @@ class PersonalDataController extends BaseUserDomainController
 
         foreach ($personalDataFields as $field) {
             if (isset($validatedData[$field]) && $personalData->$field !== $validatedData[$field]) {
-                $changes[$field] = [
-                    'old' => $personalData->$field,
-                    'new' => $validatedData[$field]
-                ];
+                $changes[$field] = ['old' => $personalData->$field, 'new' => $validatedData[$field]];
                 $personalData->$field = $validatedData[$field];
             }
         }
-
-        // Save personal data changes
-        $personalData->save();
-
-        // ✅ PROCESS CONSENTS ARRAY via ConsentService
-        if (isset($validatedData['consents']) && is_array($validatedData['consents'])) {
-            $consentService = app(\App\Services\Gdpr\ConsentService::class);
-            $consentsToProcess = $validatedData['consents'];
-            $consentMetadata = $validatedData['consent_metadata'] ?? [];
-
-            // Process each consent type
-            foreach ($consentsToProcess as $consentType => $consentValue) {
-                $consentGranted = (bool) $consentValue;
-
-                // Prepare metadata for this consent type
-                $metadata = [
-                    'updated_via' => 'personal_data_form',
-                    'ip_address' => $request->ip(),
-                    'user_agent' => $request->userAgent(),
-                    'timestamp' => now()->toISOString()
-                ];
-
-                // Add specific metadata for allow_personal_data_processing
-                if ($consentType === 'allow_personal_data_processing' && isset($consentMetadata['processing_purposes'])) {
-                    $metadata['processing_purposes'] = $consentMetadata['processing_purposes'];
-                }
-
-                // Update consent via ConsentService
-                if ($consentGranted) {
-                    $result = $consentService->grantConsent($user, $consentType, $metadata);
-                } else {
-                    $result = $consentService->withdrawConsent($user, $consentType, $metadata);
-                }
-
-                if ($result) {
-                    $consentUpdated = true;
-                    $changes["consent_{$consentType}"] = [
-                        'old' => !$consentGranted,
-                        'new' => $consentGranted
-                    ];
-                }
-
-                $this->logger->info('Consent processed via ConsentService', [
-                    'user_id' => $user->id,
-                    'consent_type' => $consentType,
-                    'granted' => $consentGranted,
-                    'metadata' => $metadata
-                ]);
-            }
-
-            // ✅ OS1.5 EXPLICITLY INTENTIONAL: Capture consent state AFTER modifications
-            // Compare with old state to detect changes requiring GDPR notifications
-            $newConsentState = $this->captureCurrentConsentState($user);
-
-            $this->logger->info('Captured consent state after modifications', [
-                'user_id' => $user->id,
-                'consent_types_captured' => array_keys($newConsentState),
-                'operation' => 'consent_change_detection'
-            ]);
-
-            // ✅ TRIGGER CONSENT CHANGE NOTIFICATIONS
-            $this->handleConsentChangeNotifications(
-                $user,
-                $oldConsentState,
-                $newConsentState,
-                $request
-            );
-
+        if ($personalData->isDirty()) {
+            $personalData->save();
         }
 
-        // Update user basic info if provided
-        $userChanges = [];
+        // ===================================================================
+        // 2. GESTIONE DEI CONSENSI (con Guardia Logica)
+        // ===================================================================
+        if (isset($validatedData['consents']) && is_array($validatedData['consents'])) {
+
+            $consentService = app(\App\Services\Gdpr\ConsentService::class);
+            $consentsToProcess = $validatedData['consents'];
+
+            // ✅ OTTIMIZZAZIONE: Catturiamo lo stato dei consensi UNA SOLA VOLTA.
+            $oldConsentState = $this->captureCurrentConsentState($user);
+            $this->logger->info('Captured consent state before modifications.', [
+                'user_id' => $user->id, 'consent_state' => $oldConsentState
+            ]);
+
+            foreach ($consentsToProcess as $consentType => $consentValue) {
+                $consentGranted = (bool) $consentValue;
+                $currentValue = $oldConsentState[$consentType] ?? null;
+
+                // --- GUARDIA LOGICA ---
+                // Eseguiamo la logica solo se lo stato è effettivamente cambiato.
+                if ($currentValue === null || $currentValue !== $consentGranted) {
+
+                    $this->logger->info('Consent change detected. Processing update.', [
+                        'user_id' => $user->id, 'consent_type' => $consentType,
+                        'from' => $currentValue, 'to' => $consentGranted
+                    ]);
+
+                    $metadata = [
+                        'updated_via' => 'personal_data_form',
+                        'ip_address' => $request->ip(),
+                        'user_agent' => $request->userAgent(),
+                        'timestamp' => now()->toISOString()
+                    ];
+
+                    // ✅ CORREZIONE: Gestione corretta dei metadati specifici
+                    $consentMetadata = $validatedData['consent_metadata'] ?? [];
+                    if ($consentType === 'allow_personal_data_processing' && isset($consentMetadata['processing_purposes'])) {
+                        $metadata['processing_purposes'] = $consentMetadata['processing_purposes'];
+                    }
+
+                    if ($consentGranted) {
+                        $result = $consentService->grantConsent($user, $consentType, $metadata);
+                    } else {
+                        $result = $consentService->withdrawConsent($user, $consentType, $metadata);
+                    }
+
+                    if ($result) {
+                        $consentUpdated = true;
+                        $changes["consent_{$consentType}"] = ['old' => !$consentGranted, 'new' => $consentGranted];
+
+                        // ✅ OTTIMIZZAZIONE: Logghiamo il successo solo quando l'azione è avvenuta.
+                        $this->logger->info('Consent processed successfully via ConsentService.', [
+                            'user_id' => $user->id, 'consent_type' => $consentType, 'granted' => $consentGranted
+                        ]);
+                    }
+                } else {
+                    $this->logger->info('No change for consent type, skipping update.', [
+                        'user_id' => $user->id, 'consent_type' => $consentType
+                    ]);
+                }
+            }
+
+            // La logica di notifica può rimanere, userà lo stato aggiornato
+            $newConsentState = $this->captureCurrentConsentState($user);
+            $this->handleConsentChangeNotifications($user, $oldConsentState, $newConsentState, $request);
+        }
+
+        // ===================================================================
+        // 3. GESTIONE DEI DATI UTENTE (es. lingua)
+        // ===================================================================
         $userFields = ['name', 'last_name', 'language'];
         foreach ($userFields as $field) {
             if (isset($validatedData[$field]) && $user->$field !== $validatedData[$field]) {
-                $userChanges[$field] = [
-                    'old' => $user->$field,
-                    'new' => $validatedData[$field]
-                ];
+                $changes[$field] = ['old' => $user->$field, 'new' => $validatedData[$field]];
                 $user->$field = $validatedData[$field];
             }
         }
-
-        if (!empty($userChanges)) {
+        if ($user->isDirty()) {
             $user->save();
-            $changes = array_merge($changes, $userChanges);
         }
 
+        // ===================================================================
+        // 4. RISULTATO FINALE
+        // ===================================================================
         return [
             'success' => true,
             'changes' => $changes,
@@ -631,44 +650,45 @@ class PersonalDataController extends BaseUserDomainController
     }
 
     /**
-     * @Oracode Method: Capture Current Consent State
-     * 🎯 Purpose: Snapshot complete consent state for change detection
-     * 📥 Input: User instance
-     * 📤 Output: Array with current consent status for all types
-     * 🛡️ Privacy: Read-only operation, no sensitive data exposure
-     * 🧱 Core Logic: Query ConsentService for current user consent status
+     * @Oracode Method: Capture Current Consent State (Robust & Efficient)
+     * 🎯 Purpose: Snapshot complete consent state for all relevant types using
+     * a single, efficient service call.
+     * 📥 Input: User instance.
+     * 📤 Output: A key-value array of all user consents, e.g., ['marketing' => true, 'analytics' => false].
+     * 🛡️ Privacy: Read-only operation, leverages ConsentService for data access.
+     * 🧱 Core Logic: Calls `ConsentService::getUserConsentStatus()` once and transforms
+     * the result into a simple key-value array for easy comparison.
      */
     private function captureCurrentConsentState(User $user): array
     {
         try {
             $consentService = app(\App\Services\Gdpr\ConsentService::class);
 
-            // ✅ OS1.5 SIMPLICITY EMPOWERMENT: Single call captures all relevant consents
-            $consentState = [
-                'allow_personal_data_processing' => $consentService->hasConsent($user, 'allow_personal_data_processing'),
-                'marketing' => $consentService->hasConsent($user, 'marketing'),
-                'analytics' => $consentService->hasConsent($user, 'analytics'),
-            ];
+            // ✅ SOLUZIONE: Chiamiamo il metodo più completo che recupera tutto in una volta.
+            $fullConsentStatus = $consentService->getUserConsentStatus($user);
 
-            // ✅ OS1.5 INTERROGABILITY: Complete audit trail for state capture
-            $this->logger->debug('Consent state captured successfully', [
+            $consentState = [];
+
+            // Trasformiamo la collezione di oggetti in un semplice array [key => boolean]
+            foreach ($fullConsentStatus['userConsents'] as $consentObject) {
+                $consentState[$consentObject->purpose] = (bool)$consentObject->granted;
+            }
+
+            $this->logger->debug('Consent state captured successfully using getUserConsentStatus.', [
                 'user_id' => $user->id,
-                'consent_state' => $consentState,
-                'timestamp' => now()->toISOString()
+                'captured_state' => $consentState,
             ]);
 
             return $consentState;
 
         } catch (\Throwable $e) {
-            // ✅ OS1.5 PROACTIVE SECURITY: Graceful failure with logging
             $this->logger->warning('Failed to capture consent state', [
                 'user_id' => $user->id,
                 'error' => $e->getMessage(),
                 'operation' => 'consent_state_capture'
             ]);
 
-            // Return empty state to prevent notification errors
-            return [];
+            return []; // Ritorna uno stato vuoto in caso di errore
         }
     }
 
@@ -836,313 +856,312 @@ class PersonalDataController extends BaseUserDomainController
     {
         $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n<personal_data_export>\n";
 
-        foreach ($data as $category => $fields) {
-            $xml .= "  <{$category}>\n";
-            if (is_array($fields)) {
-                foreach ($fields as $field => $value) {
-                    $xml .= "    <{$field}>" . htmlspecialchars((string)$value) . "</{$field}>\n";
-                }
-            }
-            $xml .= "  </{$category}>\n";
+    foreach ($data as $category => $fields) {
+    $xml .= " <{$category}>\n";
+        if (is_array($fields)) {
+        foreach ($fields as $field => $value) {
+        $xml .= " <{$field}>" . htmlspecialchars((string)$value) . "</{$field}>\n";
         }
-
-        $xml .= "</personal_data_export>\n";
-
-        return $xml;
+        }
+        $xml .= " </{$category}>\n";
     }
 
-    /**
-     * @Oracode Method: Get Export Headers
-     * 🎯 Purpose: Return appropriate HTTP headers for export download
-     * 📥 Input: Export format
-     * 📤 Output: Array of HTTP headers
-     * 🧱 Core Logic: Format-specific headers
-     *
-     * @param string $format Export format
-     * @return array<string, string> HTTP headers
-     */
-    private function getExportHeaders(string $format): array
-    {
-        $headers = [
-            'Cache-Control' => 'no-cache, no-store, must-revalidate',
-            'Pragma' => 'no-cache',
-            'Expires' => '0'
-        ];
+    $xml .= "</personal_data_export>\n";
 
-        switch ($format) {
-            case 'csv':
-                $headers['Content-Type'] = 'text/csv';
-                break;
-            case 'xml':
-                $headers['Content-Type'] = 'application/xml';
-                break;
-            case 'json':
-            default:
-                $headers['Content-Type'] = 'application/json';
-                break;
-        }
-
-        return $headers;
-    }
-
-    /**
-     * @Oracode Method: Process Personal Data Deletion
-     * 🎯 Purpose: Execute GDPR-compliant data deletion
-     * 📥 Input: User and deletion reason
-     * 📤 Output: Void (processes deletion)
-     * 🛡️ Privacy: Secure deletion with audit trail
-     *
-     * @param User $user User instance
-     * @param string|null $reason Deletion reason
-     * @return void
-     */
-    private function processPersonalDataDeletion(User $user, ?string $reason): void
-    {
-        $personalData = UserPersonalData::where('user_id', $user->id)->first();
-
-        if ($personalData) {
-            // Create deletion audit record before deletion
-            $this->auditDataAccess('personal_data_deletion_executed', [
-                'user_id' => $user->id,
-                'data_fields_deleted' => array_keys($personalData->toArray()),
-                'reason' => $reason,
-                'deletion_method' => 'user_requested'
-            ]);
-
-            // Perform deletion
-            $personalData->delete();
-        }
-
-        // Clear related data processing consents
-        $user->update([
-            'consent' => false,
-            'consent_summary' => null,
-            'consents_updated_at' => now()
-        ]);
-    }
-
-    /**
-     * @Oracode Method: Handle Consent Change Notifications
-     * 🎯 Purpose: Detect consent changes and trigger GDPR notifications for user awareness
-     * 📥 Input: User, old consent state, new consent state, HTTP request context
-     * 📤 Output: Void (side effect: notifications created)
-     * 🛡️ Privacy: Only processes user's own consent changes with complete audit trail
-     * 🧱 Core Logic: Compare states, detect significant changes, trigger notifications gracefully
-     */
-    private function handleConsentChangeNotifications(
-        User $user,
-        ?array $oldConsentState,
-        array $newConsentState,
-        UpdatePersonalDataRequest $request
-    ): void {
-        // ✅ OS1.5 PROACTIVE SECURITY: Guard against missing old state
-        if (empty($oldConsentState) || empty($newConsentState)) {
-            $this->logger->info('Skipping consent change notifications - insufficient state data', [
-                'user_id' => $user->id,
-                'old_state_available' => !empty($oldConsentState),
-                'new_state_available' => !empty($newConsentState),
-                'operation' => 'consent_change_detection'
-            ]);
-            return;
-        }
-
-        try {
-            // ✅ OS1.5 EXPLICITLY INTENTIONAL: Detect all significant consent changes
-            $detectedChanges = $this->detectSignificantConsentChanges($oldConsentState, $newConsentState);
-
-            if (empty($detectedChanges)) {
-                $this->logger->info('No significant consent changes detected - no notifications triggered', [
-                    'user_id' => $user->id,
-                    'old_state' => $oldConsentState,
-                    'new_state' => $newConsentState
-                ]);
-                return;
-            }
-
-            // ✅ OS1.5 SIMPLICITY EMPOWERMENT: Build notification context once, reuse for all
-            $notificationContext = $this->buildNotificationContext($request, $detectedChanges);
-
-            $this->logger->info('Consent changes detected - triggering GDPR notifications', [
-                'user_id' => $user->id,
-                'changes_count' => count($detectedChanges),
-                'change_types' => array_keys($detectedChanges),
-                'operation' => 'gdpr_notification_trigger'
-            ]);
-
-            // ✅ OS1.5 CIRCOLARITÀ VIRTUOSA: Each notification improves user trust
-            $notificationResults = [];
-            foreach ($detectedChanges as $consentType => $change) {
-                $notificationResults[$consentType] = $this->triggerSingleConsentNotification(
-                    $user,
-                    $consentType,
-                    $change,
-                    $notificationContext
-                );
-            }
-
-            // ✅ OS1.5 INTERROGABILITÀ TOTALE: Complete audit trail of notification results
-            $this->logger->info('GDPR notifications triggered successfully', [
-                'user_id' => $user->id,
-                'notifications_triggered' => count(array_filter($notificationResults)),
-                'notifications_failed' => count(array_filter($notificationResults, fn($r) => !$r)),
-                'results_detail' => $notificationResults,
-                'operation' => 'gdpr_notification_completion'
-            ]);
-
-        } catch (\Throwable $e) {
-            // ✅ OS1.5 RESILIENZA PROGRESSIVA: Notification failure doesn't break consent save
-            $this->logger->warning('GDPR notification triggering failed - consent changes saved but notifications not sent', [
-                'user_id' => $user->id,
-                'error_message' => $e->getMessage(),
-                'error_type' => get_class($e),
-                'old_state' => $oldConsentState,
-                'new_state' => $newConsentState,
-                'operation' => 'gdpr_notification_error'
-            ]);
-
-            // Don't throw - consent save should succeed even if notifications fail
-        }
-    }
-
-    /**
-     * @Oracode Method: Detect Significant Consent Changes
-     * 🎯 Purpose: Identify consent changes that require user notification per GDPR
-     * 📥 Input: Old and new consent state arrays
-     * 📤 Output: Array of significant changes with change metadata
-     * 🧱 Core Logic: Compare boolean consent states, identify meaningful transitions
-     */
-    private function detectSignificantConsentChanges(array $oldState, array $newState): array
-    {
-        $significantChanges = [];
-
-        // ✅ OS1.5 EXPLICITLY INTENTIONAL: Check each consent type for significant changes
-        $consentTypesToCheck = [
-            'allow_personal_data_processing',
-            'marketing',
-            'analytics'
-        ];
-
-        foreach ($consentTypesToCheck as $consentType) {
-            $oldValue = $oldState[$consentType] ?? false;
-            $newValue = $newState[$consentType] ?? false;
-
-            // ✅ OS1.5 SEMANTIC CONSISTENCY: Only boolean state changes are significant
-            if ($oldValue !== $newValue) {
-                $significantChanges[$consentType] = [
-                    'previous_value' => $oldValue,
-                    'new_value' => $newValue,
-                    'change_type' => $newValue ? 'granted' : 'withdrawn',
-                    'timestamp' => now()->toISOString()
-                ];
-
-                $this->logger->debug('Significant consent change detected', [
-                    'consent_type' => $consentType,
-                    'change' => $significantChanges[$consentType],
-                    'operation' => 'change_detection'
-                ]);
-            }
-        }
-
-        return $significantChanges;
-    }
-
-    /**
-     * @Oracode Method: Build Notification Context
-     * 🎯 Purpose: Create complete context for GDPR notification with audit trail data
-     * 📥 Input: HTTP request and detected changes
-     * 📤 Output: Context array for notification service
-     * 🛡️ Privacy: Include only necessary context for GDPR compliance
-     */
-    private function buildNotificationContext(UpdatePersonalDataRequest $request, array $detectedChanges): array
-    {
-        return [
-            'ip_address' => $request->ip(),
-            'user_agent' => $request->userAgent(),
-            'session_id' => session()->getId(),
-            'timestamp' => now()->toISOString(),
-            'changes_count' => count($detectedChanges),
-            'change_source' => 'personal_data_form',
-            'change_types' => array_keys($detectedChanges)
-        ];
-    }
-
-    /**
-     * @Oracode Method: Trigger Single Consent Notification
-     * 🎯 Purpose: Trigger GDPR notification for specific consent change
-     * 📥 Input: User, consent type, change details, notification context
-     * 📤 Output: Boolean success/failure
-     * 🛡️ Privacy: Graceful failure ensures consent save succeeds even if notification fails
-     */
-    private function triggerSingleConsentNotification(
-        User $user,
-        string $consentType,
-        array $change,
-        array $baseContext
-    ): bool {
-        try {
-            // ✅ OS1.5 MODULARITÀ SEMANTICA: Build context specific to this change
-            $changeContext = array_merge($baseContext, [
-                'consent_type' => $consentType,
-                'previous_value' => $change['previous_value'],
-                'new_value' => $change['new_value'],
-                'change_type' => $change['change_type']
-            ]);
-
-            // ✅ OS1.5 CIRCOLARITÀ VIRTUOSA: Each notification builds user trust
-            $notificationResult = $this->gdprNotificationService->dispatchNotification(
-                $user,
-                'consent_updated',
-                $changeContext
-            );
-
-            $this->logger->info('Single consent notification triggered successfully', [
-                'user_id' => $user->id,
-                'consent_type' => $consentType,
-                'change_type' => $change['change_type'],
-                'notification_result' => is_object($notificationResult) ? 'success' : 'failed'
-            ]);
-
-            return is_object($notificationResult);
-
-        } catch (\Throwable $e) {
-            $this->logger->warning('Single consent notification failed', [
-                'user_id' => $user->id,
-                'consent_type' => $consentType,
-                'error' => $e->getMessage(),
-                'operation' => 'single_notification_trigger'
-            ]);
-
-            return false;
-        }
-    }
-
-
-    /**
-     * Override Identity Verification for Personal Data Updates
-     * @Oracode Method: Override Identity Verification for Personal Data Updates
-     * 🎯 Purpose: Allow personal data updates without additional identity verification for MVP
-     * 📤 Output: Always returns true for authenticated users
-     * ⚠️  MVP: Simplified verification logic for personal data updates
-     */
-    protected function requireIdentityVerification(): bool|RedirectResponse
-    {
-        $user = FegiAuth::user();
-
-        $this->logger->info('Identity verification check bypassed for personal data updates', [
-            'user_id' => $user?->id,
-            'auth_type' => FegiAuth::getAuthType(),
-            'operation' => 'personal_data_update',
-            'reason' => 'MVP_simplified_verification'
-        ]);
-
-        // ✅ MVP: For personal data updates, being authenticated is sufficient
-        // Future: Implement proper re-verification flow
-        if (FegiAuth::check()) {
-            return true;
-        }
-
-        // If not authenticated at all, use parent logic
-        return parent::requireIdentityVerification();
-    }
+return $xml;
 }
 
+/**
+* @Oracode Method: Get Export Headers
+* 🎯 Purpose: Return appropriate HTTP headers for export download
+* 📥 Input: Export format
+* 📤 Output: Array of HTTP headers
+* 🧱 Core Logic: Format-specific headers
+*
+* @param string $format Export format
+* @return array<string, string> HTTP headers
+    */
+    private function getExportHeaders(string $format): array
+    {
+    $headers = [
+    'Cache-Control' => 'no-cache, no-store, must-revalidate',
+    'Pragma' => 'no-cache',
+    'Expires' => '0'
+    ];
+
+    switch ($format) {
+    case 'csv':
+    $headers['Content-Type'] = 'text/csv';
+    break;
+    case 'xml':
+    $headers['Content-Type'] = 'application/xml';
+    break;
+    case 'json':
+    default:
+    $headers['Content-Type'] = 'application/json';
+    break;
+    }
+
+    return $headers;
+    }
+
+    /**
+    * @Oracode Method: Process Personal Data Deletion
+    * 🎯 Purpose: Execute GDPR-compliant data deletion
+    * 📥 Input: User and deletion reason
+    * 📤 Output: Void (processes deletion)
+    * 🛡️ Privacy: Secure deletion with audit trail
+    *
+    * @param User $user User instance
+    * @param string|null $reason Deletion reason
+    * @return void
+    */
+    private function processPersonalDataDeletion(User $user, ?string $reason): void
+    {
+    $personalData = UserPersonalData::where('user_id', $user->id)->first();
+
+    if ($personalData) {
+    // Create deletion audit record before deletion
+    $this->auditDataAccess('personal_data_deletion_executed', [
+    'user_id' => $user->id,
+    'data_fields_deleted' => array_keys($personalData->toArray()),
+    'reason' => $reason,
+    'deletion_method' => 'user_requested'
+    ]);
+
+    // Perform deletion
+    $personalData->delete();
+    }
+
+    // Clear related data processing consents
+    $user->update([
+    'consent' => false,
+    'consent_summary' => null,
+    'consents_updated_at' => now()
+    ]);
+    }
+
+    /**
+    * @Oracode Method: Handle Consent Change Notifications
+    * 🎯 Purpose: Detect consent changes and trigger GDPR notifications for user awareness
+    * 📥 Input: User, old consent state, new consent state, HTTP request context
+    * 📤 Output: Void (side effect: notifications created)
+    * 🛡️ Privacy: Only processes user's own consent changes with complete audit trail
+    * 🧱 Core Logic: Compare states, detect significant changes, trigger notifications gracefully
+    */
+    private function handleConsentChangeNotifications(
+    User $user,
+    ?array $oldConsentState,
+    array $newConsentState,
+    UpdatePersonalDataRequest $request
+    ): void {
+    // ✅ OS1.5 PROACTIVE SECURITY: Guard against missing old state
+    if (empty($oldConsentState) || empty($newConsentState)) {
+    $this->logger->info('Skipping consent change notifications - insufficient state data', [
+    'user_id' => $user->id,
+    'old_state_available' => !empty($oldConsentState),
+    'new_state_available' => !empty($newConsentState),
+    'operation' => 'consent_change_detection'
+    ]);
+    return;
+    }
+
+    try {
+    // ✅ OS1.5 EXPLICITLY INTENTIONAL: Detect all significant consent changes
+    $detectedChanges = $this->detectSignificantConsentChanges($oldConsentState, $newConsentState);
+
+    if (empty($detectedChanges)) {
+    $this->logger->info('No significant consent changes detected - no notifications triggered', [
+    'user_id' => $user->id,
+    'old_state' => $oldConsentState,
+    'new_state' => $newConsentState
+    ]);
+    return;
+    }
+
+    // ✅ OS1.5 SIMPLICITY EMPOWERMENT: Build notification context once, reuse for all
+    $notificationContext = $this->buildNotificationContext($request, $detectedChanges);
+
+    $this->logger->info('Consent changes detected - triggering GDPR notifications', [
+    'user_id' => $user->id,
+    'changes_count' => count($detectedChanges),
+    'change_types' => array_keys($detectedChanges),
+    'operation' => 'gdpr_notification_trigger'
+    ]);
+
+    // ✅ OS1.5 CIRCOLARITÀ VIRTUOSA: Each notification improves user trust
+    $notificationResults = [];
+    foreach ($detectedChanges as $consentType => $change) {
+    $notificationResults[$consentType] = $this->triggerSingleConsentNotification(
+    $user,
+    $consentType,
+    $change,
+    $notificationContext
+    );
+    }
+
+    // ✅ OS1.5 INTERROGABILITÀ TOTALE: Complete audit trail of notification results
+    $this->logger->info('GDPR notifications triggered successfully', [
+    'user_id' => $user->id,
+    'notifications_triggered' => count(array_filter($notificationResults)),
+    'notifications_failed' => count(array_filter($notificationResults, fn($r) => !$r)),
+    'results_detail' => $notificationResults,
+    'operation' => 'gdpr_notification_completion'
+    ]);
+
+    } catch (\Throwable $e) {
+    // ✅ OS1.5 RESILIENZA PROGRESSIVA: Notification failure doesn't break consent save
+    $this->logger->warning('GDPR notification triggering failed - consent changes saved but notifications not sent', [
+    'user_id' => $user->id,
+    'error_message' => $e->getMessage(),
+    'error_type' => get_class($e),
+    'old_state' => $oldConsentState,
+    'new_state' => $newConsentState,
+    'operation' => 'gdpr_notification_error'
+    ]);
+
+    // Don't throw - consent save should succeed even if notifications fail
+    }
+    }
+
+    /**
+    * @Oracode Method: Detect Significant Consent Changes
+    * 🎯 Purpose: Identify consent changes that require user notification per GDPR
+    * 📥 Input: Old and new consent state arrays
+    * 📤 Output: Array of significant changes with change metadata
+    * 🧱 Core Logic: Compare boolean consent states, identify meaningful transitions
+    */
+    private function detectSignificantConsentChanges(array $oldState, array $newState): array
+    {
+    $significantChanges = [];
+
+    // ✅ OS1.5 EXPLICITLY INTENTIONAL: Check each consent type for significant changes
+    $consentTypesToCheck = [
+    'allow_personal_data_processing',
+    'marketing',
+    'analytics'
+    ];
+
+    foreach ($consentTypesToCheck as $consentType) {
+    $oldValue = $oldState[$consentType] ?? false;
+    $newValue = $newState[$consentType] ?? false;
+
+    // ✅ OS1.5 SEMANTIC CONSISTENCY: Only boolean state changes are significant
+    if ($oldValue !== $newValue) {
+    $significantChanges[$consentType] = [
+    'previous_value' => $oldValue,
+    'new_value' => $newValue,
+    'change_type' => $newValue ? 'granted' : 'withdrawn',
+    'timestamp' => now()->toISOString()
+    ];
+
+    $this->logger->debug('Significant consent change detected', [
+    'consent_type' => $consentType,
+    'change' => $significantChanges[$consentType],
+    'operation' => 'change_detection'
+    ]);
+    }
+    }
+
+    return $significantChanges;
+    }
+
+    /**
+    * @Oracode Method: Build Notification Context
+    * 🎯 Purpose: Create complete context for GDPR notification with audit trail data
+    * 📥 Input: HTTP request and detected changes
+    * 📤 Output: Context array for notification service
+    * 🛡️ Privacy: Include only necessary context for GDPR compliance
+    */
+    private function buildNotificationContext(UpdatePersonalDataRequest $request, array $detectedChanges): array
+    {
+    return [
+    'ip_address' => $request->ip(),
+    'user_agent' => $request->userAgent(),
+    'session_id' => session()->getId(),
+    'timestamp' => now()->toISOString(),
+    'changes_count' => count($detectedChanges),
+    'change_source' => 'personal_data_form',
+    'change_types' => array_keys($detectedChanges)
+    ];
+    }
+
+    /**
+    * @Oracode Method: Trigger Single Consent Notification
+    * 🎯 Purpose: Trigger GDPR notification for specific consent change
+    * 📥 Input: User, consent type, change details, notification context
+    * 📤 Output: Boolean success/failure
+    * 🛡️ Privacy: Graceful failure ensures consent save succeeds even if notification fails
+    */
+    private function triggerSingleConsentNotification(
+    User $user,
+    string $consentType,
+    array $change,
+    array $baseContext
+    ): bool {
+    try {
+    // ✅ OS1.5 MODULARITÀ SEMANTICA: Build context specific to this change
+    $changeContext = array_merge($baseContext, [
+    'consent_type' => $consentType,
+    'previous_value' => $change['previous_value'],
+    'new_value' => $change['new_value'],
+    'change_type' => $change['change_type']
+    ]);
+
+    // ✅ OS1.5 CIRCOLARITÀ VIRTUOSA: Each notification builds user trust
+    $notificationResult = $this->gdprNotificationService->dispatchNotification(
+    $user,
+    'consent_updated',
+    $changeContext
+    );
+
+    $this->logger->info('Single consent notification triggered successfully', [
+    'user_id' => $user->id,
+    'consent_type' => $consentType,
+    'change_type' => $change['change_type'],
+    'notification_result' => is_object($notificationResult) ? 'success' : 'failed'
+    ]);
+
+    return is_object($notificationResult);
+
+    } catch (\Throwable $e) {
+    $this->logger->warning('Single consent notification failed', [
+    'user_id' => $user->id,
+    'consent_type' => $consentType,
+    'error' => $e->getMessage(),
+    'operation' => 'single_notification_trigger'
+    ]);
+
+    return false;
+    }
+    }
+
+
+    /**
+    * Override Identity Verification for Personal Data Updates
+    * @Oracode Method: Override Identity Verification for Personal Data Updates
+    * 🎯 Purpose: Allow personal data updates without additional identity verification for MVP
+    * 📤 Output: Always returns true for authenticated users
+    * ⚠️ MVP: Simplified verification logic for personal data updates
+    */
+    protected function requireIdentityVerification(): bool|RedirectResponse
+    {
+    $user = FegiAuth::user();
+
+    $this->logger->info('Identity verification check bypassed for personal data updates', [
+    'user_id' => $user?->id,
+    'auth_type' => FegiAuth::getAuthType(),
+    'operation' => 'personal_data_update',
+    'reason' => 'MVP_simplified_verification'
+    ]);
+
+    // ✅ MVP: For personal data updates, being authenticated is sufficient
+    // Future: Implement proper re-verification flow
+    if (FegiAuth::check()) {
+    return true;
+    }
+
+    // If not authenticated at all, use parent logic
+    return parent::requireIdentityVerification();
+    }
+    }

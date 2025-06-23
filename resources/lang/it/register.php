@@ -10,6 +10,8 @@
  */
 
 return [
+    'read_the_terms' => 'Leggi i Termini di Servizio',
+
     // SEO and Meta
     'seo_title' => 'Registrazione - FlorenceEGI | Unisciti al Rinascimento Digitale',
     'seo_description' => 'Registrati su FlorenceEGI e partecipa al Rinascimento Digitale. Crea, colleziona, investi e fai trading di asset culturali con impatto EPP.',

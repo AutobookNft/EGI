@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Enums\Gdpr\GdprActivityCategory;
 use App\Http\Controllers\Controller;
 use App\Services\Gdpr\ConsentService;
 use App\Services\Gdpr\AuditLogService;
@@ -189,7 +190,7 @@ class AuthenticatedSessionController extends Controller
                             'logout_method' => 'manual',
                             'session_duration' => $logContext['session_duration_minutes']
                         ],
-                        'authentication'
+                        GdprActivityCategory::AUTHENTICATION_LOGOUT
                     );
                 }
 
@@ -276,7 +277,7 @@ class AuthenticatedSessionController extends Controller
                         'ecosystem_status' => $user->ecosystem_setup_completed ? 'complete' : 'incomplete',
                         'timestamp' => now()->toISOString()
                     ],
-                    'authentication'
+                    GdprActivityCategory::AUTHENTICATION_LOGIN
                 );
             }
 

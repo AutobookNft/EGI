@@ -126,6 +126,7 @@ class PrivacyPolicy extends Model
         'FR' => 'fr',
         'DE' => 'de',
         'ES' => 'es',
+        'PT' => 'pt',
     ];
 
     /**

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Enums\Gdpr\GdprActivityCategory;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\UserProfile;
@@ -11,6 +12,7 @@ use App\Models\UserDocument;
 use App\Models\UserInvoicePreference;
 use App\Services\Gdpr\ConsentService;
 use App\Services\Gdpr\AuditLogService;
+use App\Services\Gdpr\LegalContentService;
 use App\Services\CollectionService;
 use Ultra\EgiModule\Contracts\WalletServiceInterface;
 use Illuminate\Auth\Events\Registered;
@@ -20,6 +22,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rules;
+use Ultra\EgiModule\Contracts\UserRoleServiceInterface;
 use Ultra\ErrorManager\Interfaces\ErrorManagerInterface;
 use Ultra\UltraLogManager\UltraLogManager;
 
@@ -46,7 +49,10 @@ class RegisteredUserController extends Controller
         protected ConsentService $consentService,
         protected AuditLogService $auditService,
         protected CollectionService $collectionService,
-        protected WalletServiceInterface $walletService
+        protected WalletServiceInterface $walletService,
+        protected UserRoleServiceInterface $userRoleService,
+        protected LegalContentService $legalContentService,
+
     ) {}
 
     /**
@@ -504,56 +510,71 @@ class RegisteredUserController extends Controller
     }
 
     /**
-     * Process GDPR consents using existing ConsentService
-     * @oracode-pillar: Dignità Preservata
+     * Process GDPR consents dynamically and record Terms of Service acceptance.
+     * The logic is now driven by the consent types defined in the database,
+     * making it robust and automatically adaptable to future changes.
+     * @oracode-pillar: Dignità Preservata, Coerenza Semantica
      */
     protected function processGdprConsents(User $user, array $validated, array $logContext): void
     {
         try {
-            // ═══ REQUIRED CONSENTS VALIDATION ═══
-            $requiredConsents = [
-                'privacy_policy' => $validated['privacy_policy_accepted'] ?? false,
-                'terms_of_service' => $validated['terms_accepted'] ?? false,
-                'age_confirmation' => $validated['age_confirmation'] ?? false,
-            ];
+            // 1. Otteniamo la versione corrente dei ToS, necessaria per la registrazione specifica.
+            $currentTermsVersion = $this->legalContentService->getCurrentVersionString();
 
-            foreach ($requiredConsents as $consentType => $granted) {
-                if (!$granted) {
-                    throw new \Exception("Required consent not granted: {$consentType}");
+            // 2. Recuperiamo TUTTI i tipi di consenso disponibili dal nostro servizio.
+            // Questa è la nostra Single Source of Truth.
+            $availableConsentTypes = $this->consentService->getConsentTypes();
+
+            // ✅ NUOVO BLOCCO DINAMICO: Costruiamo l'array dei consensi iniziali
+            // iterando su quelli disponibili, invece di hardcodarli.
+            $initialConsents = [];
+            foreach ($availableConsentTypes as $consentType) {
+                // I consensi obbligatori sono sempre 'true'.
+                // Nota: 'terms-of-service' verrà gestito a parte per registrare la versione.
+                if ($consentType->required && $consentType->key !== 'terms-of-service') {
+                    $initialConsents[$consentType->key] = true;
+                } else {
+                    // Per i consensi opzionali, controlliamo il valore inviato dal form.
+                    // Il cast a (bool) gestisce '1', '0', o l'assenza del campo.
+                    $initialConsents[$consentType->key] = (bool)($validated['consents'][$consentType->key] ?? false);
                 }
             }
 
-            // ═══ PREPARE INITIAL CONSENTS FOR CONSENTSERVICE ═══
-            $initialConsents = [
-                'functional' => true, // Always required for platform operation
-                'analytics' => ($validated['consents']['analytics'] ?? false) === '1',
-                'marketing' => ($validated['consents']['marketing'] ?? false) === '1',
-                'profiling' => ($validated['consents']['profiling'] ?? false) === '1',
-                'allow_personal_data_processing' => true, // ✅ AGGIUNTO - Required for personal data management. è un consenso tecnico, senza il quale non possiamo procedere
-            ];
+            // Validiamo i consensi obbligatori che devono essere stati accettati dal form
+            if (!($validated['privacy_policy_accepted'] ?? false) || !($validated['terms_accepted'] ?? false) || !($validated['age_confirmation'] ?? false)) {
+                throw new \Exception("Required consent (privacy, terms, or age) not accepted in submission.");
+            }
 
-            $this->logger->info('[Registration] Processing GDPR consents', [
+            $this->logger->info('[Registration] Processing dynamically built GDPR consents', [
                 ...$logContext,
-                'required_consents' => $requiredConsents,
-                'initial_consents' => $initialConsents
+                'initial_consents_built' => $initialConsents,
+                'terms_version_to_be_accepted' => $currentTermsVersion
             ]);
 
-            // ═══ USE EXISTING CONSENTSERVICE - createDefaultConsents ═══
+            // 3. Creiamo i consensi di default (esclusi i ToS che registriamo dopo)
+            // Il metodo createDefaultConsents gestirà i consensi opzionali e tecnici.
             $createdConsents = $this->consentService->createDefaultConsents($user, $initialConsents);
 
             if (empty($createdConsents)) {
                 throw new \Exception('ConsentService createDefaultConsents returned empty result');
             }
 
+            // 4. Registriamo in modo ESPLICITO l'accettazione dei Termini di Servizio con la versione.
+            $this->consentService->recordTermsConsent(
+                $user,
+                $currentTermsVersion,
+                ['source' => 'user_registration']
+            );
+
             $this->logger->info('[Registration] GDPR consents processed successfully', [
                 ...$logContext,
-                'consents_created' => array_keys($createdConsents)
+                'consents_created' => array_keys($createdConsents),
+                'terms_of_service_accepted_version' => $currentTermsVersion
             ]);
 
         } catch (\Exception $e) {
             $this->logger->error('[Registration] Failed to process GDPR consents', [
                 'user_id' => $user->id,
-                'consents_received' => $validated['consents'] ?? [],
                 'error' => $e->getMessage()
             ]);
 
@@ -588,7 +609,8 @@ class RegisteredUserController extends Controller
                     'optional_consents' => $validated['consents'] ?? [],
                     'domains_initialized' => true,
                 ],
-                'registration'
+                GdprActivityCategory::REGISTRATION,
+
             );
 
         } catch (\Exception $e) {

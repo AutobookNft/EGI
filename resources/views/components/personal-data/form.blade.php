@@ -329,7 +329,7 @@
                     <div class="flex items-start space-x-3">
                         @php
                             // ✅ CORRETTO: Controllo consent dal ConsentService + old() su array consents
-                            $currentConsentStatus = $gdprConsents['allow_personal_data_processing'] ?? false;
+                            $currentConsentStatus = $gdprConsents['allow-personal-data-processing'] ?? false;
                             $oldConsentValue = old('consents.allow_personal_data_processing', $currentConsentStatus);
                             $isChecked = (bool) $oldConsentValue;
                         @endphp
@@ -337,7 +337,7 @@
                         <input
                             type="checkbox"
                             id="consent_allow_personal_data_processing"
-                            name="consents[allow_personal_data_processing]" {{-- ✅ ARRAY di consensi --}}
+                            name="consents[allow_personal_data_processing]"
                             value="1"
                             {{ $isChecked ? 'checked' : '' }}
                             @if(!$canEdit) disabled @endif
@@ -355,52 +355,32 @@
                         </div>
                     </div>
 
-                    {{-- Processing Purposes - Metadata per il consenso --}}
+
+                    {{-- Processing Purposes - Corretto come lista informativa non interattiva --}}
                     <div id="processing-purposes"
-                        class="ml-6 space-y-2"
-                        style="display: {{ $isChecked ? 'block' : 'none' }}">
+                        class="pl-6 ml-6 space-y-1 border-l-2 border-gray-200">
+
                         <p class="mb-2 text-sm font-medium text-gray-700">{{ __('user_personal_data.processing_purposes') }}:</p>
 
-                        @php
-                            // ✅ Get processing purposes from ConsentService metadata
-                            $currentPurposes = old('consent_metadata.processing_purposes', []);
+                        {{-- Controlliamo che il nostro DTO esista e abbia dei purposes --}}
+                        @if(isset($platformServicesConsent) && !empty($platformServicesConsent->processingPurposes))
 
-                            // If we have existing consent, extract purposes from ConsentService
-                            if (isset($gdprConsents['_debug']['user_consents_raw'])) {
-                                foreach ($gdprConsents['_debug']['user_consents_raw'] as $consent) {
-                                    if ($consent->consent_key === 'allow_personal_data_processing' && !empty($consent->metadata)) {
-                                        $metadata = json_decode($consent->metadata, true);
-                                        $currentPurposes = $metadata['processing_purposes'] ?? [];
-                                        break;
-                                    }
-                                }
-                            }
+                            {{-- Usiamo una lista non ordinata (<ul>) per la massima chiarezza semantica --}}
+                            <ul class="text-sm text-gray-600 list-disc list-inside">
 
-                            $availablePurposes = [
-                                'account_management' => __('user_personal_data.purpose_account_management'),
-                                'service_delivery' => __('user_personal_data.purpose_service_delivery'),
-                                'legal_compliance' => __('user_personal_data.purpose_legal_compliance'),
-                                'marketing' => __('user_personal_data.purpose_marketing'),
-                                'analytics' => __('user_personal_data.purpose_analytics'),
-                                'customer_support' => __('user_personal_data.purpose_customer_support'),
-                            ];
-                        @endphp
+                                {{-- Cicliamo sulla lista di "slug" dei purposes --}}
+                                @foreach($platformServicesConsent->processingPurposes as $purposeSlug)
 
-                        @foreach($availablePurposes as $purpose => $label)
-                            <div class="flex items-center space-x-2">
-                                <input
-                                    type="checkbox"
-                                    id="purpose_{{ $purpose }}"
-                                    name="consent_metadata[processing_purposes][]" {{-- ✅ Metadata per il consenso --}}
-                                    value="{{ $purpose }}"
-                                    {{ in_array($purpose, $currentPurposes) ? 'checked' : '' }}
-                                    @if(!$canEdit) disabled @endif
-                                    class="text-indigo-600 border-gray-300 rounded shadow-sm focus:ring-indigo-500" />
-                                <label for="purpose_{{ $purpose }}" class="text-sm text-gray-600">
-                                    {{ $label }}
-                                </label>
-                            </div>
-                        @endforeach
+                                    {{-- Ogni purpose è un semplice punto della lista (<li>) --}}
+                                    <li>
+                                        {{-- Usiamo lo slug per prendere la sua traduzione --}}
+                                        {{ __('gdpr.consent_types.purposes.' . $purposeSlug) }}
+                                    </li>
+
+                                @endforeach
+                            </ul>
+
+                        @endif
                     </div>
 
                     {{-- Altri consensi GDPR --}}
@@ -425,7 +405,7 @@
                                     {{ __('user_personal_data.consent_marketing') }}
                                 </label>
                                 <p class="mt-1 text-xs text-gray-500">
-                                    {{ __('user_personal_data.consent_marketing_description') }}
+                                    {{ __('user_personal_data.consent_marketing_desc') }}
                                 </p>
                             </div>
                         </div>
@@ -450,7 +430,7 @@
                                     {{ __('user_personal_data.consent_analytics') }}
                                 </label>
                                 <p class="mt-1 text-xs text-gray-500">
-                                    {{ __('user_personal_data.consent_analytics_description') }}
+                                    {{ __('user_personal_data.consent_analytics_desc') }}
                                 </p>
                             </div>
                         </div>

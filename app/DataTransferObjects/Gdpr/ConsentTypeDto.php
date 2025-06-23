@@ -17,7 +17,8 @@ class ConsentTypeDto
         public readonly string $legalBasis,
         public readonly bool $required,
         public readonly bool $defaultValue,
-        public readonly bool $canWithdraw
+        public readonly bool $canWithdraw,
+        public readonly ?array $processingPurposes = []
     ) {}
 
     /**

@@ -10,6 +10,8 @@
  */
 
 return [
+    'read_the_terms' => 'Read the Terms of Service',
+
     // SEO and Meta
     'seo_title' => 'Registration - FlorenceEGI | Join the Digital Renaissance',
     'seo_description' => 'Sign up for FlorenceEGI and participate in the Digital Renaissance. Create, collect, invest, and trade cultural assets with EPP impact.',

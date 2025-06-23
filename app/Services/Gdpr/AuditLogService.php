@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 use Ultra\UltraLogManager\UltraLogManager;
 use Ultra\ErrorManager\Interfaces\ErrorManagerInterface;
 use Carbon\Carbon;
+use App\Enums\Gdpr\GdprActivityCategory;
 
 /**
  * @Oracode Service: Audit Trail Management
@@ -118,7 +119,7 @@ class AuditLogService
      * @param User $user
      * @param string $action
      * @param array $context
-     * @param string $category
+     * @param GdprActivityCategory $category
      * @return UserActivity
      * @privacy-safe Logs action for specified user only
      */
@@ -126,7 +127,7 @@ class AuditLogService
         User $user,
         string $action,
         array $context = [],
-        string $category = 'platform_usage'
+        GdprActivityCategory $category = GdprActivityCategory::PLATFORM_USAGE
     ): UserActivity {
         try {
             $this->logger->debug('Audit Log Service: Logging user action', [
@@ -142,20 +143,28 @@ class AuditLogService
             // Get request metadata
             $requestMetadata = $this->getRequestMetadata();
 
-            // Determine retention period based on category
-            $retentionDays = $this->activityCategories[$category]['retention_period'] ?? $this->retentionDays;
+            /* Determine retention period based on category
+            *  GdprActivityCategory $categories
+            */
+            if (!isset($this->activityCategories[$category->value])) {
+                $this->logger->warning('Audit Log Service: Unknown category, using default retention', [
+                    'category' => $category->value,
+                    'log_category' => 'AUDIT_SERVICE_WARNING'
+                ]);
+            }
+            $retentionDays = $this->activityCategories[$category->value]['retention_period'] ?? $this->retentionDays;
 
             $activity = UserActivity::create([
                 'user_id' => $user->id,
                 'action' => $action,
-                'category' => $category,
+                'category' => $category->value,
                 'context' => $sanitizedContext,
                 'metadata' => $requestMetadata,
                 'ip_address' => $this->maskIpAddress($requestMetadata['ip_address']),
                 'user_agent' => $requestMetadata['user_agent'],
                 'session_id' => $requestMetadata['session_id'],
                 'expires_at' => now()->addDays($retentionDays),
-                'privacy_level' => $this->activityCategories[$category]['privacy_level'] ?? 'standard'
+                'privacy_level' => $this->activityCategories[$category->value]['privacy_level'] ?? 'standard'
             ]);
 
             // Log critical actions immediately to ULM
@@ -296,7 +305,7 @@ class AuditLogService
             ]);
 
             // Also create user activity record
-            $this->logUserAction($user, "gdpr_{$gdprAction}", $details, 'gdpr_actions');
+            $this->logUserAction($user, "gdpr_{$gdprAction}", $details, GdprActivityCategory::GDPR_ACTIONS);
 
             return $gdprLog;
 
@@ -491,7 +500,7 @@ class AuditLogService
                     'to' => $dateTo?->toDateString()
                 ],
                 'total_records' => $activities->count()
-            ], 'data_access');
+            ],  GdprActivityCategory::DATA_ACCESS);
 
             $fileName = "activity_log_{$user->id}_" . now()->format('Y-m-d_H-i-s') . ".{$format}";
 

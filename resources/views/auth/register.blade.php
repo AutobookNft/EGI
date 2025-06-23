@@ -286,11 +286,12 @@
                                     ];
                                     $selectedUserType = old('user_type', 'creator');
                                 @endphp
+
                                 @foreach ($userTypes as $type => $details)
-                                <label class="p-4 cursor-pointer consent-card group {{ $selectedUserType === $type ? 'selected' : '' }}" for="user_type_{{ $type }}" data-user-type="{{ $type }}">
+                                <label class="p-4 transition-all duration-300 ease-in-out cursor-pointer consent-card group {{ $selectedUserType === $type ? 'selected' : '' }}" for="user_type_{{ $type }}" data-user-type="{{ $type }}">
                                     <input type="radio" id="user_type_{{ $type }}" name="user_type" value="{{ $type }}"
-                                           class="sr-only" {{ $selectedUserType === $type ? 'checked' : '' }}
-                                           aria-describedby="{{ $type }}-description" required>
+                                        class="sr-only" {{ $selectedUserType === $type ? 'checked' : '' }}
+                                        aria-describedby="{{ $type }}-description" required>
                                     <div class="text-center">
                                         <div class="flex items-center justify-center w-12 h-12 mx-auto mb-3 transition-transform rounded-full bg-{{ $details['color'] }} user-type-icon group-hover:scale-110">
                                             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -301,10 +302,19 @@
                                         <p id="{{ $type }}-description" class="mt-1 text-sm text-grigio-pietra">
                                             {{ __('register.user_type_' . $type . '_desc') }}
                                         </p>
+
+                                        {{-- ✅ NUOVO LINK AI TERMINI --}}
+                                        <a href="{{ route('legal.terms', ['userType' => $type, 'redirect_url' => url()->full()]) }}"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            class="inline-block mt-3 text-xs transition-colors text-oro-fiorentino hover:text-verde-rinascita hover:underline"
+                                            onclick="event.stopPropagation();">
+                                            {{ __('register.read_the_terms') }}
+                                        </a>
                                     </div>
                                 </label>
                                 @endforeach
-                            </div>
+                                                            </div>
                             @error('user_type')
                                 <p class="mt-1 text-sm text-rosso-urgenza" role="alert">{{ $message }}</p>
                             @enderror

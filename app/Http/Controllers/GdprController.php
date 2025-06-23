@@ -4,11 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Enums\Gdpr\ProcessingRestrictionReason;
 use App\Enums\Gdpr\ProcessingRestrictionType;
+use App\Helpers\FegiAuth;
 use App\Http\Requests\Gdpr\ProcessingRestrictionRequest;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -23,8 +25,13 @@ use App\Services\Gdpr\AuditLogService;
 use App\Models\User;
 use App\Models\GdprRequest;
 use App\Models\BreachReport;
+use App\Models\PrivacyPolicy;
 use App\Models\ProcessingRestriction;
+use App\Services\Fiscal\FiscalValidatorFactory;
 use App\Services\Gdpr\ProcessingRestrictionService;
+use Carbon\Carbon;
+use TCPDF;
+use Illuminate\Support\Facades\Log;
 
 /**
  * @Oracode Controller: GDPR Compliance Management
@@ -810,48 +817,16 @@ class GdprController extends Controller
         }
     }
 
-    /**
-     * Get list of countries for dropdown
+   /**
+     * Get list of supported countries for dropdowns.
+     * The method is now a simple wrapper that delegates the entire logic
+     * to the FiscalValidatorFactory, which acts as the Single Source of Truth.
      *
      * @return array
      */
     private function getCountriesList(): array
     {
-        // You can replace this with a more comprehensive list or use a package
-        return [
-            'IT' => 'Italia',
-            'US' => 'United States',
-            'GB' => 'United Kingdom',
-            'FR' => 'France',
-            'DE' => 'Germany',
-            'ES' => 'Spain',
-            'PT' => 'Portugal',
-            'NL' => 'Netherlands',
-            'BE' => 'Belgium',
-            'CH' => 'Switzerland',
-            'AT' => 'Austria',
-            'SE' => 'Sweden',
-            'NO' => 'Norway',
-            'DK' => 'Denmark',
-            'FI' => 'Finland',
-            'IE' => 'Ireland',
-            'PL' => 'Poland',
-            'CZ' => 'Czech Republic',
-            'HU' => 'Hungary',
-            'GR' => 'Greece',
-            'HR' => 'Croatia',
-            'SI' => 'Slovenia',
-            'SK' => 'Slovakia',
-            'EE' => 'Estonia',
-            'LV' => 'Latvia',
-            'LT' => 'Lithuania',
-            'MT' => 'Malta',
-            'CY' => 'Cyprus',
-            'LU' => 'Luxembourg',
-            'BG' => 'Bulgaria',
-            'RO' => 'Romania',
-            // Add more countries as needed
-        ];
+        return FiscalValidatorFactory::getSupportedCountriesTranslated();
     }
 
     /**
@@ -1466,31 +1441,68 @@ class GdprController extends Controller
      * Display privacy policy page
      *
      * @return View
-     * @privacy-safe Public information display
+     * @privacy-safe Public information display with structured content
      */
     public function privacyPolicy(): View
     {
         try {
-            $user = Auth::user();
+            $user = FegiAuth::user();
 
             $this->logger->info('GDPR: Accessing privacy policy page', [
                 'user_id' => $user?->id,
                 'log_category' => 'GDPR_ACCESS'
             ]);
 
-            $policyData = $this->gdprService->getCurrentPrivacyPolicy();
-            $userConsents = $user ? $this->consentService->getUserConsentStatus($user) : null;
+            // Get current active policy
+            $currentPolicy = PrivacyPolicy::active()
+                ->documentType('privacy_policy')
+                ->language(app()->getLocale())
+                ->first();
+
+            // If no policy is found for the current locale, fallback to a default
+            if (!$currentPolicy) {
+                $currentPolicy = PrivacyPolicy::active()
+                    ->documentType('privacy_policy')
+                    ->language(config('app.fallback_locale', 'it'))
+                    ->firstOrFail(); // Fails if no policy is available at all
+            }
+
+            // Parse policy content for table of contents and sectioned display
+            $policyContent = $this->parsePolicyContent($currentPolicy);
 
             if ($user) {
                 $this->auditService->logUserAction($user, 'privacy_policy_viewed');
             }
 
-            return view('gdpr.privacy-policy', [
-                'user' => $user,
-                'policyData' => $policyData,
-                'userConsents' => $userConsents
+            // Version history - all versions for the current document type and language
+            $versionHistory = PrivacyPolicy::where('document_type', 'privacy_policy')
+                ->where('language', app()->getLocale())
+                ->orderBy('effective_date', 'desc')
+                ->orderBy('version', 'desc')
+                ->get();
+
+            // User acceptance status for the specific policy type
+            $userAcceptance = $user ? $user->consents()
+                ->where('consent_type', 'privacy-policy')
+                ->where('granted', true)
+                ->latest('created_at')
+                ->first() : null;
+
+            $this->logger->info('GDPR: Privacy policy page loaded', [
+                'user_id' => $user?->id,
+                'current_policy_id' => $currentPolicy?->id,
+                'version_count' => $versionHistory->count(),
+                'user_acceptance' => $userAcceptance?->id ?? 'none',
             ]);
 
+            return view('gdpr.privacy-policy', [
+                'user' => $user,
+                'currentPolicy' => $currentPolicy,
+                'versionHistory' => $versionHistory,
+                'userAcceptance' => $userAcceptance,
+                'policyData' => $currentPolicy,
+                'policyContent' => $policyContent
+            ]);
         } catch (\Exception $e) {
             return $this->errorManager->handle('GDPR_PRIVACY_POLICY_PAGE_FAILED', [
                 'user_id' => Auth::id(),
@@ -1498,6 +1510,252 @@ class GdprController extends Controller
             ], $e);
         }
     }
+
+    public function privacyPolicyVersion(PrivacyPolicy $policy): View
+    {
+        try {
+            $user = FegiAuth::user();
+
+            $this->logger->info('GDPR: Viewing privacy policy version', [
+                'user_id' => $user?->id,
+                'policy_id' => $policy->id,
+                'log_category' => 'GDPR_ACCESS'
+            ]);
+
+            // Parse policy content for table of contents
+            $policyContent = $this->parsePolicyContent($policy);
+
+            if ($user) {
+                $this->auditService->logUserAction($user, 'privacy_policy_version_viewed', [
+                    'policy_id' => $policy->id
+                ]);
+            }
+
+            return view('gdpr.privacy-policy-version', [
+                'user' => $user,
+                'policy' => $policy,
+                'policyContent' => $policyContent
+            ]);
+        } catch (\Exception $e) {
+            return $this->errorManager->handle('GDPR_PRIVACY_POLICY_VERSION_FAILED', [
+                'user_id' => Auth::id(),
+                'policy_id' => $policy->id ?? null,
+                'error_message' => $e->getMessage()
+            ], $e);
+        }
+    }
+
+    // ================================================
+    // CONTENT PARSER HELPER METHODS (REFACTORED)
+    // ================================================
+
+    /**
+     * Parse privacy policy content for structured display.
+     * This is the main orchestrator for content parsing.
+     *
+     * @param PrivacyPolicy|null $policyData The policy model instance.
+     * @return array Structured content with sections for TOC and display.
+     */
+    protected function parsePolicyContent(?PrivacyPolicy $policyData): array
+    {
+        $content = $policyData->content ?? '';
+
+        if (empty($content)) {
+            return $this->getFallbackPolicyContent();
+        }
+
+        // 🎯 The refactored method now correctly extracts full sections.
+        $sections = $this->extractSectionsFromMarkdown($content);
+
+        return [
+            'sections' => $sections,
+            'raw_content' => $content,
+            'total_sections' => count($sections),
+            'estimated_reading_time' => $this->calculateReadingTime($content)
+        ];
+    }
+
+
+    /**
+     * 🎯 REFACTORED LOGIC
+     * Extract sections (title AND content) from markdown text.
+     * This method now correctly parses the content belonging to each header.
+     *
+     * @param string $content Markdown content
+     * @return array Array of sections, each with title, anchor, and its own content.
+     */
+    protected function extractSectionsFromMarkdown(string $content): array
+    {
+        $lines = explode("\n", $content);
+        $sections = [];
+        $currentSection = null;
+        $sectionIndex = 0;
+
+        foreach ($lines as $lineNumber => $line) {
+            // Check if the line is a header (H1, H2, H3)
+            if (preg_match('/^(#{1,3})\s+(.+)$/', trim($line), $matches)) {
+                // If there's a section being built, finalize it.
+                if ($currentSection !== null) {
+                    // Trim trailing newlines from the content
+                    $currentSection['content'] = trim($currentSection['content']);
+                    $sections[] = $currentSection;
+                }
+
+                // Start a new section
+                $headerLevel = strlen($matches[1]);
+                $rawTitle = trim($matches[2]);
+                $cleanTitle = $this->cleanHeaderTitle($rawTitle);
+
+                // Aggiungi un controllo per i titoli vuoti
+                if (empty($cleanTitle)) continue;
+
+                $currentSection = [
+                    'title' => $cleanTitle,
+                    'anchor' => $this->generateAnchorId($cleanTitle, $sectionIndex),
+                    'level' => $headerLevel,
+                    'line_number' => $lineNumber + 1,
+                    'index' => $sectionIndex + 1,
+                    'raw_title' => $rawTitle,
+                    'content' => '' // Initialize content for the new section
+                ];
+                $sectionIndex++;
+            } elseif ($currentSection !== null) {
+                // If it's not a header, append the line to the current section's content.
+                // We add the newline back, as markdown() will need it.
+                $currentSection['content'] .= $line . "\n";
+            }
+        }
+
+        // Add the last section if it exists
+        if ($currentSection !== null) {
+            $currentSection['content'] = trim($currentSection['content']);
+            $sections[] = $currentSection;
+        }
+
+        return $sections;
+    }
+
+    /**
+     * Clean header title from markdown formatting
+     *
+     * @param string $title Raw header title
+     * @return string Cleaned title
+     */
+    protected function cleanHeaderTitle(string $title): string
+    {
+        // Remove markdown formatting
+        $cleaned = $title;
+
+        // Remove bold **text** and __text__
+        $cleaned = preg_replace('/\*\*(.*?)\*\*/', '$1', $cleaned);
+        $cleaned = preg_replace('/__(.*?)__/', '$1', $cleaned);
+
+        // Remove italic *text* and _text_
+        $cleaned = preg_replace('/(?<!\*)\*([^*]+)\*(?!\*)/', '$1', $cleaned);
+        $cleaned = preg_replace('/(?<!_)_([^_]+)_(?!_)/', '$1', $cleaned);
+
+        // Remove code `text`
+        $cleaned = preg_replace('/`([^`]+)`/', '$1', $cleaned);
+
+        // Remove links [text](url)
+        $cleaned = preg_replace('/\[([^\]]+)\]\([^)]+\)/', '$1', $cleaned);
+
+        // Remove emojis and special characters for cleaner TOC
+        $cleaned = preg_replace('/[\x{1F600}-\x{1F64F}]/u', '', $cleaned); // Emoticons
+        $cleaned = preg_replace('/[\x{1F300}-\x{1F5FF}]/u', '', $cleaned); // Misc symbols
+        $cleaned = preg_replace('/[\x{1F680}-\x{1F6FF}]/u', '', $cleaned); // Transport
+        $cleaned = preg_replace('/[\x{1F1E0}-\x{1F1FF}]/u', '', $cleaned); // Flags
+
+        return trim($cleaned);
+    }
+
+    /**
+     * Generate anchor ID for section
+     *
+     * @param string $title Section title
+     * @param int $index Section index
+     * @return string Anchor ID
+     */
+    protected function generateAnchorId(string $title, int $index): string
+    {
+        // Create slug from title
+        $slug = Str::slug($title);
+
+        // If slug is empty or too short, use section number
+        if (empty($slug) || strlen($slug) < 3) {
+            return "section-" . ($index + 1);
+        }
+
+        // Limit length and ensure uniqueness
+        $baseSlug = Str::limit($slug, 50, '');
+        return "section-" . ($index + 1) . "-" . $baseSlug;
+    }
+
+    /**
+     * Calculate estimated reading time
+     *
+     * @param string $content Content to analyze
+     * @return int Reading time in minutes
+     */
+    protected function calculateReadingTime(string $content): int
+    {
+        // Remove markdown syntax for accurate word count
+        $plainText = strip_tags(\Illuminate\Mail\Markdown::parse($content));
+        $wordCount = str_word_count($plainText);
+
+        // Average reading speed: 200-250 words per minute
+        // Use 200 for conservative estimate
+        $readingTime = ceil($wordCount / 200);
+
+        return max(1, $readingTime); // Minimum 1 minute
+    }
+
+    /**
+     * Get fallback content structure when no policy is available
+     *
+     * @return array Fallback structure
+     */
+    protected function getFallbackPolicyContent(): array
+    {
+        return [
+            'sections' => [
+                [
+                    'title' => __('gdpr.privacy_policy.introduction'),
+                    'anchor' => 'section-1-introduction',
+                    'level' => 1,
+                    'index' => 1
+                ],
+                [
+                    'title' => __('gdpr.privacy_policy.data_collection'),
+                    'anchor' => 'section-2-data-collection',
+                    'level' => 1,
+                    'index' => 2
+                ],
+                [
+                    'title' => __('gdpr.privacy_policy.data_usage'),
+                    'anchor' => 'section-3-data-usage',
+                    'level' => 1,
+                    'index' => 3
+                ],
+                [
+                    'title' => __('gdpr.privacy_policy.your_rights'),
+                    'anchor' => 'section-4-your-rights',
+                    'level' => 1,
+                    'index' => 4
+                ],
+                [
+                    'title' => __('gdpr.privacy_policy.contact'),
+                    'anchor' => 'section-5-contact',
+                    'level' => 1,
+                    'index' => 5
+                ]
+            ],
+            'content' => __('gdpr.privacy_policy.content_not_available'),
+            'total_sections' => 5,
+            'estimated_reading_time' => 5
+        ];
+    }
+
 
     /**
      * Display privacy policy changelog
@@ -1867,4 +2125,382 @@ class GdprController extends Controller
 
        return $this->confirmAccountDeletion($request);
    }
+
+   /**
+     * Download active privacy policy as PDF using TCPDF
+     *
+     * @return \Illuminate\Http\Response
+     * @privacy-safe Public document download with proper headers
+     */
+    public function privacyPolicyDownload(): Response
+    {
+        try {
+            // Retrieve active privacy policy
+            $policy = PrivacyPolicy::active()
+                ->documentType('privacy_policy')
+                ->language(app()->getLocale())
+                ->first();
+
+            if (!$policy) {
+                // Fallback to default language if user language not available
+                $policy = PrivacyPolicy::active()
+                    ->documentType('privacy_policy')
+                    ->language('it') // FlorenceEGI default
+                    ->first();
+            }
+
+            if (!$policy) {
+                abort(404, 'Privacy Policy non disponibile');
+            }
+
+            // Generate PDF using TCPDF
+            $pdfContent = $this->generatePolicyPdfTcpdf($policy, 'privacy-policy');
+            $filename = $this->getPolicyFilename($policy);
+
+            // Return download response with proper headers
+            return response($pdfContent)
+                ->header('Content-Type', 'application/pdf')
+                ->header('Content-Disposition', 'attachment; filename="' . $filename . '"')
+                ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
+                ->header('Pragma', 'no-cache')
+                ->header('Expires', '0');
+
+        } catch (\Exception $e) {
+            Log::error('Privacy Policy PDF Download Error', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'user_agent' => request()->userAgent(),
+                'ip' => request()->ip()
+            ]);
+
+            abort(500, 'Errore nella generazione del PDF');
+        }
+    }
+
+    /**
+     * Download cookie policy as PDF
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function cookiePolicyDownload(): Response
+    {
+        return $this->downloadPolicyByType('cookie_policy');
+    }
+
+    /**
+     * Generic policy download by type
+     *
+     * @param string $type Policy document type
+     * @return \Illuminate\Http\Response
+     */
+    public function policyDownload(string $type): Response
+    {
+        // Map route params to document types
+        $typeMapping = [
+            'privacy-policy' => 'privacy_policy',
+            'cookie-policy' => 'cookie_policy',
+            'terms-of-service' => 'terms_of_service'
+        ];
+
+        $documentType = $typeMapping[$type] ?? null;
+
+        if (!$documentType) {
+            abort(404, 'Tipo di policy non supportato');
+        }
+
+        return $this->downloadPolicyByType($documentType);
+    }
+
+    /**
+     * Download policy by document type
+     *
+     * @param string $documentType
+     * @return \Illuminate\Http\Response
+     * @privacy-safe Document type validation and secure retrieval
+     */
+    protected function downloadPolicyByType(string $documentType): Response
+    {
+        try {
+            // Validate document type
+            $validTypes = array_values(PrivacyPolicy::DOCUMENT_TYPES);
+            if (!in_array($documentType, $validTypes)) {
+                abort(400, 'Tipo documento non valido');
+            }
+
+            // Retrieve active policy
+            $policy = PrivacyPolicy::active()
+                ->documentType($documentType)
+                ->language(app()->getLocale())
+                ->first();
+
+            if (!$policy) {
+                // Fallback to Italian
+                $policy = PrivacyPolicy::active()
+                    ->documentType($documentType)
+                    ->language('it')
+                    ->first();
+            }
+
+            if (!$policy) {
+                abort(404, 'Documento non disponibile');
+            }
+
+            // Generate PDF using TCPDF
+            $pdfContent = $this->generatePolicyPdfTcpdf($policy, $documentType);
+            $filename = $this->getPolicyFilename($policy);
+
+            return response($pdfContent)
+                ->header('Content-Type', 'application/pdf')
+                ->header('Content-Disposition', 'attachment; filename="' . $filename . '"')
+                ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
+                ->header('Pragma', 'no-cache')
+                ->header('Expires', '0');
+
+        } catch (\Exception $e) {
+            Log::error('Policy PDF Download Error', [
+                'document_type' => $documentType,
+                'error' => $e->getMessage(),
+                'user_agent' => request()->userAgent(),
+                'ip' => request()->ip()
+            ]);
+
+            abort(500, 'Errore nella generazione del PDF');
+        }
+    }
+
+    /**
+     * Generate PDF from privacy policy using TCPDF
+     *
+     * @param PrivacyPolicy $policy
+     * @param string $templateType
+     * @return string PDF content as binary string
+     * @privacy-safe Secure PDF generation with TCPDF
+     */
+    protected function generatePolicyPdfTcpdf(PrivacyPolicy $policy, string $templateType): string
+    {
+        // Create new TCPDF instance
+        $pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+
+        // ===== DOCUMENT INFORMATION =====
+        $pdf->SetCreator('FlorenceEGI - Rinascimento Digitale');
+        $pdf->SetAuthor('FlorenceEGI');
+        $pdf->SetTitle($policy->title);
+        $pdf->SetSubject('Privacy Policy - FlorenceEGI Marketplace NFT Sostenibile');
+        $pdf->SetKeywords('Privacy, GDPR, NFT, Blockchain, Sostenibilità, FlorenceEGI');
+
+        // ===== HEADER/FOOTER SETUP =====
+        $pdf->setPrintHeader(false);
+        $pdf->setPrintFooter(false);
+
+        // ===== MARGINS =====
+        $pdf->SetMargins(20, 20, 20);
+        $pdf->SetAutoPageBreak(TRUE, 25);
+
+        // ===== FONT SETUP =====
+        $pdf->SetFont('helvetica', '', 10);
+
+        // ===== ADD PAGE =====
+        $pdf->AddPage();
+
+        // ===== HEADER SECTION =====
+        $this->addPdfHeader($pdf, $policy);
+
+        // ===== META INFO SECTION =====
+        $this->addPdfMetaInfo($pdf, $policy);
+
+        // ===== CONTENT SECTION =====
+        $this->addPdfContent($pdf, $policy);
+
+        // ===== FOOTER SECTION =====
+        $this->addPdfFooter($pdf, $policy);
+
+        // Return PDF as string
+        return $pdf->Output('', 'S');
+    }
+
+    /**
+     * Add header section to PDF
+     *
+     * @param TCPDF $pdf
+     * @param PrivacyPolicy $policy
+     * @return void
+     */
+    protected function addPdfHeader(TCPDF $pdf, PrivacyPolicy $policy): void
+    {
+        // FlorenceEGI Brand Header
+        $pdf->SetFillColor(102, 126, 234); // Brand color #667eea
+        $pdf->Rect(0, 0, 210, 40, 'F');
+
+        // White text for header
+        $pdf->SetTextColor(255, 255, 255);
+        $pdf->SetFont('helvetica', 'B', 18);
+        $pdf->SetXY(20, 10);
+        $pdf->Cell(170, 10, 'FlorenceEGI', 0, 1, 'C');
+
+        $pdf->SetFont('helvetica', '', 12);
+        $pdf->SetXY(20, 22);
+        $pdf->Cell(170, 8, 'Rinascimento Digitale Sostenibile 🌱', 0, 1, 'C');
+
+        // Policy Title
+        $pdf->SetTextColor(0, 0, 0);
+        $pdf->SetFont('helvetica', 'B', 16);
+        $pdf->SetXY(20, 50);
+        $pdf->MultiCell(170, 8, $policy->title, 0, 'C');
+
+        $pdf->Ln(10);
+    }
+
+    /**
+     * Add meta information section to PDF
+     *
+     * @param TCPDF $pdf
+     * @param PrivacyPolicy $policy
+     * @return void
+     */
+    protected function addPdfMetaInfo(TCPDF $pdf, PrivacyPolicy $policy): void
+    {
+        $currentY = $pdf->GetY();
+
+        // Background for meta info
+        $pdf->SetFillColor(248, 249, 250);
+        $pdf->Rect(20, $currentY, 170, 35, 'F');
+
+        // Border
+        $pdf->SetDrawColor(102, 126, 234);
+        $pdf->SetLineWidth(0.5);
+        $pdf->Line(20, $currentY, 25, $currentY + 35);
+
+        $pdf->SetFont('helvetica', 'B', 9);
+        $pdf->SetTextColor(0, 0, 0);
+
+        // Meta information table
+        $metaY = $currentY + 5;
+        $pdf->SetXY(30, $metaY);
+
+        // Row 1
+        $pdf->Cell(35, 6, 'Versione:', 0, 0, 'L');
+        $pdf->Cell(40, 6, $policy->version, 0, 0, 'L');
+        $pdf->Cell(35, 6, 'Tipo Documento:', 0, 0, 'L');
+        $pdf->Cell(50, 6, ucfirst(str_replace('_', ' ', $policy->document_type)), 0, 1, 'L');
+
+        // Row 2
+        $pdf->SetX(30);
+        $pdf->Cell(35, 6, 'Data Effettiva:', 0, 0, 'L');
+        $pdf->Cell(40, 6, $policy->effective_date->format('d/m/Y'), 0, 0, 'L');
+        $pdf->Cell(35, 6, 'Lingua:', 0, 0, 'L');
+        $pdf->Cell(50, 6, strtoupper($policy->language), 0, 1, 'L');
+
+        // Row 3
+        $pdf->SetX(30);
+        $pdf->Cell(35, 6, 'Stato:', 0, 0, 'L');
+        $pdf->SetTextColor(102, 126, 234);
+        $pdf->Cell(40, 6, ucfirst($policy->status), 0, 0, 'L');
+        $pdf->SetTextColor(0, 0, 0);
+        $pdf->Cell(35, 6, 'Generato il:', 0, 0, 'L');
+        $pdf->Cell(50, 6, Carbon::now()->format('d/m/Y H:i'), 0, 1, 'L');
+
+        // Row 4
+        $pdf->SetX(30);
+        $pdf->Cell(35, 6, 'Contatto Privacy:', 0, 0, 'L');
+        $pdf->SetTextColor(102, 126, 234);
+        $pdf->Cell(125, 6, 'privacy@florenceegi.com', 0, 1, 'L');
+
+        $pdf->SetTextColor(0, 0, 0);
+        $pdf->SetY($currentY + 40);
+    }
+
+    /**
+     * Add content section to PDF
+     *
+     * @param TCPDF $pdf
+     * @param PrivacyPolicy $policy
+     * @return void
+     */
+    protected function addPdfContent(TCPDF $pdf, PrivacyPolicy $policy): void
+    {
+        // Convert Markdown to HTML and then to TCPDF-compatible format
+        $content = $this->formatContentForTcpdf($policy->content);
+
+        $pdf->SetFont('helvetica', '', 10);
+        $pdf->SetTextColor(44, 62, 80);
+
+        // Add content with HTML support
+        $pdf->writeHTML($content, true, false, true, false, '');
+    }
+
+    /**
+     * Add footer section to PDF
+     *
+     * @param TCPDF $pdf
+     * @param PrivacyPolicy $policy
+     * @return void
+     */
+    protected function addPdfFooter(TCPDF $pdf, PrivacyPolicy $policy): void
+    {
+        // Footer is handled by page event
+        $pdf->setFooterData();
+    }
+
+    /**
+     * Format content for TCPDF HTML rendering
+     *
+     * @param string $markdownContent
+     * @return string
+     */
+    protected function formatContentForTcpdf(string $markdownContent): string
+    {
+        // Convert markdown to HTML
+        $html = \Illuminate\Mail\Markdown::parse($markdownContent);
+
+        // Clean up for TCPDF
+        $html = str_replace(['<p>', '</p>'], ['<p style="margin-bottom: 10px; text-align: justify;">', '</p>'], $html);
+        $html = str_replace(['<h1>', '</h1>'], ['<h1 style="color: #2c3e50; font-size: 16px; margin-top: 20px; margin-bottom: 10px; border-bottom: 2px solid #667eea; padding-bottom: 5px;">', '</h1>'], $html);
+        $html = str_replace(['<h2>', '</h2>'], ['<h2 style="color: #495057; font-size: 14px; margin-top: 15px; margin-bottom: 8px;">', '</h2>'], $html);
+        $html = str_replace(['<h3>', '</h3>'], ['<h3 style="color: #6c757d; font-size: 12px; margin-top: 12px; margin-bottom: 6px;">', '</h3>'], $html);
+        $html = str_replace(['<strong>', '</strong>'], ['<strong style="color: #2c3e50; font-weight: bold;">', '</strong>'], $html);
+        $html = str_replace(['<em>', '</em>'], ['<em style="color: #667eea; font-style: italic;">', '</em>'], $html);
+        $html = str_replace(['<ul>', '</ul>'], ['<ul style="margin: 10px 0; padding-left: 20px;">', '</ul>'], $html);
+        $html = str_replace(['<ol>', '</ol>'], ['<ol style="margin: 10px 0; padding-left: 20px;">', '</ol>'], $html);
+        $html = str_replace(['<li>', '</li>'], ['<li style="margin-bottom: 5px;">', '</li>'], $html);
+
+        return $html;
+    }
+
+    /**
+     * Generate filename for policy PDF
+     *
+     * @param PrivacyPolicy $policy
+     * @return string
+     * @privacy-safe Sanitized filename generation
+     */
+    protected function getPolicyFilename(PrivacyPolicy $policy): string
+    {
+        $date = Carbon::now()->format('Y-m-d');
+        $type = str_replace('_', '-', $policy->document_type);
+        $version = str_replace('.', '-', $policy->version);
+
+        return "florenceegi-{$type}-v{$version}-{$date}.pdf";
+    }
+
+    /**
+     * Stream policy PDF (alternative to download)
+     *
+     * @param string $documentType
+     * @return \Illuminate\Http\Response
+     */
+    public function streamPolicy(string $documentType): Response
+    {
+        $policy = PrivacyPolicy::active()
+            ->documentType($documentType)
+            ->language(app()->getLocale())
+            ->firstOrFail();
+
+        $pdfContent = $this->generatePolicyPdfTcpdf($policy, $documentType);
+        $filename = $this->getPolicyFilename($policy);
+
+        return response($pdfContent)
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'inline; filename="' . $filename . '"')
+            ->header('Cache-Control', 'no-cache, no-store, must-revalidate');
+    }
 }

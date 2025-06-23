@@ -475,13 +475,27 @@ class User extends Authenticatable
      */
 
     /**
-     * Get all user consents given by this user.
+     * Get all the consent records for the user.
+     * This represents the user's consent history log.
      *
      * @return HasMany
      */
     public function consents(): HasMany
     {
-        return $this->hasMany(UserConsent::class);
+        return $this->hasMany(UserConsent::class, 'user_id');
+    }
+
+    /**
+     * Get the full forensic audit log for the user's consents.
+     *
+     * Recupera la cronologia di audit completa e dettagliata, come registrata
+     * nella tabella `consent_histories`. Utile per scopi di compliance e legali.
+     *
+     * @return HasMany
+     */
+    public function consentAuditLog(): HasMany
+    {
+        return $this->hasMany(ConsentHistory::class, 'user_id');
     }
 
     /**

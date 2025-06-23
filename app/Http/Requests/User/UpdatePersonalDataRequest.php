@@ -66,7 +66,7 @@ class UpdatePersonalDataRequest extends FormRequest
             $this->errorManager = app(ErrorManagerInterface::class);
             $this->consentService = app(ConsentService::class);
             $this->userCountry = $this->determineUserCountry();
-            
+
             $this->logger->info('UpdatePersonalDataRequest initialized', [
                 'component' => 'UpdatePersonalDataRequest',
                 'user_id' => FegiAuth::id(),
@@ -74,7 +74,7 @@ class UpdatePersonalDataRequest extends FormRequest
                 'request_ip' => $this->ip(),
                 'operation' => 'request_initialization'
             ]);
-            
+
         } catch (\Throwable $e) {
             // ✅ OS1.5 PROACTIVE SECURITY: Graceful degradation if dependencies fail
             if (app()->bound(UltraLogManager::class)) {
@@ -83,7 +83,7 @@ class UpdatePersonalDataRequest extends FormRequest
                     'operation' => 'dependency_initialization_failure'
                 ]);
             }
-            
+
             // Set safe defaults
             $this->userCountry = 'IT';
         }
@@ -102,7 +102,7 @@ class UpdatePersonalDataRequest extends FormRequest
     public function authorize(): bool
     {
         $this->initializeDependencies();
-        
+
         $this->logger->info('Personal data update authorization started', [
             'component' => 'UpdatePersonalDataRequest',
             'operation' => 'authorization_check',
@@ -112,7 +112,7 @@ class UpdatePersonalDataRequest extends FormRequest
         ]);
 
         // ✅ OS1.5 EXPLICITLY INTENTIONAL: Clear authorization steps
-        
+
         // STEP 1: Authentication Check
         if (!FegiAuth::check()) {
             $this->logger->warning('Personal data update denied - user not authenticated', [
@@ -175,7 +175,7 @@ class UpdatePersonalDataRequest extends FormRequest
     public function rules(): array
     {
         $this->initializeDependencies();
-        
+
         $this->logger->info('Generating validation rules for personal data update', [
             'component' => 'UpdatePersonalDataRequest',
             'operation' => 'validation_rules_generation',
@@ -287,7 +287,7 @@ class UpdatePersonalDataRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $this->initializeDependencies();
-        
+
         $this->logger->debug('Preparing personal data for validation', [
             'component' => 'UpdatePersonalDataRequest',
             'operation' => 'input_preparation',
@@ -375,7 +375,7 @@ class UpdatePersonalDataRequest extends FormRequest
             }
 
             // ✅ Use ConsentService for accurate consent checking
-            $hasConsent = $this->consentService->hasConsent($user, 'allow_personal_data_processing');
+            $hasConsent = $this->consentService->hasConsent($user, 'allow-personal-data-processing');
 
             $this->logger->debug('GDPR consent verification completed', [
                 'component' => 'UpdatePersonalDataRequest',
@@ -411,10 +411,10 @@ class UpdatePersonalDataRequest extends FormRequest
     private function isFirstTimeConsentSetup(): bool
     {
         $consentData = $this->input('consents', []);
-        
+
         // User is providing main consent for first time
-        return isset($consentData['allow_personal_data_processing']) 
-               && $consentData['allow_personal_data_processing'] === '1';
+        return isset($consentData['allow-personal-data-processing'])
+               && $consentData['allow-personal-data-processing'] === '1';
     }
 
     /**
@@ -431,7 +431,7 @@ class UpdatePersonalDataRequest extends FormRequest
     {
         try {
             $hasConsent = \App\Models\UserConsent::where('user_id', $user->id)
-                ->where('consent_type', 'allow_personal_data_processing')
+                ->where('consent_type', 'allow-personal-data-processing')
                 ->where('granted', true)
                 ->exists();
 
@@ -590,7 +590,7 @@ class UpdatePersonalDataRequest extends FormRequest
     {
         try {
             $validator = FiscalValidatorFactory::create($this->userCountry);
-            
+
             $rules = ['nullable', 'string'];
 
             // Add country-specific format validation for MVP countries
@@ -721,7 +721,7 @@ class UpdatePersonalDataRequest extends FormRequest
         // Try to detect from Accept-Language header (MVP countries)
         $acceptLanguage = $this->header('Accept-Language', '');
         $languageMap = [
-            'it' => 'IT', 'fr' => 'FR', 'es' => 'SP', 
+            'it' => 'IT', 'fr' => 'FR', 'es' => 'SP',
             'pt' => 'PT', 'en-GB' => 'EN', 'de' => 'DE'
         ];
 
@@ -766,9 +766,9 @@ class UpdatePersonalDataRequest extends FormRequest
         return [
             // MVP Countries (Primary Support)
             'IT', 'FR', 'SP', 'PT', 'EN', 'DE',
-            
+
             // Additional Countries (Extended Support)
-            'US', 'NL', 'BE', 'CH', 'AT', 'SE', 'NO', 'DK', 
+            'US', 'NL', 'BE', 'CH', 'AT', 'SE', 'NO', 'DK',
             'FI', 'IE', 'PL', 'CZ', 'HU', 'GR'
         ];
     }
@@ -799,7 +799,7 @@ class UpdatePersonalDataRequest extends FormRequest
     private function sanitizeConsentData(array $consents): array
     {
         $sanitized = [];
-        $allowedConsents = ['allow_personal_data_processing', 'marketing', 'analytics'];
+        $allowedConsents = ['allow-personal-data-processing', 'marketing', 'analytics'];
 
         foreach ($consents as $key => $value) {
             if (in_array($key, $allowedConsents)) {
@@ -822,13 +822,13 @@ class UpdatePersonalDataRequest extends FormRequest
     private function sanitizeConsentMetadata(array $metadata): array
     {
         $sanitized = [];
-        
+
         if (isset($metadata['processing_purposes']) && is_array($metadata['processing_purposes'])) {
             $allowedPurposes = [
                 'account_management', 'service_delivery', 'legal_compliance',
                 'marketing', 'analytics', 'customer_support'
             ];
-            
+
             $sanitized['processing_purposes'] = array_filter(
                 $metadata['processing_purposes'],
                 fn($purpose) => in_array($purpose, $allowedPurposes)

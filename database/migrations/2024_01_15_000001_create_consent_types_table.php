@@ -30,8 +30,6 @@ return new class extends Migration
 
             // Type identification
             $table->string('slug', 100)->unique(); // marketing_emails, analytics_tracking, etc.
-            $table->json('name'); // Multilingual name {'en': 'Marketing Emails', 'it': 'Email Marketing'}
-            $table->json('description'); // Multilingual description
 
             // GDPR compliance
             $table->enum('legal_basis', [

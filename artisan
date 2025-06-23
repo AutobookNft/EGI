@@ -3,6 +3,15 @@
 
 use Symfony\Component\Console\Input\ArgvInput;
 
+/**
+ * Polyfill for missing JSON constants in a broken PHP environment.
+ * This ensures the application can run even if the PHP build
+ * fails to define standard constants.
+ */
+if (!defined('JSON_SORT_KEYS')) {
+    define('JSON_SORT_KEYS', 8);
+}
+
 define('LARAVEL_START', microtime(true));
 
 // Register the Composer autoloader...

@@ -231,6 +231,9 @@ return [
         // My Added Errors - Developer Messages IT
         'gdpr_consent_page_failed' => 'Errore caricamento pagina consensi GDPR. Verificare ConsentService, DTO integration e view data structure.',
         'gdpr_service_unavailable' => 'ConsentService GDPR o dipendenze non disponibili. Controllare database connection, DTO files e traduzioni.',
+
+        'legal_content_load_failed' => 'Caricamento del contenuto legale fallito. Controllare i permessi dei file in resources/legal/ e la validità del symlink "current".',
+        'terms_acceptance_check_failed' => 'Fallimento nella verifica dell\'accettazione dei termini correnti per l\'utente. Controllare la logica in ConsentService e la raggiungibilità del LegalContentService.',
     ],
 
     'user' => [
@@ -407,7 +410,8 @@ return [
         'gdpr_notification_persistence_failed' => 'Non è stato possibile completare l\'operazione richiesta per la gestione dei tuoi dati. Ti invitiamo a riprovare più tardi o contattare il supporto.',
         'gdpr_service_unavailable' => 'Il servizio di gestione consensi non è al momento disponibile. Ti preghiamo di riprovare più tardi.',
 
-        
+        'legal_content_load_failed' => 'Impossibile caricare i documenti legali in questo momento. Riprova più tardi.',
+        // Nota: per TERMS_ACCEPTANCE_CHECK_FAILED usiamo la traduzione 'generic_error' già esistente
     ],
 
     // Generic message (used by UserInterfaceHandler if no specific message found)

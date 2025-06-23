@@ -3,16 +3,20 @@
 namespace App\Services\Gdpr;
 
 use App\DataTransferObjects\Gdpr\ConsentTypeDto;
+use App\Models\ConsentHistory;
 use App\Models\User;
 use App\Models\UserConsent;
 use App\Models\ConsentVersion;
 use Illuminate\Support\Collection;
+use App\Services\Gdpr\LegalContentService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 use Ultra\UltraLogManager\UltraLogManager;
 use Ultra\ErrorManager\Interfaces\ErrorManagerInterface;
 use Carbon\Carbon;
 use PSpell\Config;
+use App\Models\ConsentType;
+
 
 /**
  * @Oracode Service: Consent Management System
@@ -27,6 +31,13 @@ use PSpell\Config;
  */
 class ConsentService
 {
+
+    /**
+     * Legal content service for fetching legal documents
+     * @var LegalContentService
+     */
+    protected LegalContentService $legalContentService;
+
     /**
      * Logger instance for audit trail
      * @var UltraLogManager
@@ -54,57 +65,45 @@ class ConsentService
         $this->errorManager = $errorManager;
     }
 
-    /**
-     * @Oracode Method: Get All Consent Types as DTO Collection
-     * 🎯 Purpose: Provide type-safe, localized consent type definitions
-     * 📤 Output: Collection of ConsentTypeDto instances
-     * 🧱 Core Logic: Runtime localization with DTO pattern
+     /**
+     * @Oracode Method: Get All Consent Types as a DTO Collection (FINAL Refactored)
+     * 🎯 Purpose: To be the single source of truth for consent configurations, respecting
+     * the application's existing DTO contract.
+     * 📤 Output: A Collection of `App\DataTransferObjects\Gdpr\ConsentTypeDto`.
+     * 🧱 Core Logic: Reads consent configurations from the database, caches them,
+     * and maps the Eloquent Models to the pre-existing DTO structure to ensure
+     * zero impact on the rest of the application.
      */
     public function getConsentTypes(): Collection
     {
-        return collect([
-            new ConsentTypeDto(
-                key: 'functional',
-                category: 'necessary',
-                legalBasis: 'legitimate_interest',
-                required: true,
-                defaultValue: true,
-                canWithdraw: false
-            ),
-            new ConsentTypeDto(
-                key: 'analytics',
-                category: 'statistics',
-                legalBasis: 'consent',
-                required: false,
-                defaultValue: false,
-                canWithdraw: true
-            ),
-            new ConsentTypeDto(
-                key: 'marketing',
-                category: 'marketing',
-                legalBasis: 'consent',
-                required: false,
-                defaultValue: false,
-                canWithdraw: true
-            ),
-            new ConsentTypeDto(
-                key: 'profiling',
-                category: 'profiling',
-                legalBasis: 'consent',
-                required: false,
-                defaultValue: false,
-                canWithdraw: true
-            ),
-            new ConsentTypeDto(
-                key: 'allow_personal_data_processing',
-                category: 'data_processing',
-                legalBasis: 'consent',
-                required: false,
-                defaultValue: false,
-                canWithdraw: true
-            ),
-        ]);
+        $cacheKey = 'consent_types.all_active_dtos.final'; // Nuova chiave per la massima sicurezza
+
+        return Cache::rememberForever($cacheKey, function () {
+
+            if (isset($this->logger)) {
+                $this->logger->info('Cache miss for consent DTOs. Fetching from DB and mapping to existing DTO...');
+            }
+
+            $consentTypesFromDb = ConsentType::where('is_active', true)
+                ->orderBy('priority_order')
+                ->get();
+
+            // Mappiamo ogni modello Eloquent ESATTAMENTE al DTO esistente
+            return $consentTypesFromDb->map(function (ConsentType $type) {
+                return new ConsentTypeDto(
+                    // Mappatura esplicita: Proprietà del DTO <-- Colonna della Tabella
+                    key:          $type->slug,
+                    category:     $type->legal_basis, // Usiamo la base legale come 'category' per coerenza
+                    legalBasis:   $type->legal_basis,
+                    required:     $type->is_required,
+                    defaultValue: false,
+                    canWithdraw:  $type->can_withdraw,
+                    processingPurposes: json_decode($type->processing_purposes)
+                );
+            });
+        });
     }
+
 
     /**
      * @Oracode Method: Get Single Consent Type
@@ -478,13 +477,17 @@ class ConsentService
     }
 
 
-    /**
-     * @Oracode Method: Grant Consent with UPSERT Logic
-     * 🎯 Purpose: Grant or update existing consent using proper UPSERT pattern
-     * 📥 Input: User, consent type, metadata
-     * 📤 Output: Boolean success result
-     * 🛡️ Privacy: GDPR-compliant consent management with audit trail
-     * 🧱 Core Logic: Smart UPSERT - update metadata if same, create new if changed
+   /**
+     * @Oracode Method: Grant Consent with Dual-Write Audit Trail
+     * 🎯 Purpose: Grant or update a user's consent, ensuring a fast status check
+     * and a parallel, detailed forensic audit log.
+     * 📥 Input: User, consent type string, optional metadata.
+     * 📤 Output: Boolean success result.
+     * 🛡️ Privacy: Creates/updates a record in `user_consents` for live status
+     * and creates an immutable forensic record in `consent_histories`
+     * for full GDPR compliance.
+     * 🧱 Core Logic: Transactional dual-write. A "hot" table (`user_consents`) for
+     * application logic and a "cold" table (`consent_histories`) for auditing.
      */
     public function grantConsent(User $user, string $consentType, array $metadata = []): bool
     {
@@ -503,12 +506,11 @@ class ConsentService
 
             $consentVersion = $this->getCurrentConsentVersion();
 
+            // CORREZIONE 3: L'array restituito da questa transazione viene assegnato alla variabile $result.
             $result = DB::transaction(function () use ($user, $consentType, $consentConfig, $consentVersion, $metadata) {
-
-                // ✅ OS1.5 EXPLICITLY INTENTIONAL: Check if consent already exists
                 $existingConsent = UserConsent::where('user_id', $user->id)
                     ->where('consent_type', $consentType)
-                    ->latest()
+                    ->latest('created_at')
                     ->first();
 
                 $consentData = [
@@ -520,51 +522,33 @@ class ConsentService
                     'user_agent' => request()->userAgent(),
                     'legal_basis' => $consentConfig->legalBasis,
                     'withdrawal_method' => null,
-                    'metadata' => array_merge([
-                        'source' => 'consent_grant',
-                        'grant_timestamp' => now()->toISOString(),
+                    'metadata' => array_merge($metadata, [
+                        'source' => $metadata['source'] ?? 'consent_grant',
+                        'grant_timestamp' => now()->toIso8601String(),
                         'session_id' => session()->getId()
-                    ], $metadata)
+                    ])
                 ];
 
                 if ($existingConsent && $existingConsent->granted === true) {
-                    // ✅ Consent already granted, just update metadata
+                    // CORREZIONE 2: Aggiunto esplicitamente updated_at per chiarezza.
                     $existingConsent->update([
                         'metadata' => $consentData['metadata'],
                         'updated_at' => now()
                     ]);
-
-                    $this->logger->info('ConsentService: Updated existing granted consent metadata', [
-                        'user_id' => $user->id,
-                        'consent_type' => $consentType,
-                        'consent_id' => $existingConsent->id,
-                        'operation' => 'consent_metadata_update'
-                    ]);
-
-                    return $existingConsent;
-
+                    return ['current' => $existingConsent, 'previous' => $existingConsent];
                 } else {
-                    // ✅ Create new consent record (first time or re-grant after withdrawal)
                     $newConsent = UserConsent::create($consentData);
-
-                    $this->logger->info('ConsentService: Created new consent record', [
-                        'user_id' => $user->id,
-                        'consent_type' => $consentType,
-                        'consent_id' => $newConsent->id,
-                        'previous_consent_id' => $existingConsent?->id,
-                        'operation' => $existingConsent ? 'consent_re_grant' : 'consent_first_grant'
-                    ]);
-
-                    return $newConsent;
+                    return ['current' => $newConsent, 'previous' => $existingConsent];
                 }
             });
 
-            // Update user's consent summary
-            $this->updateUserConsentSummary($user);
+            // Integrazione della cronologia forense
+            $this->recordInHistory($result['current'], ConsentHistory::ACTIONS['granted'], $result['previous']);
 
-            // Clear cache
+            $this->updateUserConsentSummary($user);
             $this->clearUserConsentCache($user);
 
+            // Questo è il return che soddisfa la firma `: bool` del metodo.
             return true;
 
         } catch (\Exception $e) {
@@ -580,13 +564,16 @@ class ConsentService
     }
 
 
-    /**
-     * @Oracode Method: Withdraw Consent with Audit Trail
-     * 🎯 Purpose: Withdraw consent using proper audit trail pattern
-     * 📥 Input: User, consent type, metadata array
-     * 📤 Output: Boolean success result
-     * 🛡️ Privacy: GDPR-compliant consent withdrawal with complete audit trail
-     * 🧱 Core Logic: Always create withdrawal record for audit compliance
+/**
+     * @Oracode Method: Withdraw Consent with Dual-Write Audit Trail
+     * 🎯 Purpose: Withdraw a user's consent, ensuring a fast status check
+     * and a parallel, detailed forensic audit log of the withdrawal event.
+     * 📥 Input: User, consent type string, optional metadata.
+     * 📤 Output: Boolean success result.
+     * 🛡️ Privacy: Creates a `granted=false` record in `user_consents` and a parallel,
+     * immutable forensic record in `consent_histories` for non-repudiation.
+     * 🧱 Core Logic: Guarantees a complete and immutable audit trail for every withdrawal
+     * action, separating application state from the forensic log.
      */
     public function withdrawConsent(User $user, string $consentType, array $metadata = []): bool
     {
@@ -603,7 +590,6 @@ class ConsentService
                 throw new \InvalidArgumentException("Invalid consent type: {$consentType}");
             }
 
-            // Check if consent can be withdrawn
             if (!$consentConfig->canWithdraw) {
                 $this->logger->warning('ConsentService: Attempt to withdraw non-withdrawable consent', [
                     'user_id' => $user->id,
@@ -616,10 +602,14 @@ class ConsentService
             $consentVersion = $this->getCurrentConsentVersion();
             $withdrawalMethod = $metadata['withdrawal_method'] ?? 'manual';
 
-            DB::transaction(function () use ($user, $consentType, $withdrawalMethod, $consentConfig, $consentVersion, $metadata) {
+            // CORREZIONE 3: L'array restituito da questa transazione viene assegnato alla variabile $result.
+            $result = DB::transaction(function () use ($user, $consentType, $withdrawalMethod, $consentConfig, $consentVersion, $metadata) {
+                $previousConsent = UserConsent::where('user_id', $user->id)
+                    ->where('consent_type', $consentType)
+                    ->latest('created_at')
+                    ->first();
 
-                // ✅ OS1.5 EXPLICITLY INTENTIONAL: Always create withdrawal record for audit trail
-                UserConsent::create([
+                $newWithdrawalRecord = UserConsent::create([
                     'user_id' => $user->id,
                     'consent_type' => $consentType,
                     'granted' => false,
@@ -628,20 +618,23 @@ class ConsentService
                     'user_agent' => request()->userAgent(),
                     'legal_basis' => $consentConfig->legalBasis,
                     'withdrawal_method' => $withdrawalMethod,
-                    'metadata' => array_merge([
+                    'metadata' => array_merge($metadata, [
                         'source' => 'withdrawal',
-                        'withdrawal_timestamp' => now()->toISOString(),
+                        'withdrawal_timestamp' => now()->toIso8601String(),
                         'session_id' => session()->getId()
-                    ], $metadata)
+                    ])
                 ]);
+
+                return ['current' => $newWithdrawalRecord, 'previous' => $previousConsent];
             });
 
-            // Update user's consent summary
-            $this->updateUserConsentSummary($user);
+            // Integrazione della cronologia forense
+            $this->recordInHistory($result['current'], ConsentHistory::ACTIONS['withdrawn'], $result['previous']);
 
-            // Clear cache
+            $this->updateUserConsentSummary($user);
             $this->clearUserConsentCache($user);
 
+            // Questo è il return che soddisfa la firma `: bool` del metodo.
             return true;
 
         } catch (\Exception $e) {
@@ -694,12 +687,22 @@ class ConsentService
             return Cache::remember($cacheKey, 300, function () use ($user, $consentType) {
                 $consent = $user->consents()
                     ->where('consent_type', $consentType)
-                    ->latest()
+                    ->latest('created_at') // Corretto da latest() a latest('created_at') per essere espliciti
                     ->first();
 
                 if (!$consent) {
-                    // Return default value if no explicit consent found
-                    return $this->consentTypes[$consentType]['default_value'] ?? false;
+                    // Se non esiste un consenso esplicito, recuperiamo la configurazione di default dal DTO.
+
+                    // ✅ CORREZIONE: Usiamo il metodo corretto per ottenere il DTO di configurazione.
+                    $consentConfig = $this->getConsentType($consentType);
+
+                    // Se per qualche motivo il tipo non è valido, il default sicuro è 'false'.
+                    if (!$consentConfig) {
+                        return false;
+                    }
+
+                    // ✅ CORREZIONE: Accediamo alla proprietà 'defaultValue' dell'oggetto DTO.
+                    return $consentConfig->defaultValue;
                 }
 
                 return $consent->granted;
@@ -713,7 +716,7 @@ class ConsentService
                 'log_category' => 'CONSENT_SERVICE_ERROR'
             ]);
 
-            // Return safe default
+            // Il default sicuro in caso di errore rimane 'false'.
             return false;
         }
     }
@@ -815,6 +818,64 @@ class ConsentService
             Cache::forget("user_consent_{$user->id}_{$consentType->key}");
         }
         Cache::forget("user_consent_status_{$user->id}");
+    }
+
+    /**
+     * @Oracode Method: Record Forensic Audit Trail
+     * 🎯 Purpose: Create a detailed, immutable record of a consent event.
+     * 📥 Input: The created UserConsent, the action type, and the previous state.
+     * 📤 Output: Void. Handles its own errors internally to not break user flow.
+     * 🛡️ Privacy: The core of GDPR Article 7 compliance documentation.
+     * 🧱 Core Logic: Centralizes the creation of ConsentHistory records.
+     *
+     * @param UserConsent $userConsent The UserConsent record that was just created.
+     * @param string $action The action performed (e.g., 'granted', 'withdrawn').
+     * @param UserConsent|null $previousConsent The previous state, if any.
+     * @return void
+     */
+    private function recordInHistory(UserConsent $userConsent, string $action, ?UserConsent $previousConsent = null): void
+    {
+        try {
+            // Prepara i dati per il record di audit forense.
+            // Il modello ConsentHistory è ricco di campi per la massima compliance.
+            // Qui popoliamo i più importanti basandoci sui dati a nostra disposizione.
+             ConsentHistory::create([
+                'user_id' => $userConsent->user_id,
+                'user_consent_id' => $userConsent->id,
+                'consent_type_slug' => $userConsent->consent_type,
+                'action' => $action,
+                'action_timestamp' => $userConsent->created_at,
+                'action_source' => $userConsent->metadata['source'] ?? 'web_form',
+                'interaction_method' => $userConsent->metadata['interaction_method'] ?? 'form_submit',
+                'previous_state' => $previousConsent ? ['granted' => $previousConsent->granted] : null,
+                'new_state' => ['granted' => $userConsent->granted],
+                'state_diff' => [
+                    'from' => $previousConsent?->granted,
+                    'to' => $userConsent->granted,
+                ],
+                'consent_version' => $userConsent->consentVersion?->version,
+                'ip_address' => $userConsent->ip_address,
+                'user_agent' => $userConsent->user_agent,
+                'session_id' => session()->getId(),
+                'legal_basis' => $userConsent->legal_basis,
+                'triggered_by' => 'user',
+            ]);
+
+            $this->logger->info('Forensic consent history recorded successfully.', [
+                'user_id' => $userConsent->user_id,
+                'user_consent_id' => $userConsent->id,
+                'action' => $action,
+                'log_category' => 'CONSENT_HISTORY_SUCCESS'
+            ]);
+
+        } catch (\Exception $e) {
+            // Logga l'errore in modo critico, ma non bloccare il flusso principale dell'utente.
+            // La registrazione della cronologia non deve MAI impedire all'utente di completare l'azione.
+            $this->errorManager->handle('CONSENT_HISTORY_RECORDING_FAILED', [
+                'user_consent_id' => $userConsent->id,
+                'error_message' => $e->getMessage()
+            ], $e, false); // il 'false' finale indica di non lanciare l'eccezione
+        }
     }
 
     /**
@@ -984,5 +1045,93 @@ class ConsentService
 
         // If translation exists and is an array, return it; otherwise return empty array
         return is_array($translated) ? $translated : [];
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════════
+    // OS2.0 - LEGAL TERMS MANAGEMENT INTEGRATION
+    // ═══════════════════════════════════════════════════════════════════════════════
+
+    /**
+     * @Oracode Method: Get Current Terms For User
+     * 🎯 Purpose: Retrieve the versioned content of the Terms of Service applicable to the user's type.
+     * 📥 Input: User model, optional locale.
+     * 📤 Output: Array of the legal terms content.
+     * 🧱 Core Logic: Delegates file reading to LegalContentService to maintain separation of concerns.
+     *
+     * @param User $user
+     * @param string $locale
+     * @return array|null
+     */
+    public function getTermsForUserType(User $user, string $locale = 'it'): ?array
+    {
+        return $this->legalContentService->getCurrentTermsContent($user->usertype, $locale);
+    }
+
+    /**
+     * @Oracode Method: Record Terms of Service Consent
+     * 🎯 Purpose: Create a specific, audited consent record for ToS acceptance.
+     * 📥 Input: User model, version string, optional context.
+     * 📤 Output: Boolean success status.
+     * 🛡️ Privacy: Uses the generic grantConsent method to ensure a full forensic audit trail.
+     *
+     * @param User $user
+     * @param string $version
+     * @param array $context Additional metadata for the consent record.
+     * @return bool
+     */
+    public function recordTermsConsent(User $user, string $version, array $context = []): bool
+    {
+        $metadata = array_merge($context, [
+            'version' => $version,
+            'source' => $context['source'] ?? 'terms_acceptance_page',
+            'acceptance_timestamp' => now()->toIso8601String(),
+        ]);
+
+        return $this->grantConsent($user, 'terms-of-service', $metadata);
+    }
+
+    /**
+     * @Oracode Method: Check if User Has Accepted Current Terms
+     * 🎯 Purpose: Verify if a user has accepted the latest active version of the ToS.
+     * 📥 Input: User model.
+     * 📤 Output: Boolean result.
+     * 🧱 Core Logic: Compares the user's latest accepted version against the current version string.
+     *
+     * @param User $user
+     * @return bool
+     */
+    public function hasAcceptedCurrentTerms(User $user): bool
+    {
+        try {
+            // 1. Get the version string of the currently active terms (e.g., "1.1.0")
+            $currentVersion = $this->legalContentService->getCurrentVersionString();
+
+            // 2. Find the latest 'terms-of-service' consent for the user.
+            $latestTermsConsent = $user->consents()
+                ->where('consent_type', 'terms-of-service')
+                ->where('granted', true)
+                ->latest('created_at')
+                ->first();
+
+            // 3. If the user has never accepted the terms, they haven't accepted the current ones.
+            if (!$latestTermsConsent) {
+                return false;
+            }
+
+            // 4. Extract the version from the consent metadata.
+            $acceptedVersion = $latestTermsConsent->metadata['version'] ?? '0.0.0';
+
+            // 5. Use version_compare to safely compare semantic versions.
+            // Returns true if the accepted version is greater than or equal to the current one.
+            return version_compare($acceptedVersion, $currentVersion, '>=');
+
+        } catch (\Throwable $e) {
+            $this->errorManager->handle('TERMS_ACCEPTANCE_CHECK_FAILED', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+            ], $e, false); // Logga senza bloccare il flusso, ritornando un safe default.
+
+            return false; // In caso di errore, il default sicuro è 'false'.
+        }
     }
 }

@@ -189,6 +189,52 @@ return [
         'gdpr_notification_send_failed' => 'Critical error while sending a GDPR notification. Check notification service configuration and logs for details.',
         'gdpr_notification_dispatch_failed' => 'Critical error during GDPR notification dispatch. Check handler configuration and input data validity.',
         'gdpr_notification_persistence_failed' => 'Critical error during GDPR notification persistence to database. Transaction failed, possible data integrity issue.',
+        'gdpr_service_unavailable' => 'GDPR ConsentService or related dependencies unavailable. Check database, DTOs, and translations.',
+
+        // GDPR Consent Errors - Developer Messages EN
+        'gdpr_consent_required' => 'GDPR consent required but not provided. Check ConsentService::hasConsent() and consent middleware.',
+        'gdpr_consent_update_error' => 'Error updating user consents. Check ConsentService::updateUserConsents() and form validation.',
+        'gdpr_consent_save_error' => 'Failed to save consents to database. Check DB transaction and UserConsent model constraints.',
+        'gdpr_consent_load_error' => 'Error loading user consent status. Check ConsentService::getUserConsentStatus() and model relationships.',
+
+        // GDPR Export Errors - Developer Messages EN
+        'gdpr_export_request_error' => 'Error requesting GDPR data export. Check DataExportService and request validation.',
+        'gdpr_export_limit_reached' => 'GDPR export limit reached. Check rate limiting and export policies.',
+        'gdpr_export_create_error' => 'Failed to create export file. Check DataExportService::processExport() and storage permissions.',
+        'gdpr_export_download_error' => 'Error downloading export file. Check file existence, permissions, and URL generation.',
+        'gdpr_export_status_error' => 'Error verifying export status. Check DataExport model and status tracking.',
+        'gdpr_export_processing_failed' => 'Failed to process export data. Check background jobs and data serialization.',
+
+        // GDPR Processing Restriction Errors - Developer Messages EN
+        'gdpr_processing_restricted' => 'Operation blocked by GDPR processing restriction. Check ProcessingRestrictionService.',
+        'gdpr_processing_limit_view_error' => 'Error loading processing limitations view. Check middleware and view data.',
+        'gdpr_processing_restriction_create_error' => 'Failed to create processing restriction. Check ProcessingRestrictionService::createRestriction().',
+        'gdpr_processing_restriction_remove_error' => 'Error removing processing restriction. Check permissions and validation logic.',
+        'gdpr_processing_restriction_limit_reached' => 'Processing restrictions limit reached. Check business rules and rate limiting.',
+
+        // GDPR Deletion Errors - Developer Messages EN
+        'gdpr_deletion_request_error' => 'Error requesting GDPR account deletion. Check AccountDeletionService and validation.',
+        'gdpr_deletion_cancellation_error' => 'Failed to cancel deletion request. Check status transitions and business logic.',
+        'gdpr_deletion_processing_error' => 'Error processing account deletion. Check background jobs and data cleanup.',
+
+        // GDPR Breach Report Errors - Developer Messages EN
+        'gdpr_breach_report_error' => 'Error submitting GDPR breach report. Check BreachReportService and form validation.',
+        'gdpr_breach_evidence_upload_error' => 'Failed to upload breach evidence. Check file upload service and storage.',
+
+        // GDPR Activity Log Errors - Developer Messages EN
+        'gdpr_activity_log_error' => 'Error logging GDPR activity. Check ActivityLogService and database logging.',
+
+        // GDPR Security Errors - Developer Messages EN
+        'gdpr_enhanced_security_required' => 'Enhanced authentication required for GDPR operation. Check security middleware.',
+        'gdpr_critical_security_required' => 'Password confirmation required for critical GDPR operation. Check auth verification.',
+
+        // My Added Errors - Developer Messages EN
+        'gdpr_consent_page_failed' => 'Error loading GDPR consent page. Check ConsentService, DTO integration, and view data structure.',
+        'gdpr_service_unavailable' => 'GDPR ConsentService or dependencies unavailable. Check database connection, DTO files, and translations.',
+
+        'legal_content_load_failed' => 'Legal content loading failed. Check file permissions in resources/legal/ and the validity of the "current" symlink.',
+        'terms_acceptance_check_failed' => 'Failed to verify current terms acceptance for user. Check logic in ConsentService and reachability of LegalContentService.',
+
     ],
     'user' => [
         // == Existing Entries ==
@@ -362,6 +408,10 @@ return [
         'gdpr_notification_send_failed_user' => 'We\'re sorry, a technical issue occurred and an important notification could not be sent. Our team has been notified.',
         'gdpr_notification_dispatch_failed' => 'A problem occurred while processing your privacy-related request. Our team has been notified and will resolve the issue as soon as possible.',
         'gdpr_notification_persistence_failed' => 'We were unable to complete the requested operation for your data management. Please try again later or contact support.',
+        'gdpr_service_unavailable' => 'The consent management service is currently unavailable. Please try again later.',
+
+        'legal_content_load_failed' => 'Unable to load legal documents at this time. Please try again later.',
+        // Note: for TERMS_ACCEPTANCE_CHECK_FAILED, use the existing translation for 'generic_error'
     ],
 
     // Generic message (used by UserInterfaceHandler if no specific message found)

@@ -63,7 +63,8 @@
                         :available-countries="$availableCountries"
                         :validation-config="$validationConfig"
                         :can-edit="$canEdit"
-                        :auth-type="$authType" />
+                        :auth-type="$authType"
+                        :platform-services-consent="$platformServicesConsent" />
 
                 </div>
 

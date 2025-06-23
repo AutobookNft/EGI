@@ -2544,5 +2544,30 @@ return [
             'msg_to' => 'toast',
         ],
 
+        // ====================================================
+        // LEGAL SYSTEM ERRORS
+        // ====================================================
+        'LEGAL_CONTENT_LOAD_FAILED' => [
+            'type' => 'critical',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.legal_content_load_failed',
+            'user_message_key' => 'error-manager::errors.user.legal_content_load_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'TERMS_ACCEPTANCE_CHECK_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'not', // Non blocca la richiesta, il metodo ritorna 'false' come default
+            'dev_message_key' => 'error-manager::errors.dev.terms_acceptance_check_failed',
+            'user_message_key' => 'error-manager::errors.user.generic_error', // Non mostriamo un errore specifico all'utente
+            'http_status_code' => 200, // La pagina viene caricata, l'errore è di sottofondo
+            'devTeam_email_need' => true, // Notifica il team perché è un errore di compliance importante
+            'notify_slack' => true,
+            'msg_to' => 'toast', // Un avviso non invadente, se necessario
+        ],
+
     ]
 ];

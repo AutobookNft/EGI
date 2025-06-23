@@ -31,6 +31,7 @@ use Ultra\ErrorManager\Interfaces\ErrorManagerInterface;
 use Ultra\UltraLogManager\UltraLogManager;
 use Laravel\Fortify\Fortify;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Services\Gdpr\LegalContentService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
@@ -72,7 +73,8 @@ class AppServiceProvider extends ServiceProvider
                 $app->make(AuditLogService::class),
                 $app->make(CollectionService::class),
                 $app->make(WalletServiceInterface::class),
-                $app->make(UserRoleServiceInterface::class)
+                $app->make(UserRoleServiceInterface::class),
+                $app->make(LegalContentService::class),
             );
         });
 

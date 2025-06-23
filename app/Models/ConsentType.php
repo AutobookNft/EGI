@@ -116,6 +116,7 @@ class ConsentType extends Model
         'archive' => 'archive',
     ];
 
+
     /**
      * Get the user who created this consent type.
      *

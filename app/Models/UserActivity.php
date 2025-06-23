@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Gdpr\GdprActivityCategory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -47,7 +48,8 @@ class UserActivity extends Model
         'metadata' => 'array',
         'expires_at' => 'datetime',
         'created_at' => 'datetime',
-        'updated_at' => 'datetime'
+        'updated_at' => 'datetime',
+        'category' => GdprActivityCategory::class,
     ];
 
     /**
