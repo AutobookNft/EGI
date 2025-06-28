@@ -104,6 +104,7 @@ return new class extends Migration
             $table->string('doc_photo_path_r')->nullable();
             $table->enum('verification_status', ['pending', 'verified', 'rejected', 'expired'])->default('pending');
             $table->boolean('is_encrypted')->default(true);
+            $table->timestamp('verified_at')->nullable();
             $table->timestamps();
             $table->unique('user_id');
         });

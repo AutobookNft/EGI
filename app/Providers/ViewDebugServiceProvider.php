@@ -18,9 +18,9 @@ class ViewDebugServiceProvider extends ServiceProvider
 
             view()->share('__current_view_path', $relativePath);
 
-            if (app()->environment('local')) {
-                logger()->info('Current view: ' . $relativePath);
-            }
+            // if (app()->environment('local')) {
+            //     logger()->info('Current view: ' . $relativePath);
+            // }
         });
     }
 }

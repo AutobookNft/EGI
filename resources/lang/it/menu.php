@@ -27,4 +27,11 @@ return [
     'my_organization' => 'La Mia Organizzazione',
     'my_documents' => 'I Miei Documenti',
     'my_invoice_preferences' => 'Preferenze Fatturazione',
+    'privacy_policy' => 'Politica sulla Privacy',
+    'terms_of_service' => 'Termini di Servizio',
+    'cookie_policy' => 'Politica sui Cookie',
+    'breach_report' => 'Segnalazione Violazioni',
+    'activity_log' => 'Registro Attività',
+    'limit_processing' => 'Limita il Trattamento',
+    'export_data' => 'Esporta Dati',
 ];

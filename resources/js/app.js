@@ -5,6 +5,9 @@ console.log('Inizializzazione di app.js (inizio)'); // Debugging
 import './bootstrap';
 console.log('bootstrap importato.'); // Debugging
 
+import './legal/editor'; // Importa il file editor.js
+console.log('editor.js importato.'); // Debugging
+
 // Importa il polyfill whatwg-fetch
 import 'whatwg-fetch';
 console.log('Polyfill whatwg-fetch importato.'); // Debugging

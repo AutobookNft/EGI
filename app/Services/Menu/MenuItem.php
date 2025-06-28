@@ -3,14 +3,16 @@
 namespace App\Services\Menu;
 
 /**
- * @Oracode Menu Item class - OS1 Enhanced
- * 🎯 Purpose: Base class for all menu items with i18n and modal action support
+ * @Oracode Menu Item class - OS2.0 Enhanced
+ * 🎯 Purpose: Base class for all menu items with i18n, modal actions, and parameterized route support.
  *
  * @seo-purpose Menu system foundation for FlorenceEGI navigation
  * @accessibility-trait Supports ARIA navigation patterns
  *
  * @package App\Services\Menu
- * @version 3.0 - OS1 Enhanced
+ * @author Padmin D. Curtis (AI Partner OS2.0) for Fabio Cherici
+ * @version 3.1.0 - Parameterized Route Support
+ * @deadline 2025-06-30
  */
 class MenuItem
 {
@@ -22,21 +24,23 @@ class MenuItem
     /** @var MenuItem[]|null */
     public ?array $children;
 
+    // OS2.0 ENHANCEMENT: Aggiunto supporto per i parametri della rotta
+    public array $routeParams;
+
     // OS1 Enhancement: Modal action support
     public ?string $modalAction;
     public bool $isModalAction;
 
     /**
-     * Constructor with translation and modal action support
+     * Constructor with translation, modal action, and parameterized route support
      *
-     * @param string $translationKey The translation key for the menu item name
-     * @param string $route The route name for this menu item (or '#' for modal actions)
-     * @param string|null $icon The icon key for this menu item
-     * @param string|null $permission The permission required to see this menu item
-     * @param array|null $children Child menu items, if any
-     * @param string|null $modalAction The modal action attribute (e.g., 'open-create-collection-modal')
-     *
-     * @oracular-purpose Validates that either route or modalAction is properly defined
+     * @param string $translationKey The translation key
+     * @param string $route The route name (or '#' for modal actions)
+     * @param string|null $icon The icon key
+     * @param string|null $permission The required permission
+     * @param array $routeParams OS2.0 - Associative array of parameters for the route
+     * @param array|null $children Child menu items
+     * @param string|null $modalAction The modal action attribute
      */
     public function __construct(
         string $translationKey,
@@ -44,20 +48,24 @@ class MenuItem
         ?string $icon = null,
         ?string $permission = null,
         ?array $children = null,
-        ?string $modalAction = null
+        ?string $modalAction = null,
+        array $routeParams = [], // OS2.0 ENHANCEMENT: Nuovo parametro
     ) {
         $this->translationKey = $translationKey;
-        $this->name = __($translationKey); // Traduzione immediata
+        $this->name = __($translationKey);
         $this->route = $route;
         $this->icon = $icon;
         $this->permission = $permission;
         $this->children = $children;
 
+        // OS2.0 ENHANCEMENT: Memorizziamo i parametri
+        $this->routeParams = $routeParams;
+
         // OS1 Enhancement: Modal action support
         $this->modalAction = $modalAction;
         $this->isModalAction = !empty($modalAction);
 
-        // OS1 Validation: Ensure semantic coherence
+        // OS1 Validation
         if ($this->isModalAction && $route !== '#') {
             throw new \InvalidArgumentException(
                 "Modal action items must use '#' as route. Item: {$translationKey}"
@@ -79,8 +87,6 @@ class MenuItem
      * Gets the appropriate href for this menu item
      *
      * @return string The href attribute value
-     *
-     * @oracular-purpose Ensures proper href generation for both routes and modal actions
      */
     public function getHref(): string
     {
@@ -88,15 +94,14 @@ class MenuItem
             return '#';
         }
 
-        return route($this->route);
+        // OS2.0 ENHANCEMENT: Usiamo i parametri per generare la rotta
+        return route($this->route, $this->routeParams);
     }
 
     /**
      * Gets the HTML attributes for this menu item
      *
      * @return array Associative array of HTML attributes
-     *
-     * @accessibility-trait Provides proper attributes for screen readers
      */
     public function getHtmlAttributes(): array
     {

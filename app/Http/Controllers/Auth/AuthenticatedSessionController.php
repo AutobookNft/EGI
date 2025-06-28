@@ -19,14 +19,14 @@ use Laravel\Fortify\Contracts\LoginResponse;
 
 /**
  * @Oracode Controller: INDEPENDENT Authentication with GDPR Integration (FINAL SOLUTION)
- * 🎯 Purpose: Independent auth controller with GDPR consent checking
+ * 🎯 Purpose: Independent auth controller with GDPR consent checking & session enrichment
  * 🛡️ Privacy: Ensures consent compliance during login flow
  * 🧱 Core Logic: Uses Fortify's logic but with our signature
  *
  * @package App\Http\Controllers\Auth
  * @author Padmin D. Curtis (for Fabio Cherici)
- * @version 3.0.0 - INDEPENDENT CONTROLLER - NO INHERITANCE
- * @date 2025-05-25
+ * @version 3.1.0 - Session Enrichment
+ * @date 2025-06-24
  * @solution Independent controller that uses Fortify internally
  */
 class AuthenticatedSessionController extends Controller
@@ -52,7 +52,7 @@ class AuthenticatedSessionController extends Controller
     public function create(Request $request)
     {
         if (Auth::check()) {
-            return redirect()->intended(route('dashboard'));
+            return redirect()->intended(route(config('app.redirect_to_url_after_login', 'home')));
         }
 
         return view('auth.login', [
@@ -67,6 +67,7 @@ class AuthenticatedSessionController extends Controller
             'welcomeMessage' => __('auth.login_welcome_message')
         ]);
     }
+
 
     /**
      * Handle login with GDPR checks
@@ -96,9 +97,16 @@ class AuthenticatedSessionController extends Controller
             if ($this->attemptLogin($request)) {
                 $user = Auth::user();
                 $logContext['user_id'] = $user->id;
-                $logContext['user_type'] = $user->user_type ?? 'unknown';
+                $logContext['user_type'] = $user->usertype ?? 'unknown'; // Leggiamo subito lo usertype per il log
 
-                $this->logger->info('[Auth] Authentication successful, checking GDPR', $logContext);
+                $this->logger->info('[Auth] Authentication successful, proceeding with session setup', $logContext);
+
+                // ===== INNESTO OS2.0: Scrittura UserType in Sessione =====
+                // 🎯 Scriviamo in modo esplicito il tipo utente nella sessione per un accesso rapido
+                // da parte di altri componenti dell'applicazione (es. Middleware, View Composers).
+                $request->session()->put('user_type', $user->usertype);
+                $this->logger->info('[Auth] UserType written to session', $logContext);
+                // ===== FINE INNESTO OS2.0 =====
 
                 // Log successful login
                 $this->logSuccessfulLoginWithGdpr($user, $request);
@@ -110,8 +118,7 @@ class AuthenticatedSessionController extends Controller
 
                     $this->logger->info('[Auth] Redirecting to GDPR consent', $logContext);
 
-                    return redirect()->route('gdpr.consent')
-                        ->with('post_login_consent_required', true);
+                    return redirect()->route(config('app.redirect_to_url_after_login', 'home'));
                 }
 
                 // Update last login timestamp
@@ -120,7 +127,7 @@ class AuthenticatedSessionController extends Controller
                 // Success message
                 session()->flash('success', __('auth.login_success'));
 
-                $this->logger->info('[Auth] Login completed successfully', $logContext);
+                $this->logger->info('[Auth] Login completed successfully, returning response', $logContext);
 
                 // Return success response (use Fortify's response if available)
                 return app(LoginResponse::class);
@@ -255,7 +262,7 @@ class AuthenticatedSessionController extends Controller
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
             'login_method' => 'enhanced_credentials',
-            'user_type' => $user->user_type ?? 'unknown',
+            'user_type' => $user->usertype ?? 'unknown',
             'ecosystem_status' => $user->ecosystem_setup_completed ? 'complete' : 'incomplete',
             'timestamp' => now()->toISOString()
         ];

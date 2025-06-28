@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\User;
 
+use App\Helpers\FegiAuth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Collection;
@@ -56,11 +57,14 @@ final class UserCollectionController extends Controller
      * @oracode-output
      *  - On Success (200 OK): JSON with 'owned_collections' and 'collaborating_collections'.
      *  - On Unauthenticated (401 - gestito dal middleware Sanctum/Auth): Standard 401 response.
+     *  - Utilizzato dal div id = "collection-list-dropdown-menu" nei layout
      */
     public function getAccessibleCollections(Request $request): JsonResponse
     {
         /** @var User|null $user */
-        $user = $request->user();
+        // $user = $request->user();
+
+        $user = FegiAuth::user();
 
         if (!$user) {
             // Questa condizione dovrebbe essere gestita dal middleware auth:sanctum.
@@ -81,11 +85,13 @@ final class UserCollectionController extends Controller
             ['user_id' => $user->id, 'log_category' => 'COLLECTION_ACCESS']
         );
 
+        // Elenco collection dell'utente loggato
         $ownedCollections = $user->ownedCollections()
                                  ->select('id', 'collection_name')
                                  ->orderBy('collection_name', 'asc')
                                  ->get();
 
+        // Elenco collection in cui l'utente loggato collabora come memebro della collection
         $collaboratingCollections = $user->collaborations()
                                          ->with('creator:id,email')
                                          ->select('collections.id', 'collections.collection_name', 'collections.creator_id')

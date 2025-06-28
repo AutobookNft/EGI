@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\EgiReservationCertificate;
+use App\Models\Reservation;
 use App\Services\CertificateGeneratorService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Ultra\ErrorManager\Facades\UltraError;
 use Ultra\UltraLogManager\UltraLogManager;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @Oracode Controller: EgiReservationCertificateController
@@ -60,8 +62,16 @@ class EgiReservationCertificateController extends Controller
     public function show(Request $request, string $uuid)
     {
         try {
+            // Carica il certificato con EGI e le sue prenotazioni ordinate
             $certificate = EgiReservationCertificate::where('certificate_uuid', $uuid)
-                ->with(['egi', 'egi.collection', 'reservation'])
+                ->with([
+                    'egi' => function ($query) {
+                        // Carica l'EGI con le prenotazioni ordinate usando la relazione modificata
+                        $query->with('reservationCertificates');
+                    },
+                    'egi.collection',
+                    'reservation'
+                ])
                 ->firstOrFail();
 
             // Log access to certificate

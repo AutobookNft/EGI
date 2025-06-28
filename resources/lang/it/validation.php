@@ -150,23 +150,6 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Custom Validation Language Lines
-    |--------------------------------------------------------------------------
-    |
-    | Here you may specify custom validation messages for attributes using the
-    | convention "attribute.rule" to name the lines. This makes it quick to
-    | specify a specific custom language line for a given attribute rule.
-    |
-    */
-
-    'custom' => [
-        'attribute-name' => [
-            'rule-name' => 'messaggio-personalizzato',
-        ],
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
     | Custom Validation Attributes
     |--------------------------------------------------------------------------
     |
@@ -176,5 +159,44 @@ return [
     |
     */
 
-    'attributes' => [],
+    'custom' => [
+        'attribute-name' => [
+            'rule-name' => 'messaggio-personalizzato',
+        ],
+        'email' => [
+            'unique' => 'Questo indirizzo email è già registrato.',
+            'email' => 'Inserisci un indirizzo email valido.',
+            'required' => 'L\'indirizzo email è obbligatorio.',
+        ],
+        'password' => [
+            'min' => 'La password deve essere lunga almeno :min caratteri.',
+            'confirmed' => 'La conferma della password non corrisponde.',
+            'required' => 'La password è obbligatoria.',
+        ],
+        'password_confirmation' => [
+            'required' => 'Conferma la password.',
+        ],
+        'name' => [
+            'required' => 'Il nome completo è obbligatorio.',
+            'string' => 'Il nome deve contenere solo testo.',
+            'max' => 'Il nome non può superare :max caratteri.',
+        ],
+        'usertype' => [
+            'required' => 'Seleziona il tipo di account.',
+            'in' => 'Seleziona un tipo di account valido.',
+        ],
+        'terms_accepted' => [
+            'accepted' => 'Devi accettare i termini e condizioni per continuare.',
+            'required' => 'Devi accettare i termini e condizioni.',
+        ],
+    ],
+
+    'attributes' => [
+        'email' => 'indirizzo email',
+        'password' => 'password',
+        'password_confirmation' => 'conferma password',
+        'name' => 'nome completo',
+        'usertype' => 'tipo di account',
+        'terms_accepted' => 'termini e condizioni',
+    ],
 ];

@@ -27,8 +27,8 @@ export default defineConfig(({ mode }) => {
                     'home-nft.js',
                     'resources/js/components/create-collection-modal.js',
                     // 🎯 USER DOMAINS - Personal Data
-                    'resources/css/domains/personal-data.css',
-                    'resources/ts/domains/personal-data.ts',
+                    'resources/css/personal-data.css',
+                    'resources/ts/domain/personal-data.ts',
                     // 🎯 USER DOMAINS - Organization Data (future)
                     'resources/css/domains/organization-data.css',
                     'resources/ts/domains/organization-data.ts',
@@ -66,6 +66,8 @@ export default defineConfig(({ mode }) => {
             preserveSymlinks: true,
         },
         server: {
+            host: 'localhost',
+            port: 5173,
             hmr: {
                 overlay: true,
             },

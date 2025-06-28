@@ -59,6 +59,7 @@ return [
         'egi_storage_config_error' => "Il disco di storage 'local' richiesto per il fallback non è configurato.",
         'egi_unexpected_error' => 'Errore inaspettato durante l\'elaborazione dell\'EGI per il file :original_filename.',
         'egi_unauthorized_access' => 'Tentativo non autenticato di accedere alla pagina di upload EGI.',
+        'record_not_found_egi_in_reservation_controller' => 'Nessun record EGI trovato per l\'ID :egi_id nella prenotazione. Verificare che l\'EGI esista e sia accessibile.',
         // Errori relativi all'interfaccia utente (messaggi per sviluppatori)
         'egi_page_access_notice' => 'Pagina di upload EGI acceduta con successo dall\'amministratore con ID :user_id.',
         'egi_page_rendering_error' => 'Eccezione durante il rendering della pagina di upload EGI: :exception_message',
@@ -234,8 +235,16 @@ return [
 
         'legal_content_load_failed' => 'Caricamento del contenuto legale fallito. Controllare i permessi dei file in resources/legal/ e la validità del symlink "current".',
         'terms_acceptance_check_failed' => 'Fallimento nella verifica dell\'accettazione dei termini correnti per l\'utente. Controllare la logica in ConsentService e la raggiungibilità del LegalContentService.',
-    ],
 
+        // Registration validation errors - Messaggi sviluppatore
+        'registration_email_already_exists' => 'Validazione registrazione fallita: Email :email già esistente nel database',
+        'registration_password_too_weak' => 'Validazione registrazione fallita: Password non soddisfa i requisiti di sicurezza',
+        'registration_password_confirmation_mismatch' => 'Validazione registrazione fallita: Conferma password non corrispondente',
+        'registration_invalid_email_format' => 'Validazione registrazione fallita: Formato email non valido: :email',
+        'registration_required_field_missing' => 'Validazione registrazione fallita: Campi obbligatori mancanti: :fields',
+        'registration_validation_comprehensive_failed' => 'Validazione registrazione fallita: Rilevati errori di validazione multipli',
+
+     ],
     'user' => [
         // == Existing Entries ==
         'authentication_error' => 'Non hai l\'autorizzazione per eseguire questa operazione.',
@@ -412,6 +421,14 @@ return [
 
         'legal_content_load_failed' => 'Impossibile caricare i documenti legali in questo momento. Riprova più tardi.',
         // Nota: per TERMS_ACCEPTANCE_CHECK_FAILED usiamo la traduzione 'generic_error' già esistente
+
+        // Registration validation errors - Messaggi user-friendly
+        'registration_email_already_exists' => 'Questo indirizzo email è già registrato. Prova a effettuare il login.',
+        'registration_password_too_weak' => 'La password deve essere lunga almeno 8 caratteri e includere lettere e numeri.',
+        'registration_password_confirmation_mismatch' => 'La conferma della password non corrisponde. Riprova.',
+        'registration_invalid_email_format' => 'Inserisci un indirizzo email valido.',
+        'registration_required_field_missing' => 'Compila tutti i campi obbligatori.',
+        'registration_validation_comprehensive_failed' => 'Controlla il modulo e correggi gli errori.',
     ],
 
     // Generic message (used by UserInterfaceHandler if no specific message found)

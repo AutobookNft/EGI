@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\Api\LikeController;
 use App\Http\Controllers\Notifications\Gdpr\GdprNotificationResponseController;
+use App\Http\Controllers\ReservationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -42,6 +44,18 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
     //     });
 });
 
-// === GDPR Interactive Notification Routes ===
-    
+// API Routes
+Route::name('api.')->group(function () {
 
+
+   
+
+    // API di configurazione per le definizioni degli errori
+    Route::get('/error-definitions', [App\Http\Controllers\Api\AppConfigController::class, 'getErrorDefinitions'])
+        ->name('error.definitions');
+
+
+});
+
+
+// === GDPR Interactive Notification Routes ===

@@ -27,6 +27,51 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | FEGI User Types
+    |--------------------------------------------------------------------------
+    | This configuration option defines the different user types in the FEGI
+    | platform. Each user type is represented as a string in the array. This
+    | setting is useful for managing user roles and permissions within the
+    | application, allowing you to easily reference user types in your code.
+    | You can add or remove user types as needed, and the application will
+    | automatically recognize the changes.
+    |--------------------------------------------------------------------------
+    */
+    'fegi_user_type' => [
+        'collector',
+        'creator',
+        'patron',
+        'epp',
+        'company',
+        'trader_pro'
+    ],
+
+    'role_mapping' => [
+        'creator' => 'creator',
+        'patron' => 'patron',
+        'collector' => 'collector',
+        'enterprise' => 'enterprise',
+        'trader_pro' => 'trader_pro',
+        'epp_entity' => 'epp_entity',
+    ],
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | FEGI Countries
+    |--------------------------------------------------------------------------
+    | This configuration option defines the countries supported by the FEGI
+    | platform. Each country is represented by its ISO 3166-1 alpha-2
+    | country code. This setting is useful for localization and internationalization
+    | purposes, allowing you to easily reference countries in your code.
+    | You can add or remove countries as needed, and the application will
+    | automatically recognize the changes.
+    |--------------------------------------------------------------------------
+    */
+    'fegi_countries' => ['it', 'es', 'fr', 'de', 'pt', 'en'],
+
+    /*
+    |--------------------------------------------------------------------------
     | EGI Asset
     |--------------------------------------------------------------------------
     |
@@ -59,6 +104,7 @@ return [
     'natan_tr' => env('NATAN_TR'),
     'natan_01' => env('NATAN_01'),
     'logo_tr' => env('LOGO_TR'),
+    'logo' => env('LOGO'),
     'logo_01' => env('LOGO_01'),
     'logo_02' => env('LOGO_02'),
     'logo_03' => env('LOGO_03'),

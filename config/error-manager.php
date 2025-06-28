@@ -14,6 +14,17 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Log Handler Configuration
+    |--------------------------------------------------------------------------
+    */
+    'log_handler' => [
+        // Puoi sovrascrivere il percorso del file di log dedicato di UEM.
+        // Se non specificato, il default sarà 'storage/logs/error_manager.log'.
+        // 'path' => storage_path('logs/uem_errors.log'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Default Handlers
     |--------------------------------------------------------------------------
     | Handlers automatically registered. Order can matter for some logic.
@@ -383,6 +394,16 @@ return [
              'notify_slack' => false,
              'msg_to' => 'sweet-alert',
          ],
+         'RECORD_EGI_NOT_FOUND_IN_RESERVATION_CONTROLLER' => [
+             'type' => 'warning',
+             'blocking' => 'not', // Usually stops the current action
+             'dev_message_key' => 'error-manager::errors.dev.record_not_found_egi_in_reservation_controller',
+             'user_message_key' => '',
+             'http_status_code' => 200, // Not a real HTTP error, just a warning
+             'devTeam_email_need' => false,
+             'notify_slack' => false,
+             'msg_to' => 'log-only',
+         ],
         'ERROR_DURING_CREATE_EGI_RECORD' => [
             'type' => 'critical',
             'blocking' => 'blocking',
@@ -392,6 +413,76 @@ return [
             'devTeam_email_need' => true,
             'notify_slack' => true,
             'msg_to' => 'sweet-alert',
+        ],
+
+        // ====================================================
+        // REGISTRATION VALIDATION ERRORS - Add to config/error-manager.php
+        // ====================================================
+
+        'REGISTRATION_EMAIL_ALREADY_EXISTS' => [
+            'type' => 'warning',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.registration_email_already_exists',
+            'user_message_key' => 'error-manager::errors.user.registration_email_already_exists',
+            'http_status_code' => 422,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'div', // Mostra nel form
+        ],
+
+        'REGISTRATION_PASSWORD_TOO_WEAK' => [
+            'type' => 'warning',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.registration_password_too_weak',
+            'user_message_key' => 'error-manager::errors.user.registration_password_too_weak',
+            'http_status_code' => 422,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'div',
+        ],
+
+        'REGISTRATION_PASSWORD_CONFIRMATION_MISMATCH' => [
+            'type' => 'warning',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.registration_password_confirmation_mismatch',
+            'user_message_key' => 'error-manager::errors.user.registration_password_confirmation_mismatch',
+            'http_status_code' => 422,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'div',
+        ],
+
+        'REGISTRATION_INVALID_EMAIL_FORMAT' => [
+            'type' => 'warning',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.registration_invalid_email_format',
+            'user_message_key' => 'error-manager::errors.user.registration_invalid_email_format',
+            'http_status_code' => 422,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'div',
+        ],
+
+        'REGISTRATION_REQUIRED_FIELD_MISSING' => [
+            'type' => 'warning',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.registration_required_field_missing',
+            'user_message_key' => 'error-manager::errors.user.registration_required_field_missing',
+            'http_status_code' => 422,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'div',
+        ],
+
+        'REGISTRATION_VALIDATION_COMPREHENSIVE_FAILED' => [
+            'type' => 'warning',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.registration_validation_comprehensive_failed',
+            'user_message_key' => 'error-manager::errors.user.registration_validation_comprehensive_failed',
+            'http_status_code' => 422,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'div',
         ],
 
         // ====================================================

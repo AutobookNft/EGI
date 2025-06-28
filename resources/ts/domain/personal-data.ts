@@ -13,13 +13,13 @@
  */
 
 // Global window interface extensions
-declare global {
-    interface Window {
-        personalDataConfig: PersonalDataConfig;
-        UEM: any; // UltraErrorManager client-side
-        showToast: (message: string, type: string) => void;
-    }
-}
+// declare global {
+//     interface Window {
+//         personalDataConfig: PersonalDataConfig;
+//         UEM: any; // UltraErrorManager client-side
+//         showToast: (message: string, type: string) => void;
+//     }
+// }
 
 // Configuration interface
 interface PersonalDataConfig {
@@ -144,6 +144,8 @@ class PersonalDataManager {
 
         // Initialize real-time validation
         this.initializeValidation();
+
+        console.log('[Personal Data] Manager initialized with config:', this.config);
 
         // Initialize GDPR consent handling
         this.initializeConsentHandling();
@@ -499,7 +501,7 @@ class PersonalDataManager {
         }
 
         // Basic format validation (letters, spaces, apostrophes, dashes)
-        const pattern = /^[\p{L}\s\-\.\,\']+$/u;
+        const pattern = /^[\p{L}\s\-.,']+$/u;
         const isValid = pattern.test(value) && value.length >= 2 && value.length <= 255;
 
         return {
@@ -520,7 +522,7 @@ class PersonalDataManager {
         // Basic validation based on field type
         switch (validationType) {
             case 'street':
-                const streetPattern = /^[\p{L}\p{N}\s\-\.\,\/\#]+$/u;
+                const streetPattern = /^[\p{L}\p{N}\s\-\.,\/#]+$/u;
                 return {
                     isValid: !value || (streetPattern.test(value) && value.length <= 255),
                     field: validationType,
@@ -529,7 +531,8 @@ class PersonalDataManager {
                 };
 
             case 'city':
-                const cityPattern = /^[\p{L}\s\-\.\']+$/u;
+                const cityPattern = /^[-\p{L}\s.']+$/u;
+
                 return {
                     isValid: !value || (cityPattern.test(value) && value.length <= 100),
                     field: validationType,

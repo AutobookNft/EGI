@@ -28,6 +28,12 @@ import { UEM_Client_TS_Placeholder as UEM } from '../services/uemClientService';
  * @param {typeof DOMElements} DOM Collezione dei riferimenti agli elementi DOM.
  */
 export function updateNavbarUI(config: AppConfig, DOM: typeof DOMElements): void {
+
+
+    console.log('🔄 updateNavbarUI called with auth status:', getAuthStatus(config));
+    console.log('🔄 config.isAuthenticatedByBackend:', config.isAuthenticatedByBackend);
+ 
+
     const authStatus = getAuthStatus(config);
     const walletAddress = getConnectedWalletAddress(config);
     const shortAddress = walletAddress
@@ -104,7 +110,7 @@ export function updateNavbarUI(config: AppConfig, DOM: typeof DOMElements): void
             else if (DOM.genericCollectionsLinkMobileEl) DOM.genericCollectionsLinkMobileEl.style.display = 'block'; // Fallback
         }
     } else {
-        // console.warn("Padmin NavbarManager: Core DOM elements for Collection List/Generic Links not all found. UI may be inconsistent.");
+        console.warn("Padmin NavbarManager: Core DOM elements for Collection List/Generic Links not all found. UI may be inconsistent.");
     }
-    // console.log(`Padmin NavbarManager: UI Updated. Auth Status: ${authStatus}`);
+        console.log(`Padmin NavbarManager: UI Updated. Auth Status: ${authStatus}`);
 }

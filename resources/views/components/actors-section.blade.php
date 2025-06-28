@@ -42,7 +42,7 @@
                 :title="__('guest_home.actor_patron_title')"
                 :message="__('guest_home.actor_patron_message')"
                 :ctaText="__('guest_home.actor_patron_cta')"
-                ctaLink="{{ route('register') }}?role=patron"
+                ctaLink="{{ route('archetypes.patron') }}"
                 ctaIcon="storefront"
                 accentColorClass="border-t-4 border-florence-gold"
                 iconColorClass="text-florence-gold"

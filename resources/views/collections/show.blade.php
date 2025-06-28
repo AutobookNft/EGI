@@ -1,26 +1,25 @@
 {{-- resources/views/collections/show.blade.php --}}
-{{-- 📜 Oracode View: Collection Detail Page --}}
-{{-- Displays the detailed view of a single EGI Collection, including its metadata, --}}
-{{-- associated EGIs, EPP information, and creator details. --}}
-{{-- Expects $collection (loaded with creator, epp, egis) and optionally $relatedCollections. --}}
-{{-- Uses Tailwind CSS for styling and layout. --}}
+{{-- 🎨 ORACODE REDESIGN: Galleria Imponente Mobile-First --}}
+{{-- Trasformazione orchestrata per massimo impatto visivo e UX --}}
+{{-- Focus: Hero Impact + Info Critica + Griglia Adattiva + Micro-animazioni --}}
 
 <x-collection-layout :title="$collection->collection_name . ' | FlorenceEGI'"
     :metaDescription="Str::limit($collection->description, 155) ?? 'Details for the collection ' . $collection->collection_name">
 
-{{-- Inserisci qui lo Schema.org specifico per questa pagina --}}
+{{-- Schema.org ottimizzato --}}
 <x-slot name="schemaMarkup">
 <script type="application/ld+json">
     {
         "@context": "https://schema.org",
-        "@type": "ItemPage", // O CollectionPage
+        "@type": "CollectionPage",
         "name": "{{ $collection->collection_name }}",
         "description": "{{ $collection->description }}",
         "image": "{{ $collection->image_banner ? Storage::url($collection->image_banner) : asset('images/default_banner.jpg') }}",
         "author": {
-        "@type": "Person",
-        "name": "{{ $collection->creator->name ?? 'Unknown Creator' }}"
+            "@type": "Person",
+            "name": "{{ $collection->creator->name ?? 'Unknown Creator' }}"
         },
+        "numberOfItems": "{{ $collection->egis_count ?? 0 }}",
         "mainEntity": {
             "@type": "CreativeWork",
             "name": "{{ $collection->collection_name }}"
@@ -29,356 +28,607 @@
 </script>
 </x-slot>
 
-{{-- 🏛️ Contenitore Principale --}}
-<div class="collection-detail-container">
+{{-- Stili custom per questa vista --}}
+<x-slot name="headExtra">
+<style>
+/* === ORCHESTRATED ANIMATION SYSTEM === */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
 
-{{-- 🖼️ Header della Collezione con Banner --}}
-{{-- @style: Relative positioning, background image, overlay gradient, text color. --}}
-<header class="relative bg-gray-700 text-white pt-24 pb-12 md:pt-32 md:pb-16 lg:pt-40 lg:pb-20">
-{{-- Immagine Banner --}}
-{{-- @style: Absolute positioning, full cover, background properties. --}}
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
 
-@if($collection->image_banner)
-    <div class="absolute inset-0 z-0">
-        <img src="{{ $collection->image_banner }}" alt="Banner for {{ $collection->collection_name }}" class="w-full h-full object-cover">
-        {{-- Overlay Gradiente per leggibilità testo --}}
-        <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent"></div>
-    </div>
-@else
-    {{-- Fallback se non c'è banner (es. colore solido scuro) --}}
-    <div class="absolute inset-0 z-0 bg-gray-800"></div>
-@endif
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
 
-{{-- Contenuto Header (sopra overlay) --}}
-<div class="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8">
-    {{-- Link Indietro --}}
-    {{-- @style: Inline flex, vertical alignment, hover effect. --}}
-    <div class="mb-6">
-        <a href="{{ route('home.collections.index') }}" class="inline-flex items-center text-sm text-gray-300 hover:text-white transition duration-150 ease-in-out">
-            {{-- @accessibility-trait: Icon is decorative --}}
-            <svg class="w-4 h-4 mr-1.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
-            </svg>
-            {{ __('Back to Collections') }}
-        </a>
-    </div>
+/* === ENHANCED VISUAL HIERARCHY === */
+.hero-glass {
+    backdrop-filter: blur(20px);
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
 
-    {{-- Info Principali: Avatar, Nome, Creator --}}
-    <div class="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 mb-8">
-        {{-- Avatar Collezione --}}
-        {{-- @style: Size, rounded, border, shadow. --}}
-        <div class="flex-shrink-0 w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full border-4 border-white shadow-lg bg-gray-300 flex items-center justify-center text-gray-500 overflow-hidden">
+.info-glass {
+    backdrop-filter: blur(10px);
+    background: rgba(17, 24, 39, 0.8);
+    border: 1px solid rgba(75, 85, 99, 0.3);
+}
 
-            @if($collection->image_avatar)
-                <img src="{{ $collection->image_avatar }}" alt="{{ $collection->collection_name }}" class="w-full h-full object-cover">
-            @else
-                {{-- Placeholder Icona --}}
-                <svg class="w-16 h-16" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm16.5-1.5H3.75" />
-                </svg>
-            @endif
+.card-hover {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-hover:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+/* === RESPONSIVE GRID SYSTEM === */
+.egi-grid {
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: 1fr; /* Mobile: 1 colonna */
+}
+
+@media (min-width: 640px) {
+    .egi-grid {
+        grid-template-columns: repeat(2, 1fr); /* Tablet: 2 colonne */
+        gap: 2rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .egi-grid {
+        grid-template-columns: repeat(3, 1fr); /* Desktop: 3 colonne */
+    }
+}
+
+@media (min-width: 1280px) {
+    .egi-grid {
+        grid-template-columns: repeat(4, 1fr); /* Large: 4 colonne */
+    }
+}
+
+@media (min-width: 1536px) {
+    .egi-grid {
+        grid-template-columns: repeat(5, 1fr); /* XL: 5 colonne */
+    }
+}
+
+/* === MICRO-INTERACTIONS === */
+.stat-card {
+    animation: fadeInUp 0.6s ease-out forwards;
+}
+
+.stat-card:nth-child(1) { animation-delay: 0.1s; }
+.stat-card:nth-child(2) { animation-delay: 0.2s; }
+.stat-card:nth-child(3) { animation-delay: 0.3s; }
+.stat-card:nth-child(4) { animation-delay: 0.4s; }
+
+.egi-item {
+    opacity: 0;
+    animation: scaleIn 0.5s ease-out forwards;
+}
+
+.egi-item:nth-child(1) { animation-delay: 0.1s; }
+.egi-item:nth-child(2) { animation-delay: 0.15s; }
+.egi-item:nth-child(3) { animation-delay: 0.2s; }
+.egi-item:nth-child(4) { animation-delay: 0.25s; }
+.egi-item:nth-child(5) { animation-delay: 0.3s; }
+
+/* === FLOATING ACTION BAR === */
+.floating-actions {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    z-index: 40;
+    opacity: 0;
+    animation: slideInLeft 0.6s ease-out 0.8s forwards;
+}
+
+@media (max-width: 768px) {
+    .floating-actions {
+        bottom: 1rem;
+        right: 1rem;
+        left: 1rem;
+        display: flex;
+        justify-content: center;
+    }
+}
+
+/* === PARALLAX BANNER === */
+.parallax-banner {
+    transform: translateZ(0);
+    will-change: transform;
+}
+
+/* === ENHANCED BUTTONS === */
+.btn-primary-glow {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
+    transition: all 0.3s ease;
+}
+
+.btn-primary-glow:hover {
+    box-shadow: 0 15px 35px rgba(99, 102, 241, 0.4);
+    transform: translateY(-2px);
+}
+</style>
+</x-slot>
+
+{{-- 🎯 SEZIONE INFORMAZIONI CRITICHE (Sopra al Banner) --}}
+<div class="bg-gray-900 border-b border-gray-800">
+    <div class="container px-4 py-6 mx-auto sm:px-6 lg:px-8">
+        {{-- Breadcrumb migliorato --}}
+        <nav class="flex items-center mb-4 space-x-2 text-sm text-gray-400" aria-label="Breadcrumb">
+            <a href="{{ route('home.collections.index') }}" class="transition-colors duration-200 hover:text-emerald-400">
+                <span class="mr-1 text-base material-symbols-outlined">collections</span>
+                Collections
+            </a>
+            <span class="text-xs material-symbols-outlined">chevron_right</span>
+            <span class="font-medium text-gray-300">{{ Str::limit($collection->collection_name, 30) }}</span>
+        </nav>
+
+        {{-- Quick Stats Cards - Mobile First --}}
+        <div class="grid grid-cols-2 gap-3 lg:grid-cols-4 sm:gap-4">
+            <div class="p-3 text-center rounded-lg stat-card info-glass sm:p-4">
+                <div class="text-xl font-bold sm:text-2xl text-emerald-400">{{ $collection->EGI_number ?? $collection->egis_count ?? 0 }}</div>
+                <div class="text-xs tracking-wider text-gray-400 uppercase">EGIs</div>
+            </div>
+            <div class="p-3 text-center rounded-lg stat-card info-glass sm:p-4">
+                <div class="text-xl font-bold text-pink-400 sm:text-2xl">{{ $collection->likes_count ?? 0 }}</div>
+                <div class="text-xs tracking-wider text-gray-400 uppercase">Likes</div>
+            </div>
+            <div class="p-3 text-center rounded-lg stat-card info-glass sm:p-4">
+                <div class="text-xl font-bold text-blue-400 sm:text-2xl">{{ $collection->reservations_count ?? 0 }}</div>
+                <div class="text-xs tracking-wider text-gray-400 uppercase">Reserved</div>
+            </div>
+            <div class="p-3 text-center rounded-lg stat-card info-glass sm:p-4">
+                @if($collection->floor_price && $collection->floor_price > 0)
+                    <div class="text-xl font-bold text-yellow-400 sm:text-2xl">{{ number_format($collection->floor_price, 2) }}</div>
+                    <div class="text-xs tracking-wider text-gray-400 uppercase">ALGO Floor</div>
+                @else
+                    <div class="text-xl font-bold text-purple-400 sm:text-2xl">Free</div>
+                    <div class="text-xs tracking-wider text-gray-400 uppercase">Mint</div>
+                @endif
+            </div>
         </div>
+    </div>
+</div>
 
-        {{-- Nome Collection e Creator --}}
-        <div class="text-center sm:text-left">
-            {{-- 🎯 Nome Collezione --}}
-            <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight break-words">
-                {{ $collection->collection_name }}
-            </h1>
-            {{-- 👤 Info Creator --}}
-            <div class="mt-2 flex items-center justify-center sm:justify-start text-sm text-gray-200">
-                <span>{{ __('By') }}</span>
-                <div class="ml-1.5 flex items-center">
-                    {{-- Avatar Creator --}}
+{{-- 🎨 HERO BANNER POTENZIATO --}}
+<section class="relative overflow-hidden">
+    {{-- Background con Parallax Effect --}}
+    <div class="absolute inset-0 z-0 parallax-banner">
+        @if($collection->image_banner)
+            <img src="{{ $collection->image_banner }}"
+                 alt="Banner for {{ $collection->collection_name }}"
+                 class="object-cover w-full h-full scale-105">
+        @else
+            <div class="w-full h-full bg-gradient-to-br from-indigo-900 via-purple-900 to-gray-900"></div>
+        @endif
+        {{-- Overlay gradiente potenziato --}}
+        <div class="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent"></div>
+        <div class="absolute inset-0 bg-gradient-to-r from-black/30 to-transparent"></div>
+    </div>
+
+    {{-- Hero Content --}}
+    <div class="container relative z-10 px-4 py-16 mx-auto sm:px-6 lg:px-8 sm:py-20 lg:py-24">
+        <div class="max-w-4xl">
+            {{-- Creator Info + Avatar --}}
+            <div class="flex items-center gap-3 mb-6">
+                {{-- Avatar Creator --}}
+                <div class="flex-shrink-0">
                     @if ($collection->creator && $collection->creator->profile_photo_url)
-                        <img src="{{ $collection->creator->profile_photo_url }}" alt="{{ $collection->creator->name }}" class="w-5 h-5 rounded-full mr-1.5 object-cover">
+                        <img src="{{ $collection->creator->profile_photo_url }}"
+                             alt="{{ $collection->creator->name }}"
+                             class="object-cover w-12 h-12 border-2 rounded-full border-white/30">
                     @else
-                        {{-- Placeholder --}}
-                        <span class="inline-block h-5 w-5 rounded-full overflow-hidden bg-gray-400 mr-1.5">
-                            <svg class="h-full w-full text-gray-600" fill="currentColor" viewBox="0 0 24 24"><path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
-                        </span>
+                        <div class="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-emerald-500 to-blue-500">
+                            <span class="text-lg font-bold text-white">{{ substr($collection->creator->name ?? 'U', 0, 1) }}</span>
+                        </div>
                     @endif
-                    {{-- Nome Creator (Link opzionale) --}}
-                    <span class="font-medium hover:text-white transition duration-150 ease-in-out">
-                        {{-- <a href="{{ route('users.show', $collection->creator_id) }}"> --}}
-                            {{ $collection->creator->name ?? __('Unknown Creator') }}
-                        {{-- </a> --}}
-                    </span>
-                    {{-- 💎 Badge Verificato --}}
-                    @if ($collection->creator && $collection->creator->usertype === 'verified') {{-- Logica verifica --}}
-                        <svg class="ml-1 w-4 h-4 text-blue-400 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" title="{{ __('Verified Creator') }}">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.857-9.809a.75.75 0 0 0-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.06 0l4-5.5Z" clip-rule="evenodd" />
-                        </svg>
+                </div>
+
+                {{-- Creator Name + Badge --}}
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="font-semibold text-white">{{ $collection->creator->name ?? __('Unknown Creator') }}</span>
+                        @if ($collection->creator && $collection->creator->usertype === 'verified')
+                            <span class="text-lg text-blue-400 material-symbols-outlined" title="{{ __('Verified Creator') }}">verified</span>
+                        @endif
+                    </div>
+                    <p class="text-sm text-gray-300">{{ __('Collection Creator') }}</p>
+                </div>
+            </div>
+
+            {{-- Collection Name + Avatar --}}
+            <div class="flex flex-col items-start gap-6 mb-8 sm:flex-row sm:items-center">
+                {{-- Collection Avatar --}}
+                <div class="flex-shrink-0 w-24 h-24 overflow-hidden bg-gray-800 border-4 sm:w-32 sm:h-32 rounded-2xl border-white/20">
+                    @if($collection->image_avatar)
+                        <img src="{{ $collection->image_avatar }}"
+                             alt="{{ $collection->collection_name }}"
+                             class="object-cover w-full h-full">
+                    @else
+                        <div class="flex items-center justify-center w-full h-full bg-gradient-to-br from-purple-500 to-pink-500">
+                            <span class="text-3xl text-white material-symbols-outlined">image</span>
+                        </div>
                     @endif
+                </div>
+
+                {{-- Title + Description --}}
+                <div class="flex-1 min-w-0">
+                    <h1 class="mb-4 text-3xl font-bold leading-tight text-white sm:text-4xl lg:text-5xl">
+                        {{ $collection->collection_name }}
+                    </h1>
+
+                    @if($collection->description)
+                        <p class="text-base leading-relaxed text-gray-200 sm:text-lg line-clamp-3 sm:line-clamp-none">
+                            {{ $collection->description }}
+                        </p>
+                    @endif
+                </div>
+            </div>
+
+            {{-- CTA Section --}}
+            <div class="flex flex-col gap-4 sm:flex-row">
+                <button class="btn-primary-glow flex items-center justify-center px-6 py-3 rounded-lg text-white font-semibold text-sm sm:text-base like-button {{ $collection->is_liked ?? false ? 'is-liked' : '' }}"
+                        data-collection-id="{{ $collection->id }}"
+                        data-like-url="{{ route('api.toggle.collection.like', $collection->id) }}">
+                    <span class="mr-2 material-symbols-outlined icon-heart">{{ $collection->is_liked ?? false ? 'favorite' : 'favorite_border' }}</span>
+                    <span class="like-text">{{ $collection->is_liked ?? false ? __('Liked') : __('Like Collection') }}</span>
+                    <span class="ml-2 like-count-display">({{ $collection->likes_count ?? 0 }})</span>
+                </button>
+
+                <button class="flex items-center justify-center px-6 py-3 text-sm font-semibold text-white transition-all duration-300 border rounded-lg bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/20 sm:text-base"
+                        onclick="navigator.share ? navigator.share({title: '{{ $collection->collection_name }}', url: window.location.href}) : copyToClipboard(window.location.href)">
+                    <span class="mr-2 material-symbols-outlined">share</span>
+                    {{ __('Share') }}
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+{{-- 🌳 EPP SECTION (Se presente) --}}
+@if($collection->epp)
+<div class="border-b border-gray-800 bg-gradient-to-r from-green-900/20 to-emerald-900/20">
+    <div class="container px-4 py-6 mx-auto sm:px-6 lg:px-8">
+        <div class="p-4 hero-glass rounded-xl sm:p-6">
+            <div class="flex items-start gap-4">
+                <div class="flex-shrink-0 p-3 rounded-lg bg-green-500/20">
+                    <span class="text-2xl text-green-400 material-symbols-outlined">eco</span>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h3 class="mb-2 text-lg font-semibold text-white">{{ __('Supporting Environmental Project') }}</h3>
+                    <h4 class="mb-2 font-medium text-emerald-400">{{ $collection->epp->name }}</h4>
+                    <p class="mb-3 text-sm text-gray-300 line-clamp-2">{{ $collection->epp->description }}</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-medium text-green-400">20% {{ __('of sales support this project') }}</span>
+                        <a href="{{ route('epps.show', $collection->epp_id) }}"
+                           class="flex items-center gap-1 text-sm font-medium text-emerald-400 hover:text-emerald-300">
+                            {{ __('Learn more') }}
+                            <span class="text-sm material-symbols-outlined">arrow_forward</span>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
+@endif
 
-    {{-- 📊 Statistiche Principali --}}
-    {{-- @style: Flex layout, gap, padding, background semi-trasparente, bordi arrotondati. --}}
-    <div class="bg-black/30 backdrop-blur-sm rounded-lg p-4 flex flex-wrap justify-center sm:justify-start gap-x-6 gap-y-3 text-sm">
-        <div class="text-center sm:text-left">
-            <div class="font-semibold text-lg">{{ $collection->EGI_number ?? $collection->egis_count ?? 0 }}</div>
-            <div class="text-xs uppercase text-gray-300 tracking-wider">{{ __('Items') }}</div>
+{{-- 🎨 GRIGLIA EGI PRINCIPALE --}}
+<main class="py-8 bg-gray-900 sm:py-12">
+    <div class="container px-4 mx-auto sm:px-6 lg:px-8">
+        {{-- Header con Filtri --}}
+        <div class="flex flex-col items-start justify-between gap-4 mb-8 sm:flex-row sm:items-center">
+            <div>
+                <h2 class="mb-2 text-2xl font-bold text-white sm:text-3xl">
+                    {{ __('Collection Items') }}
+                </h2>
+                <p class="text-sm text-gray-400">
+                    {{ $collection->egis_count ?? 0 }} {{ __('unique digital assets') }}
+                </p>
+            </div>
+
+            {{-- Filtri e ordinamento --}}
+            <div class="flex flex-col w-full gap-3 sm:flex-row sm:w-auto">
+                <select id="egis-sort"
+                        class="px-4 py-2 text-sm text-white bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                    <option value="position">{{ __('Position') }}</option>
+                    <option value="newest">{{ __('Newest') }}</option>
+                    <option value="oldest">{{ __('Oldest') }}</option>
+                    <option value="price_low">{{ __('Price: Low to High') }}</option>
+                    <option value="price_high">{{ __('Price: High to Low') }}</option>
+                </select>
+
+                {{-- View Toggle --}}
+                <div class="flex p-1 bg-gray-800 rounded-lg">
+                    <button class="px-3 py-1 text-sm font-medium text-white bg-indigo-600 rounded view-toggle active" data-view="grid">
+                        <span class="text-sm material-symbols-outlined">grid_view</span>
+                    </button>
+                    <button class="px-3 py-1 text-sm font-medium text-gray-400 rounded view-toggle hover:text-white" data-view="list">
+                        <span class="text-sm material-symbols-outlined">view_list</span>
+                    </button>
+                </div>
+            </div>
         </div>
-        <div class="text-center sm:text-left">
-            <div class="font-semibold text-lg">{{ $collection->likes_count ?? 0 }}</div>
-            <div class="text-xs uppercase text-gray-300 tracking-wider">{{ __('Likes') }}</div>
+
+        {{-- Griglia EGI Responsiva --}}
+        <div class="egi-grid" id="egis-container">
+            @forelse($collection->egis as $index => $egi)
+                <div class="egi-item card-hover">
+                    <x-egi-card :egi="$egi" :collection="$collection" />
+                </div>
+            @empty
+                {{-- Stato Vuoto Migliorato --}}
+                <div class="col-span-full">
+                    <div class="px-6 py-16 text-center">
+                        <div class="inline-flex items-center justify-center w-16 h-16 mb-6 bg-gray-800 rounded-full">
+                            <span class="text-2xl text-gray-400 material-symbols-outlined">image</span>
+                        </div>
+                        <h3 class="mb-2 text-xl font-semibold text-white">{{ __('No EGIs Yet') }}</h3>
+                        <p class="max-w-md mx-auto mb-6 text-gray-400">
+                            {{ __("This collection is waiting for its first masterpiece. Check back soon!") }}
+                        </p>
+                        @if(auth()->id() === $collection->creator_id)
+                            <button class="px-6 py-3 font-semibold text-white rounded-lg btn-primary-glow">
+                                <span class="mr-2 material-symbols-outlined">add</span>
+                                {{ __('Add First EGI') }}
+                            </button>
+                        @endif
+                    </div>
+                </div>
+            @endforelse
         </div>
-        <div class="text-center sm:text-left">
-            <div class="font-semibold text-lg">{{ $collection->reservations_count ?? 0 }}</div>
-            <div class="text-xs uppercase text-gray-300 tracking-wider">{{ __('Reservations') }}</div>
-        </div>
-        @if($collection->floor_price && $collection->floor_price > 0)
-            <div class="text-center sm:text-left">
-                <div class="font-semibold text-lg">{{ number_format($collection->floor_price, 2) }} <span class="text-xs text-gray-300">ALGO</span></div>
-                <div class="text-xs uppercase text-gray-300 tracking-wider">{{ __('Floor Price') }}</div>
+
+        {{-- Load More Button (se necessario) --}}
+        @if($collection->egis->count() >= 20)
+            <div class="mt-12 text-center">
+                <button class="px-8 py-3 font-medium text-white transition-colors duration-200 bg-gray-800 rounded-lg hover:bg-gray-700">
+                    {{ __('Load More Items') }}
+                </button>
             </div>
         @endif
     </div>
-</div> {{-- Fine Contenuto Header --}}
-</header>
-
-{{-- 🧩 Corpo Principale (Sidebar + Contenuto EGI) --}}
-{{-- @style: Layout a griglia, gap. --}}
-<div class="container mx-auto px-4 sm:px-6 lg:px-8 py-12 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
-
-{{-- 📌 Sidebar (Informazioni Aggiuntive) --}}
-{{-- @style: Colonna laterale su schermi grandi. --}}
-<aside class="lg:col-span-4 xl:col-span-3 space-y-6">
-
-    {{-- 📄 Card Descrizione --}}
-    <div class="bg-white p-5 rounded-lg shadow-md">
-        <h3 class="text-lg font-semibold text-gray-900 mb-3 border-b pb-2">{{ __('About this Collection') }}</h3>
-        {{-- @style: Prosa per formattazione testo, gestione link. --}}
-        <div class="prose prose-sm text-gray-700 max-w-none">
-            {!! nl2br(e($collection->description ?? __('No description available.'))) !!}
-        </div>
-        {{-- Metadati (Data Creazione, Tipo) --}}
-        <div class="mt-5 border-t border-gray-200 pt-4 space-y-2 text-sm">
-            <div class="flex justify-between">
-                <span class="text-gray-500 font-medium">{{ __('Created') }}</span>
-                <span class="text-gray-800">{{ $collection->created_at->format('M d, Y') }}</span>
-            </div>
-            @if($collection->type)
-                <div class="flex justify-between">
-                    <span class="text-gray-500 font-medium">{{ __('Type') }}</span>
-                    <span class="inline-block bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded text-xs font-semibold">
-                        {{ __(ucfirst($collection->type)) }}
-                    </span>
-                </div>
-            @endif
-        </div>
-    </div>
-
-    {{-- 🌳 Card EPP --}}
-    @if($collection->epp)
-        <div class="bg-white p-5 rounded-lg shadow-md">
-            <h3 class="text-lg font-semibold text-gray-900 mb-3 border-b pb-2">{{ __('Environmental Project Supported') }}</h3>
-            <div class="flex items-start gap-4">
-                {{-- Icona EPP --}}
-                <div class="flex-shrink-0 text-green-600 mt-1">
-                    <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                        <path fill-rule="evenodd" d="M11.983 2.504a1 1 0 0 0-1.966 0l-3.044 6.164a1 1 0 0 0 .763 1.52h6.5l.002-.001a1 1 0 0 0 .763-1.52L11.983 2.504ZM12.5 11.562v5.627a.75.75 0 0 1-1.5 0v-5.627a.75.75 0 0 1 1.5 0ZM8.45 18.16a.75.75 0 1 1-1.41-.496l.37-.923a.75.75 0 1 1 1.41.496l-.37.923ZM16.96 17.664a.75.75 0 1 0-1.41.496l.37.923a.75.75 0 1 0 1.41-.496l-.37-.923Z" clip-rule="evenodd" /> <path d="M11.158 19.75a.75.75 0 1 0 1.41-.496l-.185-.462a.75.75 0 1 0-1.41.496l.185.462Zm1.598-1.841a.75.75 0 1 0-1.41-.496l-.878.349a.75.75 0 1 0 .59 1.393l.878-.349ZM9.49 17.407a.75.75 0 1 0 .59 1.393l.878-.349a.75.75 0 1 0-.59-1.393l-.878.349Z" />
-                    </svg>
-                </div>
-                {{-- Dettagli EPP --}}
-                <div class="flex-grow">
-                    <h4 class="font-semibold text-gray-800">{{ $collection->epp->name }}</h4>
-                    <p class="text-sm text-gray-600 mt-1 mb-3 line-clamp-3">{{ $collection->epp->description }}</p>
-                    {{-- Impatto (Percentuale - Rendi dinamica se necessario) --}}
-                    <div class="text-xs text-gray-500 mb-3">
-                        <span class="font-medium text-green-700">20%</span> {{ __('of each primary sale funds this project.') }}
-                    </div>
-                    {{-- Link Scopri di più --}}
-                    <a href="{{ route('epps.show', $collection->epp_id) }}" class="inline-flex items-center text-sm font-medium text-green-600 hover:text-green-800 group">
-                        {{ __('Learn more') }}
-                        <svg class="w-4 h-4 ml-1 transform group-hover:translate-x-1 transition-transform duration-150" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3" />
-                        </svg>
-                    </a>
-                </div>
-            </div>
-        </div>
-    @endif
-
-    {{-- 🛠️ Card Azioni --}}
-    <div class="bg-white p-4 rounded-lg shadow-md">
-         <h3 class="text-base font-semibold text-gray-900 mb-3">{{ __('Collection Actions') }}</h3>
-         <div class="flex flex-col space-y-2">
-             {{-- Pulsante Like (se implementato JS) --}}
-             <button class="w-full inline-flex items-center justify-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 like-button {{ $collection->is_liked ?? false ? 'is-liked ring-2 ring-pink-500 text-pink-600' : '' }}"
-                     data-collection-id="{{ $collection->id }}"
-                     data-like-url="{{ route('api.toggle.collection.like', $collection->id) }}">
-                <svg class="-ml-1 mr-2 h-5 w-5 icon-heart {{ $collection->is_liked ?? false ? 'text-pink-500' : 'text-gray-400' }}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                    <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 0 1 5.656 0L10 6.343l1.172-1.171a4 4 0 1 1 5.656 5.656L10 17.657l-6.828-6.829a4 4 0 0 1 0-5.656Z" clip-rule="evenodd" />
-                </svg>
-                <span class="like-text">{{ $collection->is_liked ?? false ? __('Liked') : __('Like') }}</span>
-                <span class="ml-1.5 like-count-display">({{ $collection->likes_count ?? 0 }})</span>
-             </button>
-             {{-- Pulsante Share (richiede JS per implementazione) --}}
-             <button class="w-full inline-flex items-center justify-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                     onclick="alert('Share functionality to be implemented. URL: {{ route('home.collections.show', $collection->id) }}')"> {{-- Placeholder JS --}}
-                <svg class="-ml-1 mr-2 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                  <path d="M13 4.5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0Zm-7.56-.154a3.5 3.5 0 0 0 6.118 3.027l.755 1.51a.5.5 0 0 0 .87-.43l-.5-1a3.502 3.502 0 0 0-3.231-1.993 3.5 3.5 0 0 0-3.232 1.993l-.5 1a.5.5 0 0 0 .87.43l.755-1.51A3.502 3.502 0 0 0 5.44 4.346ZM3.75 11.5a.75.75 0 0 0 0 1.5h12.5a.75.75 0 0 0 0-1.5H3.75Z" />
-                </svg>
-                {{ __('Share') }}
-             </button>
-             {{-- Pulsante Report (richiede logica/modal) --}}
-             <button class="w-full inline-flex items-center justify-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                     onclick="alert('Report functionality to be implemented for collection ID: {{ $collection->id }}')"> {{-- Placeholder JS --}}
-                <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                  <path fill-rule="evenodd" d="M3 3a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V7.414a1 1 0 0 0-.293-.707l-4.414-4.414A1 1 0 0 0 12.586 2H4a1 1 0 0 0-1 1Zm10.293 1.293a1 1 0 0 1 1.414 0l2 2a1 1 0 0 1 0 1.414l-9.5 9.5a1 1 0 0 1-.474.264l-3 1a1 1 0 0 1-1.212-1.212l1-3a1 1 0 0 1 .264-.474l9.5-9.5Z" clip-rule="evenodd" />
-                </svg>
-                {{ __('Report') }}
-             </button>
-         </div>
-    </div>
-</aside>
-
-{{-- 📦 Contenuto Principale (Griglia EGI) --}}
-{{-- @style: Colonna principale su schermi grandi. --}}
-<main class="lg:col-span-8 xl:col-span-9">
-
-    {{-- Barra Filtri EGI --}}
-    <div class="flex flex-col sm:flex-row justify-between items-center mb-6 pb-4 border-b border-gray-200 gap-4">
-        <h2 class="text-xl sm:text-2xl font-semibold text-gray-900 flex-shrink-0">{{ __('EGIs in this Collection') }}</h2>
-        {{-- Filtri (esempio - da implementare con JS/Livewire) --}}
-        <div class="flex items-center gap-2 sm:gap-4 w-full sm:w-auto">
-            <select name="sort" id="egis-sort" class="flex-grow sm:flex-grow-0 block w-full sm:w-auto rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" aria-label="{{ __('Sort EGIs') }}">
-                <option value="position">{{ __('Position') }}</option>
-                <option value="newest">{{ __('Newest') }}</option>
-                <option value="oldest">{{ __('Oldest') }}</option>
-                <option value="price_low">{{ __('Price: Low to High') }}</option>
-                <option value="price_high">{{ __('Price: High to Low') }}</option>
-            </select>
-            {{-- Toggle Vista (Grid/List - richiede JS) --}}
-            {{-- <div class="flex rounded-md shadow-sm bg-white border border-gray-300">
-                <button class="view-btn p-2 rounded-l-md text-gray-500 hover:bg-gray-100 focus:z-10 focus:outline-none focus:ring-2 focus:ring-indigo-500 is-active" data-view="grid" aria-pressed="true" aria-label="{{ __('Grid view') }}">
-                    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.25 2A2.25 2.25 0 0 0 2 4.25v2.5A2.25 2.25 0 0 0 4.25 9h2.5A2.25 2.25 0 0 0 9 6.75v-2.5A2.25 2.25 0 0 0 6.75 2h-2.5ZM4.25 11A2.25 2.25 0 0 0 2 13.25v2.5A2.25 2.25 0 0 0 4.25 18h2.5A2.25 2.25 0 0 0 9 15.75v-2.5A2.25 2.25 0 0 0 6.75 11h-2.5ZM11 4.25A2.25 2.25 0 0 1 13.25 2h2.5A2.25 2.25 0 0 1 18 4.25v2.5A2.25 2.25 0 0 1 15.75 9h-2.5A2.25 2.25 0 0 1 11 6.75v-2.5ZM13.25 11A2.25 2.25 0 0 0 11 13.25v2.5A2.25 2.25 0 0 0 13.25 18h2.5A2.25 2.25 0 0 0 18 15.75v-2.5A2.25 2.25 0 0 0 15.75 11h-2.5Z" clip-rule="evenodd" /></svg>
-                </button>
-                <button class="view-btn p-2 -ml-px rounded-r-md text-gray-400 hover:bg-gray-100 focus:z-10 focus:outline-none focus:ring-2 focus:ring-indigo-500" data-view="list" aria-pressed="false" aria-label="{{ __('List view') }}">
-                    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M2 4.75A.75.75 0 0 1 2.75 4h14.5a.75.75 0 0 1 0 1.5H2.75A.75.75 0 0 1 2 4.75ZM2 10a.75.75 0 0 1 .75-.75h14.5a.75.75 0 0 1 0 1.5H2.75A.75.75 0 0 1 2 10Zm0 5.25a.75.75 0 0 1 .75-.75h14.5a.75.75 0 0 1 0 1.5H2.75a.75.75 0 0 1-.75-.75Z" clip-rule="evenodd" /></svg>
-                </button>
-            </div> --}}
-        </div>
-    </div>
-
-    {{-- Griglia EGI --}}
-    {{-- @style: Layout a griglia responsive. --}}
-    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6" id="egis-container">
-        @forelse($collection->egis as $egi)
-            {{-- Includi la card EGI (assumendo esista un componente x-egi-card) --}}
-            <x-egi-card :egi="$egi" :collection='$collection' />
-        @empty
-            {{-- 💨 Stato Vuoto EGIs --}}
-            <div class="sm:col-span-2 xl:col-span-3 text-center py-12 px-4 bg-gray-50 rounded-lg">
-                <div class="inline-block bg-gray-200 p-4 rounded-full mb-4">
-                    <svg class="w-10 h-10 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="m21 7.5-9-5.25L3 7.5m18 0-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
-                    </svg>
-                </div>
-                <h3 class="text-lg font-semibold text-gray-800 mb-1">{{ __('No EGIs in this Collection Yet') }}</h3>
-                <p class="text-sm text-gray-600 mb-5">{{ __("The creator hasn't added any EGIs to this collection.") }}</p>
-                {{-- @permission-check: Mostra bottone solo al creator della collezione --}}
-                @if(auth()->id() === $collection->creator_id)
-                    {{-- <a href="{{ route('egis.create', ['collection_id' => $collection->id]) }}" --}} {{-- Assumi esista questa rotta --}}
-                    <a href="#" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 active:bg-indigo-800 focus:outline-none focus:border-indigo-800 focus:ring focus:ring-indigo-300 disabled:opacity-25 transition">
-                       {{ __('Add First EGI') }}
-                    </a>
-                @endif
-            </div>
-        @endforelse
-    </div>
-     {{-- Qui potrebbe andare la paginazione degli EGI se sono molti --}}
-     {{-- {{ $egis->links() }} --}}
-
-    {{-- 📚 Collezioni Correlate (se presenti) --}}
-    @if(isset($relatedCollections) && $relatedCollections->count() > 0)
-        <div class="mt-12 md:mt-16 pt-8 border-t border-gray-200">
-            <h2 class="text-xl sm:text-2xl font-semibold text-gray-900 mb-6">{{ __('More from this Creator') }}</h2>
-            {{-- @style: Usa una griglia simile a quella principale, magari con meno colonne. --}}
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8">
-                 @foreach($relatedCollections as $relatedCollection)
-                    <x-collection-card :collection="$relatedCollection" imageType="card" />
-                @endforeach
-            </div>
-        </div>
-    @endif
-
 </main>
 
-</div> {{-- Fine Corpo Principale --}}
+{{-- 📚 COLLEZIONI CORRELATE --}}
+@if(isset($relatedCollections) && $relatedCollections->count() > 0)
+<section class="py-12 bg-gray-800">
+    <div class="container px-4 mx-auto sm:px-6 lg:px-8">
+        <h2 class="mb-8 text-2xl font-bold text-center text-white">
+            {{ __('More from this Creator') }}
+        </h2>
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            @foreach($relatedCollections->take(3) as $relatedCollection)
+                <div class="card-hover">
+                    <x-collection-card :collection="$relatedCollection" imageType="card" />
+                </div>
+            @endforeach
+        </div>
+    </div>
+</section>
+@endif
 
-</div> {{-- Fine Container Principale --}}
+{{-- 🚀 FLOATING ACTIONS (Mobile) --}}
+<div class="floating-actions lg:hidden">
+    <div class="flex items-center gap-3 px-4 py-3 border border-gray-700 rounded-full bg-gray-900/90 backdrop-blur-sm">
+        <button class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white transition-colors bg-indigo-600 rounded-full hover:bg-indigo-700">
+            <span class="text-sm material-symbols-outlined">favorite_border</span>
+            {{ __('Like') }}
+        </button>
+        <button class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white transition-colors bg-gray-700 rounded-full hover:bg-gray-600">
+            <span class="text-sm material-symbols-outlined">share</span>
+            {{ __('Share') }}
+        </button>
+    </div>
+</div>
 
-{{-- Eventuale JS specifico per questa pagina (es. per filtri EGI, share button) --}}
+{{-- JavaScript Enhancements --}}
 @push('scripts')
 <script>
-// Esempio per il pulsante like (richiede integrazione con API)
+// === ORCHESTRATED INTERACTIONS ===
+
+// Like functionality migliorata
 document.querySelectorAll('.like-button').forEach(button => {
-button.addEventListener('click', async function() {
-    const collectionId = this.dataset.collectionId;
-    const likeUrl = this.dataset.likeUrl; // Assicurati di avere questa rotta API
-    const icon = this.querySelector('.icon-heart');
-    const text = this.querySelector('.like-text');
-    const countDisplay = document.querySelector(`.like-count-display[data-collection-id="${collectionId}"]`) ?? this.querySelector('.like-count-display');
+    button.addEventListener('click', async function() {
+        const collectionId = this.dataset.collectionId;
+        const likeUrl = this.dataset.likeUrl;
+        const icon = this.querySelector('.icon-heart');
+        const text = this.querySelector('.like-text');
+        const countDisplay = this.querySelector('.like-count-display');
 
+        // Visual feedback immediato
+        this.style.transform = 'scale(0.95)';
+        setTimeout(() => {
+            this.style.transform = 'scale(1)';
+        }, 150);
 
-    // Aggiungi stato 'loading' visivo (opzionale)
-    this.disabled = true;
-    // icon.classList.add('animate-pulse');
+        try {
+            const response = await fetch(likeUrl, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json',
+                },
+            });
 
-    try {
-        const response = await fetch(likeUrl, {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                'Accept': 'application/json',
-                'Content-Type': 'application/json' // Se invii dati nel body
-            },
-            // body: JSON.stringify({ collection_id: collectionId }) // Se necessario
+            const data = await response.json();
+
+            if (data.success) {
+                this.classList.toggle('is-liked', data.is_liked);
+
+                if (data.is_liked) {
+                    icon.textContent = 'favorite';
+                    text.textContent = 'Liked';
+                    this.style.background = 'linear-gradient(135deg, #ec4899 0%, #be185d 100%)';
+                } else {
+                    icon.textContent = 'favorite_border';
+                    text.textContent = 'Like Collection';
+                    this.style.background = 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)';
+                }
+
+                countDisplay.textContent = `(${data.likes_count ?? 0})`;
+
+                // Celebrazione visiva
+                if (data.is_liked) {
+                    icon.style.animation = 'heartBeat 0.6s ease-in-out';
+                    setTimeout(() => {
+                        icon.style.animation = '';
+                    }, 600);
+                }
+            }
+        } catch (error) {
+            console.error('Error toggling like:', error);
+        }
+    });
+});
+
+// View Toggle
+document.querySelectorAll('.view-toggle').forEach(button => {
+    button.addEventListener('click', function() {
+        const view = this.dataset.view;
+        const container = document.getElementById('egis-container');
+
+        // Update buttons
+        document.querySelectorAll('.view-toggle').forEach(btn => {
+            btn.classList.remove('active', 'bg-indigo-600', 'text-white');
+            btn.classList.add('text-gray-400');
         });
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        this.classList.add('active', 'bg-indigo-600', 'text-white');
+        this.classList.remove('text-gray-400');
 
-        const data = await response.json();
-
-        if (data.success) {
-            this.classList.toggle('is-liked', data.is_liked);
-            icon.classList.toggle('text-pink-500', data.is_liked);
-            icon.classList.toggle('text-gray-400', !data.is_liked);
-            if (text) text.textContent = data.is_liked ? '{{__("Liked")}}' : '{{__("Like")}}';
-            if (countDisplay) countDisplay.textContent = `(${data.likes_count ?? 0})`;
-
-             // Aggiorna anche il conteggio nella barra delle statistiche se presente
-             const statsBarLikeCount = document.getElementById(`stats-like-count-${collectionId}`); // Dovresti aggiungere un ID univoco
-             if (statsBarLikeCount) {
-                statsBarLikeCount.textContent = data.likes_count ?? 0;
-             }
-
+        // Update grid
+        if (view === 'list') {
+            container.className = 'space-y-4';
         } else {
-            // Gestisci errore (es. mostra messaggio)
-            console.error('Like toggle failed:', data.message);
-            alert('Could not update like status. Please try again.');
+            container.className = 'egi-grid';
         }
+    });
+});
 
-    } catch (error) {
-        console.error('Error toggling like:', error);
-         alert('An error occurred. Please try again.');
-    } finally {
-        // Rimuovi stato 'loading'
-        this.disabled = false;
-        // icon.classList.remove('animate-pulse');
+// Parallax effect (performance-conscious)
+let ticking = false;
+
+function updateParallax() {
+    const scrolled = window.pageYOffset;
+    const parallax = document.querySelector('.parallax-banner');
+
+    if (parallax) {
+        const speed = scrolled * 0.5;
+        parallax.style.transform = `translateY(${speed}px)`;
     }
-});
+
+    ticking = false;
+}
+
+function requestTick() {
+    if (!ticking) {
+        requestAnimationFrame(updateParallax);
+        ticking = true;
+    }
+}
+
+window.addEventListener('scroll', requestTick);
+
+// Copy to clipboard utility
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        // Show toast notification
+        const toast = document.createElement('div');
+        toast.className = 'fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium z-50';
+        toast.textContent = 'Link copied to clipboard!';
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
+    });
+}
+
+// Enhanced scroll animations
+const observerOptions = {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+};
+
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.style.animationPlayState = 'running';
+        }
+    });
+}, observerOptions);
+
+// Observe all animated elements
+document.querySelectorAll('.egi-item, .stat-card').forEach(el => {
+    observer.observe(el);
 });
 
-// Aggiungere qui eventuale JS per i filtri EGI o il toggle Grid/List view
 </script>
+
+<style>
+@keyframes heartBeat {
+    0% { transform: scale(1); }
+    25% { transform: scale(1.2); }
+    50% { transform: scale(1); }
+    75% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+/* Ottimizzazioni performance */
+.parallax-banner {
+    will-change: transform;
+    transform: translateZ(0);
+}
+
+.card-hover {
+    will-change: transform, box-shadow;
+}
+
+/* Line clamp utility */
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+</style>
 @endpush
 
 </x-collection-layout>

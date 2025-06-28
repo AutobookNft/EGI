@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Egi;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage; // Importa Storage
 use Illuminate\View\View; // Importa View
+use Ultra\UltraLogManager\UltraLogManager;
 
 class EgiController extends Controller
 {
@@ -29,6 +31,7 @@ class EgiController extends Controller
      */
     public function show($id): View
     {
+
         $egi = Egi::with([
             'collection.creator',
             'collection.epp',
@@ -37,6 +40,12 @@ class EgiController extends Controller
             'likes',
             'reservationCertificates'
         ])->findOrFail($id);
+
+        // Log::channel('florenceegi')->info('EgiController:show', [
+        //     'egi_id' => $egi->id,
+        //     'collection_id' => $egi->collection_id,
+        //     'connected_user_id' => session('connected_user_id'),
+        // ]);
 
         // Verifica like per utente strong auth
         if (auth()->check()) {

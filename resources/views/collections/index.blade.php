@@ -27,7 +27,7 @@
                     "@type": "CreativeWork", // O tipo più specifico se conosciuto
                     "name": "{{ $collection->collection_name }}",
                     "url": "{{ route('home.collections.show', $collection->id) }}",
-                    "image": "{{ $collection->image_card ? Storage::url($collection->image_card) : asset('images/default_card.jpg') }}",
+                    "image": "{{ $collection->image_card ? Storage::url($collection->image_card) : asset('images/logo/logo.png') }}",
                     "author": {
                       "@type": "Person",
                       "name": "{{ $collection->creator->name ?? 'Unknown Creator' }}"

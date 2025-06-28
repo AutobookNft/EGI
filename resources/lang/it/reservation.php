@@ -13,6 +13,7 @@ return [
     'status_failed' => 'Impossibile recuperare lo stato della prenotazione. Riprova più tardi.',
     'unauthorized_cancel' => 'Non hai il permesso per annullare questa prenotazione.',
     'cancel_failed' => 'Impossibile annullare la prenotazione. Riprova più tardi.',
+    'egi_not_found' => 'EGI non trovato. Assicurati che l\'ID sia corretto.',
 
     // Formulario
     'form' => [

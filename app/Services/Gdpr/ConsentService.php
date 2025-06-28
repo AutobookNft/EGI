@@ -80,10 +80,6 @@ class ConsentService
 
         return Cache::rememberForever($cacheKey, function () {
 
-            if (isset($this->logger)) {
-                $this->logger->info('Cache miss for consent DTOs. Fetching from DB and mapping to existing DTO...');
-            }
-
             $consentTypesFromDb = ConsentType::where('is_active', true)
                 ->orderBy('priority_order')
                 ->get();
@@ -504,10 +500,11 @@ class ConsentService
                 throw new \InvalidArgumentException("Invalid consent type: {$consentType}");
             }
 
+            // Return ConsentVersion
             $consentVersion = $this->getCurrentConsentVersion();
 
             // CORREZIONE 3: L'array restituito da questa transazione viene assegnato alla variabile $result.
-            $result = DB::transaction(function () use ($user, $consentType, $consentConfig, $consentVersion, $metadata) {
+             $result = DB::transaction(function () use ($user, $consentType, $consentConfig, $consentVersion, $metadata) {
                 $existingConsent = UserConsent::where('user_id', $user->id)
                     ->where('consent_type', $consentType)
                     ->latest('created_at')
@@ -531,10 +528,7 @@ class ConsentService
 
                 if ($existingConsent && $existingConsent->granted === true) {
                     // CORREZIONE 2: Aggiunto esplicitamente updated_at per chiarezza.
-                    $existingConsent->update([
-                        'metadata' => $consentData['metadata'],
-                        'updated_at' => now()
-                    ]);
+                    $existingConsent->create($consentData);
                     return ['current' => $existingConsent, 'previous' => $existingConsent];
                 } else {
                     $newConsent = UserConsent::create($consentData);

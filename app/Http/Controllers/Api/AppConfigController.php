@@ -89,7 +89,7 @@ class AppConfigController extends Controller
 
 
         try {
-            $user = FegiAuth::user();
+            $user = Auth::user();
             $lang = app()->getLocale();
 
             // Cache configuration for performance
@@ -140,7 +140,7 @@ class AppConfigController extends Controller
         try {
             $uemConfig = [
                 'errors' => config('error-manager.errors', []),
-                'default_display_mode' => config('error-manager.default_display_mode', 'toast'),
+                'default_display_mode' => config('error-manager.ui.default_display_mode', 'sweet-alert'),
                 'error_container_id' => 'error-container',
                 'error_message_id' => 'error-message'
             ];

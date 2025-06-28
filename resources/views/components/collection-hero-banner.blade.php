@@ -6,7 +6,7 @@
 
 @php
     $instanceId = $attributes->get('id', $componentElementId ?: 'chb_'.uniqid());
-
+    $logo = "15.jpg";
     if (is_array($collections)) {
         $collections = collect($collections);
     }
@@ -16,14 +16,14 @@
     // ... ($jsCollectionsData come definito precedentemente) ...
     $jsCollectionsData = [];
     if ($hasCollections) {
-        $jsCollectionsData = $collections->map(function($c) {
+        $jsCollectionsData = $collections->map(function($c) use($logo) {
             $creatorName = $c->creator ? $c->creator->name : null;
             $bannerPath = $c->image_banner;
             return [
                 'id' => $c->id,
                 'name' => $c->collection_name ?? '',
                 'creator' => $creatorName ?: __('guest_home.unknown_artist'),
-                'banner' => $bannerPath ? asset($bannerPath) : asset('images/default/banner_placeholder.jpg'),
+                'banner' => $bannerPath ? asset($bannerPath) : asset("images/default/random_background/$logo"),
             ];
         })->values()->all();
     }
@@ -37,7 +37,7 @@
     {{-- ... (div hero-banner-background come prima) ... --}}
     <div class="absolute inset-0 transition-opacity duration-700 ease-in-out bg-center bg-cover hero-banner-background"
          id="heroBannerBackground_{{ $instanceId }}"
-         style="background-image: url('{{ $hasCollections && $firstCollection && $firstCollection->image_banner ? asset($firstCollection->image_banner) : asset('images/default/banner_placeholder.jpg') }}')">
+         style="background-image: url('{{ $hasCollections && $firstCollection && $firstCollection->image_banner ? asset($firstCollection->image_banner) : asset("images/default/random_background/$logo") }}')">
         <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10"></div>
         <div class="absolute inset-0 opacity-75 bg-gradient-to-r from-black/50 via-transparent to-transparent"></div>
     </div>

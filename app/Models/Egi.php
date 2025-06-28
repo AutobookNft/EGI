@@ -231,13 +231,21 @@ class Egi extends Model
     }
 
     /**
-     * Get the reservation certificates associated with the EGI.
+     * Relazione con i certificati di prenotazione
+     * Ordinamento: strong prima di weak, poi per offer_amount_eur decrescente
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function reservationCertificates(): HasMany
+    public function reservationCertificates()
     {
-        return $this->hasMany(EgiReservationCertificate::class, 'egi_id', 'id');
+        return $this->hasMany(EgiReservationCertificate::class, 'egi_id')
+                    ->orderByRaw("CASE
+                        WHEN reservation_type = 'strong' THEN 0
+                        WHEN reservation_type = 'weak' THEN 1
+                        ELSE 2
+                    END")
+                    ->orderBy('offer_amount_eur', 'desc')
+                    ->orderBy('created_at', 'desc'); // Tie-breaker per stesso prezzo
     }
 
 

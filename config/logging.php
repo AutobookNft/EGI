@@ -36,6 +36,7 @@ return [
         'trace' => env('LOG_DEPRECATIONS_TRACE', false),
     ],
 
+
     /*
     |--------------------------------------------------------------------------
     | Log Channels

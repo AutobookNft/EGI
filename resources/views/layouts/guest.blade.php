@@ -323,7 +323,7 @@ html, body {
             @endisset
 
             {{-- Contenuto sotto l'hero --}}
-            <div class="relative z-10 w-full mt-auto ml-10 mr-10 below-hero-content" role="region" aria-label="{{ __('guest_layout.hero_featured_content_aria_label') }}"> {{-- Aggiunto z-10 e w-full --}}
+            <div class="relative z-10 w-11/12 mt-12 mb-12 ml-10 mr-10 below-hero-content" role="region" aria-label="{{ __('guest_layout.hero_featured_content_aria_label') }}"> {{-- Aggiunto z-10 e w-full --}}
                 {{ $belowHeroContent ?? '' }}
             </div>
 

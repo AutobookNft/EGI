@@ -29,6 +29,7 @@ use App\Services\Menu\Items\MyOrganizationMenu;
 use App\Services\Menu\Items\MyPersonalDataMenu;
 use App\Services\Menu\Items\MyProfileMenu;
 use App\Services\Menu\Items\PrivacyPolicyMenu;
+use App\Services\Menu\Items\TermOfServiceMenu;
 
 /**
  * @Oracode Service: Context-aware Menu Provider
@@ -100,6 +101,7 @@ class ContextMenus
                     new ActivityLogMenu(),
                     new BreachReportMenu(),
                     new PrivacyPolicyMenu(),
+                    new TermOfServiceMenu(),
                     new BackToDashboardMenu(),
                 ]);
                 $menus[] = $gdprMenu;
@@ -140,6 +142,7 @@ class ContextMenus
                     new ActivityLogMenu(),
                     new BreachReportMenu(),
                     new PrivacyPolicyMenu(),
+                    // new TermOfServiceMenu(),
                     new BackToDashboardMenu(),
                 ]);
                 $menus[] = $gdprPrivacyMenu;

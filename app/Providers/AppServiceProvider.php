@@ -53,6 +53,9 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->singleton(IconRepository::class);
 
+        // Singletone di Ultralogmanager
+        // $this->app->singleton(UltraLogManager::class);
+
         // Registra il servizio di storage dei file
         $this->app->singleton(FileStorageService::class, function ($app) {
             return new FileStorageService();

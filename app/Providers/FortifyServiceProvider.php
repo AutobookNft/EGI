@@ -78,6 +78,7 @@ class FortifyServiceProvider extends ServiceProvider
                     'auth_status' => 'connected', // Stato specifico per "weak auth"
                     'connected_wallet' => $user->wallet,
                     'connected_user_id' => $user->id,
+                    'user_type' => $user->usertype, // Aggiungi il tipo di utente
                 ]);
 
                 if (!empty($user->wallet)) {

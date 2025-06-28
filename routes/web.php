@@ -152,6 +152,10 @@ Route::get('/', function () {
 
 Route::get('/home', [HomeController::class, 'index'])->name('home');
 
+Route::get('/archetypes/patron', function () {
+    return view('archetypes.patron');
+})->name('archetypes.patron');
+
 /*
 |--------------------------------------------------------------------------
 | Public Routes - Collections & EGIs
@@ -223,6 +227,20 @@ Route::get('/photo-uploader', PhotoUploader::class)->name('photo-uploader');
         return view('dashboard');
     })->name('dashboard');
 
+
+/*
+|--------------------------------------------------------------------------
+| User Collections API
+|--------------------------------------------------------------------------
+*/
+Route::prefix('api/user')->name('api.user.')->group(function () {
+    Route::get('/accessible-collections', [UserCollectionController::class, 'getAccessibleCollections'])
+        ->name('accessible.collections');
+
+    Route::post('/set-current-collection/{collection}', [UserCollectionController::class, 'setCurrentCollection'])
+        ->name('setCurrentCollection');
+});
+
 /*
 |--------------------------------------------------------------------------
 | Protected Routes (Authenticated Users)
@@ -251,18 +269,9 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
             return Route::currentRouteName();
         })->name('debug.context');
 
-        /*
-        |--------------------------------------------------------------------------
-        | User Collections API
-        |--------------------------------------------------------------------------
-        */
-        Route::prefix('api/user')->name('api.user.')->group(function () {
-            Route::get('/accessible-collections', [UserCollectionController::class, 'getAccessibleCollections'])
-                ->name('accessible.collections');
 
-            Route::post('/set-current-collection/{collection}', [UserCollectionController::class, 'setCurrentCollection'])
-                ->name('setCurrentCollection');
-        });
+
+
 
         // EGI upload routes
         Route::middleware('collection_can:manage_egi')->group(function () {
@@ -412,33 +421,6 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         ->name('my-certificates');
 });
 
-// API Routes
-Route::prefix('api')->name('api.')->group(function () {
-    // Reservation API endpoints
-    Route::post('/egis/{egiId}/reserve', [ReservationController::class, 'apiReserve'])
-        ->name('egis.reserve');
-    Route::delete('/reservations/{id}', [ReservationController::class, 'cancel'])
-        ->name('reservations.cancel');
-    Route::get('/my-reservations', [ReservationController::class, 'listUserReservations'])
-        ->name('my-reservations');
-    Route::get('/egis/{egiId}/reservation-status', [ReservationController::class, 'getEgiReservationStatus'])
-        ->name('egis.reservation-status');
-
-    // API di configurazione
-    Route::get('/app-config', [App\Http\Controllers\Api\AppConfigController::class, 'getAppConfig'])
-        ->name('app.config');
-
-    // API di configurazione per le definizioni degli errori
-    Route::get('/error-definitions', [App\Http\Controllers\Api\AppConfigController::class, 'getErrorDefinitions'])
-        ->name('error.definitions');
-
-    // Like/Unlike routes
-    Route::post('/collections/{collection}/toggle-like', [LikeController::class, 'toggleCollectionLike'])
-        ->name('toggle.collection.like');
-
-    Route::post('/egis/{egi}/toggle-like', [LikeController::class, 'toggleEgiLike'])
-        ->name('toggle.egi.like');
-});
 
 Route::prefix('notifications/{notification}/gdpr')
     ->name('notifications.gdpr.')
@@ -456,6 +438,28 @@ Route::prefix('notifications/{notification}/gdpr')
             ->name('disavow')
             ->middleware('throttle:3,60');
     });
+
+Route::prefix('api')->name('api.')->group(function () {
+    // Reservation API endpoints
+    Route::post('/egis/{egiId}/reserve', [ReservationController::class, 'apiReserve'])
+        ->name('egis.reserve');
+    Route::delete('/reservations/{id}', [ReservationController::class, 'cancel'])
+        ->name('reservations.cancel');
+    Route::get('/my-reservations', [ReservationController::class, 'listUserReservations'])
+        ->name('my-reservations');
+    Route::get('/egis/{egiId}/reservation-status', [ReservationController::class, 'getEgiReservationStatus'])
+        ->name('egis.reservation-status');
+        // Like/Unlike routes
+    Route::post('/collections/{collection}/toggle-like', [LikeController::class, 'toggleCollectionLike'])
+        ->name('toggle.collection.like');
+
+    Route::post('/egis/{egi}/toggle-like', [LikeController::class, 'toggleEgiLike'])
+        ->name('toggle.egi.like');// Like/Unlike routes
+     // API di configurazione
+    Route::get('/app-config', [App\Http\Controllers\Api\AppConfigController::class, 'getAppConfig'])
+        ->name('app.config');
+
+});
 
 /*
 |--------------------------------------------------------------------------

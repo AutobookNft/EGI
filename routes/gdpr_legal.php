@@ -49,10 +49,9 @@ Route::prefix('legal')
     ->group(function () {
 
         // Public terms display
-        Route::get('/terms/{userType}/{locale?}', [GdprLegalController::class, 'showTerms'])
-            ->where('userType', 'collector|creator|patron|epp|company|trader_pro')
-            ->where('locale', 'it|en|es|pt|fr|de')
-            ->defaults('locale', 'it')
+        Route::get('/terms/{userType?}/{locale?}', [GdprLegalController::class, 'showTerms'])
+            ->where('userType', 'collector|creator|patron|epp|company|trader_pro')->defaults('userType', 'creator')
+            ->where('locale', 'it|en|es|pt|fr|de')->defaults('locale', 'it')
             ->name('terms');
 
         // Terms acceptance (requires auth)

@@ -33,7 +33,7 @@ import {
 } from './features/collections/collectionUI';
 import { toggleMobileMenu } from './features/mobile/mobileMenu';
 import { updateNavbarUI } from './ui/navbarManager';
-import { UEM_Client_TS_Placeholder as UEM } from './services/uemClientService';
+import { UEM } from './services/uemClientService';
 import reservationFeature from './features/reservations/reservationFeature';
 import reservationButtons from './features/reservations/reservationButtons';
 import { NatanAssistant } from './components/natan-assistant';
@@ -51,10 +51,7 @@ async function initializeApplication(): Promise<void> {
     try {
         // 1. Inizializza UEM per gestione errori
         if (UEM && typeof UEM.initialize === 'function') {
-            const uemInit = UEM.initialize();
-            if (uemInit && typeof uemInit.then === 'function') {
-                await uemInit;
-            }
+            await UEM.initialize();
             console.log('Padmin Main: UEM Client Service initialized.');
         }
 
@@ -105,7 +102,7 @@ async function initializeApplication(): Promise<void> {
 
         // 9. Inizializza il sistema di prenotazione
         if (reservationFeature && typeof reservationFeature.initialize === 'function') {
-            await reservationFeature.initialize();
+            // await reservationFeature.initialize();
             console.log('Padmin Main: Reservation feature initialized.');
         } else {
             console.warn('Padmin Main: reservationFeature or its initialize method not found.');
@@ -251,6 +248,7 @@ function setupFegiCustomEvents(): void {
     });
     // Event listener per aggiornamenti UI dopo connessione FEGI
     document.addEventListener('fegiConnectionComplete', (event) => {
+        
         const customEvent = event as CustomEvent;
         updateNavbarUI(mainAppConfig, DOMElements);
         if (reservationFeature && typeof reservationFeature.updateReservationButtonStates === 'function') {

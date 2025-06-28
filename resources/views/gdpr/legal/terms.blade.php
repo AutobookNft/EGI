@@ -119,7 +119,7 @@
                 <section id="acceptance" class="scroll-mt-20">
                     <div class="bg-[#EAE7DC]/60 backdrop-blur-lg p-8 rounded-2xl shadow-md border border-gray-300/50">
                         <h2 class="text-3xl font-bold text-center mb-4 text-[#2D5016]">{{ __('legal_viewer.acceptance_title') }}</h2>
-                        @if ($hasAcceptedCurrent)
+                        @if ($consentStatus['hasAcceptedCurrent'])
                             <div class="flex items-center justify-center p-3 text-sm text-green-800 bg-green-100 rounded-md">
                                 <span class="mr-2 material-symbols-outlined">verified_user</span>
                                 <span>{{ __('legal_viewer.accepted_status') }}</span>

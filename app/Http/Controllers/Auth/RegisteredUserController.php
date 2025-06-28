@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Enums\Gdpr\GdprActivityCategory;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\RegistrationRequest;
 use App\Models\User;
 use App\Models\UserProfile;
 use App\Models\UserPersonalData;
@@ -96,7 +97,7 @@ class RegisteredUserController extends Controller
      * @param Request $request
      * @return RedirectResponse
      */
-    public function store(Request $request): RedirectResponse
+    public function store(RegistrationRequest $request): RedirectResponse
     {
         $userId = null;
         $collectionId = null;
@@ -323,14 +324,7 @@ class RegisteredUserController extends Controller
     {
         try {
             // Map user type to Spatie role
-            $roleMapping = [
-                'creator' => 'creator',
-                'patron' => 'patron',
-                'collector' => 'collector',
-                'enterprise' => 'enterprise',
-                'trader_pro' => 'trader_pro',
-                'epp_entity' => 'epp_entity',
-            ];
+            $roleMapping = config('app.role_mapping');
 
             $roleName = $roleMapping[$userType] ?? 'guest';
             $user->assignRole($roleName);

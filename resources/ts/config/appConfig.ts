@@ -193,7 +193,7 @@ export function getAppConfig(): AppConfig {
     if (!loadedConfig) {
         throw new Error('App configuration not initialized. Call initializeAppConfig() first.');
     }
-    console.log('Padmin Config: translations called with key:', 'getAppConfig');
+    // console.log('Padmin Config: translations called with key:', 'getAppConfig');
     return loadedConfig;
 }
 
@@ -267,7 +267,7 @@ export function appTranslate(
             }
         }
 
-        console.log('Padmin Config: translations called with key:', translatedString);
+        // console.log('Padmin Config: translations called with key:', translatedString);
 
         return translatedString;
     } catch (error) {

@@ -5,7 +5,7 @@
     'message' => __('guest_home.epp_banner_message'), // "Collaboriamo con Programmi di Protezione Ambientale verificati per garantire che una parte significativa di ogni transazione generi un cambiamento positivo e misurabile. La trasparenza è al centro del nostro operato: segui il flusso dei contributi e osserva i risultati."
     'ctaText' => __('guest_home.epp_banner_cta'), // "Scopri i Programmi Supportati"
     'ctaLink' => null, // Verrà passato da home.blade.php (route('epps.index'))
-    'backgroundImage' => asset('images/default/epp_banner_background.jpg'), // Immagine di sfondo a tema ambientale/speranza
+    'backgroundImage' => asset('images/default/epp_banner_background.png'), // Immagine di sfondo a tema ambientale/speranza
     'heightClass' => 'min-h-[50vh] md:min-h-[60vh]', // Altezza del banner
     'overlayColor' => 'bg-black/60' // Overlay per leggibilità testo
 ])

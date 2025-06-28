@@ -143,27 +143,10 @@ return [
     'url' => 'The :attribute must be a valid URL.',
     'uuid' => 'The :attribute must be a valid UUID.',
 
-    'collection_name_required' => 'Il nome della collezione è obbligatorio.',
-    'collection_name_min_length' => 'Il nome della collezione deve avere almeno 2 caratteri.',
-    'collection_name_max_length' => 'Il nome della collezione non può superare i 100 caratteri.',
-    'collection_name_invalid_characters' => 'Il nome della collezione contiene caratteri non validi.',
-
-    /*
-    |--------------------------------------------------------------------------
-    | Custom Validation Language Lines
-    |--------------------------------------------------------------------------
-    |
-    | Here you may specify custom validation messages for attributes using the
-    | convention "attribute.rule" to name the lines. This makes it quick to
-    | specify a specific custom language line for a given attribute rule.
-    |
-    */
-
-    'custom' => [
-        'attribute-name' => [
-            'rule-name' => 'custom-message',
-        ],
-    ],
+    'collection_name_required' => 'The collection name is required.',
+    'collection_name_min_length' =>  'The collection name must be at least 2 characters long.',
+    'collection_name_max_length' =>  'The collection name must not exceed 100 characters.',
+    'collection_name_invalid_characters' => 'The collection name may only contain letters, numbers, spaces, dashes, and underscores.',
 
     /*
     |--------------------------------------------------------------------------
@@ -176,6 +159,44 @@ return [
     |
     */
 
-    'attributes' => [],
+    'custom' => [
+        'attribute-name' => [
+            'rule-name' => 'custom-message',
+        ],
+        'email' => [
+            'unique' => 'This email address is already registered.',
+            'email' => 'Please enter a valid email address.',
+            'required' => 'Email address is required.',
+        ],
+        'password' => [
+            'min' => 'Password must be at least :min characters long.',
+            'confirmed' => 'Password confirmation does not match.',
+            'required' => 'Password is required.',
+        ],
+        'password_confirmation' => [
+            'required' => 'Please confirm your password.',
+        ],
+        'name' => [
+            'required' => 'Full name is required.',
+            'string' => 'Name must be text only.',
+            'max' => 'Name cannot be longer than :max characters.',
+        ],
+        'usertype' => [
+            'required' => 'Please select your account type.',
+            'in' => 'Please select a valid account type.',
+        ],
+        'terms_accepted' => [
+            'accepted' => 'You must accept the terms and conditions to continue.',
+            'required' => 'You must accept the terms and conditions.',
+        ],
+    ],
 
+    'attributes' => [
+        'email' => 'email address',
+        'password' => 'password',
+        'password_confirmation' => 'password confirmation',
+        'name' => 'full name',
+        'usertype' => 'account type',
+        'terms_accepted' => 'terms and conditions',
+    ],
 ];

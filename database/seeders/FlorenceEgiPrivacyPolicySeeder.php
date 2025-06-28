@@ -31,7 +31,7 @@ class FlorenceEgiPrivacyPolicySeeder extends Seeder
     {
         // Use existing users if available, otherwise null for optional fields
         $adminUser = User::first(); // Take first user if any exists
-        $legalUser = User::skip(1)->first(); // Take second user if exists
+        $legalUser = User::first(); // Take second user if exists
 
         // Seed Privacy Policies
         $this->seedPrivacyPolicies($adminUser, $legalUser);

@@ -24,6 +24,7 @@ return new class extends Migration
 
         // Dati della collection
         $table->string('collection_name')->index()->nullable();     // Nome della collection
+        $table->boolean('is_default')->default(false)->index();    // Booleano per indicare la collection di default
         $table->text('description')->nullable();                   // Descrizione
         $table->string('type', 25)->index()->nullable();           // Tipo (es. standard, single_egi)
 

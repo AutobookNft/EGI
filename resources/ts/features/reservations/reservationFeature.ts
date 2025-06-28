@@ -25,7 +25,7 @@ let isInitialized = false;
 
 /**
  * 📜 Oracode Function: initialize
- * 🎯 Purpose: Initialize the reservation feature by finding and attaching event handlers to reservation buttons
+ * 🎯 Purpose: Initialize the reservation feature by finding and attaching event handlers to reservation buttonsSee console.
  *
  * @returns {Promise<void>}
  *

@@ -59,6 +59,7 @@ return [
         'egi_storage_config_error' => "'local' storage disk required for fallback is not configured.",
         'egi_unexpected_error' => 'Unexpected error during EGI processing for file :original_filename.',
         'egi_unauthorized_access' => 'Unauthenticated attempt to access the EGI upload page.',
+        'record_not_found_egi_in_reservation_controller' => 'EGI with ID :egi_id not found in the reservation controller.',
         // UI Related Errors (developer messages)
         'egi_page_access_notice' => 'EGI upload page accessed successfully by administrator with ID :user_id.',
         'egi_page_rendering_error' => 'Exception during EGI upload page rendering: :exception_message',
@@ -234,6 +235,14 @@ return [
 
         'legal_content_load_failed' => 'Legal content loading failed. Check file permissions in resources/legal/ and the validity of the "current" symlink.',
         'terms_acceptance_check_failed' => 'Failed to verify current terms acceptance for user. Check logic in ConsentService and reachability of LegalContentService.',
+
+        // Registration validation errors - Developer messages
+        'registration_email_already_exists' => 'Registration validation failed: Email :email already exists in database',
+        'registration_password_too_weak' => 'Registration validation failed: Password does not meet security requirements',
+        'registration_password_confirmation_mismatch' => 'Registration validation failed: Password confirmation mismatch',
+        'registration_invalid_email_format' => 'Registration validation failed: Invalid email format provided: :email',
+        'registration_required_field_missing' => 'Registration validation failed: Required fields missing: :fields',
+        'registration_validation_comprehensive_failed' => 'Registration validation failed: Multiple validation errors detected',
 
     ],
     'user' => [
@@ -412,6 +421,14 @@ return [
 
         'legal_content_load_failed' => 'Unable to load legal documents at this time. Please try again later.',
         // Note: for TERMS_ACCEPTANCE_CHECK_FAILED, use the existing translation for 'generic_error'
+
+        // Registration validation errors - User-friendly messages
+        'registration_email_already_exists' => 'This email address is already registered. Try logging in instead.',
+        'registration_password_too_weak' => 'Password must be at least 8 characters long and include letters and numbers.',
+        'registration_password_confirmation_mismatch' => 'Password confirmation does not match. Please try again.',
+        'registration_invalid_email_format' => 'Please enter a valid email address.',
+        'registration_required_field_missing' => 'Please fill in all required fields.',
+        'registration_validation_comprehensive_failed' => 'Please check the form and correct any errors.',
     ],
 
     // Generic message (used by UserInterfaceHandler if no specific message found)
