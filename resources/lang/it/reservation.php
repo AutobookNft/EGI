@@ -1,59 +1,104 @@
 <?php
 
+/**
+ * Messaggi Prenotazione
+ * @package FlorenceEGI
+ * @subpackage Traduzioni
+ * @language it
+ * @version 1.0.0
+ */
+
 return [
     // Messaggi di successo
-    'success' => 'La tua prenotazione è stata completata con successo! Il certificato è stato generato.',
+    'success' => 'La tua prenotazione è stata effettuata con successo! Il certificato è stato generato.',
     'cancel_success' => 'La tua prenotazione è stata annullata con successo.',
+    'success_title' => 'Prenotazione effettuata!',
+    'view_certificate' => 'Visualizza Certificato',
+    'close' => 'Chiudi',
 
-    // Errori
-    'unauthorized' => 'Devi connettere il tuo wallet o accedere per effettuare una prenotazione.',
+    // Messaggi di errore
+    'unauthorized' => 'Devi collegare il tuo wallet o effettuare l’accesso per prenotare.',
     'validation_failed' => 'Controlla i dati inseriti e riprova.',
-    'auth_required' => 'Autenticazione richiesta per visualizzare le tue prenotazioni.',
+    'auth_required' => 'È richiesta l’autenticazione per visualizzare le tue prenotazioni.',
     'list_failed' => 'Impossibile recuperare le tue prenotazioni. Riprova più tardi.',
     'status_failed' => 'Impossibile recuperare lo stato della prenotazione. Riprova più tardi.',
     'unauthorized_cancel' => 'Non hai il permesso per annullare questa prenotazione.',
     'cancel_failed' => 'Impossibile annullare la prenotazione. Riprova più tardi.',
-    'egi_not_found' => 'EGI non trovato. Assicurati che l\'ID sia corretto.',
 
-    // Formulario
+    // Pulsanti UI
+    'button' => [
+        'reserve' => 'Prenota',
+        'reserved' => 'Prenotato',
+        'make_offer' => 'Fai un’offerta'
+    ],
+
+    // Badge
+    'badge' => [
+        'highest' => 'Massima Priorità',
+        'superseded' => 'Priorità Inferiore',
+        'has_offers' => 'Prenotato'
+    ],
+
+    // Dettagli prenotazione
+    'already_reserved' => [
+        'title' => 'Già Prenotato',
+        'text' => 'Hai già una prenotazione per questo EGI.',
+        'details' => 'Dettagli della tua prenotazione:',
+        'type' => 'Tipo',
+        'amount' => 'Importo',
+        'status' => 'Stato',
+        'view_certificate' => 'Visualizza Certificato',
+        'ok' => 'OK',
+        'new_reservation' => 'Nuova Prenotazione',
+        'confirm_new' => 'Vuoi effettuare una nuova prenotazione?'
+    ],
+
+    // Storico prenotazioni
+    'history' => [
+        'title' => 'Storico Prenotazioni',
+        'entries' => 'Voci di Prenotazione',
+        'view_certificate' => 'Visualizza Certificato',
+        'no_entries' => 'Nessuna prenotazione trovata.',
+        'be_first' => 'Sii il primo a prenotare questo EGI!'
+    ],
+
+    // Messaggi di errore
+    'errors' => [
+        'button_click_error' => 'Si è verificato un errore nell’elaborazione della tua richiesta.',
+        'form_validation' => 'Controlla i dati inseriti e riprova.',
+        'api_error' => 'Si è verificato un errore nella comunicazione con il server.',
+        'unauthorized' => 'Devi collegare il tuo wallet o effettuare l’accesso per prenotare.'
+    ],
+
+    // Form
     'form' => [
         'title' => 'Prenota questo EGI',
-        'offer_amount_label' => 'La tua offerta (EUR)',
-        'offer_amount_placeholder' => 'Inserisci l\'importo in EUR',
+        'offer_amount_label' => 'La tua Offerta (EUR)',
+        'offer_amount_placeholder' => 'Inserisci l’importo in EUR',
         'algo_equivalent' => 'Circa :amount ALGO',
-        'terms_accepted' => 'Accetto i termini e le condizioni per le prenotazioni EGI',
-        'contact_info' => 'Informazioni di contatto aggiuntive (opzionale)',
+        'terms_accepted' => 'Accetto i termini e le condizioni per la prenotazione degli EGI',
+        'contact_info' => 'Informazioni di Contatto Aggiuntive (Opzionale)',
         'submit_button' => 'Effettua Prenotazione',
         'cancel_button' => 'Annulla'
     ],
 
-    // Errori specifici
-    'errors' => [
-        'RESERVATION_EGI_NOT_AVAILABLE' => 'Questo EGI non è attualmente disponibile per la prenotazione.',
-        'RESERVATION_AMOUNT_TOO_LOW' => 'L\'importo offerto è troppo basso. Inserisci un importo più alto.',
-        'RESERVATION_UNAUTHORIZED' => 'Devi connettere il tuo wallet o accedere per effettuare una prenotazione.',
-        'RESERVATION_CERTIFICATE_GENERATION_FAILED' => 'Non siamo riusciti a generare il tuo certificato di prenotazione. Il nostro team è stato informato.',
-        'RESERVATION_CERTIFICATE_NOT_FOUND' => 'Il certificato richiesto non è stato trovato.',
-        'RESERVATION_ALREADY_EXISTS' => 'Hai già una prenotazione attiva per questo EGI.',
-        'RESERVATION_CANCEL_FAILED' => 'Non siamo riusciti ad annullare la tua prenotazione. Riprova più tardi.',
-        'RESERVATION_UNAUTHORIZED_CANCEL' => 'Non hai il permesso per annullare questa prenotazione.',
-        'RESERVATION_STATUS_FAILED' => 'Impossibile recuperare lo stato della prenotazione. Riprova più tardi.',
-        'RESERVATION_UNKNOWN_ERROR' => 'Qualcosa è andato storto con la tua prenotazione. Il nostro team è stato informato.'
-    ],
-
-    // Badge e status descriptor
+    // Tipologia prenotazione
     'type' => [
         'strong' => 'Prenotazione Forte',
-        'weak' => 'Prenotazione Base'
+        'weak' => 'Prenotazione Debole'
     ],
+
+    // Livelli di priorità
+    'priority' => [
+        'highest' => 'Massima Priorità',
+        'superseded' => 'Priorità Inferiore'
+    ],
+
+    // Stato della prenotazione
     'status' => [
         'active' => 'Attiva',
+        'pending' => 'In attesa',
         'cancelled' => 'Annullata',
-        'expired' => 'Scaduta',
-        'superseded' => 'Superata'
-    ],
-    'priority' => [
-        'highest' => 'Priorità Massima',
-        'superseded' => 'Priorità Inferiore'
+        'expired' => 'Scaduta'
     ]
 ];

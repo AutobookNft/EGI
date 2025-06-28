@@ -1,14 +1,22 @@
 <?php
 
+/**
+ * Reservation messages
+ * @package FlorenceEGI
+ * @subpackage Translations
+ * @language en
+ * @version 1.0.0
+ */
+
 return [
-    // Messaggi di successo
+    // Success messages
     'success' => 'Your reservation was successful! The certificate has been generated.',
     'cancel_success' => 'Your reservation has been canceled successfully.',
     'success_title' => 'Reservation Successful!',
     'view_certificate' => 'View Certificate',
     'close' => 'Close',
 
-    // Errori
+    // Error messages
     'unauthorized' => 'You need to connect your wallet or log in to make a reservation.',
     'validation_failed' => 'Please check your input and try again.',
     'auth_required' => 'Authentication required to view your reservations.',
@@ -17,7 +25,7 @@ return [
     'unauthorized_cancel' => 'You don\'t have permission to cancel this reservation.',
     'cancel_failed' => 'Could not cancel the reservation. Please try again later.',
 
-    // UI bottoni
+    // UI buttons
     'button' => [
         'reserve' => 'Reserve',
         'reserved' => 'Reserved',
@@ -31,7 +39,7 @@ return [
         'has_offers' => 'Reserved'
     ],
 
-    // Prenotazione esistente
+    // Reservation details
     'already_reserved' => [
         'title' => 'Already Reserved',
         'text' => 'You already have a reservation for this EGI.',
@@ -45,14 +53,17 @@ return [
         'confirm_new' => 'Do you want to make a new reservation?'
     ],
 
-    // Cronologia delle prenotazioni
+    // Reservation history
     'history' => [
         'title' => 'Reservation History',
         'entries' => 'Reservation Entries',
-        'view_certificate' => 'View Certificate'
+        'view_certificate' => 'View Certificate',
+        'no_entries' => 'No reservation entries found.',
+        'be_first' => 'Be the first to reserve this EGI!'
+
     ],
 
-    // Errori client
+    // Error messages
     'errors' => [
         'button_click_error' => 'An error occurred while processing your request.',
         'form_validation' => 'Please check your input and try again.',
@@ -60,7 +71,7 @@ return [
         'unauthorized' => 'You need to connect your wallet or log in to make a reservation.'
     ],
 
-    // Formulario
+    // Form
     'form' => [
         'title' => 'Reserve this EGI',
         'offer_amount_label' => 'Your Offer (EUR)',
@@ -72,19 +83,19 @@ return [
         'cancel_button' => 'Cancel'
     ],
 
-    // Tipi di prenotazione
+    // Type of reservation
     'type' => [
         'strong' => 'Strong Reservation',
         'weak' => 'Basic Reservation'
     ],
 
-    // Stati di priorità
+    // Priority levels
     'priority' => [
         'highest' => 'Highest Priority',
         'superseded' => 'Lower Priority'
     ],
 
-    // Stati della prenotazione
+    // Status of the reservation
     'status' => [
         'active' => 'Active',
         'pending' => 'Pending',

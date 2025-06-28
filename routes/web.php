@@ -194,8 +194,21 @@ Route::prefix('home')->name('home.')->group(function () {
 });
 
 // EGI routes
-Route::get('/egis/{id}', [EgiController::class, 'show'])->name('egis.show');
 
+Route::group(['prefix' => 'egis'], function () {
+
+    // Mostra singolo EGI (già esistente, confermo per completezza)
+    Route::get('/{egi}', [App\Http\Controllers\EgiController::class, 'show'])
+        ->name('egis.show');
+
+    // Update EGI - PATCH per aggiornamento parziale
+    Route::put('/{egi}', [App\Http\Controllers\EgiController::class, 'update'])
+        ->name('egis.update');
+
+    // Delete EGI - DELETE per eliminazione
+    Route::delete('/{egi}', [App\Http\Controllers\EgiController::class, 'destroy'])
+        ->name('egis.destroy');
+});
 
 // EPP routes
 Route::get('/epps', [EppController::class, 'index'])->name('epps.index');

@@ -63,6 +63,8 @@ return [
         // UI Related Errors (developer messages)
         'egi_page_access_notice' => 'EGI upload page accessed successfully by administrator with ID :user_id.',
         'egi_page_rendering_error' => 'Exception during EGI upload page rendering: :exception_message',
+        'egi_update_failed' => 'EGI update failed: :error for user :user_id on EGI :egi_id',
+        'egi_delete_failed' => 'EGI deletion failed: :error for user :user_id on EGI :egi_id',
 
         // Validation Related Errors (developer messages)
         'invalid_egi_file' => 'EGI file validation failed with errors: :validation_errors',
@@ -296,6 +298,8 @@ return [
         'egi_unexpected_error' => 'An unexpected error occurred while processing your EGI. Please try again later.',
         'egi_unauthorized_access' => 'Unauthorized access. Please log in.',
         'egi_page_rendering_error' => 'An issue occurred while loading the page. Please try again later or contact support.',
+        'egi_update_failed' => 'Unable to update the EGI. Please try again.',
+        'egi_delete_failed' => 'Unable to delete the EGI. Please try again.',
         'invalid_egi_file' => 'The EGI file cannot be processed due to validation errors. Please verify the file format and content.',
         'error_during_egi_processing' => 'An error occurred while processing the EGI file. Our team has been notified and will investigate the issue.',
 

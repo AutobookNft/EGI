@@ -63,6 +63,8 @@ return [
         // Errori relativi all'interfaccia utente (messaggi per sviluppatori)
         'egi_page_access_notice' => 'Pagina di upload EGI acceduta con successo dall\'amministratore con ID :user_id.',
         'egi_page_rendering_error' => 'Eccezione durante il rendering della pagina di upload EGI: :exception_message',
+        'egi_update_failed' => 'Aggiornamento EGI fallito: :error per utente :user_id su EGI :egi_id',
+        'egi_delete_failed' => 'Eliminazione EGI fallita: :error per utente :user_id su EGI :egi_id',
 
         // Errori di validazione (messaggi per sviluppatori)
         'invalid_egi_file' => 'Validazione del file EGI fallita con errori: :validation_errors',
@@ -296,6 +298,8 @@ return [
         'egi_unexpected_error' => 'Si è verificato un errore inaspettato durante l\'elaborazione del tuo EGI. Riprova più tardi.',
         'egi_unauthorized_access' => 'Accesso non autorizzato. Effettua il login.',
         'egi_page_rendering_error' => 'Si è verificato un problema durante il caricamento della pagina. Riprova più tardi o contatta l\'assistenza.',
+        'egi_update_failed' => 'Impossibile aggiornare l\'EGI. Si prega di riprovare.',
+        'egi_delete_failed' => 'Impossibile eliminare l\'EGI. Si prega di riprovare.',
         'invalid_egi_file' => 'Il file EGI non può essere elaborato a causa di errori di validazione. Verifica il formato e il contenuto del file.',
         'error_during_egi_processing' => 'Si è verificato un errore durante l\'elaborazione del file EGI. Il nostro team è stato avvisato e analizzerà il problema.',
 

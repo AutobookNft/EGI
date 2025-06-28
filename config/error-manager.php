@@ -951,6 +951,28 @@ return [
             'msg_to' => 'sweet-alert', // Mostra un alert all'utente
         ],
 
+        'EGI_UPDATE_FAILED' => [
+            'type' => 'critical',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.egi_update_failed',
+            'user_message_key' => 'error-manager::errors.user.egi_update_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'EGI_DELETE_FAILED' => [
+            'type' => 'critical',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.egi_delete_failed',
+            'user_message_key' => 'error-manager::errors.user.egi_delete_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
         // ====================================================
         // Errori specifici per la validazione EGI
         // ====================================================

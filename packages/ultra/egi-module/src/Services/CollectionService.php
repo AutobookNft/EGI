@@ -109,7 +109,7 @@ class CollectionService
                 'collection_name' => $collectionName,
                 'description'     => __('collection.default_description'),
                 'creator_id'      => $user->id,
-                'type'            => 'standard',
+                'type'            => 'image',
                 'position'        => 1,
                 'EGI_number'      => 1,
                 'floor_price'     => 0.0,

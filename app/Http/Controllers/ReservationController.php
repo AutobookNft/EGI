@@ -81,17 +81,13 @@ class ReservationController extends Controller
             $egi = Egi::findOrFail($egiId);
 
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return $this->errorManager->handle(
-                'RESERVATION_EGI_NOT_FOUND',
-                [
+            return $this->errorManager->handle('RESERVATION_EGI_NOT_FOUND', [
                     'egi_id' => $egiId,
                     'operation' => 'web_reservation',
                     'user_id' => FegiAuth::id(),
                     'ip_address' => $request->ip(),
                     'user_agent' => $request->userAgent()
-                ],
-                $e
-            );
+                ], $e);
         }
 
         try {

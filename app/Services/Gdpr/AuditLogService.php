@@ -50,44 +50,7 @@ class AuditLogService
      * Activity categories for classification
      * @var array
      */
-    protected array $activityCategories = [
-        'authentication' => [
-            'name' => 'Authentication',
-            'description' => 'Login, logout, password changes',
-            'retention_period' => 365,
-            'privacy_level' => 'standard'
-        ],
-        'gdpr_actions' => [
-            'name' => 'GDPR Actions',
-            'description' => 'Data requests, consent changes, deletions',
-            'retention_period' => 2555, // 7 years
-            'privacy_level' => 'high'
-        ],
-        'data_access' => [
-            'name' => 'Data Access',
-            'description' => 'Profile views, data exports, sensitive operations',
-            'retention_period' => 1095, // 3 years
-            'privacy_level' => 'high'
-        ],
-        'platform_usage' => [
-            'name' => 'Platform Usage',
-            'description' => 'Navigation, feature usage, interactions',
-            'retention_period' => 730, // 2 years
-            'privacy_level' => 'standard'
-        ],
-        'security_events' => [
-            'name' => 'Security Events',
-            'description' => 'Failed logins, suspicious activities, breaches',
-            'retention_period' => 2555, // 7 years
-            'privacy_level' => 'critical'
-        ],
-        'blockchain_activity' => [
-            'name' => 'Blockchain Activity',
-            'description' => 'NFT creation, wallet connections, transactions',
-            'retention_period' => 2555, // 7 years (legal requirement)
-            'privacy_level' => 'immutable'
-        ]
-    ];
+    protected array $activityCategories = [];
 
     /**
      * Sensitive data fields that need special handling
@@ -111,6 +74,7 @@ class AuditLogService
     ) {
         $this->logger = $logger;
         $this->errorManager = $errorManager;
+        $this->activityCategories= config('gdpr.activity_categories');
     }
 
     /**
