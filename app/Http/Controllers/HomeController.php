@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Collection;
 use App\Models\Egi;
 use App\Models\Epp;
+use App\Models\User; // Importa il modello User
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -28,7 +29,7 @@ class HomeController extends Controller
      *
      * 🎯 Presenta una panoramica dell'ecosistema FlorenceEGI
      * 📥 Recupera EGI casuali, collezioni in evidenza, ultime gallerie, progetti EPP
-     *     e statistiche di impatto ambientale
+     * e statistiche di impatto ambientale, e ora anche i Creator.
      * 📤 Restituisce la vista home con tutti i dati necessari
      *
      * @seo-purpose Pagina principale del sito con showcase delle collezioni NFT e impatto ambientale
@@ -43,6 +44,7 @@ class HomeController extends Controller
         $featuredCollections = $this->getFeaturedCollections();
         $latestCollections = $this->getLatestCollections($featuredCollections->pluck('id'));
         $highlightedEpps = $this->getHighlightedEpps();
+        $featuredCreators = $this->getFeaturedCreators(); // Nuovo: recupera i Creator
 
         // Dati impatto ambientale - valore hardcoded per MVP
         // TODO: In futuro, recuperare da database o API dedicata
@@ -54,6 +56,7 @@ class HomeController extends Controller
             'latestCollections' => $latestCollections,
             'highlightedEpps' => $highlightedEpps,
             'totalPlasticRecovered' => $totalPlasticRecovered,
+            'featuredCreators' => $featuredCreators, // Nuovo: passa i Creator alla vista
         ]);
     }
 
@@ -113,6 +116,22 @@ class HomeController extends Controller
         return Epp::where('status', 'active')
             ->orderBy('created_at', 'desc')
             ->take(3)
+            ->get();
+    }
+
+    /**
+     * Ottiene i Creator in evidenza per il carousel
+     *
+     * 🎯 Recupera utenti con usertype 'creator' in ordine casuale per la homepage
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    private function getFeaturedCreators()
+    {
+        return User::where('usertype', 'creator')
+            // Assicurati che esista un campo 'is_published' o 'is_active' se necessario
+            // ->where('is_published', true)
+            ->inRandomOrder()
+            ->take(8) // Puoi regolare il numero di creator da mostrare
             ->get();
     }
 

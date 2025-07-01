@@ -36,13 +36,13 @@ return [
      * Your config defines category-specific limits in 'size_limits' (e.g., 20 MB for images).
      * Since getUploadLimits() uses a single value, we take the most restrictive (20 MB) as a general default.
      */
-    'max_file_size' => '20M', // 20971520 bytes
+    'max_file_size' => '100M', // 20971520 bytes
 
     /**
      * Maximum number of files that can be uploaded in a single request.
      * Not explicitly defined in your original config, so we set a reasonable default (50).
      */
-    'max_files' => 50,
+    'max_files' => 1000,
 
     /**
      * Safety margin for size limits, used in getUploadLimits() to account for overhead.

@@ -53,6 +53,26 @@ class ReservationController extends Controller
             'session_id' => $request->session()->getId()
         ]);
 
+        $user = FegiAuth::user();
+        if (!$user) {
+            $this->logger->warning('Unauthenticated like attempt on EGI', [
+                'egi_id' => $egiId,
+                'user_id' => FegiAuth::id(),
+                'session_id' => $request->session()->getId(),
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent()
+            ]);
+
+            return $this->errorManager->handle('AUTH_REQUIRED', [
+                'operation' => 'web_reservation',
+                'endpoint' => 'reservations.reserve',
+                'user_id' => FegiAuth::id(),
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'session_id' => $request->session()->getId()
+            ]);
+        }
+
         try {
             // Validate inputs
             $validated = $request->validate([
@@ -177,6 +197,25 @@ class ReservationController extends Controller
             'session_id' => Session::getId()
         ]);
 
+        $user = FegiAuth::user();
+        if (!$user) {
+            $this->logger->warning('Unauthenticated like attempt on EGI', [
+                'egi_id' => $egiId,
+                'user_id' => FegiAuth::id(),
+                'session_id' => $request->session()->getId(),
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent()
+            ]);
+
+            return $this->errorManager->handle('AUTH_REQUIRED', [
+                'operation' => 'web_reservation',
+                'endpoint' => 'reservations.reserve',
+                'user_id' => FegiAuth::id(),
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'session_id' => $request->session()->getId()
+            ]);
+        }
         try {
             // Validate inputs
             $validated = $request->validate([
@@ -490,10 +529,10 @@ class ReservationController extends Controller
      */
     public function getEgiReservationStatus(Request $request, int $egiId): JsonResponse
     {
-        $this->logger->info('[RESERVATION_STATUS_REQUEST] EGI reservation status requested', [
-            'egi_id' => $egiId,
-            'user_id' => FegiAuth::id()
-        ]);
+        // $this->logger->info('[RESERVATION_STATUS_REQUEST] EGI reservation status requested', [
+        //     'egi_id' => $egiId,
+        //     'user_id' => FegiAuth::id()
+        // ]);
 
         try {
             $egi = Egi::findOrFail($egiId);
@@ -570,11 +609,11 @@ class ReservationController extends Controller
                 ] : null
             ];
 
-            $this->logger->info('[RESERVATION_STATUS_SUCCESS] EGI reservation status retrieved', [
-                'egi_id' => $egiId,
-                'total_reservations' => $totalReservations,
-                'user_has_reservation' => $userReservation !== null
-            ]);
+            // $this->logger->info('[RESERVATION_STATUS_SUCCESS] EGI reservation status retrieved', [
+            //     'egi_id' => $egiId,
+            //     'total_reservations' => $totalReservations,
+            //     'user_has_reservation' => $userReservation !== null
+            // ]);
 
             return response()->json([
                 'success' => true,

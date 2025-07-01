@@ -1,0 +1,303 @@
+/* resources/css/creator-home.css */
+
+/* ==========================================================================
+   Creator Home Styles - FlorenceEGI Nuovo Rinascimento
+   ========================================================================== */
+
+/* Custom properties per i colori del brand */
+:root {
+    --oro-fiorentino: #D4A574;
+    --verde-rinascita: #2D5016;
+    --blu-algoritmo: #1B365D;
+    --grigio-pietra: #6B6B6B;
+}
+
+/* ==========================================================================
+   Hero Section Enhancements
+   ========================================================================== */
+
+/* Gradient overlay con pattern rinascimentale */
+.creator-hero-gradient {
+    background: linear-gradient(
+        135deg,
+        rgba(27, 54, 93, 0.95) 0%,
+        rgba(27, 54, 93, 0.7) 50%,
+        rgba(17, 24, 39, 0.95) 100%
+    );
+}
+
+/* Avatar ring animation on hover */
+.creator-avatar-ring {
+    position: relative;
+}
+
+.creator-avatar-ring::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, var(--oro-fiorentino), var(--verde-rinascita));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.creator-avatar-ring:hover::before {
+    opacity: 0.5;
+    animation: rotate-ring 3s linear infinite;
+}
+
+@keyframes rotate-ring {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ==========================================================================
+   Navigation Tabs
+   ========================================================================== */
+
+/* Scrollbar nascosta per nav tabs */
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+
+/* Tab indicator animation */
+nav a {
+    position: relative;
+}
+
+nav a::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background-color: var(--oro-fiorentino);
+    transition: width 0.3s ease;
+}
+
+nav a:hover::after {
+    width: 100%;
+}
+
+/* ==========================================================================
+   Stats Section
+   ========================================================================== */
+
+/* Animated number counter */
+.stat-number {
+    display: inline-block;
+    animation: count-up 1s ease-out;
+}
+
+@keyframes count-up {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ==========================================================================
+   Impact Score Widget
+   ========================================================================== */
+
+/* Pulsing glow effect */
+.impact-score-glow {
+    position: relative;
+}
+
+.impact-score-glow::before {
+    content: '';
+    position: absolute;
+    inset: -20px;
+    background: radial-gradient(circle, var(--verde-rinascita) 0%, transparent 70%);
+    opacity: 0.3;
+    filter: blur(20px);
+    animation: pulse-glow 3s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+    0%, 100% { transform: scale(0.9); opacity: 0.3; }
+    50% { transform: scale(1.1); opacity: 0.5; }
+}
+
+/* ==========================================================================
+   Collection Cards
+   ========================================================================== */
+
+/* Hover lift effect */
+.collection-preview-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.collection-preview-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+/* ==========================================================================
+   Follow/Patron Buttons
+   ========================================================================== */
+
+/* Button shine effect */
+.btn-shine {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-shine::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+        45deg,
+        transparent 30%,
+        rgba(255, 255, 255, 0.3) 50%,
+        transparent 70%
+    );
+    transform: rotate(45deg) translateX(-100%);
+    transition: transform 0.6s;
+}
+
+.btn-shine:hover::before {
+    transform: rotate(45deg) translateX(100%);
+}
+
+/* ==========================================================================
+   Loading States
+   ========================================================================== */
+
+/* Skeleton loader per contenuti in caricamento */
+.skeleton-loader {
+    background: linear-gradient(90deg,
+        rgba(255, 255, 255, 0.05) 25%,
+        rgba(255, 255, 255, 0.1) 50%,
+        rgba(255, 255, 255, 0.05) 75%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* ==========================================================================
+   Renaissance Pattern Background
+   ========================================================================== */
+
+.renaissance-pattern {
+    background-image:
+        repeating-linear-gradient(
+            45deg,
+            transparent,
+            transparent 35px,
+            rgba(212, 165, 116, 0.03) 35px,
+            rgba(212, 165, 116, 0.03) 70px
+        ),
+        repeating-linear-gradient(
+            -45deg,
+            transparent,
+            transparent 35px,
+            rgba(45, 80, 22, 0.03) 35px,
+            rgba(45, 80, 22, 0.03) 70px
+        );
+}
+
+/* ==========================================================================
+   Mobile Optimizations
+   ========================================================================== */
+
+@media (max-width: 640px) {
+    /* Reduce animation complexity on mobile */
+    .creator-avatar-ring::before,
+    .impact-score-glow::before,
+    .btn-shine::before {
+        animation: none;
+    }
+
+    /* Simplified hover states */
+    .collection-preview-card:hover {
+        transform: none;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+}
+
+/* ==========================================================================
+   Dark Mode Enhancements
+   ========================================================================== */
+
+@media (prefers-color-scheme: dark) {
+    .creator-hero-gradient {
+        background: linear-gradient(
+            135deg,
+            rgba(17, 24, 39, 0.98) 0%,
+            rgba(27, 54, 93, 0.9) 50%,
+            rgba(17, 24, 39, 0.98) 100%
+        );
+    }
+}
+
+/* ==========================================================================
+   Utility Animations
+   ========================================================================== */
+
+/* Fade in animation for lazy loaded images */
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Page loaded transition */
+.creator-page-loaded {
+    transition: opacity 0.3s ease-in;
+}
+
+/* Button state transitions */
+.btn-following {
+    background-color: var(--grigio-pietra) !important;
+}
+
+/* ==========================================================================
+   Accessibility
+   ========================================================================== */
+
+/* Focus states con brand colors */
+*:focus-visible {
+    outline: 2px solid var(--oro-fiorentino);
+    outline-offset: 2px;
+}
+
+/* Reduce motion per chi ha questa preferenza */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}

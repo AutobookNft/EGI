@@ -23,6 +23,7 @@ return [
 
     // Navigation items
     'home' => 'Startseite',
+    'creators' => 'Creators',
     'home_link_aria_label' => 'Zur Startseite gehen',
     'collections' => 'Sammlungen',
     'collections_link_aria_label' => 'Alle öffentlichen Sammlungen anzeigen',

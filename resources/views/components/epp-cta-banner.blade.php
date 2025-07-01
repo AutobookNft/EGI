@@ -10,7 +10,7 @@
     'overlayColor' => 'bg-black/60' // Overlay per leggibilità testo
 ])
 
-<section class="relative w-full overflow-hidden {{ $heightClass }}" aria-labelledby="epp-banner-title-{{ Str::slug($title) }}">
+<section class="relative w-full overflow-hidden {{ $heightClass }}" aria-labelledby="epp-banner-title-{{ Str::slug($title) }}" style="height: 50vh; min-height: 450px; max-height: 700px;">
     <!-- Banner Background -->
     <div class="absolute inset-0 bg-center bg-cover"
          style="background-image: url('{{ $backgroundImage }}');">

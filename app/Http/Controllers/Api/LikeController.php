@@ -55,34 +55,45 @@ class LikeController extends Controller
      * @param Request $request
      * @return JsonResponse
      */
-    public function toggleCollectionLike(Collection $collection, Request $request): JsonResponse
+    public function toggleCollectionLike($collectionId, Request $request): JsonResponse
     {
         $this->logger->info('Collection like toggle attempt', [
-            'collection_id' => $collection->id,
+            'collection_id' => $collectionId,
             'auth_check' => auth()->check(),
             'session_wallet' => $request->session()->get('connected_wallet')
         ]);
 
         $userId = $this->getAuthenticatedUserId($request);
 
-        if (!$userId) {
-            $this->logger->warning('Unauthenticated like attempt on collection', [
-                'collection_id' => $collection->id,
-                'ip' => $request->ip()
-            ]);
-
-            return $this->errorManager->handle('AUTH_REQUIRED', [
-                'action' => 'like_toggle',
-                'resource_type' => 'collection',
-                'resource_id' => $collection->id,
-                'auth_status' => $this->getAuthStatus($request)
-            ]);
-        }
-
         try {
+
+            if (!$userId) {
+                $this->logger->warning('Unauthenticated like attempt on collection', [
+                    'collection_id' => $collectionId,
+                    'ip' => $request->ip()
+                ]);
+
+                throw new \Illuminate\Auth\AuthenticationException(
+                    'Unauthenticated in LikeController::toggleCollectionLike'
+                );
+            }
+
+            // Collection
+            $collection = Collection::find($collectionId);
+            if (!$collection) {
+                $this->logger->error('Collection not found for like toggle', [
+                'collection_id' => $collectionId,
+                'creator_id' => $userId
+                ]);
+
+                throw new \Illuminate\Database\Eloquent\ModelNotFoundException(
+                    'Collection not found'
+                );
+            }
+
             // Toggle the like
             $existingLike = $collection->likes()
-                ->where('user_id', $userId)
+                ->where('creator_id', $userId)
                 ->first();
 
             if ($existingLike) {
@@ -90,7 +101,7 @@ class LikeController extends Controller
                 $isLiked = false;
             } else {
                 $collection->likes()->create([
-                    'user_id' => $userId
+                    'creator_id' => $userId
                 ]);
                 $isLiked = true;
             }
@@ -99,7 +110,7 @@ class LikeController extends Controller
 
             $this->logger->info('Collection like toggled successfully', [
                 'collection_id' => $collection->id,
-                'user_id' => $userId,
+                'creator_id' => $userId,
                 'is_liked' => $isLiked,
                 'total_likes' => $likesCount
             ]);
@@ -111,10 +122,24 @@ class LikeController extends Controller
                 'message' => $isLiked ? 'Collection liked successfully' : 'Collection unliked successfully'
             ]);
 
+        } catch(\Illuminate\Auth\AuthenticationException $e) {
+            $this->logger->warning('Authentication required for collection like toggle', [
+                'collection_id' => $collectionId,
+                'error' => $e->getMessage()
+            ]);
+
+            return $this->errorManager->handle('AUTH_REQUIRED', [
+                'action' => 'like_toggle',
+                'resource_type' => 'collection',
+                'resource_id' => $collectionId,
+                'auth_status' => $this->getAuthStatus($request)
+            ], $e);
+
+
         } catch (\Exception $e) {
             $this->logger->error('Failed to toggle collection like', [
                 'collection_id' => $collection->id,
-                'user_id' => $userId,
+                'creator_id' => $userId,
                 'error' => $e->getMessage()
             ]);
 

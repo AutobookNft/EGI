@@ -463,7 +463,7 @@ Route::prefix('api')->name('api.')->group(function () {
     Route::get('/egis/{egiId}/reservation-status', [ReservationController::class, 'getEgiReservationStatus'])
         ->name('egis.reservation-status');
         // Like/Unlike routes
-    Route::post('/collections/{collection}/toggle-like', [LikeController::class, 'toggleCollectionLike'])
+    Route::post('/collections/{collectionId}/toggle-like', [LikeController::class, 'toggleCollectionLike'])
         ->name('toggle.collection.like');
 
     Route::post('/egis/{egi}/toggle-like', [LikeController::class, 'toggleEgiLike'])

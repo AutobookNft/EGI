@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Api;
 use App\Helpers\FegiAuth;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Exception;
 use Ultra\ErrorManager\Interfaces\ErrorManagerInterface;
 use Ultra\UltraLogManager\UltraLogManager;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Ultra\ErrorManager\Facades\UltraError;
 
 /**
  * @Oracode Controller: Centralized Application Configuration Provider
@@ -87,9 +89,8 @@ class AppConfigController extends Controller
             'channel' => $this->channel
         ]);
 
-
         try {
-            $user = Auth::user();
+            $user = FegiAuth::user();
             $lang = app()->getLocale();
 
             // Cache configuration for performance
@@ -283,7 +284,7 @@ class AppConfigController extends Controller
                 'myReservations' => route('api.my-reservations'),
 
                 // Route per like/unlike
-                'toggleCollectionLike' => route('api.toggle.collection.like', ['collection' => ':collection']),
+                'toggleCollectionLike' => route('api.toggle.collection.like', ['collectionId' => ':collection->id']),
                 'toggleEgiLike' => route('api.toggle.egi.like', ['egi' => ':egi']),
 
                 // Aggiungi qui altre route API future
@@ -793,6 +794,104 @@ class AppConfigController extends Controller
 
 
         ];
+    }
+
+    /**
+     * Returns the current upload limits considering both server and application settings.
+     *
+     * This method compares the server's PHP.ini settings (post_max_size, upload_max_filesize, max_file_uploads)
+     * with the application's configured limits (max_total_size, max_file_size, max_files) and returns the most
+     * restrictive values. It also logs a warning and notifies the dev team if the server limits are more restrictive.
+     *
+     * @return \Illuminate\Http\JsonResponse Response with effective upload limits
+     */
+    public function getUploadLimits()
+    {
+        // Limite server (php.ini)
+        $serverPostMaxSize = $this->parseSize(ini_get('post_max_size'));
+        $serverUploadMaxFilesize = $this->parseSize(ini_get('upload_max_filesize'));
+        $serverMaxFileUploads = (int)ini_get('max_file_uploads');
+
+        // Limiti applicazione (config)
+        $appMaxTotalSize = $this->parseSize(config('upload-manager.max_total_size', ini_get('post_max_size')));
+        $appMaxFileSize = $this->parseSize(config('upload-manager.max_file_size', ini_get('upload_max_filesize')));
+        $appMaxFiles = (int)config('upload-manager.max_files', ini_get('max_file_uploads'));
+        $sizeMargin = (float)config('upload-manager.size_margin', 1.1); // Aggiunto
+
+        // Usa il limite più restrittivo tra server e applicazione
+        $effectiveTotalSize = min($serverPostMaxSize, $appMaxTotalSize);
+        $effectiveFileSize = min($serverUploadMaxFilesize, $appMaxFileSize);
+        $effectiveMaxFiles = min($serverMaxFileUploads, $appMaxFiles);
+
+        // Genera warning se i limiti del server sono più restrittivi dell'applicazione
+        if ($serverPostMaxSize < $appMaxTotalSize ||
+            $serverUploadMaxFilesize < $appMaxFileSize ||
+            $serverMaxFileUploads < $appMaxFiles) {
+
+            UltraError::handle('SERVER_LIMITS_RESTRICTIVE', [
+                'server_post_max_size' => ini_get('post_max_size'),
+                'app_max_total_size' => config('upload-manager.max_total_size'),
+                'server_upload_max_filesize' => ini_get('upload_max_filesize'),
+                'app_max_file_size' => config('upload-manager.max_file_size'),
+                'server_max_file_uploads' => $serverMaxFileUploads,
+                'app_max_files' => $appMaxFiles
+            ], new Exception(trans('uploadmanager::uploadmanager.dev.server_limits_restrictive')));
+        }
+
+        return response()->json([
+            // Limiti effettivi (i più restrittivi)
+            'max_total_size' => $effectiveTotalSize,
+            'max_file_size' => $effectiveFileSize,
+            'max_files' => $effectiveMaxFiles,
+
+            // Valori formattati per la visualizzazione
+            'max_total_size_formatted' => $this->formatSize($effectiveTotalSize),
+            'max_file_size_formatted' => $this->formatSize($effectiveFileSize),
+
+            // Flag per indicare da dove provengono i limiti
+            'total_size_limited_by' => ($serverPostMaxSize <= $appMaxTotalSize) ? 'server' : 'app',
+            'file_size_limited_by' => ($serverUploadMaxFilesize <= $appMaxFileSize) ? 'server' : 'app',
+            'max_files_limited_by' => ($serverMaxFileUploads <= $appMaxFiles) ? 'server' : 'app',
+
+            // Margine di sicurezza
+            'size_margin' => $sizeMargin
+        ]);
+    }
+
+    /**
+     * Converts size string (like "8M") to bytes.
+     *
+     * @param string $size Size string to parse (e.g., "8M", "2G")
+     * @return int Size in bytes
+     */
+    private function parseSize($size)
+    {
+        $unit = preg_replace('/[^a-zA-Z]/', '', $size);
+        $size = preg_replace('/[^0-9.]/', '', $size);
+
+        if ($unit) {
+            return round($size * pow(1024, stripos('KMGTPEZY', $unit[0])));
+        }
+
+        return round($size);
+    }
+
+    /**
+     * Formats bytes into human-readable size.
+     *
+     * @param int $bytes Size in bytes
+     * @return string Formatted size (e.g., "8 MB")
+     */
+    private function formatSize($bytes)
+    {
+        $units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
+        $bytes = max($bytes, 0);
+        $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
+        $pow = min($pow, count($units) - 1);
+
+        $bytes /= pow(1024, $pow);
+
+        return round($bytes, 2) . ' ' . $units[$pow];
     }
 
     /**

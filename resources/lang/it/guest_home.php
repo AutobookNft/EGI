@@ -102,4 +102,11 @@ return [
     'actor_trader_pro_title' => 'Per il Trader Pro',
     'actor_trader_pro_message' => 'Trading EGI pt ad alta frequenza con fee ultra-basse (1.5%) e liquidità garantita. Ogni trade contribuisce automaticamente ai progetti EPP. Guadagna velocemente facendo del bene al pianeta.',
     'actor_trader_pro_cta' => 'Inizia Trading Virtuoso',
+
+    'featured_creators_title' => 'Creator in Evidenza',
+    'no_creators_available' => 'Nessun creator disponibile al momento.',
+    'creator_default_bio' => 'Questo è un creator di talento dell\'ecosistema FlorenceEGI.',
+    'view_profile' => 'Vedi Profilo',
+    'previous_creators' => 'Creator precedenti',
+    'next_creators' => 'Prossimi creator',
 ];

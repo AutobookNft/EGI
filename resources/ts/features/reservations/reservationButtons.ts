@@ -105,6 +105,19 @@ async function handleButtonClick(e: Event, egiId: number): Promise<void> {
         // Check if user already has a reservation for this EGI
         const status = await getEgiReservationStatus(egiId);
 
+        if (status.error_code) {
+            console.error(`Padmin ReservationButtons: Error fetching reservation status for EGI ${egiId}`, status.error_code);
+
+            if (UEM && typeof UEM.handleServerErrorResponse === 'function') {
+                UEM.handleServerErrorResponse(status);
+                return;
+            }
+
+            // Still try to open the modal as fallback
+            openReservationModal(egiId);
+            return;
+        }
+
         if (status.success && status.data && status.data.user_has_reservation) {
             // User already has a reservation
             const reservation = status.data.user_reservation;

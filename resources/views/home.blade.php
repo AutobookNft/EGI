@@ -1,7 +1,7 @@
 {{-- resources/views/home.blade.php --}}
 {{-- 📜 Oracode View: FlorenceEGI Homepage NFT-Style Edition --}}
 
-@vite(['resources/css/home-nft.css', 'resources/js/home-nft.js'])
+@vite(['resources/css/home-nft.css'])
 
 <x-guest-layout :title="__('guest_home.page_title')" :metaDescription="__('guest_home.meta_description')">
 
@@ -13,7 +13,17 @@
 
     {{-- Contenuto SOTTO il testo hero: Collezioni in Evidenza NFT Style --}}
     <x-slot name="belowHeroContent">
-       <x-collections-carousel
+       <x-creators-carousel
+            :creators="$featuredCreators"
+            title="{{ __('guest_home.featured_creators_title') }}"
+            bgClass="bg-gray-900"
+            marginClass="mb-12"
+        />
+    </x-slot>
+
+    {{-- Nuovo slot per il carousel dei Creator --}}
+    <x-slot name="belowHeroContent_1">
+         <x-collections-carousel
             :collections="$featuredCollections"
             title="Collezioni in Evidenza"
             bgClass="bg-gray-900"
@@ -34,7 +44,7 @@
     {{-- Sezione: Protagonisti e Attori dell'Ecosistema --}}
     {{-- POPOLIAMO IL NUOVO SLOT $actorContent CON IL NOSTRO COMPONENTE actors-section --}}
     <x-slot name="actorContent">
-        <x-actors-section /> {{-- Il componente che contiene la griglia delle 4 card attore --}}
+        <x-actors-section /> Il componente che contiene la griglia delle 4 card attore
     </x-slot>
 
     <x-slot name="heroNatanAssistant">
@@ -56,6 +66,6 @@
     />
 
 
-
+    @vite(['resources/js/home-nft.js'])
 
 </x-guest-layout>

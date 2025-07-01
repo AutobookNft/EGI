@@ -103,4 +103,12 @@ return [
     'actor_trader_pro_message' => 'High-frequency EGI pt trading with ultra-low fees (1.5%) and guaranteed liquidity. Every trade automatically contributes to EPP projects. Earn fast while doing good for the planet.',
     'actor_trader_pro_cta' => 'Start Virtuous Trading',
 
+    'featured_creators_title' => 'Featured Creators',
+    'no_creators_available' => 'No creators available at the moment.',
+    'creator_default_bio' => 'This is a talented creator in the FlorenceEGI ecosystem.',
+    'view_profile' => 'View Profile',
+    'previous_creators' => 'Previous creators',
+    'next_creators' => 'Next creators',
+
+
 ];

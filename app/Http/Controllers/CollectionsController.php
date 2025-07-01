@@ -53,20 +53,14 @@ class CollectionsController extends Controller
         $epps = Epp::select('id', 'name')->get();
 
         // Costruisci la query di base con le relazioni necessarie
+        // Inizialmente selezioniamo solo le colonne della tabella collections
         $query = Collection::with(['creator', 'epp', 'egis'])
-            ->select([
-                'id',
-                'creator_id',
-                'epp_id',
-                'collection_name',
-                'description',
-                'image_card',
-                'status',
-                'is_published',
-                'EGI_number',
-                'floor_price',
-                'created_at',
-            ]);
+            ->select('collections.*'); // Seleziona tutte le colonne da 'collections' per evitare ambiguità iniziali
+
+        // Nuovo filtro opzionale per creator_id
+        if ($request->filled('creator')) {
+            $query->where('creator_id', $request->creator);
+        }
 
         // Filtro per stato
         if ($request->filled('status')) {
@@ -83,6 +77,14 @@ class CollectionsController extends Controller
             $query->where('epp_id', $request->epp);
         }
 
+        // Aggiungi un filtro per `is_published` al join per la popolarità se non è già gestito globalmente
+        $query->when(true, function ($q) { // Questo `when(true)` è un modo per applicare la condizione se la rotta lo richiede
+            if (!auth()->user() || !auth()->user()->can('view_draft_collections')) {
+                $q->where('collections.is_published', true);
+            }
+        });
+
+
         // Ordinamento
         $sortBy = $request->input('sort', 'newest');
 
@@ -94,16 +96,15 @@ class CollectionsController extends Controller
                 $query->orderBy('collection_name', 'asc');
                 break;
             case 'popularity':
-                // Assumo che `EGI_number` o `floor_price` possano essere proxy per popolarità
-                // Se esiste una tabella `likes`, usa quella
-                if (Schema::hasTable('likes')) {
-                    $query->leftJoin('likes', 'collections.id', '=', 'likes.collection_id')
-                        ->groupBy('collections.id')
-                        ->orderByDesc(DB::raw('COUNT(likes.id)'));
-                } else {
-                    // Fallback: ordina per numero di EGI
-                    $query->orderByDesc('EGI_number');
-                }
+                // Per la popolarità, aggiungiamo il join e selezioniamo il conteggio dei like.
+                // 🎯 Soluzione: Usiamo un subquery per calcolare i likes per ogni collection
+                // Questo evita l'ambiguità del GROUP BY e permette una paginazione più pulita.
+                $query->leftJoin(DB::raw('(SELECT likeable_id, COUNT(id) as likes_count FROM likes WHERE likeable_type = \'App\\\\Models\\\\Collection\' GROUP BY likeable_id) as likes_aggregated'),
+                    function($join) {
+                        $join->on('collections.id', '=', 'likes_aggregated.likeable_id');
+                    })
+                    ->orderByDesc('likes_aggregated.likes_count')
+                    ->select('collections.*'); // Assicurati di selezionare le colonne di collections
                 break;
             case 'newest':
             default:
@@ -112,6 +113,7 @@ class CollectionsController extends Controller
         }
 
         // Paginazione (12 elementi per pagina)
+        // 🧪 Resilienza Progressiva: appends(request()->query()) mantiene i parametri del filtro nella paginazione
         $collections = $query->paginate(12)->appends($request->query());
 
         // Aggiungi attributi calcolati senza query extra
@@ -120,6 +122,8 @@ class CollectionsController extends Controller
             $collection->egi_count = $collection->EGI_number ?? $collection->egis->count();
 
             // Conteggi di likes e reservations (se le relazioni esistono)
+            // Questi dovrebbero essere ricalcolati o recuperati dalla relazione eager loading,
+            // non dal join della query principale che non è sempre presente.
             $collection->likes_count = Schema::hasTable('likes') ? $collection->likes()->count() : 0;
             $collection->reservations_count = Schema::hasTable('reservations') ? $collection->reservations()->count() : 0;
 
@@ -225,6 +229,8 @@ class CollectionsController extends Controller
                 'user_agent' => $request->userAgent(),
                 'timestamp' => now()->toISOString()
             ];
+
+            app(UltraLogManager::class)->info('Collection creation initiated', $operationContext);
 
             // Enhanced Authentication Check with UEM
             $user = FegiAuth::user();

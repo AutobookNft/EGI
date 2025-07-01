@@ -12,8 +12,9 @@
  */
 
 import { UEM_Client_TS_Placeholder as UEM } from './uemClientService';
-import { getAppConfig, route, appTranslate } from '../config/appConfig';
+import { getAppConfig, route, appTranslate, ServerErrorResponse } from '../config/appConfig';
 import { getCsrfTokenTS } from '../utils/csrf';
+import { getAuthStatus } from '../features/auth/authService';
 
 // --- TYPES ---
 export interface ReservationFormData {
@@ -380,7 +381,30 @@ class ReservationFormModal {
      * @returns {string} The modal HTML
      */
     private generateModalHTML(): string {
+
         const egiId = this.egiId;
+
+        const authStatus = getAuthStatus(getAppConfig());
+
+        if (authStatus === 'disconnected') {
+            // Mostra messaggio o apri modal wallet connect
+            if (window.Swal) {
+                window.Swal.fire({
+                    icon: 'info',
+                    title: appTranslate('reservation.unauthorized'),
+                    text: appTranslate('reservation.auth_required'),
+                    confirmButtonText: appTranslate('wallet_connect_button'),
+                    confirmButtonColor: '#3085d6'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Trigger apertura modale wallet
+                        document.dispatchEvent(new CustomEvent('open-wallet-modal'));
+                    }
+                });
+            }
+            return '';
+        }
+
 
         return `
         <div id="reservation-modal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black bg-opacity-75 hidden" role="dialog" aria-modal="true" aria-hidden="true" tabindex="-1" aria-labelledby="reservation-modal-title">
@@ -523,8 +547,10 @@ export async function reserveEgi(egiId: number, data: ReservationFormData): Prom
  *
  * @param {number} egiId The ID of the EGI to check
  * @returns {Promise<ReservationStatusResponse>} The reservation status response
+ * @return {Promise<ServerErrorResponse>} The reservation status response
  */
-export async function getEgiReservationStatus(egiId: number): Promise<ReservationStatusResponse> {
+export async function getEgiReservationStatus(egiId: number): Promise<ReservationStatusResponse | ServerErrorResponse> {
+
     try {
         // Use UEM.safeFetch if available, otherwise use regular fetch
         // const statusUrl = route(`api/egis/${egiId}/reservation-status`);

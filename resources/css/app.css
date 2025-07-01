@@ -2,20 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ==========================================================================
+   Base Styles
+   ========================================================================== */
+
 [x-cloak] {
     display: none;
 }
 
-/* @import "./collection-detail.css";
-@import "./collection-styles.css"; */
+/* ==========================================================================
+   Layout Components
+   ========================================================================== */
 
-/*
----------------------------------
-*   stili per uploading_files
----------------------------------
-*/
-
-/* Layout con tre colonne */
+/* Three Column Layout for Upload Pages */
 .three-column-layout {
     display: flex;
     width: 100%;
@@ -26,38 +25,34 @@
     gap: 20px;
 }
 
-/* Colonna sinistra (Matrix) */
-.left-column {
-    width: 25%; /* Aumentato da 300px a 25% */
+.left-column,
+.right-column {
+    width: 25%;
     flex-shrink: 0;
     height: 600px;
 }
 
-/* Colonna centrale (Form) */
 .center-column {
     flex: 0 1 auto;
     width: 50%;
     min-width: 400px;
-    max-height: 95vh; /* Limita l'altezza al 90% dell'altezza della viewport */
-    overflow-y: auto; /* Aggiungi scrolling verticale se il contenuto è troppo alto */
+    max-height: 95vh;
+    overflow-y: auto;
 }
 
-/* Riduci lo spazio interno del contenitore principale */
 .center-column > div {
-    padding: 5px; /* Ridotto da 8px */
+    padding: 5px;
 }
 
-/* Riduci i margini verticali tra le sezioni */
 .center-column .mb-6 {
-    margin-bottom: 1rem; /* Ridotto da 1.5rem (valore originale di mb-6) */
+    margin-bottom: 1rem;
 }
 
-/* Riduci l'altezza dell'area di drop */
 .center-column #upload-drop-zone {
-    height: 160px; /* Ridotto da 256px (h-64) */
+    height: 160px;
 }
 
-/* Personalizza scrollbar per Chrome/Safari/Edge */
+/* Custom Scrollbar */
 .center-column::-webkit-scrollbar {
     width: 8px;
 }
@@ -68,7 +63,7 @@
 }
 
 .center-column::-webkit-scrollbar-thumb {
-    background: rgba(139, 92, 246, 0.5); /* Viola chiaro semi-trasparente */
+    background: rgba(139, 92, 246, 0.5);
     border-radius: 10px;
 }
 
@@ -76,31 +71,13 @@
     background: rgba(139, 92, 246, 0.8);
 }
 
-/* Per Firefox */
 .center-column {
     scrollbar-width: thin;
     scrollbar-color: rgba(139, 92, 246, 0.5) rgba(0, 0, 0, 0.1);
 }
 
-/* Colonna destra (3D) */
-.right-column {
-    width: 25%; /* Aumentato da 300px a 25% */
-    flex-shrink: 0;
-    height: 600px;
-}
-
-/* Contenitore per l'effetto Matrix */
-.matrix-container {
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(145deg, #1a1a2e, #121229);
-    border-radius: 1.5rem;
-    box-shadow: 0 25px 50px -12px rgba(79, 70, 229, 0.2);
-    overflow: hidden;
-    position: relative;
-}
-
-/* Contenitore per l'animazione 3D */
+/* Matrix & Animation Containers */
+.matrix-container,
 .animation-container {
     width: 100%;
     height: 100%;
@@ -109,6 +86,9 @@
     box-shadow: 0 25px 50px -12px rgba(79, 70, 229, 0.2);
     overflow: hidden;
     position: relative;
+}
+
+.animation-container {
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -117,52 +97,50 @@
     box-shadow: 0 30px 60px -15px rgba(79, 70, 229, 0.25);
 }
 
-/* Responsive per tablet */
+/* Responsive Three Column Layout */
 @media (max-width: 1280px) {
     .three-column-layout {
         flex-wrap: wrap;
     }
 
     .center-column {
-    width: 100%;
-    min-width: 0;
-    margin-bottom: 20px;
-    order: -1;
-}
+        width: 100%;
+        min-width: 0;
+        margin-bottom: 20px;
+        order: -1;
+    }
 
-    .left-column, .right-column {
+    .left-column,
+    .right-column {
         width: calc(50% - 10px);
         height: 400px;
     }
 }
 
-/* Responsive per mobile */
 @media (max-width: 768px) {
     .three-column-layout {
         flex-direction: column;
     }
 
-    .left-column, .right-column {
+    .left-column,
+    .right-column {
         width: 100%;
         height: 250px;
     }
 }
 
-/*
----------------------------------
-* stili per uploading_files
----------------------------------
-*/
+/* ==========================================================================
+   Post Upload Cards
+   ========================================================================== */
 
 #post-upload-card-container {
     display: flex;
     flex-wrap: wrap;
     gap: 1rem;
     justify-content: flex-end;
-    /* margin-top: 2rem; */
-  }
+}
 
-  .post-upload-card {
+.post-upload-card {
     position: relative;
     width: 300px;
     height: 300px;
@@ -173,23 +151,25 @@
     transform: scale(0.9);
     opacity: 0;
     transition: transform 0.2s ease, opacity 0.2s ease, box-shadow 0.2s ease;
-  }
-  .post-upload-card.loaded {
+}
+
+.post-upload-card.loaded {
     transform: scale(1);
     opacity: 1;
-  }
-  .post-upload-card:hover {
+}
+
+.post-upload-card:hover {
     transform: scale(1.03);
     box-shadow: 0 10px 15px rgba(0,0,0,0.2);
-  }
+}
 
-  .post-upload-card img {
+.post-upload-card img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-  }
+}
 
-  .post-upload-card__overlay {
+.post-upload-card__overlay {
     position: absolute;
     inset: 0;
     background: rgba(0,0,0,0.3);
@@ -199,172 +179,470 @@
     opacity: 0;
     transition: opacity 0.2s ease;
     z-index: 2;
-  }
-  .post-upload-card:hover .post-upload-card__overlay {
-    opacity: 1;
-  }
+}
 
-  .post-upload-card__footer {
+.post-upload-card:hover .post-upload-card__overlay {
+    opacity: 1;
+}
+
+.post-upload-card__footer {
     position: absolute;
-    bottom: 0; left: 0; right: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
     background: rgba(255,255,255,0.9);
     padding: 0.75rem;
     z-index: 1;
-  }
-  .post-upload-card__footer h3 {
+}
+
+.post-upload-card__footer h3 {
     margin: 0;
     font-weight: bold;
     color: #333;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-  }
-  .post-upload-card__footer p {
+}
+
+.post-upload-card__footer p {
     margin: 0.25rem 0 0;
     font-size: 0.875rem;
     color: #555;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-  }
+}
 
-  .post-upload-card__badge {
+.post-upload-card__badge {
     position: absolute;
-    top: 0.5rem; right: 0.5rem;
+    top: 0.5rem;
+    right: 0.5rem;
     padding: 0.25rem 0.5rem;
     font-size: 0.75rem;
     border-radius: 0.5rem;
     font-weight: 500;
     z-index: 3;
-  }
-  .post-upload-card__badge--ready { background: #22c55e; color: #fff; }
-  .post-upload-card__badge--draft { background: #eab308; color: #000; }
-
-
-
-/*
----------------------------------
-* stili per il modal
----------------------------------
-*/
-
-  #upload-modal {
-    transition: opacity 0.3s ease-in-out;
-  }
-
-  #upload-modal.hidden {
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  #upload-modal.flex {
-    opacity: 1;
-    pointer-events: auto;
-  }
-
-  /* Riduci le dimensioni del contenitore interno del modale */
-  #upload-modal > div {
-    max-width: 2xl; /* Ridotto da max-w-4xl (1024px) a max-w-2xl (672px) */
-    width: 100%;
-    margin: 0 1rem; /* Ridotto da mx-4 (16px) a 1rem (16px, ma più flessibile) */
-  }
-
-  /* Riduci l'altezza massima del contenuto del modale */
-  #upload-container {
-    max-height: 70vh; /* Ridotto da 80vh per adattarsi alle nuove dimensioni */
-    overflow-y: auto;
-  }
-
-  /* Stile per il bottone di chiusura */
-  #close-upload-modal {
-    background: none;
-    border: none;
-    cursor: pointer;
-    transition: color 0.3s;
-    font-size: 1.25rem; /* Ridotto da 1.5rem (24px) a 1.25rem (20px) */
-    top: 0.75rem; /* Ridotto da 1rem (16px) a 0.75rem (12px) */
-    right: 0.75rem; /* Ridotto da 1rem (16px) a 0.75rem (12px) */
-  }
-
-  #close-upload-modal:hover {
-    color: #ff4444;
-  }
-
-/* Media query per schermi più piccoli */
-@media (max-width: 640px) {
-    #upload-modal > div {
-            max-width: full; /* Usa tutta la larghezza disponibile su schermi piccoli */
-            margin: 0 0.5rem; /* Margine ridotto su mobile */
-        }
-
-    #upload-container {
-            max-height: 80vh; /* Aumenta leggermente l'altezza su mobile per usabilità */
-            padding: 1rem; /* Override p-5 per schermi piccoli */
-        }
-
-    #close-upload-modal {
-            font-size: 1rem; /* Ancora più piccolo su mobile */
-            top: 0.5rem;
-            right: 0.5rem;
-        }
-    }
-
-    .swal2-dark-theme {
-        background: linear-gradient(45deg, #1a1a1a, #2d2d2d);
-        color: #ffffff;
-        border: 2px solid #00ffcc; /* Verde brillante ispirato a Tredici */
-        animation: pulse 1s infinite alternate;
-    }
-
-@keyframes pulse {
-    from { box-shadow: 0 0 10px rgba(0, 255, 204, 0.5); }
-    to { box-shadow: 0 0 20px rgba(0, 255, 204, 0.8); }
 }
 
-/*
-    ---------------------------------
-    * stili per layout guest
-    ---------------------------------
-    */
+.post-upload-card__badge--ready {
+    background: #22c55e;
+    color: #fff;
+}
 
-    /* Effetto hover per i bottoni */
-    .btn-hover:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    }
+.post-upload-card__badge--draft {
+    background: #eab308;
+    color: #000;
+}
 
-    /* Stili per l'animazione Hero Section */
+/* ==========================================================================
+   Modal Styles - Professional Responsive Implementation
+   ========================================================================== */
 
-    #background-gradient {
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(135deg, #052e16 0%, #064e3b 100%);
-        z-index: -2;
-    }
+/* Base Modal Styles */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.75);
+    display: flex;
+    align-items: center;      /* Centra verticalmente */
+    justify-content: center;  /* Centra orizzontalmente */
+    z-index: 9999;
+    overflow: hidden;         /* Cambiato da overflow-y: auto */
+    padding: 0;               /* Rimosso padding */
+}
 
-    #backgroundCanvas {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        z-index: 0;
-    }
+/* Assicuriamoci che il div interno non interferisca */
+.modal > div {
+    z-index: 10000;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    margin: auto;             /* Auto margin per centraggio */
+}
 
+/* Upload Modal Specific - forza centraggio */
+#upload-modal {
+    transition: opacity 0.3s ease-in-out;
+    display: flex !important;  /* Forza display flex quando visibile */
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+#upload-modal.hidden {
+    display: none !important;  /* Cambiato da opacity: 0 */
+}
+
+#upload-modal.flex {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Modal Inner Container - Mobile First Approach */
+#upload-modal > div {
+    width: 100vw;
+    height: 100vh;
+    max-width: none;
+    margin: 0;
+    border-radius: 0;
+    background: #1f2937;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Upload Container Inside Modal */
+#upload-container {
+    width: 100%;
+    height: 100%;
+    max-height: none;
+    overflow-y: auto;
+    overflow-x: hidden;
+    border-radius: 0;
+    padding: 1rem;
+    box-sizing: border-box;
+}
+
+/* Close Button - Mobile Optimized */
+#close-upload-modal {
+    position: fixed;
+    top: 0.5rem;
+    right: 0.5rem;
+    z-index: 50;
+    font-size: 1.75rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(17, 24, 39, 0.9);
+    border-radius: 50%;
+    color: #9ca3af;
+    transition: color 0.2s, background-color 0.2s;
+    cursor: pointer;
+    border: none;
+    padding: 0;
+}
+
+#close-upload-modal:hover {
+    color: #ff4444;
+    background-color: rgba(17, 24, 39, 1);
+}
+
+/* Ensure all content respects boundaries */
+#upload-container * {
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+/* Badge Container Responsive Grid */
+#upload-container .flex.flex-wrap.justify-center {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 0.5rem;
+    width: 100%;
+}
+
+/* Collection Grid Inside Modal */
+#upload-container #collection {
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+}
+
+/* Buttons Full Width on Mobile */
+#upload-container button {
+    width: 100%;
+}
+
+/* Mobile - assicura fullscreen */
+@media (max-width: 639px) {
     .modal {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.75);
+        padding: 0;
+    }
+
+    #upload-modal > div {
+        width: 100vw;
+        height: 100vh;
+        margin: 0;
+    }
+}
+
+/* Small Mobile Optimizations */
+@media (max-width: 359px) {
+    #upload-container {
+        padding: 0.75rem;
+    }
+
+    .nft-title {
+        font-size: 1.125rem;
+        padding: 0 2.5rem 0 0.5rem;
+    }
+
+    #upload-container .flex.flex-wrap.justify-center > div {
+        font-size: 0.625rem;
+        padding: 0.25rem 0.5rem;
+    }
+}
+
+/* Tablet Styles */
+@media (min-width: 640px) {
+    #upload-modal > div {
+        width: 95%;
+        height: auto;
+        max-width: 42rem;
+        max-height: 90vh;
+        margin: 1rem;
+        border-radius: 0.75rem;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    }
+
+    #upload-container {
+        max-height: 80vh;
+        overflow-y: auto;
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+    }
+
+    #close-upload-modal {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        font-size: 1.5rem;
+        width: auto;
+        height: auto;
+        padding: 0.5rem;
+        background-color: transparent;
+        border-radius: 0.25rem;
+    }
+
+    #upload-container button {
+        width: auto;
+    }
+
+    #upload-container .flex.flex-wrap.justify-center {
         display: flex;
-        align-items: center;
+        flex-wrap: wrap;
         justify-content: center;
-        z-index: 9999;
+    }
+}
+
+/* Large Tablet / Small Desktop */
+@media (min-width: 768px) {
+    #upload-modal > div {
+        max-width: 90vw;  /* Era 56rem - ora 90% della viewport */
+        max-height: 90vh;
+        margin: 5vh auto; /* Margine verticale ridotto */
+    }
+
+    #upload-container {
+        padding: 2rem;
+        max-height: calc(90vh - 4rem); /* Altezza adattiva */
+    }
+}
+
+/* Desktop Large */
+@media (min-width: 1024px) {
+    .modal {
+        padding: 2rem; /* Padding solo su desktop per evitare che tocchi i bordi */
+    }
+
+    #upload-modal > div {
+        width: 90vw;
+        max-width: 1600px;
+        height: 85vh;      /* Ridotto da 90vh per lasciare più spazio */
+        max-height: 85vh;
+        margin: auto;      /* Centra con auto margin */
+        display: flex;
+        flex-direction: column;
+    }
+
+    #upload-container {
+        padding: 2.5rem;
+        height: 100%;
+        max-height: 100%;
         overflow-y: auto;
     }
-    .modal > div {
-            z-index: 10000;
-            position: relative;
+}
+
+/* Extra Large Screens */
+@media (min-width: 1920px) {
+    #upload-modal > div {
+        width: 90vw;       /* Leggermente più piccolo su schermi enormi */
+        max-width: 1800px; /* Limite massimo */
     }
+}
+
+/* Ottimizzazione contenuto per desktop large */
+@media (min-width: 1024px) {
+    /* Grid collezioni più ampio */
+    #upload-container #collection {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1.5rem;
+    }
+
+    /* Drop zone più grande */
+    #upload-container #upload-drop-zone {
+        height: 200px;
+    }
+
+    /* Badge in linea invece che grid su desktop */
+    #upload-container .flex.flex-wrap.justify-center {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 1rem;
+    }
+}
+
+@media (min-width: 1920px) {
+    /* Ancora più colonne per schermi molto grandi */
+    #upload-container #collection {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    }
+}
+
+/* ==========================================================================
+   Guest Layout Styles
+   ========================================================================== */
+
+/* Button Hover Effects */
+.btn-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Hero Section */
+#background-gradient {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #052e16 0%, #064e3b 100%);
+    z-index: -2;
+}
+
+#backgroundCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+}
+
+/* ==========================================================================
+   Utility Classes
+   ========================================================================== */
+
+/* NFT Background Effects */
+.nft-background {
+    position: relative;
+    overflow: hidden;
+}
+
+.nft-background::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%);
+    animation: rotate 20s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes rotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* NFT Buttons */
+.nft-button {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.nft-button:not(:disabled):hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.nft-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+/* Override aggressivo per centraggio modal */
+#upload-modal.flex,
+/* Forza display flex sul modal quando visibile */
+#upload-modal:not(.hidden) {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    z-index: 9999 !important;
+}
+
+/* Centra il contenuto interno */
+#upload-modal:not(.hidden) > div {
+    position: relative !important;
+    margin: auto !important;
+    max-height: 90vh !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+/* Specifico per desktop */
+@media (min-width: 1024px) {
+    #upload-modal:not(.hidden) > div {
+        width: 90vw !important;
+        max-width: 1600px !important;
+        height: 85vh !important;
+    }
+}
+
+/* Debug: aggiungi un bordo rosso per verificare il centraggio */
+#upload-modal:not(.hidden) {
+    /* border: 2px solid red; */ /* Decommenta per debug */
+}
+
+#upload-modal:not(.hidden) > div {
+    /* border: 2px solid yellow; */ /* Decommenta per debug */
+}
+
+@layer utilities {
+    /* Override modal con layer utilities di Tailwind */
+    #upload-modal:not(.hidden) {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        position: fixed !important;
+        inset: 0 !important;
+        z-index: 9999 !important;
+        background-color: rgba(0, 0, 0, 0.75) !important;
+    }
+
+    #upload-modal:not(.hidden) > div {
+        position: relative !important;
+        margin: auto !important;
+        width: 90vw !important;
+        max-width: 1600px !important;
+        height: 85vh !important;
+        max-height: 85vh !important;
+    }
+}
+
+/* Test immediato - se vedi questo bordo, il CSS viene caricato */
+#upload-modal {
+    outline: 5px solid red !important;
+}
+
+

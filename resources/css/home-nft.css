@@ -67,11 +67,13 @@ main#main-content {
     z-index: 15 !important;
 }
 
-html,
-body {
-    overflow-x: hidden !important;
-    width: 100% !important;
-    max-width: 100% !important;
+
+/* Fix per i margini che causano overflow orizzontale */
+.below-hero-content {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 2rem !important;
+    padding-right: 2rem !important;
 }
 
 /* Grid aggressivo */
@@ -83,13 +85,13 @@ body {
 
 
 /* Forza la visualizzazione di tutti gli elementi principali */
-section, .section, .py-16, .py-20 {
+/* section, .section, .py-16, .py-20 {
     display: block !important;
     height: auto !important;
     min-height: unset !important;
     overflow: visible !important;
     position: relative !important;
-}
+} */
 
 /* Fix per il footer */
 footer {

@@ -17,8 +17,8 @@ Artisan::command('inspire', function () {
 
 ### 📌 1️⃣ COMANDO ARTISAN: NOTIFICHE ATTIVE ###
 Artisan::command('notifications:summary', function () {
-    $pendingCount = CustomDatabaseNotification::where('status', 'pending')->count();
-    $expiringSoon = CustomDatabaseNotification::where('status', 'pending')
+    $pendingCount = CustomDatabaseNotification::where('outcome', 'pending')->count();
+    $expiringSoon = CustomDatabaseNotification::where('soutcometatus', 'pending')
                                 ->where('created_at', '<', Carbon::now()->subHours(config('app.notifications.expiration_hours', 72) - 5))
                                 ->count();
 
@@ -35,4 +35,3 @@ Schedule::call(function () {
 ->everyMinute()
 ->withoutOverlapping()
 ->onOneServer();
-

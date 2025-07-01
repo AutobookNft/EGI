@@ -12,6 +12,13 @@
     </a>
 @endunless
 
+{{-- Home Link - Solo se NON siamo in creators --}}
+@unless(request()->routeIs('creator.index') || request()->is('/'))
+    <a href="{{ url('/creator') }}" class="{{ $navLinkClasses }}" aria-label="{{ __('guest_layout.' . ($isMobile ? 'mobile_' : '') . 'home_link_aria_label') }}">
+        {{ __('guest_layout.creators') }}
+    </a>
+@endunless
+
 {{-- Collections Link - Solo se NON siamo nelle pagine collections --}}
 @unless(request()->routeIs('home.collections.*'))
     <a href="{{ route('home.collections.index') }}"

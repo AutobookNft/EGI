@@ -52,36 +52,49 @@
                     <div class="relative w-full max-w-5xl">
 
                         {{-- Main Image Display --}}
-                        <div class="relative cursor-pointer group artwork-container">
-                            @if($imageUrl = ($egi->collection_id && $egi->user_id && $egi->key_file && $egi->extension ? asset(sprintf('storage/users_files/collections_%d/creator_%d/%d.%s', $egi->collection_id, $egi->user_id, $egi->key_file, $egi->extension)) : null))
-                                <div class="relative overflow-hidden bg-black shadow-2xl rounded-2xl">
-                                    <img src="{{ $imageUrl }}"
-                                         alt="{{ $egi->title ?? __('egi.image_alt_default') }}"
-                                         class="w-full h-auto max-h-[85vh] object-contain mx-auto transition-all duration-700 group-hover:scale-[1.02] group-hover:brightness-110"
-                                         loading="eager" />
-
-                                    {{-- Subtle Overlay for Interaction Hints --}}
-                                    <div class="absolute inset-0 transition-opacity duration-500 opacity-0 bg-gradient-to-t from-black/20 via-transparent to-black/10 group-hover:opacity-100"></div>
-
-                                    {{-- Zoom Hint --}}
-                                    <div class="absolute px-3 py-1 text-sm text-white transition-all duration-300 rounded-full opacity-0 top-4 right-4 bg-black/70 group-hover:opacity-100 backdrop-blur-sm">
-                                        <svg class="inline w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path>
-                                        </svg>
-                                        {{ __('egi.view_full') }}
-                                    </div>
+                        <div class="relative w-full max-w-5xl mx-auto">
+                            @if($imageUrl = (
+                                $egi->collection_id
+                                && $egi->user_id
+                                && $egi->key_file
+                                && $egi->extension
+                            )
+                                ? asset(sprintf(
+                                    'storage/users_files/collections_%d/creator_%d/%d.%s',
+                                    $egi->collection_id,
+                                    $egi->user_id,
+                                    $egi->key_file,
+                                    $egi->extension
+                                ))
+                                : null
+                            )
+                                {{-- Trigger per lo zoom --}}
+                                <div id="zoom-container" class="overflow-hidden">
+                                    <img
+                                        id="zoom-image-trigger"
+                                        src="{{ $imageUrl }}"
+                                        alt="{{ $egi->title ?? __('egi.image_alt_default') }}"
+                                        class="w-full h-auto cursor-zoom-in"
+                                        {{-- OPZIONALE: aggiungi data-zoom-src per immagine high-res --}}
+                                        {{-- data-zoom-src="{{ $imageUrl }}" --}}
+                                    />
                                 </div>
                             @else
-                                <div class="flex items-center justify-center w-full h-96 lg:h-[70vh] bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-2xl">
+                                {{-- Placeholder quando non c'è immagine --}}
+                                <div
+                                    class="flex items-center justify-center w-full shadow-2xl h-96 lg:h-auto bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl"
+                                >
                                     <div class="text-center">
-                                        <svg class="w-24 h-24 mx-auto mb-4 text-gray-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="m21 7.5-9-5.25L3 7.5m18 0-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
+                                        <svg class="w-24 h-24 mb-4" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 3l18 18M21 3L3 21" />
                                         </svg>
                                         <p class="text-lg text-gray-400">{{ __('egi.artwork_loading') }}</p>
                                     </div>
                                 </div>
                             @endif
                         </div>
+
+                        {{-- Zoom Functionality --}}
 
                         {{-- Floating Title Card - Elegantly Positioned --}}
                         <div class="absolute bottom-6 left-6 right-6 lg:bottom-8 lg:left-8 lg:right-8">
@@ -125,15 +138,16 @@
                     </div>
                 </div>
 
-                {{-- Center: CRUD Box (NUOVO) --}}
+                {{-- Center: CRUD Box (CORREZIONE SOLO PERMESSI) --}}
                 @php
-                    $canUpdateEgi = auth()->check() &&
-                                    auth()->user()->can('update_EGI') &&
-                                    $collection->users()->where('user_id', auth()->id())->whereIn('role', ['admin', 'editor'])->exists();
+                    // CORREZIONE: Sostituito auth() con App\Helpers\FegiAuth::
+                    $canUpdateEgi = App\Helpers\FegiAuth::check() &&
+                                    App\Helpers\FegiAuth::user()->can('update_EGI') &&
+                                    $collection->users()->where('user_id', App\Helpers\FegiAuth::id())->whereIn('role', ['admin', 'editor', 'creator'])->exists();
 
-                    $canDeleteEgi = auth()->check() &&
-                                    auth()->user()->can('delete_EGI') &&
-                                    $collection->users()->where('user_id', auth()->id())->whereIn('role', ['admin', 'editor'])->exists();
+                    $canDeleteEgi = App\Helpers\FegiAuth::check() &&
+                                    App\Helpers\FegiAuth::user()->can('delete_EGI') &&
+                                    $collection->users()->where('user_id', App\Helpers\FegiAuth::id())->whereIn('role', ['admin', 'creator'])->exists();
                 @endphp
 
                 @if($canUpdateEgi)
@@ -319,7 +333,7 @@
                         {{-- Price & Purchase Section --}}
                         @php
                             $isForSale = $egi->price && $egi->price > 0 && !$egi->mint;
-                            $canBeReserved = !$egi->mint && ($egi->is_published || (auth()->check() && auth()->id() === $collection->creator_id));
+                            $canBeReserved = !$egi->mint && ($egi->is_published || (App\Helpers\FegiAuth::check() && App\Helpers\FegiAuth::id() === $collection->creator_id));
                         @endphp
 
                         <div class="p-6 border bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl border-gray-700/30">
@@ -578,6 +592,410 @@
             }
         });
     </script>
+    {{-- Lightbox Zoom Overlay --}}
+    <div
+        id="zoom-overlay"
+        class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black/80 backdrop-blur-sm"
+    >
+        <div id="zoom-content" class="relative max-w-[90%] max-h-[90%]">
+            <img
+                id="zoom-overlay-image"
+                src=""
+                alt=""
+                class="max-w-full max-h-full touch-none user-select-none"
+                style="object-fit: contain;"
+            />
+            <button
+                id="zoom-close"
+                aria-label="Chiudi ingrandimento"
+                class="absolute flex items-center justify-center w-10 h-10 text-3xl text-white transition-colors rounded-full top-4 right-4 bg-black/50 hover:bg-black/70"
+            >
+                ×
+            </button>
+        </div>
+</div>
 </x-slot>
 
+
+
+<style>
+/* Prevenire selezione del testo durante il pan */
+.touch-none {
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+/* Migliorare l'overlay */
+#zoom-overlay {
+    backdrop-filter: blur(4px);
+}
+
+/* Cursor style per indicare zoom disponibile */
+#zoom-image-trigger:hover {
+    cursor: zoom-in;
+}
+
+/* Smooth transitions */
+#zoom-overlay {
+    transition: opacity 0.2s ease-in-out;
+}
+
+#zoom-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+#zoom-overlay:not(.hidden) {
+    opacity: 1;
+    pointer-events: all;
+}
+</style>
+
 </x-guest-layout>
+
+{{-- SOSTITUISCI questa riga alla fine del file show.blade.php --}}
+{{-- DA: @vite(['resources/ts/zoom.ts']) --}}
+{{-- A: Script inline JavaScript --}}
+
+{{-- JavaScript Zoom Implementation - OS2.0 Compliant --}}
+<script>
+/**
+ * @Oracode ImageZoom: Timing-Fixed Implementation
+ * 🎯 Purpose: Robust image zoom with element waiting mechanism
+ * 🛡️ Security: Error handling and element availability checking
+ * 🧱 Core Logic: Waits for all elements before initialization
+ *
+ * @package FlorenceEGI\Frontend\Zoom
+ * @author Padmin D. Curtis (AI Partner OS2.0-Compliant) for Fabio Cherici
+ * @version 1.1.0 (FlorenceEGI MVP Zoom - Timing Fixed)
+ * @date 2025-06-30
+ */
+
+class ImageZoom {
+    constructor(triggerId) {
+        this.triggerId = triggerId;
+        this.maxRetries = 50; // 5 seconds max wait
+        this.retryCount = 0;
+
+        // Zoom state
+        this.scale = 1;
+        this.panX = 0;
+        this.panY = 0;
+        this.startX = 0;
+        this.startY = 0;
+        this.isPanning = false;
+        this.startDistance = 0;
+        this.isZoomOpen = false;
+
+        // Bind methods to preserve context
+        this.handleWheel = this.handleWheel.bind(this);
+        this.handlePointerDown = this.handlePointerDown.bind(this);
+        this.handlePointerMove = this.handlePointerMove.bind(this);
+        this.handlePointerUp = this.handlePointerUp.bind(this);
+        this.handleTouchStart = this.handleTouchStart.bind(this);
+        this.handleTouchMove = this.handleTouchMove.bind(this);
+        this.handleTouchEnd = this.handleTouchEnd.bind(this);
+
+        // Start waiting for elements
+        this.waitForElements();
+    }
+
+    waitForElements() {
+        console.log(`🔍 ZOOM: Waiting for elements... (attempt ${this.retryCount + 1}/${this.maxRetries})`);
+
+        // Try to find all required elements
+        this.trigger = document.getElementById(this.triggerId);
+        this.overlay = document.getElementById('zoom-overlay');
+        this.overlayImage = document.getElementById('zoom-overlay-image');
+        this.closeButton = document.getElementById('zoom-close');
+
+        const elementsFound = {
+            trigger: !!this.trigger,
+            overlay: !!this.overlay,
+            overlayImage: !!this.overlayImage,
+            closeButton: !!this.closeButton
+        };
+
+        console.log('🔍 ZOOM: Elements status:', elementsFound);
+
+        // Check if all elements are available
+        const allElementsReady = this.trigger && this.overlay && this.overlayImage && this.closeButton;
+
+        if (allElementsReady) {
+            console.log('✅ ZOOM: All elements found! Initializing...');
+            this.bindEvents();
+        } else {
+            this.retryCount++;
+
+            if (this.retryCount >= this.maxRetries) {
+                console.error('❌ ZOOM: Failed to find all elements after maximum retries:', elementsFound);
+                return;
+            }
+
+            // Wait 100ms and try again
+            setTimeout(() => this.waitForElements(), 100);
+        }
+    }
+
+    bindEvents() {
+        try {
+            console.log('🔗 ZOOM: Binding events...');
+
+            // Trigger click to open zoom
+            this.trigger.addEventListener('click', (e) => {
+                console.log('🎯 ZOOM: Image clicked!');
+                e.preventDefault();
+                e.stopPropagation();
+                this.open();
+            });
+
+            // Close zoom
+            this.closeButton.addEventListener('click', (e) => {
+                console.log('🎯 ZOOM: Close button clicked');
+                e.preventDefault();
+                e.stopPropagation();
+                this.close();
+            });
+
+            this.overlay.addEventListener('click', (e) => {
+                if (e.target === this.overlay) {
+                    console.log('🎯 ZOOM: Overlay background clicked');
+                    this.close();
+                }
+            });
+
+            // Escape key to close
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && this.isZoomOpen) {
+                    console.log('🎯 ZOOM: Escape key pressed');
+                    this.close();
+                }
+            });
+
+            // Desktop wheel zoom
+            this.overlayImage.addEventListener('wheel', this.handleWheel, { passive: false });
+
+            // Pointer events for pan
+            this.overlayImage.addEventListener('pointerdown', this.handlePointerDown);
+            this.overlayImage.addEventListener('pointermove', this.handlePointerMove);
+            this.overlayImage.addEventListener('pointerup', this.handlePointerUp);
+            this.overlayImage.addEventListener('pointercancel', this.handlePointerUp);
+
+            // Touch events for pinch-to-zoom
+            this.overlayImage.addEventListener('touchstart', this.handleTouchStart, { passive: false });
+            this.overlayImage.addEventListener('touchmove', this.handleTouchMove, { passive: false });
+            this.overlayImage.addEventListener('touchend', this.handleTouchEnd);
+            this.overlayImage.addEventListener('touchcancel', this.handleTouchEnd);
+
+            console.log('✅ ZOOM: All events bound successfully!');
+
+        } catch (error) {
+            console.error('❌ ZOOM: Error binding events', error);
+        }
+    }
+
+    open() {
+        try {
+            console.log('🚀 ZOOM: Opening zoom...');
+
+            // Get image source with multiple fallbacks
+            const src = this.trigger.dataset.zoomSrc ||
+                       this.trigger.dataset.src ||
+                       this.trigger.src ||
+                       this.trigger.getAttribute('src');
+
+            console.log('🔍 ZOOM: Image source:', src);
+
+            if (!src) {
+                console.error('❌ ZOOM: No valid image source found');
+                return;
+            }
+
+            // Set overlay image source
+            this.overlayImage.src = src;
+
+            // Show overlay
+            this.overlay.classList.remove('hidden');
+            this.overlay.style.display = 'flex';
+
+            this.isZoomOpen = true;
+
+            // Prevent body scroll
+            document.body.style.overflow = 'hidden';
+
+            this.reset();
+
+            console.log('✅ ZOOM: Zoom opened successfully!');
+        } catch (error) {
+            console.error('❌ ZOOM: Error opening zoom', error);
+        }
+    }
+
+    close() {
+        try {
+            console.log('🔒 ZOOM: Closing zoom...');
+
+            this.overlay.classList.add('hidden');
+            this.overlay.style.display = 'none';
+            this.isZoomOpen = false;
+
+            // Restore body scroll
+            document.body.style.overflow = '';
+
+            this.reset();
+
+            console.log('✅ ZOOM: Zoom closed successfully');
+        } catch (error) {
+            console.error('❌ ZOOM: Error closing zoom', error);
+        }
+    }
+
+    reset() {
+        this.scale = 1;
+        this.panX = 0;
+        this.panY = 0;
+        this.isPanning = false;
+        this.updateTransform();
+    }
+
+    handleWheel(e) {
+        if (!this.isZoomOpen) return;
+
+        try {
+            e.preventDefault();
+
+            const delta = -e.deltaY * 0.002;
+            const newScale = Math.min(Math.max(1, this.scale + delta), 5);
+
+            const rect = this.overlayImage.getBoundingClientRect();
+            const centerX = (e.clientX - rect.left) / rect.width;
+            const centerY = (e.clientY - rect.top) / rect.height;
+
+            if (newScale !== this.scale) {
+                const scaleDiff = newScale - this.scale;
+                this.panX -= (centerX - 0.5) * rect.width * scaleDiff * 0.5;
+                this.panY -= (centerY - 0.5) * rect.height * scaleDiff * 0.5;
+            }
+
+            this.scale = newScale;
+            this.updateTransform();
+        } catch (error) {
+            console.error('❌ ZOOM: Error handling wheel', error);
+        }
+    }
+
+    handlePointerDown(e) {
+        if (!this.isZoomOpen) return;
+
+        try {
+            e.preventDefault();
+            this.isPanning = true;
+            this.startX = e.clientX - this.panX;
+            this.startY = e.clientY - this.panY;
+
+            if (this.overlayImage.setPointerCapture) {
+                this.overlayImage.setPointerCapture(e.pointerId);
+            }
+        } catch (error) {
+            console.error('❌ ZOOM: Error handling pointer down', error);
+        }
+    }
+
+    handlePointerMove(e) {
+        if (!this.isPanning || !this.isZoomOpen) return;
+
+        try {
+            this.panX = e.clientX - this.startX;
+            this.panY = e.clientY - this.startY;
+            this.updateTransform();
+        } catch (error) {
+            console.error('❌ ZOOM: Error handling pointer move', error);
+        }
+    }
+
+    handlePointerUp() {
+        this.isPanning = false;
+    }
+
+    handleTouchStart(e) {
+        if (!this.isZoomOpen) return;
+
+        try {
+            if (e.touches.length === 2) {
+                e.preventDefault();
+                const [t1, t2] = Array.from(e.touches);
+                this.startDistance = this.getDistance(t1, t2);
+            }
+        } catch (error) {
+            console.error('❌ ZOOM: Error handling touch start', error);
+        }
+    }
+
+    handleTouchMove(e) {
+        if (!this.isZoomOpen) return;
+
+        try {
+            if (e.touches.length === 2) {
+                e.preventDefault();
+                const [t1, t2] = Array.from(e.touches);
+                const newDistance = this.getDistance(t1, t2);
+
+                if (this.startDistance > 0) {
+                    const factor = newDistance / this.startDistance;
+                    this.scale = Math.min(Math.max(1, this.scale * factor), 5);
+                    this.startDistance = newDistance;
+                    this.updateTransform();
+                }
+            }
+        } catch (error) {
+            console.error('❌ ZOOM: Error handling touch move', error);
+        }
+    }
+
+    handleTouchEnd() {
+        this.startDistance = 0;
+    }
+
+    getDistance(t1, t2) {
+        return Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+    }
+
+    updateTransform() {
+        try {
+            this.overlayImage.style.transform =
+                `translate(${this.panX}px, ${this.panY}px) scale(${this.scale})`;
+        } catch (error) {
+            console.error('❌ ZOOM: Error updating transform', error);
+        }
+    }
+}
+
+// Multiple initialization strategies for maximum compatibility
+function initializeZoom() {
+    console.log('🚀 ZOOM: Attempting to initialize ImageZoom...');
+    try {
+        new ImageZoom('zoom-image-trigger');
+    } catch (error) {
+        console.error('❌ ZOOM: Failed to initialize', error);
+    }
+}
+
+// Strategy 1: DOMContentLoaded
+document.addEventListener('DOMContentLoaded', initializeZoom);
+
+// Strategy 2: Immediate if DOM is ready
+if (document.readyState !== 'loading') {
+    initializeZoom();
+}
+
+// Strategy 3: Window load as final fallback
+window.addEventListener('load', () => {
+    console.log('🔄 ZOOM: Window load event - final initialization attempt');
+    setTimeout(initializeZoom, 100);
+});
+
+console.log('📝 ZOOM: Script loaded successfully');
+</script>

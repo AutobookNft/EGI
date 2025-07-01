@@ -458,6 +458,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'view_EGI',
             'like_EGI',
             'reserve_EGI',                    // Con priorità bassa
+            'update_EGI',                   // Solo se ha creato l'EGI
 
             // Collection di default (solo 1)
             'view_collection',

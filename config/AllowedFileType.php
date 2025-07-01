@@ -110,7 +110,7 @@ return [
 
         // Maximum sizes for specific categories (override global limits)
         'size_limits' => [
-            'image' => 20971520,  // 20MB for images
+            'image' => 104857600,  // 100MB for images
             'document' => 104857600, // 100MB for documents
             'audio' => 52428800,  // 50MB for audio
             'video' => 524288000  // 500MB for video

@@ -126,7 +126,7 @@ class EgiController extends Controller
                 'egi_id' => $id,
                 'error' => $e->getMessage(),
                 'user_id' => FegiAuth::id()
-            ]);
+            ], $e);
         }
     }
 
@@ -259,7 +259,7 @@ class EgiController extends Controller
                 'user_id' => FegiAuth::id(),
                 'egi_id' => $egi->id,
                 'error' => $e->getMessage()
-            ]);
+            ], $e);
         }
     }
 
@@ -392,10 +392,10 @@ class EgiController extends Controller
                 return false;
             }
 
-            // Check role - only admin/editor can manage EGIs
+            // Check role - only admin/editor/creator can manage EGIs
             $userRole = $membership->pivot->role ?? null;
 
-            return in_array($userRole, ['admin', 'editor']);
+            return in_array($userRole, ['admin', 'editor', 'creator']);
 
         } catch (\Exception $e) {
             // Log error (developers only - English)

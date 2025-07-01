@@ -58,6 +58,10 @@ async function initializeApplication(): Promise<void> {
         // 2. Inizializza i riferimenti DOM
         DOMElements.initializeDOMReferences();
 
+        document.addEventListener('open-wallet-modal', () => {
+            openSecureWalletModal(mainAppConfig, DOMElements, null);
+        });
+
         // 3. Carica configurazione dal server
         mainAppConfig = await initializeAppConfig();
         console.log(`${appTranslate('padminGreeting', mainAppConfig?.translations || {padminGreeting:'Padmin'})} FEGI Configuration loaded successfully.`);
@@ -248,7 +252,7 @@ function setupFegiCustomEvents(): void {
     });
     // Event listener per aggiornamenti UI dopo connessione FEGI
     document.addEventListener('fegiConnectionComplete', (event) => {
-        
+
         const customEvent = event as CustomEvent;
         updateNavbarUI(mainAppConfig, DOMElements);
         if (reservationFeature && typeof reservationFeature.updateReservationButtonStates === 'function') {

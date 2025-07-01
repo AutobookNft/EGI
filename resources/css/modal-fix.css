@@ -1,0 +1,46 @@
+/* resources/css/modal-fix.css - File separato per fix modal */
+
+/* Reset e override totale per il modal */
+#upload-modal {
+    /* Test visibilità */
+    outline: 5px solid lime !important;
+}
+
+#upload-modal:not(.hidden) {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background-color: rgba(0, 0, 0, 0.75) !important;
+    z-index: 99999 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+}
+
+#upload-modal:not(.hidden) > div {
+    position: relative !important;
+    width: 90vw !important;
+    max-width: 1600px !important;
+    height: 85vh !important;
+    margin: 0 !important;
+    transform: none !important;
+    top: auto !important;
+    left: auto !important;
+    background: #1f2937 !important;
+    border-radius: 0.75rem !important;
+    overflow: hidden !important;
+}
+
+/* Mobile reset */
+@media (max-width: 640px) {
+    #upload-modal:not(.hidden) > div {
+        width: 100vw !important;
+        height: 100vh !important;
+        border-radius: 0 !important;
+    }
+}

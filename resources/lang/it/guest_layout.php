@@ -23,6 +23,7 @@ return [
 
     // Navigation items
     'home' => 'Home',
+    'creators' => 'Artisti',
     'home_link_aria_label' => 'Vai alla Homepage',
     'collections' => 'Collezioni',
     'collections_link_aria_label' => 'Visualizza tutte le collezioni pubbliche',

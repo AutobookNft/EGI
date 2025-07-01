@@ -3,181 +3,34 @@
 {{-- Trasformazione orchestrata per massimo impatto visivo e UX --}}
 {{-- Focus: Hero Impact + Info Critica + Griglia Adattiva + Micro-animazioni --}}
 
+@vite(['resources/css/collections-show.css'])
+
+{{-- Includiamo il layout principale per le collezioni --}}
+{{-- Questo layout gestisce il titolo, la descrizione e gli script condivisi --}}
+
 <x-collection-layout :title="$collection->collection_name . ' | FlorenceEGI'"
     :metaDescription="Str::limit($collection->description, 155) ?? 'Details for the collection ' . $collection->collection_name">
 
 {{-- Schema.org ottimizzato --}}
 <x-slot name="schemaMarkup">
-<script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "CollectionPage",
-        "name": "{{ $collection->collection_name }}",
-        "description": "{{ $collection->description }}",
-        "image": "{{ $collection->image_banner ? Storage::url($collection->image_banner) : asset('images/default_banner.jpg') }}",
-        "author": {
-            "@type": "Person",
-            "name": "{{ $collection->creator->name ?? 'Unknown Creator' }}"
-        },
-        "numberOfItems": "{{ $collection->egis_count ?? 0 }}",
-        "mainEntity": {
-            "@type": "CreativeWork",
-            "name": "{{ $collection->collection_name }}"
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "CollectionPage",
+            "name": "{{ $collection->collection_name }}",
+            "description": "{{ $collection->description }}",
+            "image": "{{ $collection->image_banner ? Storage::url($collection->image_banner) : asset('images/default_banner.jpg') }}",
+            "author": {
+                "@type": "Person",
+                "name": "{{ $collection->creator->name ?? 'Unknown Creator' }}"
+            },
+            "numberOfItems": "{{ $collection->egis_count ?? 0 }}",
+            "mainEntity": {
+                "@type": "CreativeWork",
+                "name": "{{ $collection->collection_name }}"
+            }
         }
-    }
-</script>
-</x-slot>
-
-{{-- Stili custom per questa vista --}}
-<x-slot name="headExtra">
-<style>
-/* === ORCHESTRATED ANIMATION SYSTEM === */
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@keyframes slideInLeft {
-    from {
-        opacity: 0;
-        transform: translateX(-30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-@keyframes scaleIn {
-    from {
-        opacity: 0;
-        transform: scale(0.9);
-    }
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
-}
-
-/* === ENHANCED VISUAL HIERARCHY === */
-.hero-glass {
-    backdrop-filter: blur(20px);
-    background: rgba(0, 0, 0, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.info-glass {
-    backdrop-filter: blur(10px);
-    background: rgba(17, 24, 39, 0.8);
-    border: 1px solid rgba(75, 85, 99, 0.3);
-}
-
-.card-hover {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.card-hover:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-}
-
-/* === RESPONSIVE GRID SYSTEM === */
-.egi-grid {
-    display: grid;
-    gap: 1.5rem;
-    grid-template-columns: 1fr; /* Mobile: 1 colonna */
-}
-
-@media (min-width: 640px) {
-    .egi-grid {
-        grid-template-columns: repeat(2, 1fr); /* Tablet: 2 colonne */
-        gap: 2rem;
-    }
-}
-
-@media (min-width: 1024px) {
-    .egi-grid {
-        grid-template-columns: repeat(3, 1fr); /* Desktop: 3 colonne */
-    }
-}
-
-@media (min-width: 1280px) {
-    .egi-grid {
-        grid-template-columns: repeat(4, 1fr); /* Large: 4 colonne */
-    }
-}
-
-@media (min-width: 1536px) {
-    .egi-grid {
-        grid-template-columns: repeat(5, 1fr); /* XL: 5 colonne */
-    }
-}
-
-/* === MICRO-INTERACTIONS === */
-.stat-card {
-    animation: fadeInUp 0.6s ease-out forwards;
-}
-
-.stat-card:nth-child(1) { animation-delay: 0.1s; }
-.stat-card:nth-child(2) { animation-delay: 0.2s; }
-.stat-card:nth-child(3) { animation-delay: 0.3s; }
-.stat-card:nth-child(4) { animation-delay: 0.4s; }
-
-.egi-item {
-    opacity: 0;
-    animation: scaleIn 0.5s ease-out forwards;
-}
-
-.egi-item:nth-child(1) { animation-delay: 0.1s; }
-.egi-item:nth-child(2) { animation-delay: 0.15s; }
-.egi-item:nth-child(3) { animation-delay: 0.2s; }
-.egi-item:nth-child(4) { animation-delay: 0.25s; }
-.egi-item:nth-child(5) { animation-delay: 0.3s; }
-
-/* === FLOATING ACTION BAR === */
-.floating-actions {
-    position: fixed;
-    bottom: 2rem;
-    right: 2rem;
-    z-index: 40;
-    opacity: 0;
-    animation: slideInLeft 0.6s ease-out 0.8s forwards;
-}
-
-@media (max-width: 768px) {
-    .floating-actions {
-        bottom: 1rem;
-        right: 1rem;
-        left: 1rem;
-        display: flex;
-        justify-content: center;
-    }
-}
-
-/* === PARALLAX BANNER === */
-.parallax-banner {
-    transform: translateZ(0);
-    will-change: transform;
-}
-
-/* === ENHANCED BUTTONS === */
-.btn-primary-glow {
-    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-    box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
-    transition: all 0.3s ease;
-}
-
-.btn-primary-glow:hover {
-    box-shadow: 0 15px 35px rgba(99, 102, 241, 0.4);
-    transform: translateY(-2px);
-}
-</style>
+    </script>
 </x-slot>
 
 {{-- 🎯 SEZIONE INFORMAZIONI CRITICHE (Sopra al Banner) --}}
@@ -298,11 +151,15 @@
             {{-- CTA Section --}}
             <div class="flex flex-col gap-4 sm:flex-row">
                 <button class="btn-primary-glow flex items-center justify-center px-6 py-3 rounded-lg text-white font-semibold text-sm sm:text-base like-button {{ $collection->is_liked ?? false ? 'is-liked' : '' }}"
+
                         data-collection-id="{{ $collection->id }}"
+                        data-resource-type="collection"
+                        data-resource-id="{{ $collection->id }}"
                         data-like-url="{{ route('api.toggle.collection.like', $collection->id) }}">
                     <span class="mr-2 material-symbols-outlined icon-heart">{{ $collection->is_liked ?? false ? 'favorite' : 'favorite_border' }}</span>
                     <span class="like-text">{{ $collection->is_liked ?? false ? __('Liked') : __('Like Collection') }}</span>
                     <span class="ml-2 like-count-display">({{ $collection->likes_count ?? 0 }})</span>
+                    <span class="ml-2 like-count-display">Collection id ({{ $collection->id }})</span>
                 </button>
 
                 <button class="flex items-center justify-center px-6 py-3 text-sm font-semibold text-white transition-all duration-300 border rounded-lg bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/20 sm:text-base"
@@ -454,181 +311,144 @@
 {{-- JavaScript Enhancements --}}
 @push('scripts')
 <script>
-// === ORCHESTRATED INTERACTIONS ===
+// document.querySelectorAll('.like-button').forEach(button => {
+//         button.addEventListener('click', async function() {
+//             const collectionId = this.dataset.collectionId;
+//             const likeUrl = this.dataset.likeUrl;
+//             const icon = this.querySelector('.icon-heart');
+//             const text = this.querySelector('.like-text');
+//             const countDisplay = this.querySelector('.like-count-display');
 
-// Like functionality migliorata
-document.querySelectorAll('.like-button').forEach(button => {
-    button.addEventListener('click', async function() {
-        const collectionId = this.dataset.collectionId;
-        const likeUrl = this.dataset.likeUrl;
-        const icon = this.querySelector('.icon-heart');
-        const text = this.querySelector('.like-text');
-        const countDisplay = this.querySelector('.like-count-display');
+//             // Visual feedback immediato
+//             this.style.transform = 'scale(0.95)';
+//             setTimeout(() => {
+//                 this.style.transform = 'scale(1)';
+//             }, 150);
 
-        // Visual feedback immediato
-        this.style.transform = 'scale(0.95)';
-        setTimeout(() => {
-            this.style.transform = 'scale(1)';
-        }, 150);
+//             try {
+//                 const response = await fetch(likeUrl, {
+//                     method: 'POST',
+//                     headers: {
+//                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+//                         'Accept': 'application/json',
+//                     },
+//                 });
 
-        try {
-            const response = await fetch(likeUrl, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                    'Accept': 'application/json',
-                },
-            });
+//                 const data = await response.json();
 
-            const data = await response.json();
+//                 if (data.success) {
+//                     this.classList.toggle('is-liked', data.is_liked);
 
-            if (data.success) {
-                this.classList.toggle('is-liked', data.is_liked);
+//                     if (data.is_liked) {
+//                         icon.textContent = 'favorite';
+//                         text.textContent = 'Liked';
+//                         this.style.background = 'linear-gradient(135deg, #ec4899 0%, #be185d 100%)';
+//                     } else {
+//                         icon.textContent = 'favorite_border';
+//                         text.textContent = 'Like Collection';
+//                         this.style.background = 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)';
+//                     }
 
-                if (data.is_liked) {
-                    icon.textContent = 'favorite';
-                    text.textContent = 'Liked';
-                    this.style.background = 'linear-gradient(135deg, #ec4899 0%, #be185d 100%)';
-                } else {
-                    icon.textContent = 'favorite_border';
-                    text.textContent = 'Like Collection';
-                    this.style.background = 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)';
-                }
+//                     countDisplay.textContent = `(${data.likes_count ?? 0})`;
 
-                countDisplay.textContent = `(${data.likes_count ?? 0})`;
+//                     // Celebrazione visiva
+//                     if (data.is_liked) {
+//                         icon.style.animation = 'heartBeat 0.6s ease-in-out';
+//                         setTimeout(() => {
+//                             icon.style.animation = '';
+//                         }, 600);
+//                     }
+//                 }
+//             } catch (error) {
+//                 console.error('Error toggling like:', error);
+//             }
+//         });
+//     });
 
-                // Celebrazione visiva
-                if (data.is_liked) {
-                    icon.style.animation = 'heartBeat 0.6s ease-in-out';
-                    setTimeout(() => {
-                        icon.style.animation = '';
-                    }, 600);
-                }
-            }
-        } catch (error) {
-            console.error('Error toggling like:', error);
-        }
-    });
-});
+//     // View Toggle
+//     document.querySelectorAll('.view-toggle').forEach(button => {
+//         button.addEventListener('click', function() {
+//             const view = this.dataset.view;
+//             const container = document.getElementById('egis-container');
 
-// View Toggle
-document.querySelectorAll('.view-toggle').forEach(button => {
-    button.addEventListener('click', function() {
-        const view = this.dataset.view;
-        const container = document.getElementById('egis-container');
+//             // Update buttons
+//             document.querySelectorAll('.view-toggle').forEach(btn => {
+//                 btn.classList.remove('active', 'bg-indigo-600', 'text-white');
+//                 btn.classList.add('text-gray-400');
+//             });
 
-        // Update buttons
-        document.querySelectorAll('.view-toggle').forEach(btn => {
-            btn.classList.remove('active', 'bg-indigo-600', 'text-white');
-            btn.classList.add('text-gray-400');
-        });
+//             this.classList.add('active', 'bg-indigo-600', 'text-white');
+//             this.classList.remove('text-gray-400');
 
-        this.classList.add('active', 'bg-indigo-600', 'text-white');
-        this.classList.remove('text-gray-400');
+//             // Update grid
+//             if (view === 'list') {
+//                 container.className = 'space-y-4';
+//             } else {
+//                 container.className = 'egi-grid';
+//             }
+//         });
+//     });
 
-        // Update grid
-        if (view === 'list') {
-            container.className = 'space-y-4';
-        } else {
-            container.className = 'egi-grid';
-        }
-    });
-});
+//     // Parallax effect (performance-conscious)
+//     let ticking = false;
 
-// Parallax effect (performance-conscious)
-let ticking = false;
+//     function updateParallax() {
+//         const scrolled = window.pageYOffset;
+//         const parallax = document.querySelector('.parallax-banner');
 
-function updateParallax() {
-    const scrolled = window.pageYOffset;
-    const parallax = document.querySelector('.parallax-banner');
+//         if (parallax) {
+//             const speed = scrolled * 0.5;
+//             parallax.style.transform = `translateY(${speed}px)`;
+//         }
 
-    if (parallax) {
-        const speed = scrolled * 0.5;
-        parallax.style.transform = `translateY(${speed}px)`;
-    }
+//         ticking = false;
+//     }
 
-    ticking = false;
-}
+//     function requestTick() {
+//         if (!ticking) {
+//             requestAnimationFrame(updateParallax);
+//             ticking = true;
+//         }
+//     }
 
-function requestTick() {
-    if (!ticking) {
-        requestAnimationFrame(updateParallax);
-        ticking = true;
-    }
-}
+//     window.addEventListener('scroll', requestTick);
 
-window.addEventListener('scroll', requestTick);
+//     // Copy to clipboard utility
+//     function copyToClipboard(text) {
+//         navigator.clipboard.writeText(text).then(() => {
+//             // Show toast notification
+//             const toast = document.createElement('div');
+//             toast.className = 'fixed z-50 px-4 py-2 text-sm font-medium text-white transform -translate-x-1/2 bg-green-600 rounded-lg bottom-4 left-1/2';
+//             toast.textContent = 'Link copied to clipboard!';
+//             document.body.appendChild(toast);
 
-// Copy to clipboard utility
-function copyToClipboard(text) {
-    navigator.clipboard.writeText(text).then(() => {
-        // Show toast notification
-        const toast = document.createElement('div');
-        toast.className = 'fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium z-50';
-        toast.textContent = 'Link copied to clipboard!';
-        document.body.appendChild(toast);
+//             setTimeout(() => {
+//                 toast.remove();
+//             }, 3000);
+//         });
+//     }
 
-        setTimeout(() => {
-            toast.remove();
-        }, 3000);
-    });
-}
+//     // Enhanced scroll animations
+//     const observerOptions = {
+//         threshold: 0.1,
+//         rootMargin: '0px 0px -50px 0px'
+//     };
 
-// Enhanced scroll animations
-const observerOptions = {
-    threshold: 0.1,
-    rootMargin: '0px 0px -50px 0px'
-};
+//     const observer = new IntersectionObserver((entries) => {
+//         entries.forEach(entry => {
+//             if (entry.isIntersecting) {
+//                 entry.target.style.animationPlayState = 'running';
+//             }
+//         });
+//     }, observerOptions);
 
-const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            entry.target.style.animationPlayState = 'running';
-        }
-    });
-}, observerOptions);
-
-// Observe all animated elements
-document.querySelectorAll('.egi-item, .stat-card').forEach(el => {
-    observer.observe(el);
-});
-
-</script>
-
-<style>
-@keyframes heartBeat {
-    0% { transform: scale(1); }
-    25% { transform: scale(1.2); }
-    50% { transform: scale(1); }
-    75% { transform: scale(1.1); }
-    100% { transform: scale(1); }
-}
-
-/* Ottimizzazioni performance */
-.parallax-banner {
-    will-change: transform;
-    transform: translateZ(0);
-}
-
-.card-hover {
-    will-change: transform, box-shadow;
-}
-
-/* Line clamp utility */
-.line-clamp-2 {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-
-.line-clamp-3 {
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-</style>
+//     // Observe all animated elements
+//     document.querySelectorAll('.egi-item, .stat-card').forEach(el => {
+//         observer.observe(el);
+//     });
+    </script>
 @endpush
 
 </x-collection-layout>
+
+{{-- @vite(['resources/js/collections-show.js']) --}}

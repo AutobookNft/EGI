@@ -110,7 +110,7 @@ export class LikeService {
 
         switch (resource.type) {
             case 'collection':
-                return `${baseUrl}/collections/${resource.id}/toggle-like`;
+                return `${baseUrl}/collections/${resource.id}`;
             case 'egi':
                 return `${baseUrl}/egis/${resource.id}/toggle-like`;
             default:

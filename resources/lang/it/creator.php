@@ -1,0 +1,75 @@
+<?php
+
+// resources/lang/it/creator.php
+
+return [
+    'home' => [
+        'default_bio' => 'Questo è un creator di talento dell\'ecosistema FlorenceEGI.', // Questa era in guest_home.php prima
+        'view_profile' => 'Vedi Profilo', // Questa era in guest_home.php prima
+        'title_suffix' => 'Mecenate del Nuovo Rinascimento',
+        'meta_description' => 'Scopri le opere di :name su FlorenceEGI. Arte che genera impatto ambientale nel mercato virtuoso.',
+        'default_bio' => 'Artista e creatore su FlorenceEGI',
+        'creative_work_type' => 'Digital Art NFTs',
+        'hero_aria_label' => 'Profilo di :name',
+        'avatar_alt' => 'Avatar di :name',
+        'verified_badge_title' => 'Creator Verificato',
+        'verified_sr' => 'Verificato',
+        'member_since' => 'Membro dal :year',
+        'follow_aria' => 'Segui :name',
+        'follow_button' => 'Segui',
+        'become_patron_aria' => 'Diventa mecenate di :name',
+        'become_patron_button' => 'Diventa Mecenate',
+        'login_to_follow' => 'Accedi per seguire',
+        'stats' => [
+            'works' => 'Opere',
+            'collections' => 'Collezioni',
+            'patrons' => 'Mecenati',
+        ],
+        'nav_aria_label' => 'Navigazione profilo creator',
+        'nav' => [
+            'overview' => 'Overview',
+            'portfolio' => 'Portfolio',
+            'collections' => 'Collezioni',
+            'biography' => 'Biografia',
+            'impact' => 'Impatto',
+            'community' => 'Community',
+        ],
+        'featured_works_heading' => 'Opere in Evidenza',
+        'no_works_yet' => 'Nessuna opera pubblicata ancora',
+        'sidebar_aria_label' => 'Informazioni aggiuntive',
+        'environmental_impact' => 'Impatto Ambientale',
+        'impact_points' => 'pts',
+        'epp_contribution' => 'Contributo ai progetti EPP',
+        'recent_collections' => 'Collezioni Recenti',
+        'collection_works_count' => ':count opere',
+        'view_all_collections' => 'Vedi tutte le collezioni',
+        'no_collections_yet' => 'Nessuna collezione ancora',
+    ],
+    'under_construction' => [
+        'title' => 'In Costruzione',
+        'meta_description' => 'La sezione :section di :name è in costruzione. Torna presto per scoprire di più.',
+        'heading' => ':section in Costruzione',
+        'message_details' => 'La sezione ":section" del profilo di :name è attualmente in fase di costruzione e miglioramento. La tua pazienza è apprezzata mentre portiamo questa sezione alla sua piena bellezza e funzionalità.',
+        'message' => 'Stiamo lavorando per rendere questa sezione ancora più straordinaria. Torna presto!',
+        'back_to_profile' => 'Torna al profilo',
+    ],
+
+    'index' => [ // Tutte le stringhe per la pagina index
+        'page_title' => 'Esplora i Creator - FlorenceEGI',
+        'meta_description' => 'Scopri i talentuosi creator che danno vita alle collezioni NFT su FlorenceEGI. Filtra per categoria, nome o popolarità.',
+        'main_title' => 'I Nostri Creator',
+        'subtitle' => 'Esplora la comunità di artisti, innovatori e visionari che stanno plasmando il futuro su FlorenceEGI.',
+        'search_placeholder' => 'Cerca per nome o descrizione...',
+        'filter_category' => 'Filtra per Categoria',
+        'all_categories' => 'Tutte le Categorie',
+        'sort_by' => 'Ordina per',
+        'sort_latest' => 'Più Recenti',
+        'sort_oldest' => 'Meno Recenti',
+        'sort_name_asc' => 'Nome (A-Z)',
+        'sort_name_desc' => 'Nome (Z-A)',
+        'sort_random' => 'Casuale',
+        'reset_filters' => 'Reset Filtri',
+        'apply_filters' => 'Applica Filtri',
+        'no_creators_found' => 'Nessun creator trovato con i criteri di ricerca attuali.',
+    ],
+];

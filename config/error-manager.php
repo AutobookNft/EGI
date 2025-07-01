@@ -245,7 +245,7 @@ return [
             'type' => 'critical',
             'blocking' => 'blocking', // Treat undefined code as blocking
             'dev_message_key' => 'error-manager::errors.dev.undefined_error_code',
-            'user_message_key' => 'error-manager::errors.user.undefined_error_code',
+            'user_message_key' => 'error-manager::errors.user.unexpected_error',
             'http_status_code' => 500,
             'devTeam_email_need' => true,
             'notify_slack' => true, // Notify Slack too
@@ -350,6 +350,18 @@ return [
              'notify_slack' => false,
              'msg_to' => 'log-only', // Let Laravel handle 404 page
          ],
+
+         'RESOURCE_NOT_FOUND' => [
+             'type' => 'error',
+             'blocking' => 'blocking',
+             'dev_message_key' => 'error-manager::errors.dev.resource_not_found',
+             'user_message_key' => 'error-manager::errors.user.unexpected_error',
+             'http_status_code' => 404,
+                'devTeam_email_need' => true,
+                'notify_slack' => false,
+                'msg_to' => 'sweet-alert', // Inform user resource is missing
+        ],
+
          'METHOD_NOT_ALLOWED' => [
              'type' => 'error',
              'blocking' => 'blocking',
@@ -1666,6 +1678,17 @@ return [
             'blocking' => 'semi-blocking',
             'dev_message_key' => 'error-manager::errors.dev.auth_required_for_like',
             'user_message_key' => 'error-manager::errors.user.auth_required_for_like',
+            'http_status_code' => 401,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'RESERVATION_STATUS_AUTH_REQUIRED' => [
+            'type' => 'warning',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.reservation_status_auth_required',
+            'user_message_key' => 'error-manager::errors.user.reservation_status_auth_required',
             'http_status_code' => 401,
             'devTeam_email_need' => false,
             'notify_slack' => false,
