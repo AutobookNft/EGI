@@ -4,11 +4,9 @@
  * 📜 Oracode TypeScript Module: DOMElementReferences
  * Centralizza l'acquisizione e l'esportazione dei riferimenti agli elementi DOM
  * utilizzati dall'applicazione client-side di FlorenceEGI.
- * I riferimenti vengono acquisiti tramite la funzione initializeDOMReferences(),
- * che DEVE essere chiamata dopo che l'evento DOMContentLoaded è stato emesso.
  *
- * @version 1.2.1 (Padmin - Consistent Robust DOM Initialization)
- * @date 2025-05-24
+ * @version 1.3.0 (Padmin - Added Contextual EGI Button Elements)
+ * @date 2025-07-01
  * @author Padmin D. Curtis (for Fabio Cherici)
  */
 
@@ -18,6 +16,8 @@ const queryEl = <T extends HTMLElement>(selector: string): T | null => document.
 const queryAllEl = <T extends HTMLElement>(selector: string): NodeListOf<T> | null => document.querySelectorAll(selector) as NodeListOf<T> | null;
 
 // --- DICHIARAZIONE DELLE VARIABILI ESPORTATE (inizializzate a null) ---
+
+// Wallet & Auth Modals
 export let connectWalletModalEl: HTMLDivElement | null = null;
 export let closeConnectWalletButtonEl: HTMLButtonElement | null = null;
 export let connectWalletFormEl: HTMLFormElement | null = null;
@@ -26,6 +26,8 @@ export let walletErrorMessageEl: HTMLParagraphElement | null = null;
 export let connectSubmitButtonEl: HTMLButtonElement | null = null;
 export let connectWalletButtonStdEl: HTMLButtonElement | null = null;
 export let connectWalletButtonMobileEl: HTMLButtonElement | null = null;
+
+// Navbar: Wallet Dropdown & Auth Links
 export let walletDropdownContainerEl: HTMLDivElement | null = null;
 export let walletDisplayTextEl: HTMLSpanElement | null = null;
 export let walletDropdownButtonEl: HTMLButtonElement | null = null;
@@ -35,15 +37,15 @@ export let walletDisconnectButtonEl: HTMLButtonElement | null = null;
 export let loginLinkDesktopEl: HTMLAnchorElement | null = null;
 export let registerLinkDesktopEl: HTMLAnchorElement | null = null;
 export let mobileAuthButtonsContainerEl: HTMLDivElement | null = null;
-export let createEgiGuestButtonsEl: NodeListOf<HTMLButtonElement> | null = null;
-export let createCollectionGuestButtonsEl: NodeListOf<HTMLButtonElement> | null = null;
-export let uploadModalEl: HTMLDivElement | null = null;
-export let uploadModalCloseButtonEl: HTMLButtonElement | null = null;
-export let uploadModalContentEl: HTMLDivElement | null = null;
+export let logoutFormEl: HTMLFormElement | null = null;
+
+// Navbar: Mobile Menu
 export let mobileMenuButtonEl: HTMLButtonElement | null = null;
 export let mobileMenuEl: HTMLDivElement | null = null;
 export let hamburgerIconEl: HTMLElement | null = null;
 export let closeIconEl: HTMLElement | null = null;
+
+// Navbar: Collection Dropdown & Badge
 export let collectionListDropdownContainerEl: HTMLDivElement | null = null;
 export let collectionListDropdownButtonEl: HTMLButtonElement | null = null;
 export let collectionListDropdownMenuEl: HTMLDivElement | null = null;
@@ -53,14 +55,28 @@ export let collectionListErrorEl: HTMLDivElement | null = null;
 export let currentCollectionBadgeContainerEl: HTMLDivElement | null = null;
 export let currentCollectionBadgeLinkEl: HTMLAnchorElement | null = null;
 export let currentCollectionBadgeNameEl: HTMLSpanElement | null = null;
-export let logoutFormEl: HTMLFormElement | null = null;
+
+// Navbar: Link Generici
 export let genericCollectionsLinkDesktopEl: HTMLAnchorElement | null = null;
 export let genericCollectionsLinkMobileEl: HTMLAnchorElement | null = null;
+
+// Navbar: Pulsanti Guest e Modali
+export let createEgiGuestButtonsEl: NodeListOf<HTMLButtonElement> | null = null;
+export let createCollectionGuestButtonsEl: NodeListOf<HTMLButtonElement> | null = null;
+export let uploadModalEl: HTMLDivElement | null = null;
+export let uploadModalCloseButtonEl: HTMLButtonElement | null = null;
+export let uploadModalContentEl: HTMLDivElement | null = null;
+
+// === NUOVI ELEMENTI PER PULSANTE CONTESTUALE "CREA EGI" ===
+export let createEgiContextualButtonEl: HTMLButtonElement | null = null;
+export let createEgiButtonTextEl: HTMLSpanElement | null = null;
+export let createEgiButtonIconEl: SVGElement | null = null;
+
 
 /**
  * 📜 Oracode Function: initializeDOMReferences
  * 🎯 Acquisisce tutti i riferimenti agli elementi DOM e li assegna
- *    alle variabili esportate da questo modulo.
+ * alle variabili esportate da questo modulo.
  */
 export function initializeDOMReferences(): void {
     connectWalletModalEl = getEl<HTMLDivElement>('connect-wallet-modal');
@@ -101,10 +117,13 @@ export function initializeDOMReferences(): void {
     logoutFormEl = getEl<HTMLFormElement>('logout-form');
     genericCollectionsLinkDesktopEl = queryEl<HTMLAnchorElement>('header nav.hidden.md\\:flex > a[href$="/home/collections"]:not([data-action])');
     genericCollectionsLinkMobileEl = queryEl<HTMLAnchorElement>('#mobile-menu > div:nth-child(1) > a[href$="/home/collections"]:not([data-action])');
-    
+
+    // === ACQUISIZIONE NUOVI ELEMENTI ===
+    createEgiContextualButtonEl = queryEl<HTMLButtonElement>('.js-create-egi-contextual-button');
+    createEgiButtonTextEl = queryEl<HTMLSpanElement>('.js-create-egi-button-text');
+    createEgiButtonIconEl = queryEl<SVGElement>('.js-create-egi-button-icon');
 
     // console.log('Padmin D. Curtis: DOM references acquired/re-acquired via initializeDOMReferences().');
-    // confirmDOMReferencesLoaded(); // La chiamata a confirm è già qui se decommentata
 }
 
 /**
@@ -116,6 +135,7 @@ export function confirmDOMReferencesLoaded(): void {
         { name: 'mobileMenuButtonEl', element: mobileMenuButtonEl },
         { name: 'mobileMenuEl', element: mobileMenuEl },
         { name: 'connectWalletModalEl', element: connectWalletModalEl },
+        { name: 'createEgiContextualButtonEl', element: createEgiContextualButtonEl }, // Aggiunto al check
         // Aggiungi altri se necessario
     ];
     // console.log('Padmin D. Curtis: Confirming critical DOM references post-initialization...');

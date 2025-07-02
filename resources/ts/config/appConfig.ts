@@ -99,7 +99,7 @@ export interface AppTranslations {
 }
 
 export interface AppConfig {
-    isAuthenticatedByBackend: boolean;
+    isAuthenticated: boolean;
     loggedInUserWallet: string | null;
     initialUserData: InitialUserData;
     routes: AppRoutes;
@@ -146,9 +146,16 @@ async function loadAppConfigFromAPI(): Promise<AppConfig> {
         throw new Error(errorMsg);
     }
 
-    const config = await response.json() as AppConfig;
-    console.log('Padmin Config: Application configuration loaded from API successfully.');
-    return config;
+    // --- LA CORREZIONE È QUI ---loadAppConfigFromAPI
+    // 1. Riceviamo la risposta completa (l'involucro)
+    const fullResponse = await response.json();
+
+    // 2. Estraiamo l'oggetto AppConfig interno e lo tipizziamo correttamente
+    const config = fullResponse.AppConfig as AppConfig;
+    // -------------------------
+
+    console.log('Padmin Config: Application configuration loaded and extracted successfully.');
+    return config; // Ora restituiamo l'oggetto con la forma corretta
 }
 
 /**

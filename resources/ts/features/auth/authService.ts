@@ -109,7 +109,7 @@
      * @returns {('logged-in' | 'connected' | 'disconnected')} Lo stato di autenticazione.
      */
     export function getAuthStatus(config: AppConfig): 'logged-in' | 'connected' | 'disconnected' {
-        if (config.isAuthenticatedByBackend) {
+        if (config.isAuthenticated) {
             return 'logged-in';
         }
         if (localStorage.getItem('connected_wallet')) {

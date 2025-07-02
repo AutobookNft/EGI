@@ -179,5 +179,5 @@
         <p id="status-message" class="text-xs" role="status">{{ trans('uploadmanager::uploadmanager.preparing_to_mint') }}</p>
     </div>
 </div>
-@include('layouts.guest_script')
+
 @vite(['resources/js/components/create-collection-modal.js'])

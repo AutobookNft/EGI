@@ -36,6 +36,7 @@ return [
     'epps' => 'EPP',
     'epps_link_aria_label' => 'Visualizza Progetti di Protezione Ambientale',
     'create_egi' => 'Crea EGI',
+    'add_egi_to' => 'Aggiungi EGI a:',
     'create_egi_aria_label' => 'Crea nuovo EGI',
     'create_collection' => 'Crea Collezione',
     'create_collection_aria_label' => 'Crea nuova galleria',

@@ -25,25 +25,6 @@
     <!-- Styles -->
     @livewireStyles
 
-    <script>
-        window.allowedExtensions = @json(config('AllowedFileType.collection.allowed_extensions', []));
-        window.allowedMimeTypes = @json(config('AllowedFileType.collection.allowed_mime_types', []));
-        window.maxSize = {{ config('AllowedFileType.collection.max_size', 10 * 1024 * 1024) }};
-
-        // Caricamento configurazione
-        fetch('{{ route("global.config") }}', {
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-            }
-        })
-        .then(response => response.json())
-        .then(config => {
-            Object.assign(window, config);
-            document.dispatchEvent(new Event('configLoaded'));
-        })
-        .catch(error => console.error('Error loading configuration:', error));
-    </script>
-
     <style>
 
         body {
@@ -99,22 +80,22 @@
 
             <livewire:navigation-menu />
 
-            <div class="three-column-layout mt-24">
+            <div class="mt-24 three-column-layout">
 
                 <!-- Left Column (Matrix) -->
                 {{-- <div class="left-column">
                     @include('egimodule::partials.matrix_animation')
                 </div> --}}
 
-                <div class="left-column mt-2">
+                <div class="mt-2 left-column">
                     @include('egimodule::partials.logo3d')
                 </div>
 
                 <!-- Center Column (Main Form) -->
-                <div class="center-column mt-2">
-                    <div class="p-8 bg-gradient-to-br from-gray-800 via-purple-900 to-blue-900 rounded-2xl shadow-2xl border border-purple-500/30 relative nft-background" id="upload-container">
+                <div class="mt-2 center-column">
+                    <div class="relative p-8 border shadow-2xl bg-gradient-to-br from-gray-800 via-purple-900 to-blue-900 rounded-2xl border-purple-500/30 nft-background" id="upload-container">
                         <!-- Title with EGI style -->
-                        <h2 class="text-4xl font-extrabold text-white mb-6 text-center tracking-wide drop-shadow-lg nft-title">
+                        <h2 class="mb-6 text-4xl font-extrabold tracking-wide text-center text-white drop-shadow-lg nft-title">
                             💎 {{ __('uploadmanager::uploadmanager.mint_your_masterpiece') }}
                         </h2>
 
@@ -150,27 +131,27 @@
 
                         <!-- Enhanced drag & drop upload area -->
                         <div
-                            class="w-full h-64 border-4 border-dashed border-blue-400/50 rounded-2xl mb-6 flex flex-col items-center justify-center p-8 transition-all duration-300 bg-purple-800/20 hover:bg-purple-800/30 group"
+                            class="flex flex-col items-center justify-center w-full h-64 p-8 mb-6 transition-all duration-300 border-4 border-dashed border-blue-400/50 rounded-2xl bg-purple-800/20 hover:bg-purple-800/30 group"
                             id="upload-drop-zone">
                             <!-- Drag & drop icon/illustration -->
-                            <div class="text-5xl mb-4 text-blue-400 group-hover:scale-110 transition-transform duration-300">
+                            <div class="mb-4 text-5xl text-blue-400 transition-transform duration-300 group-hover:scale-110">
                                 📤
                             </div>
                             <!-- Instructions with improved contrast (Punto 5) -->
-                            <p class="text-xl text-center text-white mb-6">
+                            <p class="mb-6 text-xl text-center text-white">
                                 {{ trans('uploadmanager::uploadmanager.drag_files_here') }} <br>
-                                <span class="text-blue-200 text-sm">{{ trans('uploadmanager::uploadmanager.or') }}</span>
+                                <span class="text-sm text-blue-200">{{ trans('uploadmanager::uploadmanager.or') }}</span>
                             </p>
                             <!-- Button styled with tooltip (Punto 5) -->
-                            <label for="files" id="file-label" class="relative cursor-pointer rounded-full bg-gradient-to-r from-purple-600 to-blue-600 px-8 py-4 flex items-center justify-center text-lg font-semibold text-white transition-all duration-300 ease-in-out hover:from-purple-500 hover:to-blue-500 hover:shadow-xl nft-button group" aria-label="{{ trans('uploadmanager::uploadmanager.select_files_aria') }}">
+                            <label for="files" id="file-label" class="relative flex items-center justify-center px-8 py-4 text-lg font-semibold text-white transition-all duration-300 ease-in-out rounded-full cursor-pointer bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 hover:shadow-xl nft-button group" aria-label="{{ trans('uploadmanager::uploadmanager.select_files_aria') }}">
                                 {{ trans('uploadmanager::uploadmanager.select_files') }}
-                                <input type="file" id="files" multiple class="absolute left-0 top-0 h-full w-full cursor-pointer opacity-0">
+                                <input type="file" id="files" multiple class="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer">
                                 <!-- Tooltip (Punto 5) -->
-                                <span class="absolute -top-12 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 w-48 text-center">
+                                <span class="absolute w-48 px-2 py-1 text-xs text-center text-white transition-opacity duration-300 transform -translate-x-1/2 bg-gray-800 rounded opacity-0 -top-12 left-1/2 group-hover:opacity-100">
                                     {{ trans('uploadmanager::uploadmanager.select_files_tooltip') }}
                                 </span>
                             </label>
-                            <div class="upload-dropzone text-center text-gray-200 text-sm mt-2">
+                            <div class="mt-2 text-sm text-center text-gray-200 upload-dropzone">
                                 <!-- About upload size -->
                             </div>
                         </div>
@@ -180,10 +161,10 @@
 
                         <!-- Progress bar and virus switch -->
                         <div class="mt-6 space-y-6">
-                            <div class="w-full bg-gray-700 rounded-full h-3 overflow-hidden">
-                                <div class="bg-gradient-to-r from-green-400 to-blue-500 h-3 rounded-full transition-all duration-500" id="progress-bar"></div>
+                            <div class="w-full h-3 overflow-hidden bg-gray-700 rounded-full">
+                                <div class="h-3 transition-all duration-500 rounded-full bg-gradient-to-r from-green-400 to-blue-500" id="progress-bar"></div>
                             </div>
-                            <p class="text-gray-200 text-sm text-center"><span id="progress-text"></span></p>
+                            <p class="text-sm text-center text-gray-200"><span id="progress-text"></span></p>
 
                             <div class="flex items-center justify-center gap-3">
                                 <input
@@ -194,40 +175,40 @@
                                     title="{{ trans('uploadmanager::uploadmanager.toggle_virus_scan') }}"
                                 />
                                 <label
-                                    class="text-red-400 font-medium hover:pointer-events-none"
+                                    class="font-medium text-red-400 hover:pointer-events-none"
                                     id="scanvirus_label"
                                     for="scanvirus"
                                 >{{ trans('uploadmanager::uploadmanager.virus_scan_disabled') }}</label>
                             </div>
-                            <p class="text-gray-200 text-sm text-center"><span id="virus-advise"></span></p>
+                            <p class="text-sm text-center text-gray-200"><span id="virus-advise"></span></p>
                         </div>
 
                         <!-- Action buttons with EGI style and tooltips -->
-                        <div class="mt-10 flex justify-center space-x-6">
-                            <button type="button" id="uploadBtn" class="relative bg-green-500 text-white px-8 py-4 rounded-full font-semibold text-lg nft-button opacity-50 cursor-not-allowed disabled:hover:bg-green-500 disabled:hover:shadow-none group" aria-label="{{ trans('uploadmanager::uploadmanager.save_aria') }}">
+                        <div class="flex justify-center mt-10 space-x-6">
+                            <button type="button" id="uploadBtn" class="relative px-8 py-4 text-lg font-semibold text-white bg-green-500 rounded-full opacity-50 cursor-not-allowed nft-button disabled:hover:bg-green-500 disabled:hover:shadow-none group" aria-label="{{ trans('uploadmanager::uploadmanager.save_aria') }}">
                                 💾 {{ trans('uploadmanager::uploadmanager.save_the_files') }}
-                                <span class="absolute -top-12 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 w-48 text-center pointer-events-none">
+                                <span class="absolute w-48 px-2 py-1 text-xs text-center text-white transition-opacity duration-300 transform -translate-x-1/2 bg-gray-800 rounded opacity-0 pointer-events-none -top-12 left-1/2 group-hover:opacity-100">
                                     {{ trans('uploadmanager::uploadmanager.save_tooltip') }}
                                 </span>
                             </button>
-                            <button type="button" onclick="cancelUpload()" id="cancelUpload" class="relative bg-red-500 text-white px-8 py-4 rounded-full font-semibold text-lg nft-button opacity-50 cursor-not-allowed disabled:hover:bg-red-500 disabled:hover:shadow-none group" aria-label="{{ trans('uploadmanager::uploadmanager.cancel_aria') }}">
+                            <button type="button" onclick="cancelUpload()" id="cancelUpload" class="relative px-8 py-4 text-lg font-semibold text-white bg-red-500 rounded-full opacity-50 cursor-not-allowed nft-button disabled:hover:bg-red-500 disabled:hover:shadow-none group" aria-label="{{ trans('uploadmanager::uploadmanager.cancel_aria') }}">
                                 ❌ {{ trans('uploadmanager::uploadmanager.cancel') }}
-                                <span class="absolute -top-12 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 w-48 text-center pointer-events-none">
+                                <span class="absolute w-48 px-2 py-1 text-xs text-center text-white transition-opacity duration-300 transform -translate-x-1/2 bg-gray-800 rounded opacity-0 pointer-events-none -top-12 left-1/2 group-hover:opacity-100">
                                     {{ trans('uploadmanager::uploadmanager.cancel_tooltip') }}
                                 </span>
                             </button>
                         </div>
 
                         <!-- Previews grid -->
-                        <div id="collection" class="mt-10 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+                        <div id="collection" class="grid grid-cols-2 gap-6 mt-10 sm:grid-cols-3 lg:grid-cols-4">
                             <!-- Previews will be loaded dynamically via JS -->
                         </div>
 
                         <!-- Return to collection button with tooltip -->
-                        <div class="mt-6 flex justify-center">
-                            <button type="button" onclick="redirectToCollection()" id="returnToCollection" class="relative bg-gray-700 text-white px-8 py-4 rounded-full font-semibold text-lg nft-button hover:bg-gray-600 group" aria-label="{{ trans('uploadmanager::uploadmanager.return_aria') }}">
+                        <div class="flex justify-center mt-6">
+                            <button type="button" onclick="redirectToCollection()" id="returnToCollection" class="relative px-8 py-4 text-lg font-semibold text-white bg-gray-700 rounded-full nft-button hover:bg-gray-600 group" aria-label="{{ trans('uploadmanager::uploadmanager.return_aria') }}">
                                 🔙 {{ trans('uploadmanager::uploadmanager.return_to_collection') }}
-                                <span class="absolute -top-12 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 w-48 text-center pointer-events-none">
+                                <span class="absolute w-48 px-2 py-1 text-xs text-center text-white transition-opacity duration-300 transform -translate-x-1/2 bg-gray-800 rounded opacity-0 pointer-events-none -top-12 left-1/2 group-hover:opacity-100">
                                     {{ trans('uploadmanager::uploadmanager.return_tooltip') }}
                                 </span>
                             </button>
@@ -235,11 +216,11 @@
 
                         <!-- Scan progress with improved contrast -->
                         <div class="mt-10 text-center">
-                            <p class="text-gray-200 text-sm"><span id="scan-progress-text"></span></p>
+                            <p class="text-sm text-gray-200"><span id="scan-progress-text"></span></p>
                         </div>
 
                         <!-- Status showEmoji-->
-                        <div id="status" class="mt-6 text-center text-gray-200 text-sm mx-auto w-48 p-4"></div>
+                        <div id="status" class="w-48 p-4 mx-auto mt-6 text-sm text-center text-gray-200"></div>
 
                         <!-- Upload status -->
                         <div id="upload-status" class="mt-8 text-center text-gray-200">
@@ -249,7 +230,7 @@
                 </div>
 
                 <!-- Right Column (3D Animation) -->
-                <div id="post-upload-card-container" class="right-column mt-2">
+                <div id="post-upload-card-container" class="mt-2 right-column">
                     @include('egimodule::partials.tunnel')
                 </div>
 

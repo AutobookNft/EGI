@@ -8,7 +8,8 @@
  */
 
 return [
-    // OS1 Modal Content
+    'my_galleries' => 'Le mie Collezioni',
+
     'create_new_collection' => 'Crea Nuova Collezione',
     'create_modal_subtitle' => 'Inizia il tuo viaggio artistico con una nuova collezione',
     'close_modal' => 'Chiudi modale',
@@ -124,6 +125,21 @@ return [
     'my_first_collection' => 'La mia prima collezione',
     'default_collection_description' => 'Collezione predefinita per :name',
     'current_active_collection' => 'Collezione attiva corrente',
+
+    // === HEADER & GENERIC NAVIGATION (ADDED BY PADMIN) ===
+    'default_page_title' => 'Dettaglio Collezione | FlorenceEGI',
+    'default_meta_description' => 'Dettagli per questa collezione EGI su FlorenceEGI.',
+    'logo_home_link_aria_label' => 'Homepage di FlorenceEGI',
+    'main_navigation_aria_label' => 'Navigazione principale',
+    'loading_galleries' => 'Caricamento gallerie...',
+    'no_galleries_found' => 'Nessuna galleria trovata',
+    'create_one_question' => 'Crearne una?',
+    'error_loading_galleries' => 'Errore nel caricamento delle gallerie',
+    'dashboard' => 'Dashboard',
+    'login' => 'Accedi',
+    'register' => 'Registrati',
+    'open_main_menu' => 'Apri menù principale',
+
     'wallet' => [
         'copy_address' => 'Copia indirizzo',
         'donation' => 'Donazione',
@@ -356,4 +372,13 @@ return [
         'create_collection_button' => 'Crea la Tua Collezione',
     ],
 
+    'schema' => [
+        'website' => [
+            'name'        => 'FlorenceEGI | Frangette',
+            'description' => 'Esplora e crea asset digitali ecologici (EGI) sulla piattaforma FlorenceEGI di Frangette, supportando progetti di protezione ambientale.',
+        ],
+        'publisher' => [
+            'name' => 'Associazione di Promozione Culturale Frangette',
+        ],
+    ],
 ];

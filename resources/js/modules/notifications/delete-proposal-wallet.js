@@ -1,5 +1,7 @@
 console.log('DeleteProposalWallet.js caricato');
 
+import { ensureTranslationsLoaded } from '../../../js/utils/translations';
+
 /**
  * @translation_abstract Gestisce l'eliminazione delle proposte di wallet e l'aggiornamento dell'UI.
  */

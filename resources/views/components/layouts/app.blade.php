@@ -12,7 +12,7 @@
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
         <!-- Scripts -->
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
+        @vite(['resources/css/app.css'])
         <script>console.log('resources/views/components/layouts/app.blade.php');</script>
 
         {{-- Icone di MaterialIcons --}}
@@ -62,5 +62,6 @@
             {{-- <script src="{{ url('utils/translations.js') }}"></script> --}}
 
         </div>
+        @vite(['resources/ts/main_app.ts', 'resources/js/app.js'])
     </body>
 </html>

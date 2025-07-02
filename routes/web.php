@@ -281,11 +281,6 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         Route::get('/debug-context', function () {
             return Route::currentRouteName();
         })->name('debug.context');
-
-
-
-
-
         // EGI upload routes
         Route::middleware('collection_can:manage_egi')->group(function () {
             // Upload routes are defined here when needed

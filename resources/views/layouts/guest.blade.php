@@ -2,6 +2,8 @@
 
     @include('layouts.partials.header')
 
+    @include('layouts.guest_script')
+
     <!-- Hero Section -->
     @unless(isset($noHero) && $noHero)
         <section id="hero-section" class="relative flex flex-col items-center overflow-hidden min-h-[100vh]" aria-labelledby="hero-main-title">
@@ -145,12 +147,17 @@
 
     <!-- Scripts -->
 
+
     @vite([
-        'resources/js/guest.js',
-        'resources/js/polyfills.js',
         'resources/ts/main.ts',
         'resources/js/app.js',
+        'resources/js/guest.js',
+        'resources/js/polyfills.js',
+
         ])
+
     @stack('scripts')
 </body>
 </html>
+
+

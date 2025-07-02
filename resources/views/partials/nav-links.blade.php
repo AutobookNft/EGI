@@ -38,18 +38,29 @@
     </a>
 @endunless
 
-{{-- Create EGI Button - Sempre visibile (oppure aggiungi condizione se vuoi) --}}
-<button type="button"
-        data-action="open-connect-modal-or-create-egi"
-        class="{{ $navLinkClasses }} {{ $isMobile ? 'w-full text-left' : 'flex items-center gap-1' }}"
-        aria-label="{{ __('guest_layout.' . ($isMobile ? 'mobile_' : '') . 'create_egi_aria_label') }}">
-    @unless($isMobile)
-        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
-            <path d="M8.75 3.75a.75.75 0 0 0-1.5 0v3.5h-3.5a.75.75 0 0 0 0 1.5h3.5v3.5a.75.75 0 0 0 1.5 0v-3.5h3.5a.75.75 0 0 0 0-1.5h-3.5v-3.5Z" />
-        </svg>
-    @endunless
-    {{ __('guest_layout.create_egi') }}
-</button>
+@php
+    $canUpdateEgi = App\Helpers\FegiAuth::check() && App\Helpers\FegiAuth::user()->can('manage_EGI');
+@endphp
+{{-- Create EGI Button - Dinamico e Contestuale --}}
+ @if($canUpdateEgi)
+    {{-- Create EGI Button - Dinamico e Contestuale --}}
+    <button type="button"
+            class="js-create-egi-contextual-button {{ $navLinkClasses }} {{ $isMobile ? 'w-full text-left' : 'inline-flex items-center gap-1' }}"
+            data-action="open-connect-modal-or-create-egi"
+            aria-label="{{ __('guest_layout.create_egi') }}">
+
+        @unless($isMobile)
+            <svg class="w-4 h-4 js-create-egi-button-icon"
+                 fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+                <path d="M8.75 3.75a.75.75 0 0 0-1.5 0v3.5h-3.5a.75.75 0 0 0 0 1.5h3.5v3.5a.75.75 0 0 0 1.5 0v-3.5h3.5a.75.75 0 0 0 0-1.5h-3.5v-3.5Z" />
+            </svg>
+        @endunless
+
+        <span class="js-create-egi-button-text">
+            {{-- Testo popolato da TypeScript --}}
+        </span>
+    </button>
+@endif
 
 {{-- Create Collection CTA - Solo se l'utente ha il permesso --}}
 @can('create_collection')

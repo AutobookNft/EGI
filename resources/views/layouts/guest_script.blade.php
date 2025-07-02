@@ -5,7 +5,7 @@
     window.maxSize = {{ config('AllowedFileType.collection.max_size', 10 * 1024 * 1024) }};
 
     // Caricamento configurazione
-    fetch('{{ route("global.config") }}', {
+    fetch('{{ route("api.app.config") }}', {
         headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content, {{-- Corretto a 'csrf-token' --}}
         }
@@ -14,13 +14,16 @@
     .then(config => {
         Object.assign(window, config);
         document.dispatchEvent(new Event('configLoaded'));
+
+
     })
     .catch(error => console.error('Error loading configuration:', error))
 
-    // --- Configurazione Animazione ---
-    
+    console.log('Guest layout script loaded successfully.');
+
 </script>
 
 <!-- <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script> -->
+
 
 

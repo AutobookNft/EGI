@@ -2,6 +2,8 @@
     "compilerOptions": {
       "target": "es2020",
       "module": "esnext",
+      "allowJs": true,
+      "checkJs": false,
       "moduleResolution": "node",
       "lib": ["es2020", "dom", "dom.iterable"],
       "strict": true,
@@ -15,7 +17,8 @@
       "baseUrl": "./",
       "paths": {
         "@/*": ["resources/js/*"],
-        "@ts/*": ["resources/ts/*"]
+        "@ts/*": ["resources/ts/*"],
+        "/vendor/*": ["vendor/*"]
       },
       "typeRoots": [
           "./node_modules/@types"
@@ -35,8 +38,7 @@
       "node_modules",
       "public",
       "storage",
-      "vendor/*/*/*",
-      "!vendor/ultra",
-      "!vendor/ultra/*"
+      "vendor/**/*",
+      "!vendor/ultra/**/*"
     ]
-  }
+}

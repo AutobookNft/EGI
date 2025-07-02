@@ -182,39 +182,25 @@ class AppConfigController extends Controller
     private function buildConfiguration($user, string $lang): array
     {
         $isAuthenticated = (bool) $user;
-
-        // User data and current collection
         $userData = $this->getUserData($user);
-
-        // Public and API routes
         $routes = $this->getRoutes();
-
-        // Frontend required translations
         $translations = $this->getFrontendTranslations($lang);
-
-        $this->logger->info('Configuration built successfully', [
-            'user_id' => $user?->id,
-            'language' => $lang,
-            'channel' => $this->channel,
-            // 'translations' => $translations,
-
-        ]);
-
-
-        // General app settings
         $appSettings = $this->getAppSettings();
 
+        // VERSIONE CORRETTA: Raggruppiamo tutto sotto una chiave "AppConfig"
         return [
-            'isAuthenticatedByBackend' => $isAuthenticated,
-            'loggedInUserWallet' => $user?->wallet,
-            'initialUserData' => $userData,
-            'routes' => $routes,
-            'translations' => $translations,
-            'appSettings' => $appSettings,
-            'locale' => $lang,
-            'availableLocales' => config('app.available_locales', ['it', 'en']),
-            'csrf_token' => csrf_token(),
-            'env' => app()->environment('production') ? 'production' : 'development'
+            'AppConfig' => [
+                'isAuthenticated' => $isAuthenticated, // Nome pulito
+                'loggedInUserWallet' => $user?->wallet,
+                'initialUserData' => $userData,
+                'routes' => $routes,
+                'translations' => $translations,
+                'appSettings' => $appSettings,
+                'locale' => $lang,
+                'availableLocales' => config('app.available_locales', ['it', 'en']),
+                'csrf_token' => csrf_token(),
+                'env' => app()->environment('production') ? 'production' : 'development'
+            ]
         ];
     }
 
@@ -854,7 +840,17 @@ class AppConfigController extends Controller
             'max_files_limited_by' => ($serverMaxFileUploads <= $appMaxFiles) ? 'server' : 'app',
 
             // Margine di sicurezza
-            'size_margin' => $sizeMargin
+            'size_margin' => $sizeMargin,
+
+            'allowedExtensions' => config('AllowedFileType.collection.allowed_extensions', [
+                'jpg', 'jpeg', 'png', 'gif', 'pdf', 'doc', 'docx'
+            ]),
+            'allowedMimeTypes' => config('AllowedFileType.collection.allowed_mime_types', [
+                'image/jpeg', 'image/jpg', 'image/png', 'image/gif',
+                'application/pdf', 'application/msword',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+            ]),
+            'envMode' => config('app.env', 'production'),
         ]);
     }
 

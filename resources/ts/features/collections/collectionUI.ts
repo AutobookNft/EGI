@@ -231,6 +231,7 @@ function _handleOutsideCollectionListDropdownClick(event: MouseEvent, DOM: typeo
  * @param {typeof UEM} uem Istanza del gestore errori UEM.
  */
 export async function initializeUserCollectionState(config: AppConfig, DOM: typeof DOMElements, uem: typeof UEM): Promise<void> {
+    console.log('--- DEBUG COLLECTION_UI: Funzione initializeUserCollectionState chiamata. Ispeziono il parametro uem ricevuto:', uem); // <-- AGGIUNGI QUESTO
     currentCollectionDetailsState = {
         id: config.initialUserData.current_collection_id,
         name: config.initialUserData.current_collection_name,

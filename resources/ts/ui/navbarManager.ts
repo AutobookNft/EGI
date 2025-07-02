@@ -27,12 +27,12 @@ import { UEM_Client_TS_Placeholder as UEM } from '../services/uemClientService';
  * @param {AppConfig} config L'oggetto di configurazione dell'applicazione.
  * @param {typeof DOMElements} DOM Collezione dei riferimenti agli elementi DOM.
  */
-export function updateNavbarUI(config: AppConfig, DOM: typeof DOMElements): void {
-
+export function updateNavbarUI(config: AppConfig, DOM: typeof DOMElements, uem: typeof UEM): void {
+    console.log('--- DEBUG NAVBAR_MANAGER: Funzione updateNavbarUI chiamata. Ispeziono il parametro uem ricevuto:', uem); // <-- AGGIUNGI QUESTO
 
     console.log('🔄 updateNavbarUI called with auth status:', getAuthStatus(config));
-    console.log('🔄 config.isAuthenticatedByBackend:', config.isAuthenticatedByBackend);
- 
+    console.log('🔄 config.isAuthenticatedByBackend:', config.isAuthenticated);
+
 
     const authStatus = getAuthStatus(config);
     const walletAddress = getConnectedWalletAddress(config);

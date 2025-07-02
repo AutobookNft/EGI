@@ -1,47 +1,52 @@
-// File: resources/ts/ui/uploadModalManager.ts (Nuovo nome e posizione suggerita)
-// Precedentemente open-close-modal.ts
+// File: resources/ts/ui/uploadModalManager.ts (Coordinamento Ultra Upload Manager Fixato)
 
 /**
  * 📜 Oracode TypeScript Module: UploadModalManager
  * Gestisce specificamente l'apertura, la chiusura e la logica associata
  * per la modale di UPLOAD (#upload-modal) di FlorenceEGI.
  *
- * @version 2.0.0-ts (Refactored)
- * @date 2025-05-10
- * @author Padmin D. Curtis (for Fabio Cherici)
+ * @version 2.1.0-ts (Ultra Coordination Fixed)
+ * @date 2025-07-02
+ * @author Padmin D. Curtis (AI Partner OS2.0-Compliant) for Fabio Cherici
  */
 
 // --- 💎 IMPORTAZIONI TIPI E UTILITIES ---
-// import { appConfig } from '../config/appConfig'; // Se necessario per rotte API o traduzioni
-// import { UEM_Client_TS } from '../services/uemClientService'; // Se UEM client è in un modulo
-// Per ora, assumiamo che CSRF e UEM siano gestiti esternamente o tramite funzioni globali/helper
-
 import { ServerErrorResponse } from "../config/appConfig";
 
 // --- 🔗 INTERFACCIA PER GLI ELEMENTI DOM NECESSARI ---
 export interface UploadModalDomElements {
     modal: HTMLDivElement;
-    // openButtons: NodeListOf<HTMLButtonElement>; // Questi erano per l'apertura DIRETTA da layout app, non da guest
     closeButton: HTMLButtonElement; // Il bottone "X" o "Return" dentro la modale
     modalContent: HTMLDivElement; // L'area di contenuto principale della modale
 }
 
-// Riferimento globale al gestore di upload file (da UUM/EGI-Module)
-// Assumiamo che sia ancora su window per ora, finché non refattorizziamo anche quello.
+// --- 📤 IMPORTAZIONI ULTRA UPLOAD MANAGER (per coordinamento diretto) ---
+import { initializeApp as initializeUltraUploadManager } from '/vendor/ultra/ultra-upload-manager/resources/ts/core/file_upload_manager';
+
+// Riferimenti globali semplificati (se ancora necessari)
 declare global {
     interface Window {
-        fileUploadManager?: {
-            resetUploadForm: () => void;
-        };
-        // redirectToURL?: () => void; // Se ancora usato
+        uploadType?: string;
+        allowedExtensions?: string[];
+        allowedMimeTypes?: string[];
+        maxSize?: number;
+        envMode?: string;
+        uploadLimits?: any;
+        cancelConfirmation?: string;
+        uploadStatusWaiting?: string;
+        invalidFilesTitle?: string;
+        invalidFilesMessage?: string;
+        checkFilesGuide?: string;
+        okButton?: string;
+        uploadFiniscedText?: string;
+        allowedExtensionsMessage?: string;
     }
 }
-
 
 export class UploadModalManager {
     private elements: UploadModalDomElements;
     private isOpen: boolean;
-    private csrfToken: string; // Se l'auth check è ancora qui
+    private csrfToken: string;
     private lastFocusedElement: HTMLElement | null = null;
 
     /**
@@ -55,13 +60,12 @@ export class UploadModalManager {
         this.csrfToken = csrfToken;
 
         this.initializeEventListeners();
-        console.log('Padmin D. Curtis: UploadModalManager instance created.');
+        console.log('Padmin D. Curtis: UploadModalManager instance created with Ultra coordination.');
     }
 
     private initializeEventListeners(): void {
         if (!this.elements.modal || !this.elements.closeButton || !this.elements.modalContent) {
             console.warn('UploadModalManager: Critical DOM elements missing. Modal may not function.');
-            // UEM_Client_TS.handleClientError('CLIENT_DOM_MISSING_MODAL_UPLOAD', { missing: !this.elements.modal ? 'modal' : !this.elements.closeButton ? 'closeButton' : 'modalContent' });
             return;
         }
 
@@ -78,6 +82,12 @@ export class UploadModalManager {
             }
         });
 
+        // Listener per ESC key
+        document.addEventListener('keydown', (event: KeyboardEvent) => {
+            if (event.key === 'Escape' && this.isOpen) {
+                this.closeModal();
+            }
+        });
 
         // Listener per l'evento custom 'upload-completed' (se ancora usato)
         document.addEventListener('upload-completed', () => {
@@ -87,25 +97,66 @@ export class UploadModalManager {
     }
 
     /**
+     * 🎯 Carica le configurazioni necessarie per Ultra Upload Manager.
+     */
+    private async loadUltraUploadConfig(): Promise<void> {
+        try {
+            console.log('UploadModalManager: Loading Ultra Upload Manager configuration...');
+
+            // Ultra Upload Manager chiama già /api/system/upload-limits da solo
+            // Qui dobbiamo solo fornire le configurazioni che non vengono da lì
+
+            // Configurazioni che Ultra Upload Manager si aspetta
+            window.allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'pdf', 'doc', 'docx', 'txt'];
+            window.allowedMimeTypes = [
+                'image/jpeg', 'image/jpg', 'image/png', 'image/gif',
+                'application/pdf', 'application/msword',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'text/plain'
+            ];
+            window.maxSize = 10 * 1024 * 1024; // 10MB - verrà sovrascritto da upload-limits se necessario
+            window.envMode = 'production'; // O 'local' se in sviluppo
+
+            // Messaggi di testo che Ultra Upload Manager si aspetta
+            (window as any).cancelConfirmation = 'Sei sicuro di voler annullare il caricamento?';
+            (window as any).uploadStatusWaiting = 'Stato Upload: In attesa...';
+            (window as any).invalidFilesTitle = 'File Non Validi Rilevati';
+            (window as any).invalidFilesMessage = 'I seguenti file non possono essere caricati';
+            (window as any).checkFilesGuide = 'Controlla tipi di file, dimensioni e nomi.';
+            (window as any).okButton = 'OK';
+            (window as any).uploadFiniscedText = 'Upload completato con successo!';
+            (window as any).allowedExtensionsMessage = 'Estensioni consentite: ' + window.allowedExtensions.join(', ');
+
+            console.log('UploadModalManager: Ultra Upload Manager configuration loaded successfully.');
+            console.log('Config loaded:', {
+                allowedExtensions: window.allowedExtensions,
+                allowedMimeTypes: window.allowedMimeTypes,
+                maxSize: window.maxSize,
+                envMode: window.envMode
+            });
+
+        } catch (error) {
+            console.error('UploadModalManager: Failed to load Ultra Upload Manager configuration:', error);
+
+            // Configurazioni di emergenza per non bloccare tutto
+            window.allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
+            window.allowedMimeTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+            window.maxSize = 10 * 1024 * 1024;
+            window.envMode = 'production';
+
+            console.warn('UploadModalManager: Using fallback configuration.');
+        }
+    }
+
+    /**
      * 🎯 Gestisce l'apertura della modale DOPO un check di autorizzazione.
-     * Questa funzione era pensata per bottoni nel layout `app.blade.php` (utenti loggati).
-     * Potrebbe essere richiamata dal `main.ts` se quei bottoni esistono ancora.
      * @param {string} [uploadType='egi'] Il tipo di upload.
      * @deprecated Se il check di autorizzazione viene fatto prima di chiamare openModal().
-     *             Preferire `openModal()` direttamente dopo aver verificato l'autorizzazione esternamente.
      */
     public async openModalWithAuthCheck(uploadType: string = 'egi'): Promise<void> {
-        // Fabio, questo check di autorizzazione era specifico per bottoni che aprono DIRETTAMENTE
-        // la modale di upload (tipicamente in un layout per utenti già loggati).
-        // Nel flusso guest, l'autorizzazione è implicita dopo la connessione del wallet,
-        // quindi `main.ts` chiamerà `openModal()` direttamente.
-        // Se questi bottoni di apertura diretta (con auth check) esistono ancora, questa logica serve.
-        // Altrimenti, possiamo rimuoverla o marcarla come deprecata.
         console.log(`UploadModalManager: openModalWithAuthCheck called. Type: ${uploadType}. Checking auth...`);
         try {
-            // const apiConfig = getAppConfig().routes.api; // Assumendo che esista un endpoint per questo
-            // const authCheckEndpoint = apiConfig.checkUploadAuth; // Esempio
-            const response = await fetch('/api/check-upload-authorization', { // TODO: Usare rotta da appConfig
+            const response = await fetch('/api/check-upload-authorization', {
                 method: 'GET',
                 headers: {
                     'Accept': 'application/json',
@@ -114,14 +165,12 @@ export class UploadModalManager {
             });
 
             if (!response.ok) {
-                const errorData: ServerErrorResponse = await response.json().catch(() => ({ error: 'HTTP_ERROR', message: `Auth check HTTP error ${response.status}` }));
+                const errorData: ServerErrorResponse = await response.json().catch(() => ({
+                    error: 'HTTP_ERROR',
+                    message: `Auth check HTTP error ${response.status}`
+                }));
                 console.error('UploadModalManager: Auth check failed.', errorData);
-                // UEM_Client_TS.handleServerErrorResponse(errorData, 'Authorization check failed.');
-                alert(errorData.message || 'Authorization check failed.'); // Semplice alert per ora
-                if (response.status === 401 || response.status === 403) {
-                    // const loginRoute = getAppConfig().routes.login; // Esempio
-                    // window.location.href = loginRoute || '/login';
-                }
+                alert(errorData.message || 'Authorization check failed.');
                 return;
             }
 
@@ -130,22 +179,20 @@ export class UploadModalManager {
                 this.openModal(uploadType);
             } else {
                 console.warn('UploadModalManager: User not authorized for upload.', result);
-                alert('You are not authorized to perform this action.'); // Semplice alert
-                // window.location.href = result.redirect || getAppConfig().routes.login || '/login';
+                alert('You are not authorized to perform this action.');
             }
         } catch (error: any) {
             console.error('UploadModalManager: Error during authorization check:', error);
-            // UEM_Client_TS.handleClientError('CLIENT_AUTH_CHECK_ERROR_UPLOAD_MODAL', { error: error.message }, error);
             alert('Could not verify authorization. Please try again.');
         }
     }
 
     /**
-     * 🎯 Apre la modale di upload.
+     * 🎯 Apre la modale di upload e inizializza Ultra Upload Manager.
      * Assume che l'autorizzazione sia già stata verificata dal chiamante.
      * @param {string} [uploadType='egi'] Il tipo di upload.
      */
-    public openModal(uploadType: string = 'egi'): void {
+    public async openModal(uploadType: string = 'egi'): Promise<void> {
         if (this.isOpen || !this.elements.modal || !this.elements.modalContent) {
             console.warn('UploadModalManager: Attempted to open modal when already open or elements missing.');
             return;
@@ -155,28 +202,54 @@ export class UploadModalManager {
 
         this.lastFocusedElement = document.activeElement as HTMLElement | null;
 
-        // Assicurati che la modale di connessione wallet sia chiusa (se il main.ts non lo fa già)
+        // Assicurati che la modale di connessione wallet sia chiusa
         const connectWalletModal = document.getElementById('connect-wallet-modal') as HTMLDivElement | null;
         if (connectWalletModal && !connectWalletModal.classList.contains('hidden')) {
             const closeButton = connectWalletModal.querySelector<HTMLButtonElement>('#close-connect-wallet-modal');
             if (closeButton) closeButton.click();
-            else connectWalletModal.classList.add('hidden'); // Fallback
+            else connectWalletModal.classList.add('hidden');
         }
 
+        // Mostra la modale prima di inizializzare Ultra Upload Manager
         this.elements.modal.classList.remove('hidden');
-        this.elements.modal.classList.add('flex'); // Usa flex per centrare (come da HTML originale)
-        this.elements.modalContent.dataset.uploadType = uploadType; // Passa il tipo di upload se serve al form interno
+        this.elements.modal.classList.add('flex');
+        this.elements.modalContent.dataset.uploadType = uploadType;
         this.isOpen = true;
-        // window.uploadType = uploadType; // Se ancora necessario globalmente, ma meglio evitarlo
 
+        // Setup accessibilità
         this.elements.modal.setAttribute('aria-hidden', 'false');
         this.elements.modalContent.setAttribute('tabindex', '-1');
         this.elements.modalContent.focus();
         document.body.style.overflow = 'hidden';
+
+        // --- 🔄 INIZIALIZZAZIONE SINCRONIZZATA ULTRA UPLOAD MANAGER ---
+        try {
+            console.log('UploadModalManager: Initializing Ultra Upload Manager now that modal is open...');
+
+            // PRIMO: Carica configurazioni necessarie
+            await this.loadUltraUploadConfig();
+
+            // SECONDO: Imposta uploadType globalmente
+            window.uploadType = uploadType;
+
+            // TERZO: Inizializza Ultra Upload Manager ORA che tutto è pronto
+            await initializeUltraUploadManager();
+
+            // QUARTO: Trigger configurazione loaded per sicurezza
+            const configLoadedEvent = new CustomEvent('configLoaded');
+            document.dispatchEvent(configLoadedEvent);
+
+            console.log('UploadModalManager: Ultra Upload Manager initialization completed successfully.');
+        } catch (error) {
+            console.error('UploadModalManager: Ultra Upload Manager initialization failed:', error);
+            // Non chiudere la modale - l'utente può provare a caricare comunque
+        }
+
+        console.log('Padmin D. Curtis: Upload modal opened with synchronized Ultra coordination.');
     }
 
     /**
-     * 🎯 Chiude la modale di upload.
+     * 🎯 Chiude la modale di upload con cleanup semplificato.
      */
     public closeModal(): void {
         if (!this.isOpen || !this.elements.modal) {
@@ -184,39 +257,53 @@ export class UploadModalManager {
             return;
         }
 
+        console.log('Padmin D. Curtis: Closing upload modal...');
+
+        // --- 🎨 UI CLEANUP ---
         this.elements.modal.classList.add('hidden');
         this.elements.modal.classList.remove('flex');
         this.isOpen = false;
 
         this.elements.modal.setAttribute('aria-hidden', 'true');
 
-        // Sblocca scroll del body SOLO SE NESSUN'ALTRA MODALE è attiva
-        // (Per ora, controlliamo solo la modale connect-wallet)
+        // Sblocca scroll del body SOLO se nessun'altra modale è attiva
         const connectWalletModal = document.getElementById('connect-wallet-modal') as HTMLDivElement | null;
         if (!connectWalletModal || connectWalletModal.classList.contains('hidden')) {
             document.body.style.overflow = '';
         }
 
-
-        // Resetta il form di upload tramite il gestore di UUM/EGI-Module
-        if (window.fileUploadManager?.resetUploadForm) {
-            window.fileUploadManager.resetUploadForm();
-            console.log('UploadModalManager: Upload form reset via fileUploadManager.');
-        } else {
-            console.warn('UploadModalManager: window.fileUploadManager or resetUploadForm not found.');
-        }
-
+        // Focus management
         if (this.lastFocusedElement) {
             this.lastFocusedElement.focus();
         }
         this.lastFocusedElement = null;
-        console.log('Padmin D. Curtis: Upload modal closed.');
 
-        // Gestione di window.redirectToURL se ancora presente e necessario
-        // if (typeof window.redirectToURL === 'function') {
-        //     console.warn('UploadModalManager: window.redirectToURL will be called.');
-        //     window.redirectToURL();
-        // }
+        // --- 🔄 SIMPLE UPLOAD CLEANUP ---
+        // Reset semplice dell'UI di upload invece di chiamare funzioni problematiche
+        try {
+            // Trova e resetta gli elementi UI dell'upload se esistono
+            const uploadContainer = this.elements.modalContent.querySelector('#upload-container');
+            const progressBar = uploadContainer?.querySelector('.progress-bar') as HTMLElement;
+            const progressText = uploadContainer?.querySelector('.progress-text') as HTMLElement;
+            const fileCollection = uploadContainer?.querySelector('#collection') as HTMLElement;
+
+            if (progressBar) progressBar.style.width = '0%';
+            if (progressText) progressText.textContent = '';
+            if (fileCollection) fileCollection.innerHTML = '';
+
+            // Reset dei file input se presenti
+            const fileInputs = uploadContainer?.querySelectorAll('input[type="file"]') as NodeListOf<HTMLInputElement>;
+            fileInputs?.forEach(input => input.value = '');
+
+            console.log('UploadModalManager: Simple upload UI cleanup completed.');
+        } catch (error) {
+            console.warn('UploadModalManager: Upload cleanup had minor issues:', error);
+        }
+
+        // Cleanup globali se necessario
+        delete window.uploadType;
+
+        console.log('Padmin D. Curtis: Upload modal closed with simple cleanup.');
     }
 
     /**
@@ -227,6 +314,3 @@ export class UploadModalManager {
         return this.isOpen;
     }
 }
-
-// NON ESPORTARE UNA FUNZIONE `initializeModal` CHE ASSEGNA A `window.globalModalManager`.
-// L'istanza sarà creata e gestita da `main.ts`.

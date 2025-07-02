@@ -1,178 +1,67 @@
-// resources/js/app.js
+// resources/js/app.js (versione semplificata - solo dipendenze globali)
 
-console.log('Inizializzazione di app.js (inizio)'); // Debugging
+/**
+ * 📜 Oracode JavaScript Module: Global Dependencies Initializer
+ * @version 2.0.0 (Simplified for Orchestrated Main)
+ * @date 2025-07-02
+ * @author Padmin D. Curtis (AI Partner OS2.0-Compliant) for Fabio Cherici
+ * 🎯 Purpose: Setup only global dependencies - all initialization moved to main.ts
+ * 🧱 Core Logic: Bootstrap → Editor → Polyfill → Global Libraries → Module Imports
+ */
 
+console.log('Inizializzazione di app.js (dependencies only)'); // Debugging
+
+// --- 🔧 IMPORT BOOTSTRAP E CONFIGURAZIONI BASE ---
 import './bootstrap';
 console.log('bootstrap importato.'); // Debugging
 
+// --- 📝 IMPORT EDITOR LEGALE ---
 import './legal/editor'; // Importa il file editor.js
 console.log('editor.js importato.'); // Debugging
 
-// Importa il polyfill whatwg-fetch
+// --- 🌐 IMPORT POLYFILL FETCH ---
 import 'whatwg-fetch';
 console.log('Polyfill whatwg-fetch importato.'); // Debugging
 
-// Importa SweetAlert2
+// --- 🍯 IMPORT E SETUP GLOBALE SWEETALERT2 ---
 import Swal from 'sweetalert2';
-window.Swal = Swal; // Sintassi JS standard
-console.log('SweetAlert2 importato e globale.'); // Debugging
+window.Swal = Swal; // Rende disponibile globalmente per main.ts
+console.log('SweetAlert2 importato e reso globale.'); // Debugging
 
-// Importa la gestione del modale
-// import { initializeModal } from '../ts/open-close-modal';
-// initializeModal();
+// --- 📦 IMPORT E SETUP GLOBALE JQUERY ---
+import $ from 'jquery';
+window.$ = window.jQuery = $; // Rende disponibile globalmente per main.ts
+console.log('jQuery importato e reso globale.'); // Debugging
 
-// Importa utils (translations, enums)
+// --- 🔄 IMPORT UTILITIES (solo import, inizializzazione in main.ts) ---
 import { fetchTranslations, ensureTranslationsLoaded, getTranslation } from './utils/translations';
 import { loadEnums, getEnum, isPendingStatus } from './utils/enums';
-console.log('Utils per translations e enums importati.'); // Debugging
+console.log('Utils per translations e enums importati (init in main.ts).'); // Debugging
 
-
-// Importa jQuery
-import $ from 'jquery';
-window.$ = window.jQuery = $; // Sintassi JS standard
-console.log('jQuery importato e globale.'); // Debugging
-
-// Importa e inizializza l'animazione Three.js (sfera geodetica)
+// --- 🎮 IMPORT ANIMAZIONE (disponibile per main.ts) ---
 import { initThreeAnimation } from './sfera-geodetica';
-console.log('Modulo sfera-geodetica importato.'); // Debugging
+console.log('Modulo sfera-geodetica importato (init in main.ts).'); // Debugging
 
-
-// Importa e inizializza il File Upload Manager di Ultra
-// Assumendo che initializeApp renda disponibile window.fileUploadManager
-import { initializeApp as initializeUltraUploadManager } from '/vendor/ultra/ultra-upload-manager/resources/ts/core/file_upload_manager.ts'; // Mantieni questo import
-console.log('Modulo file_upload_manager importato.'); // Debugging
-
-
-// --- Listener DOMContentLoaded principali (esistenti nel tuo codice) ---
-
-// Listener per l'animazione Three.js (dal tuo codice originale)
-document.addEventListener('DOMContentLoaded', () => {
-    // Controlla se ci sono elementi necessari per l'animazione sulla pagina
-    if (document.getElementById('dynamic-3d-container') && document.getElementById('webgl-canvas')) {
-      // Inizializza l'animazione
-      console.log('Inizializzazione animazione Three.js (DOMContentLoaded).');
-      initThreeAnimation();
-    }
-
-});
-
-// --- Listener per l'inizializzazione Ultra Upload Manager E la logica Modale ---
-// Abbiamo UNITO i due listener per garantire l'ordine
-document.addEventListener('DOMContentLoaded', () => {
-    // 1. Inizializza Ultra Upload Manager (come facevi prima)
-    // La chiamata a initializeUltraUploadManager avviene qui
-    initializeUltraUploadManager(); // La tua chiamata originale
-    console.log('Ultra Upload Manager inizializzato (DOMContentLoaded).'); // Debugging
-
-}, { once: true }); // Manteniamo { once: true } se initializeUltraUploadManager lo richiede
-
-
-// Listener per i moduli Wallet (dal tuo codice originale)
-let walletCreateInstance = null;
-let walletUpdateInstance = null;
-let walletDonationInstance = null;
+// --- 🏦 IMPORT MODULI WALLET (disponibili per main.ts) ---
 import {
     RequestCreateNotificationWallet,
     RequestUpdateNotificationWallet,
     RequestWalletDonation,
 } from './modules/notifications/init/request-notification-wallet-init';
-document.addEventListener('DOMContentLoaded', () => {
-    if (!walletCreateInstance) {
-        walletCreateInstance = new RequestCreateNotificationWallet({ apiBaseUrl: '/notifications' });
-        console.log(`🔍 Inizializzazione unica RequestCreateNotificationWallet (DOMContentLoaded)`);
-    } else {
-        console.warn(`⛔ Tentativo di inizializzazione multipla di RequestCreateNotificationWallet ignorato`);
-    }
-
-    if (!walletUpdateInstance) {
-        walletUpdateInstance = new RequestUpdateNotificationWallet({ apiBaseUrl: '/notifications' });
-        console.log(`🔍 Inizializzazione unica RequestUpdateNotificationWallet (DOMContentLoaded)`);
-    } else {
-        console.warn(`⛔ Tentativo di inizializzazione multipla di RequestUpdateNotificationWallet ignorato`);
-    }
-
-    if (!walletDonationInstance) {
-        walletDonationInstance = new RequestWalletDonation({ apiBaseUrl: '/notifications' }); // Corretto nome classe? Era RequestWalletDonation
-        console.log(`🔍 Inizializzazione unica RequestWalletDonation (DOMContentLoaded)`);
-    } else {
-        console.warn(`⛔ Tentativo di inizializzazione multipla di RequestWalletDonation ignorato`);
-    }
-});
-
-// Listener per DeleteProposalInvitation (dal tuo codice originale)
-let deleteProposalInvitationInstance = null;
 import { DeleteProposalInvitation } from './modules/notifications/delete-proposal-invitation';
-document.addEventListener('DOMContentLoaded', () => {
-    if (!deleteProposalInvitationInstance) {
-        deleteProposalInvitationInstance = new DeleteProposalInvitation({ apiBaseUrl: '/notifications' });
-        console.log(`🔍 Inizializzazione unica DeleteProposalInvitation (DOMContentLoaded)`);
-    } else {
-        console.warn(`⛔ Tentativo di inizializzazione multipla di DeleteProposalInvitation ignorato`);
-    }
-});
-
-// Listener per DeleteProposalWallet (dal tuo codice originale)
-let deleteProposalWalletInstance = null;
 import { DeleteProposalWallet } from './modules/notifications/delete-proposal-wallet';
-document.addEventListener('DOMContentLoaded', () => {
-    if (!deleteProposalWalletInstance) {
-        deleteProposalWalletInstance = new DeleteProposalWallet({ apiBaseUrl: '/notifications' });
-        console.log(`🔍 Inizializzazione unica DeleteProposalWallet (DOMContentLoaded)`);
-    } else {
-        console.warn(`⛔ Tentativo di inizializzazione multipla di DeleteProposalWallet ignorato`);
-    }
-});
+console.log('Moduli wallet importati (init in main.ts).'); // Debugging
 
-// --- Rimuovi il listener separato per la logica Modale ---
-// document.addEventListener('DOMContentLoaded', () => {
-//     console.log('Inizializzazione logica modale di upload (DOMContentLoaded).');
-//     initUploadModalLogic();
-// });
-// --- FINE RIMOZIONE ---
+// --- 📤 IMPORT ULTRA UPLOAD MANAGER (disponibile per main.ts) ---
+import { initializeApp as initializeUltraUploadManager } from '/vendor/ultra/ultra-upload-manager/resources/ts/core/file_upload_manager.ts';
+console.log('Modulo file_upload_manager importato (init in main.ts).'); // Debugging
 
+// --- 🔔 IMPORT MODULI NOTIFICHE (auto-eseguiti o passive) ---
+import './notification'; // Se auto-eseguito, rimane qui
+import './modules/notifications/init/notification-response-init'; // Se auto-eseguito, rimane qui
+console.log('Moduli notifiche importati.'); // Debugging
 
-// Carica gli enum all'avvio (mantieni come nel tuo codice originale se è fuori listener)
-loadEnums(); // <-- Questo è chiamato direttamente nel tuo codice originale, non in un listener
-window.getEnum = getEnum; // Sintassi JS standard
-window.isPendingStatus = isPendingStatus; // Sintassi JS standard
-console.log('Enums caricati (fuori listener).'); // Debugging
+console.log('app.js setup complete (dependencies only - orchestration in main.ts).'); // Debugging
 
-
-// Carica le traduzioni all'avvio (mantieni come nel tuo codice originale se è fuori listener)
-fetchTranslations(); // <-- Questo è chiamato direttamente nel tuo codice originale, non in un listener
-window.getTranslation = getTranslation; // Sintassi JS standard
-window.ensureTranslationsLoaded = ensureTranslationsLoaded; // Sintassi JS standard
-console.log('Traduzioni avviate (fuori listener).'); // Debugging
-
-
-// Import dei moduli notifiche (senza inizializzazioni dirette mostrate nel listener DOMContentLoaded fornito)
-import './notification'; // Questo modulo esegue codice subito?
-import './modules/notifications/init/notification-response-init'; // Questo modulo esegue codice subito?
-// Se questi moduli devono essere inizializzati DOPO DOMContentLoaded, dovrai spostare le loro importazioni
-// o chiamare le loro funzioni di inizializzazione dentro un listener DOMContentLoaded come gli altri.
-
-
-console.log('app.js execution finished (initial phase - after imports).'); // Debugging
-
-document.addEventListener('DOMContentLoaded', function() {
-    // Aggiungi classe alla pagina iniziale
-    document.body.classList.add('page-loaded');
-
-    // Aggiungi listener per link interni
-    document.querySelectorAll('a[href^="/"]').forEach(link => {
-        link.addEventListener('click', function(e) {
-            if (this.hostname === window.location.hostname) {
-                e.preventDefault();
-
-                document.body.classList.add('page-transitioning');
-
-                setTimeout(() => {
-                    window.location.href = this.href;
-                }, 300);
-            }
-        });
-    });
-});
-
-// // Documentazione: di window.fetch polyfill
-// Documentazione: https://github.com/github/fetch;
+// --- 📚 DOCUMENTAZIONE POLYFILL ---
+// Documentazione: https://github.com/github/fetch
