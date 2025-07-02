@@ -1,4 +1,4 @@
-<div id="collection_management" class="rounded-2xl border border-gray-700 bg-gray-800 p-6 shadow-lg">
+<div id="collection_management" class="p-6 bg-gray-800 border border-gray-700 shadow-lg rounded-2xl">
 
     @php
         // Gestione del permesso per creare un wallet
@@ -10,10 +10,10 @@
     @endphp
 
     <!-- Titolo della sezione -->
-    <div id="collection_management" class="rounded-2xl border border-gray-700 bg-gray-800 p-6 shadow-lg">
+    <div id="collection_management" class="p-6 bg-gray-800 border border-gray-700 shadow-lg rounded-2xl">
 
         <!-- Titolo della sezione -->
-        <div class="mb-6 flex flex-wrap items-start justify-between gap-4">
+        <div class="flex flex-wrap items-start justify-between gap-4 mb-6">
             <div>
                 <h2 class="text-2xl font-bold text-white">{{ $collectionName }}</h2>
                 <p class="text-sm text-gray-400">
@@ -27,11 +27,11 @@
             @if ($canCreateWallet)
                 <div class="flex flex-wrap gap-4 space-x-0">
                     <!-- Bottone per invitare un nuovo membro alla collection -->
-                    <button id ="inviteNewMember" class="btn btn-primary w-full sm:w-auto" wire:click="openInviteModal">
+                    <button id ="inviteNewMember" class="w-full btn btn-primary sm:w-auto" wire:click="openInviteModal">
                         {{ __('collection.invite_collection_member') }}
                     </button>
                     <!-- Bottone per creare un nuovo wallet -->
-                    <button id="createNewWallet" name = "createNewWallet" class="btn btn-primary w-full sm:w-auto">
+                    <button id="createNewWallet" name = "createNewWallet" class="w-full btn btn-primary sm:w-auto">
                         {{ __('collection.wallet.create_the_wallet') }}
                     </button>
                 </div>
@@ -54,8 +54,8 @@
             <div data-user-id="{{ $member->receiver_id }}" data-id="{{ $member->id }}"
                 class="{{ $member->status === 'pending' ? 'bg-yellow-800' : 'bg-gray-900' }} rounded-xl p-4 shadow-md transition-shadow duration-300 hover:shadow-lg">
 
-                <div class="mb-4 flex items-center">
-                    <img class="h-12 w-12 rounded-full" src="{{ $member->receiver->profile_photo_url }}"
+                <div class="flex items-center mb-4">
+                    <img class="w-12 h-12 rounded-full" src="{{ $member->receiver->profile_photo_url }}"
                         alt="{{ $member->receiver->name }}">
                     <div class="ml-4">
                         <h3 class="text-lg font-bold text-white">{{ $member->receiver->name }}
@@ -67,11 +67,11 @@
                 </div>
 
                 <!-- Aggiungiamo qui il bottone Elimina -->
-                <div class="mt-4 flex justify-end">
+                <div class="flex justify-end mt-4">
                     <button data-id="{{ $member->id }}" data-collection="{{ $member->collection_id }}"
                         data-user="{{ $member->receiver_id }}" {{-- Questo è l'utente che ha creato il wallet --}}
-                        class="delete-proposal-invitation flex items-center rounded-md bg-red-600 px-3 py-1 text-sm text-white transition-colors duration-150 hover:bg-red-700">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="mr-1 h-4 w-4" fill="none" viewBox="0 0 24 24"
+                        class="flex items-center px-3 py-1 text-sm text-white transition-colors duration-150 bg-red-600 rounded-md delete-proposal-invitation hover:bg-red-700">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -84,7 +84,7 @@
     </div>
 
     <!-- Sezione Wallet -->
-    <h3 class="mb-4 mt-8 text-xl font-bold text-white">{{ __('collection.wallet.wallets') }}</h3>
+    <h3 class="mt-8 mb-4 text-xl font-bold text-white">{{ __('collection.wallet.wallets') }}</h3>
     <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
         @foreach ($wallets as $wallet)
             @include('livewire.partials.card-wallet')
@@ -92,7 +92,7 @@
     </div>
 
     <!--  Sezione Wallet proposal -->
-    <h3 class="mb-4 mt-8 text-xl font-bold text-white">{{ __('collection.wallet.wallets') }}</h3>
+    <h3 class="mt-8 mb-4 text-xl font-bold text-white">{{ __('collection.wallet.wallets') }}</h3>
     <div id="wallet-list" class="grid grid-cols-1 gap-6 md:grid-cols-3">
         @foreach ($walletProposals as $wallet)
             @php
@@ -113,13 +113,13 @@
                 $canCreateWallet	    $wallet->platform_role	  $isPending	Colore finale
                 ❌ false	                qualsiasi	            ✅ true	    ⚫ bg-gray-700 opacity-75 (non interattivo)
                 ❌ false	                qualsiasi	            ❌ false     ⚫ bg-gray-700 opacity-75 (non interattivo)
-                ✅ true	                "natan" / "EPP"	        ✅ true	    ⚫ bg-gray-700 opacity-75 (non interattivo)
-                ✅ true	                "natan" / "EPP"	        ❌ false	    ⚫ bg-gray-700 opacity-75 (non interattivo)
+                ✅ true	                "Natan" / "EPP"	        ✅ true	    ⚫ bg-gray-700 opacity-75 (non interattivo)
+                ✅ true	                "Natan" / "EPP"	        ❌ false	    ⚫ bg-gray-700 opacity-75 (non interattivo)
                 ✅ true	                altro	                ✅ true	    🟡 bg-yellow-800
                 ✅ true	                altro	                ❌ false	    ⚫ bg-gray-900
             -->
             <div id="wallet-{{ $wallet->id }}"
-                class="wallet-item {{ !$canCreateWallet || in_array($wallet->platform_role, ['natan', 'EPP'])
+                class="wallet-item {{ !$canCreateWallet || in_array($wallet->platform_role, ['Natan', 'EPP'])
                     ? 'bg-gray-700 opacity-75 cursor-not-allowed'
                     : ($isPending
                         ? 'bg-yellow-800'
@@ -153,11 +153,11 @@
                     @endif
 
                     <!-- Aggiungiamo qui il bottone Elimina -->
-                    <div class="mt-4 flex justify-end">
+                    <div class="flex justify-end mt-4">
                         <button data-id="{{ $wallet->id }}" data-collection="{{ $collectionId }}"
                             data-user="{{ $wallet->receiver_id }}" {{-- Questo è l'utente che riceve  il wallet --}}
-                            class="delete-proposal-wallet flex items-center rounded-md bg-red-600 px-3 py-1 text-sm text-white transition-colors duration-150 hover:bg-red-700">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="mr-1 h-4 w-4" fill="none"
+                            class="flex items-center px-3 py-1 text-sm text-white transition-colors duration-150 bg-red-600 rounded-md delete-proposal-wallet hover:bg-red-700">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-1" fill="none"
                                 viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />

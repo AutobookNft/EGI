@@ -70,8 +70,9 @@ return [
     'modifies_EGI' => 'Modifica EGI',
     'new_collection' => 'Nuova collection',
     'open_collection' => 'Apri la collezione',
-    'collection_members' => 'Membri della collection',
+    'members' => 'Membri della collection',
     'team_members_description' => 'Qui puoi vedere tutti i membri del team che hanno accesso a questa collection',
+    'manage_role' => 'Gestisci i ruoli dei membri della collection',
     'manage_collection' => 'Gestisci le collection',
     'manage_head_images' => 'Gestisci le immagini di testata',
     'collection' => 'Collezione',
@@ -141,6 +142,7 @@ return [
     'open_main_menu' => 'Apri menù principale',
 
     'wallet' => [
+        'wallets' => 'Wallet della collection',
         'copy_address' => 'Copia indirizzo',
         'donation' => 'Donazione',
         'donation_success' => 'Donazione effettuata con successo',

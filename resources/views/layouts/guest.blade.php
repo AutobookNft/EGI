@@ -2,7 +2,7 @@
 
     @include('layouts.partials.header')
 
-    @include('layouts.guest_script')
+    {{-- @include('layouts.guest_script') --}}
 
     <!-- Hero Section -->
     @unless(isset($noHero) && $noHero)

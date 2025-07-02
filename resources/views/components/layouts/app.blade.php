@@ -51,6 +51,7 @@
 
             @stack('modals')
 
+
             @if(app()->environment('local'))
                 {!! $debugInfo ?? '' !!}
             @endif
@@ -58,8 +59,6 @@
             <script>
                 window.appConfig = @json(config('app'));
             </script>
-
-            {{-- <script src="{{ url('utils/translations.js') }}"></script> --}}
 
         </div>
         @vite(['resources/ts/main_app.ts', 'resources/js/app.js'])

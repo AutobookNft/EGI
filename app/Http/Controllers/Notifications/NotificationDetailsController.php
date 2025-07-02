@@ -36,7 +36,7 @@ class NotificationDetailsController extends Controller
          * NotificationViewResolver::resolveView($notification->type); si basa sul FQCN della notifica,
          * standard OS 1.5 Self declaring code. Adottato inzialmente solo per le notifiche GDPR.
          */
-        $viewKey = $notification->type ?? NotificationViewResolver::resolveView($notification->type);
+        $viewKey = $notification->view; // ?? NotificationViewResolver::resolveView($notification->type);
 
         if (is_array($viewKey)) {
             $viewKey = array_map('strtolower', $viewKey); // Converte ogni elemento dell'array in minuscolo
@@ -44,7 +44,7 @@ class NotificationDetailsController extends Controller
             $viewKey = strtolower($viewKey); // Converte la stringa in minuscolo
         }
 
-        $config = $viewKey ? config('notification-views.gdpr.' . $viewKey, []) : [];
+        $config = $viewKey ? config('notification-views.' . $viewKey, []) : [];
 
         $view = $config['view'] ?? null;
 
