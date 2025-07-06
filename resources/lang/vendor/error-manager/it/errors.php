@@ -246,6 +246,35 @@ return [
         'registration_required_field_missing' => 'Validazione registrazione fallita: Campi obbligatori mancanti: :fields',
         'registration_validation_comprehensive_failed' => 'Validazione registrazione fallita: Rilevati errori di validazione multipli',
 
+        // Biography errors
+        'biography_index_failed' => 'Errore nel recupero delle biografie utente. Verifica la query di paginazione e i filtri applicati.',
+        'biography_validation_failed' => 'Validazione fallita per creazione/aggiornamento biografia. Controlla le regole di validazione Laravel.',
+        'biography_create_failed' => 'Fallimento critico nella creazione biografia. Possibili cause: DB constraint violation, filesystem error.',
+        'biography_access_denied' => 'Accesso negato a biografia. User ID non corrisponde a owner_id e biografia non è pubblica.',
+        'biography_show_failed' => 'Errore nel caricamento dettagli biografia. Possibili cause: relazione mancante, eager loading fallito.',
+        'biography_update_denied' => 'Tentativo di aggiornamento biografia senza ownership. User ID non corrisponde al proprietario.',
+        'biography_update_failed' => 'Fallimento aggiornamento biografia. Possibili cause: DB lock, constraint violation.',
+        'biography_type_change_invalid' => 'Tentativo cambio tipo biografia da "chapters" a "single" con capitoli esistenti.',
+        'biography_delete_denied' => 'Tentativo eliminazione biografia senza ownership. User ID non corrisponde al proprietario.',
+        'biography_delete_failed' => 'Fallimento eliminazione biografia. Possibili cause: DB constraint violation, cascade delete failure.',
+
+        // Chapter errors
+        'biography_chapter_validation_failed' => 'Validazione fallita per operazione capitolo biografia. Controlla date range validation.',
+        'biography_chapter_create_failed' => 'Fallimento creazione capitolo biografia. Possibili cause: parent biography type mismatch.',
+        'biography_chapter_access_denied' => 'Accesso negato a capitolo biografia. Verifica ownership via parent biography.',
+        'biography_chapter_update_failed' => 'Fallimento aggiornamento capitolo biografia. Possibili cause: date constraint violation.',
+        'biography_chapter_delete_failed' => 'Fallimento eliminazione capitolo biografia. Possibili cause: DB constraint.',
+        'biography_chapter_reorder_failed' => 'Fallimento riordinamento capitoli biografia. Possibili cause: transaction rollback.',
+
+        // Media errors
+        'biography_media_upload_failed' => 'Fallimento upload media biografia. Possibili cause: Spatie media library error.',
+        'biography_media_validation_failed' => 'Validazione media biografia fallita. Controlla file type validation, size limits.',
+        'biography_media_delete_failed' => 'Fallimento eliminazione media biografia. Possibili cause: Spatie media library error.',
+
+         // Missing Chapter Error Codes - Developer Messages
+        'biography_chapter_index_failed' => 'Errore nel recupero dei capitoli biografia. Verifica la query di ordinamento e i filtri di pubblicazione. Context: biography_id, user_id, order_by.',
+        'biography_chapter_show_failed' => 'Errore nel caricamento dettagli capitolo biografia. Possibili cause: relazione mancante, eager loading fallito, o corruzione dati capitolo. Context: biography_id, chapter_id, user_id.',
+
      ],
     'user' => [
         // == Existing Entries ==
@@ -433,6 +462,35 @@ return [
         'registration_invalid_email_format' => 'Inserisci un indirizzo email valido.',
         'registration_required_field_missing' => 'Compila tutti i campi obbligatori.',
         'registration_validation_comprehensive_failed' => 'Controlla il modulo e correggi gli errori.',
+
+        // Biography errors - User-friendly messages
+        'biography_index_failed' => 'Non è stato possibile caricare le tue biografie. Riprova tra qualche momento.',
+        'biography_validation_failed' => 'Alcuni campi non sono stati compilati correttamente. Controlla i dati inseriti.',
+        'biography_create_failed' => 'Non è stato possibile creare la biografia. Riprova tra qualche momento.',
+        'biography_access_denied' => 'Non hai i permessi per visualizzare questa biografia.',
+        'biography_show_failed' => 'Non è stato possibile caricare i dettagli della biografia. Riprova tra qualche momento.',
+        'biography_update_denied' => 'Non hai i permessi per modificare questa biografia.',
+        'biography_update_failed' => 'Non è stato possibile salvare le modifiche alla biografia.',
+        'biography_type_change_invalid' => 'Impossibile cambiare il tipo di biografia perché sono presenti dei capitoli. Elimina prima tutti i capitoli.',
+        'biography_delete_denied' => 'Non hai i permessi per eliminare questa biografia.',
+        'biography_delete_failed' => 'Non è stato possibile eliminare la biografia. Riprova tra qualche momento.',
+
+        // Chapter errors
+        'biography_chapter_validation_failed' => 'Alcuni campi del capitolo non sono stati compilati correttamente.',
+        'biography_chapter_create_failed' => 'Non è stato possibile creare il capitolo. Controlla che la biografia sia impostata per "capitoli".',
+        'biography_chapter_access_denied' => 'Non hai i permessi per visualizzare questo capitolo.',
+        'biography_chapter_update_failed' => 'Non è stato possibile salvare le modifiche al capitolo.',
+        'biography_chapter_delete_failed' => 'Non è stato possibile eliminare il capitolo.',
+        'biography_chapter_reorder_failed' => 'Non è stato possibile riordinare i capitoli. Riprova o aggiorna la pagina.',
+
+        // Media errors
+        'biography_media_upload_failed' => 'Non è stato possibile caricare l\'immagine. Controlla che sia un\'immagine valida (JPG, PNG) sotto i 5MB.',
+        'biography_media_validation_failed' => 'Il file selezionato non è valido. Usa immagini JPG, PNG o WebP fino a 5MB.',
+        'biography_media_delete_failed' => 'Non è stato possibile eliminare l\'immagine. Riprova tra qualche momento.',
+
+        // Missing Chapter Error Codes - User Messages
+        'biography_chapter_index_failed' => 'Non è stato possibile caricare i capitoli della biografia. Riprova tra qualche momento o aggiorna la pagina.',
+        'biography_chapter_show_failed' => 'Non è stato possibile caricare i dettagli del capitolo. Riprova tra qualche momento.',
     ],
 
     // Generic message (used by UserInterfaceHandler if no specific message found)

@@ -246,6 +246,30 @@ return [
         'registration_required_field_missing' => 'Registration validation failed: Required fields missing: :fields',
         'registration_validation_comprehensive_failed' => 'Registration validation failed: Multiple validation errors detected',
 
+        // Biography Core Errors - Developer Messages
+        'biography_index_failed' => 'Error retrieving user biographies. Check pagination query and applied filters. Context: user_id, filters_applied.',
+        'biography_validation_failed' => 'Validation failed for biography creation/update. Check Laravel validation rules and database constraints. Context: validation_errors, user_id.',
+        'biography_create_failed' => 'Critical failure in biography creation. Possible causes: DB constraint violation, filesystem error for slug generation, or model boot exception. Context: user_id, attempted_data.',
+        'biography_access_denied' => 'Biography access denied. User ID does not match owner_id and biography is not public. Check privacy logic. Context: user_id, biography_id, owner_id.',
+        'biography_show_failed' => 'Error loading biography details. Possible causes: missing relationship, eager loading failure, or data corruption. Context: user_id, biography_id.',
+        'biography_update_denied' => 'Biography update attempt without ownership. User ID does not match owner. Check authorization logic. Context: user_id, biography_id, owner_id.',
+        'biography_update_failed' => 'Biography update failure. Possible causes: DB lock, constraint violation, or model event failure. Context: user_id, biography_id, updated_fields.',
+        'biography_type_change_invalid' => 'Invalid biography type change from "chapters" to "single" with existing chapters. Business rule violation. Context: biography_id, from_type, to_type, chapters_count.',
+        'biography_delete_denied' => 'Biography deletion attempt without ownership. User ID does not match owner. Check authorization logic. Context: user_id, biography_id, owner_id.',
+        'biography_delete_failed' => 'Biography deletion failure. Possible causes: DB constraint violation, cascade delete failure, or filesystem cleanup error. Context: user_id, biography_id.',
+        'biography_chapter_validation_failed' => 'Biography chapter operation validation failed. Check date range validation and parent biography constraints. Context: biography_id, validation_errors.',
+        'biography_chapter_create_failed' => 'Biography chapter creation failure. Possible causes: parent biography type mismatch, sort_order conflict, or date range violation. Context: biography_id, chapter_data.',
+        'biography_chapter_access_denied' => 'Biography chapter access denied. Check ownership via parent biography and publication status. Context: user_id, biography_id, chapter_id.',
+        'biography_chapter_update_failed' => 'Biography chapter update failure. Possible causes: date constraint violation, sort_order conflict, or model event failure. Context: biography_id, chapter_id.',
+        'biography_chapter_delete_failed' => 'Biography chapter deletion failure. Possible causes: DB constraint, cascade delete error, or media cleanup failure. Context: biography_id, chapter_id.',
+        'biography_chapter_reorder_failed' => 'Biography chapters reorder failure. Possible causes: transaction rollback, invalid sort_order values, or DB lock. Context: biography_id, chapter_ids.',
+        'biography_media_upload_failed' => 'Biography media upload failure. Possible causes: Spatie media library error, filesystem permission, or image processing failure. Context: biography_id, file_info.',
+        'biography_media_validation_failed' => 'Biography media validation failed. Check file type validation, size limits, and Spatie media collection rules. Context: biography_id, file_validation_errors.',
+        'biography_media_delete_failed' => 'Biography media deletion failure. Possible causes: Spatie media library error, filesystem permission, or missing media record. Context: biography_id, media_id.',
+
+        // Missing Chapter Error Codes - Developer Messages
+        'biography_chapter_index_failed' => 'Error retrieving biography chapters. Check ordering query and publication filters. Context: biography_id, user_id, order_by.',
+        'biography_chapter_show_failed' => 'Error loading biography chapter details. Possible causes: missing relationship, eager loading failure, or chapter data corruption. Context: biography_id, chapter_id, user_id.',
     ],
     'user' => [
         // == Existing Entries ==
@@ -433,6 +457,31 @@ return [
         'registration_invalid_email_format' => 'Please enter a valid email address.',
         'registration_required_field_missing' => 'Please fill in all required fields.',
         'registration_validation_comprehensive_failed' => 'Please check the form and correct any errors.',
+
+        // Biography Core Errors - User Messages
+        'biography_index_failed' => 'Unable to load your biographies. Please try again in a moment or refresh the page.',
+        'biography_validation_failed' => 'Some fields were not filled correctly. Please check the entered data and try again.',
+        'biography_create_failed' => 'Unable to create the biography. Please try again in a moment or contact support if the problem persists.',
+        'biography_access_denied' => 'You do not have permission to view this biography. You may not be the owner or the biography may be private.',
+        'biography_show_failed' => 'Unable to load biography details. Please try again in a moment.',
+        'biography_update_denied' => 'You do not have permission to edit this biography. Only the owner can make changes.',
+        'biography_update_failed' => 'Unable to save changes to the biography. Please try again in a moment.',
+        'biography_type_change_invalid' => 'Cannot change biography type from "chapters" to "single text" because chapters exist. Please delete all chapters first.',
+        'biography_delete_denied' => 'You do not have permission to delete this biography. Only the owner can delete it.',
+        'biography_delete_failed' => 'Unable to delete the biography. Please try again in a moment or contact support.',
+        'biography_chapter_validation_failed' => 'Some chapter fields were not filled correctly. Please check the dates and content entered.',
+        'biography_chapter_create_failed' => 'Unable to create the chapter. Check that the biography is set to "chapters" and try again.',
+        'biography_chapter_access_denied' => 'You do not have permission to view this chapter. You may not be the owner or the chapter may not be published.',
+        'biography_chapter_update_failed' => 'Unable to save changes to the chapter. Check the entered dates and try again.',
+        'biography_chapter_delete_failed' => 'Unable to delete the chapter. Please try again in a moment.',
+        'biography_chapter_reorder_failed' => 'Unable to reorder chapters. Try again or refresh the page to see the correct order.',
+        'biography_media_upload_failed' => 'Unable to upload the image. Check that the file is a valid image (JPG, PNG) and does not exceed 5MB.',
+        'biography_media_validation_failed' => 'The selected file is not valid. Make sure to upload an image in JPG, PNG or WebP format with a maximum size of 5MB.',
+        'biography_media_delete_failed' => 'Unable to delete the image. Please try again in a moment.',
+
+        // Missing Chapter Error Codes - User Messages
+        'biography_chapter_index_failed' => 'Unable to load biography chapters. Please try again in a moment or refresh the page.',
+        'biography_chapter_show_failed' => 'Unable to load chapter details. Please try again in a moment.',
     ],
 
     // Generic message (used by UserInterfaceHandler if no specific message found)

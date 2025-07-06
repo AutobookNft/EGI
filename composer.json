@@ -13,6 +13,7 @@
         "laravel/tinker": "^2.9",
         "league/flysystem-aws-s3-v3": "^3.29",
         "livewire/livewire": "^3.0",
+        "spatie/laravel-medialibrary": "^11.13",
         "spatie/laravel-permission": "^6.10",
         "tecnickcom/tcpdf": "^6.9",
         "ultra/egi-module": "@dev",
@@ -23,6 +24,7 @@
         "ultra/ultra-upload-manager": "dev-main"
     },
     "require-dev": {
+        "barryvdh/laravel-ide-helper": "^3.5",
         "fakerphp/faker": "^1.23",
         "laravel/pail": "^1.1",
         "laravel/pint": "^1.13",
@@ -79,7 +81,11 @@
             "dont-discover": []
         },
         "providers": [
-            "Ultra\\EgiModule\\Providers\\EgiModuleServiceProvider"
+            "Ultra\\EgiModule\\Providers\\EgiModuleServiceProvider",
+            "Ultra\\UltraLogManager\\UltraLogManagerServiceProvider::class",
+            "Ultra\\UltraErrorManager\\UltraErrorManagerServiceProvider::class",
+            "Ultra\\UltraTranslationManager\\UltraTranslationManagerServiceProvider::class",
+            "Ultra\\UltraUploadManager\\UltraUploadManagerServiceProvider::class"
         ]
     },
     "config": {

@@ -92,32 +92,58 @@
     {{-- Hero Content --}}
     <div class="container relative z-10 px-4 py-16 mx-auto sm:px-6 lg:px-8 sm:py-20 lg:py-24">
         <div class="max-w-4xl">
-            {{-- Creator Info + Avatar --}}
             <div class="flex items-center gap-3 mb-6">
-                {{-- Avatar Creator --}}
-                <div class="flex-shrink-0">
-                    @if ($collection->creator && $collection->creator->profile_photo_url)
-                        <img src="{{ $collection->creator->profile_photo_url }}"
-                             alt="{{ $collection->creator->name }}"
-                             class="object-cover w-12 h-12 border-2 rounded-full border-white/30">
-                    @else
-                        <div class="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-emerald-500 to-blue-500">
-                            <span class="text-lg font-bold text-white">{{ substr($collection->creator->name ?? 'U', 0, 1) }}</span>
-                        </div>
-                    @endif
-                </div>
+                @if($collection->creator)
+                    {{-- Se il creator esiste, rendi tutto cliccabile --}}
+                    <a href="{{ route('creator.home', ['id' => $collection->creator->id]) }}"
+                    class="flex items-center gap-3 transition-all duration-200 hover:opacity-80 group">
 
-                {{-- Creator Name + Badge --}}
-                <div>
-                    <div class="flex items-center gap-2">
-                        <span class="font-semibold text-white">{{ $collection->creator->name ?? __('Unknown Creator') }}</span>
-                        @if ($collection->creator && $collection->creator->usertype === 'verified')
-                            <span class="text-lg text-blue-400 material-symbols-outlined" title="{{ __('Verified Creator') }}">verified</span>
-                        @endif
+                        {{-- Avatar Creator --}}
+                        <div class="flex-shrink-0">
+                            @if ($collection->creator->profile_photo_url)
+                                <img src="{{ $collection->creator->profile_photo_url }}"
+                                    alt="{{ $collection->creator->name }}"
+                                    class="object-cover w-12 h-12 transition-transform duration-200 border-2 rounded-full border-white/30 group-hover:scale-110">
+                            @else
+                                <div class="flex items-center justify-center w-12 h-12 transition-transform duration-200 rounded-full bg-gradient-to-br from-emerald-500 to-blue-500 group-hover:scale-110">
+                                    <span class="text-lg font-bold text-white">{{ substr($collection->creator->name ?? 'U', 0, 1) }}</span>
+                                </div>
+                            @endif
+                        </div>
+
+                        {{-- Creator Name + Badge --}}
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="font-semibold text-white transition-colors duration-200 group-hover:text-emerald-400">{{ $collection->creator->name ?? __('Unknown Creator') }}</span>
+                                @if ($collection->creator->usertype === 'verified')
+                                    <span class="text-lg text-blue-400 material-symbols-outlined" title="{{ __('Verified Creator') }}">verified</span>
+                                @endif
+                            </div>
+                            <p class="text-sm text-gray-300 transition-colors duration-200 group-hover:text-gray-200">{{ __('Collection Creator') }}</p>
+                        </div>
+                    </a>
+                @else
+                    {{-- Se il creator non esiste, mostra solo un div non cliccabile --}}
+                    <div class="flex items-center gap-3">
+                        {{-- Avatar placeholder --}}
+                        <div class="flex-shrink-0">
+                            <div class="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-emerald-500 to-blue-500">
+                                <span class="text-lg font-bold text-white">U</span>
+                            </div>
+                        </div>
+
+                        {{-- Creator Name placeholder --}}
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="font-semibold text-white">{{ __('Unknown Creator') }}</span>
+                            </div>
+                            <p class="text-sm text-gray-300">{{ __('Collection Creator') }}</p>
+                        </div>
                     </div>
-                    <p class="text-sm text-gray-300">{{ __('Collection Creator') }}</p>
-                </div>
+                @endif
             </div>
+
+            {{-- Titolo della Collezione --}}
 
             {{-- Collection Name + Avatar --}}
             <div class="flex flex-col items-start gap-6 mb-8 sm:flex-row sm:items-center">

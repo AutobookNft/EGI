@@ -1,9 +1,29 @@
 // resources/ts/components/natan-assistant.ts
 
 /**
- * Natan Assistant UI Component
- * @description Gestisce l'assistente UI Natan che fornisce aiuto contestuale senza interrompere la navigazione
- * @version 2.1.0
+ * Natan Butler Assistant UI Component
+ * @description Maggiordomo digitale che accoglie gli utenti e fornisce assistenza personalizzata
+ * @version 3.0.0 - Butler Mode
+ *
+ * NUOVE FUNZIONALITÀ MAGGIORDOMO:
+ * - Modal di benvenuto prominente all'arrivo sulla pagina
+ * - Interfaccia conversazionale "Cosa posso fare per te?"
+ * - Opzioni di azione dirette (Esplora, Impara, Inizia, Business)
+ * - Pulsante di chiusura per utenti esperti
+ * - Dismissal permanente con localStorage
+ * - Auto-dismiss dopo 30 secondi di inattività
+ * - Animazioni fluide e design elegante
+ * - Completamente responsivo
+ *
+ * COME USARE:
+ * - Il maggiordomo appare automaticamente per nuovi utenti
+ * - Può essere chiuso temporaneamente o permanentemente
+ * - Per testing: natan.resetButler() o natan.showButlerManually()
+ *
+ * COMPATIBILITÀ:
+ * - Mantiene tutte le funzionalità precedenti
+ * - Fallback elegante se elementi DOM non esistono
+ * - Supporta sia il nuovo che il vecchio comportamento
  */
 export class NatanAssistant {
     private sections: {id: string, element: HTMLElement, suggestion: string}[] = [];
@@ -17,18 +37,46 @@ export class NatanAssistant {
     private debugMode: boolean = true;
     private isProcessingToggle: boolean = false;
 
+    // Nuove proprietà per il comportamento da maggiordomo
+    private butlerModal: HTMLElement | null = null;
+    private isButlerDismissed: boolean = false;
+    private hasGreeted: boolean = false;
+    private dismissTimeout: number | null = null;
+
     constructor() {
-        this.debug('NatanAssistant constructor called');
+        console.log('🎩 [NATAN BUTLER] Constructor called - versione 3.0.0');
+        this.debug('NatanAssistant Butler constructor called');
+
+        // Controlla solo se l'utente ha chiuso permanentemente il maggiordomo
+        this.isButlerDismissed = localStorage.getItem('natan_butler_dismissed') === 'true';
+        // hasGreeted serve solo per tracking, NON blocca la visualizzazione
+        this.hasGreeted = localStorage.getItem('natan_has_greeted') === 'true';
+
+        console.log('🎩 [NATAN BUTLER] State check:', {
+            isButlerDismissed: this.isButlerDismissed,
+            hasGreeted: this.hasGreeted,
+            willShowModal: !this.isButlerDismissed, // SOLO isButlerDismissed blocca la visualizzazione
+            localStorage_dismissed: localStorage.getItem('natan_butler_dismissed'),
+            localStorage_greeted: localStorage.getItem('natan_has_greeted')
+        });
 
         // Ottieni riferimenti DOM principali
         this.toggleButton = document.getElementById('natan-assistant-toggle');
         this.menuElement = document.getElementById('natan-assistant-menu');
+
+        console.log('🎩 [NATAN BUTLER] DOM elements:', {
+            toggleButton: !!this.toggleButton,
+            menuElement: !!this.menuElement
+        });
 
         if (!this.toggleButton || !this.menuElement) {
             this.debug('ERROR: Critical DOM elements not found', {
                 toggleButton: !!this.toggleButton,
                 menuElement: !!this.menuElement
             });
+            // Anche senza elementi esistenti, creiamo il maggiordomo
+            console.log('🎩 [NATAN BUTLER] Creating butler modal without DOM elements');
+            this.createButlerModal();
             return;
         }
 
@@ -36,6 +84,9 @@ export class NatanAssistant {
         this.setupToggle();
         this.addStyles();
         this.initLearnMoreButtons();
+        this.createButlerModal();
+
+        console.log('🎩 [NATAN BUTLER] All systems initialized!');
 
         // Protezione aggiuntiva per eventi esterni
         document.addEventListener('click', (e) => {
@@ -43,6 +94,7 @@ export class NatanAssistant {
             if (e.target instanceof Element &&
                 (e.target.closest('#natan-assistant-container') ||
                 e.target.closest('#natan-suggestion') ||
+                e.target.closest('#natan-butler-modal') ||
                 e.target.id === 'natan-assistant-toggle' ||
                 e.target.closest('#natan-assistant-toggle'))) {
                 return;
@@ -73,12 +125,45 @@ export class NatanAssistant {
                 this.initHoverSuggestions();
                 this.checkUserHistory();
 
-                // Mostra il pulse di benvenuto dopo 3 secondi
-                setTimeout(() => this.showWelcomePulse(), 3000);
+                // Mostra il maggiordomo di benvenuto (sempre, tranne se dismesso)
+                console.log('🎩 [NATAN BUTLER] Checking conditions for auto-show:', {
+                    isButlerDismissed: this.isButlerDismissed,
+                    hasGreeted: this.hasGreeted,
+                    shouldShow: !this.isButlerDismissed // Solo il dismiss blocca la visualizzazione
+                });
+
+                if (!this.isButlerDismissed) {
+                    console.log('🎩 [NATAN BUTLER] ✅ Conditions met - Will show butler welcome in 2 seconds');
+                    setTimeout(() => {
+                        console.log('🎩 [NATAN BUTLER] 🚀 Executing auto-show now!');
+                        this.showButlerWelcome();
+                    }, 2000);
+                } else {
+                    console.log('🎩 [NATAN BUTLER] ❌ Conditions NOT met for auto-show');
+                    console.log('🎩 [NATAN BUTLER] - Reason: Butler was dismissed permanently');
+                }
             }, 1000);
         });
 
-        this.debug('NatanAssistant initialization complete');
+        // BACKUP: Se window.load non funziona, prova dopo DOMContentLoaded
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                setTimeout(() => {
+                    if (!this.isButlerDismissed) {
+                        console.log('🎩 [NATAN BUTLER] DOMContentLoaded - Showing butler');
+                        this.showButlerWelcome();
+                    }
+                }, 1000);
+            });
+        } else if (!this.isButlerDismissed) {
+            // Documento già carico, mostra subito se non dismesso
+            setTimeout(() => {
+                console.log('🎩 [NATAN BUTLER] Document already loaded - Showing butler');
+                this.showButlerWelcome();
+            }, 2000);
+        }
+
+        this.debug('NatanAssistant Butler initialization complete');
     }
 
     /**
@@ -120,7 +205,7 @@ export class NatanAssistant {
      */
     private debug(...args: any[]): void {
         if (this.debugMode) {
-            // console.log('[NatanAssistant]', ...args);
+            console.log('[🎩 NatanButler]', ...args);
         }
     }
 
@@ -881,6 +966,17 @@ export class NatanAssistant {
                     animation: natan-welcome-pulse 1.5s ease-in-out 3;
                 }
 
+                @keyframes natan-typing {
+                    0% { width: 0; }
+                    100% { width: 100%; }
+                }
+
+                .natan-typing-effect {
+                    overflow: hidden;
+                    white-space: nowrap;
+                    animation: natan-typing 2s ease-in-out;
+                }
+
                 #natan-assistant-menu:not(.hidden) {
                     display: flex !important;
                 }
@@ -903,11 +999,95 @@ export class NatanAssistant {
                     cursor: pointer;
                 }
 
-                /* AGGIUNGI QUESTA CLASSE PER IL MIGLIORAMENTO */
+                /* Classe per il miglioramento highlight */
                 .natan-item-highlight {
                     border-color: rgba(16, 185, 129, 0.7) !important;
                     box-shadow: 0 0 8px rgba(16, 185, 129, 0.5) !important;
                     transform: scale(1.05) !important;
+                }
+
+                /* NUOVI STILI PER IL MAGGIORDOMO */
+                #natan-butler-modal {
+                    backdrop-filter: blur(4px);
+                    z-index: 9999;
+                }
+
+                .natan-butler-container {
+                    transform: scale(0.9);
+                    opacity: 0;
+                    transition: all 0.3s ease-out;
+                }
+
+                .natan-butler-option {
+                    transition: all 0.2s ease;
+                }
+
+                .natan-butler-option:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+                }
+
+                .natan-butler-option:active {
+                    transform: translateY(0);
+                }
+
+                /* Animazione per l'avatar del maggiordomo */
+                @keyframes natan-butler-float {
+                    0%, 100% { transform: translateY(0px) rotate(0deg); }
+                    33% { transform: translateY(-2px) rotate(1deg); }
+                    66% { transform: translateY(-1px) rotate(-1deg); }
+                }
+
+                .natan-butler-container .w-24 {
+                    animation: natan-butler-float 3s ease-in-out infinite;
+                }
+
+                /* Responsività per mobile */
+                @media (max-width: 640px) {
+                    .natan-butler-container {
+                        margin: 1rem;
+                        max-width: calc(100vw - 2rem);
+                    }
+
+                    #natan-butler-modal .space-y-3 {
+                        gap: 0.5rem;
+                    }
+
+                    .natan-butler-option {
+                        padding: 0.75rem;
+                    }
+                }
+
+                /* Effetti di hover migliorati */
+                #natan-butler-close:hover {
+                    transform: scale(1.1);
+                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+                }
+
+                /* Gradiente animato per il background del modal */
+                .natan-butler-container {
+                    position: relative;
+                    overflow: hidden;
+                }
+
+                .natan-butler-container::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    height: 1px;
+                    background: linear-gradient(90deg,
+                        transparent,
+                        rgba(16, 185, 129, 0.5),
+                        transparent
+                    );
+                    animation: natan-shimmer 3s ease-in-out infinite;
+                }
+
+                @keyframes natan-shimmer {
+                    0%, 100% { opacity: 0; transform: translateX(-100%); }
+                    50% { opacity: 1; transform: translateX(100%); }
                 }
             `;
             document.head.appendChild(styleEl);
@@ -1199,5 +1379,537 @@ export class NatanAssistant {
         const hasOpened = localStorage.getItem('natan_assistant_opened') === 'true';
         this.debug('Has user opened assistant before?', hasOpened);
         return hasOpened;
+    }
+
+    /**
+     * Crea il modal del maggiordomo per l'accoglienza
+     */
+    private createButlerModal(): void {
+        console.log('🎩 [NATAN BUTLER] createButlerModal called');
+        this.debug('Creating butler modal');
+
+        // Rimuovi eventuali modal esistenti
+        const existingModal = document.getElementById('natan-butler-modal');
+        if (existingModal) {
+            console.log('🎩 [NATAN BUTLER] Removing existing modal');
+            existingModal.remove();
+        }
+
+        // Crea il modal del maggiordomo (SENZA CLASSE HIDDEN)
+        this.butlerModal = document.createElement('div');
+        this.butlerModal.id = 'natan-butler-modal';
+        this.butlerModal.className = 'natan-butler-modal-base';
+
+        // Applica stili CSS di base inline
+        this.butlerModal.style.cssText = `
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 999999;
+            background-color: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
+        `;
+
+        console.log('🎩 [NATAN BUTLER] Creating modal HTML...');
+
+        this.butlerModal.innerHTML = `
+            <div class="natan-butler-container" style="
+                background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+                border: 1px solid rgba(16, 185, 129, 0.3);
+                border-radius: 16px;
+                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 25px 50px -12px rgba(16, 185, 129, 0.1);
+                max-width: 28rem;
+                margin: 0 1rem;
+                overflow: hidden;
+                width: 100%;
+                max-height: 90vh;
+                position: relative;
+            ">
+                <!-- Header con Natan e pulsante chiudi -->
+                <div style="
+                    background: linear-gradient(90deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.1) 100%);
+                    padding: 1.5rem;
+                    text-align: center;
+                    border-bottom: 1px solid rgba(16, 185, 129, 0.3);
+                    position: relative;
+                ">
+                    <button id="natan-butler-close" style="
+                        position: absolute;
+                        top: 1rem;
+                        right: 1rem;
+                        width: 2rem;
+                        height: 2rem;
+                        background: rgba(55, 65, 81, 0.5);
+                        border: none;
+                        border-radius: 50%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        cursor: pointer;
+                        transition: background-color 0.2s;
+                    " onmouseover="this.style.backgroundColor='rgba(75, 85, 99, 0.5)'" onmouseout="this.style.backgroundColor='rgba(55, 65, 81, 0.5)'" aria-label="Chiudi assistente">
+                        <svg style="width: 1rem; height: 1rem; color: #d1d5db;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+
+                    <!-- Avatar di Natan più grande -->
+                    <div style="
+                        width: 6rem;
+                        height: 6rem;
+                        margin: 0 auto 1rem auto;
+                        border-radius: 50%;
+                        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                        padding: 4px;
+                    ">
+                        <div style="
+                            width: 100%;
+                            height: 100%;
+                            border-radius: 50%;
+                            background: #111827;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                        ">
+                            <div style="
+                                width: 4rem;
+                                height: 4rem;
+                                border-radius: 50%;
+                                background: rgba(16, 185, 129, 0.2);
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                            ">
+                                <span style="font-size: 2rem;">🎩</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h2 style="font-size: 1.25rem; font-weight: bold; color: white; margin-bottom: 0.5rem;">Ciao! Sono Natan</h2>
+                    <p style="color: #6ee7b7; font-size: 0.875rem;">Il tuo maggiordomo digitale</p>
+                </div>
+
+                <!-- Messaggio di benvenuto -->
+                <div class="natan-content">
+                    <div class="natan-welcome-message">
+                        <span class="natan-welcome-text">Benvenuto! Sono qui per aiutarti a navigare nel mondo EGI. Cosa ti interessa scoprire?</span>
+                    </div>
+
+                    <!-- Opzioni principali -->
+                    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                        <button class="natan-butler-option natan-option-button" data-action="explore">
+                            <span style="font-size: 1.25rem;">🔍</span>
+                            <div>
+                                <div style="color: #ecfdf5; font-weight: 500;">Esplora le collezioni</div>
+                                <div style="color: rgba(110, 231, 183, 0.7); font-size: 0.75rem;">Scopri gli EGI disponibili</div>
+                            </div>
+                        </button>
+
+                        <button class="natan-butler-option natan-option-button" data-action="learn">
+                            <span style="font-size: 1.25rem;">🌱</span>
+                            <div>
+                                <div style="color: #ecfdf5; font-weight: 500;">Cos'è un EGI?</div>
+                                <div style="color: rgba(110, 231, 183, 0.7); font-size: 0.75rem;">Scopri il nostro impatto ambientale</div>
+                            </div>
+                        </button>
+
+                        <button class="natan-butler-option natan-option-button" data-action="start">
+                            <span style="font-size: 1.25rem;">🚀</span>
+                            <div>
+                                <div style="color: #ecfdf5; font-weight: 500;">Inizia subito</div>
+                                <div style="color: rgba(110, 231, 183, 0.7); font-size: 0.75rem;">Registrati e crea la tua galleria</div>
+                            </div>
+                        </button>
+
+                        <button class="natan-butler-option natan-option-button" data-action="business">
+                            <span style="font-size: 1.25rem;">💼</span>
+                            <div>
+                                <div style="color: #ecfdf5; font-weight: 500;">Business granulare</div>
+                                <div style="color: rgba(110, 231, 183, 0.7); font-size: 0.75rem;">Scopri le opportunità commerciali</div>
+                            </div>
+                        </button>
+                    </div>
+
+                    <!-- Footer -->
+                    <div style="
+                        margin-top: 1.5rem;
+                        padding-top: 1rem;
+                        border-top: 1px solid rgba(16, 185, 129, 0.2);
+                        text-align: center;
+                    ">
+                        <button id="natan-butler-dismiss" style="
+                            color: rgba(110, 231, 183, 0.7);
+                            font-size: 0.75rem;
+                            background: none;
+                            border: none;
+                            cursor: pointer;
+                            transition: color 0.2s;
+                        " onmouseover="this.style.color='#6ee7b7'" onmouseout="this.style.color='rgba(110, 231, 183, 0.7)'">
+                            Non mostrare più questo messaggio
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(this.butlerModal);
+        console.log('🎩 [NATAN BUTLER] Modal appended to body');
+
+        // Aggiungi event listeners
+        this.setupButlerEventListeners();
+
+        console.log('🎩 [NATAN BUTLER] Butler modal created and added to DOM');
+        this.debug('Butler modal created and added to DOM');
+    }
+
+    /**
+     * Configura gli event listener per il modal del maggiordomo
+     */
+    private setupButlerEventListeners(): void {
+        if (!this.butlerModal) return;
+
+        this.debug('Setting up butler event listeners');
+
+        // Pulsante chiudi (X)
+        const closeButton = this.butlerModal.querySelector('#natan-butler-close');
+        closeButton?.addEventListener('click', () => {
+            this.hideButlerModal();
+        });
+
+        // Pulsante "Non mostrare più"
+        const dismissButton = this.butlerModal.querySelector('#natan-butler-dismiss');
+        dismissButton?.addEventListener('click', () => {
+            this.dismissButlerPermanently();
+        });
+
+        // Opzioni del maggiordomo
+        const options = this.butlerModal.querySelectorAll('.natan-butler-option');
+        options.forEach(option => {
+            option.addEventListener('click', (e) => {
+                const action = (e.currentTarget as HTMLElement).dataset.action;
+                if (action) {
+                    this.handleButlerAction(action);
+                }
+            });
+        });
+
+        // Click esterno per chiudere
+        this.butlerModal.addEventListener('click', (e) => {
+            if (e.target === this.butlerModal) {
+                this.hideButlerModal();
+            }
+        });
+
+        // Escape per chiudere
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !this.butlerModal?.classList.contains('hidden')) {
+                this.hideButlerModal();
+            }
+        });
+    }
+
+    /**
+     * Mostra il modal di benvenuto del maggiordomo
+     */
+    private showButlerWelcome(): void {
+        console.log('🎩 [NATAN BUTLER] showButlerWelcome called');
+        console.log('🎩 [NATAN BUTLER] butlerModal exists:', !!this.butlerModal);
+        console.log('🎩 [NATAN BUTLER] isButlerDismissed:', this.isButlerDismissed);
+
+        if (!this.butlerModal || this.isButlerDismissed) {
+            this.debug('Butler modal not available or dismissed');
+            return;
+        }
+
+        this.debug('Showing butler welcome modal');
+        console.log('🎩 [NATAN BUTLER] About to show modal');
+
+        // FORZA BRUTALMENTE la visualizzazione del modal
+        this.butlerModal.className = 'natan-butler-modal-visible';
+
+        // Applica stili CSS inline super aggressivi
+        this.butlerModal.style.cssText = `
+            display: flex !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            z-index: 999999 !important;
+            background-color: rgba(0, 0, 0, 0.7) !important;
+            align-items: center !important;
+            justify-content: center !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+            pointer-events: auto !important;
+        `;
+
+        console.log('🎩 [NATAN BUTLER] Modal should now be visible');
+        console.log('🎩 [NATAN BUTLER] Modal classes:', this.butlerModal.className);
+        console.log('🎩 [NATAN BUTLER] Modal display:', this.butlerModal.style.display);
+
+        // DEBUG AGGRESSIVO: Verifica che il modal sia effettivamente visibile
+        setTimeout(() => {
+            const modalElement = document.getElementById('natan-butler-modal');
+            if (modalElement) {
+                const computedStyle = window.getComputedStyle(modalElement);
+                console.log('🎩 [NATAN BUTLER] DEBUG Computed styles:');
+                console.log('- display:', computedStyle.display);
+                console.log('- visibility:', computedStyle.visibility);
+                console.log('- opacity:', computedStyle.opacity);
+                console.log('- z-index:', computedStyle.zIndex);
+                console.log('- position:', computedStyle.position);
+                console.log('- width:', computedStyle.width);
+                console.log('- height:', computedStyle.height);
+                console.log('🎩 [NATAN BUTLER] Modal rect:', modalElement.getBoundingClientRect());
+            }
+        }, 100);
+
+        // Anima l'entrata
+        const container = this.butlerModal.querySelector('.natan-butler-container');
+        if (container) {
+            console.log('🎩 [NATAN BUTLER] Container found, animating');
+            (container as HTMLElement).style.transform = 'scale(0.9)';
+            (container as HTMLElement).style.opacity = '0';
+
+            setTimeout(() => {
+                (container as HTMLElement).style.transition = 'all 0.3s ease-out';
+                (container as HTMLElement).style.transform = 'scale(1)';
+                (container as HTMLElement).style.opacity = '1';
+                console.log('🎩 [NATAN BUTLER] Animation applied');
+            }, 50);
+        } else {
+            console.log('🎩 [NATAN BUTLER] ERROR: Container not found!');
+        }
+
+        // Anima il testo di benvenuto
+        setTimeout(() => {
+            const welcomeText = this.butlerModal?.querySelector('.natan-welcome-text');
+            if (welcomeText) {
+                welcomeText.classList.add('natan-typing-effect');
+            }
+        }, 300);
+
+        // Marca come salutato
+        this.hasGreeted = true;
+        localStorage.setItem('natan_has_greeted', 'true');
+
+        // Auto-nascondi dopo 60 secondi se non interagisce (aumentato da 30s)
+        this.dismissTimeout = window.setTimeout(() => {
+            console.log('🎩 [NATAN BUTLER] Auto-dismissing modal after 60 seconds');
+            this.hideButlerModal();
+        }, 60000);
+    }
+
+    /**
+     * Nasconde il modal del maggiordomo
+     */
+    private hideButlerModal(): void {
+        if (!this.butlerModal) return;
+
+        console.log('🎩 [NATAN BUTLER] Hiding butler modal');
+        this.debug('Hiding butler modal');
+
+        // Cancella timeout di auto-dismiss
+        if (this.dismissTimeout) {
+            clearTimeout(this.dismissTimeout);
+            this.dismissTimeout = null;
+        }
+
+        // Anima l'uscita
+        const container = this.butlerModal.querySelector('.natan-butler-container');
+        if (container) {
+            (container as HTMLElement).style.transition = 'all 0.2s ease-in';
+            (container as HTMLElement).style.transform = 'scale(0.9)';
+            (container as HTMLElement).style.opacity = '0';
+        }
+
+        // CRUCIALE: Disabilita immediatamente i pointer events per permettere interazione con la pagina
+        this.butlerModal.style.pointerEvents = 'none';
+
+        // Nascondi completamente dopo l'animazione
+        setTimeout(() => {
+            if (this.butlerModal) {
+                // Rimuovi completamente gli stili inline che forzano la visualizzazione
+                this.butlerModal.style.cssText = 'display: none !important;';
+
+                // Aggiungi anche la classe hidden per sicurezza
+                this.butlerModal.classList.add('hidden');
+
+                console.log('🎩 [NATAN BUTLER] Modal completely hidden');
+                this.debug('Butler modal completely hidden and page interaction restored');
+            }
+        }, 200);
+    }
+
+    /**
+     * Dismissal permanente del maggiordomo
+     */
+    private dismissButlerPermanently(): void {
+        this.debug('Butler dismissed permanently');
+
+        this.isButlerDismissed = true;
+        localStorage.setItem('natan_butler_dismissed', 'true');
+
+        this.hideButlerModal();
+    }
+
+    /**
+     * Gestisce le azioni del maggiordomo
+     */
+    private handleButlerAction(action: string): void {
+        console.log('🎩 [NATAN BUTLER] Butler action selected:', action);
+        this.debug('Butler action selected:', action);
+
+        // Nascondi il modal
+        this.hideButlerModal();
+
+        // Esegui l'azione appropriata
+        switch (action) {
+            case 'explore':
+                console.log('🎩 [NATAN BUTLER] Navigating to collections page');
+                // Naviga alla pagina delle collezioni
+                window.location.href = '/home/collections';
+                break;
+
+            case 'learn':
+                console.log('🎩 [NATAN BUTLER] Showing impact information');
+                // Scrolla alla sezione impatto o stats
+                const impactSection = document.querySelector('.nft-stats-section');
+                if (impactSection) {
+                    impactSection.scrollIntoView({ behavior: 'smooth' });
+                    setTimeout(() => {
+                        this.spotlight('.nft-stats-section [data-counter]', 4000);
+                    }, 1000);
+                } else {
+                    // Se non c'è la sezione, naviga a una pagina informativa
+                    console.log('🎩 [NATAN BUTLER] Impact section not found, could navigate to info page');
+                }
+                break;
+
+            case 'start':
+                console.log('🎩 [NATAN BUTLER] Highlighting registration options');
+                // Spotlight sui pulsanti di registrazione
+                this.spotlight('#register-link-desktop, #register-link-mobile', 4000);
+                break;
+
+            case 'business':
+                console.log('🎩 [NATAN BUTLER] Showing business opportunities');
+                // Scrolla alla sezione creator
+                const creatorSection = document.querySelector('section[aria-labelledby="creator-cta-heading"]');
+                if (creatorSection) {
+                    creatorSection.scrollIntoView({ behavior: 'smooth' });
+                    setTimeout(() => {
+                        this.spotlight('section[aria-labelledby="creator-cta-heading"] .cta-button', 4000);
+                    }, 1000);
+                } else {
+                    // Se non c'è la sezione, potremmo navigare a una pagina dedicata
+                    console.log('🎩 [NATAN BUTLER] Creator section not found, could navigate to business page');
+                }
+                break;
+
+            default:
+                console.log('🎩 [NATAN BUTLER] Unknown action:', action);
+        }
+
+        // Segna che l'utente ha interagito con il maggiordomo
+        localStorage.setItem('natan_assistant_opened', 'true');
+
+        // Apri l'assistente normale dopo un momento per ulteriore aiuto (solo se rimaniamo sulla stessa pagina)
+        if (action !== 'explore') {
+            setTimeout(() => {
+                if (!this.isOpen && this.toggleButton) {
+                    this.showSuggestion("Posso aiutarti con altro! 😊", "follow-up");
+                }
+            }, 3000);
+        }
+    }
+
+    /**
+     * Reset completo del maggiordomo (utile per testing)
+     */
+    public resetButler(): void {
+        console.log('🎩 [NATAN BUTLER] Resetting butler state');
+        this.debug('Resetting butler state');
+
+        localStorage.removeItem('natan_butler_dismissed');
+        localStorage.removeItem('natan_has_greeted');
+        localStorage.removeItem('natan_assistant_opened');
+
+        this.isButlerDismissed = false;
+        this.hasGreeted = false;
+
+        console.log('🎩 [NATAN BUTLER] Butler state reset. Reload page to see modal automatically.');
+
+        // Rimostra il maggiordomo dopo 2 secondi
+        setTimeout(() => {
+            this.showButlerWelcome();
+        }, 2000);
+    }
+
+    /**
+     * Funzione combinata per test completo e debug
+     */
+    public testButler(): void {
+        console.log('🎩 [NATAN BUTLER] === COMPLETE BUTLER TEST ===');
+        console.log('Current state:', {
+            isButlerDismissed: this.isButlerDismissed,
+            hasGreeted: this.hasGreeted,
+            butlerModal: !!this.butlerModal,
+            localStorage_dismissed: localStorage.getItem('natan_butler_dismissed'),
+            localStorage_greeted: localStorage.getItem('natan_has_greeted')
+        });
+
+        // Reset stato e forza visualizzazione
+        this.resetButler();
+    }
+
+    /**
+     * Mostra il maggiordomo anche se già salutato (per test)
+     */
+    public showButlerManually(): void {
+        console.log('🎩 [NATAN BUTLER] showButlerManually called');
+        this.debug('Showing butler manually');
+
+        // Se il modal non esiste, crealo
+        if (!this.butlerModal) {
+            console.log('🎩 [NATAN BUTLER] Modal doesn\'t exist, creating it');
+            this.createButlerModal();
+        }
+
+        // Forza lo stato per mostrare il modal
+        this.isButlerDismissed = false;
+
+        this.showButlerWelcome();
+    }
+
+    /**
+     * Forza la creazione e visualizzazione immediata del modal (SUPER DEBUG)
+     */
+    public forceShowModal(): void {
+        console.log('🎩 [NATAN BUTLER] FORCE SHOW MODAL - Creating modal from scratch');
+
+        // Rimuovi qualsiasi modal esistente
+        const existing = document.getElementById('natan-butler-modal');
+        if (existing) {
+            existing.remove();
+        }
+
+        // Crea e mostra immediatamente
+        this.butlerModal = null;
+        this.isButlerDismissed = false;
+        this.createButlerModal();
+
+        setTimeout(() => {
+            this.showButlerWelcome();
+        }, 100);
     }
 }

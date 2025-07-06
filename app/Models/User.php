@@ -13,11 +13,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Log;
 use Laravel\Fortify\TwoFactorAuthenticatable;
-use Laravel\Jetstream\HasProfilePhoto;
+use App\Traits\HasProfilePhoto;
 use Laravel\Jetstream\HasTeams;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
@@ -969,6 +970,120 @@ class User extends Authenticatable
         return $query->whereDoesntHave('dataExports', function ($q) {
             $q->where('created_at', '>=', now()->subDays(30));
         });
+    }
+
+    /**
+     * @Oracode Relationship: User Biographies
+     * 🔗 Purpose: One-to-many relationship with user biographies
+     * 📊 Ordering: Most recent biographies first
+     * 🔍 Usage: $user->biographies()->get()
+     */
+    public function biographies(): HasMany
+    {
+        return $this->hasMany(Biography::class)
+                    ->orderBy('updated_at', 'desc');
+    }
+
+    /**
+     * @Oracode Relationship: Active Biography
+     * 🔗 Purpose: Get user's primary/most recent biography
+     * 🎯 Logic: Most recently updated biography (for quick access)
+     * 🔍 Usage: $user->activeBiography
+     */
+    public function activeBiography(): HasOne
+    {
+        return $this->hasOne(Biography::class)
+                    ->latestOfMany('updated_at');
+    }
+
+    /**
+     * @Oracode Relationship: Public Biographies
+     * 🔗 Purpose: Only public biographies for profile display
+     * 🛡️ Privacy: Respects user privacy settings
+     * 🔍 Usage: $user->publicBiographies()->get()
+     */
+    public function publicBiographies(): HasMany
+    {
+        return $this->biographies()
+                    ->where('is_public', true);
+    }
+
+    /**
+     * @Oracode Relationship: Completed Biographies
+     * 🔗 Purpose: Filter biographies marked as completed
+     * 📊 Quality: Show only finished biographies
+     * 🔍 Usage: $user->completedBiographies()->get()
+     */
+    public function completedBiographies(): HasMany
+    {
+        return $this->biographies()
+                    ->where('is_completed', true);
+    }
+
+    /**
+     * @Oracode Method: Has Biography
+     * 🎯 Purpose: Quick check if user has any biography
+     * 📤 Returns: Boolean indicating biography existence
+     * 🔍 Usage: if ($user->hasBiography()) { ... }
+     */
+    public function hasBiography(): bool
+    {
+        return $this->biographies()->exists();
+    }
+
+    /**
+     * @Oracode Method: Has Public Biography
+     * 🎯 Purpose: Check if user has at least one public biography
+     * 📤 Returns: Boolean for profile display logic
+     * 🔍 Usage: if ($user->hasPublicBiography()) { ... }
+     */
+    public function hasPublicBiography(): bool
+    {
+        return $this->publicBiographies()->exists();
+    }
+
+    /**
+     * @Oracode Method: Get Primary Biography
+     * 🎯 Purpose: Get the main biography for display
+     * 📊 Logic: Public > Completed > Most Recent
+     * 📤 Returns: Biography model or null
+     */
+    public function getPrimaryBiography(): ?Biography
+    {
+        // Try public first
+        $public = $this->publicBiographies()->first();
+        if ($public) {
+            return $public;
+        }
+
+        // Then completed
+        $completed = $this->completedBiographies()->first();
+        if ($completed) {
+            return $completed;
+        }
+
+        // Finally most recent
+        return $this->biographies()->first();
+    }
+
+    /**
+     * @Oracode Method: Get Biography Summary
+     * 🎯 Purpose: Generate user biography summary for profiles
+     * 📤 Returns: Array with biography stats and info
+     */
+    public function getBiographySummary(): array
+    {
+        $primary = $this->getPrimaryBiography();
+
+        return [
+            'has_biography' => $this->hasBiography(),
+            'has_public' => $this->hasPublicBiography(),
+            'total_count' => $this->biographies()->count(),
+            'public_count' => $this->publicBiographies()->count(),
+            'primary_biography' => $primary,
+            'primary_preview' => $primary?->content_preview,
+            'estimated_reading_time' => $primary?->getEstimatedReadingTime(),
+        ];
     }
 
 }

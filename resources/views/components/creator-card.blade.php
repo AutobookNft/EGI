@@ -3,17 +3,11 @@
 
 <div class="flex flex-col h-full overflow-hidden transition-shadow duration-300 bg-gray-800 shadow-lg rounded-2xl hover:shadow-2xl">
     <figure class="flex items-center justify-center w-full h-48 overflow-hidden bg-gray-900">
-        @if($creator->profile_image) {{-- Assumiamo che esista un campo profile_image nel modello User --}}
-            <img
-                src="{{ $creator->profile_image }}"
-                alt="{{ $creator->name }}"
-                class="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
-            >
-        @else
-            <div class="flex items-center justify-center w-full h-full bg-gradient-to-r from-green-500 to-teal-600">
-                <span class="text-6xl text-white opacity-50 material-symbols-outlined">person</span> {{-- Icona generica --}}
-            </div>
-        @endif
+        <img
+            src="{{ $creator->profile_photo_url }}"
+            alt="{{ $creator->name }}"
+            class="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
+        />
     </figure>
 
     <div class="flex flex-col justify-between flex-grow p-4">

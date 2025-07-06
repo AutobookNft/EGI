@@ -24,7 +24,7 @@ export default defineConfig(({ mode }) => {
                     'resources/css/collections-show.css',
                     'resources/js/app.js',
                     'resources/js/collection.js',
-                    'resources/ts/main.js',
+                    'resources/ts/main.ts', // Corretto da main.js a main.ts
                     'resources/js/guest.js',
                     'resources/js/polyfills.js',
                     'resources/js/collections-show.js',
@@ -33,15 +33,8 @@ export default defineConfig(({ mode }) => {
                     // 🎯 USER DOMAINS - Personal Data
                     'resources/css/personal-data.css',
                     'resources/ts/domain/personal-data.ts',
-                    // 🎯 USER DOMAINS - Organization Data (future)
-                    'resources/css/domains/organization-data.css',
-                    'resources/ts/domains/organization-data.ts',
-                    // 🎯 USER DOMAINS - Documents (future)
-                    'resources/css/domains/documents.css',
-                    'resources/ts/domains/documents.ts',
-                    // 🎯 USER DOMAINS - Invoice Preferences (future)
-                    'resources/css/domains/invoice-preferences.css',
-                    'resources/ts/domains/invoice-preferences.ts',
+                    // Modal Fix CSS
+                    'resources/css/modal-fix.css',
                     // Ultra Upload Manager
                     'vendor/ultra/ultra-upload-manager/resources/ts/core/file_upload_manager.ts',
                     'vendor/ultra/ultra-upload-manager/resources/css/app.css',
@@ -95,7 +88,7 @@ export default defineConfig(({ mode }) => {
         },
         build: {
             outDir: 'public/build',
-            manifest: true,
+            manifest: 'manifest.json', // Genera il manifest direttamente in public/build/
             sourcemap: true,
             cssCodeSplit: true,
             chunkSizeWarningLimit: 1000,

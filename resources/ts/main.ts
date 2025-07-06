@@ -316,7 +316,27 @@ async function initializeFEGISystemOrchestrated(): Promise<void> {
         try {
             if (typeof NatanAssistant === 'function') {
                 const natanAssistant = new NatanAssistant();
+
+                // Esporta globalmente per debug
+                (window as any).natan = natanAssistant;
+                (window as any).testButlerModal = () => {
+                    console.log('🎩 TEST: Forcing butler modal display from global function');
+                    natanAssistant.forceShowModal();
+                };
+                (window as any).testButler = () => {
+                    console.log('🎩 TEST: Complete butler test with state reset');
+                    natanAssistant.testButler();
+                };
+                (window as any).resetButler = () => {
+                    console.log('🎩 TEST: Resetting butler state');
+                    natanAssistant.resetButler();
+                };
+
                 console.log('Padmin Main: Natan Assistant initialized.');
+                console.log('🎩 Available test functions:');
+                console.log('- window.testButlerModal() - Force show modal');
+                console.log('- window.testButler() - Complete test with reset');
+                console.log('- window.resetButler() - Reset state only');
             } else {
                 console.warn('Padmin Main: NatanAssistant is not a constructor or function.');
             }

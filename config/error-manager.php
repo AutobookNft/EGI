@@ -2705,5 +2705,242 @@ return [
             'msg_to' => 'toast', // Un avviso non invadente, se necessario
         ],
 
+        // ====================================================
+        // Biography System Error Codes
+        // ====================================================
+        'BIOGRAPHY_INDEX_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.biography_index_failed',
+            'user_message_key' => 'error-manager::errors.user.biography_index_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'BIOGRAPHY_VALIDATION_FAILED' => [
+            'type' => 'warning',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.biography_validation_failed',
+            'user_message_key' => 'error-manager::errors.user.biography_validation_failed',
+            'http_status_code' => 422,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'div',
+        ],
+
+        'BIOGRAPHY_CREATE_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.biography_create_failed',
+            'user_message_key' => 'error-manager::errors.user.biography_create_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'BIOGRAPHY_ACCESS_DENIED' => [
+            'type' => 'warning',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.biography_access_denied',
+            'user_message_key' => 'error-manager::errors.user.biography_access_denied',
+            'http_status_code' => 403,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'BIOGRAPHY_SHOW_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.biography_show_failed',
+            'user_message_key' => 'error-manager::errors.user.biography_show_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'BIOGRAPHY_UPDATE_DENIED' => [
+            'type' => 'warning',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.biography_update_denied',
+            'user_message_key' => 'error-manager::errors.user.biography_update_denied',
+            'http_status_code' => 403,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'BIOGRAPHY_UPDATE_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.biography_update_failed',
+            'user_message_key' => 'error-manager::errors.user.biography_update_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'BIOGRAPHY_TYPE_CHANGE_INVALID' => [
+            'type' => 'warning',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.biography_type_change_invalid',
+            'user_message_key' => 'error-manager::errors.user.biography_type_change_invalid',
+            'http_status_code' => 422,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'div',
+        ],
+
+        'BIOGRAPHY_DELETE_DENIED' => [
+            'type' => 'warning',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.biography_delete_denied',
+            'user_message_key' => 'error-manager::errors.user.biography_delete_denied',
+            'http_status_code' => 403,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'BIOGRAPHY_DELETE_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.biography_delete_failed',
+            'user_message_key' => 'error-manager::errors.user.biography_delete_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        // Additional Biography Chapter Error Codes (for future BiographyChapterController)
+        'BIOGRAPHY_CHAPTER_VALIDATION_FAILED' => [
+            'type' => 'warning',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.biography_chapter_validation_failed',
+            'user_message_key' => 'error-manager::errors.user.biography_chapter_validation_failed',
+            'http_status_code' => 422,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'div',
+        ],
+
+        'BIOGRAPHY_CHAPTER_CREATE_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.biography_chapter_create_failed',
+            'user_message_key' => 'error-manager::errors.user.biography_chapter_create_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'BIOGRAPHY_CHAPTER_ACCESS_DENIED' => [
+            'type' => 'warning',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.biography_chapter_access_denied',
+            'user_message_key' => 'error-manager::errors.user.biography_chapter_access_denied',
+            'http_status_code' => 403,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'BIOGRAPHY_CHAPTER_UPDATE_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.biography_chapter_update_failed',
+            'user_message_key' => 'error-manager::errors.user.biography_chapter_update_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'BIOGRAPHY_CHAPTER_DELETE_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.biography_chapter_delete_failed',
+            'user_message_key' => 'error-manager::errors.user.biography_chapter_delete_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'BIOGRAPHY_CHAPTER_REORDER_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.biography_chapter_reorder_failed',
+            'user_message_key' => 'error-manager::errors.user.biography_chapter_reorder_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        // Biography Media Error Codes
+        'BIOGRAPHY_MEDIA_UPLOAD_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.biography_media_upload_failed',
+            'user_message_key' => 'error-manager::errors.user.biography_media_upload_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'BIOGRAPHY_MEDIA_VALIDATION_FAILED' => [
+            'type' => 'warning',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.biography_media_validation_failed',
+            'user_message_key' => 'error-manager::errors.user.biography_media_validation_failed',
+            'http_status_code' => 422,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'div',
+        ],
+
+        'BIOGRAPHY_MEDIA_DELETE_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.biography_media_delete_failed',
+            'user_message_key' => 'error-manager::errors.user.biography_media_delete_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        // Biography Chapter System Error Codes
+        'BIOGRAPHY_CHAPTER_INDEX_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.biography_chapter_index_failed',
+            'user_message_key' => 'error-manager::errors.user.biography_chapter_index_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'BIOGRAPHY_CHAPTER_SHOW_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.biography_chapter_show_failed',
+            'user_message_key' => 'error-manager::errors.user.biography_chapter_show_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'sweet-alert',
+        ],
+
     ]
 ];

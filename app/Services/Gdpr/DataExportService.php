@@ -180,17 +180,6 @@ class DataExportService
     }
 
     /**
-     * Get available data categories
-     *
-     * @return array
-     * @privacy-safe Returns public category definitions
-     */
-    public function getAvailableDataCategories(): array
-    {
-        return $this->dataCategories;
-    }
-
-    /**
      * Get supported export formats
      *
      * @return array
@@ -474,36 +463,65 @@ class DataExportService
             ]
         ];
 
-        $totalCategories = count($categories);
+        // 🔥 VERIFICA CHE LE CATEGORIE SIANO VALIDE DALLA CONFIG
+        $validCategories = array_keys(config('gdpr.export.data_categories', []));
+        $categoriesToProcess = array_intersect($categories, $validCategories);
+
+        $totalCategories = count($categoriesToProcess);
         $currentCategory = 0;
 
-        foreach ($categories as $category) {
+        foreach ($categoriesToProcess as $category) {
             $this->updateExportProgress($export, ($currentCategory / $totalCategories) * 80);
 
             switch ($category) {
                 case 'profile':
                     $data['profile'] = $this->collectProfileData($user);
                     break;
-                case 'activities':
-                    $data['activities'] = $this->collectActivityData($user);
+                case 'account':
+                    $data['account'] = $this->collectAccountData($user);
                     break;
-                case 'collections':
-                    $data['collections'] = $this->collectCollectionData($user);
+                case 'preferences':
+                    $data['preferences'] = $this->collectPreferencesData($user);
                     break;
-                case 'wallet':
-                    $data['wallet'] = $this->collectWalletData($user);
+                case 'activity':
+                    $data['activity'] = $this->collectActivityData($user);
                     break;
                 case 'consents':
                     $data['consents'] = $this->collectConsentData($user);
                     break;
+                case 'collections':
+                    $data['collections'] = $this->collectCollectionData($user);
+                    break;
+                case 'purchases':
+                    $data['purchases'] = $this->collectPurchasesData($user);
+                    break;
+                case 'comments':
+                    $data['comments'] = $this->collectCommentsData($user);
+                    break;
+                case 'messages':
+                    $data['messages'] = $this->collectMessagesData($user);
+                    break;
+                case 'biography':
+                    $data['biography'] = $this->collectBiographyData($user);
+                    break;
+                // Mantieni anche i metodi esistenti se ci sono
+                case 'wallet':
+                    $data['wallet'] = $this->collectWalletData($user);
+                    break;
                 case 'audit':
                     $data['audit'] = $this->collectAuditData($user);
+                    break;
+                default:
+                    // Log unknown category
+                    $this->logger->warning('Unknown export category requested', [
+                        'category' => $category,
+                        'user_id' => $user->id
+                    ]);
                     break;
             }
 
             $currentCategory++;
         }
-
         return $data;
     }
 
@@ -920,4 +938,344 @@ class DataExportService
 
         return 'masked';
     }
+
+    /**
+     * Get available data categories
+     *
+     * @return array
+     * @privacy-safe Returns public category definitions
+     */
+    public function getAvailableDataCategories(): array
+    {
+        // 🔥 USA LA CONFIGURAZIONE ESISTENTE invece di $this->dataCategories
+        $categories = config('gdpr.export.data_categories', []);
+
+        $result = [];
+        foreach ($categories as $key => $translationKey) {
+            $result[$key] = [
+                'name' => __($translationKey),
+                'key' => $key,
+                'translation_key' => $translationKey
+            ];
+        }
+
+        return $result;
+    }
+
+    /**
+     * @Oracode Collect Account Data
+     * 🎯 Purpose: Export core account information and settings
+     * 🛡️ Privacy: User's account data only
+     *
+     * @param User $user
+     * @return array
+     * @privacy-safe Returns user's account data only
+     */
+    private function collectAccountData(User $user): array
+    {
+        return [
+            'account_info' => [
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'email_verified' => !is_null($user->email_verified_at),
+                'email_verified_at' => $user->email_verified_at?->toISOString(),
+                'account_created' => $user->created_at->toISOString(),
+                'last_updated' => $user->updated_at->toISOString(),
+                'last_login' => $user->last_login_at?->toISOString()
+            ],
+            'account_status' => [
+                'active' => true, // Se può fare export, è attivo
+                'verified' => !is_null($user->email_verified_at),
+                'two_factor_enabled' => !is_null($user->two_factor_secret ?? null)
+            ],
+            'account_metadata' => [
+                'timezone' => $user->timezone ?? config('app.timezone'),
+                'language' => $user->language ?? 'it',
+                'created_via' => $user->created_via ?? 'web'
+            ]
+        ];
+    }
+
+    /**
+     * @Oracode Collect User Preferences
+     * 🎯 Purpose: Export user preferences and settings
+     * 🛡️ Privacy: User's preferences only
+     *
+     * @param User $user
+     * @return array
+     * @privacy-safe Returns user's preferences only
+     */
+    private function collectPreferencesData(User $user): array
+    {
+        return [
+            'ui_preferences' => [
+                'language' => $user->language ?? 'it',
+                'timezone' => $user->timezone ?? config('app.timezone'),
+                'theme' => $user->theme ?? 'light',
+                'notifications_enabled' => $user->notifications_enabled ?? true
+            ],
+            'privacy_preferences' => [
+                'profile_visibility' => $user->profile_visibility ?? 'public',
+                'allow_contact' => $user->allow_contact ?? true,
+                'show_online_status' => $user->show_online_status ?? true
+            ],
+            'platform_preferences' => [
+                'newsletter_subscribed' => $user->newsletter_subscribed ?? false,
+                'marketing_emails' => $user->marketing_emails ?? false,
+                'product_updates' => $user->product_updates ?? true
+            ],
+            'notification_settings' => [
+                // Placeholder per future notifiche
+                'email_notifications' => $user->email_notifications ?? [],
+                'push_notifications' => $user->push_notifications ?? [],
+                'sms_notifications' => $user->sms_notifications ?? []
+            ]
+        ];
+    }
+
+    /**
+     * @Oracode Collect Purchases Data
+     * 🎯 Purpose: Export purchase history and transaction data
+     * 🛡️ Privacy: User's purchase data only
+     *
+     * @param User $user
+     * @return array
+     * @privacy-safe Returns user's purchase data only
+     */
+    private function collectPurchasesData(User $user): array
+    {
+        // Placeholder per future implementazione e-commerce
+        // Al momento FlorenceEGI potrebbe non avere un sistema acquisti completo
+
+        return [
+            'purchase_summary' => [
+                'total_purchases' => 0,
+                'total_spent' => 0,
+                'currency' => 'EUR',
+                'first_purchase' => null,
+                'last_purchase' => null
+            ],
+            'purchase_history' => [
+                // Placeholder per quando implementerete il sistema acquisti
+            ],
+            'payment_methods' => [
+                // Placeholder per metodi di pagamento salvati
+            ],
+            'invoices' => [
+                // Placeholder per fatture
+            ],
+            'refunds' => [
+                // Placeholder per rimborsi
+            ],
+            'note' => 'Purchase system not yet implemented in FlorenceEGI MVP'
+        ];
+    }
+
+    /**
+     * @Oracode Collect Messages Data
+     * 🎯 Purpose: Export user messages and communications
+     * 🛡️ Privacy: User's messages only
+     *
+     * @param User $user
+     * @return array
+     * @privacy-safe Returns user's messages only
+     */
+    private function collectMessagesData(User $user): array
+    {
+        // Placeholder per future sistema messaggi
+        // Al momento FlorenceEGI potrebbe non avere un sistema messaggi
+
+        return [
+            'message_summary' => [
+                'total_sent' => 0,
+                'total_received' => 0,
+                'conversations' => 0,
+                'first_message' => null,
+                'last_message' => null
+            ],
+            'conversations' => [
+                // Placeholder per conversazioni future
+            ],
+            'sent_messages' => [
+                // Placeholder per messaggi inviati
+            ],
+            'received_messages' => [
+                // Placeholder per messaggi ricevuti
+            ],
+            'message_settings' => [
+                'allow_messages' => true,
+                'message_privacy' => 'contacts_only'
+            ],
+            'note' => 'Messaging system not yet implemented in FlorenceEGI MVP'
+        ];
+    }
+
+    /**
+     * @Oracode Collect Comments Data
+     * 🎯 Purpose: Export user comments and reviews
+     * 🛡️ Privacy: User's comments only
+     *
+     * @param User $user
+     * @return array
+     * @privacy-safe Returns user's comments only
+     */
+    private function collectCommentsData(User $user): array
+    {
+        // Placeholder per future sistema commenti
+
+        return [
+            'comment_summary' => [
+                'total_comments' => 0,
+                'total_reviews' => 0,
+                'average_rating_given' => null,
+                'first_comment' => null,
+                'last_comment' => null
+            ],
+            'comments' => [
+                // Placeholder per commenti futuri
+            ],
+            'reviews' => [
+                // Placeholder per recensioni future
+            ],
+            'comment_settings' => [
+                'allow_public_comments' => true,
+                'moderate_comments' => false
+            ],
+            'note' => 'Comment system not yet implemented in FlorenceEGI MVP'
+        ];
+    }
+
+    /**
+     * @Oracode Collect Biography Data with GDPR Compliance
+     * 🎯 Purpose: Export complete biography data including chapters and media
+     * 🛡️ Privacy: Only user's own biographies with privacy level tracking
+     * 🧱 Core Logic: Structured export with timeline integrity and media references
+     *
+     * @param User $user
+     * @return array
+     * @privacy-safe Returns user's biography data only
+     */
+    private function collectBiographyData(User $user): array
+    {
+        $biographies = $user->biographies()
+            ->with(['chapters' => function ($query) {
+                $query->orderBy('sort_order')->orderBy('date_from');
+            }])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return [
+            'summary' => [
+                'total_biographies' => $biographies->count(),
+                'public_biographies' => $biographies->where('is_public', true)->count(),
+                'completed_biographies' => $biographies->where('is_completed', true)->count(),
+                'total_chapters' => $biographies->sum(fn($bio) => $bio->chapters->count()),
+                'export_date' => now()->toISOString()
+            ],
+            'biographies' => $biographies->map(function ($biography) {
+                return [
+                    'biography_info' => [
+                        'id' => $biography->id,
+                        'type' => $biography->type,
+                        'title' => $biography->title,
+                        'slug' => $biography->slug,
+                        'excerpt' => $biography->excerpt,
+                        'is_public' => $biography->is_public,
+                        'is_completed' => $biography->is_completed,
+                        'created_at' => $biography->created_at->toISOString(),
+                        'updated_at' => $biography->updated_at->toISOString()
+                    ],
+                    'content' => [
+                        'main_content' => $biography->content,
+                        'content_length' => strlen($biography->content ?? ''),
+                        'estimated_reading_time' => $biography->getEstimatedReadingTime()
+                    ],
+                    'settings' => $biography->settings ?? [],
+                    'chapters' => $biography->chapters->map(function ($chapter) {
+                        return [
+                            'chapter_info' => [
+                                'id' => $chapter->id,
+                                'title' => $chapter->title,
+                                'chapter_type' => $chapter->chapter_type,
+                                'slug' => $chapter->slug,
+                                'sort_order' => $chapter->sort_order,
+                                'is_published' => $chapter->is_published,
+                                'is_ongoing' => $chapter->is_ongoing,
+                                'created_at' => $chapter->created_at->toISOString(),
+                                'updated_at' => $chapter->updated_at->toISOString()
+                            ],
+                            'content' => [
+                                'content' => $chapter->content,
+                                'content_length' => strlen($chapter->content),
+                                'reading_time' => $chapter->getReadingTime()
+                            ],
+                            'timeline' => [
+                                'date_from' => $chapter->date_from?->toDateString(),
+                                'date_to' => $chapter->date_to?->toDateString(),
+                                'date_range_display' => $chapter->date_range_display,
+                                'duration_formatted' => $chapter->duration_formatted,
+                                'is_current_period' => $chapter->isCurrentPeriod()
+                            ],
+                            'formatting' => $chapter->formatting_data ?? [],
+                            'media_info' => [
+                                'total_media' => $chapter->getMedia()->count(),
+                                'media_collections' => $chapter->getMedia()
+                                    ->groupBy('collection_name')
+                                    ->map(function ($mediaGroup, $collection) {
+                                        return [
+                                            'collection' => $collection,
+                                            'count' => $mediaGroup->count(),
+                                            'files' => $mediaGroup->map(function ($media) {
+                                                return [
+                                                    'filename' => $media->file_name,
+                                                    'mime_type' => $media->mime_type,
+                                                    'size' => $media->size,
+                                                    'url' => $media->getUrl(),
+                                                    'created_at' => $media->created_at->toISOString()
+                                                ];
+                                            })->toArray()
+                                        ];
+                                    })->toArray()
+                            ]
+                        ];
+                    })->toArray(),
+                    'media_summary' => [
+                        'total_media' => $biography->getMedia()->count(),
+                        'media_collections' => $biography->getMedia()
+                            ->groupBy('collection_name')
+                            ->map(function ($mediaGroup, $collection) {
+                                return [
+                                    'collection' => $collection,
+                                    'count' => $mediaGroup->count(),
+                                    'total_size' => $mediaGroup->sum('size'),
+                                    'files' => $mediaGroup->map(function ($media) {
+                                        return [
+                                            'filename' => $media->file_name,
+                                            'mime_type' => $media->mime_type,
+                                            'size' => $media->size,
+                                            'url' => $media->getUrl(),
+                                            'created_at' => $media->created_at->toISOString()
+                                        ];
+                                    })->toArray()
+                                ];
+                            })->toArray()
+                    ],
+                    'privacy_info' => [
+                        'visibility_level' => $biography->is_public ? 'public' : 'private',
+                        'published_chapters' => $biography->chapters->where('is_published', true)->count(),
+                        'draft_chapters' => $biography->chapters->where('is_published', false)->count(),
+                        'gdpr_notes' => 'This biography data is exported under Article 20 GDPR - Right to data portability'
+                    ]
+                ];
+            })->toArray(),
+            'export_metadata' => [
+                'legal_basis' => 'Article 20 GDPR - Right to data portability',
+                'processing_purpose' => 'User data export request',
+                'retention_note' => 'This export file will be automatically deleted after 30 days',
+                'data_controller' => 'FlorenceEGI S.r.l.',
+                'export_format_note' => 'Structured data for portability and interoperability'
+            ]
+        ];
+    }
+
 }

@@ -141,7 +141,7 @@ final class UserCollectionController extends Controller
             return $this->errorManager->handle('UEM_USER_UNAUTHENTICATED', [
                 'target_collection_id' => $collection->id,
                 'ip_address' => $request->ip()
-            ]);
+            ], new \Exception('User not authenticated'));
         }
 
         $isOwner = $collection->creator_id === $user->id;

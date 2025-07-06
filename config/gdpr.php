@@ -159,6 +159,7 @@ return [
             'purchases' => 'gdpr.export.categories.purchases',
             'comments' => 'gdpr.export.categories.comments',
             'messages' => 'gdpr.export.categories.messages',
+            'biography' => 'gdpr.export.categories.biography',
         ],
     ],
 

@@ -23,6 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
             __DIR__.'/../routes/user-domains.php',
             __DIR__.'/../routes/gdpr_legal.php',
             __DIR__.'/../routes/creator.php',
+            __DIR__.'/../routes/biography.php',
         ],
         api: __DIR__.'/../routes/api.php',
         commands: __DIR__.'/../routes/console.php',
