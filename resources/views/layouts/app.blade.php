@@ -153,7 +153,7 @@
             @endif
         </div>
 
-         {{-- Footer --}}
+        {{-- Footer --}}
         <footer class="mt-auto border-t gdpr-header border-gray-200/50" role="contentinfo">
             <div class="px-4 py-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
                 <div class="flex items-center justify-between text-sm gdpr-subtitle">
