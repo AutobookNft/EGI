@@ -217,7 +217,7 @@ class BiographyService
                     'chapters_deleted' => $chaptersCount,
                     'media_deleted' => $mediaCount
                 ],
-                GdprActivityCategory::DATA_DELETION
+                GdprActivityCategory::GDPR_ACTIONS
             );
 
             $this->logger->info('BiographyService: delete successful', [

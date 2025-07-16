@@ -23,6 +23,8 @@ use App\Livewire\Notifications\Wallets\EditWalletModal;
 use Illuminate\Support\Facades\Route;
 use App\Livewire\PhotoUploader;
 use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\Api\BiographyController;
+use App\Http\Controllers\Api\BiographyChapterController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\EgiReservationCertificateController;
 use App\Http\Controllers\GdprController;
@@ -118,6 +120,13 @@ Route::get('/debug-session-direct', function () {
         ]
     ];
 });
+
+// Route::get('/test-upload-dir', function() {
+//     return response()->json([
+//         'upload_tmp_dir' => ini_get('upload_tmp_dir')
+//     ]);
+// });
+
 
 
 /*
@@ -412,20 +421,64 @@ Route::get('/biographies/{biography:slug}', [BiographyWebController::class, 'sho
 |
 */
 
-Route::middleware(['auth', 'can:manage_bio_profile'])->group(function () {
+Route::middleware(['auth'])->group(function () {
     // Biography management (user's own biographies)
     Route::get('/biography/manage', [App\Http\Controllers\Web\BiographyController::class, 'manage'])
         ->name('biography.manage');
-    Route::post('/biography/manage', [App\Http\Controllers\Web\BiographyController::class, 'store'])
+    Route::get('/biography/create', [BiographyController::class, 'create'])
+        ->name('biography.create');
+    Route::post('/biography/create', [App\Http\Controllers\Web\BiographyController::class, 'store'])
         ->name('biography.store');
+    Route::get('/biography/{biography}/edit', [App\Http\Controllers\Web\BiographyController::class, 'edit'])
+        ->name('biography.edit');
+    Route::put('/biography/{biography}', [App\Http\Controllers\Web\BiographyController::class, 'update'])
+        ->name('biography.update');
 
     Route::get('/biography/view', [App\Http\Controllers\Web\BiographyController::class, 'viewOwn'])
         ->name('biography.view');
+
+    // CRUD Capitoli Biografia
+    Route::post('/biography/{biography}/chapters', [App\Http\Controllers\Web\BiographyChapterController::class, 'store'])
+        ->name('biography.chapters.store');
+    Route::put('/biography/{biography}/chapters/{chapter}', [App\Http\Controllers\Web\BiographyChapterController::class, 'update'])
+        ->name('biography.chapters.update');
+    Route::delete('/biography/{biography}/chapters/{chapter}', [App\Http\Controllers\Web\BiographyChapterController::class, 'destroy'])
+        ->name('biography.chapters.destroy');
+    Route::get('/biography/{biography}/chapters/{chapter}', [App\Http\Controllers\Web\BiographyChapterController::class, 'show'])
+        ->name('biography.chapters.show');
 });
 
 // Public biography viewing (no auth required)
 Route::get('/biography/{user}', [App\Http\Controllers\Web\BiographyController::class, 'show'])
     ->name('biography.user.show');
+
+// Biography media upload route
+Route::post('/biography/upload-media', [App\Http\Controllers\Web\BiographyController::class, 'uploadMedia'])
+    ->name('biography.upload-media')
+    ->middleware('auth');
+
+// Biography remove media route
+Route::delete('/biography/remove-media', [App\Http\Controllers\Web\BiographyController::class, 'removeMedia'])
+    ->name('biography.remove-media')
+    ->middleware('auth');
+
+// Biography chapter media routes
+Route::post('/biography/chapters/{chapter}/media', [App\Http\Controllers\Web\BiographyChapterController::class, 'uploadMedia'])
+    ->name('biography.chapters.media.upload')
+    ->middleware('auth');
+Route::delete('/biography/chapters/{chapter}/media', [App\Http\Controllers\Web\BiographyChapterController::class, 'removeMedia'])
+    ->name('biography.chapters.media.remove')
+    ->middleware('auth');
+
+// Biography set avatar route
+Route::post('/biography/set-avatar', [App\Http\Controllers\Web\BiographyController::class, 'setAvatar'])
+    ->name('biography.set-avatar')
+    ->middleware('auth');
+
+// Biography delete route (web version for session auth)
+Route::delete('/biography/{biography}', [App\Http\Controllers\Web\BiographyController::class, 'destroy'])
+    ->name('biography.destroy')
+    ->middleware('auth');
 
 /*
 |--------------------------------------------------------------------------

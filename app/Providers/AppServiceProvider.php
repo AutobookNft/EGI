@@ -33,7 +33,10 @@ use Laravel\Fortify\Fortify;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Services\Gdpr\LegalContentService;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Queue\Events\JobFailed;
 use Illuminate\Support\Facades\Log;
+use Spatie\ImageOptimizer\OptimizerChain;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -104,6 +107,25 @@ class AppServiceProvider extends ServiceProvider
         // if (app()->environment('local')) {
         //     Log::channel('florenceegi')->info('FEGI Guard registered early in AppServiceProvider::register() with FIXED session access');
         // }
+
+         // 🎯 SOLUZIONE DEFINITIVA: Forziamo il sistema a usare sempre
+        //    una catena di ottimizzatori VUOTA, bypassando la logica della Factory.
+        // $this->app->bind(OptimizerChain::class, fn () => new OptimizerChain()); // <-- 2. AGGIUNGI QUESTA RIGA
+
+
+        // 🎯 2. AGGIUNGI QUESTO BLOCCO DI CODICE QUI
+        Event::listen(JobFailed::class, function (JobFailed $event) {
+            Log::channel('florenceegi')->error('--- JOB FAILED: DETAILED REPORT (L11) ---', [
+                'connection' => $event->connectionName,
+                'job' => $event->job->resolveName(),
+                'exception_class' => get_class($event->exception),
+                'exception_message' => $event->exception->getMessage(),
+                'exception_file' => $event->exception->getFile(),
+                'exception_line' => $event->exception->getLine(),
+                'payload' => $event->job->payload(),
+                'exception_trace' => $event->exception->getTraceAsString(),
+            ]);
+        });
 
         // Override Fortify's default login handling
         Fortify::authenticateUsing(function ($request) {

@@ -10373,7 +10373,6 @@ namespace Illuminate\Support\Facades {
      * @method static void determineLocalesUsing(callable $callback)
      * @method static \Illuminate\Translation\MessageSelector getSelector()
      * @method static void setSelector(\Illuminate\Translation\MessageSelector $selector)
-     * @method static \Illuminate\Contracts\Translation\Loader getLoader()
      * @method static string locale()
      * @method static string getFallback()
      * @method static void setFallback(string $fallback)
@@ -10490,6 +10489,17 @@ namespace Illuminate\Support\Facades {
         {
             /** @var \Ultra\TranslationManager\TranslationManager $instance */
             $instance->registerPackageTranslations($package, $baseLangPath);
+        }
+
+        /**
+         * 
+         *
+         * @static 
+         */
+        public static function getLoader()
+        {
+            /** @var \Ultra\TranslationManager\TranslationManager $instance */
+            return $instance->getLoader();
         }
 
             }
@@ -23085,6 +23095,17 @@ namespace Ultra\TranslationManager\Facades {
             $instance->registerPackageTranslations($package, $baseLangPath);
         }
 
+        /**
+         * 
+         *
+         * @static 
+         */
+        public static function getLoader()
+        {
+            /** @var \Ultra\TranslationManager\TranslationManager $instance */
+            return $instance->getLoader();
+        }
+
             }
     }
 
@@ -28041,11 +28062,6 @@ namespace  {
 }
 
 
-namespace Facades\Livewire\Features\SupportFileUploads {
-    /**
-     * @mixin \Livewire\Features\SupportFileUploads\GenerateSignedUploadUrl     */
-    class GenerateSignedUploadUrl extends \Livewire\Features\SupportFileUploads\GenerateSignedUploadUrl {}
-}
 
 
 

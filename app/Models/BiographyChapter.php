@@ -23,9 +23,9 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
-class BiographyChapter extends Model implements HasMedia
-{
+class BiographyChapter extends Model implements HasMedia {
     use HasFactory, InteractsWithMedia;
 
     /**
@@ -61,13 +61,13 @@ class BiographyChapter extends Model implements HasMedia
         'updated_at' => 'datetime',
     ];
 
+
     /**
      * @Oracode Relationship: Parent Biography
      * 🔗 Purpose: Connect chapter to its parent biography
      * 🎯 Optimization: Eager loading ready for performance
      */
-    public function biography(): BelongsTo
-    {
+    public function biography(): BelongsTo {
         return $this->belongsTo(Biography::class);
     }
 
@@ -76,8 +76,7 @@ class BiographyChapter extends Model implements HasMedia
      * 🔗 Purpose: Access user owner through parent biography
      * 📊 Convenience: Direct access to owner without join complexity
      */
-    public function user(): BelongsTo
-    {
+    public function user(): BelongsTo {
         return $this->biography->user();
     }
 
@@ -86,8 +85,7 @@ class BiographyChapter extends Model implements HasMedia
      * 🎯 Purpose: Filter only published chapters for public display
      * 🔍 Usage: BiographyChapter::published()->get()
      */
-    public function scopePublished(Builder $query): Builder
-    {
+    public function scopePublished(Builder $query): Builder {
         return $query->where('is_published', true);
     }
 
@@ -96,8 +94,7 @@ class BiographyChapter extends Model implements HasMedia
      * 🎯 Purpose: Filter chapters that are marked as ongoing (current)
      * 🔍 Usage: BiographyChapter::ongoing()->get()
      */
-    public function scopeOngoing(Builder $query): Builder
-    {
+    public function scopeOngoing(Builder $query): Builder {
         return $query->where('is_ongoing', true);
     }
 
@@ -106,8 +103,7 @@ class BiographyChapter extends Model implements HasMedia
      * 🎯 Purpose: Filter chapters by type (standard, milestone, achievement)
      * 🔍 Usage: BiographyChapter::byType('milestone')->get()
      */
-    public function scopeByType(Builder $query, string $type): Builder
-    {
+    public function scopeByType(Builder $query, string $type): Builder {
         return $query->where('chapter_type', $type);
     }
 
@@ -116,10 +112,9 @@ class BiographyChapter extends Model implements HasMedia
      * 🎯 Purpose: Order chapters by timeline logic (date_from, then sort_order)
      * 🔍 Usage: BiographyChapter::timelineOrdered()->get()
      */
-    public function scopeTimelineOrdered(Builder $query): Builder
-    {
+    public function scopeTimelineOrdered(Builder $query): Builder {
         return $query->orderBy('date_from', 'asc')
-                    ->orderBy('sort_order', 'asc');
+            ->orderBy('sort_order', 'asc');
     }
 
     /**
@@ -127,15 +122,14 @@ class BiographyChapter extends Model implements HasMedia
      * 🎯 Purpose: Filter chapters within a specific date range
      * 🔍 Usage: BiographyChapter::dateRange('2020-01-01', '2023-12-31')->get()
      */
-    public function scopeDateRange(Builder $query, $startDate, $endDate): Builder
-    {
+    public function scopeDateRange(Builder $query, $startDate, $endDate): Builder {
         return $query->where(function ($q) use ($startDate, $endDate) {
             $q->whereBetween('date_from', [$startDate, $endDate])
-              ->orWhereBetween('date_to', [$startDate, $endDate])
-              ->orWhere(function ($q2) use ($startDate, $endDate) {
-                  $q2->where('date_from', '<=', $startDate)
-                     ->where('date_to', '>=', $endDate);
-              });
+                ->orWhereBetween('date_to', [$startDate, $endDate])
+                ->orWhere(function ($q2) use ($startDate, $endDate) {
+                    $q2->where('date_from', '<=', $startDate)
+                        ->where('date_to', '>=', $endDate);
+                });
         });
     }
 
@@ -144,8 +138,7 @@ class BiographyChapter extends Model implements HasMedia
      * 🎯 Purpose: Human-readable duration between dates
      * 📤 Returns: Formatted duration string (e.g., "2 anni, 3 mesi")
      */
-    public function durationFormatted(): Attribute
-    {
+    public function durationFormatted(): Attribute {
         return Attribute::make(
             get: function () {
                 if (!$this->date_from) {
@@ -179,8 +172,7 @@ class BiographyChapter extends Model implements HasMedia
      * 🎯 Purpose: Formatted date range for timeline display
      * 📤 Returns: User-friendly date range string
      */
-    public function dateRangeDisplay(): Attribute
-    {
+    public function dateRangeDisplay(): Attribute {
         return Attribute::make(
             get: function () {
                 if (!$this->date_from) {
@@ -208,10 +200,9 @@ class BiographyChapter extends Model implements HasMedia
      * 🎯 Purpose: Short preview of chapter content for cards/listings
      * 📤 Returns: Truncated content with HTML tags stripped
      */
-    public function contentPreview(): Attribute
-    {
+    public function contentPreview(): Attribute {
         return Attribute::make(
-            get: fn () => \Str::limit(strip_tags($this->content), 150)
+            get: fn() => \Str::limit(strip_tags($this->content), 150)
         );
     }
 
@@ -220,11 +211,10 @@ class BiographyChapter extends Model implements HasMedia
      * 🎯 Purpose: Return appropriate icon based on chapter type
      * 📤 Returns: Icon class/name for UI rendering
      */
-    public function chapterIcon(): Attribute
-    {
+    public function chapterIcon(): Attribute {
         return Attribute::make(
             get: function () {
-                return match($this->chapter_type) {
+                return match ($this->chapter_type) {
                     'milestone' => 'star',
                     'achievement' => 'trophy',
                     'standard' => 'book-open',
@@ -240,8 +230,7 @@ class BiographyChapter extends Model implements HasMedia
      * 📊 Logic: Average 200 words per minute reading speed
      * 📤 Returns: Reading time in minutes
      */
-    public function getReadingTime(): int
-    {
+    public function getReadingTime(): int {
         $wordCount = str_word_count(strip_tags($this->content));
         return max(1, ceil($wordCount / 200));
     }
@@ -251,16 +240,16 @@ class BiographyChapter extends Model implements HasMedia
      * 🎯 Purpose: Create URL-friendly slug for chapter within biography
      * 🛡️ Security: Ensures unique slugs within parent biography
      */
-    public function generateSlug(): string
-    {
+    public function generateSlug(): string {
         $baseSlug = \Str::slug($this->title);
         $slug = $baseSlug;
         $counter = 1;
 
         while (static::where('biography_id', $this->biography_id)
-                     ->where('slug', $slug)
-                     ->where('id', '!=', $this->id)
-                     ->exists()) {
+            ->where('slug', $slug)
+            ->where('id', '!=', $this->id)
+            ->exists()
+        ) {
             $slug = $baseSlug . '-' . $counter;
             $counter++;
         }
@@ -273,8 +262,7 @@ class BiographyChapter extends Model implements HasMedia
      * 🎯 Purpose: Check if chapter represents current/ongoing period
      * 📤 Returns: Boolean indicating if chapter is current
      */
-    public function isCurrentPeriod(): bool
-    {
+    public function isCurrentPeriod(): bool {
         if ($this->is_ongoing) {
             return true;
         }
@@ -292,15 +280,14 @@ class BiographyChapter extends Model implements HasMedia
      * 🎯 Purpose: Define media collections for chapter images
      * 🖼️ Collections: chapter_images for general content, featured for chapter hero
      */
-    public function registerMediaCollections(): void
-    {
+    public function registerMediaCollections(): void {
         $this->addMediaCollection('chapter_images')
-              ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp'])
-              ->singleFile(false);
+            ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp'])
+            ->singleFile(false);
 
         $this->addMediaCollection('chapter_featured')
-              ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp'])
-              ->singleFile(true);
+            ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp'])
+            ->singleFile(true);
     }
 
     /**
@@ -308,26 +295,27 @@ class BiographyChapter extends Model implements HasMedia
      * 🎯 Purpose: Auto-generate optimized image versions
      * ⚡ Performance: Thumbnail and web-optimized versions
      */
-    public function registerMediaConversions(Media $media = null): void
-    {
+    public function registerMediaConversions(?Media $media = null): void {
+
+        Log::channel('egi_upload')->info('registerMediaConversions chiamato', [
+            'media' => $media ? $media->id : 'null',
+            'file_path' => $media ? $media->getPath() : 'null',
+        ]);
+
         $this->addMediaConversion('thumb')
-              ->width(200)
-              ->height(200)
-              ->sharpen(10)
-              ->optimize()
-              ->nonQueued();
+            ->width(200)
+            ->height(200)
+            ->optimize();
 
         $this->addMediaConversion('card')
-              ->width(400)
-              ->height(300)
-              ->optimize()
-              ->nonQueued();
+            ->width(400)
+            ->height(300)
+            ->optimize();
 
         $this->addMediaConversion('full')
-              ->width(1200)
-              ->height(800)
-              ->optimize()
-              ->nonQueued();
+            ->width(1200)
+            ->height(800)
+            ->optimize();
     }
 
     /**
@@ -335,8 +323,7 @@ class BiographyChapter extends Model implements HasMedia
      * 🎯 Purpose: Auto-generate slug and handle model events
      * 🔄 Automation: Seamless slug generation and ordering
      */
-    protected static function boot()
-    {
+    protected static function boot() {
         parent::boot();
 
         static::creating(function ($chapter) {
@@ -347,7 +334,7 @@ class BiographyChapter extends Model implements HasMedia
             // Auto-set sort_order if not provided
             if (is_null($chapter->sort_order)) {
                 $maxOrder = static::where('biography_id', $chapter->biography_id)
-                                 ->max('sort_order') ?? 0;
+                    ->max('sort_order') ?? 0;
                 $chapter->sort_order = $maxOrder + 1;
             }
 
