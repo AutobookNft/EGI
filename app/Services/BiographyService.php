@@ -77,9 +77,9 @@ class BiographyService
                 }
 
                 // Handle type change validation
-                if (isset($data['type']) && $data['type'] !== $biography->type) {
-                    $this->validateTypeChange($biography, $data['type']);
-                }
+                // if (isset($data['type']) && $data['type'] !== $biography->type) {
+                //     $this->validateTypeChange($biography, $data['type']);
+                // }
 
                 $biography->update($data);
                 $action = 'biography_updated';
@@ -722,7 +722,6 @@ class BiographyService
     private function hasValidPublicBiographyConsent(User $user): bool
     {
         // Integration with existing GDPR consent system
-        return $user->hasActiveConsent('public_biography_sharing') ||
-            $user->hasActiveConsent('allow_personal_data_processing');
+        return $user->hasActiveConsent('allow-personal-data-processing');
     }
 }

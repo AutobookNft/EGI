@@ -23,6 +23,7 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class BiographyChapter extends Model implements HasMedia {
@@ -71,15 +72,10 @@ class BiographyChapter extends Model implements HasMedia {
         return $this->belongsTo(Biography::class);
     }
 
-    /**
-     * @Oracode Relationship: Biography Owner (Through Parent)
-     * 🔗 Purpose: Access user owner through parent biography
-     * 📊 Convenience: Direct access to owner without join complexity
-     */
-    public function user(): BelongsTo {
-        return $this->biography->user();
+    public function getUserAttribute()
+    {
+        return $this->biography ? $this->biography->user : null;
     }
-
     /**
      * @Oracode Scope: Published Chapters Only
      * 🎯 Purpose: Filter only published chapters for public display
@@ -281,9 +277,12 @@ class BiographyChapter extends Model implements HasMedia {
      * 🖼️ Collections: chapter_images for general content, featured for chapter hero
      */
     public function registerMediaCollections(): void {
-        $this->addMediaCollection('chapter_images')
-            ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp'])
-            ->singleFile(false);
+        $collection = $this->addMediaCollection('chapter_images')
+            ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp']);
+
+        // FORZA singleFile a false in modo esplicito
+        $collection->singleFile = false;
+        $collection->collectionSizeLimit = null;
 
         $this->addMediaCollection('chapter_featured')
             ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp'])
@@ -297,9 +296,10 @@ class BiographyChapter extends Model implements HasMedia {
      */
     public function registerMediaConversions(?Media $media = null): void {
 
-        Log::channel('egi_upload')->info('registerMediaConversions chiamato', [
-            'media' => $media ? $media->id : 'null',
-            'file_path' => $media ? $media->getPath() : 'null',
+        Log::channel('egi_upload')->info('CONVERSION: registerMediaConversions chiamato', [
+            'media_id' => $media?->id,
+            'media_path' => $media?->getPath(),
+            'file_exists' => $media ? file_exists($media->getPath()) : 'no media',
         ]);
 
         $this->addMediaConversion('thumb')
@@ -325,6 +325,17 @@ class BiographyChapter extends Model implements HasMedia {
      */
     protected static function boot() {
         parent::boot();
+
+        DB::listen(function ($query) {
+            if (str_contains($query->sql, 'DELETE') && str_contains($query->sql, 'media')) {
+                Log::channel('egi_upload')->warning('SQL DELETE DETECTED!', [
+                    'sql' => $query->sql,
+                    'bindings' => $query->bindings,
+                    'time' => $query->time,
+                    'trace' => debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 10),
+                ]);
+            }
+        });
 
         static::creating(function ($chapter) {
             if (empty($chapter->slug)) {

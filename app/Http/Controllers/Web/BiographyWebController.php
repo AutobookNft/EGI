@@ -7,10 +7,13 @@ use App\Models\Biography;
 use App\Helpers\FegiAuth;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Response;
 use Ultra\UltraLogManager\UltraLogManager;
 use Ultra\ErrorManager\Interfaces\ErrorManagerInterface;
 use App\Services\Gdpr\AuditLogService;
 use App\Enums\Gdpr\GdprActivityCategory;
+use App\Models\User;
 
 /**
  * @Oracode Web Controller for Biography Display Pages
@@ -185,11 +188,18 @@ class BiographyWebController extends Controller
      *
      * @throws \Ultra\ErrorManager\Exceptions\UltraErrorException When access denied or display fails
      */
-    public function show(Request $request, Biography $biography): View
+    public function show(Request $request, $creator_id): View | RedirectResponse | Response
     {
         $authType = FegiAuth::getAuthType();
         $userId = FegiAuth::id();
         $walletAddress = FegiAuth::getWallet();
+
+        $biography = Biography::where('user_id', $creator_id)->firstOrFail();
+
+        // Check if biography exists
+        if (!$biography) {
+            abort(404, 'Biografia non trovata');
+        }
 
         $this->logger->info('Biography page requested', [
             'user_id' => $userId,
@@ -205,13 +215,14 @@ class BiographyWebController extends Controller
         ]);
 
         try {
-            $user = FegiAuth::user();
+            $currentUser = FegiAuth::user(); // Utente attualmente autenticato
+            $biographyOwner = User::findOrFail($creator_id); // Proprietario della biografia
 
             // Access control validation
             if (!$biography->is_public && (!FegiAuth::check() || $biography->user_id !== $userId)) {
                 // Log security event for unauthorized access attempt
                 $this->auditService->logSecurityEvent(
-                    $user ?? new \stdClass(),
+                    $currentUser ?? new \stdClass(),
                     'unauthorized_biography_access',
                     [
                         'biography_id' => $biography->id,
@@ -242,22 +253,43 @@ class BiographyWebController extends Controller
             $accessType = $isOwner ? 'owner' : 'public';
 
             // Load chapters based on access level
-            if ($isOwner) {
-                // Owner: all chapters with media
-                $chapters = $biography->chapters()
-                    ->with(['media'])
-                    ->timelineOrdered()
-                    ->get();
-            } else {
+            // if ($isOwner) {
+            //     // Owner: all chapters with media
+            //     $chapters = $biography->chapters()
+            //         ->with(['media'])
+            //         ->timelineOrdered()
+            //         ->get();
+            // } else {
                 // Public access: published chapters only with media
                 $chapters = $biography->publishedChapters()
                     ->with(['media'])
                     ->timelineOrdered()
                     ->get();
+            // }
+
+            // ========== FIX MEDIA SPATIE ==========
+
+            // Load user relationship correctly
+            $biographyMedia = $biography->getMedia('main_gallery'); // Ensure media is loaded
+
+            // Se vuoi, puoi ciclare:
+            foreach($biographyMedia as $media) {
+                $this->logger->info('Biography media URL', ['url' => $media->getUrl()]);
             }
 
-            // Load biography media
-            $biography->load(['media', 'user:id,name,email,created_at']);
+            // dd([
+            //     'media_count' => $biographyMedia->count(),
+            //     'media_array' => $biographyMedia->toArray(),
+            //     'media_class' => get_class($biographyMedia),
+            // ]);
+
+            // Force reload media using Spatie methods
+            $biography->refresh(); // Refresh the model from database
+
+            // Alternative: Load media directly without using relationships
+            $biographyMediaIds = \Spatie\MediaLibrary\MediaCollections\Models\Media::where('model_type', Biography::class)
+                ->where('model_id', $biography->id)
+                ->pluck('id');
 
             // Calculate reading time
             $estimatedReadingTime = $biography->getEstimatedReadingTime();
@@ -277,7 +309,7 @@ class BiographyWebController extends Controller
             // GDPR audit logging (if authenticated)
             if (FegiAuth::check()) {
                 $this->auditService->logUserAction(
-                    $user,
+                    $currentUser,
                     'biography_viewed',
                     [
                         'entity_type' => 'Biography',
@@ -303,10 +335,16 @@ class BiographyWebController extends Controller
                 'chapters_count' => $chapters->count(),
                 'access_type' => $accessType,
                 'is_owner' => $isOwner,
-                'reading_time' => $estimatedReadingTime
+                'reading_time' => $estimatedReadingTime,
+                // DEBUG INFO
+                'media_direct_count' => $biographyMediaIds->count(),
+                'biography_refresh_attempted' => true,
+                'biography' => $biography
+
             ]);
 
             return view('biography.show', [
+                'user' => $biographyOwner, // ← FIX: Proprietario della biografia, NON utente corrente
                 'biography' => $biography,
                 'chapters' => $chapters,
                 'chapterNavigation' => $chapterNavigation,
@@ -321,7 +359,8 @@ class BiographyWebController extends Controller
                 'isAuthenticated' => FegiAuth::check(),
                 'title' => $biography->title,
                 'metaDescription' => $biography->contentPreview,
-                'canonicalUrl' => route('biography.public.show', $biography->slug)
+                'canonicalUrl' => route('biography.public.show', $biography->slug),
+                'biographyMedia' => $biographyMedia,
             ]);
         } catch (\Exception $e) {
             $this->logger->error('Biography page rendering failed', [
@@ -343,7 +382,8 @@ class BiographyWebController extends Controller
                 'is_public' => $biography->is_public
             ], $e);
 
-            // This code is never reached - UEM throws UltraErrorException for blocking errors
+            // Fallback in caso di eccezione
+            return response('Errore interno', 500);
         }
     }
 }

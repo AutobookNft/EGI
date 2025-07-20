@@ -65,7 +65,7 @@ class Biography extends Model implements HasMedia
         'slug',
         'excerpt',
         'settings',
-        'media',
+      
     ];
 
     /**
@@ -76,7 +76,6 @@ class Biography extends Model implements HasMedia
         'is_public' => 'boolean',
         'is_completed' => 'boolean',
         'settings' => 'array',
-        'media' => 'array',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
@@ -138,10 +137,10 @@ class Biography extends Model implements HasMedia
      * 🎯 Purpose: Filter biographies by structure type (single/chapters)
      * 🔍 Usage: Biography::byType('chapters')->get()
      */
-    public function scopeByType(Builder $query, string $type): Builder
-    {
-        return $query->where('type', $type);
-    }
+    // public function scopeByType(Builder $query, string $type): Builder
+    // {
+    //     return $query->where('type', $type);
+    // }
 
     /**
      * @Oracode Scope: With Full Relations
@@ -244,9 +243,12 @@ class Biography extends Model implements HasMedia
      */
     public function registerMediaCollections(): void
     {
-        $this->addMediaCollection('main_gallery')
-            ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp'])
-            ->singleFile(false);
+        $collection = $this->addMediaCollection('main_gallery')
+            ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp']);
+
+        // FORZA singleFile a false in modo esplicito
+        $collection->singleFile = false;
+        $collection->collectionSizeLimit = null;
 
         $this->addMediaCollection('featured_image')
             ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp'])
@@ -260,23 +262,18 @@ class Biography extends Model implements HasMedia
      */
     public function registerMediaConversions(Media $media = null): void
     {
-        // Temporaneamente disabilitate per evitare errori con path null
-        // TODO: Configurare correttamente Spatie Image driver
 
-        /*
         $this->addMediaConversion('thumb')
             ->width(300)
             ->height(300)
             ->sharpen(10)
-            ->optimize()
-            ->nonQueued();
+            ->optimize();
 
         $this->addMediaConversion('web')
             ->width(800)
             ->height(600)
-            ->optimize()
-            ->nonQueued();
-        */
+            ->optimize();
+
     }
 
     /**

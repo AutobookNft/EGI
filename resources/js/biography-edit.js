@@ -25,16 +25,21 @@ document.addEventListener('DOMContentLoaded', function() {
             const trixEditor = document.querySelector('trix-editor[input="content-trix"]');
             const hiddenInput = document.getElementById('content-trix');
             if (trixEditor && hiddenInput) {
-                hiddenInput.value = trixEditor.editor.getDocument().toString();
+                // USA innerHTML per mantenere la formattazione HTML
+                hiddenInput.value = trixEditor.innerHTML;
+                console.log('📝 Contenuto HTML sincronizzato:', trixEditor.innerHTML);
             }
         });
     }
+
 
     // Inizializza editor
     initializeTrixEditor();
 
     // Inizializza upload
     initializeMediaUpload();
+
+    initializeExistingImages();
 
     // Inizializza contatore caratteri
     initializeCharacterCounter();
@@ -157,6 +162,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 date_from,
                 date_to
             });
+
+            console.log('Content being sent:', content);
+            console.log('Content length:', content.length);
+            console.log('Has HTML tags:', /<[^>]*>/g.test(content));
+
             const response = await fetch(url, {
                 method,
                 headers: {
@@ -194,45 +204,49 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // === Funzione upload immagini capitolo ===
     async function uploadChapterImages(chapterId, files) {
-        console.log('🚀 Upload immagini capitolo:', { chapterId, filesCount: files.length });
+        console.log(`🚀 Inizio upload sequenziale per ${files.length} file...`);
+        const galleryContainer = document.getElementById('chapter-media-gallery'); // O dove vuoi mostrare i risultati
+        let finalGallery = [];
 
-        // Debug: controlla i file
-        for (let i = 0; i < files.length; i++) {
-            const file = files[i];
-            console.log(`📁 File ${i}:`, {
-                name: file.name,
-                size: file.size,
-                type: file.type,
-                lastModified: file.lastModified
-            });
-        }
-
-        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-        const formData = new FormData();
         for (const file of files) {
+            console.log(`📤 Caricando ${file.name}...`);
+
+            const formData = new FormData();
+            // NOTA: Usiamo 'images[]' anche se è un solo file per non dover cambiare il backend
             formData.append('images[]', file);
+
+            try {
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                const response = await fetch(`/biography/chapters/${chapterId}/media`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json'
+                    },
+                    body: formData,
+                    credentials: 'same-origin'
+                });
+
+                const result = await response.json();
+
+                if (!result.success || !result.gallery || result.gallery.length === 0) {
+                    throw new Error(result.message || `Errore durante l'upload di ${file.name}`);
+                }
+
+                console.log(`✅ ${file.name} caricato con successo.`, result.gallery[0]);
+                // Aggiungiamo il risultato all'array finale
+                finalGallery.push(result.gallery[0]);
+
+            } catch (err) {
+                console.error(`❌ Fallito l'upload per ${file.name}:`, err);
+                // Qui puoi decidere se fermare tutto o continuare con i file successivi
+            }
         }
 
-        console.log('📤 Invio richiesta upload...');
-        const response = await fetch(`/biography/chapters/${chapterId}/media`, {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': csrfToken,
-                'Accept': 'application/json'
-                // Rimuovo Content-Type per permettere al browser di impostarlo automaticamente per FormData
-            },
-            body: formData,
-            credentials: 'same-origin'
-        });
-
-        console.log('📥 Risposta ricevuta:', response.status);
-        const result = await response.json();
-        console.log('📋 Risultato:', result);
-
-        if (!result.success) throw new Error(result.message || 'Errore upload immagini');
-        return result.gallery;
+        console.log('✅ Upload sequenziale completato.', finalGallery);
+        // Qui puoi usare finalGallery per aggiornare la tua UI con tutte le immagini
+        return finalGallery;
     }
-
     // === Funzione elimina immagine capitolo ===
     async function deleteChapterImage(chapterId, mediaId) {
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
@@ -375,17 +389,18 @@ function initializeTrixEditor() {
         hiddenInput.dispatchEvent(new Event('input'));
     }
 
+    // Sync continuo per mantenere HTML - CAMBIATO
     editor.addEventListener('trix-change', function(e) {
-        const content = e.target.editor.getDocument().toString();
-        console.log('📝 Contenuto editor aggiornato, lunghezza:', content.length);
+        const content = e.target.innerHTML; // ← HTML formattato
+        console.log('📝 Contenuto editor aggiornato, con HTML:', /<[^>]*>/g.test(content));
 
-        // Aggiorna il hidden input
+        // Aggiorna il hidden input con HTML
         if (hiddenInput) {
             hiddenInput.value = content;
         }
     });
 
-    console.log('✅ Editor Trix configurato con contenuto esistente');
+    console.log('✅ Editor Trix configurato con sync HTML');
 }
 
 function initializeCharacterCounter() {
@@ -476,6 +491,24 @@ function initializeMediaUpload() {
     console.log('✅ Upload media configurato');
 }
 
+function initializeExistingImages() {
+    console.log('🖼️ Inizializzando immagini esistenti...');
+
+    if (window.existingImages && window.existingImages.length > 0) {
+        console.log('📁 Immagini esistenti trovate:', window.existingImages.length);
+
+        window.existingImages.forEach(image => {
+            addImageToGallery({
+                id: image.id,
+                url: image.url,
+                file_name: image.file_name
+            });
+        });
+    } else {
+        console.log('📁 Nessuna immagine esistente');
+    }
+}
+
 async function uploadFile(file) {
     console.log('📤 Inizio upload:', file.name);
 
@@ -484,7 +517,7 @@ async function uploadFile(file) {
         throw new Error('Il file non è un\'immagine');
     }
 
-    if (file.size > 2 * 1024 * 1024) {
+    if (file.size > 10 * 1024 * 1024) {
         throw new Error('File troppo grande (massimo 2MB)');
     }
 
@@ -492,6 +525,10 @@ async function uploadFile(file) {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('collection', 'main_gallery');
+
+    console.log('📂 FormData preparata per l\'upload:', file.name);
+    // controlliamo se l'ID della biografia è disponibile
+    console.log('🔍 ID biografia:', window.biographyId || 'non disponibile');
 
     // Aggiungi l'ID della biografia se disponibile
     if (window.biographyId) {
@@ -541,10 +578,9 @@ function addImageToGallery(media) {
     const imageElement = document.createElement('div');
     imageElement.className = 'relative group';
     imageElement.innerHTML = `
-        <div class="relative overflow-hidden rounded-lg bg-gray-900 aspect-square">
-            <img src="${media.url}" alt="${media.file_name}"
-                 class="w-full h-full object-cover">
-            <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-opacity flex items-center justify-center">
+        <div class="relative overflow-hidden rounded-lg bg-gray-900" style="width: 240px; height: 240px;">
+            <img src="${media.url}" alt="${media.file_name}" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-transparent group-hover:bg-black group-hover:bg-opacity-50 transition-opacity flex items-center justify-center pointer-events-none group-hover:pointer-events-auto">
                 <button onclick="removeImage(${media.id})"
                         class="opacity-0 group-hover:opacity-100 bg-red-500 hover:bg-red-600 text-white rounded-full p-2 transition-all">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

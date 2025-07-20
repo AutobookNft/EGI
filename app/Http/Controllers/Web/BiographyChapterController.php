@@ -10,12 +10,14 @@ use App\Models\BiographyChapter;
 use Illuminate\Support\Facades\Auth;
 use Ultra\UltraLogManager\UltraLogManager;
 use Ultra\ErrorManager\Interfaces\ErrorManagerInterface;
+use App\Services\MediaUploadService;
 
 class BiographyChapterController extends Controller {
 
 
     protected UltraLogManager $logger;
     protected ErrorManagerInterface $errorManager;
+    protected MediaUploadService $mediaUploader;
 
     /**
      * Constructor with complete dependency injection.
@@ -25,10 +27,11 @@ class BiographyChapterController extends Controller {
     public function __construct(
         UltraLogManager $logger,
         ErrorManagerInterface $errorManager,
-
+        MediaUploadService $mediaUploader
     ) {
         $this->logger = $logger;
         $this->errorManager = $errorManager;
+        $this->mediaUploader = $mediaUploader;
     }
 
     public function store(Request $request, $biography): JsonResponse {
@@ -138,14 +141,6 @@ class BiographyChapterController extends Controller {
             return response()->json(['success' => false, 'message' => 'Non autorizzato'], 403);
         }
 
-        $this->logger->info('BiographyChapterController: REQUEST', [
-            'TMP_DIR' => sys_get_temp_dir(),
-            'user_id' => $user->id,
-            'chapter_id' => $chapter,
-            'request' => $request->all(),
-            'log_category' => 'BIOGRAPHY_CHAPTER_UPLOAD_MEDIA'
-        ]);
-
         $request->validate([
             'images' => 'required|array',
             'images.*' => 'file|mimes:jpeg,png,webp,gif|max:10240',
@@ -161,17 +156,12 @@ class BiographyChapterController extends Controller {
             }
 
             try {
-                $this->logger->info('BiographyChapterController: uploadMedia', [
-                    'pathname' => $image->getPathname(),
-                    'is_file' => is_file($image->getPathname()),
-                    'size' => $image->getSize(),
-                ]);
 
-
-                $media = $chapterModel
-                    ->addMedia($image)
-                    ->usingFileName($image->getClientOriginalName())
-                    ->toMediaCollection('chapter_images');
+               $media = $this->mediaUploader->handleUpload(
+                    $chapterModel,
+                    $image,
+                    'chapter_images'
+                );
 
                 $uploadedFiles[] = [
                     'id' => $media->id,
@@ -179,12 +169,7 @@ class BiographyChapterController extends Controller {
                     'name' => $media->name,
                 ];
 
-                $this->logger->info('BiographyChapterController: Media uploaded successfully', [
-                    'media_id' => $media->id,
-                    'file_name' => $image->getClientOriginalName(),
-                    'user_id' => $user->id,
-                    'chapter_id' => $chapter,
-                ]);
+
             } catch (\Exception $e) {
 
                 return $this->errorManager->handle(
@@ -199,47 +184,29 @@ class BiographyChapterController extends Controller {
                 );
             }
         }
-        // in app/Http/Controllers/Web/BiographyChapterController.php -> uploadMedia()
 
-        // foreach ($request->file('images') as $index => $image) {
-        //     if (!$image || !$image->isValid()) {
-        //         continue;
-        //     }
-
-        //     \Illuminate\Support\Facades\Log::info('--- CORRECTED Manual Dispatch Test Starting ---');
-
-        //     $media = $chapterModel->addMedia($image)->toMediaCollection('chapter_images');
-
-        //     \Illuminate\Support\Facades\Log::info('--- Media record created, ID: ' . $media->id . ' ---');
-
-        //     // 🎯 LA CORREZIONE CHIAVE:
-        //     // Usiamo il metodo corretto di Spatie per ottenere la definizione di una conversione.
-        //     $conversion = $media->getMediaConversion('thumb');
-
-        //     // Aggiungiamo un controllo di sicurezza per essere certi.
-        //     if (! $conversion) {
-        //         dd('ERRORE FATALE DI LOGICA: Spatie non sta trovando la definizione della conversione "thumb" nel tuo modello. Controlla che il metodo registerMediaConversions esista e sia corretto.');
-        //     }
-
-        //     \Illuminate\Support\Facades\Log::info('--- Conversion "thumb" found successfully ---');
-
-        //     // Creiamo la collezione di conversioni da eseguire
-        //     $conversions = new \Spatie\MediaLibrary\Conversions\ConversionCollection([$conversion]);
-
-        //     // Spediamo il job
-        //     \Spatie\MediaLibrary\Conversions\Jobs\PerformConversionsJob::dispatch($conversions, $media);
-
-        //     \Illuminate\Support\Facades\Log::info('--- PerformConversionsJob Dispatched Manually ---');
-
-        //     dd('VICTORY! Job for conversion "thumb" dispatched. Controlla la tabella `jobs`.');
-        // }
-
-
-        if (!empty($errors)) {
-            return response()->json(['success' => false, 'message' => implode(', ', $errors)]);
+        if (!empty($errors) && empty($uploadedFiles)) {
+            return response()->json([
+                'success' => false,
+                'message' => implode(', ', $errors)
+            ], 422);
         }
 
-        return response()->json(['success' => true, 'gallery' => $uploadedFiles]);
+        $finalChapterModel = BiographyChapter::findOrFail($chapter);
+        $gallery = $chapterModel->fresh()->getMedia('chapter_images')->map(function ($media) {
+            return [
+                'id' => $media->id,
+                'url' => $media->getUrl(),
+                'name' => $media->name,
+            ];
+        });
+
+         return response()->json([
+            'success' => true,
+            'uploaded' => $uploadedFiles,
+            'gallery' => $gallery,
+            'errors' => $errors
+        ]);
     }
 
     public function removeMedia(Request $request, $chapter): JsonResponse {
