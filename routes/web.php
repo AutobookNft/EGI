@@ -478,6 +478,10 @@ Route::delete('/biography/remove-media', [App\Http\Controllers\Web\BiographyCont
 Route::post('/biography/chapters/{chapter}/media', [App\Http\Controllers\Web\BiographyChapterController::class, 'uploadMedia'])
     ->name('biography.chapters.media.upload')
     ->middleware('auth');
+
+Route::delete('/biography/chapters/{chapter}/remove-media', [App\Http\Controllers\Web\BiographyChapterController::class, 'removeMedia'])
+    ->name('biography.chapters.remove-media')
+    ->middleware('auth');
 Route::delete('/biography/chapters/{chapter}/media', [App\Http\Controllers\Web\BiographyChapterController::class, 'removeMedia'])
     ->name('biography.chapters.media.remove')
     ->middleware('auth');

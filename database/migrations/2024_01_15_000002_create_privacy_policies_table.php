@@ -14,21 +14,19 @@ use Illuminate\Support\Facades\Schema;
  * @version 1.0.0
  * @date 2025-05-22
  */
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations
      *
      * @return void
      * @privacy-safe Creates privacy policy versioning table
      */
-    public function up(): void
-    {
+    public function up(): void {
         Schema::create('privacy_policies', function (Blueprint $table) {
             $table->id();
 
             // Version control
-            $table->string('version', 20)->unique(); // e.g., "1.0", "1.1", "2.0"
+            $table->string('version', 20); // e.g., "1.0", "1.1", "2.0"
             $table->string('title', 255);
             $table->longText('content'); // Full policy content
             $table->json('summary'); // Key points summary
@@ -75,8 +73,7 @@ return new class extends Migration
      *
      * @return void
      */
-    public function down(): void
-    {
+    public function down(): void {
         Schema::dropIfExists('privacy_policies');
     }
 };

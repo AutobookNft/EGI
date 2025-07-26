@@ -253,19 +253,19 @@ class BiographyWebController extends Controller
             $accessType = $isOwner ? 'owner' : 'public';
 
             // Load chapters based on access level
-            // if ($isOwner) {
-            //     // Owner: all chapters with media
-            //     $chapters = $biography->chapters()
-            //         ->with(['media'])
-            //         ->timelineOrdered()
-            //         ->get();
-            // } else {
+            if ($isOwner) {
+                // Owner: all chapters with media
+                $chapters = $biography->chapters()
+                    ->with(['media'])
+                    ->timelineOrdered()
+                    ->get();
+            } else {
                 // Public access: published chapters only with media
                 $chapters = $biography->publishedChapters()
                     ->with(['media'])
                     ->timelineOrdered()
                     ->get();
-            // }
+            }
 
             // ========== FIX MEDIA SPATIE ==========
 

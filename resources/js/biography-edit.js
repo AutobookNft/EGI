@@ -41,7 +41,46 @@ document.addEventListener('DOMContentLoaded', function() {
 
     initializeExistingImages();
 
-    // Inizializza contatore caratteri
+    // Event delegation per i bottoni di eliminazione immagini
+    document.addEventListener('click', function(e) {
+        console.log('🖱️ Click rilevato su:', e.target);
+        console.log('🏷️ Classi target:', e.target.classList?.toString());
+
+        // Controlla se è un bottone di eliminazione immagine biografia
+        const deleteButton = e.target.closest('.btn-delete-image');
+        if (deleteButton) {
+            console.log('✅ Bottone eliminazione immagine biografia cliccato!');
+            const mediaId = deleteButton.getAttribute('data-media-id');
+            console.log('🆔 Media ID:', mediaId);
+
+            if (mediaId) {
+                console.log('🚀 Chiamando window.removeImage...');
+                window.removeImage(mediaId);
+            } else {
+                console.error('❌ Media ID non trovato!');
+            }
+            return;
+        }
+
+        // Controlla se è un bottone di eliminazione immagine capitolo
+        const deleteChapterImageButton = e.target.closest('.btn-delete-chapter-image');
+        if (deleteChapterImageButton) {
+            console.log('✅ Bottone eliminazione immagine capitolo cliccato!');
+            const mediaId = deleteChapterImageButton.getAttribute('data-media-id');
+            const chapterId = deleteChapterImageButton.getAttribute('data-chapter-id');
+            console.log('🆔 Media ID:', mediaId, 'Chapter ID:', chapterId);
+
+            if (mediaId && chapterId) {
+                console.log('🚀 Chiamando window.removeChapterImage...');
+                window.removeChapterImage(chapterId, mediaId);
+            } else {
+                console.error('❌ Media ID o Chapter ID non trovato!');
+            }
+            return;
+        }
+
+        console.log('ℹ️ Click non su bottoni eliminazione');
+    });    // Inizializza contatore caratteri
     initializeCharacterCounter();
 
     // === Capitoli: apertura modale ===
@@ -189,13 +228,30 @@ document.addEventListener('DOMContentLoaded', function() {
             if (mediaInput && mediaInput.files.length > 0) {
                 console.log('📁 File selezionati per upload:', mediaInput.files.length);
                 if (result.data && result.data.id) {
-                    await uploadChapterImages(result.data.id, mediaInput.files);
+                    // CHIUDI LA MODALE PRIMA dell'upload per vedere l'animazione
+                    closeChapterModal();
+
+                    // Mostra messaggio più chiaro e specifico
+                    showProcessingIndicator(result.data.id, `📤 Caricamento di ${mediaInput.files.length} nuove immagini in corso...`);
+                    showSuccess(`✅ Capitolo salvato! Caricamento nuove immagini...`);
+
+                    try {
+                        await uploadChapterImages(result.data.id, mediaInput.files);
+                        // Il successo finale verrà mostrato dalla funzione updateChapterWithPolling
+                    } catch (error) {
+                        console.error('❌ Errore durante upload media:', error);
+                        hideProcessingIndicator(result.data.id);
+                        showError('⚠️ Capitolo salvato, ma errore nell\'upload delle immagini: ' + error.message);
+                    }
                 } else {
                     console.error('❌ ID capitolo non trovato per upload media');
+                    closeChapterModal();
                 }
+            } else {
+                // Nessun media da caricare, chiudi modale e aggiorna immediatamente
+                closeChapterModal();
+                showSuccess(isEdit ? 'Capitolo aggiornato!' : 'Capitolo aggiunto!');
             }
-            closeChapterModal();
-            showSuccess(isEdit ? 'Capitolo aggiornato!' : 'Capitolo aggiunto!');
         } catch (err) {
             errorDiv.textContent = err.message || 'Errore imprevisto.';
             errorDiv.classList.remove('hidden');
@@ -205,14 +261,22 @@ document.addEventListener('DOMContentLoaded', function() {
     // === Funzione upload immagini capitolo ===
     async function uploadChapterImages(chapterId, files) {
         console.log(`🚀 Inizio upload sequenziale per ${files.length} file...`);
-        const galleryContainer = document.getElementById('chapter-media-gallery'); // O dove vuoi mostrare i risultati
-        let finalGallery = [];
 
-        for (const file of files) {
-            console.log(`📤 Caricando ${file.name}...`);
+        // Mostra indicatore di elaborazione
+        showProcessingIndicator(chapterId, `Caricamento di ${files.length} immagini...`);
+
+        let finalGallery = [];
+        let successCount = 0;
+        let errorCount = 0;
+
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            console.log(`📤 Caricando file ${i+1}/${files.length}: ${file.name}`);
+
+            // Aggiorna indicatore per file specifico
+            showProcessingIndicator(chapterId, `Caricamento ${i+1}/${files.length}: ${file.name}`);
 
             const formData = new FormData();
-            // NOTA: Usiamo 'images[]' anche se è un solo file per non dover cambiare il backend
             formData.append('images[]', file);
 
             try {
@@ -233,20 +297,130 @@ document.addEventListener('DOMContentLoaded', function() {
                     throw new Error(result.message || `Errore durante l'upload di ${file.name}`);
                 }
 
-                console.log(`✅ ${file.name} caricato con successo.`, result.gallery[0]);
-                // Aggiungiamo il risultato all'array finale
-                finalGallery.push(result.gallery[0]);
+                console.log(`✅ ${file.name} caricato con successo.`);
+                finalGallery.push(...result.gallery);
+                successCount++;
 
             } catch (err) {
                 console.error(`❌ Fallito l'upload per ${file.name}:`, err);
-                // Qui puoi decidere se fermare tutto o continuare con i file successivi
+                errorCount++;
             }
         }
 
-        console.log('✅ Upload sequenziale completato.', finalGallery);
-        // Qui puoi usare finalGallery per aggiornare la tua UI con tutte le immagini
+        console.log('✅ Upload sequenziale completato.', { successCount, errorCount });
+
+        // Aggiorna automaticamente il capitolo nella lista se ci sono stati upload riusciti
+        if (successCount > 0) {
+            console.log('🔄 Aggiornamento automatico del capitolo...');
+            showProcessingIndicator(chapterId, `✨ Elaborazione di ${successCount} nuove immagini...`);
+            await updateChapterWithPolling(chapterId, successCount);
+        } else {
+            hideProcessingIndicator(chapterId);
+            showError('❌ Nessuna immagine è stata caricata con successo');
+        }
+
         return finalGallery;
     }
+
+    // === Funzione per aggiornare il capitolo con polling ===
+    async function updateChapterWithPolling(chapterId, expectedNewImages = 1, maxAttempts = 10, delay = 2000) {
+        console.log(`🔄 Iniziando polling per capitolo ${chapterId}, aspettando ${expectedNewImages} nuove immagini...`);
+
+        // Ottieni lo stato attuale prima del polling
+        const initialChapter = await fetchChapter(chapterId);
+        const initialMediaCount = initialChapter?.media ? initialChapter.media.length : 0;
+        const targetMediaCount = initialMediaCount; // In realtà dovremmo conoscere il numero precedente + le nuove
+
+        console.log(`📊 Stato iniziale: ${initialMediaCount} immagini`);
+
+        let attempts = 0;
+
+        while (attempts < maxAttempts) {
+            attempts++;
+            console.log(`🔍 Tentativo ${attempts}/${maxAttempts} - Verificando elaborazione nuove immagini...`);
+
+            // Aggiorna indicatore con tentativo corrente
+            showProcessingIndicator(chapterId, `🔍 Verifica elaborazione nuove immagini... (${attempts}/${maxAttempts})`);
+
+            try {
+                // Fetch aggiornato del capitolo
+                const updatedChapter = await fetchChapter(chapterId);
+
+                if (!updatedChapter) {
+                    console.error('❌ Impossibile recuperare i dati del capitolo');
+                    break;
+                }
+
+                const currentMediaCount = updatedChapter.media ? updatedChapter.media.length : 0;
+                console.log(`📊 Media count attuale: ${currentMediaCount}`);
+
+                // Controlla se ci sono media e se hanno tutti le thumbnail processate
+                if (currentMediaCount > 0) {
+                    // Controlla solo le immagini più recenti (presumibilmente quelle appena caricate)
+                    const recentMedia = updatedChapter.media.slice(-expectedNewImages);
+                    const allRecentProcessed = recentMedia.every(media => {
+                        const hasThumb = media.thumb_url || media.url;
+                        const isProcessed = media.thumb_url !== null;
+                        console.log(`🖼️ Media ${media.id}: hasThumb=${!!hasThumb}, isProcessed=${isProcessed}`);
+                        return hasThumb;
+                    });
+
+                    if (allRecentProcessed) {
+                        console.log('✅ Tutte le nuove immagini sono state elaborate!');
+                        hideProcessingIndicator(chapterId);
+
+                        // REFRESH COMPLETO per assicurarsi che tutte le immagini siano visibili
+                        showSuccess(`✅ ${expectedNewImages} nuove immagini elaborate! Ricaricamento pagina...`);
+
+                        setTimeout(() => {
+                            console.log('🔄 Ricaricamento pagina per mostrare le nuove immagini elaborate...');
+                            window.location.reload();
+                        }, 1000);
+
+                        return updatedChapter;
+                    }
+                }
+
+                // Aggiorna comunque la UI con i dati attuali (ma senza modificare le immagini esistenti)
+                updateChapterInList(updatedChapter);
+
+                // Attesa prima del prossimo tentativo
+                if (attempts < maxAttempts) {
+                    console.log(`⏳ Attesa di ${delay}ms prima del prossimo controllo...`);
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                }
+
+            } catch (error) {
+                console.error(`❌ Errore durante il polling (tentativo ${attempts}):`, error);
+
+                if (attempts >= maxAttempts) {
+                    hideProcessingIndicator(chapterId);
+
+                    // Anche se il polling fallisce, facciamo un refresh per vedere eventuali immagini caricate
+                    showSuccess('⚠️ Elaborazione completata. Ricaricamento pagina...');
+                    setTimeout(() => {
+                        console.log('🔄 Ricaricamento pagina dopo timeout polling...');
+                        window.location.reload();
+                    }, 1500);
+
+                    break;
+                }
+            }
+        }
+
+        if (attempts >= maxAttempts) {
+            console.warn('⚠️ Raggiunto numero massimo di tentativi per il polling delle nuove immagini');
+            hideProcessingIndicator(chapterId);
+
+            // Refresh anche quando raggiungiamo il massimo dei tentativi
+            showSuccess('⚠️ Elaborazione completata. Ricaricamento pagina...');
+            setTimeout(() => {
+                console.log('🔄 Ricaricamento pagina dopo massimo tentativi...');
+                window.location.reload();
+            }, 1500);
+        }
+    }
+
     // === Funzione elimina immagine capitolo ===
     async function deleteChapterImage(chapterId, mediaId) {
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
@@ -303,11 +477,31 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
             <div class="text-sm text-gray-400 mb-2">${chapter.date_from || ''} ${chapter.date_to ? '→ ' + chapter.date_to : ''}</div>
             <div class="prose prose-invert max-w-none text-white mb-2">${chapter.content}</div>
-            <div class="mb-2">
-                <div class="flex flex-wrap gap-2">
-                    ${(chapter.media || []).map(m => `<img src="${m.thumb_url || m.url}" class="h-20 w-20 object-cover rounded shadow" alt="media">`).join('')}
+            ${(chapter.media && chapter.media.length > 0) ? `
+                <div class="mb-2">
+                    <div class="flex flex-wrap gap-2">
+                        ${chapter.media.map(media => `
+                            <div class="relative group bg-gray-900 rounded overflow-hidden" style="width: 80px; height: 80px;">
+                                <img src="${media.thumb_url || media.url}"
+                                     class="w-full h-full object-cover"
+                                     alt="media"
+                                     title="${media.file_name || 'Chapter media'}">
+                                <div class="absolute top-1 right-1">
+                                    <button class="btn-delete-chapter-image bg-red-500 hover:bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-lg"
+                                            data-media-id="${media.id}"
+                                            data-chapter-id="${chapter.id}"
+                                            title="Elimina immagine"
+                                            type="button">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
                 </div>
-            </div>
+            ` : ''}
         `;
     }
 
@@ -576,20 +770,20 @@ function addImageToGallery(media) {
     }
 
     const imageElement = document.createElement('div');
-    imageElement.className = 'relative group';
+    imageElement.className = 'relative overflow-hidden bg-gray-900 rounded-lg group';
+    imageElement.style.width = '240px';
+    imageElement.style.height = '240px';
+
     imageElement.innerHTML = `
-        <div class="relative overflow-hidden rounded-lg bg-gray-900" style="width: 240px; height: 240px;">
-            <img src="${media.url}" alt="${media.file_name}" class="w-full h-full object-cover">
-            <div class="absolute inset-0 bg-transparent group-hover:bg-black group-hover:bg-opacity-50 transition-opacity flex items-center justify-center pointer-events-none group-hover:pointer-events-auto">
-                <button onclick="removeImage(${media.id})"
-                        class="opacity-0 group-hover:opacity-100 bg-red-500 hover:bg-red-600 text-white rounded-full p-2 transition-all">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                    </svg>
-                </button>
-            </div>
+        <img src="${media.url}" alt="${media.file_name}" class="w-full h-full object-cover">
+        <div class="absolute top-2 right-2">
+            <button class="btn-delete-image bg-red-500 hover:bg-red-600 text-white rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-lg" data-media-id="${media.id}" title="Elimina immagine" type="button">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                </svg>
+            </button>
         </div>
-        <div class="mt-2 text-sm text-gray-300 truncate">
+        <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-70 text-white text-sm p-2 truncate">
             ${media.file_name}
         </div>
     `;
@@ -597,7 +791,8 @@ function addImageToGallery(media) {
     imagesGrid.appendChild(imageElement);
 }
 
-async function removeImage(mediaId) {
+// Rende la funzione accessibile globalmente
+window.removeImage = async function(mediaId) {
     console.log('🗑️ Rimozione immagine:', mediaId);
 
     if (!confirm('Sei sicuro di voler rimuovere questa immagine?')) {
@@ -625,8 +820,8 @@ async function removeImage(mediaId) {
         const result = await response.json();
 
         if (result.success) {
-            // Rimuovi l'elemento dalla gallery (cerca sia nelle immagini esistenti che in quelle nuove)
-            const imageElement = document.querySelector(`button[onclick="removeImage(${mediaId})"]`);
+            // Rimuovi l'elemento dalla gallery
+            const imageElement = document.querySelector(`button[data-media-id="${mediaId}"]`);
             if (imageElement) {
                 const parentElement = imageElement.closest('.relative.group');
                 if (parentElement) {
@@ -640,6 +835,56 @@ async function removeImage(mediaId) {
         }
     } catch (error) {
         console.error('❌ Errore rimozione immagine:', error);
+        showError('Errore durante la rimozione: ' + error.message);
+    }
+}
+
+// Rende la funzione accessibile globalmente per le immagini dei capitoli
+window.removeChapterImage = async function(chapterId, mediaId) {
+    console.log('🗑️ Rimozione immagine capitolo:', { chapterId, mediaId });
+
+    if (!confirm('Sei sicuro di voler rimuovere questa immagine dal capitolo?')) {
+        return;
+    }
+
+    try {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]');
+
+        const response = await fetch(`/biography/chapters/${chapterId}/remove-media`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': csrfToken.getAttribute('content'),
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                media_id: mediaId
+            }),
+            credentials: 'same-origin'
+        });
+
+        if (!response.ok) {
+            throw new Error('Errore nella rimozione');
+        }
+
+        const result = await response.json();
+
+        if (result.success) {
+            // Rimuovi l'elemento dalla UI
+            const imageElement = document.querySelector(`button[data-media-id="${mediaId}"][data-chapter-id="${chapterId}"]`);
+            if (imageElement) {
+                const parentElement = imageElement.closest('.relative.group');
+                if (parentElement) {
+                    parentElement.remove();
+                }
+            }
+
+            showSuccess('Immagine del capitolo rimossa con successo');
+        } else {
+            throw new Error(result.message || 'Errore nella rimozione');
+        }
+    } catch (error) {
+        console.error('❌ Errore rimozione immagine capitolo:', error);
         showError('Errore durante la rimozione: ' + error.message);
     }
 }
@@ -723,6 +968,11 @@ function showSuccess(message) {
     if (success) {
         success.textContent = message;
         success.classList.remove('hidden');
+
+        // Nascondi automaticamente dopo 3 secondi
+        setTimeout(() => {
+            hideSuccess();
+        }, 3000);
     }
 }
 
@@ -733,4 +983,50 @@ function hideSuccess() {
     }
 }
 
+// === Funzioni di utilità per il feedback durante l'elaborazione ===
+function showProcessingIndicator(chapterId, message = 'Elaborazione immagini in corso...') {
+    const chapterElement = document.querySelector(`[data-chapter-id="${chapterId}"]`);
+    if (chapterElement) {
+        // Trova o crea l'indicatore
+        let indicator = chapterElement.querySelector('.processing-indicator');
+        if (!indicator) {
+            indicator = document.createElement('div');
+            indicator.className = 'flex items-center p-2 mt-2 space-x-2 rounded-lg processing-indicator bg-blue-900/50';
+            indicator.innerHTML = `
+                <div class="h-4 w-4 animate-spin rounded-full border-b-2 border-blue-400"></div>
+                <span class="text-sm text-blue-300">${message}</span>
+            `;
+            chapterElement.appendChild(indicator);
+        } else {
+            indicator.querySelector('span').textContent = message;
+        }
+    }
+}
+
+function hideProcessingIndicator(chapterId) {
+    const chapterElement = document.querySelector(`[data-chapter-id="${chapterId}"]`);
+    if (chapterElement) {
+        const indicator = chapterElement.querySelector('.processing-indicator');
+        if (indicator) {
+            indicator.remove();
+        }
+    }
+}
+
 console.log('🎯 Biography Edit JS inizializzato completamente');
+
+// Test debug - verifica che le funzioni siano disponibili
+console.log('🔧 TEST: window.removeImage definita?', typeof window.removeImage);
+console.log('🔧 TEST: window.removeChapterImage definita?', typeof window.removeChapterImage);
+
+if (typeof window.removeImage === 'function') {
+    console.log('✅ window.removeImage è disponibile globalmente');
+} else {
+    console.error('❌ window.removeImage NON è disponibile globalmente');
+}
+
+if (typeof window.removeChapterImage === 'function') {
+    console.log('✅ window.removeChapterImage è disponibile globalmente');
+} else {
+    console.error('❌ window.removeChapterImage NON è disponibile globalmente');
+}

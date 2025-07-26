@@ -41,20 +41,20 @@ return new class extends Migration
                 'public_task'
             ])->default('consent');
 
-            $table->json('data_categories'); // Array of data categories processed
-            $table->json('processing_purposes'); // Specific processing purposes
+            $table->json('data_categories')->nullable(); // Array of data categories processed
+            $table->json('processing_purposes')->nullable(); // Specific processing purposes
             $table->json('recipients')->nullable(); // Third parties who receive data
-            $table->boolean('international_transfers')->default(false);
+            $table->boolean('international_transfers')->nullable()->default(false);
             $table->json('transfer_countries')->nullable(); // Countries for transfers
 
             // Consent configuration
-            $table->boolean('is_required')->default(false); // Required for service
-            $table->boolean('is_granular')->default(true); // Can be given/withdrawn independently
-            $table->boolean('can_withdraw')->default(true); // User can withdraw
-            $table->integer('withdrawal_effect_days')->default(30); // Days to process withdrawal
+            $table->boolean('is_required')->default(false)->nullable(); // Required for service
+            $table->boolean('is_granular')->default(true)->nullable(); // Can be given/withdrawn independently
+            $table->boolean('can_withdraw')->default(true)->nullable(); // User can withdraw
+            $table->integer('withdrawal_effect_days')->default(30)->nullable(); // Days to process withdrawal
 
             // Data retention
-            $table->string('retention_period', 100); // "2 years", "until withdrawal", etc.
+            $table->string('retention_period', 100)->nullable(); // "2 years", "until withdrawal", etc.
             $table->integer('retention_days')->nullable(); // Numeric days for automation
             $table->string('deletion_method', 50)->default('hard_delete'); // hard_delete, anonymize, archive
 

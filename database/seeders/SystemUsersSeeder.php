@@ -112,7 +112,7 @@ class SystemUsersSeeder extends Seeder
     {
         // Initialize services first
         $this->initializeServices();
-        
+
         $this->command->info('🚀 Creating System Users with Complete Ecosystem...');
 
         try {
@@ -133,13 +133,13 @@ class SystemUsersSeeder extends Seeder
 
         } catch (\Exception $e) {
             DB::statement('SET foreign_key_checks=1;');
-            
+
             $this->command->error('❌ Failed to create system users: ' . $e->getMessage());
             \Log::error('[SystemUsersSeeder] Failed to create system users', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            
+
             throw $e;
         }
     }
@@ -152,7 +152,7 @@ class SystemUsersSeeder extends Seeder
     {
         // Ensure services are initialized
         $this->initializeServices();
-        
+
         $logContext = [
             'operation' => 'system_user_seeder_creation',
             'user_data' => $userData,
@@ -208,33 +208,44 @@ class SystemUsersSeeder extends Seeder
         try {
             $algorandAddress = $this->generateValidAlgorandAddress();
 
-            // Use forceCreate to set specific ID - based on actual User model fillable fields
+            // ✅ CHECK se utente esiste già
+            $existingUser = User::find($userData['id']);
+
+            if ($existingUser) {
+                $this->command->warn("User with ID {$userData['id']} already exists. Updating...");
+
+                // Update existing user instead of creating
+                $existingUser->update([
+                    'name' => $userData['name'],
+                    'email' => $userData['email'],
+                    'usertype' => $userData['usertype'],
+                    'wallet' => $algorandAddress,
+                    'consent_summary' => $this->buildConsentSummary($userData),
+                    'consents_updated_at' => now(),
+                    'gdpr_compliant' => true,
+                    'gdpr_status_updated_at' => now(),
+                    'updated_at' => now(),
+                ]);
+
+                return $existingUser;
+            }
+
+            // Create new user if doesn't exist
             return User::forceCreate([
-                // ═══ FORCED ID ═══
                 'id' => $userData['id'],
-                
-                // ═══ CORE FIELDS (from User fillable) ═══
                 'name' => $userData['name'],
                 'email' => $userData['email'],
                 'password' => Hash::make('Password'),
                 'usertype' => $userData['usertype'],
-
-                // ═══ ALGORAND INTEGRATION ═══
                 'wallet' => $algorandAddress,
                 'wallet_balance' => 0.0000,
-
-                // ═══ SYSTEM FIELDS ═══
                 'language' => 'it',
-                'email_verified_at' => now(), // System users are pre-verified
+                'email_verified_at' => now(),
                 'created_via' => 'system_seeder',
-
-                // ═══ GDPR COMPLIANCE (actual User model fields) ═══
                 'consent_summary' => $this->buildConsentSummary($userData),
                 'consents_updated_at' => now(),
                 'gdpr_compliant' => true,
                 'gdpr_status_updated_at' => now(),
-
-                // ═══ TIMESTAMPS ═══
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
@@ -298,7 +309,7 @@ class SystemUsersSeeder extends Seeder
         try {
             // For system users, assign the specific role directly from userData
             $assignedRole = $userData['role'];
-            
+
             $user->assignRole($assignedRole);
 
             // Refresh user to load role permissions
@@ -431,7 +442,7 @@ class SystemUsersSeeder extends Seeder
             // Organization Data (for all system users) - using correct ENUM values
             $businessTypeMapping = [
                 'natan' => 'individual',
-                'fabio' => 'individual', 
+                'fabio' => 'individual',
                 'epp' => 'corporation',
             ];
 
@@ -589,14 +600,14 @@ class SystemUsersSeeder extends Seeder
     protected function logCreationSummary(): void
     {
         $users = User::whereIn('id', [1, 2, 3])->with('roles', 'collections')->get();
-        
+
         $this->command->info("\n📊 SYSTEM USERS CREATION SUMMARY:");
         $this->command->info("═══════════════════════════════════");
-        
+
         foreach ($users as $user) {
             $hasCollection = $user->collections->isNotEmpty();
             $role = $user->roles->first()?->name ?? 'none';
-            
+
             $this->command->info("🧑 {$user->name} (ID: {$user->id})");
             $this->command->info("   📧 Email: {$user->email}");
             $this->command->info("   🏷️  Type: {$user->usertype} → Role: {$role}");
@@ -604,7 +615,7 @@ class SystemUsersSeeder extends Seeder
             $this->command->info("   🏦 Wallet: {$user->wallet}");
             $this->command->info("");
         }
-        
+
         $this->command->info("🎯 All system users ready for FlorenceEGI MVP!");
     }
 }

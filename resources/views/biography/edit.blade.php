@@ -190,9 +190,22 @@
                                         <div class="mb-2">
                                             <div class="flex flex-wrap gap-2">
                                                 @foreach ($chapter->media as $media)
-                                                    <img src="{{ $media['thumb_url'] ?? $media['url'] }}"
-                                                        class="object-cover w-20 h-20 rounded shadow" alt="media",
-                                                        title={{ $media['thumb_url'] }}>
+                                                    <div class="relative overflow-hidden bg-gray-900 rounded group" style="width: 80px; height: 80px;">
+                                                        <img src="{{ $media['thumb_url'] ?? $media['url'] }}"
+                                                            class="object-cover w-full h-full" alt="media"
+                                                            title="{{ $media['file_name'] ?? 'Chapter media' }}">
+                                                        <div class="absolute top-1 right-1">
+                                                            <button class="p-1 text-white transition-opacity duration-200 bg-red-500 rounded-full shadow-lg opacity-0 btn-delete-chapter-image hover:bg-red-600 group-hover:opacity-100"
+                                                                    data-media-id="{{ $media['id'] }}"
+                                                                    data-chapter-id="{{ $chapter->id }}"
+                                                                    title="Elimina immagine"
+                                                                    type="button">
+                                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                                </svg>
+                                                            </button>
+                                                        </div>
+                                                    </div>
                                                 @endforeach
                                             </div>
                                         </div>
@@ -401,6 +414,36 @@
             background-color: #D4A574 !important;
             color: #1F2937 !important;
         }
+
+        /* Stili specifici per i bottoni di eliminazione immagini */
+        .btn-delete-image {
+            pointer-events: auto !important;
+            cursor: pointer !important;
+            z-index: 10 !important;
+        }
+
+        .btn-delete-image:hover {
+            cursor: pointer !important;
+            transform: scale(1.1) !important;
+        }
+
+        /* Stili per i bottoni di eliminazione delle immagini dei capitoli */
+        .btn-delete-chapter-image {
+            pointer-events: auto !important;
+            cursor: pointer !important;
+            z-index: 10 !important;
+        }
+
+        .btn-delete-chapter-image:hover {
+            cursor: pointer !important;
+            transform: scale(1.1) !important;
+        }
+
+        /* Assicura che l'overlay non blocchi i click */
+        .group:hover .btn-delete-image,
+        .group:hover .btn-delete-chapter-image {
+            pointer-events: auto !important;
+        }
     </style>
 @endpush
 
@@ -409,5 +452,5 @@
 @push('scripts')
     <script type="text/javascript" src="https://unpkg.com/trix@2/dist/trix.umd.min.js"></script>
 
-    <script src="{{ asset('js/biography-edit.js') }}"></script>
+    @vite('resources/js/biography-edit.js')
 @endpush

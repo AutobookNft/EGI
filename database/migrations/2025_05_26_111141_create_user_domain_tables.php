@@ -120,6 +120,7 @@ return new class extends Migration
             $table->string('invoice_city')->nullable();
             $table->string('invoice_country', 2)->nullable();
             $table->boolean('can_issue_invoices')->default(false);
+            $table->boolean('auto_request_invoice')->default(false);
             $table->timestamps();
             $table->unique('user_id');
         });

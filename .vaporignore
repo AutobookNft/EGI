@@ -1,0 +1,30 @@
+# Development files
+/node_modules
+/tests
+/docs
+*.log
+.env.example
+README.md
+docker*
+bash_files/
+packages/
+*ide*helper*
+who-called-request.log
+who-breaks-me.log
+
+# Nested vendor directories in Ultra packages
+vendor/ultra/*/vendor/
+vendor/ultra/*/node_modules/
+vendor/ultra/*/tests/
+vendor/ultra/*/.git/
+vendor/ultra/*/docs/
+vendor/ultra/*/README.md
+
+# Storage cleanup
+/storage/logs
+/storage/framework/cache
+/storage/framework/sessions
+/storage/framework/testing
+/storage/framework/views
+/storage/debugbar
+/storage/pail

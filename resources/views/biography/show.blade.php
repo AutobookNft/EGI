@@ -110,7 +110,7 @@
                     </div>
 
                     <!-- Galleria Media della Biografia Principale -->
-                    @if ($biography->getMedia('main_gallery')->count() > 0)
+                    @if ($biographyMedia->count() > 0)
                         <div class="mb-8">
                             <div class="flex items-center mb-6">
                                 <div class="mr-4 flex h-10 w-10 items-center justify-center rounded-full bg-[#D4A574]">
@@ -126,7 +126,7 @@
                                 </h3>
                             </div>
                             <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                                @foreach ($biography->getMedia('main_gallery') as $media)
+                                @foreach ($biographyMedia as $media)
                                     <div
                                         class="group relative overflow-hidden rounded-xl border-2 border-gray-600 bg-gray-800/50 backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:border-[#D4A574] hover:shadow-2xl">
                                         @if (Str::startsWith($media->mime_type, 'image/'))

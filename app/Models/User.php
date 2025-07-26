@@ -1186,7 +1186,7 @@ class User extends Authenticatable implements HasMedia
         $currentImage = $this->getCurrentProfileImage();
 
         if ($currentImage) {
-            return $currentImage->getUrl('avatar');
+            return $currentImage->getUrl('thumb');
         }
 
         // Fallback to default

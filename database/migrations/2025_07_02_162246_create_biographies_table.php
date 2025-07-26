@@ -78,6 +78,7 @@ return new class extends Migration
             $table->index(['user_id', 'type']);
             $table->index(['is_public', 'created_at']);
             $table->index('slug');
+            $table->index(['is_completed']);
         });
     }
 

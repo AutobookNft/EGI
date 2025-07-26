@@ -57,7 +57,7 @@ return new class extends Migration
             $table->string('language', 2)->nullable();
             $table->text('wallet')->nullable();
             $table->string('personal_secret')->nullable();
-            $table->boolean('is_weak_auth')->unique();
+            $table->boolean('is_weak_auth')->unique()->nullable();
             $table->decimal('wallet_balance', 20, 4)->default(0.00)->nullable();
             $table->boolean('consent')->default(false)->nullable();
             $table->string('icon_style', 20)->nullable();

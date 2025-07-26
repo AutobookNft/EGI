@@ -38,7 +38,7 @@ return new class extends Migration
 
         // Stato e pubblicazione
         $table->string('status')->default('draft')->index();       // Stato: draft, pending_approval, published
-        $table->string('created_via', 255);                        // Metodo di creazione (es. web, api)
+        $table->string('created_via', 255)->nullable();                        // Metodo di creazione (es. web, api)
         $table->boolean('is_published')->default(false)->index();  // Booleano per indicare se è pubblicata
 
         // Dati associati agli EGI

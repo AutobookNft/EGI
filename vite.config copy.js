@@ -9,11 +9,6 @@ export default defineConfig(({ mode }) => {
     let appUrl = env.APP_URL || 'http://localhost';
     appUrl = appUrl.replace(/\\x3a/g, ':').replace(/\\/g, '/');
 
-    // 🐳 Docker configuration detection
-    const isDocker = process.env.DOCKER_ENV === 'true' || env.DOCKER_ENV === 'true';
-    const viteHost = isDocker ? '0.0.0.0' : 'localhost';
-    const vitePort = parseInt(env.VITE_PORT || '5173');
-
     return {
         plugins: [
             laravel({
@@ -29,7 +24,6 @@ export default defineConfig(({ mode }) => {
                     'resources/css/collections-show.css',
                     'resources/js/app.js',
                     'resources/js/collection.js',
-                    'resources/js/biography-edit.js', // AGGIUNTO!
                     'resources/ts/main.ts', // Corretto da main.js a main.ts
                     'resources/js/guest.js',
                     'resources/js/polyfills.js',
@@ -69,11 +63,9 @@ export default defineConfig(({ mode }) => {
             preserveSymlinks: true,
         },
         server: {
-            host: viteHost, // 🐳 0.0.0.0 for Docker, localhost for local
-            port: vitePort,
+            host: 'localhost',
+            port: 5173,
             hmr: {
-                host: 'localhost', // 🐳 Always localhost for HMR from browser perspective
-                port: vitePort,
                 overlay: true,
             },
             watch: {
