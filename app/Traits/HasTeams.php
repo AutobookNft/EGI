@@ -1,6 +1,6 @@
 <?php
 
-namespace Laravel\Jetstream;
+namespace App\Traits;
 
 use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
