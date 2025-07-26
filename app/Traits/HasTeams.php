@@ -3,6 +3,8 @@
 namespace App\Traits;
 
 use Illuminate\Support\Str;
+use Laravel\Jetstream\Jetstream;
+use Laravel\Jetstream\OwnerRole;
 use Laravel\Sanctum\HasApiTokens;
 
 trait HasTeams
