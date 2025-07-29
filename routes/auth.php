@@ -13,14 +13,14 @@ Route::middleware(['web', 'guest'])->group(function () {
 
     Route::post('/login', [AuthenticatedSessionController::class, 'store'])
         ->middleware('throttle:login')
-        ->name('login');
+        ->name('login.store');
 
     Route::get('/register', [RegisteredUserController::class, 'create'])
         ->name('register');
 
     Route::post('/register', [RegisteredUserController::class, 'store'])
         ->middleware('throttle:enhanced-registration')
-        ->name('register');
+        ->name('register.store');
 });
 
 // Logout route - OUR independent controller with auth middleware
@@ -28,8 +28,3 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');
 });
-
-
-
-
-

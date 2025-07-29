@@ -23,7 +23,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
     Route::patch('/notifications/{notification}/mark-as-read', [\App\Http\Controllers\Notifications\NotificationDetailsController::class, 'markAsRead'])->name('notifications.mark-as-read');
 
     // Rotta per marcare come letta (per notifiche semplici)
-    Route::patch('/notifications/{notification}/mark-as-read', [App\Http\Controllers\Notifications\NotificationDetailsController::class, 'markAsRead'])->name('notifications.mark-as-read');
+    Route::patch('/notifications/{notification}/mark-as-read', [App\Http\Controllers\Notifications\NotificationDetailsController::class, 'markAsRead'])->name('notifications.mark-as-read.patch');
 
     // // === GDPR Interactive Notification Routes ===
     // Route::prefix('notifications/{notification}/gdpr')
