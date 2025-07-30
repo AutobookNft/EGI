@@ -17,15 +17,15 @@ use Ultra\EgiModule\Contracts\WalletServiceInterface;
 use Ultra\UltraLogManager\UltraLogManager;
 
 /**
- * @Oracode Seeder: System Users Creation with Complete Ecosystem
- * 🎯 Purpose: Create the 3 core system users with full registration flow
+ * @Oracode Seeder: System Users Creation with Selective Ecosystem
+ * 🎯 Purpose: Create the 3 core system users with selective registration flow
  * 🛡️ Privacy: Full GDPR compliance with domain-separated data initialization
  * 🧱 Core Logic: Direct model creation with simplified service dependencies
  *
  * System Users:
- * - ID 1: Natan (creator/superadmin) with full ecosystem - business_type: individual
- * - ID 2: Epp (epp/epp_entity) with organization domain - business_type: corporation
- * - ID 3: Fabio (creator/superadmin) with full ecosystem - business_type: individual
+ * - ID 1: Natan (creator/superadmin) - NO collection/wallet - business_type: individual
+ * - ID 2: Epp (epp/epp_entity) - NO collection/wallet - business_type: corporation
+ * - ID 3: Fabio (creator/superadmin) - FULL ecosystem - business_type: individual
  *
  * Features:
  * - Uses actual model fillable fields from knowledge base
@@ -33,15 +33,15 @@ use Ultra\UltraLogManager\UltraLogManager;
  * - Direct model creation instead of complex service dependencies
  * - Safe logging that works even if services are unavailable
  * - Correct ENUM values for business_type field
+ * - Selective ecosystem creation (only user ID 3)
  *
  * @package Database\Seeders
  * @author Padmin D. Curtis (for Fabio Cherici)
- * @version 1.3.0 - Fixed business_type ENUM values
- * @date 2025-06-27
- * @solution Forced IDs + Actual Model Fields + ENUM Compliance + Resilient Service Handling
+ * @version 1.4.0 - Selective ecosystem creation (only ID 3)
+ * @date 2025-07-30
+ * @solution Forced IDs + Selective Ecosystem + Actual Model Fields + ENUM Compliance
  */
-class SystemUsersSeeder extends Seeder
-{
+class SystemUsersSeeder extends Seeder {
     /**
      * System users configuration
      */
@@ -77,8 +77,7 @@ class SystemUsersSeeder extends Seeder
     /**
      * Initialize essential services only
      */
-    protected function initializeServices(): void
-    {
+    protected function initializeServices(): void {
         if ($this->logger === null) {
             try {
                 $this->logger = app(UltraLogManager::class);
@@ -92,8 +91,7 @@ class SystemUsersSeeder extends Seeder
     /**
      * Safe logging method that works even if logger service is not available
      */
-    protected function safeLog(string $level, string $message, array $context = []): void
-    {
+    protected function safeLog(string $level, string $message, array $context = []): void {
         try {
             if ($this->logger) {
                 $this->logger->info($message, $context);
@@ -108,8 +106,7 @@ class SystemUsersSeeder extends Seeder
     /**
      * Run the database seeds.
      */
-    public function run(): void
-    {
+    public function run(): void {
         // Initialize services first
         $this->initializeServices();
 
@@ -130,7 +127,6 @@ class SystemUsersSeeder extends Seeder
 
             $this->command->info('✅ System Users created successfully with full ecosystem!');
             $this->logCreationSummary();
-
         } catch (\Exception $e) {
             DB::statement('SET foreign_key_checks=1;');
 
@@ -148,8 +144,7 @@ class SystemUsersSeeder extends Seeder
      * Create complete user with full registration flow
      * Replicates RegisteredUserController::store() logic exactly
      */
-    protected function createCompleteUser(array $userData): void
-    {
+    protected function createCompleteUser(array $userData): void {
         // Ensure services are initialized
         $this->initializeServices();
 
@@ -172,14 +167,20 @@ class SystemUsersSeeder extends Seeder
             $canCreateEcosystem = $this->assignRoleAndCheckPermissions($user, $userData);
             $logContext['can_create_ecosystem'] = $canCreateEcosystem;
 
-            // 3. CONDITIONAL ECOSYSTEM SETUP
+            // 3. CONDITIONAL ECOSYSTEM SETUP - Only for user ID 3 (Fabio)
             $collection = null;
-            if ($canCreateEcosystem) {
+            if ($canCreateEcosystem && $userData['id'] === 3) {
                 $collection = $this->createFullEcosystem($user, $userData, $logContext);
                 $logContext['collection_id'] = $collection->id;
                 $logContext['ecosystem_created'] = true;
+                $this->command->info("   💼 Ecosystem: ✅ Created (Full setup)");
             } else {
                 $logContext['ecosystem_created'] = false;
+                if ($userData['id'] === 1 || $userData['id'] === 2) {
+                    $this->command->info("   💼 Ecosystem: ❌ Skipped (User {$userData['id']} - no collection needed)");
+                } else {
+                    $this->command->info("   💼 Ecosystem: ❌ None (No permissions)");
+                }
             }
 
             // 4. INITIALIZE USER DOMAINS (always)
@@ -192,7 +193,6 @@ class SystemUsersSeeder extends Seeder
             $this->createRegistrationAuditRecord($user, $collection, $userData, $logContext);
 
             $this->command->info("✅ User {$userData['name']} created successfully!");
-
         } catch (\Exception $e) {
             $this->command->error("❌ Failed to create user {$userData['name']}: " . $e->getMessage());
             throw $e;
@@ -203,8 +203,7 @@ class SystemUsersSeeder extends Seeder
      * Create user with valid Algorand wallet address
      * Uses actual User model fillable fields from knowledge base
      */
-    protected function createUserWithAlgorandWallet(array $userData): User
-    {
+    protected function createUserWithAlgorandWallet(array $userData): User {
         try {
             $algorandAddress = $this->generateValidAlgorandAddress();
 
@@ -249,7 +248,6 @@ class SystemUsersSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
-
         } catch (\Exception $e) {
             throw new \Exception("Failed to create user {$userData['name']} with Algorand wallet: " . $e->getMessage(), 0, $e);
         }
@@ -258,8 +256,7 @@ class SystemUsersSeeder extends Seeder
     /**
      * Generate valid Algorand address format (58 chars, Base32 [A-Z2-7])
      */
-    protected function generateValidAlgorandAddress(): string
-    {
+    protected function generateValidAlgorandAddress(): string {
         try {
             // Algorand addresses: 58 chars, Base32 alphabet [A-Z2-7]
             $base32Chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
@@ -275,7 +272,6 @@ class SystemUsersSeeder extends Seeder
             }
 
             return $address;
-
         } catch (\Exception $e) {
             throw new \Exception('Failed to generate valid Algorand address: ' . $e->getMessage(), 0, $e);
         }
@@ -285,8 +281,7 @@ class SystemUsersSeeder extends Seeder
      * Build consent summary for user record (JSON array for User.consent_summary field)
      * Based on actual User model casts: 'consent_summary' => 'array'
      */
-    protected function buildConsentSummary(array $userData): array
-    {
+    protected function buildConsentSummary(array $userData): array {
         return [
             'privacy_policy' => true,
             'age_confirmed' => true,
@@ -302,10 +297,9 @@ class SystemUsersSeeder extends Seeder
 
     /**
      * Assign role and check ecosystem creation permissions - Simplified for seeder
-     * For system users, we assign the specific role directly and assume permissions
+     * Only user ID 3 (Fabio) gets full ecosystem creation capability
      */
-    protected function assignRoleAndCheckPermissions(User $user, array $userData): bool
-    {
+    protected function assignRoleAndCheckPermissions(User $user, array $userData): bool {
         try {
             // For system users, assign the specific role directly from userData
             $assignedRole = $userData['role'];
@@ -315,19 +309,19 @@ class SystemUsersSeeder extends Seeder
             // Refresh user to load role permissions
             $user->refresh();
 
-            // For system users, ALL should have ecosystem creation capability
-            $canCreateEcosystem = true; // All system users get full ecosystem
+            // Only user ID 3 (Fabio) should have ecosystem creation capability
+            $canCreateEcosystem = ($userData['id'] === 3);
 
             $this->safeLog('info', '[Seeder] Role assigned and permissions checked', [
                 'user_id' => $user->id,
                 'usertype' => $userData['usertype'],
                 'assigned_role' => $assignedRole,
                 'can_create_ecosystem' => $canCreateEcosystem,
-                'system_user' => true
+                'system_user' => true,
+                'ecosystem_policy' => 'only_user_id_3_gets_full_ecosystem'
             ]);
 
             return $canCreateEcosystem;
-
         } catch (\Exception $e) {
             throw new \Exception("Failed to assign role for user {$userData['name']}: " . $e->getMessage(), 0, $e);
         }
@@ -337,8 +331,7 @@ class SystemUsersSeeder extends Seeder
      * Create complete ecosystem: collection + relationships - Simplified for seeder
      * Creates collection directly without complex services
      */
-    protected function createFullEcosystem(User $user, array $userData, array $logContext): \App\Models\Collection
-    {
+    protected function createFullEcosystem(User $user, array $userData, array $logContext): \App\Models\Collection {
         try {
             // 1. Create Collection directly using fillable fields
             $collectionName = $this->getCollectionNameForUserType($userData['usertype'], $userData['name']);
@@ -393,7 +386,6 @@ class SystemUsersSeeder extends Seeder
             ]);
 
             return $collection;
-
         } catch (\Exception $e) {
             throw new \Exception("Failed to create ecosystem for user {$userData['name']}: " . $e->getMessage(), 0, $e);
         }
@@ -403,8 +395,7 @@ class SystemUsersSeeder extends Seeder
      * Generate collection name based on user type and name
      * Updated for system users specific types
      */
-    protected function getCollectionNameForUserType(string $userType, string $userName): string
-    {
+    protected function getCollectionNameForUserType(string $userType, string $userName): string {
         $firstName = explode(' ', trim($userName), 2)[0];
 
         $typeNames = [
@@ -422,8 +413,7 @@ class SystemUsersSeeder extends Seeder
      * Initialize all user domain tables using actual fillable fields and ENUM values
      * Based on actual model fillable fields from knowledge base
      */
-    protected function initializeUserDomains(User $user, array $userData, array $logContext): void
-    {
+    protected function initializeUserDomains(User $user, array $userData, array $logContext): void {
         try {
             // User Profile (always) - using actual fillable fields
             UserProfile::create([
@@ -473,7 +463,6 @@ class SystemUsersSeeder extends Seeder
                 'business_type' => $businessTypeMapping[strtolower($userData['name'])],
                 'domains_created' => ['profiles', 'personal_data', 'organization_data', 'documents', 'invoice_preferences'],
             ]);
-
         } catch (\Exception $e) {
             throw new \Exception("Failed to initialize user domains for {$userData['name']}: " . $e->getMessage(), 0, $e);
         }
@@ -483,8 +472,7 @@ class SystemUsersSeeder extends Seeder
      * Process GDPR consents - Simplified version for seeder
      * Creates basic consent records directly using UserConsent model
      */
-    protected function processGdprConsents(User $user, array $userData, array $logContext): void
-    {
+    protected function processGdprConsents(User $user, array $userData, array $logContext): void {
         try {
             // Create basic consent records directly for system users
             $basicConsents = [
@@ -516,7 +504,6 @@ class SystemUsersSeeder extends Seeder
                 'consents_created' => array_keys($basicConsents),
                 'consent_method' => 'direct_seeder_creation'
             ]);
-
         } catch (\Exception $e) {
             // Make GDPR consent creation non-blocking for system users
             $this->safeLog('warning', "[Seeder] Failed to process GDPR consents for {$userData['name']} (non-blocking)", [
@@ -530,8 +517,7 @@ class SystemUsersSeeder extends Seeder
      * Create registration audit record - Simplified version for seeder
      * Non-blocking to avoid seeder failure due to audit service issues
      */
-    protected function createRegistrationAuditRecord(User $user, ?\App\Models\Collection $collection, array $userData, array $logContext): void
-    {
+    protected function createRegistrationAuditRecord(User $user, ?\App\Models\Collection $collection, array $userData, array $logContext): void {
         try {
             // Try to create audit record via service
             $auditService = app(\App\Services\Gdpr\AuditLogService::class);
@@ -559,7 +545,6 @@ class SystemUsersSeeder extends Seeder
                 ],
                 GdprActivityCategory::REGISTRATION,
             );
-
         } catch (\Exception $e) {
             // Don't fail seeder for audit errors - it's non-blocking
             $this->safeLog('warning', '[Seeder] Failed to create audit record (non-blocking)', [
@@ -597,8 +582,7 @@ class SystemUsersSeeder extends Seeder
     /**
      * Log creation summary
      */
-    protected function logCreationSummary(): void
-    {
+    protected function logCreationSummary(): void {
         $users = User::whereIn('id', [1, 2, 3])->with('roles', 'collections')->get();
 
         $this->command->info("\n📊 SYSTEM USERS CREATION SUMMARY:");
@@ -611,11 +595,20 @@ class SystemUsersSeeder extends Seeder
             $this->command->info("🧑 {$user->name} (ID: {$user->id})");
             $this->command->info("   📧 Email: {$user->email}");
             $this->command->info("   🏷️  Type: {$user->usertype} → Role: {$role}");
-            $this->command->info("   💼 Ecosystem: " . ($hasCollection ? "✅ Created" : "❌ None"));
-            $this->command->info("   🏦 Wallet: {$user->wallet}");
+
+            // Different ecosystem message based on user policy
+            if ($user->id === 3) {
+                $this->command->info("   💼 Ecosystem: " . ($hasCollection ? "✅ Created" : "❌ Failed"));
+                if ($hasCollection) {
+                    $this->command->info("   🏦 Wallet: {$user->wallet}");
+                }
+            } else {
+                $this->command->info("   💼 Ecosystem: ❌ Skipped (Policy: no collection for user {$user->id})");
+                $this->command->info("   🏦 Wallet: {$user->wallet}");
+            }
             $this->command->info("");
         }
 
-        $this->command->info("🎯 All system users ready for FlorenceEGI MVP!");
+        $this->command->info("🎯 System users ready - Only Fabio (ID: 3) has full ecosystem!");
     }
 }

@@ -274,20 +274,52 @@ class RegisteredUserController extends Controller
     private function generateValidAlgorandAddress(): string
     {
         try {
-            // Algorand addresses: 58 chars, Base32 alphabet [A-Z2-7]
-            $base32Chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
-            $address = '';
+            $maxAttempts = 10; // Limite per evitare loop infiniti
+            $attempt = 0;
 
-            for ($i = 0; $i < 58; $i++) {
-                $address .= $base32Chars[random_int(0, 31)];
-            }
+            do {
+                $attempt++;
 
-            // Validate our generated address
-            if (!preg_match('/^[A-Z2-7]{58}$/', $address)) {
-                throw new \Exception('Generated address does not match Algorand format validation');
-            }
+                // Algorand addresses: 58 chars, Base32 alphabet [A-Z2-7]
+                $base32Chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+                $address = '';
 
-            return $address;
+                for ($i = 0; $i < 58; $i++) {
+                    $address .= $base32Chars[\random_int(0, 31)];
+                }
+
+                // Validate our generated address
+                if (!\preg_match('/^[A-Z2-7]{58}$/', $address)) {
+                    throw new \Exception('Generated address does not match Algorand format validation');
+                }
+
+                // Check if this address already exists in users or wallets tables
+                $existsInUsers = User::where('wallet', $address)->exists();
+                $existsInWallets = \App\Models\Wallet::where('wallet', $address)->exists();
+
+                if (!$existsInUsers && !$existsInWallets) {
+                    // Address is unique, return it
+                    $this->logger->info('[Registration] Unique Algorand address generated', [
+                        'address_length' => strlen($address),
+                        'attempts_needed' => $attempt,
+                        'format_valid' => true
+                    ]);
+
+                    return $address;
+                }
+
+                // Log collision for monitoring
+                $this->logger->warning('[Registration] Algorand address collision detected', [
+                    'attempt' => $attempt,
+                    'exists_in_users' => $existsInUsers,
+                    'exists_in_wallets' => $existsInWallets,
+                    'address_preview' => substr($address, 0, 10) . '...'
+                ]);
+
+            } while ($attempt < $maxAttempts);
+
+            // Se arriviamo qui, abbiamo esaurito i tentativi
+            throw new \Exception("Failed to generate unique Algorand address after {$maxAttempts} attempts");
 
         } catch (\Exception $e) {
             $this->logger->error('[Registration] Failed to generate Algorand address', [
@@ -396,7 +428,7 @@ class RegisteredUserController extends Controller
                 'collection_id' => $collection->id
             ]);
 
-            // 3. Setup Wallets for Collection using existing WalletService
+            // 3. Setup Wallets for Collection using WalletService
             $this->walletService->attachDefaultWalletsToCollection($collection, $user);
 
             $this->logger->info('[Registration] Wallets attached to collection', [

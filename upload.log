@@ -1,0 +1,5 @@
+[2025-07-30T06:47:28.734969+00:00] upload.ERROR: Failed to create wallet
+{"collection_id":13,"user_id":1,"royalty_mint":10.0,"royalty_rebind":1.0,"platform_role":"Natan","error_message":"SQLSTATE[23000]: Integrity constraint violation:
+1062 Duplicate entry 'G6H7J8K9L0JH6G5F4DF5G6H7J8K9L0JH6G3' for key 'wallets.wallets_wallet_unique'
+(Connection: mysql, SQL: insert into `wallets` (`collection_id`, `user_id`, `wallet`, `royalty_mint`, `royalty_rebind`, `platform_role`, `updated_at`, `created_at`)
+values (13, 1, G6H7J8K9L0JH6G5F4DF5G6H7J8K9L0JH6G3, 10, 1, Natan, 2025-07-30 06:47:28, 2025-07-30 06:47:28))","error_class":"Illuminate\\Database\\UniqueConstraintViolationException","Class":"App\\Http\\Controllers\\Auth\\RegisteredUserController","Method":"store","Message":"Failed to create wallet"}

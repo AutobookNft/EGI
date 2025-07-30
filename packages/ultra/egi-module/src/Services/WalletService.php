@@ -65,8 +65,7 @@ use Throwable;
  *                                   Added structured error handling with UEM error codes.
  *                                   Updated documentation to Oracode v1.5 standard.
  */
-class WalletService implements WalletServiceInterface
-{
+class WalletService implements WalletServiceInterface {
     /**
      * 🧱 @dependency UltraErrorManager instance.
      * Used for standardized error handling.
@@ -129,8 +128,7 @@ class WalletService implements WalletServiceInterface
      * @privacy-purpose Wallet creation for royalty management
      * @privacy-data Uses user IDs and wallet addresses
      */
-    public function attachDefaultWalletsToCollection(Collection $collection, User $user): void
-    {
+    public function attachDefaultWalletsToCollection(Collection $collection, User $user): void {
         // Create context for logging and error handling
         $context = [
             'collection_id' => $collection->id,
@@ -147,7 +145,7 @@ class WalletService implements WalletServiceInterface
             $creatorWallet = $this->createWallet(
                 $collection->id,
                 $user->id,
-                $user->wallet_address ?? null,
+                $user->wallet ?? null,
                 config('app.creator_royalty_mint', 100),
                 config('app.creator_royalty_rebind', 100),
                 'Creator'
@@ -181,7 +179,6 @@ class WalletService implements WalletServiceInterface
                 'epp_wallet_id' => $eppWallet->id ?? 'failed',
                 'natan_wallet_id' => $natanWallet->id ?? 'failed'
             ]));
-
         } catch (Throwable $e) {
             // Log error with detailed context
             $this->logger->error('Failed to attach default wallets to collection', array_merge($context, [
@@ -234,8 +231,7 @@ class WalletService implements WalletServiceInterface
         float $royaltyRebind,
         string $platform_role
 
-    ): Wallet|RedirectResponse
-    {
+    ): Wallet|RedirectResponse {
         // Create context for logging and error handling
         $context = [
             'collection_id' => $collectionId,
@@ -249,7 +245,50 @@ class WalletService implements WalletServiceInterface
             // If no wallet address is provided, use a placeholder
             $address = $walletAddress ?? config('app.default_wallet_placeholder', 'pending_wallet_address');
 
-            // Create the wallet
+            // Check if wallet already exists for this collection/user/address combination
+            $existingWallet = Wallet::where('collection_id', $collectionId)
+                ->where('user_id', $userId)
+                ->where('wallet', $address)
+                ->first();
+
+            if ($existingWallet) {
+                // Update existing wallet with new values
+                $existingWallet->update([
+                    'royalty_mint' => $royaltyMint,
+                    'royalty_rebind' => $royaltyRebind,
+                    'platform_role' => $platform_role,
+                ]);
+
+                // Log wallet update
+                $this->logger->info('Existing wallet updated for collection', array_merge($context, [
+                    'wallet_id' => $existingWallet->id,
+                    'action' => 'updated_existing'
+                ]));
+
+                return $existingWallet;
+            }
+
+            // Check if this wallet address already exists in the system (unique constraint)
+            $duplicateWallet = Wallet::where('wallet', $address)->first();
+
+            if ($duplicateWallet) {
+                // If the same wallet exists for a different user or collection, we need to handle this
+                $this->logger->warning('Wallet address already exists in system', array_merge($context, [
+                    'existing_wallet_id' => $duplicateWallet->id,
+                    'existing_user_id' => $duplicateWallet->user_id,
+                    'existing_collection_id' => $duplicateWallet->collection_id,
+                    'requested_address' => $address
+                ]));
+
+                // Return the existing wallet if it's for the same user, otherwise throw an error
+                if ($duplicateWallet->user_id === $userId) {
+                    return $duplicateWallet;
+                } else {
+                    throw new \Exception("Wallet address {$address} is already associated with another user (ID: {$duplicateWallet->user_id})");
+                }
+            }
+
+            // Create the wallet only if it doesn't exist
             $wallet = Wallet::create([
                 'collection_id' => $collectionId,
                 'user_id' => $userId,
@@ -260,12 +299,12 @@ class WalletService implements WalletServiceInterface
             ]);
 
             // Log successful wallet creation
-            $this->logger->info('Wallet created for collection', array_merge($context, [
-                'wallet_id' => $wallet->id
+            $this->logger->info('New wallet created for collection', array_merge($context, [
+                'wallet_id' => $wallet->id,
+                'action' => 'created_new'
             ]));
 
             return $wallet;
-
         } catch (Throwable $e) {
             // Log error with detailed context
             $this->logger->error('Failed to create wallet', array_merge($context, [
@@ -363,7 +402,6 @@ class WalletService implements WalletServiceInterface
             }
 
             return $hasQuota;
-
         } catch (Throwable $e) {
             // Log error with detailed context
             $this->logger->error('Error during quota validation', array_merge($context, [
@@ -391,8 +429,7 @@ class WalletService implements WalletServiceInterface
      *
      * @return void
      */
-    protected function defineWalletErrorCodes(): void
-    {
+    protected function defineWalletErrorCodes(): void {
         // Define error for wallet creation failure
         $this->errorManager->defineError('WALLET_CREATION_FAILED', [
             'type' => 'critical',
