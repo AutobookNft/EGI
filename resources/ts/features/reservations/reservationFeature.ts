@@ -197,6 +197,12 @@ function openReservationModal(egiId: number): void {
  * 📜 Oracode Function: updateReservationButtonStates
  * 🎯 Purpose: Update the states of all reservation buttons based on their current reservation status
  *
+ * @package FlorenceEGI
+ * @author Padmin D. Curtis (AI Partner OS3.0) for Fabio Cherici
+ * @version 1.1.0 (FlorenceEGI - Reservation Feature TypeScript Fix)
+ * @date 2025-07-30
+ * @purpose Fix type safety and validation in reservation button state updates
+ *
  * @returns {Promise<void>}
  */
 export async function updateReservationButtonStates(): Promise<void> {
@@ -208,6 +214,12 @@ export async function updateReservationButtonStates(): Promise<void> {
     const egiButtonMap = new Map<number, HTMLElement[]>();
 
     for (const [button, egiId] of reservationButtons.entries()) {
+        // 🎯 FIX 1: Validate egiId before processing
+        if (!egiId || isNaN(egiId) || egiId <= 0) {
+            console.warn('Padmin ReservationFeature: Invalid egiId found, skipping button', { egiId, button });
+            continue; // Skip to next iteration
+        }
+
         if (!egiButtonMap.has(egiId)) {
             egiButtonMap.set(egiId, []);
         }
@@ -216,19 +228,55 @@ export async function updateReservationButtonStates(): Promise<void> {
 
     // Process each unique EGI
     for (const [egiId, buttons] of egiButtonMap.entries()) {
+        // 🎯 FIX 2: Double-check egiId validity before API call
+        if (!egiId || isNaN(egiId) || egiId <= 0) {
+            console.warn('Padmin ReservationFeature: Invalid egiId in processing loop, skipping', { egiId });
+            continue; // Skip to next iteration
+        }
+
         try {
             const statusResponse = await getEgiReservationStatus(egiId);
 
-            if (statusResponse.success && statusResponse.data) {
-                updateButtonsForEgi(buttons, statusResponse);
-                updatedEgis.add(egiId);
+            // 🎯 FIX 3: Type guard to handle both response types
+            if (isReservationStatusResponse(statusResponse)) {
+                if (statusResponse.success && statusResponse.data) {
+                    updateButtonsForEgi(buttons, statusResponse);
+                    updatedEgis.add(egiId);
+                } else {
+                    console.warn(`Padmin ReservationFeature: API returned unsuccessful response for EGI ${egiId}`, statusResponse);
+                }
+            } else {
+                // Handle ServerErrorResponse
+                console.error(`Padmin ReservationFeature: Server error for EGI ${egiId}`, statusResponse);
+
+                if (UEM && typeof UEM.handleClientError === 'function') {
+                    UEM.handleClientError('RESERVATION_STATUS_SERVER_ERROR', {
+                        egiId,
+                        error: statusResponse
+                    });
+                }
             }
+
         } catch (error) {
             console.error(`Padmin ReservationFeature: Error updating buttons for EGI ${egiId}`, error);
+
+            if (UEM && typeof UEM.handleClientError === 'function') {
+                UEM.handleClientError('RESERVATION_STATUS_FETCH_ERROR', {
+                    egiId,
+                    error
+                }, error instanceof Error ? error : undefined);
+            }
         }
     }
 
     console.log(`Padmin ReservationFeature: Updated buttons for ${updatedEgis.size} EGIs`);
+}
+
+function isReservationStatusResponse(response: any): response is ReservationStatusResponse {
+    return response &&
+           typeof response === 'object' &&
+           'success' in response &&
+           typeof response.success === 'boolean';
 }
 
 /**
