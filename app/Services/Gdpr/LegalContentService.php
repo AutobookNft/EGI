@@ -29,15 +29,16 @@ class LegalContentService
     protected ConsentService $consentService;
 
 
-    public function __construct(
-        protected ?UltraLogManager $logger = null,
-        ConsentService $consentService
-        )
-    {
-        $this->basePath = resource_path('legal/terms/versions');
-        $this->consentService = $consentService;
 
-    }
+    public function __construct(
+            ConsentService $consentService,
+            protected ?UltraLogManager $logger = null
+            )
+        {
+            $this->basePath = resource_path('legal/terms/versions');
+            $this->consentService = $consentService;
+
+        }
 
     // ═══════════════════════════════════════════════════════════════════════════════
     // READ METHODS
