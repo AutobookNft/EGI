@@ -537,20 +537,17 @@ class ReservationController extends Controller
         try {
             $egi = Egi::findOrFail($egiId);
 
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        } catch (\Exception $e) {
             return $this->errorManager->handle(
                 'RECORD_EGI_NOT_FOUND_IN_RESERVATION_CONTROLLER',
                 [
                     'model' => 'Egi',
                     'id' => $egiId,
                     'operation' => 'reservation_status',
-                    'note' => 'Un record di prenotazione EGI è orfano di EGI, non dovrebbe accadere',
                     'user_id' => FegiAuth::id(),
                     'ip_address' => $request->ip(),
                     'user_agent' => $request->userAgent()
-                ],
-                $e
-            );
+                ], $e );
         }
 
         try {
