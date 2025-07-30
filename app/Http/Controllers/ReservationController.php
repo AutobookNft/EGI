@@ -100,7 +100,7 @@ class ReservationController extends Controller
             // Find EGI - wrapped in dedicated try/catch
             $egi = Egi::findOrFail($egiId);
 
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        } catch (\Exception $e) {
             return $this->errorManager->handle('RESERVATION_EGI_NOT_FOUND', [
                     'egi_id' => $egiId,
                     'operation' => 'web_reservation',
@@ -244,7 +244,7 @@ class ReservationController extends Controller
             // Find EGI - dedicated try/catch
             $egi = Egi::findOrFail($egiId);
 
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        } catch (\Exception $e) {
             return $this->errorManager->handle(
                 'RESERVATION_EGI_NOT_FOUND',
                 [
@@ -253,9 +253,7 @@ class ReservationController extends Controller
                     'user_id' => FegiAuth::id(),
                     'ip_address' => $request->ip(),
                     'user_agent' => $request->userAgent()
-                ],
-                $e
-            );
+                ], $e );
         }
 
         try {
@@ -362,7 +360,7 @@ class ReservationController extends Controller
         try {
             $reservation = Reservation::findOrFail($id);
 
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        } catch (\Exception $e) {
             return $this->errorManager->handle(
                 'RECORD_NOT_FOUND',
                 [
@@ -372,9 +370,7 @@ class ReservationController extends Controller
                     'user_id' => FegiAuth::id(),
                     'ip_address' => $request->ip(),
                     'user_agent' => $request->userAgent()
-                ],
-                $e
-            );
+                ], $e );
         }
 
         try {
