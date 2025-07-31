@@ -331,10 +331,10 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
             });
 
             // Create collection permission
-            Route::middleware('collection_can:create_collection')->group(function () {
-                Route::post('/create', [CollectionsController::class, 'create'])
-                    ->name('collections.create');
-            });
+
+            Route::post('/create', [CollectionsController::class, 'create'])
+                ->name('collections.create');
+
 
             // Add team member permission
             Route::middleware('collection_can:add_team_member')->group(function () {

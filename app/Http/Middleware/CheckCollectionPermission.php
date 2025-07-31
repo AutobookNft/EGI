@@ -68,6 +68,26 @@ class CheckCollectionPermission
                 'current_collection_id' => $userModel->current_collection_id,
             ]);
 
+            // 🎯 SPECIAL CASE: Collection creation when user has no current collection
+            if ($permission === 'create_collection' && !$userModel->current_collection_id) {
+                // For collection creation, check user's global permissions instead of collection-specific ones
+                if ($userModel->can($permission)) {
+                    Log::channel('florenceegi')->info('Collection creation permission granted (no current collection)', [
+                        'user_id' => $user->id,
+                        'permission' => $permission,
+                        'user_roles' => $userModel->roles->pluck('name')->toArray(),
+                    ]);
+                    return $next($request);
+                } else {
+                    Log::channel('florenceegi')->error('User lacks global permission for collection creation', [
+                        'user_id' => $user->id,
+                        'permission' => $permission,
+                        'user_roles' => $userModel->roles->pluck('name')->toArray(),
+                    ]);
+                    abort(403, 'Non hai i permessi necessari per eseguire questa azione.');
+                }
+            }
+
             $collection = $userModel->currentCollection;
 
             // Se la collection non esiste, restituisci un errore 404
@@ -76,6 +96,7 @@ class CheckCollectionPermission
                     'user_id' => $user->id,
                     'ip' => $request->ip(),
                     'route' => $request->route()->getName(),
+                    'permission' => $permission,
                 ]);
                 abort(404, 'CheckCollectionPermission: Collection non trovata.');
             }

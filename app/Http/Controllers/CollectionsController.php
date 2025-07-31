@@ -245,6 +245,22 @@ class CollectionsController extends Controller
 
             $operationContext['creator_id'] = $user->id;
 
+            // 🎯 Enhanced Permission Check for Collection Creation
+            if (!$user->can('create_collection')) {
+                app(UltraLogManager::class)->warning('Collection creation permission denied', [
+                    ...$operationContext,
+                    'user_roles' => $user->roles->pluck('name')->toArray(),
+                    'user_permissions' => $user->getAllPermissions()->pluck('name')->toArray()
+                ]);
+
+                return response()->json([
+                    'success' => false,
+                    'error' => 'PERMISSION_DENIED',
+                    'message' => __('collections.creation_failed') . ' ' . __('errors.insufficient_permissions'),
+                    'required_permission' => 'create_collection'
+                ], 403);
+            }
+
             // 🎯 OS1 Enhanced Validation with Semantic Coherence
             $validated = $request->validate(
                 [
