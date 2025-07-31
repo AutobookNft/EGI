@@ -37,6 +37,11 @@ export let walletDisconnectButtonEl: HTMLButtonElement | null = null;
 export let loginLinkDesktopEl: HTMLAnchorElement | null = null;
 export let registerLinkDesktopEl: HTMLAnchorElement | null = null;
 export let mobileAuthButtonsContainerEl: HTMLDivElement | null = null;
+export let mobileWalletInfoContainerEl: HTMLDivElement | null = null;
+export let mobileWalletAddressEl: HTMLSpanElement | null = null;
+export let mobileDashboardLinkEl: HTMLAnchorElement | null = null;
+export let mobileCopyAddressButtonEl: HTMLButtonElement | null = null;
+export let mobileDisconnectButtonEl: HTMLButtonElement | null = null;
 export let logoutFormEl: HTMLFormElement | null = null;
 
 // Navbar: Mobile Menu
@@ -70,7 +75,7 @@ export let uploadModalContentEl: HTMLDivElement | null = null;
 // === NUOVI ELEMENTI PER PULSANTE CONTESTUALE "CREA EGI" ===
 export let createEgiContextualButtonEl: HTMLButtonElement | null = null;
 export let createEgiButtonTextEl: HTMLSpanElement | null = null;
-export let createEgiButtonIconEl: SVGElement | null = null;
+export let createEgiButtonIconEl: SVGSVGElement | null = null;
 
 
 /**
@@ -121,7 +126,14 @@ export function initializeDOMReferences(): void {
     // === ACQUISIZIONE NUOVI ELEMENTI ===
     createEgiContextualButtonEl = queryEl<HTMLButtonElement>('.js-create-egi-contextual-button');
     createEgiButtonTextEl = queryEl<HTMLSpanElement>('.js-create-egi-button-text');
-    createEgiButtonIconEl = queryEl<SVGElement>('.js-create-egi-button-icon');
+    createEgiButtonIconEl = document.querySelector<SVGSVGElement>('.js-create-egi-button-icon');
+
+    // Mobile wallet info section
+    mobileWalletInfoContainerEl = getEl<HTMLDivElement>('mobile-wallet-info-container');
+    mobileWalletAddressEl = getEl<HTMLSpanElement>('mobile-wallet-address');
+    mobileDashboardLinkEl = getEl<HTMLAnchorElement>('mobile-dashboard-link');
+    mobileCopyAddressButtonEl = getEl<HTMLButtonElement>('mobile-copy-address');
+    mobileDisconnectButtonEl = getEl<HTMLButtonElement>('mobile-disconnect');
 
     // console.log('Padmin D. Curtis: DOM references acquired/re-acquired via initializeDOMReferences().');
 }

@@ -13,14 +13,6 @@
     </a>
 @endif
 
-{{-- Dashboard Link - Solo per utenti autenticati --}}
-@auth
-    <a href="{{ route('dashboard') }}" class="{{ $navLinkClasses }}"
-        aria-label="{{ __('Dashboard') }}">
-        {{ __('Dashboard') }}
-    </a>
-@endauth
-
 {{-- Creators Link - Su mobile sempre visibile, su desktop solo se non siamo in creators --}}
 @if ($isMobile || !(request()->routeIs('creator.index') || request()->is('/')))
     <a href="{{ url('/creator') }}" class="{{ $navLinkClasses }}"
@@ -49,6 +41,7 @@
 @php
     $authType = App\Helpers\FegiAuth::getAuthType(); // 'strong', 'weak', 'guest'
 @endphp
+
 {{-- Create EGI Button - Sempre visibile, la logica di azione è gestita da JS in base allo stato utente --}}
 <button type="button"
     class="js-create-egi-contextual-button {{ $navLinkClasses }} {{ $isMobile ? 'w-full text-left' : 'inline-flex items-center gap-1' }}"

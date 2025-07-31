@@ -57,6 +57,12 @@ export function updateNavbarUI(config: AppConfig, DOM: typeof DOMElements, uem: 
 
         if (showWalletDropdown) {
             walletDisplayTextEl.textContent = shortAddress;
+            
+            // Aggiorna anche l'indirizzo wallet mobile
+            if (DOM.mobileWalletAddressEl) {
+                DOM.mobileWalletAddressEl.textContent = shortAddress;
+            }
+            
             const labelKey = authStatus === 'logged-in' ? 'walletAriaLabelLoggedIn' : 'walletAriaLabelConnected';
             const statusTextKey = authStatus === 'logged-in' ? 'loggedInStatus' : 'connectedStatusWeak';
             const label = appTranslate(labelKey, config.translations, {
@@ -82,6 +88,19 @@ export function updateNavbarUI(config: AppConfig, DOM: typeof DOMElements, uem: 
     if (connectWalletButtonMobileEl) {
         connectWalletButtonMobileEl.style.display = authStatus === 'disconnected' ? 'inline-flex' : 'none';
     }
+    
+    // Mobile wallet info container - mostra quando connesso (wallet o auth)
+    if (DOM.mobileWalletInfoContainerEl) {
+        DOM.mobileWalletInfoContainerEl.style.display = 
+            (authStatus === 'connected' || authStatus === 'logged-in') ? 'block' : 'none';
+    }
+    
+    // Mobile dashboard link - mostra quando connesso (wallet o auth)
+    if (DOM.mobileDashboardLinkEl) {
+        DOM.mobileDashboardLinkEl.style.display = 
+            (authStatus === 'connected' || authStatus === 'logged-in') ? 'flex' : 'none';
+    }
+    
     if (mobileAuthButtonsContainerEl) {
         mobileAuthButtonsContainerEl.style.display = authStatus === 'logged-in' ? 'none' : 'flex';
     }

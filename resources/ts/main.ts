@@ -538,6 +538,17 @@ function setupEventListeners(): void {
         });
     });
 
+    // --- MOBILE WALLET BUTTONS ---
+    DOMElements.mobileCopyAddressButtonEl?.addEventListener('click', () => copyWalletAddress(mainAppConfig, DOMElements, UEM));
+    DOMElements.mobileDisconnectButtonEl?.addEventListener('click', () => {
+        handleDisconnect(mainAppConfig, DOMElements, UEM, () => {
+            updateNavbarUI(mainAppConfig, DOMElements, UEM);
+            if (reservationFeature && typeof reservationFeature.updateReservationButtonStates === 'function') {
+                reservationFeature.updateReservationButtonStates();
+            }
+        });
+    });
+
     // --- DROPDOWN COLLECTION LIST ---
     DOMElements.collectionListDropdownButtonEl?.addEventListener('click', () => toggleCollectionListDropdown(mainAppConfig, DOMElements, UEM));
 
