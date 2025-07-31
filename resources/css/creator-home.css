@@ -1,7 +1,6 @@
 /* resources/css/creator-home.css */
-
 /* ==========================================================================
-   Creator Home Styles - FlorenceEGI Nuovo Rinascimento
+   Creator Home Styles - FlorenceEGI Nuovo Rinascimento + Blur Mobile Grid
    ========================================================================== */
 
 /* Custom properties per i colori del brand */
@@ -13,7 +12,48 @@
 }
 
 /* ==========================================================================
-   Hero Section Enhancements
+   Creator Cards - Mobile Blur Grid Layout
+   ========================================================================== */
+
+/* Mobile Blur Grid Container */
+.creators-blur-grid {
+    gap: 1rem; /* 16px gap between cards */
+}
+
+/* Individual Blur Creator Card */
+.blur-creator-card {
+    aspect-ratio: 3/4; /* Vertical aspect ratio like Blur NFT cards */
+    height: 200px; /* Fixed height for consistency */
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.blur-creator-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+}
+
+/* Creator Image Section (75% of card height) */
+.creator-image-section {
+    height: 75%; /* 75% of total card height */
+    position: relative;
+    overflow: hidden;
+}
+
+/* Creator Info Section (25% of card height) */
+.creator-info-section {
+    height: 25%; /* 25% of total card height */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* Corner Badge Styling */
+.blur-creator-card .absolute span {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* ==========================================================================
+   Hero Section Enhancements (Existing)
    ========================================================================== */
 
 /* Gradient overlay con pattern rinascimentale */
@@ -157,147 +197,45 @@ nav a:hover::after {
 .btn-shine::before {
     content: '';
     position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: linear-gradient(
-        45deg,
-        transparent 30%,
-        rgba(255, 255, 255, 0.3) 50%,
-        transparent 70%
-    );
-    transform: rotate(45deg) translateX(-100%);
-    transition: transform 0.6s;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
 }
 
 .btn-shine:hover::before {
-    transform: rotate(45deg) translateX(100%);
+    left: 100%;
 }
 
 /* ==========================================================================
-   Loading States
+   Responsive Adjustments
    ========================================================================== */
 
-/* Skeleton loader per contenuti in caricamento */
-.skeleton-loader {
-    background: linear-gradient(90deg,
-        rgba(255, 255, 255, 0.05) 25%,
-        rgba(255, 255, 255, 0.1) 50%,
-        rgba(255, 255, 255, 0.05) 75%
-    );
-    background-size: 200% 100%;
-    animation: skeleton-loading 1.5s ease-in-out infinite;
-}
-
-@keyframes skeleton-loading {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
-}
-
-/* ==========================================================================
-   Renaissance Pattern Background
-   ========================================================================== */
-
-.renaissance-pattern {
-    background-image:
-        repeating-linear-gradient(
-            45deg,
-            transparent,
-            transparent 35px,
-            rgba(212, 165, 116, 0.03) 35px,
-            rgba(212, 165, 116, 0.03) 70px
-        ),
-        repeating-linear-gradient(
-            -45deg,
-            transparent,
-            transparent 35px,
-            rgba(45, 80, 22, 0.03) 35px,
-            rgba(45, 80, 22, 0.03) 70px
-        );
-}
-
-/* ==========================================================================
-   Mobile Optimizations
-   ========================================================================== */
-
-@media (max-width: 640px) {
-    /* Reduce animation complexity on mobile */
-    .creator-avatar-ring::before,
-    .impact-score-glow::before,
-    .btn-shine::before {
-        animation: none;
+/* Small mobile specific adjustments */
+@media (max-width: 480px) {
+    .blur-creator-card {
+        height: 180px; /* Slightly smaller on very small screens */
     }
 
-    /* Simplified hover states */
-    .collection-preview-card:hover {
-        transform: none;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    .creator-info-section {
+        padding: 0.5rem; /* Less padding on small mobile */
+    }
+
+    .creator-info-section h3 {
+        font-size: 0.75rem; /* text-xs */
     }
 }
 
-/* ==========================================================================
-   Dark Mode Enhancements
-   ========================================================================== */
-
-@media (prefers-color-scheme: dark) {
-    .creator-hero-gradient {
-        background: linear-gradient(
-            135deg,
-            rgba(17, 24, 39, 0.98) 0%,
-            rgba(27, 54, 93, 0.9) 50%,
-            rgba(17, 24, 39, 0.98) 100%
-        );
+/* Tablet adjustments - show as grid too but with more columns */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .creators-blur-grid {
+        grid-template-columns: repeat(3, 1fr); /* 3 columns on tablet if needed */
+        gap: 1.25rem;
     }
-}
 
-/* ==========================================================================
-   Utility Animations
-   ========================================================================== */
-
-/* Fade in animation for lazy loaded images */
-.fade-in {
-    animation: fadeIn 0.5s ease-in;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Page loaded transition */
-.creator-page-loaded {
-    transition: opacity 0.3s ease-in;
-}
-
-/* Button state transitions */
-.btn-following {
-    background-color: var(--grigio-pietra) !important;
-}
-
-/* ==========================================================================
-   Accessibility
-   ========================================================================== */
-
-/* Focus states con brand colors */
-*:focus-visible {
-    outline: 2px solid var(--oro-fiorentino);
-    outline-offset: 2px;
-}
-
-/* Reduce motion per chi ha questa preferenza */
-@media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
+    .blur-creator-card {
+        height: 220px; /* Slightly larger on tablet */
     }
 }
