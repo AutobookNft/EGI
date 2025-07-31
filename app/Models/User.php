@@ -162,14 +162,15 @@ class User extends Authenticatable implements HasMedia
      * Get the collections the user collaborates on.
      *
      * This relationship retrieves collections where the user is listed as a collaborator
-     * in the 'collection_user' pivot table.
+     * in the 'collection_user' pivot table, excluding collections where the user is the owner.
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
     public function collaborations(): BelongsToMany
     {
         return $this->belongsToMany(Collection::class, 'collection_user', 'user_id', 'collection_id')
-            ->withPivot('role') // Include il campo 'role' dalla tabella pivot
+            ->withPivot(['role', 'is_owner']) // Include both role and is_owner from pivot table
+            ->wherePivot('is_owner', '!=', 1) // Exclude collections where user is owner
             ->withTimestamps(); // Include created_at e updated_at dalla tabella pivot
     }
 
