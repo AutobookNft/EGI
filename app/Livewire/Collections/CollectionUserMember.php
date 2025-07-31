@@ -164,7 +164,6 @@ class CollectionUserMember extends Component
 
     public function invite()
     {
-
         $this->validate();
 
         try {
@@ -198,7 +197,7 @@ class CollectionUserMember extends Component
                 'collection_id' => $this->collectionId
             ]);
 
-            $this->addError(name: 'invitation', message: 'Errore durante su invio di invito');
+            $this->addError(name: 'invitation', message: 'Errore durante l\'invio dell\'invito');
 
         }
 

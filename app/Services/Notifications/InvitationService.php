@@ -95,9 +95,9 @@ class InvitationService
             } catch (Exception $e) {
                 Log::channel('florenceegi')->error('Errore creazione invito', [
                     'error' => $e->getMessage(),
-                    'data' => $notification
+                    'data' => $notification ?? null
                 ]);
-                // throw $e;
+                throw $e;
             }
         });
     }

@@ -79,7 +79,7 @@ async function _fetchAndRenderAccessibleCollections(config: AppConfig, DOM: type
  * 🎯 Popola il menu dropdown mobile "Le mie Collezioni" con le collection dell'utente.
  */
 function _renderMobileCollectionListMenu(config: AppConfig, DOM: typeof DOMElements, uem: typeof UEM): void {
-    if (!DOM.mobileCollectionListDropdownMenuEl || !DOM.mobileCollectionListLoadingEl || 
+    if (!DOM.mobileCollectionListDropdownMenuEl || !DOM.mobileCollectionListLoadingEl ||
         !DOM.mobileCollectionListEmptyEl || !DOM.mobileCollectionListErrorEl) {
         return; // Mobile dropdown non disponibile
     }
@@ -110,7 +110,7 @@ function _renderMobileCollectionListMenu(config: AppConfig, DOM: typeof DOMEleme
                 ${isOwned ? '<span class="text-xs text-emerald-400">Owner</span>' : '<span class="text-xs text-blue-400">Collaborator</span>'}
             </div>
         `;
-        
+
         item.addEventListener('click', (e: MouseEvent) => {
             e.preventDefault();
             _handleSetCurrentCollection(config, DOM, collection.id, uem);
@@ -118,7 +118,7 @@ function _renderMobileCollectionListMenu(config: AppConfig, DOM: typeof DOMEleme
             DOM.mobileCollectionListDropdownMenuEl!.classList.add('hidden');
             DOM.mobileCollectionListDropdownButtonEl!.setAttribute('aria-expanded', 'false');
         });
-        
+
         return item;
     };
 
@@ -364,7 +364,7 @@ export function updateCurrentCollectionBadge(config: AppConfig, DOM: typeof DOME
             currentCollectionBadgeLinkEl.classList.remove('pointer-events-none', 'cursor-default', 'hover:bg-sky-100', 'hover:border-sky-400');
         }
         currentCollectionBadgeContainerEl.classList.remove('hidden');
-        
+
         // Aggiorna anche il badge mobile se presente
         if (DOM.currentCollectionBadgeContainerMobileEl && DOM.currentCollectionBadgeNameMobileEl && DOM.currentCollectionBadgeLinkMobileEl) {
             DOM.currentCollectionBadgeNameMobileEl.textContent = name;
@@ -379,7 +379,7 @@ export function updateCurrentCollectionBadge(config: AppConfig, DOM: typeof DOME
         }
     } else {
         currentCollectionBadgeContainerEl.classList.add('hidden');
-        
+
         // Nasconde anche il badge mobile se presente
         if (DOM.currentCollectionBadgeContainerMobileEl) {
             DOM.currentCollectionBadgeContainerMobileEl.classList.add('hidden');
@@ -497,7 +497,7 @@ export function toggleMobileCollectionListDropdown(config: AppConfig, DOM: typeo
     }
 
     const isOpen = !DOM.mobileCollectionListDropdownMenuEl.classList.contains('hidden');
-    
+
     if (isOpen) {
         // Chiudi il dropdown
         DOM.mobileCollectionListDropdownMenuEl.classList.add('hidden');
@@ -509,7 +509,7 @@ export function toggleMobileCollectionListDropdown(config: AppConfig, DOM: typeo
         } else if (!currentUserCollectionsDataState) {
             _fetchAndRenderAccessibleCollections(config, DOM, uem); // Riusa la stessa logica di caricamento
         }
-        
+
         DOM.mobileCollectionListDropdownMenuEl.classList.remove('hidden');
         DOM.mobileCollectionListDropdownButtonEl.setAttribute('aria-expanded', 'true');
     }

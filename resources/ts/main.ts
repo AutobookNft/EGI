@@ -552,7 +552,7 @@ function setupEventListeners(): void {
 
     // --- DROPDOWN COLLECTION LIST ---
     DOMElements.collectionListDropdownButtonEl?.addEventListener('click', () => toggleCollectionListDropdown(mainAppConfig, DOMElements, UEM));
-    
+
     // --- MOBILE DROPDOWN COLLECTION LIST ---
     DOMElements.mobileCollectionListDropdownButtonEl?.addEventListener('click', () => toggleMobileCollectionListDropdown(mainAppConfig, DOMElements, UEM));
 

@@ -23,8 +23,15 @@
                             <option value="{{ $role }}">{{ ucfirst($role) }}</option>
                         @endforeach
                     </select>
-                    {{-- @error('role') <span class="text-error text-sm">{{ $message }}</span> @enderror --}}
+                    @error('role') <span class="text-error text-sm">{{ $message }}</span> @enderror
                 </div>
+
+                <!-- Errori generali -->
+                @error('invitation') 
+                    <div class="mb-4 p-3 bg-red-900 border border-red-600 rounded-md">
+                        <span class="text-red-300 text-sm">{{ $message }}</span>
+                    </div>
+                @enderror
 
                 <!-- Azioni -->
                 <div class="flex justify-end space-x-4 mt-6">
