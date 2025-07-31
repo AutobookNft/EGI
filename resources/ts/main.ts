@@ -470,8 +470,9 @@ function setupEventListeners(): void {
 
     // --- NUOVO: Listener per il pulsante contestuale "Crea EGI" sempre visibile ---
     if (DOMElements.createEgiContextualButtonEl) {
-        DOMElements.createEgiContextualButtonEl.addEventListener('click', () => {
+        DOMElements.createEgiContextualButtonEl.addEventListener('click', (event) => {
             const authStatus = getAuthStatus(mainAppConfig);
+            
             if (authStatus === 'logged-in' || authStatus === 'connected') {
                 mainUploadModalManager?.openModal('egi');
             } else {
@@ -479,6 +480,21 @@ function setupEventListeners(): void {
             }
         });
     }
+
+    // --- LISTENER ALTERNATIVO per tutti i pulsanti con la classe (fallback) ---
+    const allEgiButtons = document.querySelectorAll('.js-create-egi-contextual-button');
+    
+    allEgiButtons.forEach((button, index) => {
+        button.addEventListener('click', (event) => {
+            const authStatus = getAuthStatus(mainAppConfig);
+            
+            if (authStatus === 'logged-in' || authStatus === 'connected') {
+                mainUploadModalManager?.openModal('egi');
+            } else {
+                openSecureWalletModal(mainAppConfig, DOMElements, 'create-egi');
+            }
+        });
+    });
 
     DOMElements.createCollectionGuestButtonsEl?.forEach(btn => btn.addEventListener('click', () => {
         const authStatus = getAuthStatus(mainAppConfig);

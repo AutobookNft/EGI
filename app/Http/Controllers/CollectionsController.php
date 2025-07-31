@@ -35,8 +35,7 @@ use Ultra\UltraLogManager\UltraLogManager;
  * @version 1.0.0
  * @since 1.0.0
  */
-class CollectionsController extends Controller
-{
+class CollectionsController extends Controller {
     /**
      * Display a paginated listing of collections.
      *
@@ -47,8 +46,7 @@ class CollectionsController extends Controller
      * @param Request $request The HTTP request with optional filter parameters
      * @return \Illuminate\View\View The view with paginated collection data
      */
-    public function index(Request $request)
-    {
+    public function index(Request $request) {
         // Ottieni tutti gli EPP per il dropdown dei filtri
         $epps = Epp::select('id', 'name')->get();
 
@@ -99,10 +97,12 @@ class CollectionsController extends Controller
                 // Per la popolarità, aggiungiamo il join e selezioniamo il conteggio dei like.
                 // 🎯 Soluzione: Usiamo un subquery per calcolare i likes per ogni collection
                 // Questo evita l'ambiguità del GROUP BY e permette una paginazione più pulita.
-                $query->leftJoin(DB::raw('(SELECT likeable_id, COUNT(id) as likes_count FROM likes WHERE likeable_type = \'App\\\\Models\\\\Collection\' GROUP BY likeable_id) as likes_aggregated'),
-                    function($join) {
+                $query->leftJoin(
+                    DB::raw('(SELECT likeable_id, COUNT(id) as likes_count FROM likes WHERE likeable_type = \'App\\\\Models\\\\Collection\' GROUP BY likeable_id) as likes_aggregated'),
+                    function ($join) {
                         $join->on('collections.id', '=', 'likes_aggregated.likeable_id');
-                    })
+                    }
+                )
                     ->orderByDesc('likes_aggregated.likes_count')
                     ->select('collections.*'); // Assicurati di selezionare le colonne di collections
                 break;
@@ -145,9 +145,8 @@ class CollectionsController extends Controller
      * @param Collection $collection The collection to display
      * @return \Illuminate\View\View The view with collection details
      */
-    public function show($id)
-    {
-       $collection = Collection::with([
+    public function show($id) {
+        $collection = Collection::with([
             'creator',
             'epp',
             'egis.user',
@@ -184,8 +183,7 @@ class CollectionsController extends Controller
      * @param Collection $collection The collection being viewed
      * @return void
      */
-    protected function trackView(Collection $collection)
-    {
+    protected function trackView(Collection $collection) {
         // This is a placeholder for view tracking functionality
         // You would implement your actual tracking logic here
 
@@ -219,8 +217,7 @@ class CollectionsController extends Controller
      * @since OS1-v1.0
      * @author Padmin D. Curtis (for Fabio Cherici)
      */
-    public function create(Request $request): JsonResponse
-    {
+    public function create(Request $request): JsonResponse {
         try {
             // 🎯 OS1 Pillar 1: Explicit Intention - Log operation start
             $operationContext = [
@@ -353,7 +350,6 @@ class CollectionsController extends Controller
                     'remaining_slots' => max(0, $maxCollections - $existingCollectionsCount - 1)
                 ]
             ], 201);
-
         } catch (ValidationException $e) {
             // 🎯 OS1 Validation Error Handling
             return response()->json([
@@ -362,7 +358,6 @@ class CollectionsController extends Controller
                 'message' => __('validation.failed'),
                 'errors' => $e->errors()
             ], 422);
-
         } catch (Throwable $e) {
             // 🎯 OS1 Comprehensive Error Boundary
             $errorContext = array_merge($operationContext ?? [], [

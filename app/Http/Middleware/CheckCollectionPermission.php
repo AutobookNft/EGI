@@ -11,8 +11,7 @@ use Illuminate\Support\Facades\Log;
 use Spatie\Permission\Models\Role;
 use App\Models\User;
 
-class CheckCollectionPermission
-{
+class CheckCollectionPermission {
     /**
      * Handle an incoming request.
      *
@@ -21,8 +20,7 @@ class CheckCollectionPermission
      * @param  string|null  $permission
      * @return mixed
      */
-    public function handle(Request $request, Closure $next, $permission = null)
-    {
+    public function handle(Request $request, Closure $next, $permission = null) {
         // Recupera l'utente autenticato
         $user = FegiAuth::user();
 
@@ -146,6 +144,4 @@ class CheckCollectionPermission
 
         return $next($request);
     }
-
-
 }
