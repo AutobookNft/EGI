@@ -36,7 +36,7 @@
                         @else
                             <div class="flex items-center justify-center h-full text-base-content">
                                 @if ($iconHtml)
-                                <x-icon name="camera" class="w-8 h-8 opacity-50" />
+                                    {!! $iconHtml !!}
                                 @endif
                             </div>
                         @endif

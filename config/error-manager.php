@@ -73,7 +73,7 @@ return [
     | Slack Notification Settings
     |--------------------------------------------------------------------------
     */
-     'slack_notification' => [
+    'slack_notification' => [
         'enabled' => env('ERROR_SLACK_NOTIFICATIONS_ENABLED', false),
         'webhook_url' => env('ERROR_SLACK_WEBHOOK_URL'),
         'channel' => env('ERROR_SLACK_CHANNEL', '#error-alerts'),
