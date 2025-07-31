@@ -57,9 +57,17 @@ export let collectionListDropdownMenuEl: HTMLDivElement | null = null;
 export let collectionListLoadingEl: HTMLDivElement | null = null;
 export let collectionListEmptyEl: HTMLDivElement | null = null;
 export let collectionListErrorEl: HTMLDivElement | null = null;
+export let mobileCollectionListDropdownButtonEl: HTMLButtonElement | null = null;
+export let mobileCollectionListDropdownMenuEl: HTMLDivElement | null = null;
+export let mobileCollectionListLoadingEl: HTMLDivElement | null = null;
+export let mobileCollectionListEmptyEl: HTMLDivElement | null = null;
+export let mobileCollectionListErrorEl: HTMLDivElement | null = null;
 export let currentCollectionBadgeContainerEl: HTMLDivElement | null = null;
 export let currentCollectionBadgeLinkEl: HTMLAnchorElement | null = null;
 export let currentCollectionBadgeNameEl: HTMLSpanElement | null = null;
+export let currentCollectionBadgeContainerMobileEl: HTMLDivElement | null = null;
+export let currentCollectionBadgeNameMobileEl: HTMLSpanElement | null = null;
+export let currentCollectionBadgeLinkMobileEl: HTMLAnchorElement | null = null;
 
 // Navbar: Link Generici
 export let genericCollectionsLinkDesktopEl: HTMLAnchorElement | null = null;
@@ -116,9 +124,23 @@ export function initializeDOMReferences(): void {
     collectionListLoadingEl = getEl<HTMLDivElement>('collection-list-loading');
     collectionListEmptyEl = getEl<HTMLDivElement>('collection-list-empty');
     collectionListErrorEl = getEl<HTMLDivElement>('collection-list-error');
+    
+    // Mobile collection dropdown
+    mobileCollectionListDropdownButtonEl = getEl<HTMLButtonElement>('mobile-collection-list-dropdown-button');
+    mobileCollectionListDropdownMenuEl = getEl<HTMLDivElement>('mobile-collection-list-dropdown-menu');
+    mobileCollectionListLoadingEl = getEl<HTMLDivElement>('mobile-collection-list-loading');
+    mobileCollectionListEmptyEl = getEl<HTMLDivElement>('mobile-collection-list-empty');
+    mobileCollectionListErrorEl = getEl<HTMLDivElement>('mobile-collection-list-error');
+    
     currentCollectionBadgeContainerEl = getEl<HTMLDivElement>('current-collection-badge-container');
     currentCollectionBadgeLinkEl = getEl<HTMLAnchorElement>('current-collection-badge-link');
     currentCollectionBadgeNameEl = getEl<HTMLSpanElement>('current-collection-badge-name');
+    
+    // Mobile badge
+    currentCollectionBadgeContainerMobileEl = getEl<HTMLDivElement>('current-collection-badge-container-mobile');
+    currentCollectionBadgeNameMobileEl = getEl<HTMLSpanElement>('current-collection-badge-name-mobile');
+    currentCollectionBadgeLinkMobileEl = getEl<HTMLAnchorElement>('current-collection-badge-link-mobile');
+    
     logoutFormEl = getEl<HTMLFormElement>('logout-form');
     genericCollectionsLinkDesktopEl = queryEl<HTMLAnchorElement>('header nav.hidden.md\\:flex > a[href$="/home/collections"]:not([data-action])');
     genericCollectionsLinkMobileEl = queryEl<HTMLAnchorElement>('#mobile-menu > div:nth-child(1) > a[href$="/home/collections"]:not([data-action])');

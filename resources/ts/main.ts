@@ -32,7 +32,8 @@ import {
     toggleWalletDropdownMenu
 } from './features/auth/walletDropdown';
 import {
-    toggleCollectionListDropdown
+    toggleCollectionListDropdown,
+    toggleMobileCollectionListDropdown
 } from './features/collections/collectionUI';
 import { toggleMobileMenu } from './features/mobile/mobileMenu';
 import { updateNavbarUI } from './ui/navbarManager';
@@ -472,7 +473,7 @@ function setupEventListeners(): void {
     if (DOMElements.createEgiContextualButtonEl) {
         DOMElements.createEgiContextualButtonEl.addEventListener('click', (event) => {
             const authStatus = getAuthStatus(mainAppConfig);
-            
+
             if (authStatus === 'logged-in' || authStatus === 'connected') {
                 mainUploadModalManager?.openModal('egi');
             } else {
@@ -483,11 +484,11 @@ function setupEventListeners(): void {
 
     // --- LISTENER ALTERNATIVO per tutti i pulsanti con la classe (fallback) ---
     const allEgiButtons = document.querySelectorAll('.js-create-egi-contextual-button');
-    
+
     allEgiButtons.forEach((button, index) => {
         button.addEventListener('click', (event) => {
             const authStatus = getAuthStatus(mainAppConfig);
-            
+
             if (authStatus === 'logged-in' || authStatus === 'connected') {
                 mainUploadModalManager?.openModal('egi');
             } else {
@@ -551,6 +552,9 @@ function setupEventListeners(): void {
 
     // --- DROPDOWN COLLECTION LIST ---
     DOMElements.collectionListDropdownButtonEl?.addEventListener('click', () => toggleCollectionListDropdown(mainAppConfig, DOMElements, UEM));
+    
+    // --- MOBILE DROPDOWN COLLECTION LIST ---
+    DOMElements.mobileCollectionListDropdownButtonEl?.addEventListener('click', () => toggleMobileCollectionListDropdown(mainAppConfig, DOMElements, UEM));
 
     // --- MENU MOBILE ---
     if (DOMElements.mobileMenuButtonEl) {

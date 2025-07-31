@@ -75,6 +75,85 @@ async function _fetchAndRenderAccessibleCollections(config: AppConfig, DOM: type
 }
 
 /**
+ * 📜 Oracode Function: _renderMobileCollectionListMenu
+ * 🎯 Popola il menu dropdown mobile "Le mie Collezioni" con le collection dell'utente.
+ */
+function _renderMobileCollectionListMenu(config: AppConfig, DOM: typeof DOMElements, uem: typeof UEM): void {
+    if (!DOM.mobileCollectionListDropdownMenuEl || !DOM.mobileCollectionListLoadingEl || 
+        !DOM.mobileCollectionListEmptyEl || !DOM.mobileCollectionListErrorEl) {
+        return; // Mobile dropdown non disponibile
+    }
+
+    // Pulisci il menu mobile
+    Array.from(DOM.mobileCollectionListDropdownMenuEl.querySelectorAll('.mobile-collection-list-item, .mobile-collection-list-header, .mobile-collection-list-separator')).forEach(el => el.remove());
+
+    if (!currentUserCollectionsDataState || (currentUserCollectionsDataState.owned_collections.length === 0 && currentUserCollectionsDataState.collaborating_collections.length === 0)) {
+        DOM.mobileCollectionListEmptyEl.classList.remove('hidden');
+        DOM.mobileCollectionListLoadingEl.classList.add('hidden');
+        DOM.mobileCollectionListErrorEl.classList.add('hidden');
+        return;
+    }
+    DOM.mobileCollectionListEmptyEl.classList.add('hidden');
+
+    const createMobileItem = (collection: OwnedCollection | CollaboratingCollection, isOwned: boolean): HTMLAnchorElement => {
+        const item = document.createElement('a');
+        item.href = '#';
+        item.className = 'block px-4 py-2 text-sm text-gray-300 mobile-collection-list-item hover:bg-gray-700 hover:text-white focus:outline-none focus:bg-gray-700';
+        item.setAttribute('role', 'menuitem');
+        item.setAttribute('data-collection-id', collection.id.toString());
+        item.innerHTML = `
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <span class="material-symbols-outlined text-sm mr-2" aria-hidden="true">${isOwned ? 'folder' : 'group'}</span>
+                    <span class="truncate">${collection.collection_name}</span>
+                </div>
+                ${isOwned ? '<span class="text-xs text-emerald-400">Owner</span>' : '<span class="text-xs text-blue-400">Collaborator</span>'}
+            </div>
+        `;
+        
+        item.addEventListener('click', (e: MouseEvent) => {
+            e.preventDefault();
+            _handleSetCurrentCollection(config, DOM, collection.id, uem);
+            // Chiudi il dropdown mobile
+            DOM.mobileCollectionListDropdownMenuEl!.classList.add('hidden');
+            DOM.mobileCollectionListDropdownButtonEl!.setAttribute('aria-expanded', 'false');
+        });
+        
+        return item;
+    };
+
+    // Aggiungi le collection possedute
+    if (currentUserCollectionsDataState.owned_collections.length > 0) {
+        const ownedHeader = document.createElement('div');
+        ownedHeader.className = 'px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider mobile-collection-list-header border-b border-gray-700';
+        ownedHeader.textContent = appTranslate('myOwnedGalleries', config.translations);
+        DOM.mobileCollectionListDropdownMenuEl.appendChild(ownedHeader);
+
+        currentUserCollectionsDataState.owned_collections.forEach(collection => {
+            DOM.mobileCollectionListDropdownMenuEl!.appendChild(createMobileItem(collection, true));
+        });
+    }
+
+    // Aggiungi le collection collaborative
+    if (currentUserCollectionsDataState.collaborating_collections.length > 0) {
+        if (currentUserCollectionsDataState.owned_collections.length > 0) {
+            const separator = document.createElement('div');
+            separator.className = 'border-t border-gray-700 mobile-collection-list-separator';
+            DOM.mobileCollectionListDropdownMenuEl.appendChild(separator);
+        }
+
+        const collabHeader = document.createElement('div');
+        collabHeader.className = 'px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider mobile-collection-list-header border-b border-gray-700';
+        collabHeader.textContent = appTranslate('myCollaboratingGalleries', config.translations);
+        DOM.mobileCollectionListDropdownMenuEl.appendChild(collabHeader);
+
+        currentUserCollectionsDataState.collaborating_collections.forEach(collection => {
+            DOM.mobileCollectionListDropdownMenuEl!.appendChild(createMobileItem(collection, false));
+        });
+    }
+}
+
+/**
  * @private
  * 🎨 Renderizza il menu del dropdown "My Galleries" con i dati caricati.
  */
@@ -94,6 +173,10 @@ function _renderCollectionListMenu(config: AppConfig, DOM: typeof DOMElements, u
     }
     collectionListEmptyEl.classList.add('hidden');
 
+    // Rendi anche il dropdown mobile se disponibile
+    _renderMobileCollectionListMenu(config, DOM, uem);
+
+    // Il resto della logica desktop...
     const createItem = (collection: OwnedCollection | CollaboratingCollection, isOwned: boolean): HTMLAnchorElement => {
         const item = document.createElement('a');
         item.href = '#'; // L'azione è gestita dal click, href="#" previene il default
@@ -281,8 +364,26 @@ export function updateCurrentCollectionBadge(config: AppConfig, DOM: typeof DOME
             currentCollectionBadgeLinkEl.classList.remove('pointer-events-none', 'cursor-default', 'hover:bg-sky-100', 'hover:border-sky-400');
         }
         currentCollectionBadgeContainerEl.classList.remove('hidden');
+        
+        // Aggiorna anche il badge mobile se presente
+        if (DOM.currentCollectionBadgeContainerMobileEl && DOM.currentCollectionBadgeNameMobileEl && DOM.currentCollectionBadgeLinkMobileEl) {
+            DOM.currentCollectionBadgeNameMobileEl.textContent = name;
+            if (can_edit) {
+                DOM.currentCollectionBadgeLinkMobileEl.href = editUrl;
+                DOM.currentCollectionBadgeLinkMobileEl.title = appTranslate('editCurrentGalleryTitle', config.translations);
+            } else {
+                DOM.currentCollectionBadgeLinkMobileEl.href = viewUrl;
+                DOM.currentCollectionBadgeLinkMobileEl.title = appTranslate('viewCurrentGalleryTitle', config.translations);
+            }
+            DOM.currentCollectionBadgeContainerMobileEl.classList.remove('hidden');
+        }
     } else {
         currentCollectionBadgeContainerEl.classList.add('hidden');
+        
+        // Nasconde anche il badge mobile se presente
+        if (DOM.currentCollectionBadgeContainerMobileEl) {
+            DOM.currentCollectionBadgeContainerMobileEl.classList.add('hidden');
+        }
     }
 }
 
@@ -377,6 +478,40 @@ export function toggleCollectionListDropdown(config: AppConfig, DOM: typeof DOME
             elements.collectionListDropdownMenuEl.focus(); // Fallback
         }
         // console.log('Padmin CollectionUI: Dropdown opened.');
+    }
+}
+
+/**
+ * 📜 Oracode Function: toggleMobileCollectionListDropdown
+ * 🎯 Alterna la visibilità del dropdown "Le mie Collezioni" nella versione mobile.
+ *
+ * @export
+ * @param {AppConfig} config Configurazione dell'applicazione.
+ * @param {typeof DOMElements} DOM Collezione dei riferimenti agli elementi DOM.
+ * @param {typeof UEM} uem Istanza del gestore errori UEM.
+ */
+export function toggleMobileCollectionListDropdown(config: AppConfig, DOM: typeof DOMElements, uem: typeof UEM): void {
+    if (!DOM.mobileCollectionListDropdownButtonEl || !DOM.mobileCollectionListDropdownMenuEl) {
+        console.warn('Mobile collection dropdown elements not found');
+        return;
+    }
+
+    const isOpen = !DOM.mobileCollectionListDropdownMenuEl.classList.contains('hidden');
+    
+    if (isOpen) {
+        // Chiudi il dropdown
+        DOM.mobileCollectionListDropdownMenuEl.classList.add('hidden');
+        DOM.mobileCollectionListDropdownButtonEl.setAttribute('aria-expanded', 'false');
+    } else {
+        // Apri il dropdown
+        if (!currentUserCollectionsDataState && DOM.mobileCollectionListLoadingEl && !DOM.mobileCollectionListLoadingEl.classList.contains('hidden')) {
+            // Già in caricamento, non fare nulla
+        } else if (!currentUserCollectionsDataState) {
+            _fetchAndRenderAccessibleCollections(config, DOM, uem); // Riusa la stessa logica di caricamento
+        }
+        
+        DOM.mobileCollectionListDropdownMenuEl.classList.remove('hidden');
+        DOM.mobileCollectionListDropdownButtonEl.setAttribute('aria-expanded', 'true');
     }
 }
 

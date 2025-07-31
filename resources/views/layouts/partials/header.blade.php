@@ -193,10 +193,10 @@
                 </div>
             </div>
             <div id="current-collection-badge-container-mobile" class="hidden px-4 py-3 text-center border-t border-gray-800">
-                <div class="inline-flex items-center px-3 py-2 text-xs font-medium text-center border rounded-full text-sky-300 border-sky-700 bg-sky-900/60">
+                <a href="#" id="current-collection-badge-link-mobile" class="inline-flex items-center px-3 py-2 text-xs font-medium text-center border rounded-full text-sky-300 border-sky-700 bg-sky-900/60 hover:bg-sky-800 hover:border-sky-600 transition">
                     <span class="material-symbols-outlined mr-1.5 text-sm" aria-hidden="true">folder_managed</span>
                     <span id="current-collection-badge-name-mobile"></span>
-                </div>
+                </a>
             </div>
         </div>
     </header>

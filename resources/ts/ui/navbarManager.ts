@@ -57,12 +57,12 @@ export function updateNavbarUI(config: AppConfig, DOM: typeof DOMElements, uem: 
 
         if (showWalletDropdown) {
             walletDisplayTextEl.textContent = shortAddress;
-            
+
             // Aggiorna anche l'indirizzo wallet mobile
             if (DOM.mobileWalletAddressEl) {
                 DOM.mobileWalletAddressEl.textContent = shortAddress;
             }
-            
+
             const labelKey = authStatus === 'logged-in' ? 'walletAriaLabelLoggedIn' : 'walletAriaLabelConnected';
             const statusTextKey = authStatus === 'logged-in' ? 'loggedInStatus' : 'connectedStatusWeak';
             const label = appTranslate(labelKey, config.translations, {
@@ -88,19 +88,19 @@ export function updateNavbarUI(config: AppConfig, DOM: typeof DOMElements, uem: 
     if (connectWalletButtonMobileEl) {
         connectWalletButtonMobileEl.style.display = authStatus === 'disconnected' ? 'inline-flex' : 'none';
     }
-    
+
     // Mobile wallet info container - mostra quando connesso (wallet o auth)
     if (DOM.mobileWalletInfoContainerEl) {
-        DOM.mobileWalletInfoContainerEl.style.display = 
+        DOM.mobileWalletInfoContainerEl.style.display =
             (authStatus === 'connected' || authStatus === 'logged-in') ? 'block' : 'none';
     }
-    
+
     // Mobile dashboard link - mostra quando connesso (wallet o auth)
     if (DOM.mobileDashboardLinkEl) {
-        DOM.mobileDashboardLinkEl.style.display = 
+        DOM.mobileDashboardLinkEl.style.display =
             (authStatus === 'connected' || authStatus === 'logged-in') ? 'flex' : 'none';
     }
-    
+
     if (mobileAuthButtonsContainerEl) {
         mobileAuthButtonsContainerEl.style.display = authStatus === 'logged-in' ? 'none' : 'flex';
     }
@@ -117,12 +117,22 @@ export function updateNavbarUI(config: AppConfig, DOM: typeof DOMElements, uem: 
             if (mobileCollectionsLink) mobileCollectionsLink.style.display = 'none';
             else if (DOM.genericCollectionsLinkMobileEl) DOM.genericCollectionsLinkMobileEl.style.display = 'none'; // Fallback
 
+            // Mostra dropdown mobile "Le mie Collezioni" per utenti loggati
+            if (DOM.mobileCollectionListDropdownButtonEl) {
+                DOM.mobileCollectionListDropdownButtonEl.style.display = 'flex';
+            }
+
             // Chiama l'inizializzazione dello stato delle collection (carica dati per dropdown e badge)
             // Passa UEM anche se non direttamente usato qui, per coerenza con la firma di initializeUserCollectionState
             initializeUserCollectionState(config, DOM, UEM);
         } else { // Utente 'connected' o 'disconnected'
             collectionListDropdownContainerEl.style.display = 'none';
             resetCollectionStateOnLogout(DOM); // Pulisce UI e stato del dropdown/badge delle collection
+
+            // Nascondi dropdown mobile "Le mie Collezioni" per utenti non loggati
+            if (DOM.mobileCollectionListDropdownButtonEl) {
+                DOM.mobileCollectionListDropdownButtonEl.style.display = 'none';
+            }
 
             genericCollectionsLinkDesktopEl.style.display = 'inline-flex';
             if (mobileCollectionsLink) mobileCollectionsLink.style.display = 'block'; // o il suo display originale
