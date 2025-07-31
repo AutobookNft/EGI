@@ -31,6 +31,7 @@ export default defineConfig(({ mode }) => {
                     'resources/js/collection.js',
                     'resources/js/biography-edit.js', // AGGIUNTO!
                     'resources/ts/main.ts', // Corretto da main.js a main.ts
+                    'resources/ts/main_app.ts',
                     'resources/js/guest.js',
                     'resources/js/polyfills.js',
                     'resources/js/collections-show.js',
