@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('notifications', function (Blueprint $table) {
             $table->char('id', 36)->primary(); // UUID come chiave primaria
             $table->string('type', 255); // Tipo di notifica (es. class name)
+            $table->string('view', 255)->nullable(); // Aggiunge la colonna view dopo type
             $table->string('model_type', 255); // Modello polimorfico per i payloads
             $table->unsignedBigInteger('model_id'); // ID del modello polimorfico per i payloads
             $table->string('notifiable_type', 255); // Modello polimorfico

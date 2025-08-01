@@ -5,14 +5,11 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * @Oracode Migration: User Activities Table
- * 🎯 Purpose: Comprehensive user activity audit trail
- * 🛡️ Privacy: GDPR-compliant activity logging with retention
- * 🧱 Core Logic: Categorized activity tracking with privacy levels
- *
- * @author Padmin D. Curtis (for Fabio Cherici)
- * @version 1.0.0
- * @date 2025-05-22
+ * @package Database\Migrations
+ * @author Padmin D. Curtis (AI Partner OS3.0) for Fabio Cherici
+ * @version 1.1.0 (FlorenceEGI - Complete User Activities Table)
+ * @date 2025-07-31
+ * @purpose Comprehensive user activity audit trail with COMPLETE enum categories
  */
 return new class extends Migration
 {
@@ -29,14 +26,25 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
 
             // Activity details
-            $table->string('action', 100); // login, logout, data_export, consent_update
+            $table->string('action', 120); // login, logout, data_export, consent_update
+
+            // COMPLETE ENUM - matches App\Enums\Gdpr\GdprActivityCategory exactly
             $table->enum('category', [
-                'authentication',    // Login/logout activities
-                'gdpr_actions',     // GDPR-related actions
-                'data_access',      // Data viewing/downloading
-                'platform_usage',   // General platform interaction
-                'security_events',  // Security-related activities
-                'blockchain_activity' // Blockchain/NFT activities
+                'authentication',        // Login/logout activities
+                'authentication_login',  // Authentication-related activities
+                'authentication_logout', // Logout activities
+                'registration',          // User Registration Activities
+                'gdpr_actions',         // GDPR-related actions
+                'data_access',          // Data viewing/downloading
+                'data_deletion',        // Data deletion and erasure
+                'content_creation',     // Content creation activities
+                'content_modification', // Content modification and updates
+                'platform_usage',       // General platform interaction
+                'system_interaction',   // System interactions and UI operations
+                'security_events',      // Security-related activities
+                'blockchain_activity',  // Blockchain/NFT activities
+                'media_management',     // File and media operations
+                'privacy_management'    // Privacy and consent operations
             ]);
 
             // Context and metadata

@@ -209,6 +209,16 @@ export async function handleDisconnect(
     closeWalletDropdownMenu(DOM); // Chiudi il menu prima di qualsiasi azione
 
     if (authStatus === 'logged-in') {
+        // Se il form di logout non è stato trovato, prova a re-inizializzare i DOM elements
+        if (!DOM.logoutFormEl) {
+            console.warn('🔄 [LOGOUT] Form di logout non trovato, re-inizializzazione DOM...');
+            const logoutForm = document.getElementById('logout-form') as HTMLFormElement;
+            if (logoutForm) {
+                DOM.logoutFormEl = logoutForm;
+                console.log('✅ [LOGOUT] Form di logout trovato dopo re-inizializzazione');
+            }
+        }
+        
         if (DOM.logoutFormEl) {
             DOM.logoutFormEl.submit(); // Questo causerà un ricaricamento della pagina
         } else {
