@@ -170,6 +170,15 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request)
     {
+        // Debug: Log che il metodo è stato chiamato
+        \Log::info('DEBUG: AuthenticatedSessionController destroy method called', [
+            'request_method' => $request->method(),
+            'request_url' => $request->url(),
+            'user_authenticated' => Auth::check(),
+            'user_id' => Auth::id(),
+            'headers' => $request->headers->all()
+        ]);
+
         $user = Auth::user();
         $logContext = [
             'operation' => 'enhanced_logout',

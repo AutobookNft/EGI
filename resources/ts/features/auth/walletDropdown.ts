@@ -220,6 +220,11 @@ export async function handleDisconnect(
         }
 
         if (DOM.logoutFormEl) {
+            console.log('🔄 [LOGOUT] Inviando form di logout...', {
+                action: DOM.logoutFormEl.action,
+                method: DOM.logoutFormEl.method,
+                formData: new FormData(DOM.logoutFormEl)
+            });
             DOM.logoutFormEl.submit(); // Questo causerà un ricaricamento della pagina
         } else {
             uem.handleClientError('CLIENT_DOM_MISSING_LOGOUT_FORM_DISCONNECT', {}, undefined, appTranslate('errorLogoutFormMissing', config.translations));
