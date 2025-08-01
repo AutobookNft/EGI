@@ -25,17 +25,15 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
-* Class InvitationService
-* @package App\Services
-*/
+ * Class InvitationService
+ * @package App\Services
+ */
 
-class InvitationService
-{
-    public function createInvitation(Collection $collection, string $email, string $role): NotificationPayloadInvitation
-    {
+class InvitationService {
+    public function createInvitation(Collection $collection, string $email, string $role): NotificationPayloadInvitation {
         return DB::transaction(function () use ($collection, $email, $role) {
 
-            try{
+            try {
 
                 Log::channel('florenceegi')->info('InvitationService:creazione invito', [
                     'collection' => $collection,
@@ -44,7 +42,7 @@ class InvitationService
                 ]);
 
                 // User destinatario della risposta, si verifica se esiste
-                $user = User::where('email','=', $email)->first();
+                $user = User::where('email', '=', $email)->first();
 
                 Log::channel('florenceegi')->info('InvitationService:utente destinatario', [
                     'user' => $user
@@ -62,10 +60,12 @@ class InvitationService
                     status: $status
                 );
 
-                Log::channel('florenceegi')->info('createInvitation: dati di payload',
-                [
-                    'invitation'=>$invitationData
-                ]);
+                Log::channel('florenceegi')->info(
+                    'createInvitation: dati di payload',
+                    [
+                        'invitation' => $invitationData
+                    ]
+                );
 
                 /**
                  * @var array $NotificationPayloadInvitation
@@ -91,7 +91,6 @@ class InvitationService
                 $handler->handle($user, $notification);
 
                 return $invitation;
-
             } catch (Exception $e) {
                 Log::channel('florenceegi')->error('Errore creazione invito', [
                     'error' => $e->getMessage(),
@@ -102,11 +101,10 @@ class InvitationService
         });
     }
 
-    public function acceptInvitation(NotificationPayloadInvitation $notificationPayloadInvitation, $notifificationId): mixed
-    {
+    public function acceptInvitation(NotificationPayloadInvitation $notificationPayloadInvitation, $notifificationId): mixed {
         return DB::transaction(function () use ($notificationPayloadInvitation, $notifificationId): void {
 
-            try{
+            try {
 
                 // L'utente che sta approvando l'invito
                 $receiver = Auth::user();
@@ -151,8 +149,6 @@ class InvitationService
                 }
 
                 Log::channel('florenceegi')->info('Invito creato', $invitationData->toCollectionUser());
-
-
             } catch (Exception $e) {
                 Log::channel('florenceegi')->error('Errore creazione invito', [
                     'error' => $e->getMessage(),
@@ -163,8 +159,7 @@ class InvitationService
         });
     }
 
-    public function updateStatusNotification($notifificationId): void
-    {
+    public function updateStatusNotification($notifificationId): void {
         $notification = CustomDatabaseNotification::find($notifificationId);
 
         if (!$notification) {

@@ -211,8 +211,8 @@ class AuthenticatedSessionController extends Controller
 
             $this->logger->info('[Auth] Logout completed successfully', $logContext);
 
-            // Return logout response with success message
-            return redirect('/')
+            // Return logout response with success message - redirect directly to home route
+            return redirect()->route('home')
                 ->with('success', __('auth.logout_success'));
 
         } catch (\Exception $e) {
@@ -226,7 +226,7 @@ class AuthenticatedSessionController extends Controller
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 
-            return redirect('/')
+            return redirect()->route('home')
                 ->with('success', __('auth.logout_success'));
         }
     }

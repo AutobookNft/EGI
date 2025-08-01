@@ -26,8 +26,7 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
-class User extends Authenticatable implements HasMedia
-{
+class User extends Authenticatable implements HasMedia {
     use HasApiTokens;
     use HasRoles;
     use InteractsWithMedia;
@@ -118,8 +117,7 @@ class User extends Authenticatable implements HasMedia
         'icon_style',
     ];
 
-    public function getIconStyleAttribute(): string
-    {
+    public function getIconStyleAttribute(): string {
 
         Log::channel('florenceegi')->info('User:getIconStyleAttribute', [
             'icon_style' => $this->attributes['icon_style'] ?? config('icons.styles.default'),
@@ -134,14 +132,12 @@ class User extends Authenticatable implements HasMedia
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function ownedCollections(): HasMany
-    {
+    public function ownedCollections(): HasMany {
         return $this->hasMany(Collection::class, 'creator_id');
     }
 
     // In app/Models/User.php
-    public function getCurrentCollectionDetails()
-    {
+    public function getCurrentCollectionDetails() {
         if (!$this->current_collection_id) {
             return [
                 'current_collection_id' => null,
@@ -166,8 +162,7 @@ class User extends Authenticatable implements HasMedia
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
-    public function collaborations(): BelongsToMany
-    {
+    public function collaborations(): BelongsToMany {
         return $this->belongsToMany(Collection::class, 'collection_user', 'user_id', 'collection_id')
             ->withPivot(['role', 'is_owner']) // Include both role and is_owner from pivot table
             ->wherePivot('is_owner', '!=', 1) // Exclude collections where user is owner
@@ -180,8 +175,7 @@ class User extends Authenticatable implements HasMedia
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
-    public function collections(): BelongsToMany
-    {
+    public function collections(): BelongsToMany {
         return $this->belongsToMany(Collection::class, 'collection_user', 'user_id', 'collection_id')
             ->withPivot([
                 'role',
@@ -202,8 +196,7 @@ class User extends Authenticatable implements HasMedia
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
-    public function ownedCollectionsViaPivot(): BelongsToMany
-    {
+    public function ownedCollectionsViaPivot(): BelongsToMany {
         return $this->belongsToMany(Collection::class, 'collection_user', 'user_id', 'collection_id')
             ->withPivot([
                 'role',
@@ -225,8 +218,7 @@ class User extends Authenticatable implements HasMedia
      * @param array|string $roles
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
-    public function collectionsWithRole($roles): BelongsToMany
-    {
+    public function collectionsWithRole($roles): BelongsToMany {
         $roles = is_array($roles) ? $roles : [$roles];
 
         return $this->belongsToMany(Collection::class, 'collection_user', 'user_id', 'collection_id')
@@ -249,8 +241,7 @@ class User extends Authenticatable implements HasMedia
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
-    public function editableCollections(): BelongsToMany
-    {
+    public function editableCollections(): BelongsToMany {
         return $this->belongsToMany(Collection::class, 'collection_user', 'user_id', 'collection_id')
             ->withPivot([
                 'role',
@@ -275,8 +266,7 @@ class User extends Authenticatable implements HasMedia
      * @param int $collectionId
      * @return bool
      */
-    public function hasAccessToCollection(int $collectionId): bool
-    {
+    public function hasAccessToCollection(int $collectionId): bool {
         return $this->collections()
             ->where('collection_id', $collectionId)
             ->exists();
@@ -288,8 +278,7 @@ class User extends Authenticatable implements HasMedia
      * @param int $collectionId
      * @return string|null
      */
-    public function getRoleInCollection(int $collectionId): ?string
-    {
+    public function getRoleInCollection(int $collectionId): ?string {
         $pivot = $this->collections()
             ->where('collection_id', $collectionId)
             ->first();
@@ -308,8 +297,7 @@ class User extends Authenticatable implements HasMedia
      * @param int $collectionId
      * @return bool
      */
-    public function canEditCollectionById(int $collectionId): bool
-    {
+    public function canEditCollectionById(int $collectionId): bool {
         $pivot = $this->collections()
             ->where('collection_id', $collectionId)
             ->first();
@@ -331,8 +319,7 @@ class User extends Authenticatable implements HasMedia
      * @param array $metadata
      * @return bool
      */
-    public function joinCollection(int $collectionId, string $role = 'viewer', bool $isOwner = false, array $metadata = []): bool
-    {
+    public function joinCollection(int $collectionId, string $role = 'viewer', bool $isOwner = false, array $metadata = []): bool {
         try {
             $this->collections()->attach($collectionId, [
                 'role' => $role,
@@ -354,8 +341,7 @@ class User extends Authenticatable implements HasMedia
      * @param int $collectionId
      * @return bool
      */
-    public function leaveCollection(int $collectionId): bool
-    {
+    public function leaveCollection(int $collectionId): bool {
         try {
             $this->collections()->updateExistingPivot($collectionId, [
                 'status' => 'removed',
@@ -375,8 +361,7 @@ class User extends Authenticatable implements HasMedia
      * @param string $newRole
      * @return bool
      */
-    public function updateRoleInCollection(int $collectionId, string $newRole): bool
-    {
+    public function updateRoleInCollection(int $collectionId, string $newRole): bool {
         try {
             $this->collections()->updateExistingPivot($collectionId, [
                 'role' => $newRole,
@@ -393,34 +378,28 @@ class User extends Authenticatable implements HasMedia
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function currentCollection(): BelongsTo
-    {
+    public function currentCollection(): BelongsTo {
         return $this->belongsTo(Collection::class, 'current_collection_id');
     }
 
 
-    public function wallets()
-    {
+    public function wallets() {
         return $this->hasMany(Wallet::class);
     }
 
-    public function customNotifications()
-    {
+    public function customNotifications() {
         return $this->morphMany(CustomDatabaseNotification::class, 'notifiable');
     }
 
-    public function walletChangeProposer()
-    {
+    public function walletChangeProposer() {
         return $this->hasMany(NotificationPayloadWallet::class, 'proposer_id');
     }
 
-    public function walletChangeReceiver()
-    {
+    public function walletChangeReceiver() {
         return $this->hasMany(NotificationPayloadWallet::class, 'receiver_id');
     }
 
-    public function currentCollectionBySession()
-    {
+    public function currentCollectionBySession() {
         $id = session('current_collection_id')
             ?? $this->current_collection_id;
 
@@ -432,8 +411,7 @@ class User extends Authenticatable implements HasMedia
     }
 
     // Nel modello User
-    public function canEditCollection(Collection $collection): bool
-    {
+    public function canEditCollection(Collection $collection): bool {
         // È creator o owner
         if ($collection->creator_id === $this->id || $collection->owner_id === $this->id) {
             return true;
@@ -447,23 +425,19 @@ class User extends Authenticatable implements HasMedia
         return $pivot && in_array($pivot->pivot->role, ['editor', 'admin']);
     }
 
-    public function getRouteKeyName(): string
-    {
+    public function getRouteKeyName(): string {
         return 'id';
     }
 
-    public function getRouteKey(): string
-    {
+    public function getRouteKey(): string {
         return $this->getAttribute($this->getRouteKeyName());
     }
 
-    public function getRouteKeyNameForCollection(): string
-    {
+    public function getRouteKeyNameForCollection(): string {
         return 'collection_id';
     }
 
-    public function getRouteKeyForCollection(): string
-    {
+    public function getRouteKeyForCollection(): string {
         return $this->getAttribute($this->getRouteKeyNameForCollection());
     }
 
@@ -487,8 +461,7 @@ class User extends Authenticatable implements HasMedia
      *
      * @return HasMany
      */
-    public function consents(): HasMany
-    {
+    public function consents(): HasMany {
         return $this->hasMany(UserConsent::class, 'user_id');
     }
 
@@ -500,8 +473,7 @@ class User extends Authenticatable implements HasMedia
      *
      * @return HasMany
      */
-    public function consentAuditLog(): HasMany
-    {
+    public function consentAuditLog(): HasMany {
         return $this->hasMany(ConsentHistory::class, 'user_id');
     }
 
@@ -510,8 +482,7 @@ class User extends Authenticatable implements HasMedia
      *
      * @return HasMany
      */
-    public function activeConsents(): HasMany
-    {
+    public function activeConsents(): HasMany {
         return $this->hasMany(UserConsent::class)
             ->where('status', ConsentStatus::ACTIVE->value)
             ->whereNull('withdrawn_at');
@@ -523,8 +494,7 @@ class User extends Authenticatable implements HasMedia
      *
      * @return HasMany
      */
-    public function gdprRequests(): HasMany
-    {
+    public function gdprRequests(): HasMany {
         return $this->hasMany(GdprRequest::class);
     }
 
@@ -533,8 +503,7 @@ class User extends Authenticatable implements HasMedia
      *
      * @return HasMany
      */
-    public function pendingGdprRequests(): HasMany
-    {
+    public function pendingGdprRequests(): HasMany {
         return $this->hasMany(GdprRequest::class)
             ->whereIn('status', ['pending', 'in_progress', 'verification_required']);
     }
@@ -544,8 +513,7 @@ class User extends Authenticatable implements HasMedia
      *
      * @return HasMany
      */
-    public function activities(): HasMany
-    {
+    public function activities(): HasMany {
         return $this->hasMany(UserActivity::class);
     }
 
@@ -554,8 +522,7 @@ class User extends Authenticatable implements HasMedia
      *
      * @return HasMany
      */
-    public function securityEvents(): HasMany
-    {
+    public function securityEvents(): HasMany {
         return $this->hasMany(SecurityEvent::class);
     }
 
@@ -564,8 +531,7 @@ class User extends Authenticatable implements HasMedia
      *
      * @return HasMany
      */
-    public function highRiskSecurityEvents(): HasMany
-    {
+    public function highRiskSecurityEvents(): HasMany {
         return $this->hasMany(SecurityEvent::class)
             ->highRisk()
             ->unresolved();
@@ -576,8 +542,7 @@ class User extends Authenticatable implements HasMedia
      *
      * @return HasMany
      */
-    public function dataExports(): HasMany
-    {
+    public function dataExports(): HasMany {
         return $this->hasMany(DataExport::class);
     }
 
@@ -586,8 +551,7 @@ class User extends Authenticatable implements HasMedia
      *
      * @return HasMany
      */
-    public function availableDataExports(): HasMany
-    {
+    public function availableDataExports(): HasMany {
         return $this->hasMany(DataExport::class)
             ->where('status', DataExportStatus::COMPLETED->value)
             ->where('expires_at', '>', now());
@@ -598,8 +562,7 @@ class User extends Authenticatable implements HasMedia
      *
      * @return HasMany
      */
-    public function breachReports(): HasMany
-    {
+    public function breachReports(): HasMany {
         return $this->hasMany(BreachReport::class);
     }
 
@@ -608,8 +571,7 @@ class User extends Authenticatable implements HasMedia
      *
      * @return HasMany
      */
-    public function openBreachReports(): HasMany
-    {
+    public function openBreachReports(): HasMany {
         return $this->hasMany(BreachReport::class)->open();
     }
 
@@ -618,8 +580,7 @@ class User extends Authenticatable implements HasMedia
      *
      * @return HasMany
      */
-    public function gdprAuditLogs(): HasMany
-    {
+    public function gdprAuditLogs(): HasMany {
         return $this->hasMany(GdprAuditLog::class, 'data_subject_id');
     }
 
@@ -628,8 +589,7 @@ class User extends Authenticatable implements HasMedia
      *
      * @return HasMany
      */
-    public function performedAuditLogs(): HasMany
-    {
+    public function performedAuditLogs(): HasMany {
         return $this->hasMany(GdprAuditLog::class, 'user_id');
     }
 
@@ -638,8 +598,7 @@ class User extends Authenticatable implements HasMedia
      *
      * @return HasMany
      */
-    public function dpoMessages(): HasMany
-    {
+    public function dpoMessages(): HasMany {
         return $this->hasMany(DpoMessage::class);
     }
 
@@ -648,8 +607,7 @@ class User extends Authenticatable implements HasMedia
      *
      * @return HasMany
      */
-    public function openDpoMessages(): HasMany
-    {
+    public function openDpoMessages(): HasMany {
         return $this->hasMany(DpoMessage::class)->open();
     }
 
@@ -658,8 +616,7 @@ class User extends Authenticatable implements HasMedia
      *
      * @return HasMany
      */
-    public function createdPrivacyPolicies(): HasMany
-    {
+    public function createdPrivacyPolicies(): HasMany {
         return $this->hasMany(PrivacyPolicy::class, 'created_by');
     }
 
@@ -668,8 +625,7 @@ class User extends Authenticatable implements HasMedia
      *
      * @return HasMany
      */
-    public function approvedPrivacyPolicies(): HasMany
-    {
+    public function approvedPrivacyPolicies(): HasMany {
         return $this->hasMany(PrivacyPolicy::class, 'approved_by');
     }
 
@@ -678,8 +634,7 @@ class User extends Authenticatable implements HasMedia
      *
      * @return HasMany
      */
-    public function assignedBreachReports(): HasMany
-    {
+    public function assignedBreachReports(): HasMany {
         return $this->hasMany(BreachReport::class, 'assigned_to');
     }
 
@@ -693,8 +648,7 @@ class User extends Authenticatable implements HasMedia
      * @param string $purpose Consent purpose
      * @return bool
      */
-    public function hasActiveConsent(string $purpose): bool
-    {
+    public function hasActiveConsent(string $purpose): bool {
         return $this->activeConsents()
             ->where('consent_type', $purpose)
             ->exists();
@@ -706,8 +660,7 @@ class User extends Authenticatable implements HasMedia
      * @param string $purpose Consent purpose
      * @return string|null Status or null if no consent given
      */
-    public function getConsentStatus(string $purpose): ?string
-    {
+    public function getConsentStatus(string $purpose): ?string {
         $consent = $this->consents()
             ->where('consent_type', $purpose)
             ->orderBy('created_at', 'desc')
@@ -721,8 +674,7 @@ class User extends Authenticatable implements HasMedia
      *
      * @return bool
      */
-    public function hasPendingGdprRequests(): bool
-    {
+    public function hasPendingGdprRequests(): bool {
         return $this->pendingGdprRequests()->exists();
     }
 
@@ -731,8 +683,7 @@ class User extends Authenticatable implements HasMedia
      *
      * @return bool
      */
-    public function hasRequestedDeletion(): bool
-    {
+    public function hasRequestedDeletion(): bool {
         return $this->gdprRequests()
             ->where('request_type', GdprRequestType::ERASURE->value)
             ->whereIn('status', [
@@ -749,8 +700,7 @@ class User extends Authenticatable implements HasMedia
      * @param int $hours Hours to look back (default 24)
      * @return bool
      */
-    public function hasRecentSecurityIncidents(int $hours = 24): bool
-    {
+    public function hasRecentSecurityIncidents(int $hours = 24): bool {
         return $this->securityEvents()
             ->where('created_at', '>=', now()->subHours($hours))
             ->highRisk()
@@ -762,8 +712,7 @@ class User extends Authenticatable implements HasMedia
      *
      * @return int
      */
-    public function getGdprComplianceScore(): int
-    {
+    public function getGdprComplianceScore(): int {
         $score = 100;
 
         // Deduct points for missing consents
@@ -793,8 +742,7 @@ class User extends Authenticatable implements HasMedia
      *
      * @return array
      */
-    public function getGdprSummary(): array
-    {
+    public function getGdprSummary(): array {
         return [
             'active_consents' => $this->activeConsents()->count(),
             'pending_requests' => $this->pendingGdprRequests()->count(),
@@ -822,8 +770,7 @@ class User extends Authenticatable implements HasMedia
      *
      * @return bool
      */
-    public function canRequestDataExport(): bool
-    {
+    public function canRequestDataExport(): bool {
         // Allow one export per 30 days
         $recentExport = $this->dataExports()
             ->where('created_at', '>=', now()->subDays(30))
@@ -837,8 +784,7 @@ class User extends Authenticatable implements HasMedia
      *
      * @return bool
      */
-    public function canSubmitBreachReport(): bool
-    {
+    public function canSubmitBreachReport(): bool {
         // Allow max 5 reports per day
         $todayReports = $this->breachReports()
             ->where('created_at', '>=', now()->startOfDay())
@@ -852,8 +798,7 @@ class User extends Authenticatable implements HasMedia
      *
      * @return string
      */
-    public function getGdprLanguage(): string
-    {
+    public function getGdprLanguage(): string {
         return $this->gdpr_language ?? $this->language ?? 'en';
     }
 
@@ -862,8 +807,7 @@ class User extends Authenticatable implements HasMedia
      *
      * @return bool
      */
-    public function hasOptedOutGdprNotifications(): bool
-    {
+    public function hasOptedOutGdprNotifications(): bool {
         return $this->gdpr_notifications_disabled ?? false;
     }
 
@@ -873,8 +817,7 @@ class User extends Authenticatable implements HasMedia
      * @param string $reason Review reason
      * @return bool
      */
-    public function markForGdprReview(string $reason): bool
-    {
+    public function markForGdprReview(string $reason): bool {
         $this->gdpr_review_required = true;
         $this->gdpr_review_reason = $reason;
         $this->gdpr_review_date = now();
@@ -886,8 +829,7 @@ class User extends Authenticatable implements HasMedia
      *
      * @return bool
      */
-    public function clearGdprReview(): bool
-    {
+    public function clearGdprReview(): bool {
         $this->gdpr_review_required = false;
         $this->gdpr_review_reason = null;
         $this->gdpr_review_completed_at = now();
@@ -904,8 +846,7 @@ class User extends Authenticatable implements HasMedia
      * @param \Illuminate\Database\Eloquent\Builder $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeRequiresGdprReview($query)
-    {
+    public function scopeRequiresGdprReview($query) {
         return $query->where('gdpr_review_required', true);
     }
 
@@ -915,8 +856,7 @@ class User extends Authenticatable implements HasMedia
      * @param \Illuminate\Database\Eloquent\Builder $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeWithPendingGdprRequests($query)
-    {
+    public function scopeWithPendingGdprRequests($query) {
         return $query->whereHas('gdprRequests', function ($q) {
             $q->whereIn('status', array_map(
                 fn($status) => $status->value,
@@ -928,8 +868,7 @@ class User extends Authenticatable implements HasMedia
     /**
      * Get active processing restrictions.
      */
-    public function activeProcessingRestrictions(): HasMany
-    {
+    public function activeProcessingRestrictions(): HasMany {
         return $this->processingRestrictions()
             ->where('is_active', true)
             ->whereNull('lifted_at');
@@ -941,8 +880,7 @@ class User extends Authenticatable implements HasMedia
      * @param string $purpose
      * @return bool
      */
-    public function hasConsentFor(string $purpose): bool
-    {
+    public function hasConsentFor(string $purpose): bool {
         return $this->consents()
             ->where('consent_type', $purpose)
             ->where('status', ConsentStatus::ACTIVE->value)
@@ -957,8 +895,7 @@ class User extends Authenticatable implements HasMedia
      * @param int $hours Hours to look back
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeWithRecentSecurityIncidents($query, int $hours = 24)
-    {
+    public function scopeWithRecentSecurityIncidents($query, int $hours = 24) {
         return $query->whereHas('securityEvents', function ($q) use ($hours) {
             $q->where('created_at', '>=', now()->subHours($hours))
                 ->highRisk();
@@ -971,8 +908,7 @@ class User extends Authenticatable implements HasMedia
      * @param \Illuminate\Database\Eloquent\Builder $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeEligibleForDataExport($query)
-    {
+    public function scopeEligibleForDataExport($query) {
         return $query->whereDoesntHave('dataExports', function ($q) {
             $q->where('created_at', '>=', now()->subDays(30));
         });
@@ -984,8 +920,7 @@ class User extends Authenticatable implements HasMedia
      * 📊 Ordering: Most recent biographies first
      * 🔍 Usage: $user->biographies()->get()
      */
-    public function biographies(): HasMany
-    {
+    public function biographies(): HasMany {
         return $this->hasMany(Biography::class)
             ->orderBy('updated_at', 'desc');
     }
@@ -996,8 +931,7 @@ class User extends Authenticatable implements HasMedia
      * 🎯 Logic: Most recently updated biography (for quick access)
      * 🔍 Usage: $user->activeBiography
      */
-    public function activeBiography(): HasOne
-    {
+    public function activeBiography(): HasOne {
         return $this->hasOne(Biography::class)
             ->latestOfMany('updated_at');
     }
@@ -1008,8 +942,7 @@ class User extends Authenticatable implements HasMedia
      * 🛡️ Privacy: Respects user privacy settings
      * 🔍 Usage: $user->publicBiographies()->get()
      */
-    public function publicBiographies(): HasMany
-    {
+    public function publicBiographies(): HasMany {
         return $this->biographies()
             ->where('is_public', true);
     }
@@ -1020,8 +953,7 @@ class User extends Authenticatable implements HasMedia
      * 📊 Quality: Show only finished biographies
      * 🔍 Usage: $user->completedBiographies()->get()
      */
-    public function completedBiographies(): HasMany
-    {
+    public function completedBiographies(): HasMany {
         return $this->biographies()
             ->where('is_completed', true);
     }
@@ -1032,8 +964,7 @@ class User extends Authenticatable implements HasMedia
      * 📤 Returns: Boolean indicating biography existence
      * 🔍 Usage: if ($user->hasBiography()) { ... }
      */
-    public function hasBiography(): bool
-    {
+    public function hasBiography(): bool {
         return $this->biographies()->exists();
     }
 
@@ -1043,8 +974,7 @@ class User extends Authenticatable implements HasMedia
      * 📤 Returns: Boolean for profile display logic
      * 🔍 Usage: if ($user->hasPublicBiography()) { ... }
      */
-    public function hasPublicBiography(): bool
-    {
+    public function hasPublicBiography(): bool {
         return $this->publicBiographies()->exists();
     }
 
@@ -1054,8 +984,7 @@ class User extends Authenticatable implements HasMedia
      * 📊 Logic: Public > Completed > Most Recent
      * 📤 Returns: Biography model or null
      */
-    public function getPrimaryBiography(): ?Biography
-    {
+    public function getPrimaryBiography(): ?Biography {
         // Try public first
         $public = $this->publicBiographies()->first();
         if ($public) {
@@ -1077,8 +1006,7 @@ class User extends Authenticatable implements HasMedia
      * 🎯 Purpose: Generate user biography summary for profiles
      * 📤 Returns: Array with biography stats and info
      */
-    public function getBiographySummary(): array
-    {
+    public function getBiographySummary(): array {
         $primary = $this->getPrimaryBiography();
 
         return [
@@ -1097,8 +1025,7 @@ class User extends Authenticatable implements HasMedia
      * 🎯 Purpose: Define media collections for user profile images
      * 🖼️ Collections: profile_images for multiple profile photos, current_profile for active one
      */
-    public function registerMediaCollections(): void
-    {
+    public function registerMediaCollections(): void {
         $userProfile = $this->addMediaCollection('profile_images')
             ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp']);
 
@@ -1115,8 +1042,7 @@ class User extends Authenticatable implements HasMedia
      * 🎯 Purpose: Auto-generate optimized image versions for profile photos
      * ⚡ Performance: Thumbnail, avatar, and web-optimized versions
      */
-    public function registerMediaConversions(?Media $media = null): void
-    {
+    public function registerMediaConversions(?Media $media = null): void {
         $this->addMediaConversion('thumb')
             ->width(200)
             ->height(200)
@@ -1138,8 +1064,7 @@ class User extends Authenticatable implements HasMedia
      * 🎯 Purpose: Get the currently active profile image using profile_photo_path
      * 📤 Returns: Media model or null
      */
-    public function getCurrentProfileImage(): ?Media
-    {
+    public function getCurrentProfileImage(): ?Media {
         if (!$this->profile_photo_path) {
             return null;
         }
@@ -1157,8 +1082,7 @@ class User extends Authenticatable implements HasMedia
      * 🎯 Purpose: Get all uploaded profile images
      * 📤 Returns: Collection of Media models
      */
-    public function getAllProfileImages()
-    {
+    public function getAllProfileImages() {
         return $this->getMedia('profile_images');
     }
 
@@ -1167,8 +1091,7 @@ class User extends Authenticatable implements HasMedia
      * 🎯 Purpose: Set a specific image as the current profile photo using profile_photo_path
      * 📤 Returns: Boolean success status
      */
-    public function setCurrentProfileImage(Media $media): bool
-    {
+    public function setCurrentProfileImage(Media $media): bool {
         // Update the profile_photo_path field with the media file_name
         $this->update([
             'profile_photo_path' => $media->file_name
@@ -1182,8 +1105,7 @@ class User extends Authenticatable implements HasMedia
      * 🎯 Purpose: Override default profile photo URL to use profile_photo_path
      * 📤 Returns: URL string for current profile image
      */
-    public function getProfilePhotoUrlAttribute(): string
-    {
+    public function getProfilePhotoUrlAttribute(): string {
         $currentImage = $this->getCurrentProfileImage();
 
         if ($currentImage) {
@@ -1199,8 +1121,7 @@ class User extends Authenticatable implements HasMedia
      * 🎯 Purpose: Get DiceBear generated avatar URL
      * 📤 Returns: URL string for default avatar
      */
-    public function defaultProfilePhotoUrl(): string
-    {
+    public function defaultProfilePhotoUrl(): string {
         $name = urlencode($this->name ?? 'Anonymous');
         return "https://api.dicebear.com/7.x/bottts/png?seed={$name}&backgroundColor=transparent&size=512";
     }

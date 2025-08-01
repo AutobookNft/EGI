@@ -218,7 +218,7 @@ export async function handleDisconnect(
                 console.log('✅ [LOGOUT] Form di logout trovato dopo re-inizializzazione');
             }
         }
-        
+
         if (DOM.logoutFormEl) {
             DOM.logoutFormEl.submit(); // Questo causerà un ricaricamento della pagina
         } else {

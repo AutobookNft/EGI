@@ -18,8 +18,7 @@ use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role; // Importiamo i ruoli di Spatie
 use Livewire\Attributes\Validate;
 
-class CollectionUserMember extends Component
-{
+class CollectionUserMember extends Component {
 
     use HasPermissionTrait;
 
@@ -42,20 +41,18 @@ class CollectionUserMember extends Component
 
     private InvitationService $invitationService;
 
-    public function boot(InvitationService $invitationService)
-    {
+    public function boot(InvitationService $invitationService) {
         $this->invitationService = $invitationService;
     }
 
-    public function mount($id)
-    {
+    public function mount($id) {
         Log::channel('florenceegi')->info('CollectionUserMember: Collection id', [
             'collectionId' => $id
         ]);
 
         $this->collectionId = $id;
 
-          // Carica i ruoli disponibili da Spatie
+        // Carica i ruoli disponibili da Spatie
         $this->roles = Role::pluck('name')->toArray(); // Recupera i nomi dei ruoli dalla tabella 'roles'
 
         // Carica la collection e i suoi dati
@@ -65,8 +62,7 @@ class CollectionUserMember extends Component
         $this->loadTeamUsers();
     }
 
-    public function loadCollectionData()
-    {
+    public function loadCollectionData() {
         $this->collection = Collection::findOrFail($this->collectionId);
 
         $this->collectionName = $this->collection->collection_name;
@@ -74,8 +70,7 @@ class CollectionUserMember extends Component
         $this->collectionOwner = $this->collection->creator;
     }
 
-    public function loadTeamUsers()
-    {
+    public function loadTeamUsers() {
         $this->collectionUsers = CollectionUser::where('collection_id', $this->collectionId)->get();
 
         $this->wallets = Wallet::where('collection_id', '=', $this->collectionId)->get();
@@ -91,11 +86,9 @@ class CollectionUserMember extends Component
         Log::channel('florenceegi')->info('CollectionUserMember: Team users', [
             'collectionUsers' => $this->collectionUsers->count()
         ]);
-
     }
 
-    public function deleteProposalWallet(Request $request, $id, $walletId)
-    {
+    public function deleteProposalWallet(Request $request, $id, $walletId) {
 
         Log::channel('florenceegi')->info('DeleteProposalWallet', [
             'walletId' => $walletId
@@ -125,8 +118,7 @@ class CollectionUserMember extends Component
         }
     }
 
-    public function deleteProposalInvitation(Request $request, $id, $invitationId)
-    {
+    public function deleteProposalInvitation(Request $request, $id, $invitationId) {
         Log::channel('florenceegi')->info('DeleteProposalInvitation', [
             'invitationId' => $invitationId
         ]);
@@ -153,7 +145,7 @@ class CollectionUserMember extends Component
 
             $invitation->delete();
             return response()->json(['message' => 'Proposta Invito eliminata con successo'], 200);
-        } catch ( Exception $e) {
+        } catch (Exception $e) {
             Log::channel('florenceegi')->error('Errore durante l\'eliminazione della proposta invito', [
                 'invitationId' => $invitationId,
                 'error' => $e->getMessage()
@@ -162,8 +154,7 @@ class CollectionUserMember extends Component
         }
     }
 
-    public function invite()
-    {
+    public function invite() {
         $this->validate();
 
         try {
@@ -198,13 +189,10 @@ class CollectionUserMember extends Component
             ]);
 
             $this->addError(name: 'invitation', message: 'Errore durante l\'invio dell\'invito');
-
         }
-
     }
 
-    public function openInviteModal()
-    {
+    public function openInviteModal() {
         Log::channel('florenceegi')->info('OpenInviteModal', [
             'collectionId' => $this->collectionId
         ]);
@@ -212,21 +200,17 @@ class CollectionUserMember extends Component
         $this->show = true; // Mostra la modale
     }
 
-    public function resetFields()
-    {
+    public function resetFields() {
         $this->email = '';
         $this->role = '';
     }
 
-    public function closeModal()
-    {
+    public function closeModal() {
         $this->show = false;
     }
 
 
-    public function render()
-    {
+    public function render() {
         return view('livewire.collections.collection-user-member');
     }
 }
-
