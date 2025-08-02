@@ -20,13 +20,45 @@ return [
         // List of allowed extensions (used for quick validation)
         'allowed_extensions' => [
             // Images
-            'jpg', 'jpeg', 'png', 'gif', 'bmp', 'tiff', 'webp', 'svg', 'eps', 'psd', 'ai', 'cdr', 'heic', 'heif',
+            'jpg',
+            'jpeg',
+            'png',
+            'gif',
+            'bmp',
+            'tiff',
+            'webp',
+            'svg',
+            'eps',
+            'psd',
+            'ai',
+            'cdr',
+            'heic',
+            'heif',
             // Documents
-            'pdf', 'epub', 'txt', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'odt', 'ods', 'odp', 'rtf',
+            'pdf',
+            'epub',
+            'txt',
+            'doc',
+            'docx',
+            'xls',
+            'xlsx',
+            'ppt',
+            'pptx',
+            'odt',
+            'ods',
+            'odp',
+            'rtf',
             // Audio
-            'mp3', 'wav', 'm4a', 'ape', 'flac',
+            'mp3',
+            'wav',
+            'm4a',
+            'ape',
+            'flac',
             // Video
-            'mp4', 'mov', 'avi', 'mkv'
+            'mp4',
+            'mov',
+            'avi',
+            'mkv'
         ],
 
         // Extension to category mapping (for UI organization)
@@ -40,52 +72,99 @@ return [
         // Extension to file type mapping (legacy - maintained for compatibility)
         'allowed' => [
             // Images
-            'jpg' => 'image', 'jpeg' => 'image', 'png' => 'image', 'gif' => 'image',
-            'bmp' => 'image', 'tiff' => 'image', 'svg' => 'image', 'webp' => 'image',
-            'eps' => 'image', 'psd' => 'image', 'ai' => 'image', 'cdr' => 'image',
-            'heic' => 'image',    
+            'jpg' => 'image',
+            'jpeg' => 'image',
+            'png' => 'image',
+            'gif' => 'image',
+            'bmp' => 'image',
+            'tiff' => 'image',
+            'svg' => 'image',
+            'webp' => 'image',
+            'eps' => 'image',
+            'psd' => 'image',
+            'ai' => 'image',
+            'cdr' => 'image',
+            'heic' => 'image',
             'heif' => 'image',
             // Documents
-            'pdf' => 'document', 'epub' => 'document', 'txt' => 'document',
-            'doc' => 'document', 'docx' => 'document',
-            'xls' => 'document', 'xlsx' => 'document',
-            'ppt' => 'document', 'pptx' => 'document',
-            'odt' => 'document', 'ods' => 'document', 'odp' => 'document',
+            'pdf' => 'document',
+            'epub' => 'document',
+            'txt' => 'document',
+            'doc' => 'document',
+            'docx' => 'document',
+            'xls' => 'document',
+            'xlsx' => 'document',
+            'ppt' => 'document',
+            'pptx' => 'document',
+            'odt' => 'document',
+            'ods' => 'document',
+            'odp' => 'document',
             'rtf' => 'document',
 
             // Audio
-            'mp3' => 'audio', 'wav' => 'audio', 'm4a' => 'audio',
-            'ape' => 'audio', 'flac' => 'audio',
+            'mp3' => 'audio',
+            'wav' => 'audio',
+            'm4a' => 'audio',
+            'ape' => 'audio',
+            'flac' => 'audio',
 
             // Video
-            'mp4' => 'video', 'mov' => 'video', 'avi' => 'video', 'mkv' => 'video'
+            'mp4' => 'video',
+            'mov' => 'video',
+            'avi' => 'video',
+            'mkv' => 'video'
         ],
 
         // Allowed MIME types for complete validation
         'allowed_mime_types' => [
             // Images
-            'image/jpeg', 'image/png', 'image/gif', 'image/bmp', 'image/webp',
-            'image/svg+xml', 'image/tiff', 'application/postscript',
-            'image/vnd.adobe.photoshop', 'application/illustrator',
+            'image/jpeg',
+            'image/png',
+            'image/gif',
+            'image/bmp',
+            'image/webp',
+            'image/svg+xml',
+            'image/tiff',
+            'application/postscript',
+            'image/vnd.adobe.photoshop',
+            'application/illustrator',
             'application/x-coreldraw',
-            'image/heic', 'image/heif',
+            'image/heic',
+            'image/heif',
             // HEIC/HEIF alternative MIME types that browsers might use
-            'image/x-heic', 'image/x-heif', 'application/heic', 'application/heif',
+            'image/x-heic',
+            'image/x-heif',
+            'application/heic',
+            'application/heif',
 
             // Documents
-            'application/pdf', 'application/epub+zip', 'text/plain',
-            'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-            'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-            'application/vnd.oasis.opendocument.text', 'application/vnd.oasis.opendocument.spreadsheet',
-            'application/vnd.oasis.opendocument.presentation', 'application/rtf',
+            'application/pdf',
+            'application/epub+zip',
+            'text/plain',
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'application/vnd.ms-excel',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'application/vnd.ms-powerpoint',
+            'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+            'application/vnd.oasis.opendocument.text',
+            'application/vnd.oasis.opendocument.spreadsheet',
+            'application/vnd.oasis.opendocument.presentation',
+            'application/rtf',
             'text/html',
 
             // Audio
-            'audio/mpeg', 'audio/wav', 'audio/x-m4a', 'audio/ape', 'audio/flac',
+            'audio/mpeg',
+            'audio/wav',
+            'audio/x-m4a',
+            'audio/ape',
+            'audio/flac',
 
             // Video
-            'video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/x-matroska'
+            'video/mp4',
+            'video/quicktime',
+            'video/x-msvideo',
+            'video/x-matroska'
         ],
 
         // Frontend display configuration
@@ -150,7 +229,13 @@ return [
     'security' => [
         // Potentially dangerous files to block even if they have allowed extensions
         'blocked_patterns' => [
-            '\.php$', '\.exe$', '\.sh$', '\.bat$', '\.cmd$', '\.dll$', '\.so$'
+            '\.php$',
+            '\.exe$',
+            '\.sh$',
+            '\.bat$',
+            '\.cmd$',
+            '\.dll$',
+            '\.so$'
         ],
 
         // MIME types to block for security

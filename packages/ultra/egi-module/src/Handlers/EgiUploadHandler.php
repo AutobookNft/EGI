@@ -96,8 +96,7 @@ use Ultra\EgiModule\Contracts\UserRoleServiceInterface;
  *                                   WalletService, UserRoleService. Enhanced error handling
  *                                   and documentation. Removed HasCreateDefaultCollectionWallets trait.
  */
-class EgiUploadHandler
-{
+class EgiUploadHandler {
     use HasValidation;
     use HasUtilitys;
     // REMOVED: HasCreateDefaultCollectionWallets trait
@@ -201,8 +200,7 @@ class EgiUploadHandler
      * @oracode-error-boundary All service failures properly handled via UEM
      * @oracode-transaction-safety DB transaction wraps all critical operations
      */
-    public function handleEgiUpload(Request $request): JsonResponse
-    {
+    public function handleEgiUpload(Request $request): JsonResponse {
         $file = null;
         $originalName = 'unknown';
         $logContext = ['handler' => static::class, 'operation_id' => Str::uuid()->toString()];
@@ -231,8 +229,8 @@ class EgiUploadHandler
                 $originalName = $file->getClientOriginalName() ?? 'uploaded_file';
                 $logContext['original_filename'] = $originalName;
 
-                // --- 2. Core File Validation (HasValidation trait) ---
-                $this->validateFile($file);
+                // --- 2. Enhanced File Validation (with MIME type support for HEIC/HEIF) ---
+                $this->validateFileEnhanced($file);
 
                 // --- 3. Request Metadata Validation ---
                 $validatedData = $this->validateMetadata($request);
@@ -261,11 +259,9 @@ class EgiUploadHandler
             });
 
             return response()->json($result, 200);
-
         } catch (ValidationException $e) {
             $logContext['validation_errors'] = $e->errors();
             return $this->errorManager->handle('EGI_VALIDATION_FAILED', $logContext, $e);
-
         } catch (Throwable $e) {
             $logContext['egi_id'] = $egiId;
             $errorCode = $this->mapExceptionToUemCode($e);
@@ -279,8 +275,7 @@ class EgiUploadHandler
      * @return User|null
      * @privacy-safe Authentication without exposing credentials
      */
-    protected function authenticateUser(): ?User
-    {
+    protected function authenticateUser(): ?User {
         // Full Laravel authentication
         if (FegiAuth::check()) {
             return FegiAuth::user();
@@ -309,8 +304,7 @@ class EgiUploadHandler
      * @return UploadedFile
      * @throws Exception
      */
-    protected function validateFileInput(Request $request): UploadedFile
-    {
+    protected function validateFileInput(Request $request): UploadedFile {
         if (!$request->hasFile('file') || !$request->file('file')->isValid()) {
             $uploadErrorCode = $request->hasFile('file') ? $request->file('file')->getError() : UPLOAD_ERR_NO_FILE;
             throw new Exception("Invalid or missing 'file' input. Upload error code: {$uploadErrorCode}", 400);
@@ -326,8 +320,7 @@ class EgiUploadHandler
      * @return array
      * @throws ValidationException
      */
-    protected function validateMetadata(Request $request): array
-    {
+    protected function validateMetadata(Request $request): array {
         return $request->validate([
             'egi-title' => ['nullable', 'string', 'max:60'],
             'egi-description' => ['nullable', 'string', 'max:5000'],
@@ -349,8 +342,7 @@ class EgiUploadHandler
      * @oracode-service-replacement Replaces findOrCreateDefaultCollection trait method
      * @oracode-error-delegation Service handles its own error cases
      */
-    protected function getOrCreateCollection(User $creatorUser, array &$logContext): Collection
-    {
+    protected function getOrCreateCollection(User $creatorUser, array &$logContext): Collection {
         try {
             $this->logger->info('[EGI Upload] Delegating collection management to CollectionService', $logContext);
 
@@ -373,7 +365,6 @@ class EgiUploadHandler
             ]);
 
             return $collectionResult;
-
         } catch (Throwable $e) {
             $this->logger->error('[EGI Upload] Collection service operation failed', [
                 ...$logContext,
@@ -395,8 +386,7 @@ class EgiUploadHandler
      * @return array
      * @throws Exception
      */
-    protected function prepareEgiData(UploadedFile $file, array $validatedData, Collection $collection, User $creatorUser): array
-    {
+    protected function prepareEgiData(UploadedFile $file, array $validatedData, Collection $collection, User $creatorUser): array {
         $tempPath = $file->getRealPath();
         if ($tempPath === false) {
             throw new Exception("Cannot access temporary file path for: {$file->getClientOriginalName()}");
@@ -464,8 +454,7 @@ class EgiUploadHandler
      * @return Egi
      * @throws Exception
      */
-    protected function createEgiRecord(array $egiData, int $collectionId, int $creatorUserId): Egi
-    {
+    protected function createEgiRecord(array $egiData, int $collectionId, int $creatorUserId): Egi {
         $creatorUser = User::find($creatorUserId);
 
         $egi = new Egi();
@@ -514,8 +503,7 @@ class EgiUploadHandler
      * @return array
      * @throws Exception
      */
-    protected function storeEgiFile(UploadedFile $file, Collection $collection, User $creatorUser, Egi $egi): array
-    {
+    protected function storeEgiFile(UploadedFile $file, Collection $collection, User $creatorUser, Egi $egi): array {
         $basePath = 'users_files/collections_' . $collection->id . '/creator_' . $creatorUser->id . '/';
         $finalPathKey = $basePath . $egi->key_file . '.' . $egi->extension;
 
@@ -532,8 +520,7 @@ class EgiUploadHandler
      * @param int $collectionId
      * @return void
      */
-    protected function invalidateRelevantCache(int $collectionId): void
-    {
+    protected function invalidateRelevantCache(int $collectionId): void {
         $cacheKeys = [
             'collection_items-' . $collectionId,
             'collection_stats-' . $collectionId,
@@ -553,8 +540,7 @@ class EgiUploadHandler
      * @param array $savedUrls
      * @return array
      */
-    protected function prepareSuccessResponse(Egi $egi, string $originalName, array $savedUrls): array
-    {
+    protected function prepareSuccessResponse(Egi $egi, string $originalName, array $savedUrls): array {
         $userMsgKey = 'uploadmanager::uploadmanager.file_saved_successfully';
         $userMsgFallback = "File '{$originalName}' (EGI ID: {$egi->id}) processed successfully.";
         $successUserMessage = trans($userMsgKey, ['fileCaricato' => $originalName]) ?: $userMsgFallback;
@@ -587,8 +573,7 @@ class EgiUploadHandler
      * @param Throwable $e
      * @return string
      */
-    protected function mapExceptionToUemCode(Throwable $e): string
-    {
+    protected function mapExceptionToUemCode(Throwable $e): string {
         if (str_contains($e->getMessage(), 'Collection service')) {
             return 'EGI_COLLECTION_SERVICE_ERROR';
         }
@@ -619,8 +604,7 @@ class EgiUploadHandler
      *
      * @oracode-storage-strategy Enhanced multi-disk with intelligent fallback
      */
-    protected function saveToMultipleDisks(string $pathKey, string $tempPath, array $logContext): array
-    {
+    protected function saveToMultipleDisks(string $pathKey, string $tempPath, array $logContext): array {
         Log::channel($this->logChannel)->info('[EGI Upload] Starting enhanced storage process', $logContext);
 
         // Enhanced configuration with better fallback
@@ -683,7 +667,6 @@ class EgiUploadHandler
                 }
 
                 Log::channel($this->logChannel)->info('[EGI Upload] File saved successfully', array_merge($diskLogContext, ['url' => $savedInfo[$disk]]));
-
             } catch (Throwable $e_store) {
                 $errorMsg = "Failed to save to disk '{$disk}': " . $e_store->getMessage();
                 Log::channel($this->logChannel)->error('[EGI Upload] ' . $errorMsg, $diskLogContext);
@@ -740,5 +723,178 @@ class EgiUploadHandler
         ]);
 
         return $savedInfo;
+    }
+
+    /**
+     * 🎯 Enhanced file validation with MIME type support for HEIC/HEIF files.
+     * Replaces the basic validateFile() method to properly handle HEIC/HEIF MIME types.
+     *
+     * @param UploadedFile $file The file to validate
+     * @return void
+     * @throws Exception If validation fails
+     */
+    protected function validateFileEnhanced(UploadedFile $file): void {
+        $fileNameForLog = $file->getClientOriginalName();
+
+        Log::channel($this->logChannel)->info('[EGI Upload] Starting enhanced file validation with HEIC/HEIF support', [
+            'fileName' => $fileNameForLog,
+            'size' => $file->getSize(),
+            'mimeType' => $file->getMimeType(),
+            'extension' => $file->getClientOriginalExtension()
+        ]);
+
+        // Get validation rules from config
+        $allowedExtensions = config('AllowedFileType.collection.allowed_extensions', []);
+        $allowedMimeTypes = config('AllowedFileType.collection.allowed_mime_types', []);
+        $maxSizeInBytes = config('AllowedFileType.collection.max_size', 100 * 1024 * 1024);
+
+        // 1. Extension validation
+        $extension = strtolower($file->getClientOriginalExtension());
+        if (!in_array($extension, $allowedExtensions)) {
+            Log::channel($this->logChannel)->error('[EGI Upload] Extension validation failed', [
+                'fileName' => $fileNameForLog,
+                'extension' => $extension,
+                'allowedExtensions' => $allowedExtensions
+            ]);
+            throw new Exception("File extension '{$extension}' is not allowed.");
+        }
+
+        // 2. MIME type validation (critical for HEIC/HEIF)
+        $mimeType = $file->getMimeType();
+        if ($mimeType && !in_array($mimeType, $allowedMimeTypes)) {
+            Log::channel($this->logChannel)->error('[EGI Upload] MIME type validation failed', [
+                'fileName' => $fileNameForLog,
+                'mimeType' => $mimeType,
+                'allowedMimeTypes' => $allowedMimeTypes
+            ]);
+            throw new Exception("File MIME type '{$mimeType}' is not allowed.");
+        }
+
+        // 3. Size validation
+        $fileSize = $file->getSize();
+        if ($fileSize > $maxSizeInBytes) {
+            $maxSizeMB = round($maxSizeInBytes / (1024 * 1024), 2);
+            $fileSizeMB = round($fileSize / (1024 * 1024), 2);
+
+            Log::channel($this->logChannel)->error('[EGI Upload] File size validation failed', [
+                'fileName' => $fileNameForLog,
+                'fileSizeMB' => $fileSizeMB,
+                'maxSizeMB' => $maxSizeMB
+            ]);
+            throw new Exception("File size ({$fileSizeMB}MB) exceeds maximum allowed size ({$maxSizeMB}MB).");
+        }
+
+        // 4. Image structure validation for image files (including HEIC/HEIF)
+        if ($this->isImageMimeType($file)) {
+            $this->validateImageStructureEnhanced($file);
+        }
+
+        Log::channel($this->logChannel)->info('[EGI Upload] Enhanced file validation completed successfully', [
+            'fileName' => $fileNameForLog
+        ]);
+    }
+
+    /**
+     * 🎯 Enhanced image structure validation with better HEIC/HEIF support.
+     *
+     * @param UploadedFile $file The image file to validate
+     * @return void
+     * @throws Exception If validation fails
+     */
+    protected function validateImageStructureEnhanced(UploadedFile $file): void {
+        $fileNameForLog = $file->getClientOriginalName();
+
+        Log::channel($this->logChannel)->info('[EGI Upload] Starting enhanced image structure validation', [
+            'fileName' => $fileNameForLog,
+            'mimeType' => $file->getMimeType()
+        ]);
+
+        if (!extension_loaded('imagick') || !class_exists('\\Imagick')) {
+            Log::channel($this->logChannel)->warning('[EGI Upload] Imagick not available, skipping structure validation', [
+                'fileName' => $fileNameForLog
+            ]);
+            return; // Skip validation instead of failing
+        }
+
+        $filePath = $file->getRealPath();
+        if ($filePath === false || !file_exists($filePath)) {
+            Log::channel($this->logChannel)->error('[EGI Upload] File path invalid for structure validation', [
+                'fileName' => $fileNameForLog,
+                'path' => $filePath ?: 'N/A'
+            ]);
+            throw new Exception("Could not access file for structure validation.");
+        }
+
+        $imagick = null;
+        try {
+            if (!class_exists('\\Imagick')) {
+                Log::channel($this->logChannel)->warning('[EGI Upload] Imagick class not available', [
+                    'fileName' => $fileNameForLog
+                ]);
+                return;
+            }
+
+            $imagick = new \Imagick();
+
+            // For HEIC/HEIF files, Imagick might fail even if they're valid
+            // So we'll be more permissive
+            $mimeType = $file->getMimeType();
+            $isHeicHeif = in_array($mimeType, ['image/heic', 'image/heif', 'image/x-heic', 'image/x-heif']);
+
+            if ($isHeicHeif) {
+                Log::channel($this->logChannel)->info('[EGI Upload] Detected HEIC/HEIF file, using permissive validation', [
+                    'fileName' => $fileNameForLog,
+                    'mimeType' => $mimeType
+                ]);
+
+                try {
+                    $imagick->pingImage($filePath);
+                    Log::channel($this->logChannel)->info('[EGI Upload] HEIC/HEIF structure validation passed', [
+                        'fileName' => $fileNameForLog
+                    ]);
+                } catch (Exception $e) {
+                    Log::channel($this->logChannel)->warning('[EGI Upload] HEIC/HEIF Imagick validation failed, but allowing file', [
+                        'fileName' => $fileNameForLog,
+                        'error' => $e->getMessage()
+                    ]);
+                    // Don't throw exception for HEIC/HEIF files as Imagick support varies
+                }
+            } else {
+                // Standard validation for other image types
+                try {
+                    if (!$imagick->pingImage($filePath)) {
+                        throw new Exception("Imagick::pingImage returned false");
+                    }
+                    Log::channel($this->logChannel)->info('[EGI Upload] Standard image structure validation passed', [
+                        'fileName' => $fileNameForLog
+                    ]);
+                } catch (Exception $e) {
+                    Log::channel($this->logChannel)->error('[EGI Upload] Image structure validation failed', [
+                        'fileName' => $fileNameForLog,
+                        'error' => $e->getMessage()
+                    ]);
+                    throw new Exception("Invalid image structure detected: " . $e->getMessage());
+                }
+            }
+        } catch (Exception $e) {
+            if (!isset($isHeicHeif) || !$isHeicHeif) {
+                Log::channel($this->logChannel)->error('[EGI Upload] Image structure validation failed', [
+                    'fileName' => $fileNameForLog,
+                    'error' => $e->getMessage()
+                ]);
+                throw new Exception("Invalid image structure detected: " . $e->getMessage());
+            }
+        } catch (Throwable $e) {
+            Log::channel($this->logChannel)->error('[EGI Upload] Unexpected error during image validation', [
+                'fileName' => $fileNameForLog,
+                'error' => $e->getMessage()
+            ]);
+            throw new Exception("Unexpected error during image validation: " . $e->getMessage());
+        } finally {
+            if ($imagick && is_object($imagick) && method_exists($imagick, 'clear')) {
+                $imagick->clear();
+                $imagick->destroy();
+            }
+        }
     }
 }
