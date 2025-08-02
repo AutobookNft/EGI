@@ -24,7 +24,7 @@ Route::middleware(['web', 'guest'])->group(function () {
 });
 
 // Logout route - OUR independent controller with auth middleware
-Route::middleware(['web', 'auth'])->group(function () {
-    Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
-        ->name('logout');
+Route::middleware(['web'])->group(function () {
+    Route::post('/custom-logout', [AuthenticatedSessionController::class, 'destroy'])
+        ->name('custom.logout');
 });

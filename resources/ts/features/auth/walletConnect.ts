@@ -418,6 +418,11 @@ function completeConnection(walletAddress: string): void {
         detail: { walletAddress }
     });
     document.dispatchEvent(uiUpdateEvent);
+
+    // Refresh della pagina dopo connessione weak completata
+    setTimeout(() => {
+        window.location.reload();
+    }, 500); // Piccolo delay per permettere al toast di mostrarsi
 }
 
 /**

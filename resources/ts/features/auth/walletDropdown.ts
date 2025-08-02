@@ -220,40 +220,63 @@ export async function handleDisconnect(
         }
 
         if (DOM.logoutFormEl) {
-            console.log('🔄 [LOGOUT] Inviando form di logout...', {
-                action: DOM.logoutFormEl.action,
-                method: DOM.logoutFormEl.method,
-                formData: new FormData(DOM.logoutFormEl)
-            });
             DOM.logoutFormEl.submit(); // Questo causerà un ricaricamento della pagina
         } else {
             uem.handleClientError('CLIENT_DOM_MISSING_LOGOUT_FORM_DISCONNECT', {}, undefined, appTranslate('errorLogoutFormMissing', config.translations));
         }
     } else if (authStatus === 'connected') {
         try {
-            // const apiDisconnectRoute = config.routes.api.walletDisconnect; // Esempio se definita
-            // if (apiDisconnectRoute) {
-            //     await fetch(apiDisconnectRoute, {
-            //         method: 'POST',
-            //         headers: {'X-CSRF-TOKEN': getCsrfTokenTS(), 'Accept': 'application/json' }
-            //     });
-            // }
+            // Chiamata API per disconnettere lato server per utenti "connected"
+            if (config.routes?.walletDisconnect) {
+                const response = await fetch(config.routes.walletDisconnect, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': getCsrfTokenTS(),
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                console.log('✅ [WALLET] Server-side disconnect successful for connected user');
+            } else {
+                console.warn('⚠️ [WALLET] walletDisconnect route not configured, proceeding with client-side disconnect only');
+            }
         } catch (apiError: any) {
-            uem.handleClientError('CLIENT_API_ERROR_WEAK_DISCONNECT', { endpoint: 'walletDisconnect', errorDetails: apiError.message }, apiError, appTranslate('errorApiDisconnect', config.translations));
+            console.error('❌ [WALLET] Server-side disconnect failed:', apiError);
+            uem.handleClientError('CLIENT_API_ERROR_WEAK_DISCONNECT', { 
+                endpoint: 'walletDisconnect', 
+                errorDetails: apiError.message 
+            }, apiError, appTranslate('errorApiDisconnect', config.translations));
         }
-        setWeakAuthWallet(null, uiUpdateCallback); // Da authService: rimuove da localStorage e CHIAMA L'AGGIORNAMENTO UI
+        
+        // Client-side cleanup sempre eseguito (anche se API fallisce)
+        setWeakAuthWallet(null, uiUpdateCallback);
         console.log('Padmin WalletDropdown: Disconnected locally (weak auth). UI update triggered.');
 
         if (window.Swal) {
             window.Swal.fire({
                 title: appTranslate('disconnectedTitle', config.translations),
                 text: appTranslate('disconnectedTextWeak', config.translations),
-                icon: 'info',
+                icon: 'success',
                 timer: 2000,
                 showConfirmButton: false,
                 toast: true,
                 position: 'top-end'
+            }).then(() => {
+                // Refresh della pagina dopo il toast per assicurare aggiornamento completo UI
+                setTimeout(() => {
+                    window.location.reload();
+                }, 300);
             });
+        } else {
+            // Se non c'è Swal, refresh immediato
+            setTimeout(() => {
+                window.location.reload();
+            }, 500);
         }
     } else {
         // Stato 'disconnected', non c'è nulla da disconnettere. Log anomalia?

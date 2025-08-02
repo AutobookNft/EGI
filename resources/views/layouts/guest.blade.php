@@ -15,7 +15,7 @@
 
         @isset($heroFullWidth)
             {{-- Layout a colonna intera --}}
-            <div class="relative z-10 w-full px-4 mx-auto mt-auto mb-auto max-w-7xl sm:px-6 lg:px-8">
+            <div class="relative z-10 mx-auto mb-auto mt-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
                 {{ $heroFullWidth }}
             </div>
 
@@ -26,8 +26,8 @@
         @else
             {{-- Layout a colonne esistente (NON USATO DALLA HOME ATTUALE) --}}
             <div
-                class="container relative z-10 flex flex-col items-center w-full px-4 mx-auto hero-content-overlay sm:px-6 lg:px-8">
-                <div class="grid w-full grid-cols-1 gap-8 mb-10 md:mb-12 md:grid-cols-12 lg:gap-6">
+                class="hero-content-overlay container relative z-10 mx-auto flex w-full flex-col items-center px-4 sm:px-6 lg:px-8">
+                <div class="mb-10 grid w-full grid-cols-1 gap-8 md:mb-12 md:grid-cols-12 lg:gap-6">
                     {{-- Colonna mobile: sinistra+destra in un contenitore --}}
                     <div class="flex flex-col items-center gap-8 md:hidden">
                         {{-- Colonna sinistra (Natan) --}}
@@ -49,7 +49,7 @@
                     </div>
 
                     {{-- Colonna centrale: Carousel (50% su desktop, 100% su tablet) --}}
-                    <div class="flex flex-col items-center justify-center w-full md:col-span-12 lg:col-span-6" role="region"
+                    <div class="flex w-full flex-col items-center justify-center md:col-span-12 lg:col-span-6" role="region"
                         aria-label="{{ __('guest_layout.hero_carousel_aria_label') }}">
                         {{ $heroCarousel ?? '' }}
                     </div>
@@ -78,27 +78,27 @@
             @endisset
 
             {{-- Contenuto sotto l'hero --}}
-            <div class="relative z-10 w-11/12 mt-12 mb-12 ml-10 mr-10 below-hero-content" role="region"
+            <div class="below-hero-content relative z-10 mb-12 ml-10 mr-10 mt-12 w-11/12" role="region"
                 aria-label="{{ __('guest_layout.hero_featured_content_aria_label') }}"> {{-- Aggiunto z-10 e w-full --}}
                 {{ $belowHeroContent ?? '' }}
             </div>
 
             {{-- Contenuto sotto l'hero --}}
-            <div class="relative z-10 w-11/12 mt-12 mb-12 ml-10 mr-10 below-hero-content" role="region"
+            <div class="below-hero-content relative z-10 mb-12 ml-10 mr-10 mt-12 w-11/12" role="region"
                 aria-label="{{ __('guest_layout.hero_featured_content_aria_label') }}"> {{-- Aggiunto z-10 e w-full --}}
                 {{ $belowHeroContent_1 ?? '' }}
             </div>
 
-            <div class="relative z-10 w-full mt-12 mb-12 ml-10 mr-10 below-hero-content" role="region"
+            <div class="below-hero-content relative z-10 mb-12 ml-10 mr-10 mt-12 w-full" role="region"
                 aria-label="{{ __('guest_layout.hero_featured_content_aria_label') }}"> {{-- Aggiunto z-10, w-full e mt-12 --}}
                 {{ $belowHeroContent_2 ?? '' }}
             </div>
 
-            <div class="absolute z-20 transform -translate-x-1/2 animate-bounce-slow bottom-6 left-1/2 md:hidden">
+            <div class="animate-bounce-slow absolute bottom-6 left-1/2 z-20 -translate-x-1/2 transform md:hidden">
                 <button type="button" aria-label="{{ __('guest_layout.scroll_down_aria_label') }}"
-                    class="flex items-center justify-center w-10 h-10 text-white bg-black rounded-full bg-opacity-30 hover:bg-opacity-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                    class="flex h-10 w-10 items-center justify-center rounded-full bg-black bg-opacity-30 text-white hover:bg-opacity-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                     onclick="document.getElementById('main-content').scrollIntoView({behavior: 'smooth'});">
-                    <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                    <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M19 14l-7 7m0 0l-7-7m7 7V3" />
@@ -121,10 +121,10 @@
 </main>
 
 <!-- Footer -->
-<footer class="py-6 mt-auto bg-gray-900 border-t border-gray-800 md:py-8" role="contentinfo"
+<footer class="mt-auto border-t border-gray-800 bg-gray-900 py-6 md:py-8" role="contentinfo"
     aria-labelledby="footer-heading">
     <h2 id="footer-heading" class="sr-only">{{ __('guest_layout.footer_sr_heading') }}</h2>
-    <div class="px-4 mx-auto text-center max-w-7xl sm:px-6 md:flex md:items-center md:justify-between lg:px-8">
+    <div class="mx-auto max-w-7xl px-4 text-center sm:px-6 md:flex md:items-center md:justify-between lg:px-8">
         <p class="mb-4 text-sm text-gray-400 md:mb-0">© {{ date('Y') }} {{ __('guest_layout.copyright_holder') }}.
             {{ __('guest_layout.all_rights_reserved') }}</p>
         <div
@@ -138,7 +138,7 @@
 
 
 <!-- Modals -->
-<div id="upload-modal" class="hidden modal" role="dialog" aria-modal="true" aria-hidden="true" tabindex="-1"
+<div id="upload-modal" class="modal hidden" role="dialog" aria-modal="true" aria-hidden="true" tabindex="-1"
     aria-labelledby="upload-modal-title">
     <div role="document">
         <button id="close-upload-modal" type="button"
@@ -152,7 +152,7 @@
 <x-wallet-connect-modal />
 
 <!-- Logout Form -->
-<form method="POST" action="{{ route('logout') }}" id="logout-form" style="display: none;">
+<form method="POST" action="{{ route('custom.logout') }}" id="logout-form" style="display: none;">
     @csrf
     <button type="submit" class="sr-only">{{ __('guest_layout.logout_sr_button') }}</button>
 </form>

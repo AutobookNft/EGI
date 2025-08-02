@@ -84,6 +84,7 @@ export interface AppRoutesApi {
 export interface AppRoutes {
     baseUrl: string; // URL base del sito, es. https://florenceegi.com
     walletConnect: string; // Path relativo a baseUrl o assoluto
+    walletDisconnect: string; // Path per disconnessione wallet
     collectionsCreate: string;
     register: string;
     logout: string;
@@ -100,6 +101,7 @@ export interface AppTranslations {
 
 export interface AppConfig {
     isAuthenticated: boolean;
+    isWeakAuth: boolean;
     loggedInUserWallet: string | null;
     initialUserData: InitialUserData;
     routes: AppRoutes;

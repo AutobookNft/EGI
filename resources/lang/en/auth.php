@@ -16,6 +16,9 @@ return [
     'failed' => 'These credentials do not match our records.',
     'password' => 'The provided password is incorrect.',
     'throttle' => 'Too many login attempts. Please try again in :seconds seconds.',
-    
+    'logout_success' => 'You have been successfully logged out.',
+    'wallet_disconnect_success' => 'Wallet has been successfully disconnected.',
+    'already_logged_out' => 'You are already logged out.',
+
 
 ];

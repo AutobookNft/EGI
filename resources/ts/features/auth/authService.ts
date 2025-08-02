@@ -109,9 +109,15 @@
      * @returns {('logged-in' | 'connected' | 'disconnected')} Lo stato di autenticazione.
      */
     export function getAuthStatus(config: AppConfig): 'logged-in' | 'connected' | 'disconnected' {
-        if (config.isAuthenticated) {
+        // Se l'utente è autenticato ma in modalità weak auth, è solo "connected"
+        if (config.isAuthenticated && config.isWeakAuth) {
+            return 'connected';
+        }
+        // Se l'utente è autenticato normalmente (non weak auth), è "logged-in"
+        if (config.isAuthenticated && !config.isWeakAuth) {
             return 'logged-in';
         }
+        // Fallback: controlla localStorage per compatibilità
         if (localStorage.getItem('connected_wallet')) {
             return 'connected';
         }
@@ -158,8 +164,23 @@
             localStorage.setItem('connected_wallet', address);
             console.log('Padmin AuthState: Weak auth wallet set in localStorage:', address);
         } else {
+            // Pulizia completa di tutti i dati relativi alla sessione weak auth
             localStorage.removeItem('connected_wallet');
-            console.log('Padmin AuthState: Weak auth wallet removed from localStorage.');
+            localStorage.removeItem('auth_status');
+            localStorage.removeItem('connected_user_id');
+            localStorage.removeItem('is_weak_auth');
+            
+            // Pulisce anche eventuali chiavi FEGI salvate
+            const keysToRemove = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith('fegi_key_')) {
+                    keysToRemove.push(key);
+                }
+            }
+            keysToRemove.forEach(key => localStorage.removeItem(key));
+            
+            console.log('Padmin AuthState: Weak auth wallet and all session data removed from localStorage.');
         }
         uiUpdateCallback(); // Notifica l'UI del cambiamento
     }

@@ -29,8 +29,7 @@ use Laravel\Fortify\Contracts\LoginResponse;
  * @date 2025-06-24
  * @solution Independent controller that uses Fortify internally
  */
-class AuthenticatedSessionController extends Controller
-{
+class AuthenticatedSessionController extends Controller {
     /**
      * Constructor with full DI
      */
@@ -49,8 +48,7 @@ class AuthenticatedSessionController extends Controller
      * @param Request $request
      * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
      */
-    public function create(Request $request)
-    {
+    public function create(Request $request) {
         if (Auth::check()) {
             return redirect()->intended(route(config('app.redirect_to_url_after_login', 'home')));
         }
@@ -75,8 +73,7 @@ class AuthenticatedSessionController extends Controller
      * @param Request $request
      * @return Response|RedirectResponse|JsonResponse
      */
-    public function store(Request $request)
-    {
+    public function store(Request $request) {
         $logContext = [
             'operation' => 'enhanced_login_attempt',
             'ip_address' => $request->ip(),
@@ -131,7 +128,6 @@ class AuthenticatedSessionController extends Controller
 
                 // Return success response (use Fortify's response if available)
                 return app(LoginResponse::class);
-
             } else {
                 // Authentication failed
                 $this->logger->info('[Auth] Authentication failed - invalid credentials', $logContext);
@@ -140,14 +136,12 @@ class AuthenticatedSessionController extends Controller
                     Fortify::username() => [__('auth.failed')],
                 ]);
             }
-
         } catch (ValidationException $e) {
             $this->logger->info('[Auth] Login validation failed', [
                 ...$logContext,
                 'validation_errors' => $e->errors()
             ]);
             throw $e;
-
         } catch (\Exception $e) {
             $this->logger->error('[Auth] Login process failed', [
                 ...$logContext,
@@ -168,18 +162,40 @@ class AuthenticatedSessionController extends Controller
      * @param Request $request
      * @return Response|RedirectResponse
      */
-    public function destroy(Request $request)
-    {
-        // Debug: Log che il metodo è stato chiamato
-        \Log::info('DEBUG: AuthenticatedSessionController destroy method called', [
-            'request_method' => $request->method(),
-            'request_url' => $request->url(),
-            'user_authenticated' => Auth::check(),
-            'user_id' => Auth::id(),
-            'headers' => $request->headers->all()
-        ]);
-
+    public function destroy(Request $request) {
         $user = Auth::user();
+
+        // Gestione per utenti "connected" ma non "logged-in"
+        if (!$user) {
+            // L'utente potrebbe essere in stato "connected" (sessione con wallet ma non autenticato Laravel)
+            $connectedUserId = $request->session()->get('connected_user_id');
+            $connectedWallet = $request->session()->get('connected_wallet');
+
+            if ($connectedUserId && $connectedWallet) {
+                // Log del disconnect per utente "connected"
+                $this->logger->info('[Auth] Wallet disconnect for connected user', [
+                    'operation' => 'wallet_disconnect_connected_user',
+                    'connected_user_id' => $connectedUserId,
+                    'connected_wallet' => $connectedWallet,
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                    'timestamp' => now()->toISOString()
+                ]);
+
+                // Pulisce la sessione del wallet "connected"
+                $request->session()->forget(['connected_user_id', 'connected_wallet', 'auth_status']);
+                $request->session()->regenerateToken();
+
+                return redirect()->route('home')
+                    ->with('success', __('auth.wallet_disconnect_success'));
+            }
+
+            // Nessun utente autenticato e nessun wallet connesso
+            return redirect()->route('home')
+                ->with('info', __('auth.already_logged_out'));
+        }
+
+        // Gestione logout normale per utenti autenticati Laravel
         $logContext = [
             'operation' => 'enhanced_logout',
             'user_id' => $user?->id,
@@ -223,7 +239,6 @@ class AuthenticatedSessionController extends Controller
             // Return logout response with success message - redirect directly to home route
             return redirect()->route('home')
                 ->with('success', __('auth.logout_success'));
-
         } catch (\Exception $e) {
             $this->logger->warning('[Auth] Failed to log user logout', [
                 ...$logContext,
@@ -248,8 +263,7 @@ class AuthenticatedSessionController extends Controller
      * @param Request $request
      * @return bool
      */
-    private function attemptLogin(Request $request): bool
-    {
+    private function attemptLogin(Request $request): bool {
         return Auth::attempt(
             $request->only(Fortify::username(), 'password'),
             $request->boolean('remember')
@@ -263,8 +277,7 @@ class AuthenticatedSessionController extends Controller
      * @param Request $request
      * @return void
      */
-    private function logSuccessfulLoginWithGdpr($user, Request $request): void
-    {
+    private function logSuccessfulLoginWithGdpr($user, Request $request): void {
         $logContext = [
             'operation' => 'enhanced_login_with_gdpr_ecosystem',
             'user_id' => $user->id,
@@ -296,7 +309,6 @@ class AuthenticatedSessionController extends Controller
                     GdprActivityCategory::AUTHENTICATION_LOGIN
                 );
             }
-
         } catch (\Exception $e) {
             $this->logger->warning('[Auth] Failed to log GDPR-enhanced login', [
                 ...$logContext,
@@ -311,8 +323,7 @@ class AuthenticatedSessionController extends Controller
      * @param \App\Models\User $user
      * @return bool
      */
-    private function userNeedsConsentReview($user): bool
-    {
+    private function userNeedsConsentReview($user): bool {
         $logContext = [
             'operation' => 'post_login_consent_check',
             'user_id' => $user->id,
@@ -345,8 +356,10 @@ class AuthenticatedSessionController extends Controller
             $userConsentData = $this->consentService->getUserConsentStatus($user);
             $currentPolicyVersion = config('gdpr.current_policy_version', '1.0');
 
-            if (isset($userConsentData['consent_version']) &&
-                $userConsentData['consent_version'] !== $currentPolicyVersion) {
+            if (
+                isset($userConsentData['consent_version']) &&
+                $userConsentData['consent_version'] !== $currentPolicyVersion
+            ) {
 
                 $this->logger->info('[Auth] User needs consent update (policy version changed)', [
                     ...$logContext,
@@ -359,7 +372,6 @@ class AuthenticatedSessionController extends Controller
             // All checks passed - no consent review needed
             $this->logger->info('[Auth] User consent status is current', $logContext);
             return false;
-
         } catch (\Exception $e) {
             $this->logger->warning('[Auth] Failed to check user consent status', [
                 ...$logContext,
@@ -377,8 +389,7 @@ class AuthenticatedSessionController extends Controller
      * @param \App\Models\User $user
      * @return int|null Duration in minutes
      */
-    private function calculateSessionDuration($user): ?int
-    {
+    private function calculateSessionDuration($user): ?int {
         try {
             if ($user->last_login_at) {
                 return now()->diffInMinutes($user->last_login_at);

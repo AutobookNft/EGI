@@ -36,8 +36,7 @@ use App\Rules\AlgorandAddress;
  *
  * @signature [WalletConnectController::v4.1] florence-egi-hash-fix
  */
-class WalletConnectController extends Controller
-{
+class WalletConnectController extends Controller {
     /** @var UltraLogManager ULM instance for structured logging */
     private UltraLogManager $logger;
 
@@ -57,11 +56,10 @@ class WalletConnectController extends Controller
         $this->collectionService = $collectionService;
     }
 
-   /**
+    /**
      * @Oracode Handle FEGI-based wallet connection with full debug logging
      */
-    public function connect(Request $request): JsonResponse
-    {
+    public function connect(Request $request): JsonResponse {
         $this->logger->info('=== FEGI WALLET CONNECT START ===', [
             'ip' => $request->ip(),
             'user_agent' => $request->userAgent(),
@@ -101,7 +99,6 @@ class WalletConnectController extends Controller
                 $this->logger->info('FEGI Connect: Authenticating existing user');
                 return $this->handleExistingFegiAuth($request, $fegiKey);
             }
-
         } catch (\Illuminate\Validation\ValidationException $e) {
             $this->logger->warning('FEGI Wallet Connect validation failed', [
                 'errors' => $e->errors(),
@@ -111,7 +108,6 @@ class WalletConnectController extends Controller
             return $this->errorManager->handle('WALLET_VALIDATION_FAILED', [
                 'errors' => $e->errors()
             ]);
-
         } catch (\Exception $e) {
             $this->logger->error('Unexpected error during FEGI wallet connection', [
                 'message' => $e->getMessage(),
@@ -127,8 +123,7 @@ class WalletConnectController extends Controller
     /**
      * @Oracode Handle automatic new account creation with full debug
      */
-    protected function handleCreateNewAccount(Request $request): JsonResponse
-    {
+    protected function handleCreateNewAccount(Request $request): JsonResponse {
         $this->logger->info('=== CREATING NEW FEGI ACCOUNT ===');
 
         // Generate valid Algorand address (simulation)
@@ -204,7 +199,6 @@ class WalletConnectController extends Controller
             ]);
 
             return $response;
-
         } catch (\Exception $e) {
             $this->logger->error('Error creating new FEGI account', [
                 'error' => $e->getMessage(),
@@ -228,8 +222,7 @@ class WalletConnectController extends Controller
      * @error-boundary Returns appropriate UEM error on invalid FEGI
      * @hash-resilient Handles both Bcrypt and legacy hash formats
      */
-    protected function handleExistingFegiAuth(Request $request, string $fegiKey): JsonResponse
-    {
+    protected function handleExistingFegiAuth(Request $request, string $fegiKey): JsonResponse {
         $this->logger->info('Attempting FEGI key authentication', [
             'fegi_prefix' => substr($fegiKey, 0, 9) . '...'
         ]);
@@ -288,8 +281,7 @@ class WalletConnectController extends Controller
      * @error-boundary Logs hash issues for debugging
      * @migration-helper Facilitates smooth transition to Bcrypt
      */
-    protected function validateFegiKeyAgainstHash(string $fegiKey, string $storedHash, int $userId): bool
-    {
+    protected function validateFegiKeyAgainstHash(string $fegiKey, string $storedHash, int $userId): bool {
         try {
             // First, try standard Bcrypt validation
             if (Hash::check($fegiKey, $storedHash)) {
@@ -350,7 +342,6 @@ class WalletConnectController extends Controller
 
             // No match found
             return false;
-
         } catch (\Exception $e) {
             $this->logger->error('Hash validation error', [
                 'user_id' => $userId,
@@ -371,8 +362,7 @@ class WalletConnectController extends Controller
      * @security-upgrade Converts legacy hashes to Bcrypt
      * @error-boundary Handles upgrade failures gracefully
      */
-    protected function upgradeUserHashToBcrypt(int $userId, string $plainFegiKey): void
-    {
+    protected function upgradeUserHashToBcrypt(int $userId, string $plainFegiKey): void {
         try {
             User::where('id', $userId)->update([
                 'personal_secret' => Hash::make($plainFegiKey)
@@ -381,7 +371,6 @@ class WalletConnectController extends Controller
             $this->logger->info('Successfully upgraded user hash to Bcrypt', [
                 'user_id' => $userId
             ]);
-
         } catch (\Exception $e) {
             $this->logger->error('Failed to upgrade user hash to Bcrypt', [
                 'user_id' => $userId,
@@ -405,8 +394,7 @@ class WalletConnectController extends Controller
      * @simulation-purpose For MVP testing, not production blockchain
      * @format-compliant Matches real Algorand address structure
      */
-    protected function generateSimulatedAlgorandAddress(): string
-    {
+    protected function generateSimulatedAlgorandAddress(): string {
         // Algorand addresses use base32 encoding (A-Z, 2-7)
         $base32Chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
 
@@ -425,8 +413,7 @@ class WalletConnectController extends Controller
     /**
      * @Oracode Establish connected session with maximum debugging
      */
-    protected function establishConnectedSession(Request $request, User $user, string $walletAddress): void
-    {
+    protected function establishConnectedSession(Request $request, User $user, string $walletAddress): void {
         $this->logger->info('establishConnectedSession START', [
             'user_id' => $user->id,
             'wallet_address' => $walletAddress,
@@ -489,8 +476,7 @@ class WalletConnectController extends Controller
      *
      * @internal Returns: weak_auth|verified|registered
      */
-    protected function getUserStatus(User $user): string
-    {
+    protected function getUserStatus(User $user): string {
         if ($user->is_weak_auth) {
             return 'weak_auth';
         }
@@ -510,10 +496,15 @@ class WalletConnectController extends Controller
      * @oracode-side-effects Clears session data
      * @error-boundary Handles failures with UEM
      */
-    public function disconnect(Request $request): JsonResponse
-    {
+    public function disconnect(Request $request): JsonResponse {
         $this->logger->info('Wallet disconnect requested', [
-            'session_id' => $request->session()->getId()
+            'session_id' => $request->session()->getId(),
+            'current_session_data' => [
+                'connected_wallet' => $request->session()->get('connected_wallet'),
+                'auth_status' => $request->session()->get('auth_status'),
+                'connected_user_id' => $request->session()->get('connected_user_id'),
+                'is_weak_auth' => $request->session()->get('is_weak_auth')
+            ]
         ]);
 
         try {
@@ -525,11 +516,25 @@ class WalletConnectController extends Controller
                 'is_weak_auth'
             ]);
 
+            // Regenera il token di sessione per una pulizia completa
+            $request->session()->regenerateToken();
+
+            // Forza il salvataggio della sessione
+            $request->session()->save();
+
+            $this->logger->info('Session cleaned successfully', [
+                'session_after_cleanup' => [
+                    'connected_wallet' => $request->session()->get('connected_wallet'),
+                    'auth_status' => $request->session()->get('auth_status'),
+                    'connected_user_id' => $request->session()->get('connected_user_id'),
+                    'is_weak_auth' => $request->session()->get('is_weak_auth')
+                ]
+            ]);
+
             return response()->json([
                 'success' => true,
                 'message' => trans('collection.wallet_disconnected_successfully')
             ]);
-
         } catch (\Exception $e) {
             $this->logger->error('Error during wallet disconnect', [
                 'error' => $e->getMessage()
@@ -557,8 +562,7 @@ class WalletConnectController extends Controller
      * - is_authenticated: boolean
      * - is_weak_auth: boolean
      */
-    public function status(Request $request): JsonResponse
-    {
+    public function status(Request $request): JsonResponse {
         if (auth()->check()) {
             return response()->json([
                 'success' => true,
