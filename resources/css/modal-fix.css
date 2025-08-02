@@ -210,3 +210,41 @@
         font-size: 0.9rem !important;
     }
 }
+
+/* Fix per SweetAlert2 - Assicura che appaia sopra tutte le modali */
+.swal-high-zindex,
+.swal2-container {
+    z-index: 999999 !important;
+}
+
+.swal-high-zindex .swal2-container,
+.swal2-popup {
+    z-index: 999999 !important;
+}
+
+.swal-high-zindex .swal2-backdrop,
+.swal2-backdrop-show {
+    z-index: 999998 !important;
+}
+
+.swal-high-zindex .swal2-popup,
+.swal2-show {
+    z-index: 999999 !important;
+}
+
+/* Assicuriamoci che SweetAlert2 sia sempre sopra tutte le modali */
+.swal2-container,
+.swal2-backdrop-show,
+.swal2-backdrop,
+.swal2-popup {
+    z-index: 999999 !important;
+}
+
+/* Fix specifico per la modale di upload - riduci z-index per permettere a SweetAlert2 di apparire sopra */
+#upload-modal {
+    z-index: 9998 !important;
+}
+
+#upload-modal > div {
+    z-index: 9999 !important;
+}

@@ -10,6 +10,7 @@
 
     @vite([
         'resources/css/app.css',
+        'resources/css/modal-fix.css',
         'resources/js/app.js',
         'vendor/ultra/ultra-upload-manager/resources/css/app.css',
         'vendor/ultra/ultra-upload-manager/resources/ts/core/file_upload_manager.ts'
