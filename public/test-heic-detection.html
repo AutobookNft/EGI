@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test HEIC Detection - Florence EGI</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .test-area {
+            border: 2px dashed #ddd;
+            padding: 20px;
+            text-align: center;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        .results {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🧪 Test HEIC/HEIF Detection Logic</h1>
+    <p>Questo strumento simula la logica di rilevamento HEIC implementata in Florence EGI.</p>
+
+    <div class="test-area">
+        <h3>📁 Seleziona un file per testare</h3>
+        <input type="file" id="fileInput" accept="*/*">
+        <p><small>Prova con file .heic, .heif, .jpg, .png per vedere i diversi comportamenti</small></p>
+    </div>
+
+    <div id="results"></div>
+
+    <div class="info">
+        <h4>🔍 Come funziona il test:</h4>
+        <ul>
+            <li><strong>File HEIC/HEIF:</strong> Vengono rilevati e mostrato il messaggio informativo</li>
+            <li><strong>File Standard:</strong> Passano la validazione normalmente</li>
+            <li><strong>MIME Type Detection:</strong> Mostra come il browser gestisce diversi formati</li>
+        </ul>
+    </div>
+
+    <script>
+        // Simula la logica di rilevamento HEIC di Florence EGI
+        function detectHEIC(file) {
+            const extension = file.name.split('.').pop()?.toLowerCase() || '';
+
+            // Logica identica a quella implementata
+            if (['heic', 'heif'].includes(extension) || file.type === '' && ['heic', 'heif'].includes(extension)) {
+                return true;
+            }
+            return false;
+        }
+
+        function displayResults(file) {
+            const resultsDiv = document.getElementById('results');
+            const isHEIC = detectHEIC(file);
+            const extension = file.name.split('.').pop()?.toLowerCase() || '';
+
+            let html = `
+                <div class="results">
+                    <h3>📋 Risultati Test per: <strong>${file.name}</strong></h3>
+                    <p><strong>Dimensione:</strong> ${(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                    <p><strong>Estensione:</strong> .${extension}</p>
+                    <p><strong>MIME Type del Browser:</strong> "${file.type}" ${file.type === '' ? '(VUOTO!)' : ''}</p>
+                    <p><strong>Ultima modifica:</strong> ${new Date(file.lastModified).toLocaleString('it-IT')}</p>
+                </div>
+            `;
+
+            if (isHEIC) {
+                html += `
+                    <div class="results info">
+                        <h4>📸 HEIC/HEIF Rilevato!</h4>
+                        <p>✅ Il sistema rileva questo file come HEIC/HEIF</p>
+                        <p>🎯 <strong>Azione:</strong> Verrà mostrato il messaggio informativo all'utente</p>
+                        <p>💡 <strong>Messaggio tipo:</strong> "Formato HEIC rilevato - ecco come convertirlo..."</p>
+                    </div>
+                `;
+            } else {
+                html += `
+                    <div class="results success">
+                        <h4>✅ File Standard Accettato</h4>
+                        <p>✅ Il file passerebbe la validazione HEIC</p>
+                        <p>🚀 <strong>Azione:</strong> Continuerebbe con la normale validazione (dimensione, tipo, ecc.)</p>
+                    </div>
+                `;
+            }
+
+            // Test aggiuntivi
+            html += `
+                <div class="results">
+                    <h4>🔬 Test Aggiuntivi</h4>
+                    <p><strong>Lingua Browser:</strong> ${navigator.language} (usata: ${navigator.language.substring(0, 2)})</p>
+                    <p><strong>Rilevamento per estensione:</strong> ${['heic', 'heif'].includes(extension) ? '✅ Positivo' : '❌ Negativo'}</p>
+                    <p><strong>MIME type vuoto:</strong> ${file.type === '' ? '✅ Sì (tipico HEIC)' : '❌ No'}</p>
+                    <p><strong>Dimensione ragionevole:</strong> ${file.size < 50 * 1024 * 1024 ? '✅ < 50MB' : '⚠️ > 50MB'}</p>
+                </div>
+            `;
+
+            resultsDiv.innerHTML = html;
+        }
+
+        // Event listener per il file input
+        document.getElementById('fileInput').addEventListener('change', function (event) {
+            const file = event.target.files[0];
+            if (file) {
+                displayResults(file);
+            }
+        });
+
+        // Mostra informazioni sulla pagina al caricamento
+        document.addEventListener('DOMContentLoaded', function () {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = `
+                <div class="results info">
+                    <h4>👋 Benvenuto nel Test HEIC Detection!</h4>
+                    <p>Seleziona un file sopra per vedere come il sistema rileva e gestisce diversi formati.</p>
+                    <p><strong>Tip:</strong> Se hai file .heic da testare, questo è il posto perfetto per verificare il comportamento!</p>
+                </div>
+            `;
+        });
+    </script>
+</body>
+
+</html>

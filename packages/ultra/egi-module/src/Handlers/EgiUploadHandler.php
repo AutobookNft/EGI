@@ -735,12 +735,26 @@ class EgiUploadHandler {
      */
     protected function validateFileEnhanced(UploadedFile $file): void {
         $fileNameForLog = $file->getClientOriginalName();
+        $detectedMimeType = $file->getMimeType();
+        $extension = strtolower($file->getClientOriginalExtension());
+        
+        // Extra debug logging for HEIC/HEIF detection
+        $isHeicHeifByExtension = in_array($extension, ['heic', 'heif']);
+        $isHeicHeifByMime = $detectedMimeType && in_array($detectedMimeType, [
+            'image/heic', 'image/heif', 'image/x-heic', 'image/x-heif', 
+            'application/heic', 'application/heif'
+        ]);
 
-        Log::channel($this->logChannel)->info('[EGI Upload] Starting enhanced file validation with HEIC/HEIF support', [
+        Log::channel($this->logChannel)->info('[EGI Upload] Enhanced file validation with HEIC/HEIF debug', [
             'fileName' => $fileNameForLog,
             'size' => $file->getSize(),
-            'mimeType' => $file->getMimeType(),
-            'extension' => $file->getClientOriginalExtension()
+            'detectedMimeType' => $detectedMimeType,
+            'extension' => $extension,
+            'isHeicHeifByExtension' => $isHeicHeifByExtension,
+            'isHeicHeifByMime' => $isHeicHeifByMime,
+            'originalName' => $file->getClientOriginalName(),
+            'tempPath' => $file->getRealPath(),
+            'uploadError' => $file->getError()
         ]);
 
         // Get validation rules from config
@@ -749,7 +763,6 @@ class EgiUploadHandler {
         $maxSizeInBytes = config('AllowedFileType.collection.max_size', 100 * 1024 * 1024);
 
         // 1. Extension validation
-        $extension = strtolower($file->getClientOriginalExtension());
         if (!in_array($extension, $allowedExtensions)) {
             Log::channel($this->logChannel)->error('[EGI Upload] Extension validation failed', [
                 'fileName' => $fileNameForLog,
@@ -759,15 +772,28 @@ class EgiUploadHandler {
             throw new Exception("File extension '{$extension}' is not allowed.");
         }
 
-        // 2. MIME type validation (critical for HEIC/HEIF)
-        $mimeType = $file->getMimeType();
-        if ($mimeType && !in_array($mimeType, $allowedMimeTypes)) {
-            Log::channel($this->logChannel)->error('[EGI Upload] MIME type validation failed', [
-                'fileName' => $fileNameForLog,
-                'mimeType' => $mimeType,
-                'allowedMimeTypes' => $allowedMimeTypes
-            ]);
-            throw new Exception("File MIME type '{$mimeType}' is not allowed.");
+        // 2. Enhanced MIME type validation with HEIC/HEIF special handling
+        if ($detectedMimeType) {
+            $mimeAllowed = in_array($detectedMimeType, $allowedMimeTypes);
+            
+            // Special case: if file has HEIC/HEIF extension but wrong MIME type, 
+            // we'll be more permissive due to browser/system variations
+            if (!$mimeAllowed && $isHeicHeifByExtension) {
+                Log::channel($this->logChannel)->warning('[EGI Upload] HEIC/HEIF file with unexpected MIME type - allowing due to extension', [
+                    'fileName' => $fileNameForLog,
+                    'detectedMimeType' => $detectedMimeType,
+                    'extension' => $extension,
+                    'allowedMimeTypes' => $allowedMimeTypes
+                ]);
+                // Continue processing - don't throw exception
+            } else if (!$mimeAllowed) {
+                Log::channel($this->logChannel)->error('[EGI Upload] MIME type validation failed', [
+                    'fileName' => $fileNameForLog,
+                    'detectedMimeType' => $detectedMimeType,
+                    'allowedMimeTypes' => $allowedMimeTypes
+                ]);
+                throw new Exception("File MIME type '{$detectedMimeType}' is not allowed.");
+            }
         }
 
         // 3. Size validation

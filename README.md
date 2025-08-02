@@ -7,17 +7,57 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
+# 🌟 Florence EGI - Enhanced Gallery Interface
+
+Florence EGI è una piattaforma avanzata per la gestione e condivisione di gallerie digitali, costruita su Laravel con tecnologie moderne per un'esperienza utente ottimale.
+
+## 📸 Supporto Formati File
+
+### Formati Supportati
+
+-   ✅ **JPEG/JPG** - Compatibilità universale
+-   ✅ **PNG** - Supporto trasparenza
+-   ✅ **GIF** - Immagini animate
+-   ⚠️ **HEIC/HEIF** - _Limitazioni browser_ (vedi sotto)
+
+### 🍎 Note Importanti su HEIC/HEIF
+
+I file **HEIC** (High Efficiency Image Container) sono il formato predefinito per le foto su dispositivi Apple moderni. Tuttavia, presentano limitazioni significative:
+
+**🌐 Supporto Browser Limitato**
+
+-   Solo 13.46% dei browser mondiali supporta HEIC
+-   Supportato solo su Safari 17.0+ (macOS Ventura+, iOS 16.1+)
+-   Nessun supporto nativo su Chrome, Firefox, Edge
+
+**💡 Soluzioni per Utenti iOS**
+
+1. **Cambio Impostazioni Camera:** Impostazioni → Fotocamera → Formati → "Massima compatibilità"
+2. **Conversione Automatica:** Condividi foto dall'app Foto (iOS converte automaticamente)
+3. **Conversione Manuale:** Usa Anteprima su Mac o convertitori online
+
+**🔧 Comportamento della Piattaforma**
+
+-   La piattaforma rileva automaticamente i file HEIC
+-   Mostra un messaggio informativo e affettuoso all'utente
+-   Fornisce istruzioni chiare per la conversione
+-   Non blocca l'esperienza utente con errori tecnici
+
+Per dettagli completi, consulta: [`docs/HEIC_SUPPORT_GUIDE.md`](docs/HEIC_SUPPORT_GUIDE.md)
+
+---
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+-   [Simple, fast routing engine](https://laravel.com/docs/routing).
+-   [Powerful dependency injection container](https://laravel.com/docs/container).
+-   Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
+-   Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
+-   Database agnostic [schema migrations](https://laravel.com/docs/migrations).
+-   [Robust background job processing](https://laravel.com/docs/queues).
+-   [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
 
 Laravel is accessible, powerful, and provides tools required for large, robust applications.
 
@@ -35,19 +75,19 @@ We would like to extend our thanks to the following sponsors for funding Laravel
 
 ### Premium Partners
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+-   **[Vehikl](https://vehikl.com/)**
+-   **[Tighten Co.](https://tighten.co)**
+-   **[WebReinvent](https://webreinvent.com/)**
+-   **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
+-   **[64 Robots](https://64robots.com)**
+-   **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
+-   **[Cyber-Duck](https://cyber-duck.co.uk)**
+-   **[DevSquad](https://devsquad.com/hire-laravel-developers)**
+-   **[Jump24](https://jump24.co.uk)**
+-   **[Redberry](https://redberry.international/laravel/)**
+-   **[Active Logic](https://activelogic.com)**
+-   **[byte5](https://byte5.de)**
+-   **[OP.GG](https://op.gg)**
 
 ## Contributing
 

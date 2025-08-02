@@ -147,7 +147,7 @@
     border-radius: 1rem;
     overflow: hidden;
     background: #fff;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     transform: scale(0.9);
     opacity: 0;
     transition: transform 0.2s ease, opacity 0.2s ease, box-shadow 0.2s ease;
@@ -160,7 +160,7 @@
 
 .post-upload-card:hover {
     transform: scale(1.03);
-    box-shadow: 0 10px 15px rgba(0,0,0,0.2);
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
 }
 
 .post-upload-card img {
@@ -172,7 +172,7 @@
 .post-upload-card__overlay {
     position: absolute;
     inset: 0;
-    background: rgba(0,0,0,0.3);
+    background: rgba(0, 0, 0, 0.3);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -190,7 +190,7 @@
     bottom: 0;
     left: 0;
     right: 0;
-    background: rgba(255,255,255,0.9);
+    background: rgba(255, 255, 255, 0.9);
     padding: 0.75rem;
     z-index: 1;
 }
@@ -247,11 +247,11 @@
     height: 100%;
     background-color: rgba(0, 0, 0, 0.75);
     display: flex;
-    align-items: center;      /* Centra verticalmente */
-    justify-content: center;  /* Centra orizzontalmente */
+    align-items: center; /* Centra verticalmente */
+    justify-content: center; /* Centra orizzontalmente */
     z-index: 9999;
-    overflow: hidden;         /* Cambiato da overflow-y: auto */
-    padding: 0;               /* Rimosso padding */
+    overflow: hidden; /* Cambiato da overflow-y: auto */
+    padding: 0; /* Rimosso padding */
 }
 
 /* Assicuriamoci che il div interno non interferisca */
@@ -260,19 +260,19 @@
     position: relative;
     display: flex;
     flex-direction: column;
-    margin: auto;             /* Auto margin per centraggio */
+    margin: auto; /* Auto margin per centraggio */
 }
 
 /* Upload Modal Specific - forza centraggio */
 #upload-modal {
     transition: opacity 0.3s ease-in-out;
-    display: flex !important;  /* Forza display flex quando visibile */
+    display: flex !important; /* Forza display flex quando visibile */
     align-items: center !important;
     justify-content: center !important;
 }
 
 #upload-modal.hidden {
-    display: none !important;  /* Cambiato da opacity: 0 */
+    display: none !important; /* Cambiato da opacity: 0 */
 }
 
 #upload-modal.flex {
@@ -431,7 +431,7 @@
 /* Large Tablet / Small Desktop */
 @media (min-width: 768px) {
     #upload-modal > div {
-        max-width: 90vw;  /* Era 56rem - ora 90% della viewport */
+        max-width: 90vw; /* Era 56rem - ora 90% della viewport */
         max-height: 90vh;
         margin: 5vh auto; /* Margine verticale ridotto */
     }
@@ -451,9 +451,9 @@
     #upload-modal > div {
         width: 90vw;
         max-width: 1600px;
-        height: 85vh;      /* Ridotto da 90vh per lasciare più spazio */
+        height: 85vh; /* Ridotto da 90vh per lasciare più spazio */
         max-height: 85vh;
-        margin: auto;      /* Centra con auto margin */
+        margin: auto; /* Centra con auto margin */
         display: flex;
         flex-direction: column;
     }
@@ -469,7 +469,7 @@
 /* Extra Large Screens */
 @media (min-width: 1920px) {
     #upload-modal > div {
-        width: 90vw;       /* Leggermente più piccolo su schermi enormi */
+        width: 90vw; /* Leggermente più piccolo su schermi enormi */
         max-width: 1800px; /* Limite massimo */
     }
 }
@@ -541,20 +541,28 @@
 }
 
 .nft-background::before {
-    content: '';
+    content: "";
     position: absolute;
     top: -50%;
     left: -50%;
     width: 200%;
     height: 200%;
-    background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%);
+    background: radial-gradient(
+        circle,
+        rgba(139, 92, 246, 0.1) 0%,
+        transparent 70%
+    );
     animation: rotate 20s linear infinite;
     pointer-events: none;
 }
 
 @keyframes rotate {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 /* NFT Buttons */
@@ -645,4 +653,70 @@
     outline: 5px solid red !important;
 }
 
+/* ==========================================================================
+   HEIC Support Information Popup Styles
+   ========================================================================== */
 
+/* Stili per il popup di informazioni HEIC */
+.heic-info-popup {
+    border-radius: 16px !important;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+        0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+    max-width: 600px !important;
+    padding: 20px !important;
+}
+
+.heic-info-title {
+    font-size: 24px !important;
+    font-weight: 600 !important;
+    color: #1f2937 !important;
+    margin-bottom: 20px !important;
+}
+
+/* Stili per le liste all'interno del popup HEIC */
+.heic-info-popup ul {
+    list-style-type: none !important;
+    padding-left: 0 !important;
+}
+
+.heic-info-popup li {
+    margin-bottom: 8px !important;
+    padding-left: 10px !important;
+    position: relative !important;
+}
+
+.heic-info-popup li::before {
+    content: "•" !important;
+    color: #007bff !important;
+    font-weight: bold !important;
+    position: absolute !important;
+    left: 0 !important;
+}
+
+/* Hover effect per il bottone del popup HEIC */
+.heic-info-popup .swal2-confirm {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    border: none !important;
+    border-radius: 8px !important;
+    padding: 12px 24px !important;
+    font-weight: 600 !important;
+    transition: all 0.3s ease !important;
+}
+
+.heic-info-popup .swal2-confirm:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 15px rgba(102, 126, 234, 0.4) !important;
+}
+
+/* Responsive per il popup HEIC */
+@media (max-width: 768px) {
+    .heic-info-popup {
+        max-width: 95vw !important;
+        margin: 10px !important;
+        padding: 15px !important;
+    }
+
+    .heic-info-title {
+        font-size: 20px !important;
+    }
+}

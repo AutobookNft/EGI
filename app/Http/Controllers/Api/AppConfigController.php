@@ -817,7 +817,8 @@ class AppConfigController extends Controller {
             $this->getLikeTranslationMappings(),
             $this->getGdprTranslationMappings(),
             $this->getNotificationTranslationMappings(),
-            $this->getAssistantTranslationMappings()
+            $this->getAssistantTranslationMappings(),
+            $this->getHeicTranslationMappings()
         );
 
         $translations = [];
@@ -834,6 +835,30 @@ class AppConfigController extends Controller {
         ]);
 
         return $translations;
+    }
+
+    /**
+     * @Oracode Get HEIC translation keys
+     * 🎯 Purpose: Map HEIC detection translation keys to simplified names
+     * 📥 Input: None
+     * 📤 Output: Array of key mappings
+     *
+     * @return array HEIC key mappings (simplified => full)
+     *
+     * @os1-compliance: Full - Centralizes HEIC translation management
+     */
+    private function getHeicTranslationMappings(): array {
+        return [
+            'heic_detection_title' => 'heic.heic_detection.title',
+            'heic_detection_greeting' => 'heic.heic_detection.greeting',
+            'heic_detection_explanation' => 'heic.heic_detection.explanation',
+            'heic_detection_solutions_title' => 'heic.heic_detection.solutions_title',
+            'heic_detection_solution_ios' => 'heic.heic_detection.solution_ios',
+            'heic_detection_solution_share' => 'heic.heic_detection.solution_share',
+            'heic_detection_solution_computer' => 'heic.heic_detection.solution_computer',
+            'heic_detection_thanks' => 'heic.heic_detection.thanks',
+            'heic_detection_understand_button' => 'heic.heic_detection.understand_button',
+        ];
     }
 
     /**
@@ -985,14 +1010,24 @@ class AppConfigController extends Controller {
      * @return int Size in bytes
      */
     private function parseSize($size) {
-        $unit = preg_replace('/[^a-zA-Z]/', '', $size);
-        $size = preg_replace('/[^0-9.]/', '', $size);
-
-        if ($unit) {
-            return round($size * pow(1024, stripos('KMGTPEZY', $unit[0])));
+        // Extract unit (last character if it's a letter)
+        $unit = '';
+        $lastChar = substr($size, -1);
+        if (ctype_alpha($lastChar)) {
+            $unit = $lastChar;
         }
 
-        return round($size);
+        // Extract numeric part
+        $numericSize = floatval($size);
+
+        if ($unit) {
+            $multiplier = stripos('KMGTPEZY', strtoupper($unit));
+            if ($multiplier !== false) {
+                return round($numericSize * pow(1024, $multiplier + 1));
+            }
+        }
+
+        return round($numericSize);
     }
 
     /**

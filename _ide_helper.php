@@ -13271,9 +13271,6 @@ namespace Illuminate\Support\Facades {
 
             }
     /**
-     * @method static array validate(array $rules, ...$params)
-     * @method static array validateWithBag(string $errorBag, array $rules, ...$params)
-     * @method static bool hasValidSignature(bool $absolute = true)
      * @see \Illuminate\Http\Request
      */
     class Request {
@@ -15778,6 +15775,69 @@ namespace Illuminate\Support\Facades {
         public static function flushMacros()
         {
             \Illuminate\Http\Request::flushMacros();
+        }
+
+        /**
+         * @see \Illuminate\Foundation\Providers\FoundationServiceProvider::registerRequestValidation()
+         * @param array $rules
+         * @param mixed $params
+         * @static
+         */
+        public static function validate($rules, ...$params)
+        {
+            return \Illuminate\Http\Request::validate($rules, ...$params);
+        }
+
+        /**
+         * @see \Illuminate\Foundation\Providers\FoundationServiceProvider::registerRequestValidation()
+         * @param string $errorBag
+         * @param array $rules
+         * @param mixed $params
+         * @static
+         */
+        public static function validateWithBag($errorBag, $rules, ...$params)
+        {
+            return \Illuminate\Http\Request::validateWithBag($errorBag, $rules, ...$params);
+        }
+
+        /**
+         * @see \Illuminate\Foundation\Providers\FoundationServiceProvider::registerRequestSignatureValidation()
+         * @param mixed $absolute
+         * @static
+         */
+        public static function hasValidSignature($absolute = true)
+        {
+            return \Illuminate\Http\Request::hasValidSignature($absolute);
+        }
+
+        /**
+         * @see \Illuminate\Foundation\Providers\FoundationServiceProvider::registerRequestSignatureValidation()
+         * @static
+         */
+        public static function hasValidRelativeSignature()
+        {
+            return \Illuminate\Http\Request::hasValidRelativeSignature();
+        }
+
+        /**
+         * @see \Illuminate\Foundation\Providers\FoundationServiceProvider::registerRequestSignatureValidation()
+         * @param mixed $ignoreQuery
+         * @param mixed $absolute
+         * @static
+         */
+        public static function hasValidSignatureWhileIgnoring($ignoreQuery = [], $absolute = true)
+        {
+            return \Illuminate\Http\Request::hasValidSignatureWhileIgnoring($ignoreQuery, $absolute);
+        }
+
+        /**
+         * @see \Illuminate\Foundation\Providers\FoundationServiceProvider::registerRequestSignatureValidation()
+         * @param mixed $ignoreQuery
+         * @static
+         */
+        public static function hasValidRelativeSignatureWhileIgnoring($ignoreQuery = [])
+        {
+            return \Illuminate\Http\Request::hasValidRelativeSignatureWhileIgnoring($ignoreQuery);
         }
 
             }
@@ -22936,7 +22996,7 @@ namespace Ultra\TranslationManager\Facades {
 namespace Illuminate\Http {
     /**
      */
-    class Request {
+    class Request extends \Symfony\Component\HttpFoundation\Request {
         /**
          * @see \Illuminate\Foundation\Providers\FoundationServiceProvider::registerRequestValidation()
          * @param array $rules
@@ -23003,7 +23063,7 @@ namespace Illuminate\Http {
             }
     /**
      */
-    class RedirectResponse {
+    class RedirectResponse extends \Symfony\Component\HttpFoundation\RedirectResponse {
         /**
          * @see \Laravel\Jetstream\JetstreamServiceProvider::boot()
          * @param mixed $message
@@ -27827,6 +27887,7 @@ namespace  {
     class Validator extends \Illuminate\Support\Facades\Validator {}
     class View extends \Illuminate\Support\Facades\View {}
     class Vite extends \Illuminate\Support\Facades\Vite {}
+    class Vapor extends \Laravel\Vapor\Vapor {}
     class Livewire extends \Livewire\Livewire {}
     class UltraError extends \Ultra\ErrorManager\Facades\UltraError {}
     class UltraTrans extends \Ultra\TranslationManager\Facades\UltraTrans {}

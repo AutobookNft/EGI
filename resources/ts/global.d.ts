@@ -100,6 +100,22 @@ declare global {
         route?: (name: string, params?: any) => string;
         csrfToken?: string;
         Echo?: any;
+
+        // --- 📸 HEIC TRANSLATIONS FOR UUM PACKAGE ---
+        heicTranslations?: {
+            title: string;
+            greeting: string;
+            explanation: string;
+            solutions_title: string;
+            solution_ios: string;
+            solution_share: string;
+            solution_computer: string;
+            thanks: string;
+            button: string;
+        };
+
+        // --- 📸 HEIC MESSAGE FUNCTION ---
+        showHEICMessage?: () => void;
     }
 
     // Utility Types for FlorenceEGI

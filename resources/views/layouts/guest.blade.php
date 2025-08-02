@@ -165,6 +165,93 @@
 
 @vite(['resources/js/polyfills.js', 'resources/js/app.js', 'resources/js/guest.js', 'resources/ts/main.ts'])
 
+{{-- 🎯 HEIC Detection Integration - Embedded in Layout --}}
+<script>
+    // 🎯 HEIC Detection Function - Provides window.showHEICMessage for UUM
+    window.showHEICMessage = function() {
+        // Check if SweetAlert2 is available
+        if (typeof Swal === 'undefined') {
+            console.warn('⚠️ SweetAlert2 not available, using alert fallback');
+            alert(
+                '� HEIC Format Detected\n\nThe selected file is in HEIC/HEIF format.\nWeb browsers don\'t support this format.\n\nSuggestion: Convert the file to JPG or PNG.');
+            return;
+        }
+
+        // Use UTM translation system if available
+        if (typeof window.getTranslation === 'function') {
+            console.log('🌍 Using UTM translation system for HEIC message');
+
+            // Get translations via UTM
+            const title = window.getTranslation('heic_detection_title');
+            const greeting = window.getTranslation('heic_detection_greeting');
+            const explanation = window.getTranslation('heic_detection_explanation');
+            const solutionsTitle = window.getTranslation('heic_detection_solutions_title');
+            const solutionIos = window.getTranslation('heic_detection_solution_ios');
+            const solutionShare = window.getTranslation('heic_detection_solution_share');
+            const solutionComputer = window.getTranslation('heic_detection_solution_computer');
+            const thanks = window.getTranslation('heic_detection_thanks');
+            const button = window.getTranslation('heic_detection_understand_button');
+
+            const htmlContent = `
+            <div style="text-align: left; line-height: 1.6;">
+                <p style="margin-bottom: 15px;">${greeting}</p>
+                <p style="margin-bottom: 20px;">${explanation}</p>
+                
+                <div style="margin-bottom: 20px;">
+                    <h4 style="margin-bottom: 10px; color: #333;">${solutionsTitle}</h4>
+                    <ul style="margin: 0; padding-left: 20px;">
+                        <li style="margin-bottom: 8px;">${solutionIos}</li>
+                        <li style="margin-bottom: 8px;">${solutionShare}</li>
+                        <li style="margin-bottom: 8px;">${solutionComputer}</li>
+                    </ul>
+                </div>
+                
+                <p style="margin-bottom: 0; text-align: center; font-style: italic;">${thanks}</p>
+            </div>
+        `;
+
+            Swal.fire({
+                title: title,
+                html: htmlContent,
+                icon: 'info',
+                confirmButtonText: button,
+                width: '600px',
+                showCancelButton: false,
+                allowOutsideClick: true,
+                allowEscapeKey: true
+            });
+
+        } else {
+            console.warn('⚠️ UTM translation system not available, using fallback');
+            // Fallback if UTM is not available
+            Swal.fire({
+                title: '📸 HEIC Format Detected',
+                html: `
+                <div style="text-align: left; line-height: 1.6;">
+                    <p>We noticed you're trying to upload <strong>HEIC/HEIF</strong> format files.</p>
+                    <p>These are great for quality and storage space, but unfortunately web browsers don't fully support them yet.</p>
+                    
+                    <div style="margin: 20px 0;">
+                        <h4 style="margin-bottom: 10px; color: #333;">💡 What you can do:</h4>
+                        <ul style="margin: 0; padding-left: 20px;">
+                            <li style="margin-bottom: 8px;"><strong>📱 iPhone/iPad:</strong> Settings → Camera → Formats → "Most Compatible"</li>
+                            <li style="margin-bottom: 8px;"><strong>🔄 Quick conversion:</strong> Share the photo from Photos app (it will convert automatically)</li>
+                            <li style="margin-bottom: 8px;"><strong>💻 On computer:</strong> Open with Preview (Mac) or online converters</li>
+                        </ul>
+                    </div>
+                    
+                    <p style="margin-bottom: 0; text-align: center; font-style: italic;">Thanks for your patience! 💚</p>
+                </div>
+            `,
+                icon: 'info',
+                confirmButtonText: '✨ I Understand'
+            });
+        }
+    };
+
+    console.log('✅ HEIC Detection function loaded and available globally');
+</script>
+
 @stack('scripts')
 </body>
 

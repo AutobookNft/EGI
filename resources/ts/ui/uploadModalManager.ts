@@ -23,7 +23,7 @@ export interface UploadModalDomElements {
 // --- 📤 IMPORTAZIONI ULTRA UPLOAD MANAGER (per coordinamento diretto) ---
 import { initializeApp as initializeUltraUploadManager } from '/vendor/ultra/ultra-upload-manager/resources/ts/core/file_upload_manager';
 
-// Riferimenti globali semplificati (se ancora necessari)
+// Riferimenti globali semplificati (solo configurazioni tecniche)
 declare global {
     interface Window {
         uploadType?: string;
@@ -32,13 +32,6 @@ declare global {
         maxSize?: number;
         envMode?: string;
         uploadLimits?: any;
-        cancelConfirmation?: string;
-        uploadStatusWaiting?: string;
-        invalidFilesTitle?: string;
-        invalidFilesMessage?: string;
-        checkFilesGuide?: string;
-        okButton?: string;
-        uploadFiniscedText?: string;
         allowedExtensionsMessage?: string;
     }
 }
@@ -103,32 +96,78 @@ export class UploadModalManager {
         try {
             console.log('UploadModalManager: Loading Ultra Upload Manager configuration...');
 
-            // Importa AppConfig per ottenere le configurazioni dinamiche
-            const { getAppConfig } = await import('../config/appConfig');
-            const config = getAppConfig();
+            // Carica sempre le configurazioni fresche dall'API
+            const response = await fetch('/api/app-config', {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': this.csrfToken,
+                },
+            });
 
-            // Usa le configurazioni da AppConfig invece di valori hardcoded
-            window.allowedExtensions = config.appSettings.allowedExtensions || ['jpg', 'jpeg', 'png', 'gif', 'pdf', 'doc', 'docx', 'txt'];
-            window.allowedMimeTypes = config.appSettings.allowedMimeTypes || [
-                'image/jpeg', 'image/jpg', 'image/png', 'image/gif',
-                'application/pdf', 'application/msword',
-                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                'text/plain'
-            ];
-            window.maxSize = config.appSettings.maxFileSize || 10 * 1024 * 1024; // Default 10MB se non configurato
-            window.envMode = config.env || 'production';
+            if (response.ok) {
+                const apiConfig = await response.json();
+                console.log('UploadModalManager: Loaded fresh config from API:', apiConfig);
 
-            // Messaggi di testo che Ultra Upload Manager si aspetta
-            (window as any).cancelConfirmation = 'Sei sicuro di voler annullare il caricamento?';
-            (window as any).uploadStatusWaiting = 'Stato Upload: In attesa...';
-            (window as any).invalidFilesTitle = 'File Non Validi Rilevati';
-            (window as any).invalidFilesMessage = 'I seguenti file non possono essere caricati';
-            (window as any).checkFilesGuide = 'Controlla tipi di file, dimensioni e nomi.';
-            (window as any).okButton = 'OK';
-            (window as any).uploadFiniscedText = 'Upload completato con successo!';
-            (window as any).allowedExtensionsMessage = 'Estensioni consentite: ' + window.allowedExtensions.join(', ');
+                // Usa le configurazioni fresche dall'API
+                window.allowedExtensions = apiConfig.AppConfig.appSettings.allowedExtensions || ['jpg', 'jpeg', 'png', 'gif', 'heic', 'heif'];
+                window.allowedMimeTypes = apiConfig.AppConfig.appSettings.allowedMimeTypes || [
+                    'image/jpeg', 'image/jpg', 'image/png', 'image/gif',
+                    'image/heic', 'image/heif', 'image/x-heic', 'image/x-heif',
+                    'application/heic', 'application/heif'
+                ];
+                window.maxSize = apiConfig.AppConfig.appSettings.maxFileSize || 100 * 1024 * 1024;
+                window.envMode = apiConfig.AppConfig.env || 'production';
 
-            console.log('UploadModalManager: Ultra Upload Manager configuration loaded successfully from AppConfig.');
+                // 🎯 HEIC TRANSLATIONS INJECTION - Pass translations to UUM package
+                const translations = apiConfig.AppConfig.translations || {};
+                window.heicTranslations = {
+                    title: translations.heic_detection_title || '📸 HEIC Format Detected',
+                    greeting: translations.heic_detection_greeting || 'Hello! 👋 We noticed you\'re trying to upload <strong>HEIC/HEIF</strong> format files.',
+                    explanation: translations.heic_detection_explanation || 'These are great for quality and storage space, but unfortunately web browsers don\'t fully support them yet. 😔',
+                    solutions_title: translations.heic_detection_solutions_title || '💡 What you can do:',
+                    solution_ios: translations.heic_detection_solution_ios || '<strong>📱 iPhone/iPad:</strong> Settings → Camera → Formats → "Most Compatible"',
+                    solution_share: translations.heic_detection_solution_share || '<strong>🔄 Quick conversion:</strong> Share the photo from Photos app (it will convert automatically)',
+                    solution_computer: translations.heic_detection_solution_computer || '<strong>💻 On computer:</strong> Open with Preview (Mac) or online converters',
+                    thanks: translations.heic_detection_thanks || 'Thanks for your patience! 💚',
+                    button: translations.heic_detection_understand_button || '✨ I Understand'
+                };
+                console.log('UploadModalManager: HEIC translations injected into window.heicTranslations:', window.heicTranslations);
+            } else {
+                console.warn('UploadModalManager: API config failed, using fallback from AppConfig');
+                // Fallback: Importa AppConfig per ottenere le configurazioni locali
+                const { getAppConfig } = await import('../config/appConfig');
+                const config = getAppConfig();
+
+                window.allowedExtensions = config.appSettings.allowedExtensions || ['jpg', 'jpeg', 'png', 'gif', 'heic', 'heif'];
+                window.allowedMimeTypes = config.appSettings.allowedMimeTypes || [
+                    'image/jpeg', 'image/jpg', 'image/png', 'image/gif',
+                    'image/heic', 'image/heif', 'image/x-heic', 'image/x-heif',
+                    'application/heic', 'application/heif'
+                ];
+                window.maxSize = config.appSettings.maxFileSize || 100 * 1024 * 1024;
+                window.envMode = config.env || 'production';
+
+                // 🎯 HEIC TRANSLATIONS FALLBACK - English translations as fallback
+                window.heicTranslations = {
+                    title: '📸 HEIC Format Detected',
+                    greeting: 'Hello! 👋 We noticed you\'re trying to upload <strong>HEIC/HEIF</strong> format files.',
+                    explanation: 'These are great for quality and storage space, but unfortunately web browsers don\'t fully support them yet. 😔',
+                    solutions_title: '💡 What you can do:',
+                    solution_ios: '<strong>📱 iPhone/iPad:</strong> Settings → Camera → Formats → "Most Compatible"',
+                    solution_share: '<strong>🔄 Quick conversion:</strong> Share the photo from Photos app (it will convert automatically)',
+                    solution_computer: '<strong>💻 On computer:</strong> Open with Preview (Mac) or online converters',
+                    thanks: 'Thanks for your patience! 💚',
+                    button: '✨ I Understand'
+                };
+                console.log('UploadModalManager: HEIC fallback translations loaded');
+            }
+
+            // Messaggi di configurazione tecnica che Ultra Upload Manager si aspetta
+            // ✅ SOLO configurazioni tecniche - UUM gestisce i propri messaggi di errore
+            window.allowedExtensionsMessage = 'Estensioni consentite: ' + (window.allowedExtensions?.join(', ') || 'non disponibili');
+
+            console.log('UploadModalManager: Ultra Upload Manager configuration loaded successfully.');
             console.log('Config loaded:', {
                 allowedExtensions: window.allowedExtensions,
                 allowedMimeTypes: window.allowedMimeTypes,
@@ -137,19 +176,35 @@ export class UploadModalManager {
             });
 
         } catch (error) {
-            console.error('UploadModalManager: Failed to load Ultra Upload Manager configuration from AppConfig:', error);
+            console.error('UploadModalManager: Failed to load Ultra Upload Manager configuration:', error);
 
             // Configurazioni di emergenza per non bloccare tutto - ora includono HEIC/HEIF
             window.allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'heic', 'heif'];
             window.allowedMimeTypes = [
-                'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 
-                'image/heic', 'image/heif', 'image/x-heic', 'image/x-heif', 
+                'image/jpeg', 'image/jpg', 'image/png', 'image/gif',
+                'image/heic', 'image/heif', 'image/x-heic', 'image/x-heif',
                 'application/heic', 'application/heif'
             ];
             window.maxSize = 10 * 1024 * 1024;
             window.envMode = 'production';
 
-            console.warn('UploadModalManager: Using fallback configuration with HEIC/HEIF support.');
+            // 🎯 HEIC TRANSLATIONS EMERGENCY FALLBACK
+            window.heicTranslations = {
+                title: '📸 HEIC Format Detected',
+                greeting: 'Hello! 👋 We noticed you\'re trying to upload <strong>HEIC/HEIF</strong> format files.',
+                explanation: 'These are great for quality and storage space, but unfortunately web browsers don\'t fully support them yet. 😔',
+                solutions_title: '💡 What you can do:',
+                solution_ios: '<strong>📱 iPhone/iPad:</strong> Settings → Camera → Formats → "Most Compatible"',
+                solution_share: '<strong>🔄 Quick conversion:</strong> Share the photo from Photos app (it will convert automatically)',
+                solution_computer: '<strong>💻 On computer:</strong> Open with Preview (Mac) or online converters',
+                thanks: 'Thanks for your patience! 💚',
+                button: '✨ I Understand'
+            };
+
+            // ✅ SOLO configurazioni tecniche di emergenza - UUM gestisce i propri messaggi
+            (window as any).allowedExtensionsMessage = 'Estensioni consentite: ' + window.allowedExtensions.join(', ');
+
+            console.warn('UploadModalManager: Using fallback configuration with HEIC/HEIF support and translations.');
         }
     }
 
