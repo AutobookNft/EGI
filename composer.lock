@@ -8087,12 +8087,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/AutobookNft/UltraUploadManager.git",
-                "reference": "a15a20ded8e09fa6334550fd9810d3a0b32b376c"
+                "reference": "d465b00f81f6401b4905bb0cccee9b6184e6ca8c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/AutobookNft/UltraUploadManager/zipball/a15a20ded8e09fa6334550fd9810d3a0b32b376c",
-                "reference": "a15a20ded8e09fa6334550fd9810d3a0b32b376c",
+                "url": "https://api.github.com/repos/AutobookNft/UltraUploadManager/zipball/d465b00f81f6401b4905bb0cccee9b6184e6ca8c",
+                "reference": "d465b00f81f6401b4905bb0cccee9b6184e6ca8c",
                 "shasum": ""
             },
             "require": {
@@ -8168,7 +8168,7 @@
                 "source": "https://github.com/AutobookNft/UltraUploadManager/tree/main",
                 "issues": "https://github.com/AutobookNft/UltraUploadManager/issues"
             },
-            "time": "2025-08-02T13:44:28+00:00"
+            "time": "2025-08-02T15:35:04+00:00"
         },
         {
             "name": "vlucas/phpdotenv",

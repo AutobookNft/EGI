@@ -42,7 +42,7 @@ return [
      * Maximum number of files that can be uploaded in a single request.
      * Not explicitly defined in your original config, so we set a reasonable default (50).
      */
-    'max_files' => 1000,
+    'max_files' => 100,
 
     /**
      * Safety margin for size limits, used in getUploadLimits() to account for overhead.

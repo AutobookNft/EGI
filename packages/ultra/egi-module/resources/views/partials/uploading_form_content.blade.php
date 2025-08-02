@@ -101,9 +101,9 @@
                 {{ trans('uploadmanager::uploadmanager.select_files_tooltip') }}
             </span>
         </label>
-        <div class="upload-dropzone text-center text-gray-200 text-xs mt-1.5">
+        {{-- <div class="upload-dropzone text-center text-gray-200 text-xs mt-1.5">
             <!-- About upload size -->
-        </div>
+        </div> --}}
     </div>
 
     {{-- Metadata partial --}}
