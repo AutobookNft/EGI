@@ -20,7 +20,7 @@ return [
         // List of allowed extensions (used for quick validation)
         'allowed_extensions' => [
             // Images
-            'jpg', 'jpeg', 'png', 'gif', 'bmp', 'tiff', 'webp', 'svg', 'eps', 'psd', 'ai', 'cdr',
+            'jpg', 'jpeg', 'png', 'gif', 'bmp', 'tiff', 'webp', 'svg', 'eps', 'psd', 'ai', 'cdr', 'heic', 'heif',
             // Documents
             'pdf', 'epub', 'txt', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'odt', 'ods', 'odp', 'rtf',
             // Audio
@@ -31,7 +31,7 @@ return [
 
         // Extension to category mapping (for UI organization)
         'categories' => [
-            'image' => ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'tiff', 'webp', 'svg', 'eps', 'psd', 'ai', 'cdr'],
+            'image' => ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'tiff', 'webp', 'svg', 'eps', 'psd', 'ai', 'cdr', 'heic', 'heif'],
             'document' => ['pdf', 'epub', 'txt', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'odt', 'ods', 'odp', 'rtf'],
             'audio' => ['mp3', 'wav', 'm4a', 'ape', 'flac'],
             'video' => ['mp4', 'mov', 'avi', 'mkv']
@@ -43,7 +43,8 @@ return [
             'jpg' => 'image', 'jpeg' => 'image', 'png' => 'image', 'gif' => 'image',
             'bmp' => 'image', 'tiff' => 'image', 'svg' => 'image', 'webp' => 'image',
             'eps' => 'image', 'psd' => 'image', 'ai' => 'image', 'cdr' => 'image',
-
+            'heic' => 'image',    
+            'heif' => 'image',
             // Documents
             'pdf' => 'document', 'epub' => 'document', 'txt' => 'document',
             'doc' => 'document', 'docx' => 'document',
@@ -67,6 +68,7 @@ return [
             'image/svg+xml', 'image/tiff', 'application/postscript',
             'image/vnd.adobe.photoshop', 'application/illustrator',
             'application/x-coreldraw',
+            'image/heic', 'image/heif',
 
             // Documents
             'application/pdf', 'application/epub+zip', 'text/plain',
