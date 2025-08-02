@@ -103,19 +103,20 @@ export class UploadModalManager {
         try {
             console.log('UploadModalManager: Loading Ultra Upload Manager configuration...');
 
-            // Ultra Upload Manager chiama già /api/system/upload-limits da solo
-            // Qui dobbiamo solo fornire le configurazioni che non vengono da lì
+            // Importa AppConfig per ottenere le configurazioni dinamiche
+            const { getAppConfig } = await import('../config/appConfig');
+            const config = getAppConfig();
 
-            // Configurazioni che Ultra Upload Manager si aspetta
-            window.allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'pdf', 'doc', 'docx', 'txt'];
-            window.allowedMimeTypes = [
+            // Usa le configurazioni da AppConfig invece di valori hardcoded
+            window.allowedExtensions = config.appSettings.allowedExtensions || ['jpg', 'jpeg', 'png', 'gif', 'pdf', 'doc', 'docx', 'txt'];
+            window.allowedMimeTypes = config.appSettings.allowedMimeTypes || [
                 'image/jpeg', 'image/jpg', 'image/png', 'image/gif',
                 'application/pdf', 'application/msword',
                 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
                 'text/plain'
             ];
-            window.maxSize = 10 * 1024 * 1024; // 10MB - verrà sovrascritto da upload-limits se necessario
-            window.envMode = 'production'; // O 'local' se in sviluppo
+            window.maxSize = config.appSettings.maxFileSize || 10 * 1024 * 1024; // Default 10MB se non configurato
+            window.envMode = config.env || 'production';
 
             // Messaggi di testo che Ultra Upload Manager si aspetta
             (window as any).cancelConfirmation = 'Sei sicuro di voler annullare il caricamento?';
@@ -127,7 +128,7 @@ export class UploadModalManager {
             (window as any).uploadFiniscedText = 'Upload completato con successo!';
             (window as any).allowedExtensionsMessage = 'Estensioni consentite: ' + window.allowedExtensions.join(', ');
 
-            console.log('UploadModalManager: Ultra Upload Manager configuration loaded successfully.');
+            console.log('UploadModalManager: Ultra Upload Manager configuration loaded successfully from AppConfig.');
             console.log('Config loaded:', {
                 allowedExtensions: window.allowedExtensions,
                 allowedMimeTypes: window.allowedMimeTypes,
@@ -136,15 +137,19 @@ export class UploadModalManager {
             });
 
         } catch (error) {
-            console.error('UploadModalManager: Failed to load Ultra Upload Manager configuration:', error);
+            console.error('UploadModalManager: Failed to load Ultra Upload Manager configuration from AppConfig:', error);
 
-            // Configurazioni di emergenza per non bloccare tutto
-            window.allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
-            window.allowedMimeTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+            // Configurazioni di emergenza per non bloccare tutto - ora includono HEIC/HEIF
+            window.allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'heic', 'heif'];
+            window.allowedMimeTypes = [
+                'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 
+                'image/heic', 'image/heif', 'image/x-heic', 'image/x-heif', 
+                'application/heic', 'application/heif'
+            ];
             window.maxSize = 10 * 1024 * 1024;
             window.envMode = 'production';
 
-            console.warn('UploadModalManager: Using fallback configuration.');
+            console.warn('UploadModalManager: Using fallback configuration with HEIC/HEIF support.');
         }
     }
 

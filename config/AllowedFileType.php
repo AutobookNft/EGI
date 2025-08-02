@@ -69,6 +69,8 @@ return [
             'image/vnd.adobe.photoshop', 'application/illustrator',
             'application/x-coreldraw',
             'image/heic', 'image/heif',
+            // HEIC/HEIF alternative MIME types that browsers might use
+            'image/x-heic', 'image/x-heif', 'application/heic', 'application/heif',
 
             // Documents
             'application/pdf', 'application/epub+zip', 'text/plain',
