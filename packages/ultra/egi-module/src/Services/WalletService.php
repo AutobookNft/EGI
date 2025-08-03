@@ -269,11 +269,15 @@ class WalletService implements WalletServiceInterface {
             }
 
             // Check if this wallet address already exists in the system (unique constraint)
-            $duplicateWallet = Wallet::where('wallet', $address)->first();
+            // La ricerca va fatta su wallet e collection_id
+            $duplicateWallet = Wallet::where('wallet', $address)
+                ->where('collection_id', '!=', $collectionId) // Exclude current collection
+                ->where('user_id', '!=', $userId) // Exclude current user
+                ->first();
 
             if ($duplicateWallet) {
                 // If the same wallet exists for a different user or collection, we need to handle this
-                $this->logger->warning('Wallet address already exists in system', array_merge($context, [
+                $this->logger->warning('Wallet address already exists in this collection', array_merge($context, [
                     'existing_wallet_id' => $duplicateWallet->id,
                     'existing_user_id' => $duplicateWallet->user_id,
                     'existing_collection_id' => $duplicateWallet->collection_id,
