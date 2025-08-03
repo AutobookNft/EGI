@@ -62,8 +62,7 @@ use Throwable;
  * @rationale   💡 Centralizes role management operations for the EGI module with
  *              proper error handling and logging for audit trails.
  */
-class UserRoleService implements UserRoleServiceInterface
-{
+class UserRoleService implements UserRoleServiceInterface {
     /**
      * 🧱 @dependency UltraErrorManager instance.
      * Used for standardized error handling.
@@ -121,8 +120,7 @@ class UserRoleService implements UserRoleServiceInterface
      *
      * @privacy-purpose User role assignment for EGI creator operations
      */
-    public function assignCreatorRole(int $userId): bool
-    {
+    public function assignCreatorRole(int $userId): bool {
         $context = [
             'user_id' => $userId,
             'role' => 'creator'
@@ -139,7 +137,6 @@ class UserRoleService implements UserRoleServiceInterface
             }
 
             return $result;
-
         } catch (Throwable $e) {
             $this->logger->error('Error during role assignment', array_merge($context, [
                 'error_message' => $e->getMessage(),
@@ -161,8 +158,7 @@ class UserRoleService implements UserRoleServiceInterface
      *
      * @privacy-purpose User role verification for access control
      */
-    public function hasCreatorRole(int $userId): bool
-    {
+    public function hasCreatorRole(int $userId): bool {
         // Create context for logging and error handling
         $context = [
             'user_id' => $userId,
@@ -190,7 +186,6 @@ class UserRoleService implements UserRoleServiceInterface
             }
 
             return $hasRole;
-
         } catch (Throwable $e) {
             // Log the error
             $this->logger->error('Error checking user role', array_merge($context, [
@@ -220,8 +215,7 @@ class UserRoleService implements UserRoleServiceInterface
      *
      * @privacy-purpose Access multiple users for administrative operations
      */
-    public function getCreators()
-    {
+    public function getCreators() {
         $context = ['role' => 'creator'];
 
         try {
@@ -242,7 +236,6 @@ class UserRoleService implements UserRoleServiceInterface
             ]));
 
             return $creators;
-
         } catch (Throwable $e) {
             // Log the error
             $this->logger->error('Error retrieving creators', array_merge($context, [
@@ -270,8 +263,7 @@ class UserRoleService implements UserRoleServiceInterface
      *
      * @return void
      */
-    protected function defineRoleErrorCodes(): void
-    {
+    protected function defineRoleErrorCodes(): void {
         // Define error for user not found during role operations
         $this->errorManager->defineError('ROLE_USER_NOT_FOUND', [
             'type' => 'error',
@@ -316,6 +308,18 @@ class UserRoleService implements UserRoleServiceInterface
             'user_message' => 'Unable to load user list. Please try again later.',
             'http_status_code' => 500,
             'msg_to' => 'div',
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+        ]);
+
+        // Define error for role permissions retrieval failures
+        $this->errorManager->defineError('ROLE_PERMISSIONS_RETRIEVAL_FAILED', [
+            'type' => 'error',
+            'blocking' => 'not',
+            'dev_message' => 'Error retrieving permissions for role :role_name: :error_message',
+            'user_message' => null, // No user message, internal error with fallback
+            'http_status_code' => 500,
+            'msg_to' => 'log-only',
             'devTeam_email_need' => false,
             'notify_slack' => false,
         ]);
@@ -386,7 +390,7 @@ class UserRoleService implements UserRoleServiceInterface
 
             // Set default permissions based on role if none provided
             if (empty($permissions)) {
-                $permissions = $this->getDefaultPermissionsForRole($role);
+                $permissions = $this->getPermissionsFromSpatieRole($role);
             }
 
             // Check for existing record to prevent duplicates
@@ -454,8 +458,7 @@ class UserRoleService implements UserRoleServiceInterface
             }
 
             return true;
-
-        } catch (\InvalidArgumentException $e) {
+        } catch (\Exception $e) {
             // Handle validation errors
             $validationContext = array_merge($context, [
                 'validation_error' => $e->getMessage(),
@@ -472,7 +475,6 @@ class UserRoleService implements UserRoleServiceInterface
             );
 
             return false;
-
         } catch (\Throwable $e) {
             // Handle all other errors
             $errorContext = array_merge($context, [
@@ -508,24 +510,23 @@ class UserRoleService implements UserRoleServiceInterface
      * @value-flow Ensures data integrity for collection associations
      * @transparency-level Validation rules are explicitly defined and logged
      */
-    protected function validateCollectionUserCreation(int $userId, int $collectionId, string $role, array $context): void
-    {
+    protected function validateCollectionUserCreation(int $userId, int $collectionId, string $role, array $context): void {
         // Validate user exists
         $user = User::find($userId);
         if (!$user) {
-            throw new \InvalidArgumentException("User with ID {$userId} not found");
+            throw new \Exception("User with ID {$userId} not found");
         }
 
         // Validate collection exists
         $collection = Collection::find($collectionId);
         if (!$collection) {
-            throw new \InvalidArgumentException("Collection with ID {$collectionId} not found");
+            throw new \Exception("Collection with ID {$collectionId} not found");
         }
 
         // Validate role is in allowed list
         $allowedRoles = $this->getAllowedCollectionRoles();
         if (!in_array($role, $allowedRoles)) {
-            throw new \InvalidArgumentException("Role '{$role}' is not allowed. Allowed roles: " . implode(', ', $allowedRoles));
+            throw new \Exception("Role '{$role}' is not allowed. Allowed roles: " . implode(', ', $allowedRoles));
         }
 
         // Log successful validation
@@ -538,25 +539,61 @@ class UserRoleService implements UserRoleServiceInterface
     }
 
     /**
-     * 🎯 Get default permissions based on role
+     * 🎯 Get permissions from Spatie role
      *
-     * @param string $role The role to get permissions for
-     * @return array Array of default permissions for the role
+     * @param string $roleName The role to get permissions for
+     * @return array Array of permissions for the role from Spatie system
      *
      * @oracode-dimension governance
-     * @value-flow Defines standard permission sets for different roles
-     * @transparency-level Permission mappings are explicitly defined
+     * @value-flow Retrieves actual permission sets from Spatie role system
+     * @transparency-level Uses actual role-permission relationships from database
      */
-    protected function getDefaultPermissionsForRole(string $role): array
-    {
-        $permissionMap = [
-            'creator' => ['upload', 'edit', 'delete', 'publish', 'manage_collaborators', 'view_analytics'],
-            'collaborator' => ['upload', 'edit', 'view'],
-            'viewer' => ['view'],
-            'admin' => ['upload', 'edit', 'delete', 'publish', 'manage_collaborators', 'view_analytics', 'admin']
+    protected function getPermissionsFromSpatieRole(string $roleName): array {
+        $context = [
+            'role_name' => $roleName,
+            'operation' => 'get_spatie_role_permissions',
+            'service' => static::class
         ];
 
-        return $permissionMap[$role] ?? ['view'];
+        try {
+            // Find the role in Spatie system
+            $role = Role::where('name', $roleName)->first();
+
+            if (!$role) {
+                $this->logger->warning('[UserRoleService] Role not found in Spatie system, using fallback permissions', $context);
+
+                // Fallback to basic view permission if role doesn't exist
+                return ['view'];
+            }
+
+            // Get all permissions associated with this role
+            $permissions = $role->permissions()->pluck('name')->toArray();
+
+            $this->logger->debug('[UserRoleService] Retrieved permissions from Spatie role', array_merge($context, [
+                'permissions_count' => count($permissions),
+                'permissions' => $permissions
+            ]));
+
+            // Return permissions or fallback if empty
+            return !empty($permissions) ? $permissions : ['view'];
+        } catch (Throwable $e) {
+            $this->logger->error('[UserRoleService] Error retrieving Spatie role permissions', array_merge($context, [
+                'error_message' => $e->getMessage(),
+                'error_class' => get_class($e)
+            ]));
+
+            // Handle error and return fallback
+            $this->errorManager->handle(
+                'ROLE_PERMISSIONS_RETRIEVAL_FAILED',
+                array_merge($context, [
+                    'error_message' => $e->getMessage()
+                ]),
+                $e,
+                false // Don't throw
+            );
+
+            return ['view']; // Safe fallback
+        }
     }
 
     /**
@@ -615,7 +652,6 @@ class UserRoleService implements UserRoleServiceInterface
             }
 
             return $updateResult;
-
         } catch (\Throwable $e) {
             $this->logger->error('[UserRoleService] Failed to update existing collection-user record', array_merge($context, [
                 'record_id' => $existingRecord->id,
@@ -651,8 +687,7 @@ class UserRoleService implements UserRoleServiceInterface
      * @privacy-data Updates user table with collection reference only
      * @privacy-consideration Collection changes affect user's default context
      */
-    public function updateUserCurrentCollection(int $userId, int $collectionId, array $logContext = []): bool
-    {
+    public function updateUserCurrentCollection(int $userId, int $collectionId, array $logContext = []): bool {
         // Enhanced context for comprehensive logging
         $context = array_merge($logContext, [
             'user_id' => $userId,
@@ -692,7 +727,6 @@ class UserRoleService implements UserRoleServiceInterface
             ]));
 
             return true;
-
         } catch (\Throwable $e) {
             // CRITICAL ERROR HANDLING
             $errorContext = array_merge($context, [
@@ -733,8 +767,7 @@ class UserRoleService implements UserRoleServiceInterface
      * @value-flow Ensures data integrity before database operations
      * @transparency-level All validation rules are explicitly defined and logged
      */
-    protected function validateUserCurrentCollectionUpdate(int $userId, int $collectionId, array $context): void
-    {
+    protected function validateUserCurrentCollectionUpdate(int $userId, int $collectionId, array $context): void {
         // Validate user exists
         $user = User::find($userId);
         if (!$user) {
@@ -746,7 +779,7 @@ class UserRoleService implements UserRoleServiceInterface
                     'validation_error' => "User with ID {$userId} not found",
                     'validation_type' => 'user_existence'
                 ]),
-                new \InvalidArgumentException("User with ID {$userId} not found"),
+                new \Exception("User with ID {$userId} not found"),
                 true // Throw to block execution
             );
         }
@@ -762,7 +795,7 @@ class UserRoleService implements UserRoleServiceInterface
                     'validation_error' => "Collection with ID {$collectionId} not found",
                     'validation_type' => 'collection_existence'
                 ]),
-                new \InvalidArgumentException("Collection with ID {$collectionId} not found"),
+                new \Exception("Collection with ID {$collectionId} not found"),
                 true // Throw to block execution
             );
         }
@@ -781,7 +814,7 @@ class UserRoleService implements UserRoleServiceInterface
                     'validation_type' => 'ownership_mismatch',
                     'collection_creator_id' => $collection->creator_id
                 ]),
-                new \InvalidArgumentException("User {$userId} cannot set collection {$collectionId} as current (not owner)"),
+                new \Exception("User {$userId} cannot set collection {$collectionId} as current (not owner)"),
                 true // Throw to block execution
             );
         }
@@ -804,8 +837,7 @@ class UserRoleService implements UserRoleServiceInterface
      * @value-flow Defines valid roles for collection access control
      * @transparency-level Role definitions are explicitly listed
      */
-    protected function getAllowedCollectionRoles(): array
-    {
+    protected function getAllowedCollectionRoles(): array {
         return [
             'creator',
             'collaborator',
@@ -823,8 +855,7 @@ class UserRoleService implements UserRoleServiceInterface
      * @value-flow Enables standardized error handling for collection operations
      * @transparency-level Error definitions are explicit and documented
      */
-    protected function defineCollectionUserErrorCodes(): void
-    {
+    protected function defineCollectionUserErrorCodes(): void {
         // Define error for collection-user validation failures
         $this->errorManager->defineError('COLLECTION_USER_VALIDATION_FAILED', [
             'type' => 'error',

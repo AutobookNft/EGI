@@ -39,8 +39,7 @@ use Ultra\UltraLogManager\UltraLogManager;
  * @date 2025-06-04
  * @solution Permission-based ecosystem setup + domain separation + Algorand integration
  */
-class RegisteredUserController extends Controller
-{
+class RegisteredUserController extends Controller {
     /**
      * Constructor with complete dependency injection
      */
@@ -54,15 +53,15 @@ class RegisteredUserController extends Controller
         protected UserRoleServiceInterface $userRoleService,
         protected LegalContentService $legalContentService,
 
-    ) {}
+    ) {
+    }
 
     /**
      * Display registration view with GDPR context
      *
      * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
      */
-    public function create()
-    {
+    public function create() {
         try {
             $consentTypes = $this->consentService->getConsentTypes();
             $privacyPolicyVersion = config('gdpr.current_policy_version', '1.0.0');
@@ -82,7 +81,6 @@ class RegisteredUserController extends Controller
                     'blu_algoritmo' => '#1B365D'
                 ]
             ]);
-
         } catch (\Exception $e) {
             return $this->errorManager->handle('REGISTRATION_PAGE_LOAD_ERROR', [
                 'error' => $e->getMessage(),
@@ -97,8 +95,7 @@ class RegisteredUserController extends Controller
      * @param Request $request
      * @return RedirectResponse
      */
-    public function store(RegistrationRequest $request): RedirectResponse
-    {
+    public function store(RegistrationRequest $request): RedirectResponse {
         $userId = null;
         $collectionId = null;
 
@@ -178,7 +175,6 @@ class RegisteredUserController extends Controller
                 ->with('user_type', $validated['user_type'])
                 ->with('ecosystem_created', $result['ecosystem_created'])
                 ->with('algorand_wallet', $result['user']->wallet);
-
         } catch (\Exception $e) {
             $errorContext = [
                 ...$logContext,
@@ -202,8 +198,7 @@ class RegisteredUserController extends Controller
      * Validate registration form with GDPR consents
      * @oracode-pillar: Interrogabilità Totale
      */
-    protected function validateRegistration(Request $request): array
-    {
+    protected function validateRegistration(Request $request): array {
         return $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
@@ -227,8 +222,7 @@ class RegisteredUserController extends Controller
      * Create user with valid Algorand wallet address
      * @oracode-pillar: Esplicitamente Intenzionale
      */
-    protected function createUserWithAlgorandWallet(array $validated): User
-    {
+    protected function createUserWithAlgorandWallet(array $validated): User {
         try {
             $algorandAddress = $this->generateValidAlgorandAddress();
 
@@ -255,7 +249,6 @@ class RegisteredUserController extends Controller
 
                 'created_via' => 'web_form_permission_based',
             ]);
-
         } catch (\Exception $e) {
             $this->logger->error('[Registration] Failed to create user with Algorand wallet', [
                 'error' => $e->getMessage(),
@@ -271,8 +264,7 @@ class RegisteredUserController extends Controller
      * Generate valid Algorand address format (58 chars, Base32 [A-Z2-7])
      * @oracode-pillar: Semplicità Potenziante
      */
-    private function generateValidAlgorandAddress(): string
-    {
+    private function generateValidAlgorandAddress(): string {
         try {
             $maxAttempts = 10; // Limite per evitare loop infiniti
             $attempt = 0;
@@ -315,12 +307,10 @@ class RegisteredUserController extends Controller
                     'exists_in_wallets' => $existsInWallets,
                     'address_preview' => substr($address, 0, 10) . '...'
                 ]);
-
             } while ($attempt < $maxAttempts);
 
             // Se arriviamo qui, abbiamo esaurito i tentativi
             throw new \Exception("Failed to generate unique Algorand address after {$maxAttempts} attempts");
-
         } catch (\Exception $e) {
             $this->logger->error('[Registration] Failed to generate Algorand address', [
                 'error' => $e->getMessage(),
@@ -335,8 +325,7 @@ class RegisteredUserController extends Controller
      * Build consent summary for user record
      * @oracode-pillar: Coerenza Semantica
      */
-    private function buildConsentSummary(array $validated): string
-    {
+    private function buildConsentSummary(array $validated): string {
         return json_encode([
             'privacy_policy' => $validated['privacy_policy_accepted'] ?? false,
             'terms' => $validated['terms_accepted'] ?? false,
@@ -352,8 +341,7 @@ class RegisteredUserController extends Controller
      * Assign role and check ecosystem creation permissions
      * @oracode-pillar: Coerenza Semantica
      */
-    protected function assignRoleAndCheckPermissions(User $user, string $userType): bool
-    {
+    protected function assignRoleAndCheckPermissions(User $user, string $userType): bool {
         try {
             // Map user type to Spatie role
             $roleMapping = config('app.role_mapping');
@@ -375,7 +363,6 @@ class RegisteredUserController extends Controller
             ]);
 
             return $canCreateEcosystem;
-
         } catch (\Exception $e) {
             $this->logger->error('[Registration] Failed to assign role and check permissions', [
                 'user_id' => $user->id,
@@ -391,8 +378,7 @@ class RegisteredUserController extends Controller
      * Create complete ecosystem: collection + wallets + relationships
      * @oracode-pillar: Circolarità Virtuosa
      */
-    protected function createFullEcosystem(User $user, array $validated, array $logContext): \App\Models\Collection
-    {
+    protected function createFullEcosystem(User $user, array $validated, array $logContext): \App\Models\Collection {
         try {
             // 1. Create Collection using existing CollectionService
             $collectionName = $this->getCollectionNameForUserType($validated['user_type'], $validated['name']);
@@ -413,22 +399,29 @@ class RegisteredUserController extends Controller
                 throw new \Exception('CollectionService returned error response instead of Collection model');
             }
 
-            // 2. Link User to Collection as Admin (SAFE - usa syncWithoutDetaching)
+            // 2. Determine the correct collection role based on user type
+            $collectionRole = $this->determineCollectionRole($validated['user_type']);
+
+            // 3. Link User to Collection with correct role (SAFE - usa syncWithoutDetaching)
             // CollectionService potrebbe aver già fatto il link, quindi usiamo sync invece di attach
             $collection->users()->syncWithoutDetaching([
                 $user->id => [
-                    'role' => 'admin',
+                    'role' => $collectionRole,
+                    'is_owner' => $collectionRole === 'creator',
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]
             ]);
 
-            $this->logger->info('[Registration] User linked to collection as admin', [
+            $this->logger->info('[Registration] User linked to collection with correct role', [
                 ...$logContext,
-                'collection_id' => $collection->id
+                'collection_id' => $collection->id,
+                'user_type' => $validated['user_type'],
+                'collection_role' => $collectionRole,
+                'is_owner' => $collectionRole === 'creator'
             ]);
 
-            // 3. Setup Wallets for Collection using WalletService
+            // 4. Setup Wallets for Collection using WalletService
             $this->walletService->attachDefaultWalletsToCollection($collection, $user);
 
             $this->logger->info('[Registration] Wallets attached to collection', [
@@ -436,18 +429,17 @@ class RegisteredUserController extends Controller
                 'collection_id' => $collection->id
             ]);
 
-            // 4. Set as Current Collection
+            // 5. Set as Current Collection
             $user->update(['current_collection_id' => $collection->id]);
 
             $this->logger->info('[Registration] Full ecosystem created successfully', [
                 ...$logContext,
                 'collection_id' => $collection->id,
                 'collection_name' => $collection->collection_name,
-                'user_role_in_collection' => 'admin'
+                'user_role_in_collection' => $collectionRole
             ]);
 
             return $collection;
-
         } catch (\Exception $e) {
             $this->logger->error('[Registration] Failed to create ecosystem', [
                 'user_id' => $user->id,
@@ -464,8 +456,7 @@ class RegisteredUserController extends Controller
      * Generate collection name based on user type and name
      * @oracode-pillar: Semplicità Potenziante
      */
-    private function getCollectionNameForUserType(string $userType, string $userName): string
-    {
+    private function getCollectionNameForUserType(string $userType, string $userName): string {
         $firstName = explode(' ', trim($userName), 2)[0];
 
         $typeNames = [
@@ -479,11 +470,28 @@ class RegisteredUserController extends Controller
     }
 
     /**
+     * Determine the correct collection role based on user type
+     * @oracode-pillar: Coerenza Semantica
+     */
+    private function determineCollectionRole(string $userType): string {
+        // Map user types to their collection roles
+        $collectionRoleMapping = [
+            'creator' => 'creator',
+            'enterprise' => 'creator', // Enterprise users are creators of their collections
+            'patron' => 'patron',
+            'collector' => 'collector',
+            'trader_pro' => 'trader',
+            'epp_entity' => 'creator',
+        ];
+
+        return $collectionRoleMapping[$userType] ?? 'viewer';
+    }
+
+    /**
      * Initialize all user domain tables
      * @oracode-pillar: Evoluzione Ricorsiva
      */
-    protected function initializeUserDomains(User $user, array $validated, array $logContext): void
-    {
+    protected function initializeUserDomains(User $user, array $validated, array $logContext): void {
         try {
             // User Profile (always)
             UserProfile::create(['user_id' => $user->id]);
@@ -523,7 +531,6 @@ class RegisteredUserController extends Controller
                 'domains_created' => ['profiles', 'personal_data', 'documents', 'invoice_preferences'],
                 'enterprise_domain' => $validated['user_type'] === 'enterprise' ? 'created' : 'skipped'
             ]);
-
         } catch (\Exception $e) {
             $this->logger->error('[Registration] Failed to initialize user domains', [
                 'user_id' => $user->id,
@@ -541,8 +548,7 @@ class RegisteredUserController extends Controller
      * making it robust and automatically adaptable to future changes.
      * @oracode-pillar: Dignità Preservata, Coerenza Semantica
      */
-    protected function processGdprConsents(User $user, array $validated, array $logContext): void
-    {
+    protected function processGdprConsents(User $user, array $validated, array $logContext): void {
         try {
             // 1. Otteniamo la versione corrente dei ToS, necessaria per la registrazione specifica.
             $currentTermsVersion = $this->legalContentService->getCurrentVersionString();
@@ -597,7 +603,6 @@ class RegisteredUserController extends Controller
                 'consents_created' => array_keys($createdConsents),
                 'terms_of_service_accepted_version' => $currentTermsVersion
             ]);
-
         } catch (\Exception $e) {
             $this->logger->error('[Registration] Failed to process GDPR consents', [
                 'user_id' => $user->id,
@@ -612,8 +617,7 @@ class RegisteredUserController extends Controller
      * Create comprehensive audit record for registration
      * @oracode-pillar: Trasparenza Operativa
      */
-    protected function createRegistrationAuditRecord(User $user, ?\App\Models\Collection $collection, array $validated, array $logContext): void
-    {
+    protected function createRegistrationAuditRecord(User $user, ?\App\Models\Collection $collection, array $validated, array $logContext): void {
         try {
             $this->auditService->logUserAction(
                 $user,
@@ -638,7 +642,6 @@ class RegisteredUserController extends Controller
                 GdprActivityCategory::REGISTRATION,
 
             );
-
         } catch (\Exception $e) {
             $this->logger->warning('[Registration] Failed to create audit record (non-blocking)', [
                 ...$logContext,
@@ -651,8 +654,7 @@ class RegisteredUserController extends Controller
     /**
      * Determine which step of ecosystem setup failed
      */
-    private function determineEcosystemFailureStep(\Exception $e): string
-    {
+    private function determineEcosystemFailureStep(\Exception $e): string {
         $message = $e->getMessage();
 
         if (str_contains($message, 'Collection')) return 'collection_creation';
@@ -666,8 +668,7 @@ class RegisteredUserController extends Controller
     /**
      * Determine appropriate UEM error code based on exception message
      */
-    private function determineErrorCode(string $errorMessage): string
-    {
+    private function determineErrorCode(string $errorMessage): string {
         // Check for specific error patterns to map to appropriate UEM codes
         if (str_contains($errorMessage, 'Algorand')) {
             return 'ALGORAND_WALLET_GENERATION_FAILED';

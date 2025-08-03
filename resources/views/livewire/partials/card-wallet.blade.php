@@ -7,7 +7,7 @@
     <div class="absolute top-0 left-0 right-0 h-2 rounded-t-2xl bg-gradient-to-r from-blue-500 to-purple-600"></div>
 
     <!-- Lock icon for disabled state -->
-    @if (!$canCreateWallet || in_array($wallet->platform_role, ['natan', 'EPP']))
+    @if (!$canCreateWallet || in_array($wallet->platform_role, ['Natan', 'EPP']))
         <div class="absolute text-red-400 right-4 top-4">
             <svg class="w-6 h-6 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

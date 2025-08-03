@@ -1,14 +1,5 @@
 <div id="collection_management" class="p-6 bg-gray-800 border border-gray-700 shadow-lg rounded-2xl">
 
-    @php
-        // Gestione del permesso per creare un wallet
-        $canCreateWallet = (new \App\Livewire\Collections\CollectionUserMember())->userHasPermissionInCollection(
-            $collectionId,
-            'create_wallet',
-        );
-        $collectionId = $collection->id;
-    @endphp
-
     <!-- Titolo della sezione -->
     <div id="collection_management" class="p-6 bg-gray-800 border border-gray-700 shadow-lg rounded-2xl">
 
@@ -23,8 +14,7 @@
 
             </div>
 
-
-            @if ($canCreateWallet)
+            @if ($canCreateTeam)
                 <div class="flex flex-wrap gap-4 space-x-0">
                     <!-- Bottone per invitare un nuovo membro alla collection -->
                     <button id ="inviteNewMember" class="w-full btn btn-primary sm:w-auto" wire:click="openInviteModal">
@@ -38,7 +28,9 @@
             @endif
         </div>
         <!-- Marquee ticker: Testo in movimento in stile tabellone borsa -->
+
         <x-quote-ticker />
+
     </div>
 
     <!-- Sezione Membri della Collection -->

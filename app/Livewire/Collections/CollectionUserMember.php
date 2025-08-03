@@ -32,6 +32,8 @@ class CollectionUserMember extends Component {
     public $invitationProposal;
     public $show = false; // Proprietà per gestire la visibilità della modale
     public $roles = []; // Ruoli disponibili
+    public $canCreateWallet = true; // Permesso per creare wallet
+    public $canCreateTeam = true; // Permesso per creare inviti
 
     #[Validate('required|email')]
     public string $email = '';
@@ -50,7 +52,24 @@ class CollectionUserMember extends Component {
             'collectionId' => $id
         ]);
 
+        // Verifica se l'utente ha i permessi per visualizzare i membri della collection
+        $collection = Collection::findOrFail($id);
+        if (!$this->hasPermission($collection, 'view_team')) {
+            Log::channel('florenceegi')->error('Utente non autorizzato a visualizzare i membri della collection', [
+                'collectionId' => $id
+            ]);
+            session()->flash('error', __('collection.collaborators.view_denied'));
+            return redirect()->route('collections.show', ['id' => $id]);
+        }
+
+        // Imposta l'ID della collection
         $this->collectionId = $id;
+
+        // Verifica se l'utente ha i permessi per creare wallet
+        $this->canCreateWallet = $this->hasPermission($collection, 'create_wallet');
+
+        // Verifica se l'utente ha i permessi per creare inviti
+        $this->canCreate = $this->hasPermission($collection, 'create_team');
 
         // Carica i ruoli disponibili da Spatie
         $this->roles = Role::pluck('name')->toArray(); // Recupera i nomi dei ruoli dalla tabella 'roles'
