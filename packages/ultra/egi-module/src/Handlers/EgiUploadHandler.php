@@ -667,6 +667,7 @@ class EgiUploadHandler {
                 }
 
                 Log::channel($this->logChannel)->info('[EGI Upload] File saved successfully', array_merge($diskLogContext, ['url' => $savedInfo[$disk]]));
+            
             } catch (Throwable $e_store) {
                 $errorMsg = "Failed to save to disk '{$disk}': " . $e_store->getMessage();
                 Log::channel($this->logChannel)->error('[EGI Upload] ' . $errorMsg, $diskLogContext);
@@ -760,7 +761,7 @@ class EgiUploadHandler {
         // Get validation rules from config
         $allowedExtensions = config('AllowedFileType.collection.allowed_extensions', []);
         $allowedMimeTypes = config('AllowedFileType.collection.allowed_mime_types', []);
-        $maxSizeInBytes = config('AllowedFileType.collection.max_size', 100 * 1024 * 1024);
+        $maxSizeInBytes = config('AllowedFileType.collection.post_max_size', 100 * 1024 * 1024);
 
         // 1. Extension validation
         if (!in_array($extension, $allowedExtensions)) {
@@ -853,13 +854,14 @@ class EgiUploadHandler {
 
         $imagick = null;
         try {
-            if (!class_exists('\\Imagick')) {
+            if (!class_exists('Imagick')) {
                 Log::channel($this->logChannel)->warning('[EGI Upload] Imagick class not available', [
                     'fileName' => $fileNameForLog
                 ]);
                 return;
             }
 
+            /** @var \Imagick $imagick */
             $imagick = new \Imagick();
 
             // For HEIC/HEIF files, Imagick might fail even if they're valid

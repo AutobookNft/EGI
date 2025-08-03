@@ -15,8 +15,11 @@ return [
      */
     'collection' => [
         // Maximum size for all files (100MB)
-        'max_size' => 104857600,
-        'max_total_size' => 100 * 104857600, // 100 files of 100 MB each
+        'post_max_size' => 100 * 1024 * 1024, // 100 MB
+        // Maximum size for a single file (10MB)
+        'upload_max_filesize' => 10 * 1024 * 1024, // 10 MB
+        // Maximum number of files in a single request
+        'max_file_uploads' => 40,
 
         // List of allowed extensions (used for quick validation)
         'allowed_extensions' => [

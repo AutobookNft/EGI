@@ -936,9 +936,9 @@ class AppConfigController extends Controller {
         $serverMaxFileUploads = (int) ini_get('max_file_uploads');
 
         // Limiti applicazione (config)
-        $appMaxTotalSize = $this->parseSize(config('upload-manager.max_total_size', ini_get('post_max_size')));
-        $appMaxFileSize = $this->parseSize(config('upload-manager.max_file_size', ini_get('upload_max_filesize')));
-        $appMaxFiles = (int) config('upload-manager.max_files', ini_get('max_file_uploads'));
+        $appMaxTotalSize = $this->parseSize(config('AllowedFileType.collection.post_max_size', ini_get('post_max_size')));
+        $appMaxFileSize = $this->parseSize(config('AllowedFileType.collection.upload_max_filesize', ini_get('upload_max_filesize')));
+        $appMaxFiles = (int) config('AllowedFileType.collection.max_file_uploads', ini_get('max_file_uploads'));
         $sizeMargin = (float) config('upload-manager.size_margin', 1.1); // Aggiunto
 
         // Usa il limite più restrittivo tra server e applicazione
