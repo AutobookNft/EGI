@@ -47,10 +47,6 @@
         <x-actors-section /> Il componente che contiene la griglia delle 4 card attore
     </x-slot>
 
-    <x-slot name="heroNatanAssistant">
-        <x-natan-assistant />
-    </x-slot>
-
     {{-- Sezione: Progetti Ambientali (EPP) NFT Style --}}
 
     <x-epp-cta-banner

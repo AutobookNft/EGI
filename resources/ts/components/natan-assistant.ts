@@ -36,6 +36,8 @@
  */
 
 import { butlerCategories, type ButlerCategory, type ButlerSubOption } from './butler-options';
+import { assistantOptions } from './assistant-options';
+import { appTranslate, getAppConfig } from '../config/appConfig';
 
 export class NatanAssistant {
     private sections: {id: string, element: HTMLElement, suggestion: string}[] = [];
@@ -329,6 +331,9 @@ export class NatanAssistant {
                 this.menuElement.classList.remove('hidden');
                 this.menuElement.style.display = 'flex';
                 this.isOpen = true; // Imposta isOpen a true quando si apre
+
+                // GENERA I BOTTONI QUANDO IL MENU VIENE APERTO
+                renderAssistantOptions();
 
                 // Force reflow per essere sicuri che le modifiche siano applicate
                 void this.menuElement.offsetHeight;
@@ -1432,8 +1437,17 @@ export class NatanAssistant {
             justify-content: center;
         `;
 
+        // Carica la configurazione per le traduzioni
+        let config;
+        try {
+            config = getAppConfig();
+        } catch (error) {
+            console.warn('App config not loaded yet, cannot create butler modal with translations');
+            return;
+        }
+
         // Genera il contenuto accordion
-        const t = appTranslate;
+        const t = (key: string) => appTranslate(key, config.translations);
         const categoriesHtml = this.generateAccordionCategories(t);
 
         const headerTitle = t('assistant.header.title');
@@ -2167,23 +2181,48 @@ export class NatanAssistant {
     }
 }
 
-import { assistantOptions } from './assistant-options';
-import { butlerOptions } from './butler-options';
-import { appTranslate } from '../config/appConfig';
-
 // Funzione per generare dinamicamente i bottoni delle opzioni nella modale
 function renderAssistantOptions() {
+    console.log('🎯 [RENDER OPTIONS] renderAssistantOptions called');
     const menu = document.getElementById('natan-assistant-menu');
-    if (!menu) return;
+    if (!menu) {
+        console.log('🎯 [RENDER OPTIONS] Menu element not found');
+        return;
+    }
+    console.log('🎯 [RENDER OPTIONS] Menu element found, clearing content');
     menu.innerHTML = '';
-    assistantOptions.forEach(option => {
+
+    // Carica la configurazione
+    let config;
+    try {
+        config = getAppConfig();
+        console.log('🎯 [RENDER OPTIONS] Config loaded successfully');
+    } catch (error) {
+        console.warn('🎯 [RENDER OPTIONS] App config not loaded yet, cannot render assistant options', error);
+        return;
+    }
+
+    console.log('🎯 [RENDER OPTIONS] Processing', assistantOptions.length, 'options');
+    assistantOptions.forEach((option, index) => {
+        console.log('🎯 [RENDER OPTIONS] Processing option', index, ':', option.key);
         const btn = document.createElement('button');
         btn.className = 'flex items-center justify-end gap-2 py-2 pl-5 pr-3 text-sm font-medium transition-all duration-300 bg-gray-900 border rounded-full shadow-md border-emerald-600/30 text-emerald-300 hover:bg-gray-800 hover:border-emerald-500/50 natan-item';
-        btn.textContent = option.label;
+
+        // Usa appTranslate con la configurazione caricata
+        try {
+            btn.textContent = appTranslate(option.label, config.translations);
+            console.log('🎯 [RENDER OPTIONS] Translation successful for', option.label, '→', btn.textContent);
+        } catch (translateError) {
+            console.error('🎯 [RENDER OPTIONS] Translation failed for', option.label, ':', translateError);
+            btn.textContent = option.label; // Fallback
+        }
+
         btn.onclick = option.action;
         btn.setAttribute('data-key', option.key);
         menu.appendChild(btn);
+        console.log('🎯 [RENDER OPTIONS] Button created and appended for', option.key);
     });
+    console.log('🎯 [RENDER OPTIONS] All buttons processed, total in menu:', menu.children.length);
 }
 
 // Chiamata al render dopo il caricamento della pagina
