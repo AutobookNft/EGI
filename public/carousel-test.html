@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carousel Test</title>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <style>
+        .carousel-item {
+            min-width: 200px;
+            height: 150px;
+            background: #f0f0f0;
+            margin: 0 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+        }
+
+        .debug {
+            background: #eee;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Collection Carousel Test</h1>
+
+    <div x-data="{
+        activeSlide: 0,
+        totalSlides: 6,
+        itemsPerView: 1,
+        maxSlide: 0,
+
+        init() {
+            this.calculateItemsPerView();
+            this.calculateMaxSlide();
+            console.log('Test carousel initialized');
+        },
+
+        calculateItemsPerView() {
+            const width = window.innerWidth;
+            if (width >= 1200) this.itemsPerView = 4;
+            else if (width >= 900) this.itemsPerView = 3;
+            else if (width >= 600) this.itemsPerView = 2;
+            else this.itemsPerView = 1;
+        },
+
+        calculateMaxSlide() {
+            this.maxSlide = Math.max(0, this.totalSlides - this.itemsPerView);
+        },
+
+        getTransform() {
+            const slideWidth = 100 / this.itemsPerView;
+            const translateX = -this.activeSlide * slideWidth;
+            return `translateX(${translateX}%)`;
+        },
+
+        nextSlide() {
+            if (this.activeSlide < this.maxSlide) {
+                this.activeSlide++;
+            }
+        },
+
+        prevSlide() {
+            if (this.activeSlide > 0) {
+                this.activeSlide--;
+            }
+        }
+    }" class="max-w-4xl mx-auto p-4">
+
+        <!-- Debug Info -->
+        <div class="debug">
+            <strong>Debug:</strong>
+            Slide: <span x-text="activeSlide"></span>/<span x-text="maxSlide"></span> |
+            Items: <span x-text="itemsPerView"></span> |
+            Total: <span x-text="totalSlides"></span> |
+            Transform: <span x-text="getTransform()"></span>
+        </div>
+
+        <!-- Carousel -->
+        <div class="relative overflow-hidden">
+            <div class="flex transition-transform duration-500" x-bind:style="{ transform: getTransform() }">
+
+                <div class="carousel-item flex-shrink-0" style="width: calc(100% / 4)">Collection 1</div>
+                <div class="carousel-item flex-shrink-0" style="width: calc(100% / 4)">Collection 2</div>
+                <div class="carousel-item flex-shrink-0" style="width: calc(100% / 4)">Collection 3</div>
+                <div class="carousel-item flex-shrink-0" style="width: calc(100% / 4)">Collection 4</div>
+                <div class="carousel-item flex-shrink-0" style="width: calc(100% / 4)">Collection 5</div>
+                <div class="carousel-item flex-shrink-0" style="width: calc(100% / 4)">Collection 6</div>
+
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="flex justify-center mt-4 space-x-4">
+            <button @click="prevSlide()" x-bind:disabled="activeSlide === 0"
+                class="px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50">
+                Previous
+            </button>
+            <button @click="nextSlide()" x-bind:disabled="activeSlide >= maxSlide"
+                class="px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50">
+                Next
+            </button>
+        </div>
+
+        <!-- Indicators -->
+        <div class="flex justify-center mt-4 space-x-2">
+            <template x-for="i in Math.min(totalSlides, 4)" :key="i">
+                <button @click="activeSlide = i - 1" class="w-3 h-3 rounded-full" x-bind:class="{
+                            'bg-blue-500': activeSlide === (i - 1),
+                            'bg-gray-300': activeSlide !== (i - 1)
+                        }">
+                </button>
+            </template>
+        </div>
+    </div>
+</body>
+
+</html>

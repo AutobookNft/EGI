@@ -29,6 +29,7 @@ export default defineConfig(({ mode }) => {
                     'resources/css/collections-show.css',
                     'resources/js/app.js',
                     'resources/js/collection.js',
+                    'resources/js/collection-carousel.js', // Carousel helper
                     'resources/js/biography-edit.js', // AGGIUNTO!
                     'resources/ts/main.ts', // Corretto da main.js a main.ts
                     'resources/ts/main_app.ts',
