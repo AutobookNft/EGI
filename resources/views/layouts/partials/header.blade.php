@@ -87,10 +87,10 @@
                         <span
                             class="hidden text-base font-semibold text-gray-400 transition group-hover:text-emerald-400 sm:inline md:text-lg">{{ __('Frangette') }}</span>
                     </a>
-                    
+
                     {{-- Natan Assistant - Posizionato vicino al logo --}}
-                    <div class="ml-6 hidden sm:block">
-                        <x-natan-assistant />
+                    <div class="ml-6 hidden md:block">
+                        <x-natan-assistant :suffix="'-desktop'" />
                     </div>
                 </div>
                 @php
@@ -202,10 +202,10 @@
                 {{-- Menu Mobile Button --}}
                 <div class="-mr-2 flex items-center gap-2 md:hidden">
                     {{-- Natan Assistant Mobile --}}
-                    <div class="sm:hidden">
-                        <x-natan-assistant />
+                    <div class="block md:hidden">
+                        <x-natan-assistant :suffix="'-mobile'" />
                     </div>
-                    
+
                     <button type="button"
                         class="inline-flex items-center justify-center rounded-md bg-gray-900 p-2 text-gray-400 hover:bg-gray-800 hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
                         aria-controls="mobile-menu" aria-expanded="false" id="mobile-menu-button">

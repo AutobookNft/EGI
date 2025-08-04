@@ -1,18 +1,29 @@
 {{-- resources/views/components/natan-assistant.blade.php --}}
 
-<div id="natan-assistant-container" class="relative">
+@php
+    $suffix = $suffix ?? '';
+    $containerId = 'natan-assistant-container' . $suffix;
+    $toggleId = 'natan-assistant-toggle' . $suffix;
+    $menuId = 'natan-assistant-menu' . $suffix;
+@endphp
+
+<div id="{{ $containerId }}" class="relative">
     {{-- Pulsante principale Natan --}}
-    <button id="natan-assistant-toggle" type="button" aria-expanded="false" aria-controls="natan-assistant-menu"
-        class="flex items-center justify-center w-12 h-12 overflow-hidden transition-all duration-300 bg-gray-900 rounded-full shadow-lg group ring-2 ring-emerald-500/40 hover:ring-emerald-400"
-        data-natan-state="idle">
+    <button id="{{ $toggleId }}" type="button" aria-expanded="false" aria-controls="{{ $menuId }}"
+        class="group flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-gray-900 shadow-lg ring-2 ring-emerald-500/40 transition-all duration-300 hover:ring-emerald-400"
+        data-natan-state="idle"
+        onclick="console.log('🎯 Natan clicked! Screen width:', window.innerWidth, 'ID:', '{{ $toggleId }}')">
         <img src="/images/default/natan-face.png" alt="Natan Assistant"
-            class="w-10 h-10 transition-transform duration-300 natan-pulse-mini group-hover:scale-110" />
+            class="natan-pulse-mini h-10 w-10 transition-transform duration-300 group-hover:scale-110" />
         <span class="sr-only">Apri assistente Natan</span>
     </button>
 
     {{-- Menu di aiuto (inizialmente nascosto) --}}
-    <div id="natan-assistant-menu" class="absolute right-0 top-full mt-2 flex-col items-end space-y-2 hidden z-50">
+    <div id="{{ $menuId }}"
+        class="absolute right-0 top-full z-[9999] mt-2 hidden flex-col items-end space-y-2 rounded-lg border border-gray-700 bg-gray-900 p-3 shadow-xl backdrop-blur-sm">
         {{-- Le opzioni saranno generate dinamicamente da JS usando assistantOptions --}}
+        <div style="padding: 10px; color: #fff; font-size: 12px;">DEBUG: Menu container visible
+            ({{ $suffix ?: 'desktop' }})</div>
     </div>
 
     <style>
@@ -35,12 +46,12 @@
         }
 
         /* Stili specifici per il funzionamento del menu */
-        #natan-assistant-menu {
+        [id^="natan-assistant-menu"] {
             transition: opacity 0.3s ease, transform 0.3s ease;
             min-width: 200px;
         }
 
-        #natan-assistant-menu.hidden {
+        [id^="natan-assistant-menu"].hidden {
             display: none !important;
             visibility: hidden !important;
             opacity: 0 !important;
@@ -81,7 +92,7 @@
         }
 
         /* Stili specifici per mobile nella navbar */
-        @media (max-width: 640px) {
+        @media (max-width: 767px) {
             #natan-assistant-toggle {
                 width: 2.75rem;
                 height: 2.75rem;
@@ -91,10 +102,19 @@
                 width: 2.25rem;
                 height: 2.25rem;
             }
-            
+
             #natan-assistant-menu {
                 min-width: 180px;
-                right: -1rem;
+                right: 0;
+                left: auto;
+                transform: none;
+                margin-right: -1rem;
+            }
+        }
+
+        @media (min-width: 768px) {
+            #natan-assistant-menu {
+                min-width: 220px;
             }
         }
     </style>

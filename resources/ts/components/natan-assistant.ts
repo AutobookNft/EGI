@@ -69,9 +69,28 @@ export class NatanAssistant {
             localStorage_greeted: localStorage.getItem('natan_has_greeted')
         });
 
-        // Ottieni riferimenti DOM principali
-        this.toggleButton = document.getElementById('natan-assistant-toggle');
-        this.menuElement = document.getElementById('natan-assistant-menu');
+        // Ottieni riferimenti DOM principali - cerca prima i nuovi ID con suffisso, poi fallback ai vecchi
+        this.toggleButton = document.getElementById('natan-assistant-toggle-desktop') ||
+                           document.getElementById('natan-assistant-toggle-mobile') ||
+                           document.getElementById('natan-assistant-toggle'); // fallback per compatibilità
+
+        this.menuElement = document.getElementById('natan-assistant-menu-desktop') ||
+                          document.getElementById('natan-assistant-menu-mobile') ||
+                          document.getElementById('natan-assistant-menu'); // fallback per compatibilità
+
+        console.log('🎯 [INIT] Elements search results:', {
+            desktopToggle: !!document.getElementById('natan-assistant-toggle-desktop'),
+            mobileToggle: !!document.getElementById('natan-assistant-toggle-mobile'),
+            oldToggle: !!document.getElementById('natan-assistant-toggle'),
+            desktopMenu: !!document.getElementById('natan-assistant-menu-desktop'),
+            mobileMenu: !!document.getElementById('natan-assistant-menu-mobile'),
+            oldMenu: !!document.getElementById('natan-assistant-menu'),
+            finalToggle: !!this.toggleButton,
+            finalMenu: !!this.menuElement,
+            toggleButtonId: this.toggleButton?.id,
+            menuElementId: this.menuElement?.id,
+            screenWidth: window.innerWidth
+        });
 
         console.log('🎩 [NATAN BUTLER] DOM elements:', {
             toggleButton: !!this.toggleButton,
@@ -275,6 +294,57 @@ export class NatanAssistant {
             this.handleToggleClick(mouseEvent);
         }, true); // true = capturing phase
 
+        // NUOVO: Aggiungi listener anche agli altri pulsanti se esistono
+        const allButtons = [
+            document.getElementById('natan-assistant-toggle-desktop'),
+            document.getElementById('natan-assistant-toggle-mobile')
+        ].filter(btn => btn && btn !== this.toggleButton);
+
+        allButtons.forEach(button => {
+            if (!button) return;
+
+            console.log('🎯 [SETUP] Adding listener to additional button:', button.id);
+
+            button.addEventListener('click', (e: Event) => {
+                const mouseEvent = e as MouseEvent;
+
+                // Determina quale menu aprire in base al pulsante
+                let targetMenuId = '';
+                if (button.id.includes('desktop')) {
+                    targetMenuId = 'natan-assistant-menu-desktop';
+                } else if (button.id.includes('mobile')) {
+                    targetMenuId = 'natan-assistant-menu-mobile';
+                }
+
+                const targetMenu = document.getElementById(targetMenuId);
+                console.log('🎯 [CLICK] Additional button clicked:', button.id, 'Target menu:', targetMenuId, 'Found:', !!targetMenu);
+
+                if (!targetMenu) {
+                    console.log('🎯 [CLICK] Target menu not found for button:', button.id);
+                    return;
+                }
+
+                // Previeni doppi click
+                if (this.isProcessingToggle) {
+                    console.log('🎯 [CLICK] Ignoring click - already processing toggle');
+                    mouseEvent.stopImmediatePropagation();
+                    mouseEvent.stopPropagation();
+                    mouseEvent.preventDefault();
+                    return;
+                }
+
+                this.isProcessingToggle = true;
+
+                // Ferma propagazione
+                mouseEvent.stopImmediatePropagation();
+                mouseEvent.stopPropagation();
+                mouseEvent.preventDefault();
+
+                // Gestisci il toggle con il menu specifico
+                this.handleToggleClick(mouseEvent, targetMenu);
+            }, true);
+        });
+
         // Aggiungi gestori click per i menu item
         document.querySelectorAll('.natan-item').forEach(item => {
             item.addEventListener('click', (e: Event) => {
@@ -310,45 +380,50 @@ export class NatanAssistant {
     /**
      * Gestisce il click sul pulsante toggle principale
      */
-    private handleToggleClick(e: MouseEvent): void {
+    private handleToggleClick(e: MouseEvent, targetMenu?: HTMLElement): void {
         this.debug('handleToggleClick executing');
 
-        if (!this.menuElement) {
+        // Usa il menu passato come parametro, altrimenti usa quello di default
+        const menuToUse = targetMenu || this.menuElement;
+
+        if (!menuToUse) {
             this.debug('ERROR: Menu element not found');
             return;
         }
+
+        console.log('🎯 [TOGGLE] Using menu:', menuToUse.id, 'Screen width:', window.innerWidth);
 
         try {
             // Assicurati che non siamo in uno stato incoerente prima di procedere
             this.resetStateIfNeeded();
 
-            const isHidden = this.menuElement.classList.contains('hidden');
-            this.debug('Current menu state - hidden:', isHidden, 'display:', this.menuElement.style.display);
+            const isHidden = menuToUse.classList.contains('hidden');
+            this.debug('Current menu state - hidden:', isHidden, 'display:', menuToUse.style.display);
 
             if (isHidden) {
                 // APERTURA MENU
-                this.debug('OPENING MENU');
-                this.menuElement.classList.remove('hidden');
-                this.menuElement.style.display = 'flex';
+                this.debug('OPENING MENU:', menuToUse.id);
+                menuToUse.classList.remove('hidden');
+                menuToUse.style.display = 'flex';
                 this.isOpen = true; // Imposta isOpen a true quando si apre
 
                 // GENERA I BOTTONI QUANDO IL MENU VIENE APERTO
                 renderAssistantOptions();
 
                 // Force reflow per essere sicuri che le modifiche siano applicate
-                void this.menuElement.offsetHeight;
+                void menuToUse.offsetHeight;
 
                 // Log immediato DOM dopo apertura
                 this.debug('Menu after opening - hidden class:',
-                    this.menuElement.classList.contains('hidden'),
-                    'display:', this.menuElement.style.display,
-                    'computed display:', window.getComputedStyle(this.menuElement).display
+                    menuToUse.classList.contains('hidden'),
+                    'display:', menuToUse.style.display,
+                    'computed display:', window.getComputedStyle(menuToUse).display
                 );
 
-                // Anima entrata elementi
+                // Anima entrata elementi - solo nel menu specifico
                 setTimeout(() => {
-                    this.debug('Animating menu items');
-                    document.querySelectorAll('.natan-item').forEach((item, index) => {
+                    this.debug('Animating menu items in:', menuToUse.id);
+                    menuToUse.querySelectorAll('.natan-item').forEach((item, index) => {
                         setTimeout(() => {
                             (item as HTMLElement).classList.remove('translate-x-20', 'opacity-0');
                         }, index * 50);
@@ -356,19 +431,19 @@ export class NatanAssistant {
                 }, 100);
             } else {
                 // CHIUSURA MENU
-                this.debug('CLOSING MENU');
+                this.debug('CLOSING MENU:', menuToUse.id);
 
-                // Reset menu items
-                document.querySelectorAll('.natan-item').forEach(item => {
+                // Reset menu items - solo nel menu specifico
+                menuToUse.querySelectorAll('.natan-item').forEach(item => {
                     (item as HTMLElement).classList.add('translate-x-20', 'opacity-0');
                 });
 
                 // Chiudi menu con leggero ritardo per animazione
                 setTimeout(() => {
-                    if (this.menuElement) {
-                        this.debug('Actually hiding menu after animation');
-                        this.menuElement.classList.add('hidden');
-                        this.menuElement.style.display = 'none';
+                    if (menuToUse) {
+                        this.debug('Actually hiding menu after animation:', menuToUse.id);
+                        menuToUse.classList.add('hidden');
+                        menuToUse.style.display = 'none';
                         this.isOpen = false; // FONDAMENTALE: Imposta isOpen a false quando si chiude
 
                         // Chiudi anche eventuali tooltip aperti
@@ -379,9 +454,9 @@ export class NatanAssistant {
         } catch (error) {
             this.debug('ERROR in handleToggleClick:', error);
             // In caso di errore, reset allo stato chiuso
-            if (this.menuElement) {
-                this.menuElement.classList.add('hidden');
-                this.menuElement.style.display = 'none';
+            if (menuToUse) {
+                menuToUse.classList.add('hidden');
+                menuToUse.style.display = 'none';
             }
             this.isOpen = false;
         } finally {
@@ -2183,14 +2258,28 @@ export class NatanAssistant {
 
 // Funzione per generare dinamicamente i bottoni delle opzioni nella modale
 function renderAssistantOptions() {
-    console.log('🎯 [RENDER OPTIONS] renderAssistantOptions called');
-    const menu = document.getElementById('natan-assistant-menu');
-    if (!menu) {
-        console.log('🎯 [RENDER OPTIONS] Menu element not found');
+    console.log('🎯 [RENDER OPTIONS] renderAssistantOptions called - Screen width:', window.innerWidth);
+
+    // Cerca entrambi i menu (desktop e mobile)
+    const desktopMenu = document.getElementById('natan-assistant-menu-desktop');
+    const mobileMenu = document.getElementById('natan-assistant-menu-mobile');
+    const oldMenu = document.getElementById('natan-assistant-menu'); // fallback
+
+    console.log('🎯 [RENDER OPTIONS] Menu search results:', {
+        desktopMenu: !!desktopMenu,
+        mobileMenu: !!mobileMenu,
+        oldMenu: !!oldMenu,
+        screenWidth: window.innerWidth
+    });
+
+    const allMenus = [desktopMenu, mobileMenu, oldMenu].filter(menu => menu !== null);
+
+    if (allMenus.length === 0) {
+        console.log('🎯 [RENDER OPTIONS] No menu elements found');
         return;
     }
-    console.log('🎯 [RENDER OPTIONS] Menu element found, clearing content');
-    menu.innerHTML = '';
+
+    console.log(`🎯 [RENDER OPTIONS] Found ${allMenus.length} menu(s), processing all`);
 
     // Carica la configurazione
     let config;
@@ -2202,27 +2291,39 @@ function renderAssistantOptions() {
         return;
     }
 
-    console.log('🎯 [RENDER OPTIONS] Processing', assistantOptions.length, 'options');
-    assistantOptions.forEach((option, index) => {
-        console.log('🎯 [RENDER OPTIONS] Processing option', index, ':', option.key);
-        const btn = document.createElement('button');
-        btn.className = 'flex items-center justify-end gap-2 py-2 pl-5 pr-3 text-sm font-medium transition-all duration-300 bg-gray-900 border rounded-full shadow-md border-emerald-600/30 text-emerald-300 hover:bg-gray-800 hover:border-emerald-500/50 natan-item';
+    // Renderizza per tutti i menu trovati
+    allMenus.forEach((menu, menuIndex) => {
+        if (!menu) return;
 
-        // Usa appTranslate con la configurazione caricata
-        try {
-            btn.textContent = appTranslate(option.label, config.translations);
-            console.log('🎯 [RENDER OPTIONS] Translation successful for', option.label, '→', btn.textContent);
-        } catch (translateError) {
-            console.error('🎯 [RENDER OPTIONS] Translation failed for', option.label, ':', translateError);
-            btn.textContent = option.label; // Fallback
-        }
+        const menuType = menu.id.includes('desktop') ? 'desktop' : menu.id.includes('mobile') ? 'mobile' : 'legacy';
+        console.log(`🎯 [RENDER OPTIONS] Processing menu ${menuIndex + 1}: ${menu.id} (${menuType})`);
 
-        btn.onclick = option.action;
-        btn.setAttribute('data-key', option.key);
-        menu.appendChild(btn);
-        console.log('🎯 [RENDER OPTIONS] Button created and appended for', option.key);
+        menu.innerHTML = '';
+
+        console.log(`🎯 [RENDER OPTIONS] Processing ${assistantOptions.length} options for ${menuType} menu`);
+        assistantOptions.forEach((option, index) => {
+            console.log(`🎯 [RENDER OPTIONS] Creating button ${index + 1} for ${menuType}:`, option.key);
+            const btn = document.createElement('button');
+            btn.className = 'flex items-center justify-end gap-2 py-2 pl-5 pr-3 text-sm font-medium transition-all duration-300 bg-gray-900 border rounded-full shadow-md border-emerald-600/30 text-emerald-300 hover:bg-gray-800 hover:border-emerald-500/50 natan-item';
+
+            // Usa appTranslate con la configurazione caricata
+            try {
+                btn.textContent = appTranslate(option.label, config.translations);
+                console.log(`🎯 [RENDER OPTIONS] Translation successful for ${menuType}`, option.label, '→', btn.textContent);
+            } catch (translateError) {
+                console.error(`🎯 [RENDER OPTIONS] Translation failed for ${menuType}`, option.label, ':', translateError);
+                btn.textContent = option.label; // Fallback
+            }
+
+            btn.onclick = option.action;
+            btn.setAttribute('data-key', option.key);
+            menu.appendChild(btn);
+            console.log(`🎯 [RENDER OPTIONS] Button appended to ${menuType} menu:`, option.key);
+        });
+        console.log(`🎯 [RENDER OPTIONS] Completed ${menuType} menu - total buttons:`, menu.children.length);
     });
-    console.log('🎯 [RENDER OPTIONS] All buttons processed, total in menu:', menu.children.length);
+
+    console.log('🎯 [RENDER OPTIONS] All menus processed successfully');
 }
 
 // Chiamata al render dopo il caricamento della pagina
