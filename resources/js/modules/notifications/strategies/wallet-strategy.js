@@ -30,6 +30,7 @@
 import { NotificationActionRequest } from '../dto/notification-action-request.js';
 import { sendAction } from '../services/notification-api.js';
 import { displayError } from '../services/utils.js';
+import { getEnum } from '../../../utils/enums.js';
 // import { progressBarMessage } from '../services/handleUI.js';
 
 export class WalletStrategy {
