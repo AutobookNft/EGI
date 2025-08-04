@@ -187,9 +187,14 @@ class RequestWalletService
                 $eppWallet = Wallet::where('collection_id', $request->collection_id)
                 ->where('user_id', $epp_id)->first();
 
-                $creatorWallet = Wallet::where('collection_id', $request->collection_id)
-                ->where('user_id', Auth::id())->first();
+                // Recupero il wallet del creator, prelevo il wallet dalla tabella users
+                $userLogged = User::findOrFail(Auth::id());
 
+                // Recupera il wallet
+                $creatorWallet = Wallet::where('wallet', $userLogged->wallet)
+                    ->where('collection_id', $request->collection_id)
+                    ->where('user_id', Auth::id())
+                    ->first();
 
                 Log::channel('florenceegi')->info('WalletService: Donation', [
                     'epp_id' => $epp_id,
