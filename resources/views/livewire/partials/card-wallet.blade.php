@@ -1,11 +1,11 @@
 <div itemscope itemtype="https://schema.org/FinancialProduct"
-    class="{{ !$canCreateWallet || in_array($wallet->platform_role, ['natan', 'EPP']) ? 'bg-gradient-to-br from-red-900/50 to-rose-900/30 cursor-not-allowed' : 'bg-gradient-to-br from-gray-800 to-gray-900' }} group relative rounded-2xl border border-gray-700/50 p-6 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl"
+    class="{{ !$canCreateWallet || in_array($wallet->platform_role, ['Natan', 'EPP']) ? 'bg-gradient-to-br from-red-900/50 to-rose-900/30 cursor-not-allowed' : 'bg-gradient-to-br from-gray-800 to-gray-900' }} group relative rounded-2xl border border-gray-700/50 p-6 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl"
     aria-label="Dettagli wallet di {{ $wallet->user ? $wallet->user->name : __('Unassigned') }}"
-    aria-disabled="{{ !$canCreateWallet || in_array($wallet->platform_role, ['natan', 'EPP']) ? 'true' : 'false' }}">
+    aria-disabled="{{ !$canCreateWallet || in_array($wallet->platform_role, ['Natan', 'EPP']) ? 'true' : 'false' }}">
 
     <!-- Top wallet banner -->
     <div class="absolute top-0 left-0 right-0 h-2 rounded-t-2xl bg-gradient-to-r from-blue-500 to-purple-600"></div>
-
+   
     <!-- Lock icon for disabled state -->
     @if (!$canCreateWallet || in_array($wallet->platform_role, ['Natan', 'EPP']))
         <div class="absolute text-red-400 right-4 top-4">

@@ -66,10 +66,10 @@ class CollectionUserMember extends Component {
         $this->collectionId = $id;
 
         // Verifica se l'utente ha i permessi per creare wallet
-        $this->canCreateWallet = $this->hasPermission($collection, 'create_wallet');
+        $this->canCreateWallet = $this->userHasPermissionInCollection($this->collectionId, 'create_wallet');
 
         // Verifica se l'utente ha i permessi per creare inviti
-        $this->canCreate = $this->hasPermission($collection, 'create_team');
+        $this->canCreateTeam = $this->userHasPermissionInCollection($this->collectionId, 'create_team');
 
         // Carica i ruoli disponibili da Spatie
         $this->roles = Role::pluck('name')->toArray(); // Recupera i nomi dei ruoli dalla tabella 'roles'

@@ -229,7 +229,7 @@ class RolesAndPermissionsSeeder extends Seeder
 
         'admin' => [
             // ═══ PERMESSI ESISTENTI DELL'ADMIN (NON TOCCARE) ═══
-            'add_team_member', 'remove_team_member', 'modify_team_roles',
+            'create_team', 'remove_team_member', 'modify_team_roles',
             'update_collection', 'update_collection_image_header', 'open_collection',
             'create_EGI', 'update_EGI', 'delete_EGI', 'manage_EGI',
             'view_user', 'view_profile', 'view_team', 'view_dashboard', 'view_bio', 'view_settings',

@@ -12,6 +12,7 @@
                 </p>
                 <p class="text-sm text-gray-400">{{ __('collection.team_members_description') }}</p>
 
+
             </div>
 
             @if ($canCreateTeam)
@@ -79,7 +80,7 @@
     <h3 class="mt-8 mb-4 text-xl font-bold text-white">{{ __('collection.wallet.wallets') }}</h3>
     <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
         @foreach ($wallets as $wallet)
-            @include('livewire.partials.card-wallet')
+            @include('livewire.partials.card-wallet', ['wallet' => $wallet, 'canCreateWallet' => $canCreateWallet])
         @endforeach
     </div>
 
