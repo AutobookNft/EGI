@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\Gdpr\GdprActivityCategory;
 use App\Enums\Gdpr\ProcessingRestrictionReason;
 use App\Enums\Gdpr\ProcessingRestrictionType;
 use App\Helpers\FegiAuth;
@@ -40,13 +41,12 @@ use Illuminate\Support\Facades\Log;
  * 🧱 Core Logic: Manages consent, data portability, rectification, erasure, limitation
  *
  * @package App\Http\Controllers
- * @author Padmin D. Curtis (for Fabio Cherici)
- * @version 2.0.0
- * @date 2025-05-22
- * @context gdpr
+ * @author Padmin D. Curtis (AI Partner OS3.0) for Fabio Cherici
+ * @version 2.1.0 (FlorenceEGI - GDPR Export Data Fix)
+ * @date 2025-08-05
+ * @purpose Fixed export data method with correct variable naming and complete logic
  */
-class GdprController extends Controller
-{
+class GdprController extends Controller {
     /**
      * Logger instance for audit trail
      * @var UltraLogManager
@@ -114,7 +114,6 @@ class GdprController extends Controller
         $this->exportService = $exportService;
         $this->auditService = $auditService;
         $this->processingRestrictionService = $processingRestrictionService;
-
     }
 
     /**
@@ -124,8 +123,7 @@ class GdprController extends Controller
      * @seo-purpose Provide comprehensive GDPR profile management interface
      * @accessibility-trait Full ARIA tablist navigation and landmark structure
      */
-    public function showProfile()
-    {
+    public function showProfile() {
         try {
             $user = auth()->user();
 
@@ -164,14 +162,19 @@ class GdprController extends Controller
                     'account_deletion' => \Laravel\Jetstream\Jetstream::hasAccountDeletionFeatures(),
                 ]
             ]);
-
         } catch (\Exception $e) {
-            return $this->errorManager->handle('GDPR_PROFILE_PAGE_LOAD_ERROR', [
+            $this->errorManager->handle('GDPR_PROFILE_PAGE_LOAD_ERROR', [
                 'user_id' => auth()->id(),
                 'ip_address' => request()->ip(),
                 'user_agent' => request()->userAgent(),
                 'error' => $e->getMessage()
             ], $e);
+
+            // Return error view on failure
+            return view('error.generic', [
+                'message' => __('gdpr.errors.general'),
+                'return_url' => route('dashboard')
+            ]);
         }
     }
 
@@ -188,8 +191,7 @@ class GdprController extends Controller
      * @transparency-level High - clear feedback on restriction status
      * @narrative-coherence Supports user autonomy and data dignity
      */
-    public function limitProcessingStore(ProcessingRestrictionRequest $request)
-    {
+    public function limitProcessingStore(ProcessingRestrictionRequest $request) {
         try {
             $user = Auth::user();
             $validated = $request->validated();
@@ -209,7 +211,6 @@ class GdprController extends Controller
 
             return redirect()->route('gdpr.limit-processing')
                 ->with('error', __('gdpr.processing_restriction_failed'));
-
         } catch (\Throwable $e) {
             $this->errorManager->handle('GDPR_PROCESSING_RESTRICTION_CREATE_ERROR', [
                 'user_id' => Auth::id(),
@@ -235,8 +236,7 @@ class GdprController extends Controller
      * @transparency-level High - clear feedback on restriction removal
      * @narrative-coherence Completes the control cycle with removal rights
      */
-    public function removeProcessingRestriction(Request $request, ProcessingRestriction $restriction)
-    {
+    public function removeProcessingRestriction(Request $request, ProcessingRestriction $restriction) {
         try {
             $user = Auth::user();
 
@@ -255,7 +255,6 @@ class GdprController extends Controller
 
             return redirect()->route('gdpr.limit-processing')
                 ->with('error', __('gdpr.processing_restriction_removal_failed'));
-
         } catch (\Throwable $e) {
             $this->errorManager->handle('GDPR_PROCESSING_RESTRICTION_REMOVE_ERROR', [
                 'user_id' => Auth::id(),
@@ -278,8 +277,7 @@ class GdprController extends Controller
      * @return View
      * @privacy-safe Shows user's own consent status only
      */
-    public function consent(): View
-    {
+    public function consent(): View {
         try {
             $user = Auth::user();
 
@@ -294,7 +292,15 @@ class GdprController extends Controller
             // ✅ OS1.5 FIX: Get consent types from ConsentService for view compatibility
             $availableConsentTypes = $this->consentService->getAvailableConsentTypes();
 
-            $this->auditService->logUserAction($user, 'consent_page_viewed');
+            $this->auditService->logUserAction(
+                $user,
+                'consent_page_viewed',
+                [
+                    'consent_count' => count($consentData['userConsents']),
+                    'consent_summary' => $consentData['consentSummary']
+                ],
+                GdprActivityCategory::GDPR_ACTIONS
+            );
 
             $this->logger->info('GDPR: Consent data retrieved', [
                 'user_id' => $user->id,
@@ -312,12 +318,17 @@ class GdprController extends Controller
                 'consentSummary' => $consentData['consentSummary'],
                 'consentTypes' => $availableConsentTypes, // ✅ MISSING! View needs this
             ]);
-
         } catch (\Exception $e) {
-            return $this->errorManager->handle('GDPR_CONSENT_PAGE_FAILED', [
+            $this->errorManager->handle('GDPR_CONSENT_PAGE_FAILED', [
                 'user_id' => Auth::id(),
                 'error_message' => $e->getMessage()
             ], $e);
+
+            // Return error view on failure
+            return view('error.generic', [
+                'message' => __('gdpr.errors.general'),
+                'return_url' => route('gdpr.consent')
+            ]);
         }
     }
 
@@ -327,8 +338,7 @@ class GdprController extends Controller
      * @return View
      * @privacy-safe Shows user's consent preferences management interface
      */
-    public function consentPreferences(): View
-    {
+    public function consentPreferences(): View {
         try {
             $user = Auth::user();
 
@@ -354,7 +364,6 @@ class GdprController extends Controller
                 'pageTitle' => __('gdpr.consent.preferences_title'),
                 'pageSubtitle' => __('gdpr.consent.preferences_subtitle')
             ]);
-
         } catch (\Exception $e) {
             $this->errorManager->handle('GDPR_CONSENT_PREFERENCES_PAGE_FAILED', [
                 'user_id' => Auth::id(),
@@ -387,8 +396,7 @@ class GdprController extends Controller
      * @return RedirectResponse
      * @privacy-safe Updates only authenticated user's consents
      */
-    public function updateConsent(Request $request): RedirectResponse
-    {
+    public function updateConsent(Request $request): RedirectResponse {
         try {
             $validated = $request->validate([
                 'consents' => 'required|array',
@@ -415,12 +423,14 @@ class GdprController extends Controller
 
             return redirect()->route('gdpr.consent')
                 ->with('success', __('gdpr.consents_updated_successfully'));
-
         } catch (\Exception $e) {
-            return $this->errorManager->handle('GDPR_CONSENT_UPDATE_FAILED', [
+            $this->errorManager->handle('GDPR_CONSENT_UPDATE_FAILED', [
                 'user_id' => Auth::id(),
                 'error_message' => $e->getMessage()
             ], $e);
+
+            return redirect()->route('gdpr.consent')
+                ->with('error', __('gdpr.consent.update_error'));
         }
     }
 
@@ -436,8 +446,7 @@ class GdprController extends Controller
      * @version 1.1.0 (FlorenceEGI MVP - Personal Data Domain)
      * @deadline 2025-06-30
      */
-    public function withdraw(Request $request): RedirectResponse
-    {
+    public function withdraw(Request $request): RedirectResponse {
         try {
             $validated = $request->validate([
                 'consent_id' => 'required|integer|exists:user_consents,id'
@@ -464,19 +473,24 @@ class GdprController extends Controller
 
             return redirect()->route('gdpr.consent')
                 ->with('success', __('gdpr.consent.withdrawn_successfully'));
-
         } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
-             return $this->errorManager->handle('GDPR_CONSENT_WITHDRAW_AUTH_FAILED', [
+            $this->errorManager->handle('GDPR_CONSENT_WITHDRAW_AUTH_FAILED', [
                 'user_id' => Auth::id(),
                 'consent_id' => $request->input('consent_id'),
                 'error_message' => 'User attempted to withdraw a consent not belonging to them.'
             ], $e);
+
+            return redirect()->route('gdpr.consent')
+                ->with('error', __('gdpr.errors.unauthorized'));
         } catch (\Exception $e) {
-            return $this->errorManager->handle('GDPR_CONSENT_WITHDRAW_FAILED', [
+            $this->errorManager->handle('GDPR_CONSENT_WITHDRAW_FAILED', [
                 'user_id' => Auth::id(),
                 'consent_id' => $request->input('consent_id'),
                 'error_message' => $e->getMessage()
             ], $e);
+
+            return redirect()->route('gdpr.consent')
+                ->with('error', __('gdpr.errors.general'));
         }
     }
 
@@ -492,8 +506,7 @@ class GdprController extends Controller
      * @version 1.1.0 (FlorenceEGI MVP - Personal Data Domain)
      * @deadline 2025-06-30
      */
-    public function renew(Request $request): RedirectResponse
-    {
+    public function renew(Request $request): RedirectResponse {
         try {
             $validated = $request->validate([
                 'consent_id' => 'required|integer|exists:user_consents,id'
@@ -520,19 +533,24 @@ class GdprController extends Controller
 
             return redirect()->route('gdpr.consent')
                 ->with('success', __('gdpr.consent.renewed_successfully'));
-
         } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
-             return $this->errorManager->handle('GDPR_CONSENT_RENEW_AUTH_FAILED', [
+            $this->errorManager->handle('GDPR_CONSENT_RENEW_AUTH_FAILED', [
                 'user_id' => Auth::id(),
                 'consent_id' => $request->input('consent_id'),
                 'error_message' => 'User attempted to renew a consent not belonging to them.'
             ], $e);
+
+            return redirect()->route('gdpr.consent')
+                ->with('error', __('gdpr.errors.unauthorized'));
         } catch (\Exception $e) {
-            return $this->errorManager->handle('GDPR_CONSENT_RENEW_FAILED', [
+            $this->errorManager->handle('GDPR_CONSENT_RENEW_FAILED', [
                 'user_id' => Auth::id(),
                 'consent_id' => $request->input('consent_id'),
                 'error_message' => $e->getMessage()
             ], $e);
+
+            return redirect()->route('gdpr.consent')
+                ->with('error', __('gdpr.errors.general'));
         }
     }
 
@@ -542,8 +560,7 @@ class GdprController extends Controller
      * @return RedirectResponse
      * @privacy-safe Shows only authenticated user's consent history
      */
-    public function consentHistory(): RedirectResponse
-    {
+    public function consentHistory(): RedirectResponse {
         try {
             $user = Auth::user();
             $history = $this->consentService->getDetailedConsentHistory($user);
@@ -555,7 +572,6 @@ class GdprController extends Controller
                 ->with('show_history', true)
                 ->with('consent_history', $history)
                 ->with('success', __('gdpr.consent.history_loaded'));
-
         } catch (\Exception $e) {
             $this->errorManager->handle('GDPR_CONSENT_HISTORY_FAILED', [
                 'user_id' => Auth::id(),
@@ -578,8 +594,7 @@ class GdprController extends Controller
      * @return View
      * @privacy-safe Shows export options and history for authenticated user
      */
-    public function exportData(): View
-    {
+    public function exportData(): View {
         try {
             $user = Auth::user();
 
@@ -588,22 +603,54 @@ class GdprController extends Controller
                 'log_category' => 'GDPR_ACCESS'
             ]);
 
+            // Get user's export history
             $exportHistory = $this->exportService->getUserExportHistory($user);
-            $dataCategories = $this->exportService->getAvailableDataCategories();
 
-            $this->auditService->logUserAction($user, 'export_page_viewed');
+            // Debug log per vedere cosa viene restituito
+            $this->logger->info('GDPR: Export history retrieved', [
+                'user_id' => $user->id,
+                'history_count' => $exportHistory->count(),
+                'history_type' => get_class($exportHistory),
+                'first_export_id' => $exportHistory->first()['id'] ?? 'no exports',
+                'last_export_created' => $exportHistory->first()['created_at'] ?? 'no exports',
+                'log_category' => 'GDPR_EXPORT_DEBUG'
+            ]);
+
+            // Get available data categories from config
+            $availableCategories = $this->exportService->getAvailableDataCategories();
+
+            // Check if user can request new export (rate limiting, permissions, etc.)
+            $canRequestExport = $user->can('can_request_export') && $this->canUserRequestExport($user);
+
+            // Log activity for audit trail
+            $this->auditService->logUserAction(
+                $user,
+                'export_page_viewed',
+                [
+                    'export_count' => $exportHistory->count(),
+                    'available_categories' => array_keys($availableCategories),
+                    'can_request' => $canRequestExport
+                ],
+                GdprActivityCategory::DATA_ACCESS
+            );
 
             return view('gdpr.export-data', [
                 'user' => $user,
                 'exportHistory' => $exportHistory,
-                'dataCategories' => $dataCategories
+                'availableCategories' => $availableCategories,
+                'canRequestExport' => $canRequestExport,
             ]);
-
         } catch (\Exception $e) {
-            return $this->errorManager->handle('GDPR_EXPORT_PAGE_FAILED', [
+            $this->errorManager->handle('GDPR_EXPORT_PAGE_FAILED', [
                 'user_id' => Auth::id(),
                 'error_message' => $e->getMessage()
             ], $e);
+
+            // Return error view on failure
+            return view('error.generic', [
+                'message' => __('gdpr.errors.general'),
+                'return_url' => route('gdpr.dashboard')
+            ]);
         }
     }
 
@@ -614,16 +661,50 @@ class GdprController extends Controller
      * @return RedirectResponse
      * @privacy-safe Generates export only for authenticated user's data
      */
-    public function generateExport(Request $request): RedirectResponse
-    {
+    public function generateExport(Request $request): RedirectResponse {
         try {
+            $this->logger->info('GDPR: Export generation started', [
+                'user_id' => Auth::id(),
+                'request_data' => $request->all(),
+                'log_category' => 'GDPR_EXPORT_DEBUG'
+            ]);
+
             $validated = $request->validate([
                 'format' => 'required|in:json,csv,pdf',
-                'categories' => 'required|array',
-                'categories.*' => 'string|in:profile,activities,collections,wallet,consents,audit'
+                'categories' => 'required|array|min:1',
+                'categories.*' => 'string|in:profile,account,preferences,activity,consents,collections,purchases,comments,messages,biography',
+                'include_metadata' => 'sometimes|boolean',
+                'include_audit_trail' => 'sometimes|boolean'
+            ]);
+
+            $this->logger->info('GDPR: Request validation passed', [
+                'validated_data' => $validated,
+                'log_category' => 'GDPR_EXPORT_DEBUG'
             ]);
 
             $user = Auth::user();
+
+            // Check if user can request export
+            $canRequestExport = $user->can('can_request_export');
+            $canUserRequestExport = $this->canUserRequestExport($user);
+
+            $this->logger->info('GDPR: Permission checks', [
+                'user_can_request_export' => $canRequestExport,
+                'user_can_request_export_rate_limit' => $canUserRequestExport,
+                'log_category' => 'GDPR_EXPORT_DEBUG'
+            ]);
+
+            if (!$canRequestExport || !$canUserRequestExport) {
+                $this->logger->warning('GDPR: Export request denied due to permissions', [
+                    'user_id' => $user->id,
+                    'can_request_export' => $canRequestExport,
+                    'can_user_request_export' => $canUserRequestExport,
+                    'log_category' => 'GDPR_EXPORT_DEBUG'
+                ]);
+
+                return redirect()->route('gdpr.export-data')
+                    ->with('error', __('gdpr.export.limit_reached'));
+            }
 
             $this->logger->info('GDPR: Generating data export', [
                 'user_id' => $user->id,
@@ -632,27 +713,46 @@ class GdprController extends Controller
                 'log_category' => 'GDPR_EXPORT_GENERATE'
             ]);
 
+            // Generate export via service
             $exportToken = $this->exportService->generateUserDataExport(
                 $user,
                 $validated['format'],
                 $validated['categories']
             );
 
+            // Check if export generation was successful
+            if (empty($exportToken)) {
+                $this->logger->error('GDPR: Export generation returned empty token', [
+                    'user_id' => $user->id,
+                    'format' => $validated['format'],
+                    'categories' => $validated['categories'],
+                    'log_category' => 'GDPR_EXPORT_GENERATE_FAILED'
+                ]);
+
+                return redirect()->route('gdpr.export-data')
+                    ->with('error', __('gdpr.export.request_error'));
+            }
+
+            // Log activity
             $this->auditService->logUserAction($user, 'export_requested', [
                 'format' => $validated['format'],
                 'categories' => $validated['categories'],
-                'export_token' => $exportToken
-            ]);
+                'export_token' => $exportToken,
+                'include_metadata' => $validated['include_metadata'] ?? false,
+                'include_audit_trail' => $validated['include_audit_trail'] ?? false
+            ], GdprActivityCategory::GDPR_ACTIONS);
 
             return redirect()->route('gdpr.export-data')
-                ->with('success', __('gdpr.export_generation_started'))
+                ->with('success', __('gdpr.export.request_success'))
                 ->with('export_token', $exportToken);
-
         } catch (\Exception $e) {
-            return $this->errorManager->handle('GDPR_EXPORT_GENERATION_FAILED', [
+            $this->errorManager->handle('GDPR_EXPORT_GENERATION_FAILED', [
                 'user_id' => Auth::id(),
                 'error_message' => $e->getMessage()
             ], $e);
+
+            return redirect()->route('gdpr.export-data')
+                ->with('error', __('gdpr.export.request_error'));
         }
     }
 
@@ -663,8 +763,7 @@ class GdprController extends Controller
      * @return StreamedResponse
      * @privacy-safe Downloads only if token belongs to authenticated user
      */
-    public function downloadExport(string $token): StreamedResponse
-    {
+    public function downloadExport(string $token): StreamedResponse {
         try {
             $user = Auth::user();
 
@@ -677,26 +776,52 @@ class GdprController extends Controller
             $export = $this->exportService->getExportByToken($token, $user);
 
             if (!$export || $export->user_id !== $user->id) {
-                return $this->errorManager->handle('GDPR_EXPORT_NOT_FOUND', [
+                $this->errorManager->handle('GDPR_EXPORT_NOT_FOUND', [
                     'user_id' => $user->id,
                     'token' => $token
                 ]);
+
+                abort(404, __('gdpr.export.export_not_found'));
             }
 
+            // Log download activity
             $this->auditService->logUserAction($user, 'export_downloaded', [
                 'export_token' => $token,
                 'file_size' => $export->file_size
-            ]);
+            ], GdprActivityCategory::DATA_ACCESS);
 
             return $this->exportService->streamExportFile($export);
-
         } catch (\Exception $e) {
-            return $this->errorManager->handle('GDPR_EXPORT_DOWNLOAD_FAILED', [
+            $this->errorManager->handle('GDPR_EXPORT_DOWNLOAD_FAILED', [
                 'user_id' => Auth::id(),
                 'token' => $token,
                 'error_message' => $e->getMessage()
             ], $e);
+
+            abort(500, __('gdpr.export.download_error'));
         }
+    }
+
+    /**
+     * Check if user can request a new export (rate limiting)
+     *
+     * @param User $user
+     * @return bool
+     * @privacy-safe Checks only authenticated user's export limits
+     */
+    private function canUserRequestExport(User $user): bool {
+        $maxExportsPerDay = config('gdpr.export.max_exports_per_day', 0);
+
+        // Se $maxExportsPerDa == 0, allora non ci sono limiti
+        if ($maxExportsPerDay <= 0) {
+            return true;
+        }
+
+        $todayExports = $user->dataExports()
+            ->whereDate('created_at', today())
+            ->count();
+
+        return $todayExports < $maxExportsPerDay;
     }
 
     // ===================================================================
@@ -710,8 +835,7 @@ class GdprController extends Controller
      * @seo-purpose Personal data editing form for authenticated users
      * @accessibility-trait Form validation, field descriptions, error handling
      */
-    public function editPersonalData()
-    {
+    public function editPersonalData() {
         try {
             $user = auth()->user();
 
@@ -739,7 +863,6 @@ class GdprController extends Controller
                 'pageTitle' => __('profile.edit_personal_data'),
                 'pageDescription' => __('profile.edit_personal_data_description'),
             ]);
-
         } catch (\Exception $e) {
             $this->logger->error('[GDPR] Failed to load personal data edit form', [
                 'user_id' => auth()->id(),
@@ -755,13 +878,12 @@ class GdprController extends Controller
     }
 
     /**
-    * Update personal data
-    *
-    * @param \App\Http\Requests\UpdatePersonalDataRequest $request
-    * @return \Illuminate\Http\RedirectResponse
-    */
-    public function updatePersonalData(\App\Http\Requests\UpdatePersonalDataRequest $request)
-    {
+     * Update personal data
+     *
+     * @param \App\Http\Requests\UpdatePersonalDataRequest $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function updatePersonalData(\App\Http\Requests\UpdatePersonalDataRequest $request) {
         try {
             $user = auth()->user();
             $validated = $request->validated();
@@ -790,7 +912,7 @@ class GdprController extends Controller
                         'ip_address' => $request->ip(),
                         'user_agent' => $request->userAgent(),
                     ],
-                    'data_modification'
+                    GdprActivityCategory::PERSONAL_DATA_UPDATE
                 );
             }
 
@@ -802,7 +924,6 @@ class GdprController extends Controller
             return redirect()
                 ->route('profile.show')
                 ->with('success', __('profile.personal_data_updated_successfully'));
-
         } catch (\Exception $e) {
             $this->logger->error('[GDPR] Failed to update personal data', [
                 'user_id' => auth()->id(),
@@ -817,15 +938,14 @@ class GdprController extends Controller
         }
     }
 
-   /**
+    /**
      * Get list of supported countries for dropdowns.
      * The method is now a simple wrapper that delegates the entire logic
      * to the FiscalValidatorFactory, which acts as the Single Source of Truth.
      *
      * @return array
      */
-    private function getCountriesList(): array
-    {
+    private function getCountriesList(): array {
         return FiscalValidatorFactory::getSupportedCountriesTranslated();
     }
 
@@ -835,8 +955,7 @@ class GdprController extends Controller
      * @param \App\Models\User $user
      * @return array
      */
-    private function getEditableFieldsForUser(\App\Models\User $user): array
-    {
+    private function getEditableFieldsForUser(\App\Models\User $user): array {
         $baseFields = [
             'name',
             'email',
@@ -925,7 +1044,6 @@ class GdprController extends Controller
                     'org_vat_number'
                 ]);
                 break;
-
         }
 
         return $baseFields;
@@ -937,8 +1055,7 @@ class GdprController extends Controller
      * @param \App\Models\User $user
      * @return array|null
      */
-    private function getOnChainData(\App\Models\User $user): ?array
-    {
+    private function getOnChainData(\App\Models\User $user): ?array {
         if (empty($user->wallet)) {
             return null;
         }
@@ -969,8 +1086,7 @@ class GdprController extends Controller
      * @return RedirectResponse
      * @privacy-safe Creates rectification request for authenticated user
      */
-    public function requestRectification(Request $request): RedirectResponse
-    {
+    public function requestRectification(Request $request): RedirectResponse {
         try {
             $validated = $request->validate([
                 'field_name' => 'required|string|max:255',
@@ -996,7 +1112,6 @@ class GdprController extends Controller
 
             return redirect()->route('gdpr.edit-personal-data')
                 ->with('success', __('gdpr.rectification_request_submitted'));
-
         } catch (\Exception $e) {
             return $this->errorManager->handle('GDPR_RECTIFICATION_REQUEST_FAILED', [
                 'user_id' => Auth::id(),
@@ -1021,8 +1136,7 @@ class GdprController extends Controller
      * @transparency-level High - all current restrictions displayed
      * @narrative-coherence Aligns with user dignity and control values
      */
-    public function limitProcessing(Request $request): View
-    {
+    public function limitProcessing(Request $request): View {
         try {
             $user = Auth::user();
             $activeRestrictions = $this->processingRestrictionService->getUserActiveRestrictions($user);
@@ -1056,8 +1170,7 @@ class GdprController extends Controller
      * @return RedirectResponse
      * @privacy-safe Updates limitations for authenticated user only
      */
-    public function updateProcessingLimits(Request $request): RedirectResponse
-    {
+    public function updateProcessingLimits(Request $request): RedirectResponse {
         try {
             $validated = $request->validate([
                 'limitations' => 'required|array',
@@ -1084,7 +1197,6 @@ class GdprController extends Controller
 
             return redirect()->route('gdpr.limit-processing')
                 ->with('success', __('gdpr.processing_limits_updated_successfully'));
-
         } catch (\Exception $e) {
             return $this->errorManager->handle('GDPR_PROCESSING_LIMITS_UPDATE_FAILED', [
                 'user_id' => Auth::id(),
@@ -1103,8 +1215,7 @@ class GdprController extends Controller
      * @return View
      * @privacy-safe Shows deletion options for authenticated user
      */
-    public function deleteAccount(): View
-    {
+    public function deleteAccount(): View {
         try {
             $user = Auth::user();
 
@@ -1123,7 +1234,6 @@ class GdprController extends Controller
                 'deletionInfo' => $deletionInfo,
                 'onChainDataSummary' => $onChainDataSummary
             ]);
-
         } catch (\Exception $e) {
             return $this->errorManager->handle('GDPR_DELETE_ACCOUNT_PAGE_FAILED', [
                 'user_id' => Auth::id(),
@@ -1139,8 +1249,7 @@ class GdprController extends Controller
      * @return RedirectResponse
      * @privacy-safe Creates deletion request for authenticated user
      */
-    public function requestAccountDeletion(Request $request): RedirectResponse
-    {
+    public function requestAccountDeletion(Request $request): RedirectResponse {
         try {
             $validated = $request->validate([
                 'reason' => 'sometimes|string|max:1000',
@@ -1164,7 +1273,6 @@ class GdprController extends Controller
 
             return redirect()->route('gdpr.delete-account')
                 ->with('warning', __('gdpr.deletion_request_submitted'));
-
         } catch (\Exception $e) {
             return $this->errorManager->handle('GDPR_DELETION_REQUEST_FAILED', [
                 'user_id' => Auth::id(),
@@ -1180,8 +1288,7 @@ class GdprController extends Controller
      * @return RedirectResponse
      * @privacy-safe Deletes only authenticated user's account
      */
-    public function confirmAccountDeletion(Request $request): RedirectResponse
-    {
+    public function confirmAccountDeletion(Request $request): RedirectResponse {
         try {
             $validated = $request->validate([
                 'password' => 'required|current_password',
@@ -1215,7 +1322,6 @@ class GdprController extends Controller
             return redirect('/')
                 ->with('account_deleted', true)
                 ->with('deletion_summary', $deletionResult);
-
         } catch (\Exception $e) {
             return $this->errorManager->handle('GDPR_ACCOUNT_DELETION_FAILED', [
                 'user_id' => Auth::id(),
@@ -1234,8 +1340,7 @@ class GdprController extends Controller
      * @return View
      * @privacy-safe Shows only authenticated user's activity log
      */
-    public function activityLog(): View
-    {
+    public function activityLog(): View {
         try {
             $user = Auth::user();
 
@@ -1254,7 +1359,6 @@ class GdprController extends Controller
                 'activities' => $activities,
                 'activityStats' => $activityStats
             ]);
-
         } catch (\Exception $e) {
             return $this->errorManager->handle('GDPR_ACTIVITY_LOG_PAGE_FAILED', [
                 'user_id' => Auth::id(),
@@ -1270,8 +1374,7 @@ class GdprController extends Controller
      * @return StreamedResponse
      * @privacy-safe Exports only authenticated user's activity log
      */
-    public function exportActivityLog(Request $request): StreamedResponse
-    {
+    public function exportActivityLog(Request $request): StreamedResponse {
         try {
             $validated = $request->validate([
                 'format' => 'sometimes|in:csv,json',
@@ -1296,7 +1399,6 @@ class GdprController extends Controller
             ]);
 
             return $this->auditService->exportUserActivityLog($user, $validated);
-
         } catch (\Exception $e) {
             return $this->errorManager->handle('GDPR_ACTIVITY_LOG_EXPORT_FAILED', [
                 'user_id' => Auth::id(),
@@ -1315,8 +1417,7 @@ class GdprController extends Controller
      * @return View
      * @privacy-safe Shows breach reporting form and user's reports
      */
-    public function breachReport(): View
-    {
+    public function breachReport(): View {
         try {
             $user = Auth::user();
 
@@ -1335,7 +1436,6 @@ class GdprController extends Controller
                 'userReports' => $userReports,
                 'reportCategories' => $reportCategories
             ]);
-
         } catch (\Exception $e) {
             return $this->errorManager->handle('GDPR_BREACH_REPORT_PAGE_FAILED', [
                 'user_id' => Auth::id(),
@@ -1351,8 +1451,7 @@ class GdprController extends Controller
      * @return RedirectResponse
      * @privacy-safe Creates breach report for authenticated user
      */
-    public function submitBreachReport(Request $request): RedirectResponse
-    {
+    public function submitBreachReport(Request $request): RedirectResponse {
         try {
             $validated = $request->validate([
                 'category' => 'required|string|in:data_leak,unauthorized_access,system_breach,phishing,other',
@@ -1381,7 +1480,6 @@ class GdprController extends Controller
 
             return redirect()->route('gdpr.breach-report')
                 ->with('success', __('gdpr.breach_report_submitted_successfully'));
-
         } catch (\Exception $e) {
             return $this->errorManager->handle('GDPR_BREACH_REPORT_SUBMISSION_FAILED', [
                 'user_id' => Auth::id(),
@@ -1397,8 +1495,7 @@ class GdprController extends Controller
      * @return View
      * @privacy-safe Shows report status only if user owns the report
      */
-    public function breachReportStatus(BreachReport $report): View
-    {
+    public function breachReportStatus(BreachReport $report): View {
         try {
             $user = Auth::user();
 
@@ -1423,7 +1520,6 @@ class GdprController extends Controller
                 'user' => $user,
                 'report' => $report
             ]);
-
         } catch (\Exception $e) {
             return $this->errorManager->handle('GDPR_BREACH_REPORT_STATUS_FAILED', [
                 'user_id' => Auth::id(),
@@ -1443,8 +1539,7 @@ class GdprController extends Controller
      * @return View
      * @privacy-safe Public information display with structured content
      */
-    public function privacyPolicy(): View
-    {
+    public function privacyPolicy(): View {
         try {
             $user = FegiAuth::user();
 
@@ -1511,8 +1606,7 @@ class GdprController extends Controller
         }
     }
 
-    public function privacyPolicyVersion(PrivacyPolicy $policy): View
-    {
+    public function privacyPolicyVersion(PrivacyPolicy $policy): View {
         try {
             $user = FegiAuth::user();
 
@@ -1556,8 +1650,7 @@ class GdprController extends Controller
      * @param PrivacyPolicy|null $policyData The policy model instance.
      * @return array Structured content with sections for TOC and display.
      */
-    protected function parsePolicyContent(?PrivacyPolicy $policyData): array
-    {
+    protected function parsePolicyContent(?PrivacyPolicy $policyData): array {
         $content = $policyData->content ?? '';
 
         if (empty($content)) {
@@ -1584,8 +1677,7 @@ class GdprController extends Controller
      * @param string $content Markdown content
      * @return array Array of sections, each with title, anchor, and its own content.
      */
-    protected function extractSectionsFromMarkdown(string $content): array
-    {
+    protected function extractSectionsFromMarkdown(string $content): array {
         $lines = explode("\n", $content);
         $sections = [];
         $currentSection = null;
@@ -1641,8 +1733,7 @@ class GdprController extends Controller
      * @param string $title Raw header title
      * @return string Cleaned title
      */
-    protected function cleanHeaderTitle(string $title): string
-    {
+    protected function cleanHeaderTitle(string $title): string {
         // Remove markdown formatting
         $cleaned = $title;
 
@@ -1676,8 +1767,7 @@ class GdprController extends Controller
      * @param int $index Section index
      * @return string Anchor ID
      */
-    protected function generateAnchorId(string $title, int $index): string
-    {
+    protected function generateAnchorId(string $title, int $index): string {
         // Create slug from title
         $slug = Str::slug($title);
 
@@ -1697,8 +1787,7 @@ class GdprController extends Controller
      * @param string $content Content to analyze
      * @return int Reading time in minutes
      */
-    protected function calculateReadingTime(string $content): int
-    {
+    protected function calculateReadingTime(string $content): int {
         // Remove markdown syntax for accurate word count
         $plainText = strip_tags(\Illuminate\Mail\Markdown::parse($content));
         $wordCount = str_word_count($plainText);
@@ -1715,8 +1804,7 @@ class GdprController extends Controller
      *
      * @return array Fallback structure
      */
-    protected function getFallbackPolicyContent(): array
-    {
+    protected function getFallbackPolicyContent(): array {
         return [
             'sections' => [
                 [
@@ -1763,8 +1851,7 @@ class GdprController extends Controller
      * @return View
      * @privacy-safe Shows public policy version history
      */
-    public function privacyPolicyChangelog(): View
-    {
+    public function privacyPolicyChangelog(): View {
         try {
             $user = Auth::user();
 
@@ -1783,7 +1870,6 @@ class GdprController extends Controller
                 'user' => $user,
                 'policyVersions' => $policyVersions
             ]);
-
         } catch (\Exception $e) {
             return $this->errorManager->handle('GDPR_PRIVACY_POLICY_CHANGELOG_FAILED', [
                 'user_id' => Auth::id(),
@@ -1798,8 +1884,7 @@ class GdprController extends Controller
      * @return View
      * @privacy-safe Shows transparency information about data processing
      */
-    public function dataProcessingInfo(): View
-    {
+    public function dataProcessingInfo(): View {
         try {
             $user = Auth::user();
 
@@ -1820,7 +1905,6 @@ class GdprController extends Controller
                 'processingInfo' => $processingInfo,
                 'thirdPartyServices' => $thirdPartyServices
             ]);
-
         } catch (\Exception $e) {
             return $this->errorManager->handle('GDPR_DATA_PROCESSING_INFO_FAILED', [
                 'user_id' => Auth::id(),
@@ -1839,8 +1923,7 @@ class GdprController extends Controller
      * @return View
      * @privacy-safe Shows DPO contact information and form
      */
-    public function contactDpo(): View
-    {
+    public function contactDpo(): View {
         try {
             $user = Auth::user();
 
@@ -1859,7 +1942,6 @@ class GdprController extends Controller
                 'dpoInfo' => $dpoInfo,
                 'userMessages' => $userMessages
             ]);
-
         } catch (\Exception $e) {
             return $this->errorManager->handle('GDPR_DPO_CONTACT_PAGE_FAILED', [
                 'user_id' => Auth::id(),
@@ -1875,8 +1957,7 @@ class GdprController extends Controller
      * @return RedirectResponse
      * @privacy-safe Creates message from authenticated user to DPO
      */
-    public function sendDpoMessage(Request $request): RedirectResponse
-    {
+    public function sendDpoMessage(Request $request): RedirectResponse {
         try {
             $validated = $request->validate([
                 'subject' => 'required|string|max:255',
@@ -1904,7 +1985,6 @@ class GdprController extends Controller
 
             return redirect()->route('gdpr.contact-dpo')
                 ->with('success', __('gdpr.dpo_message_sent_successfully'));
-
         } catch (\Exception $e) {
             return $this->errorManager->handle('GDPR_DPO_MESSAGE_FAILED', [
                 'user_id' => Auth::id(),
@@ -1918,222 +1998,210 @@ class GdprController extends Controller
     // ===================================================================
 
     /**
-    * Get current consent status (API)
-    *
-    * @return JsonResponse
-    * @privacy-safe Returns authenticated user's consent status
-    */
-   public function getConsentStatus(): JsonResponse
-   {
-       try {
-           $user = Auth::user();
-           $consentStatus = $this->consentService->getUserConsentStatus($user);
+     * Get current consent status (API)
+     *
+     * @return JsonResponse
+     * @privacy-safe Returns authenticated user's consent status
+     */
+    public function getConsentStatus(): JsonResponse {
+        try {
+            $user = Auth::user();
+            $consentStatus = $this->consentService->getUserConsentStatus($user);
 
-           $this->logger->debug('GDPR API: Consent status requested', [
-               'user_id' => $user->id,
-               'log_category' => 'GDPR_API_ACCESS'
-           ]);
+            $this->logger->debug('GDPR API: Consent status requested', [
+                'user_id' => $user->id,
+                'log_category' => 'GDPR_API_ACCESS'
+            ]);
 
-           return response()->json([
-               'success' => true,
-               'data' => $consentStatus,
-               'last_updated' => $consentStatus['last_updated'] ?? null
-           ]);
+            return response()->json([
+                'success' => true,
+                'data' => $consentStatus,
+                'last_updated' => $consentStatus['last_updated'] ?? null
+            ]);
+        } catch (\Exception $e) {
+            return $this->errorManager->handle('GDPR_API_CONSENT_STATUS_FAILED', [
+                'user_id' => Auth::id(),
+                'error_message' => $e->getMessage()
+            ], $e);
+        }
+    }
 
-       } catch (\Exception $e) {
-           return $this->errorManager->handle('GDPR_API_CONSENT_STATUS_FAILED', [
-               'user_id' => Auth::id(),
-               'error_message' => $e->getMessage()
-           ], $e);
-       }
-   }
+    /**
+     * Get current processing limitations (API)
+     *
+     * @return JsonResponse
+     * @privacy-safe Returns authenticated user's processing limits
+     */
+    public function getProcessingLimits(): JsonResponse {
+        try {
+            $user = Auth::user();
+            $processingLimits = $this->gdprService->getUserProcessingLimitations($user);
 
-   /**
-    * Get current processing limitations (API)
-    *
-    * @return JsonResponse
-    * @privacy-safe Returns authenticated user's processing limits
-    */
-   public function getProcessingLimits(): JsonResponse
-   {
-       try {
-           $user = Auth::user();
-           $processingLimits = $this->gdprService->getUserProcessingLimitations($user);
+            $this->logger->debug('GDPR API: Processing limits requested', [
+                'user_id' => $user->id,
+                'log_category' => 'GDPR_API_ACCESS'
+            ]);
 
-           $this->logger->debug('GDPR API: Processing limits requested', [
-               'user_id' => $user->id,
-               'log_category' => 'GDPR_API_ACCESS'
-           ]);
+            return response()->json([
+                'success' => true,
+                'data' => $processingLimits,
+                'effective_date' => $processingLimits['effective_date'] ?? null
+            ]);
+        } catch (\Exception $e) {
+            return $this->errorManager->handle('GDPR_API_PROCESSING_LIMITS_FAILED', [
+                'user_id' => Auth::id(),
+                'error_message' => $e->getMessage()
+            ], $e);
+        }
+    }
 
-           return response()->json([
-               'success' => true,
-               'data' => $processingLimits,
-               'effective_date' => $processingLimits['effective_date'] ?? null
-           ]);
+    /**
+     * Get export status by token (API)
+     *
+     * @param string $token
+     * @return JsonResponse
+     * @privacy-safe Returns export status only if token belongs to authenticated user
+     */
+    public function getExportStatus(string $token): JsonResponse {
+        try {
+            $user = Auth::user();
+            $export = $this->exportService->getExportByToken($token, $user);
 
-       } catch (\Exception $e) {
-           return $this->errorManager->handle('GDPR_API_PROCESSING_LIMITS_FAILED', [
-               'user_id' => Auth::id(),
-               'error_message' => $e->getMessage()
-           ], $e);
-       }
-   }
+            if (!$export || $export->user_id !== $user->id) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Export not found or access denied'
+                ], 404);
+            }
 
-   /**
-    * Get export status by token (API)
-    *
-    * @param string $token
-    * @return JsonResponse
-    * @privacy-safe Returns export status only if token belongs to authenticated user
-    */
-   public function getExportStatus(string $token): JsonResponse
-   {
-       try {
-           $user = Auth::user();
-           $export = $this->exportService->getExportByToken($token, $user);
+            $this->logger->debug('GDPR API: Export status requested', [
+                'user_id' => $user->id,
+                'export_token' => $token,
+                'log_category' => 'GDPR_API_ACCESS'
+            ]);
 
-           if (!$export || $export->user_id !== $user->id) {
-               return response()->json([
-                   'success' => false,
-                   'error' => 'Export not found or access denied'
-               ], 404);
-           }
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'status' => $export->status,
+                    'progress' => $export->progress,
+                    'created_at' => $export->created_at,
+                    'completed_at' => $export->completed_at,
+                    'download_url' => $export->status === 'completed' ?
+                        route('gdpr.export-data.download', $token) : null,
+                    'file_size' => $export->file_size,
+                    'format' => $export->format
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return $this->errorManager->handle('GDPR_API_EXPORT_STATUS_FAILED', [
+                'user_id' => Auth::id(),
+                'token' => $token,
+                'error_message' => $e->getMessage()
+            ], $e);
+        }
+    }
 
-           $this->logger->debug('GDPR API: Export status requested', [
-               'user_id' => $user->id,
-               'export_token' => $token,
-               'log_category' => 'GDPR_API_ACCESS'
-           ]);
+    // ===================================================================
+    // LEGACY METHODS (for backward compatibility)
+    // ===================================================================
 
-           return response()->json([
-               'success' => true,
-               'data' => [
-                   'status' => $export->status,
-                   'progress' => $export->progress,
-                   'created_at' => $export->created_at,
-                   'completed_at' => $export->completed_at,
-                   'download_url' => $export->status === 'completed' ?
-                       route('gdpr.export-data.download', $token) : null,
-                   'file_size' => $export->file_size,
-                   'format' => $export->format
-               ]
-           ]);
+    /**
+     * Legacy consent display method
+     *
+     * @return View
+     * @deprecated Use consent() method instead
+     * @privacy-safe Shows user's own consent status only
+     */
+    public function consents(): View {
+        $this->logger->warning('GDPR: Legacy consents() method called', [
+            'user_id' => Auth::id(),
+            'log_category' => 'GDPR_LEGACY_ACCESS'
+        ]);
 
-       } catch (\Exception $e) {
-           return $this->errorManager->handle('GDPR_API_EXPORT_STATUS_FAILED', [
-               'user_id' => Auth::id(),
-               'token' => $token,
-               'error_message' => $e->getMessage()
-           ], $e);
-       }
-   }
+        return $this->consent();
+    }
 
-   // ===================================================================
-   // LEGACY METHODS (for backward compatibility)
-   // ===================================================================
+    /**
+     * Legacy consent update method
+     *
+     * @param Request $request
+     * @return RedirectResponse
+     * @deprecated Use updateConsent() method instead
+     * @privacy-safe Updates only authenticated user's consents
+     */
+    public function updateConsents(Request $request): RedirectResponse {
+        $this->logger->warning('GDPR: Legacy updateConsents() method called', [
+            'user_id' => Auth::id(),
+            'log_category' => 'GDPR_LEGACY_ACCESS'
+        ]);
 
-   /**
-    * Legacy consent display method
-    *
-    * @return View
-    * @deprecated Use consent() method instead
-    * @privacy-safe Shows user's own consent status only
-    */
-   public function consents(): View
-   {
-       $this->logger->warning('GDPR: Legacy consents() method called', [
-           'user_id' => Auth::id(),
-           'log_category' => 'GDPR_LEGACY_ACCESS'
-       ]);
+        return $this->updateConsent($request);
+    }
 
-       return $this->consent();
-   }
+    /**
+     * Legacy data download method
+     *
+     * @param Request $request
+     * @return StreamedResponse
+     * @deprecated Use generateExport() and downloadExport() methods instead
+     * @privacy-safe Downloads only authenticated user's data
+     */
+    public function downloadData(Request $request): StreamedResponse {
+        try {
+            $user = Auth::user();
 
-   /**
-    * Legacy consent update method
-    *
-    * @param Request $request
-    * @return RedirectResponse
-    * @deprecated Use updateConsent() method instead
-    * @privacy-safe Updates only authenticated user's consents
-    */
-   public function updateConsents(Request $request): RedirectResponse
-   {
-       $this->logger->warning('GDPR: Legacy updateConsents() method called', [
-           'user_id' => Auth::id(),
-           'log_category' => 'GDPR_LEGACY_ACCESS'
-       ]);
+            $this->logger->warning('GDPR: Legacy downloadData() method called', [
+                'user_id' => $user->id,
+                'log_category' => 'GDPR_LEGACY_ACCESS'
+            ]);
 
-       return $this->updateConsent($request);
-   }
+            // Generate immediate export for backward compatibility
+            $exportToken = $this->exportService->generateUserDataExport(
+                $user,
+                'json',
+                ['profile', 'activities', 'consents']
+            );
 
-   /**
-    * Legacy data download method
-    *
-    * @param Request $request
-    * @return StreamedResponse
-    * @deprecated Use generateExport() and downloadExport() methods instead
-    * @privacy-safe Downloads only authenticated user's data
-    */
-   public function downloadData(Request $request): StreamedResponse
-   {
-       try {
-           $user = Auth::user();
+            $export = $this->exportService->getExportByToken($exportToken, $user);
 
-           $this->logger->warning('GDPR: Legacy downloadData() method called', [
-               'user_id' => $user->id,
-               'log_category' => 'GDPR_LEGACY_ACCESS'
-           ]);
+            $this->auditService->logUserAction($user, 'legacy_data_downloaded', [
+                'export_token' => $exportToken
+            ]);
 
-           // Generate immediate export for backward compatibility
-           $exportToken = $this->exportService->generateUserDataExport(
-               $user,
-               'json',
-               ['profile', 'activities', 'consents']
-           );
+            return $this->exportService->streamExportFile($export);
+        } catch (\Exception $e) {
+            return $this->errorManager->handle('GDPR_LEGACY_DATA_DOWNLOAD_FAILED', [
+                'user_id' => Auth::id(),
+                'error_message' => $e->getMessage()
+            ], $e);
+        }
+    }
 
-           $export = $this->exportService->getExportByToken($exportToken, $user);
+    /**
+     * Legacy account destruction method
+     *
+     * @param Request $request
+     * @return RedirectResponse
+     * @deprecated Use confirmAccountDeletion() method instead
+     * @privacy-safe Deletes only authenticated user's account
+     */
+    public function destroyAccount(Request $request): RedirectResponse {
+        $this->logger->warning('GDPR: Legacy destroyAccount() method called', [
+            'user_id' => Auth::id(),
+            'log_category' => 'GDPR_LEGACY_ACCESS'
+        ]);
 
-           $this->auditService->logUserAction($user, 'legacy_data_downloaded', [
-               'export_token' => $exportToken
-           ]);
+        return $this->confirmAccountDeletion($request);
+    }
 
-           return $this->exportService->streamExportFile($export);
-
-       } catch (\Exception $e) {
-           return $this->errorManager->handle('GDPR_LEGACY_DATA_DOWNLOAD_FAILED', [
-               'user_id' => Auth::id(),
-               'error_message' => $e->getMessage()
-           ], $e);
-       }
-   }
-
-   /**
-    * Legacy account destruction method
-    *
-    * @param Request $request
-    * @return RedirectResponse
-    * @deprecated Use confirmAccountDeletion() method instead
-    * @privacy-safe Deletes only authenticated user's account
-    */
-   public function destroyAccount(Request $request): RedirectResponse
-   {
-       $this->logger->warning('GDPR: Legacy destroyAccount() method called', [
-           'user_id' => Auth::id(),
-           'log_category' => 'GDPR_LEGACY_ACCESS'
-       ]);
-
-       return $this->confirmAccountDeletion($request);
-   }
-
-   /**
+    /**
      * Download active privacy policy as PDF using TCPDF
      *
      * @return \Illuminate\Http\Response
      * @privacy-safe Public document download with proper headers
      */
-    public function privacyPolicyDownload(): Response
-    {
+    public function privacyPolicyDownload(): Response {
         try {
             // Retrieve active privacy policy
             $policy = PrivacyPolicy::active()
@@ -2164,7 +2232,6 @@ class GdprController extends Controller
                 ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
                 ->header('Pragma', 'no-cache')
                 ->header('Expires', '0');
-
         } catch (\Exception $e) {
             Log::error('Privacy Policy PDF Download Error', [
                 'error' => $e->getMessage(),
@@ -2182,8 +2249,7 @@ class GdprController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function cookiePolicyDownload(): Response
-    {
+    public function cookiePolicyDownload(): Response {
         return $this->downloadPolicyByType('cookie_policy');
     }
 
@@ -2193,8 +2259,7 @@ class GdprController extends Controller
      * @param string $type Policy document type
      * @return \Illuminate\Http\Response
      */
-    public function policyDownload(string $type): Response
-    {
+    public function policyDownload(string $type): Response {
         // Map route params to document types
         $typeMapping = [
             'privacy-policy' => 'privacy_policy',
@@ -2218,8 +2283,7 @@ class GdprController extends Controller
      * @return \Illuminate\Http\Response
      * @privacy-safe Document type validation and secure retrieval
      */
-    protected function downloadPolicyByType(string $documentType): Response
-    {
+    protected function downloadPolicyByType(string $documentType): Response {
         try {
             // Validate document type
             $validTypes = array_values(PrivacyPolicy::DOCUMENT_TYPES);
@@ -2255,7 +2319,6 @@ class GdprController extends Controller
                 ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
                 ->header('Pragma', 'no-cache')
                 ->header('Expires', '0');
-
         } catch (\Exception $e) {
             Log::error('Policy PDF Download Error', [
                 'document_type' => $documentType,
@@ -2276,8 +2339,7 @@ class GdprController extends Controller
      * @return string PDF content as binary string
      * @privacy-safe Secure PDF generation with TCPDF
      */
-    protected function generatePolicyPdfTcpdf(PrivacyPolicy $policy, string $templateType): string
-    {
+    protected function generatePolicyPdfTcpdf(PrivacyPolicy $policy, string $templateType): string {
         // Create new TCPDF instance
         $pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
 
@@ -2325,8 +2387,7 @@ class GdprController extends Controller
      * @param PrivacyPolicy $policy
      * @return void
      */
-    protected function addPdfHeader(TCPDF $pdf, PrivacyPolicy $policy): void
-    {
+    protected function addPdfHeader(TCPDF $pdf, PrivacyPolicy $policy): void {
         // FlorenceEGI Brand Header
         $pdf->SetFillColor(102, 126, 234); // Brand color #667eea
         $pdf->Rect(0, 0, 210, 40, 'F');
@@ -2357,8 +2418,7 @@ class GdprController extends Controller
      * @param PrivacyPolicy $policy
      * @return void
      */
-    protected function addPdfMetaInfo(TCPDF $pdf, PrivacyPolicy $policy): void
-    {
+    protected function addPdfMetaInfo(TCPDF $pdf, PrivacyPolicy $policy): void {
         $currentY = $pdf->GetY();
 
         // Background for meta info
@@ -2416,8 +2476,7 @@ class GdprController extends Controller
      * @param PrivacyPolicy $policy
      * @return void
      */
-    protected function addPdfContent(TCPDF $pdf, PrivacyPolicy $policy): void
-    {
+    protected function addPdfContent(TCPDF $pdf, PrivacyPolicy $policy): void {
         // Convert Markdown to HTML and then to TCPDF-compatible format
         $content = $this->formatContentForTcpdf($policy->content);
 
@@ -2435,8 +2494,7 @@ class GdprController extends Controller
      * @param PrivacyPolicy $policy
      * @return void
      */
-    protected function addPdfFooter(TCPDF $pdf, PrivacyPolicy $policy): void
-    {
+    protected function addPdfFooter(TCPDF $pdf, PrivacyPolicy $policy): void {
         // Footer is handled by page event
         $pdf->setFooterData();
     }
@@ -2447,8 +2505,7 @@ class GdprController extends Controller
      * @param string $markdownContent
      * @return string
      */
-    protected function formatContentForTcpdf(string $markdownContent): string
-    {
+    protected function formatContentForTcpdf(string $markdownContent): string {
         // Convert markdown to HTML
         $html = \Illuminate\Mail\Markdown::parse($markdownContent);
 
@@ -2473,8 +2530,7 @@ class GdprController extends Controller
      * @return string
      * @privacy-safe Sanitized filename generation
      */
-    protected function getPolicyFilename(PrivacyPolicy $policy): string
-    {
+    protected function getPolicyFilename(PrivacyPolicy $policy): string {
         $date = Carbon::now()->format('Y-m-d');
         $type = str_replace('_', '-', $policy->document_type);
         $version = str_replace('.', '-', $policy->version);
@@ -2488,8 +2544,7 @@ class GdprController extends Controller
      * @param string $documentType
      * @return \Illuminate\Http\Response
      */
-    public function streamPolicy(string $documentType): Response
-    {
+    public function streamPolicy(string $documentType): Response {
         $policy = PrivacyPolicy::active()
             ->documentType($documentType)
             ->language(app()->getLocale())

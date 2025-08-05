@@ -61,6 +61,9 @@ enum GdprActivityCategory: string
     /** Privacy and consent operations */
     case PRIVACY_MANAGEMENT = 'privacy_management';
 
+    /** Personal data updates */   
+    case PERSONAL_DATA_UPDATE = 'personal_data_update';
+
     /**
      * Ritorna la descrizione umana della categoria, OS2.0 style.
      */
@@ -82,6 +85,7 @@ enum GdprActivityCategory: string
             self::BLOCKCHAIN_ACTIVITY => 'Blockchain or NFT Related Activity',
             self::MEDIA_MANAGEMENT => 'File Upload, Media and Asset Management',
             self::PRIVACY_MANAGEMENT => 'Privacy Settings and Consent Management',
+            self::PERSONAL_DATA_UPDATE => 'Personal Data Updates and Modifications',    
         };
     }
 

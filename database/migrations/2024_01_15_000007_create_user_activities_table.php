@@ -44,7 +44,8 @@ return new class extends Migration
                 'security_events',      // Security-related activities
                 'blockchain_activity',  // Blockchain/NFT activities
                 'media_management',     // File and media operations
-                'privacy_management'    // Privacy and consent operations
+                'privacy_management',   // Privacy and consent operations
+                'personal_data_update', // Personal data updates
             ]);
 
             // Context and metadata

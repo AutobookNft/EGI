@@ -8,5 +8,6 @@ return [
     App\Providers\JetstreamServiceProvider::class,
     App\Providers\ViewComposerServiceProvider::class,
     App\Providers\ViewDebugServiceProvider::class,
+    Barryvdh\DomPDF\ServiceProvider::class,
     Ultra\EgiModule\Providers\EgiModuleServiceProvider::class,
 ];

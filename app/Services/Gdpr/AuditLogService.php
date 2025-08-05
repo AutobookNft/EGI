@@ -98,7 +98,7 @@ class AuditLogService
         User $user,
         string $action,
         array $context = [],
-        GdprActivityCategory $category = GdprActivityCategory::PLATFORM_USAGE
+        GdprActivityCategory $category
     ): UserActivity {
         try {
             $this->logger->debug('Audit Log Service: Logging user action', [

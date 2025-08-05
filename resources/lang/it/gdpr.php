@@ -346,28 +346,113 @@ return [
     // Esportazione dei Dati
     'export' => [
         'title' => 'Esporta i Tuoi Dati',
+        'subtitle' => 'Richiedi una copia completa dei tuoi dati personali in formato portabile',
         'description' => 'Richiedi una copia dei tuoi dati personali. L\'elaborazione potrebbe richiedere alcuni minuti.',
+        
+        // Data Categories
+        'select_data_categories' => 'Seleziona le Categorie di Dati da Esportare',
+        'categories' => [
+            'profile' => 'Informazioni sul Profilo',
+            'account' => 'Dettagli Account',
+            'preferences' => 'Preferenze e Impostazioni',  
+            'activity' => 'Cronologia Attività',
+            'consents' => 'Cronologia Consensi',
+            'collections' => 'Collezioni e NFT',
+            'purchases' => 'Acquisti e Transazioni',
+            'comments' => 'Commenti e Recensioni',
+            'messages' => 'Messaggi e Comunicazioni',
+            'biography' => 'Biografie e Contenuti',
+        ],
+        
+        // Category Descriptions
+        'category_descriptions' => [
+            'profile' => 'Dati anagrafici, informazioni di contatto, foto profilo e descrizioni personali',
+            'account' => 'Dettagli account, impostazioni sicurezza, cronologia login e modifiche',
+            'preferences' => 'Preferenze utente, impostazioni privacy, configurazioni personalizzate',
+            'activity' => 'Cronologia navigazione, interazioni, visualizzazioni e utilizzo piattaforma',
+            'consents' => 'Storico consensi privacy, modifiche preferenze, audit trail GDPR',
+            'collections' => 'Collezioni NFT create, metadati, proprietà intellettuale e assets',
+            'purchases' => 'Transazioni, acquisti, fatture, metodi pagamento e cronologia ordini',
+            'comments' => 'Commenti, recensioni, valutazioni e feedback lasciati sulla piattaforma',
+            'messages' => 'Messaggi privati, comunicazioni, notifiche e conversazioni',
+            'biography' => 'Biografie create, capitoli, timeline, media e contenuti narrativi',
+        ],
+
+        // Export Formats
+        'select_format' => 'Seleziona il Formato di Esportazione',
+        'formats' => [
+            'json' => 'JSON - Formato Dati Strutturato',
+            'csv' => 'CSV - Compatibile con Fogli di Calcolo',
+            'pdf' => 'PDF - Documento Leggibile',
+        ],
+        
+        // Format Descriptions
+        'format_descriptions' => [
+            'json' => 'Formato dati strutturato ideale per sviluppatori e integrazioni. Mantiene la struttura completa dei dati.',
+            'csv' => 'Formato compatibile con Excel e Google Sheets. Perfetto per analisi e manipolazione dati.',
+            'pdf' => 'Documento leggibile e stampabile. Ideale per archiviazione e condivisione.',
+        ],
+
+        // Additional Options
+        'additional_options' => 'Opzioni Aggiuntive',
+        'include_metadata' => 'Includi Metadati Tecnici',
+        'metadata_description' => 'Include informazioni tecniche come timestamp, IP address, versioni e audit trail.',
+        'include_audit_trail' => 'Includi Registro Completo Attività',
+        'audit_trail_description' => 'Include cronologia completa di tutte le modifiche e attività GDPR.',
+        
+        // Actions
+        'request_export' => 'Richiedi Esportazione Dati',
+        'request_success' => 'Richiesta di esportazione inviata con successo. Riceverai una notifica al completamento.',
+        'request_error' => 'Si è verificato un errore nell\'invio della richiesta. Riprova.',
+        
+        // Export History  
+        'history_title' => 'Cronologia Esportazioni',
+        'no_exports' => 'Nessuna Esportazione Presente',
+        'no_exports_description' => 'Non hai ancora richiesto alcuna esportazione dei tuoi dati. Utilizza il modulo sopra per richiederne una.',
+        
+        // Export Item Details
+        'export_format' => 'Esportazione {format}',
+        'requested_on' => 'Richiesta il',
+        'completed_on' => 'Completata il',
+        'expires_on' => 'Scade il',
+        'file_size' => 'Dimensione',
+        'download' => 'Scarica',
+        'download_export' => 'Scarica Esportazione',
+        
+        // Status
+        'status' => [
+            'pending' => 'In Attesa',
+            'processing' => 'In Elaborazione', 
+            'completed' => 'Completata',
+            'failed' => 'Fallita',
+            'expired' => 'Scaduta',
+        ],
+        
+        // Rate Limiting
+        'rate_limit_title' => 'Limite Esportazioni Raggiunto',
+        'rate_limit_message' => 'Hai raggiunto il limite massimo di {max} esportazioni per oggi. Riprova domani.',
+        'last_export_date' => 'Ultima esportazione: {date}',
+        
+        // Validation
+        'select_at_least_one_category' => 'Seleziona almeno una categoria di dati da esportare.',
+        
+        // Legacy Support
         'request_button' => 'Richiedi Esportazione Dati',
         'format' => 'Formato di Esportazione',
         'format_json' => 'JSON (consigliato per sviluppatori)',
         'format_csv' => 'CSV (compatibile con fogli di calcolo)',
         'format_pdf' => 'PDF (documento leggibile)',
-        'include_metadata' => 'Includi metadati',
         'include_timestamps' => 'Includi timestamp',
         'password_protection' => 'Proteggi l\'esportazione con password',
         'password' => 'Password di esportazione',
         'confirm_password' => 'Conferma password',
         'data_categories' => 'Categorie di dati da esportare',
-        'request_success' => 'La tua richiesta di esportazione dati è stata inviata.',
-        'request_error' => 'Si è verificato un errore nella richiesta di esportazione dati. Riprova.',
         'recent_exports' => 'Esportazioni Recenti',
         'no_recent_exports' => 'Non hai esportazioni recenti.',
         'export_status' => 'Stato Esportazione',
         'export_date' => 'Data Esportazione',
         'export_size' => 'Dimensione Esportazione',
         'export_id' => 'ID Esportazione',
-        'download' => 'Scarica',
-        'download_export' => 'Scarica Esportazione',
         'export_preparing' => 'Preparazione della tua esportazione dati...',
         'export_queued' => 'La tua esportazione è in coda e inizierà presto...',
         'export_processing' => 'Elaborazione della tua esportazione dati...',
@@ -379,17 +464,6 @@ return [
         'retry_export' => 'Riprova Esportazione',
         'export_download_error' => 'Si è verificato un errore durante il download della tua esportazione.',
         'export_status_error' => 'Errore durante il controllo dello stato dell\'esportazione.',
-        'categories' => [
-            'profile' => 'Informazioni sul Profilo',
-            'account' => 'Dettagli Account',
-            'preferences' => 'Preferenze e Impostazioni',
-            'activity' => 'Cronologia Attività',
-            'consents' => 'Cronologia Consensi',
-            'collections' => 'Collezioni e Contenuti',
-            'purchases' => 'Acquisti e Transazioni',
-            'comments' => 'Commenti e Recensioni',
-            'messages' => 'Messaggi e Comunicazioni',
-        ],
         'limit_reached' => 'Hai raggiunto il numero massimo di esportazioni consentite al giorno.',
         'existing_in_progress' => 'Hai già un\'esportazione in corso. Attendi che sia completata.',
     ],
@@ -691,4 +765,11 @@ return [
         'preferences_updated' => 'Le tue preferenze di consenso sono state aggiornate con successo.',
         'preferences_update_error' => 'Si è verificato un errore durante l\'aggiornamento delle tue preferenze di consenso. Riprova.',
     ],
+
+    // Footer
+    'privacy_policy' => 'Informativa sulla Privacy',
+    'terms_of_service' => 'Termini di Servizio',
+    'all_rights_reserved' => 'Tutti i diritti riservati.',
+    'navigation_label' => 'Navigazione GDPR',
+    'main_content_label' => 'Contenuto principale GDPR',
 ];

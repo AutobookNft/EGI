@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Enums\Gdpr\ConsentStatus;
 use App\Enums\Gdpr\DataExportStatus;
+use App\Enums\Gdpr\GdprActivityCategory;
 use App\Enums\Gdpr\GdprRequestStatus;
 use App\Enums\Gdpr\GdprRequestType;
 use App\Traits\HasTeamRoles;
@@ -515,6 +516,16 @@ class User extends Authenticatable implements HasMedia {
      */
     public function activities(): HasMany {
         return $this->hasMany(UserActivity::class);
+    }
+
+    /**
+     * Get login history for this user from user activities.
+     *
+     * @return HasMany
+     */
+    public function loginHistory(): HasMany {
+        return $this->hasMany(UserActivity::class)
+            ->where('category', GdprActivityCategory::AUTHENTICATION_LOGIN->value);
     }
 
     /**

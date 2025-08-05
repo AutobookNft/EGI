@@ -136,7 +136,7 @@ return [
         ],
 
         // Maximum exports per user per day
-        'max_exports_per_day' => 3,
+        'max_exports_per_day' => 0, // 0 means no limit
 
         // Export timeout in minutes
         'timeout_minutes' => 30,

@@ -7,6 +7,8 @@ use App\Models\DataExport;
 use App\Models\Collection;
 use App\Models\UserConsent;
 use App\Models\UserActivity;
+use App\Jobs\ProcessDataExport;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Queue;
@@ -15,7 +17,8 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 use Ultra\UltraLogManager\UltraLogManager;
 use Ultra\ErrorManager\Interfaces\ErrorManagerInterface;
 use Carbon\Carbon;
-use ZipArchive;
+use RuntimeException;
+use InvalidArgumentException;
 
 /**
  * @Oracode Service: Data Export Management
@@ -28,8 +31,7 @@ use ZipArchive;
  * @version 1.0.0
  * @date 2025-05-22
  */
-class DataExportService
-{
+class DataExportService {
     /**
      * Logger instance for audit trail
      * @var UltraLogManager
@@ -55,6 +57,12 @@ class DataExportService
     protected int $retentionDays = 30;
 
     /**
+     * Whether to use queue for processing exports
+     * @var bool
+     */
+    protected bool $useQueue = false;
+
+    /**
      * Available data categories for export
      * @var array
      */
@@ -64,9 +72,24 @@ class DataExportService
             'description' => 'Basic profile data, settings, and preferences',
             'includes' => ['name', 'email', 'bio', 'avatar', 'settings']
         ],
-        'activities' => [
+        'account' => [
+            'name' => 'Account Information',
+            'description' => 'Core account data and settings',
+            'includes' => ['email', 'verification', 'account_status', 'metadata']
+        ],
+        'preferences' => [
+            'name' => 'User Preferences',
+            'description' => 'UI preferences and platform settings',
+            'includes' => ['language', 'timezone', 'notifications', 'privacy_settings']
+        ],
+        'activity' => [
             'name' => 'Activity History',
             'description' => 'Platform usage, logins, and interactions',
+            'includes' => ['login_history', 'page_views', 'actions', 'sessions']
+        ],
+        'activities' => [
+            'name' => 'Legacy Activity History',
+            'description' => 'Legacy platform usage data',
             'includes' => ['login_history', 'page_views', 'actions', 'sessions']
         ],
         'collections' => [
@@ -83,6 +106,26 @@ class DataExportService
             'name' => 'Privacy Consents',
             'description' => 'Consent history and privacy preferences',
             'includes' => ['consent_history', 'privacy_settings', 'cookie_preferences']
+        ],
+        'purchases' => [
+            'name' => 'Purchase History',
+            'description' => 'Purchase and transaction history',
+            'includes' => ['orders', 'payments', 'invoices', 'refunds']
+        ],
+        'comments' => [
+            'name' => 'Comments and Reviews',
+            'description' => 'User comments and review data',
+            'includes' => ['comments', 'reviews', 'ratings']
+        ],
+        'messages' => [
+            'name' => 'Messages and Communications',
+            'description' => 'User messages and communication history',
+            'includes' => ['conversations', 'sent_messages', 'received_messages']
+        ],
+        'biography' => [
+            'name' => 'Biography Data',
+            'description' => 'User biographies and personal stories',
+            'includes' => ['biographies', 'chapters', 'media', 'timeline']
         ],
         'audit' => [
             'name' => 'Audit Trail',
@@ -129,6 +172,9 @@ class DataExportService
     ) {
         $this->logger = $logger;
         $this->errorManager = $errorManager;
+        
+        // Configure queue usage based on environment
+        $this->useQueue = config('gdpr.export.use_queue', false);
     }
 
     /**
@@ -136,11 +182,10 @@ class DataExportService
      *
      * @param User $user
      * @param int $limit
-     * @return EloquentCollection
+     * @return \Illuminate\Support\Collection
      * @privacy-safe Returns user's own export history only
      */
-    public function getUserExportHistory(User $user, int $limit = 20): EloquentCollection
-    {
+    public function getUserExportHistory(User $user, int $limit = 20): \Illuminate\Support\Collection {
         try {
             $this->logger->info('Data Export Service: Getting user export history', [
                 'user_id' => $user->id,
@@ -148,34 +193,49 @@ class DataExportService
                 'log_category' => 'EXPORT_SERVICE_OPERATION'
             ]);
 
-            return $user->dataExports()
+            // Get exports and transform to array format for view compatibility
+            $exports = $user->dataExports()
                 ->orderBy('created_at', 'desc')
                 ->limit($limit)
-                ->get()
-                ->map(function ($export) {
-                    return [
-                        'id' => $export->id,
-                        'token' => $export->token,
-                        'format' => $export->format,
-                        'categories' => $export->categories,
-                        'status' => $export->status,
-                        'file_size' => $export->file_size,
-                        'progress' => $export->progress,
-                        'created_at' => $export->created_at,
-                        'completed_at' => $export->completed_at,
-                        'expires_at' => $export->expires_at,
-                        'download_count' => $export->download_count,
-                        'is_expired' => $export->expires_at < now()
-                    ];
-                });
-        } catch (\Exception $e) {
-            $this->logger->error('Data Export Service: Failed to get export history', [
-                'user_id' => $user->id,
-                'error' => $e->getMessage(),
-                'log_category' => 'EXPORT_SERVICE_ERROR'
-            ]);
+                ->get();
 
-            throw $e;
+            // Transform to array format expected by the view
+            return $exports->map(function ($export) {
+                return [
+                    'id' => $export->id,
+                    'token' => $export->token,
+                    'format' => $export->format,
+                    'categories' => $export->categories,
+                    'status' => $export->status,
+                    'progress' => $export->progress,
+                    'file_path' => $export->file_path,
+                    'file_size' => $export->file_size,
+                    'download_count' => $export->download_count,
+                    'last_downloaded_at' => $export->last_downloaded_at,
+                    'expires_at' => $export->expires_at,
+                    'completed_at' => $export->completed_at,
+                    'created_at' => $export->created_at,
+                    'updated_at' => $export->updated_at,
+                    'error_message' => $export->error_message,
+                    'metadata' => $export->metadata,
+                    'is_expired' => $export->isExpired(),
+                    'is_ready' => $export->isReady(),
+                    'formatted_file_size' => $export->getFormattedFileSizeAttribute(),
+                    'status_name' => $export->getStatusNameAttribute(),
+                    'format_name' => $export->getFormatNameAttribute(),
+                ];
+            });
+        } catch (\Exception $e) {
+            $this->errorManager->handle('GDPR_EXPORT_HISTORY_FAILED', [
+                'user_id' => $user->id,
+                'limit' => $limit,
+                'error_message' => $e->getMessage(),
+                'error_file' => $e->getFile(),
+                'error_line' => $e->getLine()
+            ], $e);
+
+            // Return empty collection on error to maintain return type
+            return new \Illuminate\Support\Collection();
         }
     }
 
@@ -185,9 +245,20 @@ class DataExportService
      * @return array
      * @privacy-safe Returns public format definitions
      */
-    public function getSupportedFormats(): array
-    {
+    public function getSupportedFormats(): array {
         return $this->supportedFormats;
+    }
+
+    /**
+     * Set queue mode for export processing
+     *
+     * @param bool $useQueue
+     * @return self
+     * @privacy-safe Controls processing mode
+     */
+    public function setQueueMode(bool $useQueue): self {
+        $this->useQueue = $useQueue;
+        return $this;
     }
 
     /**
@@ -199,28 +270,42 @@ class DataExportService
      * @return string Export token
      * @privacy-safe Generates export for authenticated user only
      */
-    public function generateUserDataExport(User $user, string $format, array $categories): string
-    {
+    public function generateUserDataExport(User $user, string $format, array $categories): string {
         try {
             $this->logger->info('Data Export Service: Generating user data export', [
                 'user_id' => $user->id,
                 'format' => $format,
-                'categories' => $categories,
+                'categories' => implode(', ', $categories),
                 'log_category' => 'EXPORT_SERVICE_OPERATION'
             ]);
 
             // Validate format
             if (!isset($this->supportedFormats[$format])) {
-                throw new \InvalidArgumentException("Unsupported export format: {$format}");
+                $this->errorManager->handle('GDPR_EXPORT_INVALID_FORMAT', [
+                    'user_id' => $user->id,
+                    'format' => $format,
+                    'supported_formats' => implode(', ', array_keys($this->supportedFormats))
+                ]);
+                return '';
             }
 
             // Validate categories
             $invalidCategories = array_diff($categories, array_keys($this->dataCategories));
             if (!empty($invalidCategories)) {
-                throw new \InvalidArgumentException("Invalid categories: " . implode(', ', $invalidCategories));
-            }
+                // Log detailed info but pass minimal data to error manager
+                $this->logger->error('GDPR Export: Invalid categories detected', [
+                    'user_id' => $user->id,
+                    'invalid_categories' => implode(', ', $invalidCategories),
+                    'valid_categories' => implode(', ', array_keys($this->dataCategories)),
+                    'requested_categories' => implode(', ', $categories)
+                ]);
 
-            // Check for existing pending exports
+                $this->errorManager->handle('GDPR_EXPORT_INVALID_CATEGORIES', [
+                    'user_id' => (string)$user->id,
+                    'error_message' => 'Invalid categories requested'
+                ]);
+                return '';
+            }            // Check for existing pending exports
             $pendingExport = $user->dataExports()
                 ->whereIn('status', ['pending', 'processing'])
                 ->first();
@@ -252,20 +337,48 @@ class DataExportService
                 ]
             ]);
 
-            // Queue export job for background processing
-            Queue::push(new \App\Jobs\ProcessDataExport($export));
+            if ($this->useQueue) {
+                // 🎯 QUEUE MODE: Process export asynchronously using job queue
+                $this->logger->info('Dispatching export to queue for background processing', [
+                    'export_id' => $export->id,
+                    'user_id' => $user->id,
+                    'log_category' => 'EXPORT_SERVICE_QUEUE'
+                ]);
+
+                ProcessDataExport::dispatch($export);
+            } else {
+                // 🎯 SYNC MODE: Process export immediately for development
+                $this->logger->info('Processing export synchronously (development mode)', [
+                    'export_id' => $export->id,
+                    'user_id' => $user->id,
+                    'log_category' => 'EXPORT_SERVICE_SYNC'
+                ]);
+
+                $success = $this->processDataExport($export);
+
+                if (!$success) {
+                    $this->logger->error('Synchronous export processing failed', [
+                        'export_id' => $export->id,
+                        'user_id' => $user->id,
+                        'log_category' => 'EXPORT_SERVICE_SYNC_FAILED'
+                    ]);
+                    return '';
+                }
+            }
 
             return $token;
         } catch (\Exception $e) {
-            $this->logger->error('Data Export Service: Failed to generate export', [
+            $this->errorManager->handle('GDPR_EXPORT_GENERATION_FAILED', [
                 'user_id' => $user->id,
                 'format' => $format,
-                'categories' => $categories,
-                'error' => $e->getMessage(),
-                'log_category' => 'EXPORT_SERVICE_ERROR'
-            ]);
+                'categories' => implode(', ', $categories),
+                'error_message' => $e->getMessage(),
+                'error_file' => $e->getFile(),
+                'error_line' => $e->getLine()
+            ], $e);
 
-            throw $e;
+            // Return empty token to indicate failure
+            return '';
         }
     }
 
@@ -276,8 +389,7 @@ class DataExportService
      * @return bool
      * @privacy-safe Processes export for specified user only
      */
-    public function processDataExport(DataExport $export): bool
-    {
+    public function processDataExport(DataExport $export): bool {
         try {
             $this->logger->info('Data Export Service: Processing data export', [
                 'export_id' => $export->id,
@@ -295,7 +407,7 @@ class DataExportService
             $filePath = $this->generateExportFile($userData, $export);
 
             // Update export record
-            $fileSize = Storage::disk('exports')->size($filePath);
+            $fileSize = Storage::disk('public')->size($filePath);
             $export->update([
                 'status' => 'completed',
                 'progress' => 100,
@@ -318,14 +430,15 @@ class DataExportService
                 'error_message' => $e->getMessage()
             ]);
 
-            $this->logger->error('Data Export Service: Export processing failed', [
+            $this->errorManager->handle('GDPR_EXPORT_PROCESSING_FAILED', [
                 'export_id' => $export->id,
                 'user_id' => $export->user_id,
-                'error' => $e->getMessage(),
-                'log_category' => 'EXPORT_SERVICE_ERROR'
-            ]);
+                'error_message' => $e->getMessage(),
+                'error_file' => $e->getFile(),
+                'error_line' => $e->getLine()
+            ], $e);
 
-            throw $e;
+            return false;
         }
     }
 
@@ -337,8 +450,7 @@ class DataExportService
      * @return DataExport|null
      * @privacy-safe Returns export only if it belongs to user
      */
-    public function getExportByToken(string $token, User $user): ?DataExport
-    {
+    public function getExportByToken(string $token, User $user): ?DataExport {
         return $user->dataExports()->where('token', $token)->first();
     }
 
@@ -349,8 +461,7 @@ class DataExportService
      * @return StreamedResponse
      * @privacy-safe Streams file only for authorized user
      */
-    public function streamExportFile(DataExport $export): StreamedResponse
-    {
+    public function streamExportFile(DataExport $export): StreamedResponse {
         try {
             $this->logger->info('Data Export Service: Streaming export file', [
                 'export_id' => $export->id,
@@ -359,40 +470,140 @@ class DataExportService
             ]);
 
             if ($export->status !== 'completed') {
-                throw new \RuntimeException('Export is not ready for download');
+                $this->errorManager->handle('GDPR_EXPORT_NOT_READY', [
+                    'export_id' => $export->id,
+                    'user_id' => $export->user_id,
+                    'status' => $export->status
+                ]);
+                abort(422, __('gdpr.export.export_not_ready'));
             }
 
             if ($export->expires_at < now()) {
-                throw new \RuntimeException('Export has expired');
+                $this->errorManager->handle('GDPR_EXPORT_EXPIRED', [
+                    'export_id' => $export->id,
+                    'user_id' => $export->user_id,
+                    'expired_at' => $export->expires_at
+                ]);
+                abort(410, __('gdpr.export.export_expired'));
             }
 
-            if (!Storage::disk('exports')->exists($export->file_path)) {
-                throw new \RuntimeException('Export file not found');
+            if (!Storage::disk('public')->exists($export->file_path)) {
+                $this->errorManager->handle('GDPR_EXPORT_FILE_NOT_FOUND', [
+                    'export_id' => $export->id,
+                    'user_id' => $export->user_id,
+                    'file_path' => $export->file_path
+                ]);
+                abort(404, __('gdpr.export.export_file_not_found'));
             }
+
+            // Debug: Log file details before download
+            $fileSize = Storage::disk('public')->size($export->file_path);
+            $this->logger->info('Preparing file download', [
+                'export_id' => $export->id,
+                'file_path' => $export->file_path,
+                'file_size' => $fileSize,
+                'format' => $export->format,
+                'log_category' => 'EXPORT_SERVICE_DOWNLOAD'
+            ]);
 
             // Update download count
             $export->increment('download_count');
             $export->update(['last_downloaded_at' => now()]);
 
             $formatConfig = $this->supportedFormats[$export->format];
-            $filename = "florence_egi_data_export_{$export->user_id}_{$export->created_at->format('Y-m-d')}.{$formatConfig['extension']}";
 
-            return Storage::disk('exports')->download($export->file_path, $filename, [
-                'Content-Type' => $formatConfig['mime_type'],
-                'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+            // 🎯 FIX: Per i CSV usiamo ZIP come estensione dato che generiamo un archivio
+            $actualExtension = $export->format === 'csv' ? 'zip' : $formatConfig['extension'];
+            $actualMimeType = $export->format === 'csv' ? 'application/zip' : $formatConfig['mime_type'];
+            $filename = "florence_egi_data_export_{$export->user_id}_{$export->created_at->format('Y-m-d')}.{$actualExtension}";
+
+            $this->logger->info('Starting file download', [
+                'export_id' => $export->id,
+                'actual_extension' => $actualExtension,
+                'actual_mime_type' => $actualMimeType,
+                'download_filename' => $filename,
+                'storage_file_path' => $export->file_path,
+                'log_category' => 'EXPORT_SERVICE_DOWNLOAD'
+            ]);
+
+            // 🎯 FIX: Use Laravel's storage download with proper headers
+            $fullPath = Storage::disk('public')->path($export->file_path);
+
+            $this->logger->info('File full path for download', [
+                'export_id' => $export->id,
+                'file_path' => $export->file_path,
+                'full_path' => $fullPath,
+                'file_exists' => file_exists($fullPath),
+                'file_size' => file_exists($fullPath) ? filesize($fullPath) : 'N/A',
+                'log_category' => 'EXPORT_SERVICE_DOWNLOAD'
+            ]);
+
+            // Verify file exists
+            if (!file_exists($fullPath)) {
+                $this->errorManager->handle('GDPR_EXPORT_FILE_NOT_FOUND_ON_DISK', [
+                    'export_id' => $export->id,
+                    'user_id' => $export->user_id,
+                    'file_path' => $export->file_path,
+                    'full_path' => $fullPath
+                ]);
+                abort(404, __('gdpr.export.export_file_not_found'));
+            }
+
+            // Get file size
+            $fileSize = filesize($fullPath);
+
+            $this->logger->info('Starting file stream download', [
+                'export_id' => $export->id,
+                'filename' => $filename,
+                'mime_type' => $actualMimeType,
+                'file_size' => $fileSize,
+                'log_category' => 'EXPORT_SERVICE_DOWNLOAD'
+            ]);
+
+            // Return response with proper streaming using readfile
+            $response = response()->stream(function () use ($fullPath) {
+                // Set output buffering and ensure clean output
+                if (ob_get_level()) {
+                    ob_end_clean();
+                }
+                
+                $file = fopen($fullPath, 'rb');
+                if ($file === false) {
+                    throw new \RuntimeException('Cannot open file for reading');
+                }
+                
+                // Use fpassthru for efficient file streaming
+                fpassthru($file);
+                fclose($file);
+            }, 200, [
+                'Content-Type' => $actualMimeType,
+                'Content-Disposition' => 'attachment; filename="' . addslashes($filename) . '"',
+                'Content-Length' => $fileSize,
+                'Content-Transfer-Encoding' => 'binary',
                 'Cache-Control' => 'no-cache, no-store, must-revalidate',
                 'Pragma' => 'no-cache',
-                'Expires' => '0'
-            ]);
-        } catch (\Exception $e) {
-            $this->logger->error('Data Export Service: Failed to stream export file', [
-                'export_id' => $export->id,
-                'user_id' => $export->user_id,
-                'error' => $e->getMessage(),
-                'log_category' => 'EXPORT_SERVICE_ERROR'
+                'Expires' => '0',
+                'Accept-Ranges' => 'bytes'
             ]);
 
-            throw $e;
+            // Log successful preparation
+            $this->logger->info('File stream response prepared successfully', [
+                'export_id' => $export->id,
+                'response_headers' => $response->headers->all(),
+                'log_category' => 'EXPORT_SERVICE_DOWNLOAD'
+            ]);
+
+            return $response;
+        } catch (\Exception $e) {
+            $this->errorManager->handle('GDPR_EXPORT_DOWNLOAD_FAILED', [
+                'export_id' => $export->id,
+                'user_id' => $export->user_id,
+                'error_message' => $e->getMessage(),
+                'error_file' => $e->getFile(),
+                'error_line' => $e->getLine()
+            ], $e);
+
+            abort(500, __('gdpr.export.download_error'));
         }
     }
 
@@ -402,8 +613,7 @@ class DataExportService
      * @return int Number of cleaned exports
      * @privacy-safe Cleans only expired exports
      */
-    public function cleanExpiredExports(): int
-    {
+    public function cleanExpiredExports(): int {
         try {
             $this->logger->info('Data Export Service: Cleaning expired exports', [
                 'log_category' => 'EXPORT_SERVICE_MAINTENANCE'
@@ -415,8 +625,8 @@ class DataExportService
 
             $cleanedCount = 0;
             foreach ($expiredExports as $export) {
-                if ($export->file_path && Storage::disk('exports')->exists($export->file_path)) {
-                    Storage::disk('exports')->delete($export->file_path);
+                if ($export->file_path && Storage::disk('public')->exists($export->file_path)) {
+                    Storage::disk('public')->delete($export->file_path);
                 }
                 $export->update(['status' => 'expired', 'file_path' => null]);
                 $cleanedCount++;
@@ -429,12 +639,13 @@ class DataExportService
 
             return $cleanedCount;
         } catch (\Exception $e) {
-            $this->logger->error('Data Export Service: Failed to clean expired exports', [
-                'error' => $e->getMessage(),
-                'log_category' => 'EXPORT_SERVICE_ERROR'
-            ]);
+            $this->errorManager->handle('GDPR_EXPORT_CLEANUP_FAILED', [
+                'error_message' => $e->getMessage(),
+                'error_file' => $e->getFile(),
+                'error_line' => $e->getLine()
+            ], $e);
 
-            throw $e;
+            return 0;
         }
     }
 
@@ -451,8 +662,7 @@ class DataExportService
      * @return array
      * @privacy-safe Collects data for specified user only
      */
-    private function collectUserData(User $user, array $categories, DataExport $export): array
-    {
+    private function collectUserData(User $user, array $categories, DataExport $export): array {
         $data = [
             'export_info' => [
                 'generated_at' => now()->toISOString(),
@@ -463,9 +673,17 @@ class DataExportService
             ]
         ];
 
-        // 🔥 VERIFICA CHE LE CATEGORIE SIANO VALIDE DALLA CONFIG
-        $validCategories = array_keys(config('gdpr.export.data_categories', []));
+        // 🔥 USA LE CATEGORIE DEFINITE IN QUESTA CLASSE
+        $validCategories = array_keys($this->dataCategories);
         $categoriesToProcess = array_intersect($categories, $validCategories);
+
+        // Debug log per vedere cosa succede
+        $this->logger->info('Processing export categories', [
+            'requested_categories' => $categories,
+            'valid_categories' => $validCategories,
+            'categories_to_process' => $categoriesToProcess,
+            'log_category' => 'EXPORT_SERVICE_DEBUG'
+        ]);
 
         $totalCategories = count($categoriesToProcess);
         $currentCategory = 0;
@@ -532,8 +750,7 @@ class DataExportService
      * @return array
      * @privacy-safe Returns user's profile data only
      */
-    private function collectProfileData(User $user): array
-    {
+    private function collectProfileData(User $user): array {
         return [
             'basic_info' => [
                 'id' => $user->id,
@@ -563,8 +780,7 @@ class DataExportService
      * @return array
      * @privacy-safe Returns user's activity data only
      */
-    private function collectActivityData(User $user): array
-    {
+    private function collectActivityData(User $user): array {
         return [
             'login_history' => $user->loginHistory()
                 ->orderBy('created_at', 'desc')
@@ -575,11 +791,12 @@ class DataExportService
                         'timestamp' => $login->created_at->toISOString(),
                         'ip_address' => $this->maskIpAddress($login->ip_address),
                         'user_agent' => $login->user_agent,
-                        'success' => $login->success
+                        'success' => true, // Assume successful if logged in user_activities
+                        'action' => $login->action ?? 'login'
                     ];
                 })->toArray(),
             'platform_usage' => [
-                'total_logins' => $user->loginHistory()->where('success', true)->count(),
+                'total_logins' => $user->loginHistory()->count(), // All login records are successful
                 'last_login' => $user->last_login_at?->toISOString(),
                 'account_age_days' => $user->created_at->diffInDays(now())
             ]
@@ -593,8 +810,7 @@ class DataExportService
      * @return array
      * @privacy-safe Returns user's collection data only
      */
-    private function collectCollectionData(User $user): array
-    {
+    private function collectCollectionData(User $user): array {
         return [
             'owned_collections' => $user->collections()
                 ->with('egis')
@@ -613,7 +829,7 @@ class DataExportService
                         ]
                     ];
                 })->toArray(),
-            'collaboration_collections' => $user->collaboratingCollections()
+            'collaboration_collections' => $user->collaborations()
                 ->get()
                 ->map(function ($collection) {
                     return [
@@ -633,8 +849,7 @@ class DataExportService
      * @return array
      * @privacy-safe Returns user's wallet data only
      */
-    private function collectWalletData(User $user): array
-    {
+    private function collectWalletData(User $user): array {
         return [
             'wallet_connections' => [
                 'primary_wallet' => $user->wallet_address,
@@ -657,8 +872,7 @@ class DataExportService
      * @return array
      * @privacy-safe Returns user's consent data only
      */
-    private function collectConsentData(User $user): array
-    {
+    private function collectConsentData(User $user): array {
         return [
             'current_consents' => $user->consent_summary ?? [],
             'consent_history' => $user->consents()
@@ -686,8 +900,7 @@ class DataExportService
      * @return array
      * @privacy-safe Returns user's audit data only
      */
-    private function collectAuditData(User $user): array
-    {
+    private function collectAuditData(User $user): array {
         return [
             'gdpr_requests' => $user->gdprRequests()
                 ->orderBy('created_at', 'desc')
@@ -724,8 +937,7 @@ class DataExportService
      * @return string File path
      * @privacy-safe Generates file for specified export only
      */
-    private function generateExportFile(array $data, DataExport $export): string
-    {
+    private function generateExportFile(array $data, DataExport $export): string {
         $this->updateExportProgress($export, 90);
 
         $fileName = "export_{$export->token}_{$export->format}";
@@ -738,7 +950,12 @@ class DataExportService
             case 'pdf':
                 return $this->generatePdfFile($data, $fileName);
             default:
-                throw new \InvalidArgumentException("Unsupported format: {$export->format}");
+                $this->errorManager->handle('GDPR_EXPORT_INVALID_FORMAT', [
+                    'export_id' => $export->id,
+                    'format' => $export->format,
+                    'supported_formats' => implode(', ', array_keys($this->supportedFormats))
+                ]);
+                return '';
         }
     }
 
@@ -750,12 +967,11 @@ class DataExportService
      * @return string
      * @privacy-safe Generates JSON file with user data
      */
-    private function generateJsonFile(array $data, string $fileName): string
-    {
+    private function generateJsonFile(array $data, string $fileName): string {
         $filePath = $fileName . '.json';
         $jsonContent = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
 
-        Storage::disk('exports')->put($filePath, $jsonContent);
+        Storage::disk('public')->put($filePath, $jsonContent);
 
         return $filePath;
     }
@@ -768,26 +984,152 @@ class DataExportService
      * @return string
      * @privacy-safe Generates CSV file with user data
      */
-    private function generateCsvFile(array $data, string $fileName): string
-    {
-        $zipPath = $fileName . '.zip';
-        $zip = new ZipArchive();
-        $tempZipPath = storage_path('app/temp/' . $zipPath);
+    private function generateCsvFile(array $data, string $fileName): string {
+        $zipFileName = $fileName . '.zip';
 
-        if ($zip->open($tempZipPath, ZipArchive::CREATE) === TRUE) {
-            foreach ($data as $category => $categoryData) {
-                if ($category === 'export_info') continue;
-
-                $csvContent = $this->arrayToCsv($categoryData);
-                $zip->addFromString($category . '.csv', $csvContent);
-            }
-            $zip->close();
+        // Create temporary files directory
+        $tempDir = storage_path('app/temp');
+        if (!file_exists($tempDir)) {
+            mkdir($tempDir, 0755, true);
         }
 
-        Storage::disk('exports')->putFileAs('', $tempZipPath, $zipPath);
-        unlink($tempZipPath);
+        $tempZipPath = $tempDir . '/' . $zipFileName;
 
-        return $zipPath;
+        // Delete existing file if present
+        if (file_exists($tempZipPath)) {
+            unlink($tempZipPath);
+        }
+
+        // Create ZIP archive
+        $zip = new \ZipArchive();
+        $result = $zip->open($tempZipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
+
+        if ($result !== TRUE) {
+            throw new \RuntimeException("Cannot create ZIP file: " . $this->getZipError($result));
+        }
+
+        // Add CSV files to ZIP
+        $fileCount = 0;
+        foreach ($data as $category => $categoryData) {
+            if ($category === 'export_info') continue;
+
+            // Flatten and convert to CSV
+            $csvData = $this->flattenForCsv($categoryData);
+            $csvContent = $this->arrayToCsv($csvData);
+
+            // Validate CSV content
+            if (empty($csvContent) || strlen($csvContent) < 10) {
+                $this->logger->warning("Empty CSV content for category: {$category}", [
+                    'log_category' => 'EXPORT_SERVICE_CSV_GENERATION'
+                ]);
+                continue;
+            }
+
+            // Add file to ZIP
+            $csvFileName = $category . '.csv';
+            if ($zip->addFromString($csvFileName, $csvContent) === FALSE) {
+                $this->logger->error("Failed to add {$csvFileName} to ZIP", [
+                    'log_category' => 'EXPORT_SERVICE_CSV_GENERATION'
+                ]);
+                continue;
+            }
+
+            $fileCount++;
+
+            $this->logger->info("Added CSV to ZIP", [
+                'category' => $category,
+                'csv_size' => strlen($csvContent),
+                'has_bom' => substr($csvContent, 0, 3) === "\xEF\xBB\xBF",
+                'has_semicolon' => strpos($csvContent, ';') !== false,
+                'log_category' => 'EXPORT_SERVICE_CSV_GENERATION'
+            ]);
+        }
+
+        // Close ZIP
+        $closeResult = $zip->close();
+        if ($closeResult === FALSE) {
+            throw new \RuntimeException("Failed to close ZIP archive");
+        }
+
+        // Verify ZIP was created
+        if (!file_exists($tempZipPath) || filesize($tempZipPath) === 0) {
+            throw new \RuntimeException("ZIP file was not created or is empty");
+        }
+
+        $this->logger->info("ZIP created successfully", [
+            'path' => $tempZipPath,
+            'size' => filesize($tempZipPath),
+            'files_added' => $fileCount,
+            'log_category' => 'EXPORT_SERVICE_CSV_GENERATION'
+        ]);
+
+        // Move to Laravel storage
+        try {
+            // Read the file content and store via Laravel
+            $zipContent = file_get_contents($tempZipPath);
+
+            $this->logger->info("Reading ZIP file for storage", [
+                'temp_path' => $tempZipPath,
+                'content_size' => strlen($zipContent),
+                'target_file' => $zipFileName,
+                'log_category' => 'EXPORT_SERVICE_CSV_GENERATION'
+            ]);
+
+            if (strlen($zipContent) === 0) {
+                throw new \RuntimeException('ZIP file content is empty');
+            }
+
+            Storage::disk('public')->put($zipFileName, $zipContent);
+
+            // Verify the file was stored correctly
+            if (!Storage::disk('public')->exists($zipFileName)) {
+                throw new \RuntimeException('ZIP file was not stored in public storage');
+            }
+
+            $storedSize = Storage::disk('public')->size($zipFileName);
+            $this->logger->info("ZIP file stored successfully", [
+                'stored_path' => $zipFileName,
+                'stored_size' => $storedSize,
+                'original_size' => strlen($zipContent),
+                'log_category' => 'EXPORT_SERVICE_CSV_GENERATION'
+            ]);
+
+            // Clean up temp file
+            unlink($tempZipPath);
+
+            return $zipFileName;
+        } catch (\Exception $e) {
+            $this->logger->error("Failed to store ZIP file", [
+                'error' => $e->getMessage(),
+                'temp_path' => $tempZipPath,
+                'target_file' => $zipFileName,
+                'log_category' => 'EXPORT_SERVICE_CSV_GENERATION'
+            ]);
+
+            // Clean up on error
+            if (file_exists($tempZipPath)) {
+                unlink($tempZipPath);
+            }
+            throw new \RuntimeException('Failed to store ZIP file: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Get human-readable ZIP error message
+     */
+    private function getZipError(int $code): string {
+        switch ($code) {
+            case \ZipArchive::ER_INVAL:
+                return 'Invalid argument';
+            case \ZipArchive::ER_NOENT:
+                return 'No such file';
+            case \ZipArchive::ER_MEMORY:
+                return 'Memory allocation failure';
+            case \ZipArchive::ER_TMPOPEN:
+                return 'Can\'t create temp file';
+            default:
+                return "Unknown error (code: {$code})";
+        }
     }
 
     /**
@@ -798,17 +1140,52 @@ class DataExportService
      * @return string
      * @privacy-safe Generates PDF file with user data
      */
-    private function generatePdfFile(array $data, string $fileName): string
-    {
-        // Implementation would use a PDF library like TCPDF or DomPDF
-        // For now, return a simple text-based approach
-        $filePath = $fileName . '.pdf';
-        $textContent = $this->arrayToText($data);
+    private function generatePdfFile(array $data, string $fileName): string {
+        try {
+            // Try DomPDF first
+            $html = $this->arrayToHtml($data);
 
-        // This would be replaced with actual PDF generation
-        Storage::disk('exports')->put($filePath, $textContent);
+            // Set memory limit for PDF generation
+            ini_set('memory_limit', '512M');
 
-        return $filePath;
+            // Create PDF using DomPDF with timeout protection
+            $pdf = Pdf::loadHTML($html);
+            $pdf->setPaper('A4', 'portrait');
+
+            // Set DomPDF options
+            $pdf->getDomPDF()->getOptions()->set([
+                'isHtml5ParserEnabled' => true,
+                'isPhpEnabled' => false,
+                'isRemoteEnabled' => false,
+                'defaultFont' => 'Arial'
+            ]);
+
+            $filePath = $fileName . '.pdf';
+            $pdfContent = $pdf->output();
+
+            // Verify PDF content is valid
+            if (substr($pdfContent, 0, 4) !== '%PDF') {
+                throw new \Exception('Generated content is not a valid PDF');
+            }
+
+            Storage::disk('public')->put($filePath, $pdfContent);
+
+            return $filePath;
+        } catch (\Exception $e) {
+            // Log the specific error
+            $this->logger->error('PDF generation failed, falling back to HTML', [
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
+
+            // Fallback to HTML file if DomPDF fails
+            $filePath = $fileName . '.html';
+            $htmlContent = $this->arrayToHtml($data);
+            Storage::disk('public')->put($filePath, $htmlContent);
+
+            return $filePath;
+        }
     }
 
     /**
@@ -819,9 +1196,59 @@ class DataExportService
      * @return void
      * @privacy-safe Updates progress for specified export
      */
-    private function updateExportProgress(DataExport $export, int $progress): void
-    {
+    private function updateExportProgress(DataExport $export, int $progress): void {
         $export->update(['progress' => min(100, max(0, $progress))]);
+    }
+
+    /**
+     * Flatten nested data structures for CSV export
+     *
+     * @param array $data
+     * @return array
+     * @privacy-safe Flattens data structure for CSV compatibility
+     */
+    private function flattenForCsv(array $data): array {
+        $flattened = [];
+
+        foreach ($data as $key => $value) {
+            if (is_array($value) && !empty($value)) {
+                // Check if this is a list of similar records (like login_history, owned_collections)
+                $first = reset($value);
+                if (is_array($first) && $this->isAssociativeArray($first)) {
+                    // This is a list of records - add them directly
+                    foreach ($value as $record) {
+                        if (is_array($record)) {
+                            $flattened[] = $record;
+                        }
+                    }
+                } else {
+                    // This is a single record or simple values
+                    if ($this->isAssociativeArray($value)) {
+                        $flattened[] = $value;
+                    } else {
+                        // Convert simple array to key-value
+                        $flattened[] = [$key => is_array($value) ? json_encode($value) : $value];
+                    }
+                }
+            } else {
+                // Single value - wrap in array with key
+                $flattened[] = [$key => is_array($value) ? json_encode($value) : $value];
+            }
+        }
+
+        // If we have no flattened data, return the original structure
+        if (empty($flattened)) {
+            // If original data is already a simple list of associative arrays, return as-is
+            if (!empty($data)) {
+                $first = reset($data);
+                if (is_array($first) && $this->isAssociativeArray($first)) {
+                    return $data;
+                }
+            }
+            return $data;
+        }
+
+        return $flattened;
     }
 
     /**
@@ -831,24 +1258,50 @@ class DataExportService
      * @return string
      * @privacy-safe Converts data to CSV format
      */
-    private function arrayToCsv(array $data): string
-    {
+    private function arrayToCsv(array $data): string {
         $output = fopen('php://temp', 'r+');
+
+        // Per massima compatibilità Excel: UTF-8 con BOM e separatore semicolon
+        fwrite($output, "\xEF\xBB\xBF");
 
         if (is_array($data) && !empty($data)) {
             $first = reset($data);
-            if (is_array($first)) {
+            if (is_array($first) && !empty($first)) {
                 // Write headers
-                fputcsv($output, array_keys($first));
-                // Write data rows
-                foreach ($data as $row) {
-                    fputcsv($output, $row);
+                $keys = array_keys($first);
+                if (!empty($keys)) {
+                    $headers = array_map(function ($header) {
+                        return $this->sanitizeForCsv($header);
+                    }, $keys);
+
+                    // Use semicolon separator for Excel European format
+                    fputcsv($output, $headers, ';', '"');
+
+                    // Write data rows
+                    foreach ($data as $row) {
+                        if (!is_array($row)) {
+                            // If row is not an array, convert to simple key-value
+                            $row = ['value' => $row];
+                        }
+                        // Convert all array values to strings and sanitize
+                        $csvRow = array_map(function ($value) {
+                            if (is_array($value)) {
+                                return $this->sanitizeForCsv(json_encode($value, JSON_UNESCAPED_UNICODE));
+                            }
+                            return $this->sanitizeForCsv((string)$value);
+                        }, $row);
+                        fputcsv($output, $csvRow, ';', '"');
+                    }
                 }
             } else {
                 // Simple key-value pairs
-                fputcsv($output, ['Key', 'Value']);
+                fputcsv($output, ['Key', 'Value'], ';', '"');
                 foreach ($data as $key => $value) {
-                    fputcsv($output, [$key, is_array($value) ? json_encode($value) : $value]);
+                    $sanitizedKey = $this->sanitizeForCsv((string)$key);
+                    $sanitizedValue = is_array($value)
+                        ? $this->sanitizeForCsv(json_encode($value, JSON_UNESCAPED_UNICODE))
+                        : $this->sanitizeForCsv((string)$value);
+                    fputcsv($output, [$sanitizedKey, $sanitizedValue], ';', '"');
                 }
             }
         }
@@ -861,14 +1314,288 @@ class DataExportService
     }
 
     /**
+     * Sanitize data for CSV output
+     *
+     * @param string $value
+     * @return string
+     * @privacy-safe Cleans data for CSV format
+     */
+    private function sanitizeForCsv(string $value): string {
+        // Convert HTML entities to readable text first
+        $value = html_entity_decode($value, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+        // Strip HTML tags but keep the content
+        $value = strip_tags($value);
+
+        // Remove any control characters and non-printable characters
+        $value = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]/', '', $value);
+
+        // Replace problematic characters that Excel doesn't handle well
+        $value = str_replace(['"', "'", '`', '´'], ['"', "'", "'", "'"], $value);
+
+        // Replace multiple whitespaces with single space
+        $value = preg_replace('/\s+/', ' ', $value);
+
+        // Trim whitespace
+        $value = trim($value);
+
+        // For Excel compatibility: convert special characters to ASCII equivalents
+        $value = $this->convertSpecialCharsForExcel($value);
+
+        // Limit length to prevent extremely long cells
+        if (strlen($value) > 1000) {
+            $value = substr($value, 0, 997) . '...';
+        }
+
+        return $value;
+    }
+
+    /**
+     * Convert special characters to Excel-friendly equivalents
+     *
+     * @param string $value
+     * @return string
+     */
+    private function convertSpecialCharsForExcel(string $value): string {
+        // Common character replacements for Excel compatibility
+        $replacements = [
+            // Quotes and apostrophes (using proper escaping)
+            '"' => '"',
+            '"' => '"',
+            "'" => "'",
+            "'" => "'",
+
+            // Dashes and hyphens
+            '–' => '-',
+            '—' => '-',
+
+            // Dots and ellipsis
+            '…' => '...',
+
+            // Mathematical symbols
+            '×' => 'x',
+            '÷' => '/',
+
+            // Currency and symbols
+            '€' => 'EUR',
+            '£' => 'GBP',
+            '¥' => 'JPY',
+        ];
+
+        return str_replace(array_keys($replacements), array_values($replacements), $value);
+    }
+
+    /**
      * Convert array to text format
      *
      * @param array $data
      * @return string
      * @privacy-safe Converts data to text format
      */
-    private function arrayToText(array $data): string
-    {
+    /**
+     * Convert array to HTML format for PDF generation
+     *
+     * @param array $data
+     * @return string
+     * @privacy-safe Converts data to HTML format
+     */
+    private function arrayToHtml(array $data): string {
+        $html = '<!DOCTYPE html><html><head>';
+        $html .= '<meta charset="UTF-8">';
+        $html .= '<title>FlorenceEGI Data Export</title>';
+        $html .= '<style>';
+        $html .= 'body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }';
+        $html .= 'h1 { color: #333; border-bottom: 3px solid #007bff; padding-bottom: 10px; }';
+        $html .= 'h2 { color: #666; margin-top: 40px; margin-bottom: 20px; border-left: 4px solid #007bff; padding-left: 15px; }';
+        $html .= 'table { width: 100%; border-collapse: collapse; margin: 15px 0; }';
+        $html .= 'th, td { border: 1px solid #ddd; padding: 12px 8px; text-align: left; vertical-align: top; }';
+        $html .= 'th { background-color: #f8f9fa; font-weight: bold; }';
+        $html .= 'tr:nth-child(even) { background-color: #f9f9f9; }';
+        $html .= 'tr:hover { background-color: #f5f5f5; }';
+        $html .= 'dl { margin: 10px 0; }';
+        $html .= 'dt { font-weight: bold; margin-top: 15px; color: #495057; }';
+        $html .= 'dd { margin-left: 20px; margin-bottom: 10px; }';
+        $html .= 'pre { background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-wrap: break-word; font-size: 12px; }';
+        $html .= '.nested-table { margin: 5px 0; }';
+        $html .= '.nested-table th, .nested-table td { padding: 6px; font-size: 14px; }';
+        // Card styles for wide data
+        $html .= '.card-container { display: block; margin: 15px 0; }';
+        $html .= '.data-card { border: 1px solid #ddd; margin-bottom: 15px; border-radius: 8px; overflow: hidden; }';
+        $html .= '.card-header { background-color: #007bff; color: white; padding: 12px; font-weight: bold; }';
+        $html .= '.card-body { padding: 15px; }';
+        $html .= '.card-row { margin-bottom: 8px; display: block; }';
+        $html .= '.card-label { font-weight: bold; color: #495057; display: inline-block; min-width: 120px; margin-right: 10px; }';
+        $html .= '.card-value { display: inline-block; word-wrap: break-word; max-width: calc(100% - 130px); vertical-align: top; }';
+        $html .= '</style>';
+        $html .= '</head><body>';
+
+        $html .= '<h1>FlorenceEGI - Esportazione Dati Personali</h1>';
+        $html .= '<p><strong>Data di generazione:</strong> ' . now()->format('d/m/Y H:i:s') . '</p>';
+        $html .= '<p><strong>Formato:</strong> PDF Export</p>';
+
+        foreach ($data as $section => $sectionData) {
+            if ($section === 'export_info') continue; // Skip technical info
+
+            $html .= '<h2>' . ucfirst(str_replace('_', ' ', $section)) . '</h2>';
+            $html .= $this->arrayToHtmlRecursive($sectionData);
+        }
+
+        $html .= '<div style="margin-top: 50px; padding-top: 20px; border-top: 1px solid #ddd; font-size: 12px; color: #666;">';
+        $html .= '<p><em>Questo documento è stato generato automaticamente in conformità al Regolamento UE 2016/679 (GDPR) - Diritto alla portabilità dei dati (Art. 20).</em></p>';
+        $html .= '</div>';
+
+        $html .= '</body></html>';
+        return $html;
+    }
+
+    /**
+     * Recursively convert array to HTML
+     *
+     * @param mixed $data
+     * @return string
+     * @privacy-safe Helper for HTML conversion
+     */
+    private function arrayToHtmlRecursive($data): string {
+        if (empty($data)) {
+            return '<p><em>No data available</em></p>';
+        }
+
+        // Handle non-array data first
+        if (!is_array($data)) {
+            return '<p>' . htmlspecialchars((string)$data) . '</p>';
+        }
+
+        // Now we know $data is an array
+        $first = reset($data);
+
+        // Check if it's a list of associative arrays (table format)
+        if (is_array($first) && !empty($first) && $this->isAssociativeArray($first)) {
+            $columnCount = count(array_keys($first));
+
+            // If too many columns (>4), use card layout instead of table
+            if ($columnCount > 4) {
+                return $this->renderAsCards($data);
+            } else {
+                return $this->renderAsTable($data);
+            }
+        } else {
+            // Key-value pairs - render as definition list for better readability
+            $html = '<dl style="margin: 10px 0;">';
+            foreach ($data as $key => $value) {
+                $html .= '<dt style="font-weight: bold; margin-top: 10px;">' .
+                    htmlspecialchars(ucfirst(str_replace('_', ' ', $key))) . '</dt>';
+                $html .= '<dd style="margin-left: 20px;">';
+
+                if (is_array($value)) {
+                    // Recursively render nested arrays
+                    $html .= $this->arrayToHtmlRecursive($value);
+                } else {
+                    $html .= htmlspecialchars((string)$value);
+                }
+                $html .= '</dd>';
+            }
+            $html .= '</dl>';
+        }
+
+        return $html;
+    }
+
+    /**
+     * Check if array is associative (has string keys)
+     *
+     * @param array $array
+     * @return bool
+     */
+    private function isAssociativeArray(array $array): bool {
+        if (empty($array)) {
+            return false;
+        }
+        return array_keys($array) !== range(0, count($array) - 1);
+    }
+
+    /**
+     * Render data as table (for 4 or fewer columns)
+     *
+     * @param array $data
+     * @return string
+     */
+    private function renderAsTable(array $data): string {
+        $first = reset($data);
+        $html = '<table>';
+        $html .= '<thead><tr>';
+        foreach (array_keys($first) as $header) {
+            $html .= '<th>' . htmlspecialchars(ucfirst(str_replace('_', ' ', $header))) . '</th>';
+        }
+        $html .= '</tr></thead><tbody>';
+
+        foreach ($data as $row) {
+            // Extra safety check: ensure $row is an array
+            if (!is_array($row)) {
+                continue;
+            }
+            $html .= '<tr>';
+            foreach ($row as $value) {
+                $html .= '<td>';
+                if (is_array($value)) {
+                    // Render nested arrays as nested tables or key-value pairs
+                    $html .= $this->arrayToHtmlRecursive($value);
+                } else {
+                    $html .= htmlspecialchars((string)$value);
+                }
+                $html .= '</td>';
+            }
+            $html .= '</tr>';
+        }
+        $html .= '</tbody></table>';
+
+        return $html;
+    }
+
+    /**
+     * Render data as cards (for more than 4 columns)
+     *
+     * @param array $data
+     * @return string
+     */
+    private function renderAsCards(array $data): string {
+        $html = '<div class="card-container">';
+        $cardNumber = 1;
+
+        foreach ($data as $index => $item) {
+            if (!is_array($item)) {
+                continue;
+            }
+
+            $html .= '<div class="data-card">';
+            $html .= '<div class="card-header">Elemento ' . $cardNumber . '</div>';
+            $html .= '<div class="card-body">';
+            $cardNumber++;
+
+            foreach ($item as $key => $value) {
+                $html .= '<div class="card-row">';
+                $html .= '<span class="card-label">' . htmlspecialchars(ucfirst(str_replace('_', ' ', $key))) . ':</span>';
+                $html .= '<span class="card-value">';
+
+                if (is_array($value)) {
+                    $html .= $this->arrayToHtmlRecursive($value);
+                } else {
+                    $html .= htmlspecialchars((string)$value);
+                }
+
+                $html .= '</span>';
+                $html .= '</div>';
+            }
+
+            $html .= '</div>';
+            $html .= '</div>';
+        }
+
+        $html .= '</div>';
+
+        return $html;
+    }
+
+    private function arrayToText(array $data): string {
         $text = "FlorenceEGI Data Export\n";
         $text .= "Generated: " . now()->toISOString() . "\n\n";
 
@@ -890,8 +1617,7 @@ class DataExportService
      * @return string
      * @privacy-safe Helper for text conversion
      */
-    private function arrayToTextRecursive($data, int $depth): string
-    {
+    private function arrayToTextRecursive($data, int $depth): string {
         $text = '';
         $indent = str_repeat('  ', $depth);
 
@@ -918,19 +1644,18 @@ class DataExportService
      * @return string|null
      * @privacy-safe Masks IP address for privacy compliance
      */
-    private function maskIpAddress(?string $ipAddress): ?string
-    {
+    private function maskIpAddress(?string $ipAddress): ?string {
         if (!$ipAddress) {
             return null;
         }
 
-        if (filter_var($ipAddress, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+        if (\filter_var($ipAddress, \FILTER_VALIDATE_IP, \FILTER_FLAG_IPV4)) {
             $parts = explode('.', $ipAddress);
             $parts[3] = 'xxx';
             return implode('.', $parts);
         }
 
-        if (filter_var($ipAddress, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
+        if (\filter_var($ipAddress, \FILTER_VALIDATE_IP, \FILTER_FLAG_IPV6)) {
             $parts = explode(':', $ipAddress);
             $parts[count($parts) - 1] = 'xxxx';
             return implode(':', $parts);
@@ -945,8 +1670,7 @@ class DataExportService
      * @return array
      * @privacy-safe Returns public category definitions
      */
-    public function getAvailableDataCategories(): array
-    {
+    public function getAvailableDataCategories(): array {
         // 🔥 USA LA CONFIGURAZIONE ESISTENTE invece di $this->dataCategories
         $categories = config('gdpr.export.data_categories', []);
 
@@ -971,8 +1695,7 @@ class DataExportService
      * @return array
      * @privacy-safe Returns user's account data only
      */
-    private function collectAccountData(User $user): array
-    {
+    private function collectAccountData(User $user): array {
         return [
             'account_info' => [
                 'user_id' => $user->id,
@@ -1005,8 +1728,7 @@ class DataExportService
      * @return array
      * @privacy-safe Returns user's preferences only
      */
-    private function collectPreferencesData(User $user): array
-    {
+    private function collectPreferencesData(User $user): array {
         return [
             'ui_preferences' => [
                 'language' => $user->language ?? 'it',
@@ -1042,8 +1764,7 @@ class DataExportService
      * @return array
      * @privacy-safe Returns user's purchase data only
      */
-    private function collectPurchasesData(User $user): array
-    {
+    private function collectPurchasesData(User $user): array {
         // Placeholder per future implementazione e-commerce
         // Al momento FlorenceEGI potrebbe non avere un sistema acquisti completo
 
@@ -1080,8 +1801,7 @@ class DataExportService
      * @return array
      * @privacy-safe Returns user's messages only
      */
-    private function collectMessagesData(User $user): array
-    {
+    private function collectMessagesData(User $user): array {
         // Placeholder per future sistema messaggi
         // Al momento FlorenceEGI potrebbe non avere un sistema messaggi
 
@@ -1119,8 +1839,7 @@ class DataExportService
      * @return array
      * @privacy-safe Returns user's comments only
      */
-    private function collectCommentsData(User $user): array
-    {
+    private function collectCommentsData(User $user): array {
         // Placeholder per future sistema commenti
 
         return [
@@ -1155,8 +1874,7 @@ class DataExportService
      * @return array
      * @privacy-safe Returns user's biography data only
      */
-    private function collectBiographyData(User $user): array
-    {
+    private function collectBiographyData(User $user): array {
         $biographies = $user->biographies()
             ->with(['chapters' => function ($query) {
                 $query->orderBy('sort_order')->orderBy('date_from');
@@ -1277,5 +1995,4 @@ class DataExportService
             ]
         ];
     }
-
 }

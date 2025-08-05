@@ -50,7 +50,7 @@ return [
     'email_notification' => [
         'enabled' => env('ERROR_EMAIL_NOTIFICATIONS_ENABLED', true),
         'to' => env('ERROR_EMAIL_RECIPIENT', 'devteam@example.com'),
-        'from' => [ /* ... */ ],
+        'from' => [ /* ... */],
         'subject_prefix' => env('ERROR_EMAIL_SUBJECT_PREFIX', '[UEM Error] '),
 
         // --- NUOVE OPZIONI GDPR ---
@@ -60,15 +60,30 @@ return [
         'include_context' => env('ERROR_EMAIL_INCLUDE_CONTEXT', true),       // Default: YES (ma verrà sanitizzato)
         'include_trace' => env('ERROR_EMAIL_INCLUDE_TRACE', false),         // Default: NO (Le tracce possono essere lunghe/sensibili)
         'context_sensitive_keys' => [ // Lista specifica per email, può differire da DB
-            'password', 'secret', 'token', 'auth', 'key', 'credentials', 'authorization',
-            'php_auth_user', 'php_auth_pw', 'credit_card', 'creditcard', 'card_number',
-            'cvv', 'cvc', 'api_key', 'secret_key', 'access_token', 'refresh_token',
+            'password',
+            'secret',
+            'token',
+            'auth',
+            'key',
+            'credentials',
+            'authorization',
+            'php_auth_user',
+            'php_auth_pw',
+            'credit_card',
+            'creditcard',
+            'card_number',
+            'cvv',
+            'cvc',
+            'api_key',
+            'secret_key',
+            'access_token',
+            'refresh_token',
             // Aggiungere chiavi specifiche se necessario
         ],
         'trace_max_lines' => env('ERROR_EMAIL_TRACE_LINES', 30), // Limita lunghezza trace inviata
     ],
 
-     /*
+    /*
     |--------------------------------------------------------------------------
     | Slack Notification Settings
     |--------------------------------------------------------------------------
@@ -86,9 +101,24 @@ return [
         'include_context' => env('ERROR_SLACK_INCLUDE_CONTEXT', true),      // Default: YES (sanitized)
         'include_trace_snippet' => env('ERROR_SLACK_INCLUDE_TRACE', false), // Default: NO (Trace can be very long for Slack)
         'context_sensitive_keys' => [ // Lista per Slack
-            'password', 'secret', 'token', 'auth', 'key', 'credentials', 'authorization',
-            'php_auth_user', 'php_auth_pw', 'credit_card', 'creditcard', 'card_number',
-            'cvv', 'cvc', 'api_key', 'secret_key', 'access_token', 'refresh_token',
+            'password',
+            'secret',
+            'token',
+            'auth',
+            'key',
+            'credentials',
+            'authorization',
+            'php_auth_user',
+            'php_auth_pw',
+            'credit_card',
+            'creditcard',
+            'card_number',
+            'cvv',
+            'cvc',
+            'api_key',
+            'secret_key',
+            'access_token',
+            'refresh_token',
             // Aggiungere chiavi specifiche se necessario
         ],
         'context_max_length' => env('ERROR_SLACK_CONTEXT_LENGTH', 1500), // Limit context length in Slack message
@@ -102,22 +132,22 @@ return [
     | Settings affecting logging handlers (LogHandler, DatabaseLogHandler).
     */
     'logging' => [
-         // Note: Main log channel is configured in ULM, not here.
-         // 'channel' => env('ERROR_LOG_CHANNEL', 'stack'), // Redundant if using ULM properly
+        // Note: Main log channel is configured in ULM, not here.
+        // 'channel' => env('ERROR_LOG_CHANNEL', 'stack'), // Redundant if using ULM properly
         'detailed_context_in_log' => env('ERROR_LOG_DETAILED_CONTEXT', true), // Affects standard LogHandler context
     ],
 
-     /*
+    /*
      |--------------------------------------------------------------------------
      | Database Logging Configuration
      |--------------------------------------------------------------------------
      */
-     'database_logging' => [
-         'enabled' => env('ERROR_DB_LOGGING_ENABLED', true), // Enable DB logging by default
-         'include_trace' => env('ERROR_DB_LOG_INCLUDE_TRACE', true), // Log stack traces to DB
-         'max_trace_length' => env('ERROR_DB_LOG_MAX_TRACE_LENGTH', 10000), // Max chars for DB trace
+    'database_logging' => [
+        'enabled' => env('ERROR_DB_LOGGING_ENABLED', true), // Enable DB logging by default
+        'include_trace' => env('ERROR_DB_LOG_INCLUDE_TRACE', true), // Log stack traces to DB
+        'max_trace_length' => env('ERROR_DB_LOG_MAX_TRACE_LENGTH', 10000), // Max chars for DB trace
 
-         /**
+        /**
          * 🛡️ Sensitive Keys for Context Redaction.
          * Keys listed here (case-insensitive) will have their values
          * replaced with '[REDACTED]' before the context is saved to the database log.
@@ -292,7 +322,7 @@ return [
             'notify_slack' => false,
             'msg_to' => 'div',
         ],
-         'INVALID_INPUT' => [
+        'INVALID_INPUT' => [
             'type' => 'warning',
             'blocking' => 'semi-blocking',
             'dev_message_key' => 'error-manager::errors.dev.invalid_input',
@@ -326,53 +356,53 @@ return [
             'notify_slack' => false,
             'msg_to' => 'sweet-alert',
         ],
-         'CSRF_TOKEN_MISMATCH' => [
-             'type' => 'error',
-             'blocking' => 'blocking',
-             'dev_message_key' => 'error-manager::errors.dev.csrf_token_mismatch',
-             'user_message_key' => 'error-manager::errors.user.csrf_token_mismatch',
-             'http_status_code' => 419,
-             'devTeam_email_need' => false,
-             'notify_slack' => false,
-             'msg_to' => 'sweet-alert', // Inform user to refresh
-         ],
+        'CSRF_TOKEN_MISMATCH' => [
+            'type' => 'error',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.csrf_token_mismatch',
+            'user_message_key' => 'error-manager::errors.user.csrf_token_mismatch',
+            'http_status_code' => 419,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'sweet-alert', // Inform user to refresh
+        ],
 
         // ====================================================
         // Routing & Request Errors (Mapped from Middleware)
         // ====================================================
-         'ROUTE_NOT_FOUND' => [
-             'type' => 'error',
-             'blocking' => 'blocking',
-             'dev_message_key' => 'error-manager::errors.dev.route_not_found',
-             'user_message_key' => 'error-manager::errors.user.route_not_found',
-             'http_status_code' => 404,
-             'devTeam_email_need' => false,
-             'notify_slack' => false,
-             'msg_to' => 'log-only', // Let Laravel handle 404 page
-         ],
-
-         'RESOURCE_NOT_FOUND' => [
-             'type' => 'error',
-             'blocking' => 'blocking',
-             'dev_message_key' => 'error-manager::errors.dev.resource_not_found',
-             'user_message_key' => 'error-manager::errors.user.unexpected_error',
-             'http_status_code' => 404,
-                'devTeam_email_need' => true,
-                'notify_slack' => false,
-                'msg_to' => 'sweet-alert', // Inform user resource is missing
+        'ROUTE_NOT_FOUND' => [
+            'type' => 'error',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.route_not_found',
+            'user_message_key' => 'error-manager::errors.user.route_not_found',
+            'http_status_code' => 404,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'log-only', // Let Laravel handle 404 page
         ],
 
-         'METHOD_NOT_ALLOWED' => [
-             'type' => 'error',
-             'blocking' => 'blocking',
-             'dev_message_key' => 'error-manager::errors.dev.method_not_allowed',
-             'user_message_key' => 'error-manager::errors.user.method_not_allowed',
-             'http_status_code' => 405,
-             'devTeam_email_need' => false,
-             'notify_slack' => false,
-             'msg_to' => 'log-only', // Let Laravel handle 405 page
-         ],
-         'TOO_MANY_REQUESTS' => [
+        'RESOURCE_NOT_FOUND' => [
+            'type' => 'error',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.resource_not_found',
+            'user_message_key' => 'error-manager::errors.user.unexpected_error',
+            'http_status_code' => 404,
+            'devTeam_email_need' => true,
+            'notify_slack' => false,
+            'msg_to' => 'sweet-alert', // Inform user resource is missing
+        ],
+
+        'METHOD_NOT_ALLOWED' => [
+            'type' => 'error',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.method_not_allowed',
+            'user_message_key' => 'error-manager::errors.user.method_not_allowed',
+            'http_status_code' => 405,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'log-only', // Let Laravel handle 405 page
+        ],
+        'TOO_MANY_REQUESTS' => [
             'type' => 'error',
             'blocking' => 'blocking',
             'dev_message_key' => 'error-manager::errors.dev.too_many_requests',
@@ -387,35 +417,35 @@ return [
         // Database / Model Errors (Mapped + Specifics)
         // ====================================================
         'DATABASE_ERROR' => [
-             'type' => 'critical',
-             'blocking' => 'blocking',
-             'dev_message_key' => 'error-manager::errors.dev.database_error',
-             'user_message_key' => 'error-manager::errors.user.database_error',
-             'http_status_code' => 500,
-             'devTeam_email_need' => true,
-             'notify_slack' => true,
-             'msg_to' => 'sweet-alert',
-         ],
-         'RECORD_NOT_FOUND' => [
-             'type' => 'error', // Or warning depending on context
-             'blocking' => 'blocking', // Usually stops the current action
-             'dev_message_key' => 'error-manager::errors.dev.record_not_found',
-             'user_message_key' => 'error-manager::errors.user.record_not_found',
-             'http_status_code' => 404,
-             'devTeam_email_need' => false,
-             'notify_slack' => false,
-             'msg_to' => 'sweet-alert',
-         ],
-         'RECORD_EGI_NOT_FOUND_IN_RESERVATION_CONTROLLER' => [
-             'type' => 'warning',
-             'blocking' => 'not', // Usually stops the current action
-             'dev_message_key' => 'error-manager::errors.dev.record_not_found_egi_in_reservation_controller',
-             'user_message_key' => '',
-             'http_status_code' => 200, // Not a real HTTP error, just a warning
-             'devTeam_email_need' => false,
-             'notify_slack' => false,
-             'msg_to' => 'log-only',
-         ],
+            'type' => 'critical',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.database_error',
+            'user_message_key' => 'error-manager::errors.user.database_error',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+        'RECORD_NOT_FOUND' => [
+            'type' => 'error', // Or warning depending on context
+            'blocking' => 'blocking', // Usually stops the current action
+            'dev_message_key' => 'error-manager::errors.dev.record_not_found',
+            'user_message_key' => 'error-manager::errors.user.record_not_found',
+            'http_status_code' => 404,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'sweet-alert',
+        ],
+        'RECORD_EGI_NOT_FOUND_IN_RESERVATION_CONTROLLER' => [
+            'type' => 'warning',
+            'blocking' => 'not', // Usually stops the current action
+            'dev_message_key' => 'error-manager::errors.dev.record_not_found_egi_in_reservation_controller',
+            'user_message_key' => '',
+            'http_status_code' => 200, // Not a real HTTP error, just a warning
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'log-only',
+        ],
         'ERROR_DURING_CREATE_EGI_RECORD' => [
             'type' => 'critical',
             'blocking' => 'blocking',
@@ -570,7 +600,7 @@ return [
             'notify_slack' => false,
             'msg_to' => 'div',
         ],
-         'INVALID_FILE' => [ // More generic file issue?
+        'INVALID_FILE' => [ // More generic file issue?
             'type' => 'warning',
             'blocking' => 'semi-blocking',
             'dev_message_key' => 'error-manager::errors.dev.invalid_file',
@@ -720,7 +750,7 @@ return [
             'notify_slack' => true,
             'msg_to' => 'sweet-alert',
         ],
-         'ERROR_SAVING_FILE_METADATA' => [
+        'ERROR_SAVING_FILE_METADATA' => [
             'type' => 'error',
             'blocking' => 'semi-blocking',
             'dev_message_key' => 'error-manager::errors.dev.error_saving_file_metadata',
@@ -941,7 +971,7 @@ return [
             'msg_to' => 'div', // Show near the file input
         ],
 
-          'EGI_PAGE_ACCESS_NOTICE' => [
+        'EGI_PAGE_ACCESS_NOTICE' => [
             'type' => 'notice',
             'blocking' => 'not',
             'dev_message_key' => 'error-manager::errors.dev.egi_page_access_notice',
@@ -1035,7 +1065,7 @@ return [
             'notify_slack' => true,
             'msg_to' => 'sweet-alert',
         ],
-         'EGI_CRYPTO_ERROR' => [ // Failure during filename encryption
+        'EGI_CRYPTO_ERROR' => [ // Failure during filename encryption
             'type' => 'critical', // Security / Data integrity related
             'blocking' => 'blocking',
             'dev_message_key' => 'error-manager::errors.dev.egi_crypto_error', // "Failed to encrypt filename: :filename"
@@ -2196,6 +2226,83 @@ return [
             'devTeam_email_need' => false,
             'notify_slack' => false,
             'msg_to' => 'sweet-alert',
+        ],
+
+        'GDPR_EXPORT_HISTORY_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'not', // Non-blocking since we return empty collection
+            'dev_message_key' => 'error-manager::errors.dev.gdpr_export_history_failed',
+            'user_message_key' => 'error-manager::errors.user.gdpr_export_history_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'log-only', // User gets empty data, error is logged
+        ],
+
+        'GDPR_EXPORT_NOT_READY' => [
+            'type' => 'warning',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.gdpr_export_not_ready',
+            'user_message_key' => 'error-manager::errors.user.gdpr_export_not_ready',
+            'http_status_code' => 422,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'GDPR_EXPORT_EXPIRED' => [
+            'type' => 'warning',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.gdpr_export_expired',
+            'user_message_key' => 'error-manager::errors.user.gdpr_export_expired',
+            'http_status_code' => 410, // Gone
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'GDPR_EXPORT_FILE_NOT_FOUND' => [
+            'type' => 'error',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.gdpr_export_file_not_found',
+            'user_message_key' => 'error-manager::errors.user.gdpr_export_file_not_found',
+            'http_status_code' => 404,
+            'devTeam_email_need' => true, // File should exist if status is completed
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'GDPR_EXPORT_CLEANUP_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'not',
+            'dev_message_key' => 'error-manager::errors.dev.gdpr_export_cleanup_failed',
+            'user_message_key' => 'error-manager::errors.user.gdpr_export_cleanup_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'log-only',
+        ],
+
+        'GDPR_EXPORT_INVALID_FORMAT' => [
+            'type' => 'warning',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.gdpr_export_invalid_format',
+            'user_message_key' => 'error-manager::errors.user.gdpr_export_invalid_format',
+            'http_status_code' => 400,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'div',
+        ],
+
+        'GDPR_EXPORT_INVALID_CATEGORIES' => [
+            'type' => 'warning',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.gdpr_export_invalid_categories',
+            'user_message_key' => 'error-manager::errors.user.gdpr_export_invalid_categories',
+            'http_status_code' => 400,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'div',
         ],
 
         'GDPR_EXPORT_DOWNLOAD_FAILED' => [

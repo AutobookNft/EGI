@@ -80,6 +80,11 @@ class RolesAndPermissionsSeeder extends Seeder
 
         // ═══ NUOVI PERMESSI (AGGIUNGERE) ═══
 
+        // Permessi GDPR e privacy
+        'can_request_export',
+        'can_request_deletion',
+
+        
         // Patron specifici
         'support_creators',
         'view_creator_projects',
@@ -225,6 +230,8 @@ class RolesAndPermissionsSeeder extends Seeder
             'manage_advanced_settings',
             'manage_own_biographies',
             'manage_bio_profile',
+            'can_request_export',
+            'can_request_deletion',
         ],
 
         'admin' => [
@@ -242,6 +249,8 @@ class RolesAndPermissionsSeeder extends Seeder
             'access_dashboard',
             'manage_own_biographies',
             'manage_bio_profile',
+            'can_request_export',
+            'can_request_deletion',
         ],
 
         'editor' => [
@@ -298,6 +307,9 @@ class RolesAndPermissionsSeeder extends Seeder
             'full_auction_access',
             'manage_own_biographies',
             'manage_bio_profile',
+            'can_request_export',
+            'can_request_deletion',
+           
         ],
 
         'collector' => [
@@ -332,6 +344,10 @@ class RolesAndPermissionsSeeder extends Seeder
             'view_own_wallet_address',
             'priority_reservations',
             'full_auction_access',
+            'can_request_export',
+            'can_request_deletion',
+            'manage_own_biographies',
+            'manage_bio_profile',
         ],
 
         'enterprise' => [
@@ -381,6 +397,10 @@ class RolesAndPermissionsSeeder extends Seeder
             'priority_reservations',
             'full_auction_access',
             'manage_advanced_settings',
+            'can_request_export',
+            'can_request_deletion',
+            'manage_own_biographies',
+            'manage_bio_profile',
         ],
 
         'trader_pro' => [
@@ -418,6 +438,10 @@ class RolesAndPermissionsSeeder extends Seeder
             'priority_reservations',
             'full_auction_access',
             'manage_advanced_settings',
+            'can_request_export',
+            'can_request_deletion',
+            'manage_own_biographies',
+            'manage_bio_profile',
         ],
 
         'epp_entity' => [
@@ -455,6 +479,11 @@ class RolesAndPermissionsSeeder extends Seeder
             'priority_reservations',
             'full_auction_access',
             'manage_advanced_settings',
+            'can_request_export',   
+            'can_request_deletion',
+            'manage_own_biographies',
+            'manage_bio_profile',
+            
         ],
 
         'weak_connect' => [
