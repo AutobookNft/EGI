@@ -172,7 +172,7 @@ class DataExportService {
     ) {
         $this->logger = $logger;
         $this->errorManager = $errorManager;
-        
+
         // Configure queue usage based on environment
         $this->useQueue = config('gdpr.export.use_queue', false);
     }
@@ -566,12 +566,12 @@ class DataExportService {
                 if (ob_get_level()) {
                     ob_end_clean();
                 }
-                
+
                 $file = fopen($fullPath, 'rb');
                 if ($file === false) {
                     throw new \RuntimeException('Cannot open file for reading');
                 }
-                
+
                 // Use fpassthru for efficient file streaming
                 fpassthru($file);
                 fclose($file);
