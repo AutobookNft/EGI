@@ -78,6 +78,12 @@
         <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16 md:h-20">
 
+                @php
+                    $navLinkClasses =
+                        'text-gray-300 hover:text-emerald-400 transition px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-800/40';
+                @endphp
+
+
                 {{-- Logo --}}
                 <div class="flex items-center flex-shrink-0">
                     <a href="{{ url('/home') }}" class="flex items-center gap-2 group"
@@ -87,19 +93,20 @@
                         <span
                             class="hidden text-base font-semibold text-gray-400 transition group-hover:text-emerald-400 sm:inline md:text-lg">{{ __('Frangette') }}</span>
                     </a>
-                    
-                    {{-- Natan Assistant - Posizionato vicino al logo --}}
-                    <div class="hidden ml-6 md:block">
-                        <x-natan-assistant :suffix="'-desktop'" />
-                    </div>
-
-                   
-                    
                 </div>
-                @php
-                    $navLinkClasses =
-                        'text-gray-300 hover:text-emerald-400 transition px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-800/40';
-                @endphp
+
+                {{-- Natan Assistant - Posizionato vicino al logo --}}
+                <div class="hidden ml-6 md:block">
+                    <x-natan-assistant :suffix="'-desktop'" />
+                </div>
+
+                <button type="button"
+                    id="open-butler-assistant"
+                    class="{{ $navLinkClasses }} w-full text-left items-center gap-1 hidden ml-6 md:block"
+                    aria-label="{{ __('assistant.open_butler_aria') }}">
+                    <span class="material-symbols-outlined" aria-hidden="true" style="font-size: 1.1em;">support_agent</span>
+                    <span>{{ __('assistant.open_butler') }}</span>
+                </button>
 
                 {{-- Nav Desktop --}}
                 <nav class="items-center hidden space-x-1 md:flex" role="navigation"
@@ -204,7 +211,7 @@
 
                 {{-- Menu Mobile Button --}}
                 <div class="flex items-center gap-2 -mr-2 md:hidden">
-                    
+
                     <div id="current-collection-badge-container-mobile"
                         class="hidden px-4 py-3 text-center border-t border-gray-800">
                         <a href="#" id="current-collection-badge-link-mobile"
@@ -214,11 +221,20 @@
                         </a>
                     </div>
 
-                    
+
                     {{-- Natan Assistant Mobile --}}
                     <div class="block md:hidden">
                         <x-natan-assistant :suffix="'-mobile'" />
                     </div>
+
+                    {{-- Butler Assistant Menu su mobile non lo mostro --}}
+                    {{-- <button type="button"
+                        id="open-butler-assistant"
+                        class="{{ $navLinkClasses }} flex items-center gap-1"
+                        aria-label="{{ __('assistant.open_butler_aria') }}">
+                        <span class="material-symbols-outlined" aria-hidden="true" style="font-size: 1.1em;">support_agent</span>
+                        <span>{{ __('assistant.open_butler') }}</span>
+                    </button> --}}
 
                     <button type="button"
                         class="inline-flex items-center justify-center p-2 text-gray-400 bg-gray-900 rounded-md hover:bg-gray-800 hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"

@@ -162,7 +162,6 @@
 
 <!-- Scripts -->
 
-
 @vite(['resources/js/polyfills.js', 'resources/js/app.js', 'resources/js/guest.js', 'resources/ts/main.ts'])
 
 {{-- 🎯 HEIC Detection Integration - Embedded in Layout --}}
@@ -196,7 +195,7 @@
             <div style="text-align: left; line-height: 1.6;">
                 <p style="margin-bottom: 15px;">${greeting}</p>
                 <p style="margin-bottom: 20px;">${explanation}</p>
-                
+
                 <div style="margin-bottom: 20px;">
                     <h4 style="margin-bottom: 10px; color: #333;">${solutionsTitle}</h4>
                     <ul style="margin: 0; padding-left: 20px;">
@@ -205,7 +204,7 @@
                         <li style="margin-bottom: 8px;">${solutionComputer}</li>
                     </ul>
                 </div>
-                
+
                 <p style="margin-bottom: 0; text-align: center; font-style: italic;">${thanks}</p>
             </div>
         `;
@@ -230,7 +229,7 @@
                 <div style="text-align: left; line-height: 1.6;">
                     <p>We noticed you're trying to upload <strong>HEIC/HEIF</strong> format files.</p>
                     <p>These are great for quality and storage space, but unfortunately web browsers don't fully support them yet.</p>
-                    
+
                     <div style="margin: 20px 0;">
                         <h4 style="margin-bottom: 10px; color: #333;">💡 What you can do:</h4>
                         <ul style="margin: 0; padding-left: 20px;">
@@ -239,7 +238,7 @@
                             <li style="margin-bottom: 8px;"><strong>💻 On computer:</strong> Open with Preview (Mac) or online converters</li>
                         </ul>
                     </div>
-                    
+
                     <p style="margin-bottom: 0; text-align: center; font-style: italic;">Thanks for your patience! 💚</p>
                 </div>
             `,

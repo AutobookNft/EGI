@@ -38,6 +38,7 @@ return [
     |--------------------------------------------------------------------------
     */
     'fegi_user_type' => [
+        'committee',
         'collector',
         'creator',
         'patron',

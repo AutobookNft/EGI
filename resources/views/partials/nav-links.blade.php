@@ -40,53 +40,57 @@
 
 @php
     $authType = App\Helpers\FegiAuth::getAuthType(); // 'strong', 'weak', 'guest'
+    $user = App\Helpers\FegiAuth::user(); // User object or null
+    $canCreateEgi = $user && $user->can('create_egi');
 @endphp
 
 {{-- Le mie Collezioni Dropdown - Solo per mobile e solo per utenti loggati --}}
-@if ($isMobile)
-    @auth
-        <button type="button"
-            id="mobile-collection-list-dropdown-button"
-            class="{{ $navLinkClasses }} w-full text-left flex items-center justify-between"
-            aria-expanded="false" aria-haspopup="true">
-            <span class="flex items-center gap-2">
-                <span class="text-base material-symbols-outlined" aria-hidden="true">view_carousel</span>
-                <span>{{ __('collection.my_galleries') }}</span>
-            </span>
-            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
-            </svg>
-        </button>
-        {{-- Dropdown menu mobile --}}
-        <div id="mobile-collection-list-dropdown-menu" class="hidden mt-1 mx-3 mb-2 py-1 bg-gray-800 rounded-md shadow-lg max-h-[40vh] overflow-y-auto border border-gray-700">
-            <div id="mobile-collection-list-loading" class="px-4 py-3 text-sm text-center text-gray-400">{{ __('collection.loading_galleries') }}</div>
-            <div id="mobile-collection-list-empty" class="hidden px-4 py-3 text-sm text-center text-gray-400">{{ __('collection.no_galleries_found') }} <a href="{{ route('collections.create') }}" class="underline hover:text-emerald-400">{{ __('collection.create_one_question') }}</a></div>
-            <div id="mobile-collection-list-error" class="hidden px-4 py-3 text-sm text-center text-red-400">{{ __('collection.error_loading_galleries') }}</div>
-        </div>
-    @endauth
-@endif
-
-{{-- Create EGI Button - Sempre visibile, la logica di azione è gestita da JS in base allo stato utente --}}
-<button type="button"
-    class="js-create-egi-contextual-button {{ $navLinkClasses }} {{ $isMobile ? 'w-full text-left' : 'inline-flex items-center gap-1' }}"
-    data-action="open-create-egi-contextual" data-auth-type="{{ $authType }}"
-    aria-label="{{ __('guest_layout.create_egi') }}">
+@can('create_egi')
     @if ($isMobile)
-        {{-- Versione Mobile - icona + testo allineati a sinistra --}}
-        <span class="flex items-center gap-1">
+        @auth
+            <button type="button"
+                id="mobile-collection-list-dropdown-button"
+                class="{{ $navLinkClasses }} w-full text-left flex items-center justify-between"
+                aria-expanded="false" aria-haspopup="true">
+                <span class="flex items-center gap-2">
+                    <span class="text-base material-symbols-outlined" aria-hidden="true">view_carousel</span>
+                    <span>{{ __('collection.my_galleries') }}</span>
+                </span>
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                </svg>
+            </button>
+            {{-- Dropdown menu mobile --}}
+            <div id="mobile-collection-list-dropdown-menu" class="hidden mt-1 mx-3 mb-2 py-1 bg-gray-800 rounded-md shadow-lg max-h-[40vh] overflow-y-auto border border-gray-700">
+                <div id="mobile-collection-list-loading" class="px-4 py-3 text-sm text-center text-gray-400">{{ __('collection.loading_galleries') }}</div>
+                <div id="mobile-collection-list-empty" class="hidden px-4 py-3 text-sm text-center text-gray-400">{{ __('collection.no_galleries_found') }} <a href="{{ route('collections.create') }}" class="underline hover:text-emerald-400">{{ __('collection.create_one_question') }}</a></div>
+                <div id="mobile-collection-list-error" class="hidden px-4 py-3 text-sm text-center text-red-400">{{ __('collection.error_loading_galleries') }}</div>
+            </div>
+        @endauth
+    @endif
+
+    {{-- Create EGI Button - Sempre visibile, la logica di azione è gestita da JS in base allo stato utente --}}
+    <button type="button"
+        class="js-create-egi-contextual-button {{ $navLinkClasses }} {{ $isMobile ? 'w-full text-left' : 'inline-flex items-center gap-1' }}"
+        data-action="open-create-egi-contextual" data-auth-type="{{ $authType }}"
+        aria-label="{{ __('guest_layout.create_egi') }}">
+        @if ($isMobile)
+            {{-- Versione Mobile - icona + testo allineati a sinistra --}}
+            <span class="flex items-center gap-1">
+                <svg class="w-4 h-4 js-create-egi-button-icon" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+                    <path d="M8.75 3.75a.75.75 0 0 0-1.5 0v3.5h-3.5a.75.75 0 0 0 0 1.5h3.5v3.5a.75.75 0 0 0 1.5 0v-3.5h3.5a.75.75 0 0 0 0-1.5h-3.5v-3.5Z" />
+                </svg>
+                <span class="js-create-egi-button-text">{{ __('guest_layout.create_egi') }}</span>
+            </span>
+        @else
+            {{-- Versione Desktop - layout inline --}}
             <svg class="w-4 h-4 js-create-egi-button-icon" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
                 <path d="M8.75 3.75a.75.75 0 0 0-1.5 0v3.5h-3.5a.75.75 0 0 0 0 1.5h3.5v3.5a.75.75 0 0 0 1.5 0v-3.5h3.5a.75.75 0 0 0 0-1.5h-3.5v-3.5Z" />
             </svg>
             <span class="js-create-egi-button-text">{{ __('guest_layout.create_egi') }}</span>
-        </span>
-    @else
-        {{-- Versione Desktop - layout inline --}}
-        <svg class="w-4 h-4 js-create-egi-button-icon" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
-            <path d="M8.75 3.75a.75.75 0 0 0-1.5 0v3.5h-3.5a.75.75 0 0 0 0 1.5h3.5v3.5a.75.75 0 0 0 1.5 0v-3.5h3.5a.75.75 0 0 0 0-1.5h-3.5v-3.5Z" />
-        </svg>
-        <span class="js-create-egi-button-text">{{ __('guest_layout.create_egi') }}</span>
-    @endif
-</button>
+        @endif
+    </button>
+@endcan
 
 {{-- Create Collection CTA - Solo se l'utente ha il permesso --}}
 @can('create_collection')
@@ -112,11 +116,4 @@
     @endif
 @endcan
 
-{{-- Butler Assistant Menu --}}
-<button type="button"
-    id="open-butler-assistant"
-    class="{{ $navLinkClasses }} {{ $isMobile ? 'w-full text-left' : '' }} flex items-center gap-1"
-    aria-label="{{ __('assistant.open_butler_aria') }}">
-    <span class="material-symbols-outlined" aria-hidden="true" style="font-size: 1.1em;">support_agent</span>
-    <span>{{ __('assistant.open_butler') }}</span>
-</button>
+
