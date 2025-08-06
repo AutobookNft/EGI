@@ -124,7 +124,9 @@ export function toggleWalletDropdownMenu(config: AppConfig, DOM: typeof DOMEleme
         closeWalletDropdownMenu(DOM);
     } else {
         // Chiudi l'altro dropdown (collection list) prima di aprire questo
-        closeCollectionListDropdown(config, DOM, uem); // Da collectionUI.ts
+        if (DOM.collectionListDropdownMenuEl) {
+            closeCollectionListDropdown(config, DOM, uem);
+        }
 
         walletDropdownMenuEl.classList.remove('hidden');
         walletDropdownButtonEl.setAttribute('aria-expanded', 'true');
@@ -236,23 +238,23 @@ export async function handleDisconnect(
                         'Content-Type': 'application/json'
                     }
                 });
-                
+
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
-                
+
                 console.log('✅ [WALLET] Server-side disconnect successful for connected user');
             } else {
                 console.warn('⚠️ [WALLET] walletDisconnect route not configured, proceeding with client-side disconnect only');
             }
         } catch (apiError: any) {
             console.error('❌ [WALLET] Server-side disconnect failed:', apiError);
-            uem.handleClientError('CLIENT_API_ERROR_WEAK_DISCONNECT', { 
-                endpoint: 'walletDisconnect', 
-                errorDetails: apiError.message 
+            uem.handleClientError('CLIENT_API_ERROR_WEAK_DISCONNECT', {
+                endpoint: 'walletDisconnect',
+                errorDetails: apiError.message
             }, apiError, appTranslate('errorApiDisconnect', config.translations));
         }
-        
+
         // Client-side cleanup sempre eseguito (anche se API fallisce)
         setWeakAuthWallet(null, uiUpdateCallback);
         console.log('Padmin WalletDropdown: Disconnected locally (weak auth). UI update triggered.');

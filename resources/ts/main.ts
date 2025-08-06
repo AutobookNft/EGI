@@ -73,6 +73,27 @@ let deleteProposalInvitationInstance: InstanceType<typeof DeleteProposalInvitati
 let deleteProposalWalletInstance: InstanceType<typeof DeleteProposalWallet> | null = null;
 
 /**
+ * 📜 Safe Event Binding Helper
+ * 🎯 Purpose: Binding sicuro degli eventi con controllo elementi
+ * 🛡️ Security: Evita errori quando elementi DOM non esistono per mancanza permessi
+ */
+function safeAddEventListener(
+    element: Element | null,
+    event: string,
+    handler: EventListener,
+    description?: string
+): boolean {
+    if (element && typeof element.addEventListener === 'function') {
+        element.addEventListener(event, handler);
+        console.log(`✅ Event listener added: ${description || 'unknown'}`);
+        return true;
+    } else {
+        console.log(`⚠️ Element not found, skipping listener: ${description || 'unknown'}`);
+        return false;
+    }
+}
+
+/**
  * 📜 Oracode Function: waitForGlobalDependencies
  * 🎯 Purpose: Aspetta che le dipendenze globali siano disponibili prima di procedere
  * 🛡️ Security: Valida la presenza delle dipendenze critiche
@@ -443,130 +464,232 @@ async function initializeApplicationOrchestrated(): Promise<void> {
     }
 }
 
+// 📋 ELEMENTI COINVOLTI NEI PERMESSI (dall'analisi di domElements.ts + nav-links.blade.php):
+//
+// @can('create_EGI') controlla:
+// - collectionListDropdownButtonEl (#collection-list-dropdown-button) - DESKTOP
+// - collectionListDropdownMenuEl (#collection-list-dropdown-menu) - DESKTOP
+// - mobileCollectionListDropdownButtonEl (#mobile-collection-list-dropdown-button) - MOBILE
+// - mobileCollectionListDropdownMenuEl (#mobile-collection-list-dropdown-menu) - MOBILE
+// - createEgiContextualButtonEl (.js-create-egi-contextual-button) - ENTRAMBI
+// - walletDropdownButtonEl (#wallet-dropdown-button) - WALLET UI
+// - walletCopyAddressButtonEl (#wallet-copy-address) - WALLET UI
+// - walletDisconnectButtonEl (#wallet-disconnect) - WALLET UI
+// - mobileCopyAddressButtonEl (#mobile-copy-address) - MOBILE WALLET
+// - mobileDisconnectButtonEl (#mobile-disconnect) - MOBILE WALLET
+//
+// @can('create_collection') controlla:
+// - Elementi con data-action="open-create-collection-modal" (gestiti da createCollectionGuestButtonsEl)
+
+// 🔄 MODIFICA LA FUNZIONE setupEventListeners ESISTENTE
+// Sostituisci la sezione problematica con questa versione safe:
+
 /**
- * 📜 Oracode Function: setupEventListeners
+ * 📜 Oracode Function: setupEventListeners (VERSIONE SAFE per PERMESSI)
  * 🎯 Associa tutti gli event listener agli elementi DOM interattivi.
- * Updated per supportare il sistema FEGI.
+ * 🛡️ Security: Safe binding per elementi che possono non esistere per mancanza permessi
  */
 function setupEventListeners(): void {
-    console.log('Padmin Main: Attempting to setup FEGI event listeners...');
+    console.log('Padmin Main: Attempting to setup FEGI event listeners with safe binding...');
 
-    // --- MODALE CONNESSIONE FEGI WALLET ---
-    DOMElements.connectWalletButtonStdEl?.addEventListener('click', () => openSecureWalletModal(mainAppConfig, DOMElements, null));
-    DOMElements.connectWalletButtonMobileEl?.addEventListener('click', () => openSecureWalletModal(mainAppConfig, DOMElements, null));
-    DOMElements.closeConnectWalletButtonEl?.addEventListener('click', () => closeSecureWalletModal(DOMElements));
-    DOMElements.connectWalletModalEl?.addEventListener('click', (e: MouseEvent) => {
-        if (e.target === DOMElements.connectWalletModalEl) closeSecureWalletModal(DOMElements);
+    // --- MODALE CONNESSIONE FEGI WALLET (sempre presenti) ---
+    safeAddEventListener(
+        DOMElements.connectWalletButtonStdEl,
+        'click',
+        () => openSecureWalletModal(mainAppConfig, DOMElements, null),
+        'Connect Wallet Button Desktop'
+    );
+
+    safeAddEventListener(
+        DOMElements.connectWalletButtonMobileEl,
+        'click',
+        () => openSecureWalletModal(mainAppConfig, DOMElements, null),
+        'Connect Wallet Button Mobile'
+    );
+
+    safeAddEventListener(
+        DOMElements.closeConnectWalletButtonEl,
+        'click',
+        () => closeSecureWalletModal(DOMElements),
+        'Close Connect Wallet Button'
+    );
+
+    safeAddEventListener(
+        DOMElements.connectWalletModalEl,
+        'click',
+        (e: MouseEvent) => {
+            if (e.target === DOMElements.connectWalletModalEl) closeSecureWalletModal(DOMElements);
+        },
+        'Connect Wallet Modal Background'
+    );
+
+    // --- AZIONI CREATE EGI/COLLECTION (sempre presenti ma logica condizionale) ---
+    DOMElements.createEgiGuestButtonsEl?.forEach((btn, index) => {
+        safeAddEventListener(
+            btn,
+            'click',
+            () => {
+                const authStatus = getAuthStatus(mainAppConfig);
+                if (authStatus === 'logged-in' || authStatus === 'connected') {
+                    mainUploadModalManager?.openModal('egi');
+                } else {
+                    openSecureWalletModal(mainAppConfig, DOMElements, 'create-egi');
+                }
+            },
+            `Create EGI Guest Button ${index}`
+        );
     });
 
-    // --- AZIONI CREATE EGI/COLLECTION con controllo FEGI ---
-    DOMElements.createEgiGuestButtonsEl?.forEach(btn => btn.addEventListener('click', () => {
-        const authStatus = getAuthStatus(mainAppConfig);
-        if (authStatus === 'logged-in' || authStatus === 'connected') {
-            mainUploadModalManager?.openModal('egi');
-        } else {
-            openSecureWalletModal(mainAppConfig, DOMElements, 'create-egi');
-        }
-    }));
-
-    // --- NUOVO: Listener per il pulsante contestuale "Crea EGI" sempre visibile ---
-    if (DOMElements.createEgiContextualButtonEl) {
-        DOMElements.createEgiContextualButtonEl.addEventListener('click', (event) => {
+    // --- PULSANTE CONTESTUALE CREATE EGI (protetto da @can('create_EGI')) ---
+    safeAddEventListener(
+        DOMElements.createEgiContextualButtonEl,
+        'click',
+        (event) => {
             const authStatus = getAuthStatus(mainAppConfig);
-
             if (authStatus === 'logged-in' || authStatus === 'connected') {
                 mainUploadModalManager?.openModal('egi');
             } else {
                 openSecureWalletModal(mainAppConfig, DOMElements, 'create-egi');
             }
-        });
-    }
+        },
+        'Create EGI Contextual Button (permission-protected)'
+    );
 
-    // --- LISTENER ALTERNATIVO per tutti i pulsanti con la classe (fallback) ---
+    // --- LISTENER ALTERNATIVO per tutti i pulsanti con la classe (protetti da @can('create_EGI')) ---
     const allEgiButtons = document.querySelectorAll('.js-create-egi-contextual-button');
-
     allEgiButtons.forEach((button, index) => {
-        button.addEventListener('click', (event) => {
-            const authStatus = getAuthStatus(mainAppConfig);
-
-            if (authStatus === 'logged-in' || authStatus === 'connected') {
-                mainUploadModalManager?.openModal('egi');
-            } else {
-                openSecureWalletModal(mainAppConfig, DOMElements, 'create-egi');
-            }
-        });
+        safeAddEventListener(
+            button,
+            'click',
+            (event) => {
+                const authStatus = getAuthStatus(mainAppConfig);
+                if (authStatus === 'logged-in' || authStatus === 'connected') {
+                    mainUploadModalManager?.openModal('egi');
+                } else {
+                    openSecureWalletModal(mainAppConfig, DOMElements, 'create-egi');
+                }
+            },
+            `EGI Contextual Button ${index} (permission-protected)`
+        );
     });
 
-    DOMElements.createCollectionGuestButtonsEl?.forEach(btn => btn.addEventListener('click', () => {
-        const authStatus = getAuthStatus(mainAppConfig);
-        if (authStatus === 'logged-in') {
-            window.location.href = mainAppConfig.routes.collectionsCreate;
-        } else if (authStatus === 'connected') {
-            // Mostra messaggio per registrazione completa
-            if (window.Swal) {
-                window.Swal.fire({
-                    icon: 'info',
-                    title: appTranslate('registrationRequiredTitle', mainAppConfig.translations),
-                    text: appTranslate('registrationRequiredTextCollections', mainAppConfig.translations),
-                    confirmButtonText: appTranslate('registerNowButton', mainAppConfig.translations),
-                    showCancelButton: true,
-                    cancelButtonText: appTranslate('laterButton', mainAppConfig.translations),
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#aaa'
-                }).then((result: { isConfirmed: boolean }) => {
-                    if (result.isConfirmed) {
+    // --- CREATE COLLECTION (protetto da @can('create_collection')) ---
+    DOMElements.createCollectionGuestButtonsEl?.forEach((btn, index) => {
+        safeAddEventListener(
+            btn,
+            'click',
+            () => {
+                const authStatus = getAuthStatus(mainAppConfig);
+                if (authStatus === 'logged-in') {
+                    window.location.href = mainAppConfig.routes.collectionsCreate;
+                } else if (authStatus === 'connected') {
+                    // Mostra messaggio per registrazione completa
+                    if (window.Swal) {
+                        window.Swal.fire({
+                            icon: 'info',
+                            title: appTranslate('registrationRequiredTitle', mainAppConfig.translations),
+                            text: appTranslate('registrationRequiredTextCollections', mainAppConfig.translations),
+                            confirmButtonText: appTranslate('registerNowButton', mainAppConfig.translations),
+                            showCancelButton: true,
+                            cancelButtonText: appTranslate('laterButton', mainAppConfig.translations),
+                            confirmButtonColor: '#3085d6',
+                            cancelButtonColor: '#aaa'
+                        }).then((result: { isConfirmed: boolean }) => {
+                            if (result.isConfirmed) {
+                                window.location.href = mainAppConfig.routes.register;
+                            }
+                        });
+                    } else {
+                        alert(appTranslate('registrationRequiredTextCollections', mainAppConfig.translations));
                         window.location.href = mainAppConfig.routes.register;
                     }
-                });
-            } else {
-                alert(appTranslate('registrationRequiredTextCollections', mainAppConfig.translations));
-                window.location.href = mainAppConfig.routes.register;
-            }
-        } else {
-            openSecureWalletModal(mainAppConfig, DOMElements, 'create-collection');
-        }
-    }));
-
-    // --- DROPDOWN WALLET ---
-    DOMElements.walletDropdownButtonEl?.addEventListener('click', () => toggleWalletDropdownMenu(mainAppConfig, DOMElements, UEM));
-    DOMElements.walletCopyAddressButtonEl?.addEventListener('click', () => copyWalletAddress(mainAppConfig, DOMElements, UEM));
-    DOMElements.walletDisconnectButtonEl?.addEventListener('click', () => {
-        handleDisconnect(mainAppConfig, DOMElements, UEM, () => {
-            updateNavbarUI(mainAppConfig, DOMElements, UEM);
-            if (reservationFeature && typeof reservationFeature.updateReservationButtonStates === 'function') {
-                reservationFeature.updateReservationButtonStates();
-            }
-        });
+                } else {
+                    openSecureWalletModal(mainAppConfig, DOMElements, 'create-collection');
+                }
+            },
+            `Create Collection Guest Button ${index} (permission-protected)`
+        );
     });
 
-    // --- MOBILE WALLET BUTTONS ---
-    DOMElements.mobileCopyAddressButtonEl?.addEventListener('click', () => copyWalletAddress(mainAppConfig, DOMElements, UEM));
-    DOMElements.mobileDisconnectButtonEl?.addEventListener('click', () => {
-        handleDisconnect(mainAppConfig, DOMElements, UEM, () => {
-            updateNavbarUI(mainAppConfig, DOMElements, UEM);
-            if (reservationFeature && typeof reservationFeature.updateReservationButtonStates === 'function') {
-                reservationFeature.updateReservationButtonStates();
-            }
-        });
-    });
+    // --- DROPDOWN WALLET DESKTOP (protetto da @can('create_EGI')) ---
+    safeAddEventListener(
+        DOMElements.walletDropdownButtonEl,
+        'click',
+        () => toggleWalletDropdownMenu(mainAppConfig, DOMElements, UEM),
+        'Wallet Dropdown Button (permission-protected)'
+    );
 
-    // --- DROPDOWN COLLECTION LIST ---
-    DOMElements.collectionListDropdownButtonEl?.addEventListener('click', () => toggleCollectionListDropdown(mainAppConfig, DOMElements, UEM));
+    safeAddEventListener(
+        DOMElements.walletCopyAddressButtonEl,
+        'click',
+        () => copyWalletAddress(mainAppConfig, DOMElements, UEM),
+        'Wallet Copy Address Button (permission-protected)'
+    );
 
-    // --- MOBILE DROPDOWN COLLECTION LIST ---
-    DOMElements.mobileCollectionListDropdownButtonEl?.addEventListener('click', () => toggleMobileCollectionListDropdown(mainAppConfig, DOMElements, UEM));
+    safeAddEventListener(
+        DOMElements.walletDisconnectButtonEl,
+        'click',
+        () => {
+            handleDisconnect(mainAppConfig, DOMElements, UEM, () => {
+                updateNavbarUI(mainAppConfig, DOMElements, UEM);
+                if (reservationFeature && typeof reservationFeature.updateReservationButtonStates === 'function') {
+                    reservationFeature.updateReservationButtonStates();
+                }
+            });
+        },
+        'Wallet Disconnect Button (permission-protected)'
+    );
 
-    // --- MENU MOBILE ---
-    if (DOMElements.mobileMenuButtonEl) {
-        DOMElements.mobileMenuButtonEl.addEventListener('click', () => {
-            console.log('Padmin Main: Mobile menu button (from setupEventListeners) clicked. Element:', DOMElements.mobileMenuButtonEl);
+    // --- MOBILE WALLET BUTTONS (protetti da @can('create_EGI')) - PROBLEMA PRINCIPALE RISOLTO ---
+    safeAddEventListener(
+        DOMElements.mobileCopyAddressButtonEl,
+        'click',
+        () => copyWalletAddress(mainAppConfig, DOMElements, UEM),
+        'Mobile Copy Address Button (permission-protected)'
+    );
+
+    safeAddEventListener(
+        DOMElements.mobileDisconnectButtonEl,
+        'click',
+        () => {
+            handleDisconnect(mainAppConfig, DOMElements, UEM, () => {
+                updateNavbarUI(mainAppConfig, DOMElements, UEM);
+                if (reservationFeature && typeof reservationFeature.updateReservationButtonStates === 'function') {
+                    reservationFeature.updateReservationButtonStates();
+                }
+            });
+        },
+        'Mobile Disconnect Button (permission-protected)'
+    );
+
+    // --- DROPDOWN COLLECTION LIST DESKTOP (protetto da @can('create_EGI')) ---
+    safeAddEventListener(
+        DOMElements.collectionListDropdownButtonEl,
+        'click',
+        () => toggleCollectionListDropdown(mainAppConfig, DOMElements, UEM),
+        'Collection List Dropdown Button (permission-protected)'
+    );
+
+    // --- MOBILE DROPDOWN COLLECTION LIST (protetto da @can('create_EGI')) ---
+    safeAddEventListener(
+        DOMElements.mobileCollectionListDropdownButtonEl,
+        'click',
+        () => toggleMobileCollectionListDropdown(mainAppConfig, DOMElements, UEM),
+        'Mobile Collection List Dropdown Button (permission-protected)'
+    );
+
+    // --- MENU MOBILE (sempre presente) ---
+    safeAddEventListener(
+        DOMElements.mobileMenuButtonEl,
+        'click',
+        () => {
+            console.log('Padmin Main: Mobile menu button clicked.');
             toggleMobileMenu(DOMElements, mainAppConfig);
-        });
-    } else {
-        console.warn('Padmin Main: mobileMenuButtonEl not found in setupEventListeners. Mobile menu click listener NOT attached.');
-    }
+        },
+        'Mobile Menu Button'
+    );
 
-    console.log('Padmin Main: FEGI Event listeners setup process complete.');
+    console.log('Padmin Main: FEGI Event listeners setup with safe binding complete.');
 }
 
 /**

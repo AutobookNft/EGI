@@ -46,7 +46,7 @@
 @endphp
 
 {{-- Le mie Collezioni Dropdown - Solo per mobile e solo per utenti loggati --}}
-@can('create_egi')
+@can('create_EGI')
     @if ($isMobile)
         @auth
             <button type="button"
