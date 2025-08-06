@@ -13,6 +13,42 @@
 /* ==========================================================================
    Layout Components
    ========================================================================== */
+/* Nasconde la navbar fino al caricamento */
+.navbar-loading {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-100%);
+    transition: all 0.4s ease-in-out;
+}
+
+/* Mostra la navbar quando è caricata */
+.navbar-loaded {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+/* Opzionale: Loader placeholder per mantenere spazio */
+.navbar-placeholder {
+    height: 4rem; /* h-16 equivalent */
+    background: transparent;
+}
+
+@media (min-width: 768px) {
+    .navbar-placeholder {
+        height: 5rem; /* h-20 equivalent per md+ */
+    }
+}
+
+/* Alternativa più semplice (solo opacity) */
+.navbar-simple-hide {
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.navbar-simple-show {
+    opacity: 1;
+}
 
 /* Three Column Layout for Upload Pages */
 .three-column-layout {

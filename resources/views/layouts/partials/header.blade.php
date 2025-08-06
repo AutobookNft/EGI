@@ -73,7 +73,7 @@
 
 <body class="flex flex-col min-h-screen antialiased text-gray-300 bg-gray-900 font-body">
 
-    <header class="sticky top-0 z-50 w-full border-b border-gray-800 shadow-lg bg-gray-900/90 backdrop-blur-md"
+    <header class="navbar-simple-hide sticky top-0 z-50 w-full border-b border-gray-800 shadow-lg bg-gray-900/90 backdrop-blur-md"
         role="banner" aria-label="{{ __('guest_layout.header_aria_label') }}">
         <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16 md:h-20">
@@ -114,6 +114,7 @@
                     @include('partials.nav-links', ['isMobile' => false])
 
                     {{-- Dropdown My Galleries --}}
+                    @can('create_collection')
                     <div id="collection-list-dropdown-container" class="relative hidden">
                         <button id="collection-list-dropdown-button" type="button"
                             class="{{ $navLinkClasses }} inline-flex items-center" aria-expanded="false"
@@ -139,6 +140,9 @@
                                 {{ __('collection.error_loading_galleries') }}</div>
                         </div>
                     </div>
+                    @endcan
+
+                    {{-- Create EGI Button - Solo per utenti con permesso --}}
 
                     {{-- Wallet e Auth --}}
                     <span class="h-6 mx-2 border-l border-gray-700" aria-hidden="true"></span>
@@ -315,3 +319,12 @@
             </div> --}}
         </div>
     </header>
+<script>
+    window.addEventListener('load', function() {
+        const header = document.querySelector('header[role="banner"]');
+        if (header) {
+            header.classList.remove('navbar-simple-hide');
+            header.classList.add('navbar-simple-show');
+        }
+    });
+</script>
