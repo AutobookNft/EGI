@@ -32,6 +32,53 @@ return [
     'add_to_favorites' => 'Aggiungi ai Preferiti',
     'reserve_this_piece' => 'Prenota Quest\'Opera',
 
+    /*
+    |--------------------------------------------------------------------------
+    | NFT Card System - Sistema Carte NFT
+    |--------------------------------------------------------------------------
+    */
+
+    // Badge e Stati
+    'badge' => [
+        'owned' => 'POSSEDUTO',
+        'media_content' => 'Contenuto Media',
+    ],
+
+    // Titoli
+    'title' => [
+        'untitled' => '✨ EGI Senza Titolo',
+    ],
+
+    // Piattaforma
+    'platform' => [
+        'powered_by' => 'Powered by :platform',
+    ],
+
+    // Creatore
+    'creator' => [
+        'created_by' => '👨‍🎨 Creato da:',
+    ],
+
+    // Prezzi
+    'price' => [
+        'purchased_for' => '💳 Acquistato per',
+        'price' => '💰 Prezzo',
+        'floor' => '📊 Floor',
+    ],
+
+    // Stati
+    'status' => [
+        'not_for_sale' => '🚫 Non in vendita',
+        'draft' => '⏳ Bozza',
+    ],
+
+    // Azioni
+    'actions' => [
+        'view' => 'Visualizza',
+        'view_details' => 'Visualizza dettagli EGI',
+        'reserve' => 'Prenota',
+    ],
+
     // Sezioni Informative
     'properties' => 'Proprietà',
     'supports_epp' => 'Supporta EPP',

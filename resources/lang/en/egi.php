@@ -32,6 +32,53 @@ return [
     'add_to_favorites' => 'Add to Favorites',
     'reserve_this_piece' => 'Reserve This Piece',
 
+    /*
+    |--------------------------------------------------------------------------
+    | NFT Card System - NFT Cards System
+    |--------------------------------------------------------------------------
+    */
+
+    // Badges and Status
+    'badge' => [
+        'owned' => 'OWNED',
+        'media_content' => 'Media Content',
+    ],
+
+    // Titles
+    'title' => [
+        'untitled' => '✨ Untitled EGI',
+    ],
+
+    // Platform
+    'platform' => [
+        'powered_by' => 'Powered by :platform',
+    ],
+
+    // Creator
+    'creator' => [
+        'created_by' => '👨‍🎨 Created by:',
+    ],
+
+    // Prices
+    'price' => [
+        'purchased_for' => '💳 Purchased for',
+        'price' => '💰 Price',
+        'floor' => '📊 Floor',
+    ],
+
+    // Status
+    'status' => [
+        'not_for_sale' => '🚫 Not for sale',
+        'draft' => '⏳ Draft',
+    ],
+
+    // Actions
+    'actions' => [
+        'view' => 'View',
+        'view_details' => 'View EGI details',
+        'reserve' => 'Reserve',
+    ],
+
     // Information Sections
     'properties' => 'Properties',
     'supports_epp' => 'Supports EPP',

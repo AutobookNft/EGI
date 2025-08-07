@@ -74,7 +74,7 @@ $imageUrl = $imageRelativePath ? asset('storage/' . $imageRelativePath) : null;
         @elseif ($egi->media)
             <span
                 class="absolute right-2 top-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm"
-                title="{{ __('Media Content') }}">
+                title="{{ __('egi.badge.media_content') }}">
                 <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
                     aria-hidden="true">
                     <path
@@ -208,7 +208,7 @@ $imageUrl = $imageRelativePath ? asset('storage/' . $imageRelativePath) : null;
             {{-- Link Visualizza Dettaglio con stile migliorato --}}
             <a href="{{ route('egis.show', $egi->id) }}"
                 class="inline-flex flex-shrink-0 items-center justify-center rounded-lg px-3 py-2 text-xs font-semibold text-gray-300 bg-gray-800 border border-gray-600 hover:bg-gray-700 hover:text-white hover:border-gray-500 transition-all duration-200 shadow-sm hover:shadow-md"
-                aria-label="{{ __('View EGI details') }}">
+                aria-label="{{ __('egi.actions.view_details') }}">
                 <svg class="mr-1.5 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
                     fill="currentColor" aria-hidden="true">
                     <path d="M10 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" />
@@ -216,7 +216,7 @@ $imageUrl = $imageRelativePath ? asset('storage/' . $imageRelativePath) : null;
                         d="M.664 10.59a1.651 1.651 0 0 1 0-1.18C3.6 8.229 6.614 6.61 10 6.61s6.4 1.619 9.336 3.8a1.651 1.651 0 0 1 0 1.18C16.4 13.771 13.386 15.39 10 15.39s-6.4-1.619-9.336-3.8ZM14 10a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z"
                         clip-rule="evenodd" />
                 </svg>
-                {{ __('View') }}
+                {{ __('egi.actions.view') }}
             </a>
 
             {{-- Pulsante Riserva stilizzato (solo se non è nascosto) --}}
@@ -238,7 +238,7 @@ $imageUrl = $imageRelativePath ? asset('storage/' . $imageRelativePath) : null;
                                 d="M4.25 2A1.75 1.75 0 0 0 2.5 3.75v14.5a.75.75 0 0 0 1.218.582l5.534-4.426a.75.75 0 0 1 .496 0l5.534 4.427A.75.75 0 0 0 17.5 18.25V3.75A1.75 1.75 0 0 0 15.75 2h-11.5Z"
                                 clip-rule="evenodd" />
                         </svg>
-                        {{ __('Reserve') }}
+                        {{ __('egi.actions.reserve') }}
                     </button>
                 @endif
             @endif
