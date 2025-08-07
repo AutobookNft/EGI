@@ -5,7 +5,7 @@
 {{-- Uses Tailwind CSS for a modern, responsive design. --}}
 
 {{-- Props: Definisci l'oggetto egi come richiesto --}}
-@props(['egi', 'collection' => null, 'showPurchasePrice' => false]) {{-- Nuovo prop per prezzo di acquisto --}}
+@props(['egi', 'collection' => null, 'showPurchasePrice' => false, 'hideReserveButton' => false]) {{-- Nuovo prop per nascondere reserve --}}
 
 {{-- 🧱 Card Container --}}
 <article
@@ -54,14 +54,24 @@ $imageUrl = $imageRelativePath ? asset('storage/' . $imageRelativePath) : null;
         <div class="absolute inset-0 bg-black/40 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
         </div>
 
-        {{-- Badges (Posizione, Media Type) --}}
+        {{-- Badges (Posizione, Media Type, Owned) --}}
         @if ($egi->position)
             <span
                 class="absolute left-2 top-2 inline-block rounded-full bg-black/50 px-2 py-0.5 text-xs font-semibold text-white backdrop-blur-sm">
                 #{{ $egi->position }}
             </span>
         @endif
-        @if ($egi->media)
+        
+        {{-- Badge Owned se siamo nel portfolio collector --}}
+        @if ($showPurchasePrice)
+            <span
+                class="absolute right-2 top-2 inline-flex items-center gap-1 rounded-full bg-green-500/90 px-2 py-1 text-xs font-semibold text-white backdrop-blur-sm">
+                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                </svg>
+                OWNED
+            </span>
+        @elseif ($egi->media)
             <span
                 class="absolute right-2 top-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm"
                 title="{{ __('Media Content') }}">
@@ -184,30 +194,31 @@ $imageUrl = $imageRelativePath ? asset('storage/' . $imageRelativePath) : null;
                         d="M.664 10.59a1.651 1.651 0 0 1 0-1.18C3.6 8.229 6.614 6.61 10 6.61s6.4 1.619 9.336 3.8a1.651 1.651 0 0 1 0 1.18C16.4 13.771 13.386 15.39 10 15.39s-6.4-1.619-9.336-3.8ZM14 10a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z"
                         clip-rule="evenodd" />
                 </svg>
-                👁️ {{ __('View') }}
+                {{ __('View') }}
             </a>
 
-            {{-- Pulsante Riserva stilizzato --}}
-            @php
-                // Determina se $collection è disponibile (potrebbe non essere passato in alcuni contesti)
-                $creatorId = isset($collection) ? $collection->creator_id : $egi->collection->creator_id ?? null;
-                $isPublished = isset($egi->is_published)
-                    ? $egi->is_published
-                    : $egi->status === 'local' || $egi->status === 'published';
-                $canReserve = !$egi->mint && ($isPublished || (auth()->check() && auth()->id() === $creatorId));
-            @endphp
-            @if ($canReserve)
-                <button
-                    class="reserve-button inline-flex flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 px-3 py-2 text-xs font-semibold text-white shadow-lg hover:from-green-600 hover:to-emerald-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600 transition-all duration-200 hover:shadow-xl hover:scale-105"
-                    data-egi-id="{{ $egi->id }}">
-                    <svg class="mr-1.5 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
-                        aria-hidden="true">
-                        <path fill-rule="evenodd"
-                            d="M4.25 2A1.75 1.75 0 0 0 2.5 3.75v14.5a.75.75 0 0 0 1.218.582l5.534-4.426a.75.75 0 0 1 .496 0l5.534 4.427A.75.75 0 0 0 17.5 18.25V3.75A1.75 1.75 0 0 0 15.75 2h-11.5Z"
-                            clip-rule="evenodd" />
-                    </svg>
-                    📋 {{ __('Reserve') }}
-                </button>
+            {{-- Pulsante Riserva stilizzato (solo se non è nascosto) --}}
+            @if (!$hideReserveButton)
+                @php
+                    // Determina se $collection è disponibile (potrebbe non essere passato in alcuni contesti)
+                    $creatorId = isset($collection) ? $collection->creator_id : $egi->collection->creator_id ?? null;
+                    // Usa solo il campo booleano is_published per determinare se l'EGI è pubblicato
+                    $isPublished = (bool) $egi->is_published;
+                    $canReserve = !$egi->mint && ($isPublished || (auth()->check() && auth()->id() === $creatorId));
+                @endphp
+                @if ($canReserve)
+                    <button
+                        class="reserve-button inline-flex flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 px-3 py-2 text-xs font-semibold text-white shadow-lg hover:from-green-600 hover:to-emerald-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600 transition-all duration-200 hover:shadow-xl hover:scale-105"
+                        data-egi-id="{{ $egi->id }}">
+                        <svg class="mr-1.5 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                            aria-hidden="true">
+                            <path fill-rule="evenodd"
+                                d="M4.25 2A1.75 1.75 0 0 0 2.5 3.75v14.5a.75.75 0 0 0 1.218.582l5.534-4.426a.75.75 0 0 1 .496 0l5.534 4.427A.75.75 0 0 0 17.5 18.25V3.75A1.75 1.75 0 0 0 15.75 2h-11.5Z"
+                                clip-rule="evenodd" />
+                        </svg>
+                        {{ __('Reserve') }}
+                    </button>
+                @endif
             @endif
         </div>
     </div>

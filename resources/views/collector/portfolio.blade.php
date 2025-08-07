@@ -214,6 +214,7 @@
                             :egi="$egi" 
                             :collection="$egi->collection"
                             :showPurchasePrice="true"
+                            :hideReserveButton="true"
                         />
                     @endforeach
                 </div>

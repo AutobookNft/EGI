@@ -227,7 +227,8 @@
                             <x-egi-card 
                                 :egi="$egi" 
                                 :collection="$egi->collection"
-                                :showPurchasePrice="true" 
+                                :showPurchasePrice="true"
+                                :hideReserveButton="true"
                             />
                         @endforeach
                     </div>
