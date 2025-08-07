@@ -69,7 +69,7 @@ $imageUrl = $imageRelativePath ? asset('storage/' . $imageRelativePath) : null;
                 <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                 </svg>
-                OWNED
+                {{ __('egi.badge.owned') }}
             </span>
         @elseif ($egi->media)
             <span
@@ -87,16 +87,25 @@ $imageUrl = $imageRelativePath ? asset('storage/' . $imageRelativePath) : null;
     {{-- ℹ️ Sezione Informazioni EGI --}}
     <div class="flex flex-1 flex-col justify-between p-4 bg-gradient-to-b from-gray-900/50 to-gray-900">
         <div>
-            {{-- Titolo EGI con icona --}}
+            {{-- Titolo EGI con icona e logo piattaforma --}}
             <div class="flex items-center gap-2 mb-2">
                 <div class="flex-shrink-0 w-6 h-6 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
                     <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                     </svg>
                 </div>
-                <h3 class="text-base font-bold text-white leading-tight group-hover:text-purple-300 transition-colors duration-200">
-                    {{ Str::limit($egi->title ?? __('✨ Untitled EGI'), 45) }}
+                <h3 class="flex-1 text-base font-bold text-white leading-tight group-hover:text-purple-300 transition-colors duration-200">
+                    {{ Str::limit($egi->title ?? __('egi.title.untitled'), 45) }}
                 </h3>
+                {{-- Logo piattaforma --}}
+                <div class="flex-shrink-0">
+                    <img src="{{ asset('images/logo/logo_1.webp') }}" alt="" 
+                         class="w-4 h-4 opacity-60 group-hover:opacity-80 transition-opacity duration-200" 
+                         loading="lazy" decoding="async" 
+                         aria-hidden="true"
+                         role="img"
+                         title="{{ __('egi.platform.powered_by', ['platform' => 'Frangette']) }}">
+                </div>
             </div>
 
             {{-- Creator EGI con badge stilizzato --}}
@@ -109,7 +118,7 @@ $imageUrl = $imageRelativePath ? asset('storage/' . $imageRelativePath) : null;
                     </div>
                     <div class="min-w-0 flex-1">
                         <div class="flex items-center gap-1">
-                            <span class="text-xs font-medium text-gray-300">👨‍🎨 Created by:</span>
+                            <span class="text-xs font-medium text-gray-300">{{ __('egi.creator.created_by') }}</span>
                         </div>
                         <span class="text-xs font-semibold text-white truncate">{{ $egi->user->name }}</span>
                     </div>
@@ -128,7 +137,7 @@ $imageUrl = $imageRelativePath ? asset('storage/' . $imageRelativePath) : null;
                                 <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
                             </svg>
                         </div>
-                        <span class="text-xs font-medium text-blue-300">💳 Purchased for</span>
+                        <span class="text-xs font-medium text-blue-300">{{ __('egi.price.purchased_for') }}</span>
                     </div>
                     <div class="text-right">
                         <span class="text-sm font-bold text-white">€{{ number_format($egi->pivot->offer_amount_eur, 2) }}</span>
@@ -143,7 +152,7 @@ $imageUrl = $imageRelativePath ? asset('storage/' . $imageRelativePath) : null;
                                 <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
                             </svg>
                         </div>
-                        <span class="text-xs font-medium text-green-300">💰 Price</span>
+                        <span class="text-xs font-medium text-green-300">{{ __('egi.price.price') }}</span>
                     </div>
                     <div class="text-right">
                         <span class="text-sm font-bold text-white">{{ number_format($egi->price, 2) }}</span>
@@ -158,7 +167,7 @@ $imageUrl = $imageRelativePath ? asset('storage/' . $imageRelativePath) : null;
                                 <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" />
                             </svg>
                         </div>
-                        <span class="text-xs font-medium text-blue-300">📊 Floor</span>
+                        <span class="text-xs font-medium text-blue-300">{{ __('egi.price.floor') }}</span>
                     </div>
                     <div class="text-right">
                         <span class="text-sm font-bold text-white">{{ number_format($egi->floorDropPrice, 2) }}</span>
@@ -174,7 +183,7 @@ $imageUrl = $imageRelativePath ? asset('storage/' . $imageRelativePath) : null;
                                 <path fill-rule="evenodd" d="M13.477 14.89A6 6 0 015.11 6.524l8.367 8.368zm1.414-1.414L6.524 5.11a6 6 0 018.367 8.367zM4 10a6 6 0 1112 0A6 6 0 014 10z" clip-rule="evenodd" />
                             </svg>
                         </div>
-                        <span class="text-xs font-medium text-gray-300">🚫 Not for sale</span>
+                        <span class="text-xs font-medium text-gray-300">{{ __('egi.status.not_for_sale') }}</span>
                     </div>
                 </div>
             {{-- Per EGI non pubblicati, mostra un messaggio diverso o niente --}}
@@ -186,7 +195,7 @@ $imageUrl = $imageRelativePath ? asset('storage/' . $imageRelativePath) : null;
                                 <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
                             </svg>
                         </div>
-                        <span class="text-xs font-medium text-yellow-300">⏳ Draft</span>
+                        <span class="text-xs font-medium text-yellow-300">{{ __('egi.status.draft') }}</span>
                     </div>
                 </div>
             @endif
