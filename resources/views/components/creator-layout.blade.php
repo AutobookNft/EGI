@@ -50,7 +50,7 @@
     <button type="submit" class="sr-only">{{ __('guest_layout.logout_sr_button') }}</button>
 </form>
 @include('components.create-collection-modal')
-@vite(['resources/js/guest.js', 'resources/js/polyfills.js', 'resources/ts/main.ts', 'resources/js/app.js'])
+@vite(['resources/js/guest.js', 'resources/js/polyfills.js', 'resources/ts/main.ts', 'resources/js/app.js', 'resources/css/reservation-history.css', 'resources/js/reservation-history.js'])
 @stack('scripts')
 </body>
 

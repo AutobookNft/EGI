@@ -22,8 +22,7 @@ use Illuminate\Support\Facades\Session;
  * @version 2.1.0-oracode-corrected
  * @package App\Http\Controllers
  */
-class ReservationController extends Controller
-{
+class ReservationController extends Controller {
     protected ReservationService $reservationService;
     protected ErrorManagerInterface $errorManager;
     protected UltraLogManager $logger;
@@ -45,8 +44,7 @@ class ReservationController extends Controller
      * @param int $egiId
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function reserve(Request $request, int $egiId)
-    {
+    public function reserve(Request $request, int $egiId) {
         $this->logger->info('[RESERVATION_WEB_ATTEMPT] Web reservation attempt started', [
             'egi_id' => $egiId,
             'user_id' => FegiAuth::id(),
@@ -80,7 +78,6 @@ class ReservationController extends Controller
                 'terms_accepted' => 'required|accepted',
                 'contact_data' => 'nullable|array'
             ]);
-
         } catch (\Illuminate\Validation\ValidationException $e) {
             return $this->errorManager->handle(
                 'VALIDATION_ERROR',
@@ -99,15 +96,14 @@ class ReservationController extends Controller
         try {
             // Find EGI - wrapped in dedicated try/catch
             $egi = Egi::findOrFail($egiId);
-
         } catch (\Exception $e) {
             return $this->errorManager->handle('RESERVATION_EGI_NOT_FOUND', [
-                    'egi_id' => $egiId,
-                    'operation' => 'web_reservation',
-                    'user_id' => FegiAuth::id(),
-                    'ip_address' => $request->ip(),
-                    'user_agent' => $request->userAgent()
-                ], $e);
+                'egi_id' => $egiId,
+                'operation' => 'web_reservation',
+                'user_id' => FegiAuth::id(),
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent()
+            ], $e);
         }
 
         try {
@@ -142,7 +138,6 @@ class ReservationController extends Controller
 
             return redirect()->route('egi-certificates.show', $reservation->certificate->certificate_uuid)
                 ->with('success', __('reservation.success'));
-
         } catch (\Exception $e) {
             // Handle unauthorized access and any other reservation creation errors
             if (str_contains($e->getMessage(), 'Unauthorized access')) {
@@ -187,8 +182,7 @@ class ReservationController extends Controller
      * @param int $egiId
      * @return JsonResponse
      */
-    public function apiReserve(Request $request, int $egiId): JsonResponse
-    {
+    public function apiReserve(Request $request, int $egiId): JsonResponse {
         $this->logger->info('[RESERVATION_API_ATTEMPT] API reservation attempt started', [
             'egi_id' => $egiId,
             'user_id' => FegiAuth::id(),
@@ -224,7 +218,6 @@ class ReservationController extends Controller
                 'contact_data' => 'nullable|array',
                 'wallet_address' => 'nullable|string|size:58'
             ]);
-
         } catch (\Illuminate\Validation\ValidationException $e) {
             return $this->errorManager->handle(
                 'VALIDATION_ERROR',
@@ -243,7 +236,6 @@ class ReservationController extends Controller
         try {
             // Find EGI - dedicated try/catch
             $egi = Egi::findOrFail($egiId);
-
         } catch (\Exception $e) {
             return $this->errorManager->handle(
                 'RESERVATION_EGI_NOT_FOUND',
@@ -253,7 +245,9 @@ class ReservationController extends Controller
                     'user_id' => FegiAuth::id(),
                     'ip_address' => $request->ip(),
                     'user_agent' => $request->userAgent()
-                ], $e );
+                ],
+                $e
+            );
         }
 
         try {
@@ -306,7 +300,6 @@ class ReservationController extends Controller
                     ]
                 ]
             ]);
-
         } catch (\Exception $e) {
             // Handle unauthorized access and any other reservation creation errors
             if (str_contains($e->getMessage(), 'Unauthorized access')) {
@@ -350,8 +343,7 @@ class ReservationController extends Controller
      * @param int $id
      * @return JsonResponse
      */
-    public function cancel(Request $request, int $id): JsonResponse
-    {
+    public function cancel(Request $request, int $id): JsonResponse {
         $this->logger->info('[RESERVATION_CANCEL_ATTEMPT] Reservation cancellation attempt', [
             'reservation_id' => $id,
             'user_id' => FegiAuth::id()
@@ -359,7 +351,6 @@ class ReservationController extends Controller
 
         try {
             $reservation = Reservation::findOrFail($id);
-
         } catch (\Exception $e) {
             return $this->errorManager->handle(
                 'RECORD_NOT_FOUND',
@@ -370,7 +361,9 @@ class ReservationController extends Controller
                     'user_id' => FegiAuth::id(),
                     'ip_address' => $request->ip(),
                     'user_agent' => $request->userAgent()
-                ], $e );
+                ],
+                $e
+            );
         }
 
         try {
@@ -378,8 +371,8 @@ class ReservationController extends Controller
             $user = FegiAuth::user();
             $isOwner = $user && $user->id === $reservation->user_id;
             $hasWallet = $request->session()->has('connected_wallet') &&
-                         $reservation->certificate &&
-                         $reservation->certificate->wallet_address === $request->session()->get('connected_wallet');
+                $reservation->certificate &&
+                $reservation->certificate->wallet_address === $request->session()->get('connected_wallet');
 
             if (!$isOwner && !$hasWallet) {
                 throw new \Exception('Unauthorized cancellation attempt');
@@ -402,7 +395,6 @@ class ReservationController extends Controller
                 'success' => true,
                 'message' => __('reservation.cancel_success')
             ]);
-
         } catch (\Exception $e) {
             if (str_contains($e->getMessage(), 'Unauthorized cancellation')) {
                 return $this->errorManager->handle(
@@ -440,8 +432,7 @@ class ReservationController extends Controller
      * @param Request $request
      * @return JsonResponse
      */
-    public function listUserReservations(Request $request): JsonResponse
-    {
+    public function listUserReservations(Request $request): JsonResponse {
         $this->logger->info('[RESERVATION_LIST_ATTEMPT] User reservations list requested', [
             'user_id' => FegiAuth::id()
         ]);
@@ -487,7 +478,6 @@ class ReservationController extends Controller
                 'count' => $reservations->count(),
                 'reservations' => $data
             ]);
-
         } catch (\Exception $e) {
             if (str_contains($e->getMessage(), 'Authentication required')) {
                 return $this->errorManager->handle(
@@ -523,8 +513,7 @@ class ReservationController extends Controller
      * @param int $egiId
      * @return JsonResponse
      */
-    public function getEgiReservationStatus(Request $request, int $egiId): JsonResponse
-    {
+    public function getEgiReservationStatus(Request $request, int $egiId): JsonResponse {
         // $this->logger->info('[RESERVATION_STATUS_REQUEST] EGI reservation status requested', [
         //     'egi_id' => $egiId,
         //     'user_id' => FegiAuth::id()
@@ -532,7 +521,6 @@ class ReservationController extends Controller
 
         try {
             $egi = Egi::findOrFail($egiId);
-
         } catch (\Exception $e) {
             return $this->errorManager->handle(
                 'RECORD_EGI_NOT_FOUND_IN_RESERVATION_CONTROLLER',
@@ -543,16 +531,17 @@ class ReservationController extends Controller
                     'user_id' => FegiAuth::id(),
                     'ip_address' => $request->ip(),
                     'user_agent' => $request->userAgent()
-                ], $e );
+                ],
+                $e
+            );
         }
 
         try {
             // Get highest priority reservation
             $highestReservation = $this->reservationService->getHighestPriorityReservation($egi);
 
-            // Get count of all active reservations
+            // Get count of all current reservations (not just active status)
             $totalReservations = Reservation::where('egi_id', $egiId)
-                ->where('status', 'active')
                 ->where('is_current', true)
                 ->count();
 
@@ -564,17 +553,15 @@ class ReservationController extends Controller
             if ($user) {
                 $userReservation = Reservation::where('egi_id', $egiId)
                     ->where('user_id', $user->id)
-                    ->where('status', 'active')
                     ->where('is_current', true)
                     ->first();
             } elseif ($walletAddress) {
                 $userReservation = Reservation::whereHas('certificate', function ($query) use ($walletAddress) {
                     $query->where('wallet_address', $walletAddress);
                 })
-                ->where('egi_id', $egiId)
-                ->where('status', 'active')
-                ->where('is_current', true)
-                ->first();
+                    ->where('egi_id', $egiId)
+                    ->where('is_current', true)
+                    ->first();
             }
 
             // Build response data
@@ -612,7 +599,6 @@ class ReservationController extends Controller
                 'success' => true,
                 'data' => $data
             ]);
-
         } catch (\Exception $e) {
             return $this->errorManager->handle(
                 'RESERVATION_STATUS_FAILED',
@@ -626,6 +612,129 @@ class ReservationController extends Controller
                 ],
                 $e
             );
+        }
+    }
+
+    /**
+     * Get reservation history for an EGI
+     *
+     * @param Request $request
+     * @param int $egiId
+     * @return JsonResponse
+     */
+    public function getReservationHistory(Request $request, int $egiId): JsonResponse {
+        try {
+            // Trova l'EGI
+            $egi = Egi::findOrFail($egiId);
+
+            // Usa il ReservationService per ottenere la cronologia
+            $reservations = $this->reservationService->getReservationHistory($egi);
+
+            // Formatta i dati per la risposta
+            $formattedReservations = $reservations->map(function ($reservation) {
+                return [
+                    'id' => $reservation->id,
+                    'type' => $reservation->type,
+                    'offer_amount_eur' => $reservation->offer_amount_eur,
+                    'offer_amount_algo' => $reservation->offer_amount_algo,
+                    'created_at' => $reservation->created_at->toIso8601String(),
+                    'is_current' => $reservation->is_current,
+                    'status' => $reservation->status,
+                    'user' => $reservation->user ? [
+                        'id' => $reservation->user->id,
+                        'name' => $reservation->user->name ?? 'Anonymous'
+                    ] : null
+                ];
+            });
+
+            return response()->json([
+                'success' => true,
+                'egi_id' => $egiId,
+                'total_count' => $reservations->count(),
+                'reservations' => $formattedReservations
+            ]);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return $this->errorManager->handle(
+                'RECORD_EGI_NOT_FOUND_IN_RESERVATION_CONTROLLER',
+                [
+                    'model' => 'Egi',
+                    'id' => $egiId,
+                    'operation' => 'reservation_history',
+                    'user_id' => FegiAuth::id(),
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->userAgent()
+                ],
+                $e
+            );
+        } catch (\Exception $e) {
+            return $this->errorManager->handle(
+                'RESERVATION_HISTORY_FAILED',
+                [
+                    'egi_id' => $egiId,
+                    'user_id' => FegiAuth::id(),
+                    'exception_class' => get_class($e),
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                    'error' => $e->getMessage()
+                ],
+                $e
+            );
+        }
+    }
+
+    /**
+     * Get reservation status for an EGI
+     * Used by frontend to check if EGI is reserved and update button state
+     *
+     * @param Request $request
+     * @param int $egiId
+     * @return JsonResponse
+     */
+    public function getReservationStatus(Request $request, int $egiId): JsonResponse {
+        try {
+            // Find the EGI
+            $egi = Egi::find($egiId);
+            if (!$egi) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'EGI not found'
+                ], 404);
+            }
+
+            // Check if EGI has any current reservations
+            $reservationCount = Reservation::where('egi_id', $egiId)
+                ->where('is_current', true)
+                ->count();
+            $isReserved = $reservationCount > 0;
+
+            // Get highest priority reservation if any
+            $highestPriorityReservation = null;
+            if ($isReserved) {
+                $highestPriorityReservation = Reservation::where('egi_id', $egiId)
+                    ->where('is_current', true)
+                    ->orderBy('created_at', 'asc') // Priority calculation might be complex, use date for now
+                    ->first();
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'egi_id' => $egiId,
+                    'is_reserved' => $isReserved,
+                    'total_reservations' => $reservationCount,
+                    'highest_priority' => $highestPriorityReservation ? ($highestPriorityReservation->priority ?? 1) : null,
+                    'highest_priority_user' => $highestPriorityReservation ? $highestPriorityReservation->user->name : null,
+                    // Debug info
+                    'debug_count' => $reservationCount,
+                    'debug_all_count' => Reservation::where('egi_id', $egiId)->count()
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error checking reservation status',
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
 }

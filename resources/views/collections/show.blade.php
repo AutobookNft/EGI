@@ -2,9 +2,6 @@
 {{-- 🎨 ORACODE REDESIGN: Galleria Imponente Mobile-First --}}
 {{-- Trasformazione orchestrata per massimo impatto visivo e UX --}}
 {{-- Focus: Hero Impact + Info Critica + Griglia Adattiva + Micro-animazioni --}}
-
-@vite(['resources/css/collections-show.css'])
-
 {{-- Includiamo il layout principale per le collezioni --}}
 {{-- Questo layout gestisce il titolo, la descrizione e gli script condivisi --}}
 

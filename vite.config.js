@@ -25,12 +25,14 @@ export default defineConfig(({ mode }) => {
                     'resources/css/home-nft.css',
                     'resources/css/create-collection-modal-context.css',
                     'resources/css/creator-home.css',
+                    'resources/css/reservation-history.css', // Stili per cronologia prenotazioni
                     'resources/js/creator-home.js',
                     'resources/css/collections-show.css',
                     'resources/js/app.js',
                     'resources/js/collection.js',
                     'resources/js/collection-carousel.js', // Carousel helper
                     'resources/js/biography-edit.js', // AGGIUNTO!
+                    'resources/js/reservation-history.js', // Sistema cronologia prenotazioni
                     'resources/ts/main.ts', // Corretto da main.js a main.ts
                     'resources/ts/main_app.ts',
                     'resources/js/guest.js',

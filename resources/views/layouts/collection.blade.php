@@ -7,6 +7,8 @@
 {{-- Expects $title, $metaDescription, $headExtra, $headMetaExtra, $schemaMarkup slots/variables. --}}
 <!DOCTYPE html>
 
+    @vite(['resources/css/collections-show.css', 'resources/css/creator-home.css', 'resources/js/creator-home.js'])
+
     @include('layouts.partials.header')
 
     {{-- NESSUNA SEZIONE HERO - Focus diretto sul contenuto --}}
@@ -58,12 +60,7 @@
     <x-wallet-connect-modal />
 
     {{-- Asset JS (Vite) --}}
-    @vite([
-        'resources/js/app.js',
-        'resources/js/guest.js',
-        'resources/js/polyfills.js',
-        'resources/ts/main.ts',
-        ])
+   @vite(['resources/js/guest.js', 'resources/js/polyfills.js', 'resources/ts/main.ts', 'resources/js/app.js', 'resources/css/reservation-history.css', 'resources/js/reservation-history.js'])
 
     {{-- Stack per script specifici della pagina --}}
     @stack('scripts')

@@ -89,9 +89,9 @@ return [
     ],
 
     // Livelli di priorità
-    'priority' => [
-        'highest' => 'Massima Priorità',
-        'superseded' => 'Priorità Inferiore'
+        'priority' => [
+        'highest' => 'Prenotazione Attiva',
+        'superseded' => 'Superata',
     ],
 
     // Stato della prenotazione

@@ -22,8 +22,7 @@ use Ultra\UltraLogManager\UltraLogManager;
  * @version 1.0.0
  * @date 2025-05-16
  */
-class ReservationService
-{
+class ReservationService {
     /**
      * @var UltraLogManager
      */
@@ -67,8 +66,7 @@ class ReservationService
      *
      * @privacy-safe Collects only necessary data for reservation
      */
-    public function createReservation(array $data, ?User $user = null, ?string $walletAddress = null): ?Reservation
-    {
+    public function createReservation(array $data, ?User $user = null, ?string $walletAddress = null): ?Reservation {
         // Start a transaction to ensure data consistency
         return DB::transaction(function () use ($data, $user, $walletAddress) {
             $egi = Egi::findOrFail($data['egi_id']);
@@ -141,8 +139,7 @@ class ReservationService
      * @param Egi $egi The EGI to check
      * @return bool Whether the EGI can be reserved
      */
-    public function canReserveEgi(Egi $egi): bool
-    {
+    public function canReserveEgi(Egi $egi): bool {
         // Check if EGI is published or if it's already minted
         return ($egi->is_published || $egi->status === 'published') && !$egi->mint;
     }
@@ -153,8 +150,7 @@ class ReservationService
      * @param Reservation $newReservation The new reservation to process
      * @return void
      */
-    public function processReservationPriorities(Reservation $newReservation): void
-    {
+    public function processReservationPriorities(Reservation $newReservation): void {
         // Get all active reservations for the same EGI
         $existingReservations = Reservation::where('egi_id', $newReservation->egi_id)
             ->where('id', '!=', $newReservation->id)
@@ -206,8 +202,7 @@ class ReservationService
      * @param Reservation $b Second reservation
      * @return bool Whether a has higher priority than b
      */
-    public function hasHigherPriority(Reservation $a, Reservation $b): bool
-    {
+    public function hasHigherPriority(Reservation $a, Reservation $b): bool {
         // Strong reservations always have priority over weak ones
         if ($a->type === 'strong' && $b->type === 'weak') {
             return true;
@@ -236,13 +231,11 @@ class ReservationService
      * @param Egi $egi The EGI to check
      * @return Reservation|null The highest priority reservation or null if none
      */
-    public function getHighestPriorityReservation(Egi $egi): ?Reservation
-    {
+    public function getHighestPriorityReservation(Egi $egi): ?Reservation {
         // First look for strong reservations
         $strongReservation = $egi->reservations()
             ->where('type', 'strong')
             ->where('is_current', true)
-            ->where('status', 'active')
             ->orderBy('offer_amount_eur', 'desc')
             ->orderBy('created_at', 'asc')
             ->first();
@@ -255,7 +248,6 @@ class ReservationService
         return $egi->reservations()
             ->where('type', 'weak')
             ->where('is_current', true)
-            ->where('status', 'active')
             ->orderBy('offer_amount_eur', 'desc')
             ->orderBy('created_at', 'asc')
             ->first();
@@ -267,8 +259,7 @@ class ReservationService
      * @param User $user The user
      * @return Collection Collection of active reservations
      */
-    public function getUserActiveReservations(User $user): Collection
-    {
+    public function getUserActiveReservations(User $user): Collection {
         return Reservation::where('user_id', $user->id)
             ->where('is_current', true)
             ->where('status', 'active')
@@ -282,8 +273,7 @@ class ReservationService
      * @param Egi $egi The EGI
      * @return Collection Collection of all reservations for the EGI
      */
-    public function getReservationHistory(Egi $egi): Collection
-    {
+    public function getReservationHistory(Egi $egi): Collection {
         return Reservation::where('egi_id', $egi->id)
             ->with(['user', 'certificate'])
             ->orderBy('created_at', 'desc')
@@ -296,8 +286,7 @@ class ReservationService
      * @param Reservation $reservation The reservation to cancel
      * @return bool Whether the cancellation was successful
      */
-    public function cancelReservation(Reservation $reservation): bool
-    {
+    public function cancelReservation(Reservation $reservation): bool {
         // Update the reservation status
         $reservation->status = 'cancelled';
         $reservation->is_current = false;
@@ -343,8 +332,7 @@ class ReservationService
      * @param int $egiId The EGI ID
      * @return void
      */
-    private function reprocessPrioritiesAfterCancellation(int $egiId): void
-    {
+    private function reprocessPrioritiesAfterCancellation(int $egiId): void {
         $activeReservations = Reservation::where('egi_id', $egiId)
             ->where('is_current', true)
             ->where('status', 'active')

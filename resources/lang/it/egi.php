@@ -77,6 +77,24 @@ return [
         'view' => 'Visualizza',
         'view_details' => 'Visualizza dettagli EGI',
         'reserve' => 'Prenota',
+        'reserved' => 'Prenotato',
+        'view_history' => 'Cronologia',
+        'reserve_egi' => 'Prenota :title',
+    ],
+
+    // Sistema cronologia prenotazioni
+    'history' => [
+        'title' => 'Cronologia Prenotazioni',
+        'no_reservations' => 'Nessuna prenotazione trovata',
+        'total_reservations' => '{1} :count prenotazione|[2,*] :count prenotazioni',
+        'current_highest' => 'Priorità massima attuale',
+        'superseded' => 'Priorità inferiore',
+        'created_at' => 'Creato il',
+        'amount' => 'Importo',
+        'type_strong' => 'Prenotazione forte',
+        'type_weak' => 'Prenotazione debole',
+        'loading' => 'Caricamento cronologia...',
+        'error' => 'Errore nel caricamento della cronologia',
     ],
 
     // Sezioni Informative
