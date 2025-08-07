@@ -37,7 +37,7 @@ $imageUrl = $imageRelativePath ? asset('storage/' . $imageRelativePath) : null;
         {{-- 🎯 Immagine Principale o Placeholder --}}
         @if ($imageUrl)
             <img src="{{ $imageUrl }}" {{-- Usa l'URL generato con asset() --}} alt="{{ $egi->title ?? 'EGI Image' }}"
-                class="h-full w-full object-cover object-center transition-transform duration-300 ease-in-out group-hover:scale-105"
+                class="h-full w-full object-contain object-center bg-gray-800 transition-transform duration-300 ease-in-out group-hover:scale-105"
                 loading="lazy" />
         @else
             {{-- Placeholder --}}

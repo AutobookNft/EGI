@@ -224,10 +224,10 @@
                     @foreach ($purchasedEgis as $egi)
                         <article class="flex overflow-hidden transition-all duration-300 bg-white border border-gray-100 shadow-lg group rounded-2xl hover:shadow-xl hover:border-gray-200">
                             <!-- Image -->
-                            <div class="relative flex-shrink-0 w-32 h-32 overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
+                            <div class="relative flex-shrink-0 w-32 h-32 overflow-hidden bg-gradient-to-br from-gray-800 to-gray-900">
                                 @if ($egi->main_image_url)
                                     <img src="{{ $egi->main_image_url }}" alt="{{ $egi->title }}"
-                                        class="object-cover w-full h-full transition-transform duration-300 group-hover:scale-110">
+                                        class="object-contain w-full h-full bg-gray-800 transition-transform duration-300 group-hover:scale-110">
                                 @else
                                     <div class="flex items-center justify-center w-full h-full bg-gradient-to-br from-purple-100 to-blue-100">
                                         <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
