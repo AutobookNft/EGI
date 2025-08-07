@@ -147,6 +147,26 @@ Route::get('/archetypes/patron', function () {
 
 /*
 |--------------------------------------------------------------------------
+| Collector Routes - Public Profiles & Portfolios
+|--------------------------------------------------------------------------
+*/
+Route::prefix('collector')->name('collector.')->group(function () {
+    // Collector index page (list all collectors)
+    Route::get('/', [\App\Http\Controllers\CollectorHomeController::class, 'index'])->name('index');
+
+    // Collector public profiles and portfolio
+    Route::get('/{id}', [\App\Http\Controllers\CollectorHomeController::class, 'home'])->name('home')->where('id', '[0-9]+');
+    Route::get('/{id}/portfolio', [\App\Http\Controllers\CollectorHomeController::class, 'portfolio'])->name('portfolio')->where('id', '[0-9]+');
+    Route::get('/{id}/collections', [\App\Http\Controllers\CollectorHomeController::class, 'collections'])->name('collections')->where('id', '[0-9]+');
+    Route::get('/{id}/collection/{collection}', [\App\Http\Controllers\CollectorHomeController::class, 'showCollection'])->name('collection.show')->where(['id' => '[0-9]+', 'collection' => '[0-9]+']);
+
+    // API endpoints for collector stats
+    Route::get('/{id}/stats', [\App\Http\Controllers\CollectorHomeController::class, 'getStats'])->name('stats')->where('id', '[0-9]+');
+
+    // Placeholder for future features
+    Route::get('/under-construction', [\App\Http\Controllers\CollectorHomeController::class, 'underConstruction'])->name('under-construction');
+});/*
+|--------------------------------------------------------------------------
 | Public Routes - Collections & EGIs
 |--------------------------------------------------------------------------
 */

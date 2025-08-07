@@ -78,8 +78,7 @@ use Illuminate\Database\Eloquent\SoftDeletes; // Importa SoftDeletes
  *
  * @method static \Database\Factories\EgiFactory factory($count = null, $state = [])
  */
-class Egi extends Model
-{
+class Egi extends Model {
     use HasFactory;
     use SoftDeletes; // Enable soft deletes
 
@@ -170,8 +169,7 @@ class Egi extends Model
      *
      * @return BelongsTo
      */
-    public function collection(): BelongsTo
-    {
+    public function collection(): BelongsTo {
         return $this->belongsTo(Collection::class, 'collection_id');
     }
 
@@ -180,8 +178,7 @@ class Egi extends Model
      *
      * @return BelongsTo
      */
-    public function user(): BelongsTo
-    {
+    public function user(): BelongsTo {
         // Assuming 'user_id' is the foreign key linking to the user who uploaded/created the record
         return $this->belongsTo(User::class, 'user_id');
     }
@@ -191,8 +188,7 @@ class Egi extends Model
      *
      * @return BelongsTo
      */
-    public function owner(): BelongsTo
-    {
+    public function owner(): BelongsTo {
         // Assuming 'owner_id' is the foreign key linking to the current owner user
         return $this->belongsTo(User::class, 'owner_id');
     }
@@ -203,8 +199,7 @@ class Egi extends Model
      *
      * @return HasMany
      */
-    public function audits(): HasMany
-    {
+    public function audits(): HasMany {
         return $this->hasMany(EgiAudit::class, 'egi_id');
     }
 
@@ -215,8 +210,7 @@ class Egi extends Model
      *
      * @return MorphMany
      */
-    public function likes(): MorphMany
-    {
+    public function likes(): MorphMany {
         return $this->morphMany(Like::class, 'likeable');
     }
 
@@ -225,8 +219,7 @@ class Egi extends Model
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function reservations(): HasMany
-    {
+    public function reservations(): HasMany {
         return $this->hasMany(Reservation::class, 'egi_id', 'id');
     }
 
@@ -236,18 +229,38 @@ class Egi extends Model
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function reservationCertificates()
-    {
+    public function reservationCertificates() {
         return $this->hasMany(EgiReservationCertificate::class, 'egi_id')
-                    ->orderByRaw("CASE
+            ->orderByRaw("CASE
                         WHEN reservation_type = 'strong' THEN 0
                         WHEN reservation_type = 'weak' THEN 1
                         ELSE 2
                     END")
-                    ->orderBy('offer_amount_eur', 'desc')
-                    ->orderBy('created_at', 'desc'); // Tie-breaker per stesso prezzo
+            ->orderBy('offer_amount_eur', 'desc')
+            ->orderBy('created_at', 'desc'); // Tie-breaker per stesso prezzo
     }
 
+    /**
+     * Get the main image URL for this EGI
+     * Constructs the image path based on collection, creator and file info
+     *
+     * @return string|null
+     */
+    public function getMainImageUrlAttribute(): ?string {
+        if (!$this->collection_id || !$this->user_id || !$this->key_file || !$this->extension) {
+            return null;
+        }
+
+        $path = sprintf(
+            'storage/users_files/collections_%d/creator_%d/%d.%s',
+            $this->collection_id,
+            $this->user_id,
+            $this->key_file,
+            $this->extension
+        );
+
+        return asset($path);
+    }
 
     // Add other relationships as needed (e.g., with Auction, Drop models later)
 

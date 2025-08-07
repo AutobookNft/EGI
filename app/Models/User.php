@@ -1136,4 +1136,173 @@ class User extends Authenticatable implements HasMedia {
         $name = urlencode($this->name ?? 'Anonymous');
         return "https://api.dicebear.com/7.x/bottts/png?seed={$name}&backgroundColor=transparent&size=512";
     }
+
+    // ======================== COLLECTOR RELATIONSHIPS ========================
+
+    /**
+     * @Oracode Collector: Get all reservations made by this user
+     * 🎯 Purpose: Track all EGI reservations/purchases by collector
+     * 📤 Returns: HasMany relationship to Reservation model
+     */
+    public function reservations(): HasMany {
+        return $this->hasMany(Reservation::class, 'user_id');
+    }
+
+    /**
+     * @Oracode Collector: Get active reservations
+     * 🎯 Purpose: Current active reservations by collector
+     * 📤 Returns: HasMany relationship filtered for active reservations
+     */
+    public function activeReservations(): HasMany {
+        return $this->hasMany(Reservation::class, 'user_id')
+            ->where('status', 'active')
+            ->where('is_current', true);
+    }
+
+    /**
+     * @Oracode Collector: Get completed/paid reservations
+     * 🎯 Purpose: Successfully completed purchases by collector
+     * 📤 Returns: HasMany relationship filtered for completed reservations
+     */
+    public function completedReservations(): HasMany {
+        return $this->hasMany(Reservation::class, 'user_id')
+            ->where('status', 'completed');
+    }
+
+    /**
+     * @Oracode Collector: Get valid reservations (active or completed)
+     * 🎯 Purpose: All valid reservations including active bookings and completed purchases
+     * 📤 Returns: HasMany relationship filtered for valid reservations
+     */
+    public function validReservations(): HasMany {
+        return $this->hasMany(Reservation::class, 'user_id')
+            ->whereIn('status', ['active', 'completed']);
+    }
+
+    /**
+     * @Oracode Collector: Get owned EGIs
+     * 🎯 Purpose: EGIs currently owned by this collector
+     * 📤 Returns: HasMany relationship to EGI model via owner_id
+     */
+    public function ownedEgis(): HasMany {
+        return $this->hasMany(Egi::class, 'owner_id');
+    }
+
+    /**
+     * @Oracode Collector: Get published owned EGIs
+     * 🎯 Purpose: Only public EGIs owned by collector for portfolio display
+     * 📤 Returns: HasMany relationship filtered for published EGIs
+     */
+    public function publicOwnedEgis(): HasMany {
+        return $this->hasMany(Egi::class, 'owner_id')
+            ->where('is_published', true);
+    }
+
+    /**
+     * @Oracode Collector: Get purchased EGIs via completed reservations
+     * 🎯 Purpose: EGIs acquired through purchase transactions (valid reservations)
+     * 📤 Returns: BelongsToMany relationship via reservations table
+     */
+    public function purchasedEgis(): BelongsToMany {
+        return $this->belongsToMany(Egi::class, 'reservations', 'user_id', 'egi_id')
+            ->wherePivotIn('status', ['active', 'completed'])
+            ->withPivot(['offer_amount_eur', 'created_at', 'id', 'status'])
+            ->withTimestamps();
+    }
+
+    /**
+     * @Oracode Collector: Get published purchased EGIs
+     * 🎯 Purpose: Only public EGIs purchased by collector for portfolio display
+     * 📤 Returns: BelongsToMany relationship filtered for published purchased EGIs
+     */
+    public function publicPurchasedEgis(): BelongsToMany {
+        return $this->purchasedEgis()
+            ->where('egis.is_published', true);
+    }
+
+    /**
+     * @Oracode Collector: Get EGI collection groups for purchased EGIs
+     * 🎯 Purpose: Group purchased EGIs by collection for portfolio organization
+     * 📤 Returns: Collection of collections with purchased EGIs
+     */
+    public function getCollectorCollectionsAttribute() {
+        // Get collection IDs from purchased EGIs
+        $collectionIds = $this->purchasedEgis()
+            ->where('egis.is_published', true)
+            ->pluck('collection_id')
+            ->unique();
+
+        return Collection::whereIn('id', $collectionIds)
+            ->with(['egis' => function ($query) {
+                // Only show EGIs that this collector has purchased
+                $query->whereHas('reservations', function ($subQuery) {
+                    $subQuery->where('user_id', $this->id)
+                        ->whereIn('status', ['active', 'completed']);
+                })->where('is_published', true);
+            }])
+            ->get();
+    }
+
+    /**
+     * @Oracode Collector: Get reservation certificates
+     * 🎯 Purpose: All reservation certificates for owned/reserved EGIs
+     * 📤 Returns: Collection of certificates through reservations
+     */
+    public function reservationCertificates() {
+        return $this->hasManyThrough(
+            EgiReservationCertificate::class,
+            Reservation::class,
+            'user_id', // Foreign key on reservations table
+            'reservation_id', // Foreign key on certificates table
+            'id', // Local key on users table
+            'id' // Local key on reservations table
+        );
+    }
+
+    /**
+     * @Oracode Collector: Get collectors stats for portfolio
+     * 🎯 Purpose: Calculate collector statistics for home page display (based on purchases)
+     * 📤 Returns: Array with collector stats
+     */
+    public function getCollectorStats(): array {
+        $purchasedEgis = $this->purchasedEgis()->count();
+        $activeReservations = $this->activeReservations()->count();
+        $completedPurchases = $this->completedReservations()->count();
+        $totalSpent = $this->validReservations()->sum('offer_amount_eur');
+
+        // Get unique creators supported through purchases
+        $creatorsSupported = $this->purchasedEgis()
+            ->join('collections', 'egis.collection_id', '=', 'collections.id')
+            ->distinct('collections.creator_id')
+            ->count('collections.creator_id');
+
+        // Calculate EPP impact based on purchases
+        $eppImpact = $purchasedEgis * 0.15; // Mock calculation
+
+        // Count unique collections purchased from
+        $totalCollections = $this->purchasedEgis()
+            ->distinct('collection_id')
+            ->count('collection_id');
+
+        return [
+            'total_egis' => $purchasedEgis,
+            'total_collections' => $totalCollections,
+            'active_reservations' => $activeReservations,
+            'completed_purchases' => $completedPurchases,
+            'total_spent_eur' => $totalSpent,
+            'creators_supported' => $creatorsSupported,
+            'epp_impact' => round($eppImpact, 2),
+            'animate' => max($purchasedEgis, $completedPurchases) > 5
+        ];
+    }
+
+    /**
+     * @Oracode Collector: Check if user is collector
+     * 🎯 Purpose: Quick check for collector role/permissions (must have valid reservations)
+     * 📤 Returns: Boolean if user has collector capabilities
+     */
+    public function isCollector(): bool {
+        return $this->hasRole('collector') ||
+            $this->validReservations()->exists();
+    }
 }

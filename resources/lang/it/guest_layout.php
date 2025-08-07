@@ -24,9 +24,11 @@ return [
     // Navigation items
     'home' => 'Home',
     'creators' => 'Artisti',
+    'collectors' => 'Collector',
     'home_link_aria_label' => 'Vai alla Homepage',
     'collections' => 'Collezioni',
     'collections_link_aria_label' => 'Visualizza tutte le collezioni pubbliche',
+    'collectors_link_aria_label' => 'Visualizza tutti i collector EGI',
     'my_galleries' => 'Le mie Gallerie',
     'my_galleries_dropdown_aria_label' => 'Apri menu le mie gallerie',
     'loading_galleries' => 'Caricamento gallerie...',

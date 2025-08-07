@@ -23,9 +23,12 @@ return [
 
     // Navigation items
     'home' => 'Home',
+    'creators' => 'Creators',
+    'collectors' => 'Collectors',
     'home_link_aria_label' => 'Go to Homepage',
     'collections' => 'Collections',
     'collections_link_aria_label' => 'View all public collections',
+    'collectors_link_aria_label' => 'View all EGI collectors',
     'my_galleries' => 'My Galleries',
     'my_galleries_dropdown_aria_label' => 'Open my galleries menu',
     'loading_galleries' => 'Loading galleries...',
