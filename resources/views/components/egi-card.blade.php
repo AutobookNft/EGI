@@ -5,7 +5,7 @@
 {{-- Uses Tailwind CSS for a modern, responsive design. --}}
 
 {{-- Props: Definisci l'oggetto egi come richiesto --}}
-@props(['egi', 'collection' => null]) {{-- $collection è opzionale ma utile --}}
+@props(['egi', 'collection' => null, 'showPurchasePrice' => false]) {{-- Nuovo prop per prezzo di acquisto --}}
 
 {{-- 🧱 Card Container --}}
 <article
@@ -75,74 +75,119 @@ $imageUrl = $imageRelativePath ? asset('storage/' . $imageRelativePath) : null;
     </figure>
 
     {{-- ℹ️ Sezione Informazioni EGI --}}
-    <div class="flex flex-1 flex-col justify-between p-4">
+    <div class="flex flex-1 flex-col justify-between p-4 bg-gradient-to-b from-gray-900/50 to-gray-900">
         <div>
-            {{-- Titolo EGI --}}
-            <h3
-                class="text-base font-semibold text-gray-800 transition-colors duration-200 group-hover:text-indigo-600">
-                {{ Str::limit($egi->title ?? __('Untitled EGI'), 45) }}
-            </h3>
+            {{-- Titolo EGI con icona --}}
+            <div class="flex items-center gap-2 mb-2">
+                <div class="flex-shrink-0 w-6 h-6 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
+                    <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                    </svg>
+                </div>
+                <h3 class="text-base font-bold text-white leading-tight group-hover:text-purple-300 transition-colors duration-200">
+                    {{ Str::limit($egi->title ?? __('✨ Untitled EGI'), 45) }}
+                </h3>
+            </div>
 
-            {{-- Creator EGI (se diverso da collection creator) --}}
+            {{-- Creator EGI con badge stilizzato --}}
             @if (isset($collection) && $egi->user_id && $egi->user_id != $collection->creator_id && $egi->user)
-                <div class="mt-1.5 flex items-center text-xs text-gray-500">
-                    @if ($egi->user->profile_photo_url)
-                        {{-- Assumendo Jetstream per _url --}}
-                        <img src="{{ $egi->user->profile_photo_url }}" alt="{{ $egi->user->name }}"
-                            class="mr-1 h-4 w-4 rounded-full object-cover">
-                    @elseif ($egi->user->profile_photo_path)
-                        {{-- Fallback a path --}}
-                        <img src="{{ asset('storage/' . $egi->user->profile_photo_path) }}" alt="{{ $egi->user->name }}"
-                            class="mr-1 h-4 w-4 rounded-full object-cover">
-                    @else
-                        <span
-                            class="mr-1 inline-block h-4 w-4 overflow-hidden rounded-full bg-gray-200 align-middle"><svg
-                                class="h-full w-full text-gray-400" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M..." />
-                            </svg></span>
-                    @endif
-                    <span class="truncate">{{ __('Created by:') }} {{ $egi->user->name }}</span>
+                <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-800/50 border border-gray-700/50 backdrop-blur-sm">
+                    <div class="flex-shrink-0 w-5 h-5 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 flex items-center justify-center">
+                        <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <div class="flex items-center gap-1">
+                            <span class="text-xs font-medium text-gray-300">👨‍🎨 Created by:</span>
+                        </div>
+                        <span class="text-xs font-semibold text-white truncate">{{ $egi->user->name }}</span>
+                    </div>
                 </div>
             @endif
         </div>
 
-        {{-- Prezzo EGI --}}
-        <div class="mt-3">
-            @if ($egi->price && $egi->price > 0)
-                <p class="text-sm font-medium text-gray-900">
-                    {{ number_format($egi->price, 2) }} <span class="text-xs text-gray-500">ALGO</span>
-                </p>
+        {{-- Prezzo con simboli e design migliorato --}}
+        <div class="mt-4">
+            {{-- Mostra prezzo di acquisto se siamo nel portfolio del collector --}}
+            @if ($showPurchasePrice && $egi->pivot && $egi->pivot->offer_amount_eur)
+                <div class="flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-500/30">
+                    <div class="flex items-center gap-2">
+                        <div class="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center">
+                            <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <span class="text-xs font-medium text-blue-300">💳 Purchased for</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-sm font-bold text-white">€{{ number_format($egi->pivot->offer_amount_eur, 2) }}</span>
+                    </div>
+                </div>
+            {{-- Prezzi originali per altri contesti --}}
+            @elseif ($egi->price && $egi->price > 0)
+                <div class="flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-500/30">
+                    <div class="flex items-center gap-2">
+                        <div class="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center">
+                            <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <span class="text-xs font-medium text-green-300">💰 Price</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-sm font-bold text-white">{{ number_format($egi->price, 2) }}</span>
+                        <span class="text-xs text-green-300 ml-1">ALGO</span>
+                    </div>
+                </div>
             @elseif($egi->floorDropPrice && $egi->floorDropPrice > 0)
-                <p class="text-sm text-gray-500">
-                    {{ __('Floor:') }} <span
-                        class="font-medium text-gray-700">{{ number_format($egi->floorDropPrice, 2) }}</span> <span
-                        class="text-xs">ALGO</span>
-                </p>
+                <div class="flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-blue-500/20 to-indigo-500/20 border border-blue-500/30">
+                    <div class="flex items-center gap-2">
+                        <div class="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center">
+                            <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <span class="text-xs font-medium text-blue-300">📊 Floor</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-sm font-bold text-white">{{ number_format($egi->floorDropPrice, 2) }}</span>
+                        <span class="text-xs text-blue-300 ml-1">ALGO</span>
+                    </div>
+                </div>
             @else
-                <p class="text-sm italic text-gray-400">{{ __('Not for sale') }}</p>
+                <div class="flex items-center justify-center p-3 rounded-xl bg-gradient-to-r from-gray-600/20 to-gray-500/20 border border-gray-500/30">
+                    <div class="flex items-center gap-2">
+                        <div class="w-6 h-6 rounded-full bg-gray-500 flex items-center justify-center">
+                            <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M13.477 14.89A6 6 0 015.11 6.524l8.367 8.368zm1.414-1.414L6.524 5.11a6 6 0 018.367 8.367zM4 10a6 6 0 1112 0A6 6 0 014 10z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <span class="text-xs font-medium text-gray-300">🚫 Not for sale</span>
+                    </div>
+                </div>
             @endif
         </div>
     </div>
 
-    {{-- 🎬 Footer Card (Azioni) --}}
-    <div class="border-t border-gray-100 px-4 py-3">
+    {{-- 🎬 Footer Card con design migliorato --}}
+    <div class="border-t border-gray-700/50 bg-gray-900/80 backdrop-blur-sm px-4 py-3">
         <div class="flex items-center justify-between gap-2">
-            {{-- Link Visualizza Dettaglio --}}
-            {{-- Usa la rotta corretta per il dettaglio EGI --}}
+            {{-- Link Visualizza Dettaglio con stile migliorato --}}
             <a href="{{ route('egis.show', $egi->id) }}"
-                class="inline-flex flex-shrink-0 items-center justify-center rounded-md px-2.5 py-1.5 text-xs font-semibold text-gray-700 ring-1 ring-inset ring-gray-300 transition-colors duration-150 ease-in-out hover:bg-gray-100"
+                class="inline-flex flex-shrink-0 items-center justify-center rounded-lg px-3 py-2 text-xs font-semibold text-gray-300 bg-gray-800 border border-gray-600 hover:bg-gray-700 hover:text-white hover:border-gray-500 transition-all duration-200 shadow-sm hover:shadow-md"
                 aria-label="{{ __('View EGI details') }}">
-                <svg class="mr-1 h-4 w-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                <svg class="mr-1.5 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
                     fill="currentColor" aria-hidden="true">
                     <path d="M10 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" />
                     <path fill-rule="evenodd"
-                        d="M.664 10.59a1.651 1.651 0 0 1 0-1.18l.879-.879a1.651 1.651 0 0 1 2.336 0l.879.879a1.651 1.651 0 0 0 2.336 0l.879-.879a1.651 1.651 0 0 1 2.336 0l.879.879a1.651 1.651 0 0 0 2.336 0l.879-.879a1.651 1.651 0 0 1 2.336 0l.879.879a1.651 1.651 0 0 1 0 1.18l-.879.879a1.651 1.651 0 0 1-2.336 0l-.879-.879a1.651 1.651 0 0 0-2.336 0l-.879.879a1.651 1.651 0 0 1-2.336 0l-.879-.879a1.651 1.651 0 0 0-2.336 0l-.879.879a1.651 1.651 0 0 1-2.336 0l-.879-.879Zm16.473-4.425a.823.823 0 0 1 0 1.166l-1.888 1.888a.823.823 0 0 1-1.167 0l-.878-.878a.823.823 0 0 0-1.167 0l-.878.878a.823.823 0 0 1-1.167 0l-.878-.878a.823.823 0 0 0-1.167 0l-.878.878a.823.823 0 0 1-1.167 0l-.878-.878a.823.823 0 0 0-1.167 0l-.878.878a.823.823 0 0 1-1.167 0L.664 7.33a.823.823 0 0 1 0-1.166l.878-.878a.823.823 0 0 1 1.167 0l.878.878a.823.823 0 0 0 1.167 0l.878-.878a.823.823 0 0 1 1.167 0l.878.878a.823.823 0 0 0 1.167 0l.878-.878a.823.823 0 0 1 1.167 0l.878.878a.823.823 0 0 0 1.167 0l.878-.878a.823.823 0 0 1 1.167 0l1.888 1.888a.823.823 0 0 1 0 1.166Z"
+                        d="M.664 10.59a1.651 1.651 0 0 1 0-1.18C3.6 8.229 6.614 6.61 10 6.61s6.4 1.619 9.336 3.8a1.651 1.651 0 0 1 0 1.18C16.4 13.771 13.386 15.39 10 15.39s-6.4-1.619-9.336-3.8ZM14 10a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z"
                         clip-rule="evenodd" />
                 </svg>
-                {{ __('View') }}
+                👁️ {{ __('View') }}
             </a>
 
-            {{-- Pulsante Riserva (Condizionale) --}}
+            {{-- Pulsante Riserva stilizzato --}}
             @php
                 // Determina se $collection è disponibile (potrebbe non essere passato in alcuni contesti)
                 $creatorId = isset($collection) ? $collection->creator_id : $egi->collection->creator_id ?? null;
@@ -153,16 +198,15 @@ $imageUrl = $imageRelativePath ? asset('storage/' . $imageRelativePath) : null;
             @endphp
             @if ($canReserve)
                 <button
-                    class="reserve-button inline-flex flex-shrink-0 items-center justify-center rounded-md bg-green-600 px-2.5 py-1.5 text-xs font-semibold text-white shadow-sm transition-colors duration-150 ease-in-out hover:bg-green-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600"
+                    class="reserve-button inline-flex flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 px-3 py-2 text-xs font-semibold text-white shadow-lg hover:from-green-600 hover:to-emerald-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600 transition-all duration-200 hover:shadow-xl hover:scale-105"
                     data-egi-id="{{ $egi->id }}">
-                    {{-- data-reserve-url="{{ route('api.egis.reserve', $egi->id) }}"> --}}
-                    <svg class="mr-1 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                    <svg class="mr-1.5 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
                         aria-hidden="true">
                         <path fill-rule="evenodd"
                             d="M4.25 2A1.75 1.75 0 0 0 2.5 3.75v14.5a.75.75 0 0 0 1.218.582l5.534-4.426a.75.75 0 0 1 .496 0l5.534 4.427A.75.75 0 0 0 17.5 18.25V3.75A1.75 1.75 0 0 0 15.75 2h-11.5Z"
                             clip-rule="evenodd" />
                     </svg>
-                    {{ __('Reserve') }}
+                    📋 {{ __('Reserve') }}
                 </button>
             @endif
         </div>

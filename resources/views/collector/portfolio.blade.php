@@ -213,6 +213,7 @@
                         <x-egi-card 
                             :egi="$egi" 
                             :collection="$egi->collection"
+                            :showPurchasePrice="true"
                         />
                     @endforeach
                 </div>
