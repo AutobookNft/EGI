@@ -13,6 +13,16 @@ Route::get('/user', function (Request $request) {
 // Currency routes
 Route::get('/algo-exchange-rate', [App\Http\Controllers\Api\CurrencyController::class, 'getAlgoExchangeRate']);
 
+// 🚀 Portfolio API Routes - NEW (usando auth session invece di sanctum per ora)
+Route::middleware(['web'])->group(function () {
+    Route::get('/portfolio/status-updates', [App\Http\Controllers\Api\PortfolioApiController::class, 'getStatusUpdates'])
+        ->name('api.portfolio.status-updates');
+    Route::get('/portfolio', [App\Http\Controllers\Api\PortfolioApiController::class, 'getPortfolio'])
+        ->name('api.portfolio.get');
+    Route::get('/portfolio/egi/{egiId}/status', [App\Http\Controllers\Api\PortfolioApiController::class, 'getEgiStatus'])
+        ->name('api.portfolio.egi-status');
+});
+
 Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
     // ... altre rotte autenticate
 

@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Collection;
 use App\Models\Egi;
 use App\Models\Reservation;
+use App\Services\PortfolioService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\JsonResponse;
@@ -23,6 +24,20 @@ use App\Helpers\FegiAuth;
  * @date 2025-08-07
  */
 class CollectorHomeController extends Controller {
+
+    /**
+     * @var PortfolioService
+     */
+    protected PortfolioService $portfolioService;
+
+    /**
+     * Constructor with dependency injection
+     *
+     * @param PortfolioService $portfolioService
+     */
+    public function __construct(PortfolioService $portfolioService) {
+        $this->portfolioService = $portfolioService;
+    }
     /**
      * @Oracode Method: Display Collector Home Page
      * 🎯 Purpose: Show collector's main showcase page with stats and recent acquisitions
@@ -46,8 +61,8 @@ class CollectorHomeController extends Controller {
             abort(404, 'User is not a collector');
         }
 
-        // Ottieni le statistiche del collector
-        $stats = $collector->getCollectorStats();
+        // 🚀 FIX: Usa PortfolioService per statistiche accurate
+        $stats = $this->portfolioService->getCollectorPortfolioStats($collector);
 
         // EGI in evidenza - acquistati dal collector
         $featuredEgis = $collector->publicPurchasedEgis()
@@ -111,6 +126,7 @@ class CollectorHomeController extends Controller {
      * @Oracode Method: Display Collector Portfolio Page
      * 🎯 Purpose: Show detailed portfolio with all purchased EGIs, filters and search
      * 📤 Output: Portfolio view with purchased EGIs grid/list and filtering options
+     * 🚀 Enhancement: Uses PortfolioService for accurate ownership tracking
      */
     public function portfolio(int $id, Request $request): View {
         $collector = User::findOrFail($id);
@@ -125,46 +141,59 @@ class CollectorHomeController extends Controller {
         $sort = $request->input('sort', 'latest');
         $view = $request->input('view', 'grid'); // 'grid' or 'list'
 
-        // Costruisci la query per gli EGI acquistati
-        $purchasedEgis = $collector->publicPurchasedEgis()
-            ->with(['collection.creator'])
-            ->when($query, function ($q) use ($query) {
-                $q->where('egis.title', 'like', '%' . $query . '%');
-            })
-            ->when($collection_filter, function ($q) use ($collection_filter) {
-                $q->where('egis.collection_id', $collection_filter);
-            })
-            ->when($creator_filter, function ($q) use ($creator_filter) {
-                $q->whereHas('collection', function ($subQ) use ($creator_filter) {
-                    $subQ->where('creator_id', $creator_filter);
+        // 🚀 FIX: Usa PortfolioService per ottenere solo EGI realmente posseduti
+        $activePortfolio = $this->portfolioService->getCollectorActivePortfolio($collector);
+
+        // Applica filtri e ordinamento alla collection
+        $filteredEgis = $activePortfolio
+            ->when($query, function ($collection) use ($query) {
+                return $collection->filter(function ($egi) use ($query) {
+                    return stripos($egi->title, $query) !== false;
                 });
             })
-            ->when($sort === 'title', function ($q) {
-                $q->orderBy('egis.title');
+            ->when($collection_filter, function ($collection) use ($collection_filter) {
+                return $collection->filter(function ($egi) use ($collection_filter) {
+                    return $egi->collection_id == $collection_filter;
+                });
             })
-            ->when($sort === 'price_high', function ($q) {
-                $q->orderBy('reservations.offer_amount_eur', 'desc');
-            })
-            ->when($sort === 'price_low', function ($q) {
-                $q->orderBy('reservations.offer_amount_eur', 'asc');
-            })
-            ->when($sort === 'latest', function ($q) {
-                $q->latest('reservations.created_at');
-            })
-            ->paginate(20);
+            ->when($creator_filter, function ($collection) use ($creator_filter) {
+                return $collection->filter(function ($egi) use ($creator_filter) {
+                    return $egi->collection && $egi->collection->creator_id == $creator_filter;
+                });
+            });
 
-        // Get filter options based on purchased EGIs
-        $availableCollections = Collection::whereHas('egis.reservations', function ($query) use ($collector) {
-            $query->where('user_id', $collector->id)
-                ->whereIn('status', ['active', 'completed']);
-        })->get();
+        // Applica ordinamento
+        switch ($sort) {
+            case 'title':
+                $filteredEgis = $filteredEgis->sortBy('title');
+                break;
+            case 'price_high':
+                $filteredEgis = $filteredEgis->sortByDesc(function ($egi) {
+                    return $egi->reservations->first()?->offer_amount_eur ?? 0;
+                });
+                break;
+            case 'price_low':
+                $filteredEgis = $filteredEgis->sortBy(function ($egi) {
+                    return $egi->reservations->first()?->offer_amount_eur ?? 0;
+                });
+                break;
+            case 'latest':
+            default:
+                $filteredEgis = $filteredEgis->sortByDesc(function ($egi) {
+                    return $egi->reservations->first()?->created_at ?? '';
+                });
+                break;
+        }
 
-        $availableCreators = User::whereHas('collections.egis.reservations', function ($query) use ($collector) {
-            $query->where('user_id', $collector->id)
-                ->whereIn('status', ['active', 'completed']);
-        })->get();
+        // Simula paginazione (per ora manteniamo il comportamento esistente)
+        $purchasedEgis = $filteredEgis->take(20);
 
-        $stats = $collector->getCollectorStats();
+        // 🚀 FIX: Usa PortfolioService per filtri accurati
+        $availableCollections = $this->portfolioService->getAvailableCollections($collector);
+        $availableCreators = $this->portfolioService->getAvailableCreators($collector);
+
+        // 🚀 FIX: Usa PortfolioService per stats accurate
+        $stats = $this->portfolioService->getCollectorPortfolioStats($collector);
 
         return view('collector.portfolio', compact(
             'collector',

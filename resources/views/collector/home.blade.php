@@ -150,13 +150,13 @@
                         </div>
                         <div class="flex flex-col">
                             <span
-                                class="text-2xl font-bold text-oro-fiorentino md:text-3xl">{{ $stats['total_collections'] ?? 0 }}</span>
+                                class="text-2xl font-bold text-oro-fiorentino md:text-3xl">{{ $stats['collections_represented'] ?? 0 }}</span>
                             <span
-                                class="text-xs text-gray-400 md:text-sm">{{ __('collector.home.collections') }}</span>
+                                class="text-xs text-gray-400 md:text-sm">{{ __('collector.collections_represented') }}</span>
                         </div>
                         <div class="flex flex-col">
                             <span
-                                class="text-2xl font-bold text-oro-fiorentino md:text-3xl">{{ $stats['total_spent'] ?? '0' }}€</span>
+                                class="text-2xl font-bold text-oro-fiorentino md:text-3xl">€{{ number_format($stats['total_spent_eur'] ?? 0, 2) }}</span>
                             <span
                                 class="text-xs text-gray-400 md:text-sm">{{ __('collector.home.total_spent') }}</span>
                         </div>

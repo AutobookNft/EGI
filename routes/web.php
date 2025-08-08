@@ -596,7 +596,8 @@ Route::prefix('api')->name('api.')->group(function () {
         ->name('egis.reservation-status');
     Route::get('/reservations/egi/{egiId}/history', [ReservationController::class, 'getReservationHistory'])
         ->name('reservations.history');
-    // Route API per status prenotazioni
+
+    // Route API per status prenotazioni (existing)
     Route::get('/api/egis/{egiId}/reservation-status', [ReservationController::class, 'getReservationStatus']);
     Route::get('/api/reservations/egi/{egiId}/history', [ReservationController::class, 'getReservationHistory']);
     // Like/Unlike routes

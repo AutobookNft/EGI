@@ -42,6 +42,8 @@ return [
     'badge' => [
         'owned' => 'POSSEDUTO',
         'media_content' => 'Contenuto Media',
+        'winning_bid' => 'OFFERTA VINCENTE',
+        'outbid' => 'SUPERATO',
     ],
 
     // Titoli

@@ -45,6 +45,7 @@ import { updateNavbarUI } from './ui/navbarManager';
 import { UEM } from './services/uemClientService';
 import reservationFeature from './features/reservations/reservationFeature';
 import reservationButtons from './features/reservations/reservationButtons';
+import { initPortfolioManager } from './features/portfolio/portfolioManager'; // 🚀 NEW
 import { NatanAssistant } from './components/natan-assistant';
 
 // --- 📦 IMPORTAZIONI DIPENDENZE ESTERNE (ora gestite da app.js) ---
@@ -339,7 +340,16 @@ async function initializeFEGISystemOrchestrated(): Promise<void> {
             console.warn('Padmin Main: reservationButtons or its initialize method not found.');
         }
 
-        // 11. Inizializza Natan Assistant
+        // 🚀 11. Inizializza Portfolio Manager (NEW)
+        try {
+            const portfolioManager = initPortfolioManager();
+            (window as any).portfolioManager = portfolioManager;
+            console.log('Padmin Main: Portfolio manager initialized successfully.');
+        } catch (error) {
+            console.warn('Padmin Main: Portfolio manager initialization failed:', error);
+        }
+
+        // 12. Inizializza Natan Assistant
         try {
             if (typeof NatanAssistant === 'function') {
                 const natanAssistant = new NatanAssistant();

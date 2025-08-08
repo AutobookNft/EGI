@@ -1202,10 +1202,13 @@ class User extends Authenticatable implements HasMedia {
      * @Oracode Collector: Get purchased EGIs via completed reservations
      * 🎯 Purpose: EGIs acquired through purchase transactions (valid reservations)
      * 📤 Returns: BelongsToMany relationship via reservations table
+     * 🚀 FIX: Only returns EGIs with WINNING (current) reservations
      */
     public function purchasedEgis(): BelongsToMany {
         return $this->belongsToMany(Egi::class, 'reservations', 'user_id', 'egi_id')
             ->wherePivotIn('status', ['active', 'completed'])
+            ->wherePivot('is_current', true)
+            ->whereNull('reservations.superseded_by_id')
             ->withPivot(['offer_amount_eur', 'created_at', 'id', 'status'])
             ->withTimestamps();
     }

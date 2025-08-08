@@ -84,6 +84,33 @@ class ReservationService {
                 ]);
             }
 
+            // 🚀 FIX: Disattiva prenotazioni precedenti dello stesso user per questo EGI
+            if ($user) {
+                $previousReservations = Reservation::where('user_id', $user->id)
+                    ->where('egi_id', $data['egi_id'])
+                    ->where('is_current', true)
+                    ->get();
+
+                foreach ($previousReservations as $prevReservation) {
+                    $prevReservation->is_current = false;
+                    $prevReservation->status = 'superseded';
+                    $prevReservation->save();
+
+                    // Aggiorna anche il certificato se presente
+                    if ($prevReservation->certificate) {
+                        $prevReservation->certificate->is_current_highest = false;
+                        $prevReservation->certificate->is_superseded = true;
+                        $prevReservation->certificate->save();
+                    }
+
+                    $this->logger->info('Previous user reservation deactivated', [
+                        'deactivated_reservation_id' => $prevReservation->id,
+                        'user_id' => $user->id,
+                        'egi_id' => $data['egi_id']
+                    ]);
+                }
+            }
+
             // Determine reservation type based on user authentication
             $reservationType = $user && !$user->is_weak_auth ? 'strong' : 'weak';
 

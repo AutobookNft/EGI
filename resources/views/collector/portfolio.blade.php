@@ -17,7 +17,7 @@
                 "owns": {
                     "@type": "Collection",
                     "name": "{{ $collector->name }}'s EGI Portfolio",
-                    "numberOfItems": {{ $purchasedEgis->total() }}
+                    "numberOfItems": {{ $purchasedEgis->count() }}
                 }
             }
         }
@@ -43,15 +43,18 @@
             {{-- Stats Bar --}}
             <div class="mt-6 grid grid-cols-3 gap-6 text-center">
                 <div>
-                    <span class="text-oro-fiorentino block text-2xl font-bold">{{ $stats['total_egis'] }}</span>
+                    <span
+                        class="text-oro-fiorentino block text-2xl font-bold">{{ $stats['total_owned_egis'] ?? 0 }}</span>
                     <span class="text-sm text-gray-300">{{ __('collector.portfolio.total_egis') }}</span>
                 </div>
                 <div>
-                    <span class="text-oro-fiorentino block text-2xl font-bold">{{ $stats['total_collections'] }}</span>
-                    <span class="text-sm text-gray-300">{{ __('collector.portfolio.collections') }}</span>
+                    <span
+                        class="text-oro-fiorentino block text-2xl font-bold">{{ $stats['total_bids_made'] ?? 0 }}</span>
+                    <span class="text-sm text-gray-300">{{ __('collector.portfolio.total_bids') }}</span>
                 </div>
                 <div>
-                    <span class="text-oro-fiorentino block text-2xl font-bold">€{{ $stats['total_spent_eur'] }}</span>
+                    <span
+                        class="text-oro-fiorentino block text-2xl font-bold">€{{ $stats['total_spent_eur'] ?? 0 }}</span>
                     <span class="text-sm text-gray-300">{{ __('collector.portfolio.total_value') }}</span>
                 </div>
             </div>
@@ -211,7 +214,7 @@
                 @if ($view == 'grid')
                     <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                         @foreach ($purchasedEgis as $egi)
-                            <x-egi-card :egi="$egi" :collection="$egi->collection" :showPurchasePrice="true" :hideReserveButton="true" />
+                            <x-egi-card :egi="$egi" :collection="$egi->collection" :portfolioContext="true" :hideReserveButton="true" />
                         @endforeach
                     </div>
                 @else
@@ -340,10 +343,10 @@
                     </div>
                 @endif
 
-                {{-- Pagination --}}
-                <div class="mt-8">
+                {{-- TODO: Implement pagination for Collection-based results --}}
+                {{-- <div class="mt-8">
                     {{ $purchasedEgis->withQueryString()->links() }}
-                </div>
+                </div> --}}
             @else
                 {{-- Empty State --}}
                 <div class="py-12 text-center">

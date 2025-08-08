@@ -24,6 +24,7 @@ return [
     // Stats
     'owned_egis' => 'EGI Posseduti',
     'collections' => 'Collezioni',
+    'collections_represented' => 'Collezioni',
     'total_spent' => 'Totale Speso',
 
     // Navigation
