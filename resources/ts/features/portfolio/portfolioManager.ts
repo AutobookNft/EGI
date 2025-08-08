@@ -167,7 +167,7 @@ export class PortfolioManager {
                 },
                 {
                     label: 'View Details',
-                    action: () => window.location.href = `/egi/${update.egi_id}`
+                    action: () => window.location.href = `/egis/${update.egi_id}`
                 }
             ]
         });
@@ -184,7 +184,7 @@ export class PortfolioManager {
             actions: [
                 {
                     label: 'View Certificate',
-                    action: () => window.location.href = `/egi/${update.egi_id}`
+                    action: () => window.location.href = `/egis/${update.egi_id}`
                 }
             ]
         });
@@ -201,7 +201,7 @@ export class PortfolioManager {
             actions: [
                 {
                     label: 'Reserve Again',
-                    action: () => window.location.href = `/egi/${update.egi_id}`
+                    action: () => window.location.href = `/egis/${update.egi_id}`
                 }
             ]
         });
@@ -364,8 +364,8 @@ export class PortfolioManager {
      * Open rebid modal for EGI
      */
     private openRebidModal(egiId: number): void {
-        // Navigate to EGI page with rebid flag
-        window.location.href = `/egi/${egiId}?rebid=1`;
+        // Navigate to EGI page
+        window.location.href = `/egis/${egiId}`;
     }
 
     /**
