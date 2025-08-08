@@ -13,6 +13,97 @@ class ReservationHistoryManager {
         this.init();
     }
 
+    /**
+     * 🎯 Calcola il posizionamento intelligente del popup
+     * @param {Element} button Il pulsante cronologia
+     * @param {number} popupWidth Larghezza del popup (default: 350)
+     * @param {number} popupHeight Altezza del popup (default: 400)
+     * @returns {Object} Posizione ottimale {top, left, transform}
+     */
+    calculatePopupPosition(button, popupWidth = 350, popupHeight = 400) {
+        const rect = button.getBoundingClientRect();
+        const viewport = {
+            width: window.innerWidth,
+            height: window.innerHeight
+        };
+
+        // Margine di sicurezza dai bordi dello schermo
+        const margin = 15;
+
+        // Trova il container EGI (il div padre della card)
+        const egiCard = button.closest('.bg-gray-800, .bg-white, [class*="egi"], .p-4, .p-6, .rounded, .shadow');
+        const cardRect = egiCard ? egiCard.getBoundingClientRect() : rect;
+
+        let top, left, transform = null;
+        let arrowClass = null;
+
+        // LOGICA DI POSIZIONAMENTO:
+        // 1. IN ALTO rispetto al pulsante cronologia
+        // 2. CENTRATO rispetto alla card EGI
+        // 3. RESPONSIVE per mobile e edge cases
+
+        // Posizione verticale: sopra il pulsante con margine
+        top = rect.top - popupHeight - margin;
+
+        // Se il popup va fuori dal top dello schermo, posiziona sotto
+        if (top < margin) {
+            top = rect.bottom + margin;
+            transform = 'bottom center';
+            arrowClass = 'arrow-top'; // Freccia verso l'alto (popup sotto il pulsante)
+        } else {
+            transform = 'top center';
+            arrowClass = 'arrow-bottom'; // Freccia verso il basso (popup sopra il pulsante)
+        }
+
+        // Posizione orizzontale: centrato rispetto alla card EGI
+        const cardCenterX = cardRect.left + (cardRect.width / 2);
+        left = cardCenterX - (popupWidth / 2);
+
+        // Dimensioni effettive del popup (può essere ridimensionato per mobile)
+        let effectiveWidth = popupWidth;
+
+        // Aggiustamenti per mobile e bordi schermo
+        if (viewport.width <= 768) {
+            // Mobile: centra nello schermo con margini
+            left = margin;
+            // Ridimensiona popup per mobile
+            effectiveWidth = Math.min(popupWidth, viewport.width - (margin * 2));
+            // Su mobile non usiamo frecce laterali
+            arrowClass = arrowClass; // Mantieni freccia verticale
+        } else {
+            // Desktop: controlla bordi dello schermo
+            if (left < margin) {
+                left = margin;
+                transform = 'top left';
+                // Se il popup è molto spostato a sinistra, usa freccia destra
+                if (left + effectiveWidth < cardCenterX - 50) {
+                    arrowClass = 'arrow-right';
+                }
+            } else if (left + effectiveWidth > viewport.width - margin) {
+                left = viewport.width - effectiveWidth - margin;
+                transform = 'top right';
+                // Se il popup è molto spostato a destra, usa freccia sinistra
+                if (left > cardCenterX + 50) {
+                    arrowClass = 'arrow-left';
+                }
+            }
+        }
+
+        // Controlla se il popup va fuori dal bottom dello schermo
+        if (top + popupHeight > viewport.height - margin) {
+            top = viewport.height - popupHeight - margin;
+        }
+
+        console.log(`📍 Popup position: top=${top}, left=${left}, transform=${transform}, arrow=${arrowClass}`);
+
+        return {
+            top: Math.max(margin, top),
+            left: Math.max(margin, left),
+            transform: transform,
+            arrowClass: arrowClass
+        };
+    }
+
     init() {
         console.log('⚡ ReservationHistoryManager.init() called');
         if (document.readyState === 'loading') {
@@ -42,29 +133,6 @@ class ReservationHistoryManager {
         buttons.forEach(button => {
             console.log('🔘 History button found:', button, 'EGI ID:', button.dataset.egiId);
         });
-    }
-
-    updateButtonToReservedState(button, totalReservations) {
-        // Cambia le classi CSS per lo stato "prenotato"
-        button.className = 'reserved-button inline-flex flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 px-3 py-2 text-xs font-semibold text-white shadow-lg transition-all duration-200 hover:scale-105 hover:from-amber-600 hover:to-orange-600 hover:shadow-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600';
-
-        // Cambia il testo
-        const buttonText = button.querySelector('.button-text');
-        if (buttonText) {
-            buttonText.textContent = 'Cronologia';
-        }
-
-        // Aggiorna il dataset
-        button.dataset.hasReservations = 'true';
-        button.dataset.totalReservations = totalReservations;
-
-        // Cambia l'icona per cronologia
-        const svg = button.querySelector('svg');
-        if (svg) {
-            svg.innerHTML = `
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.414-1.414L11 9.586V6z" clip-rule="evenodd" />
-            `;
-        }
     }
 
     async handleButtonHover(event) {
@@ -159,23 +227,24 @@ class ReservationHistoryManager {
         const popup = document.createElement('div');
         popup.className = 'reservation-history-popup';
 
-        // Posizionamento relativo al pulsante
-        const rect = button.getBoundingClientRect();
-
         popup.innerHTML = this.buildHistoryHTML(historyData);
+
+        // Posizionamento intelligente del popup
+        const position = this.calculatePopupPosition(button);
 
         // Stili CSS inline per garantire funzionamento
         popup.style.cssText = `
             position: fixed;
-            top: ${rect.top - 10}px;
-            left: ${rect.right + 10}px;
+            top: ${position.top}px;
+            left: ${position.left}px;
             z-index: 9999;
             background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
             border: 1px solid #374151;
             border-radius: 12px;
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
-            max-width: 350px;
-            max-height: 400px;
+            max-width: ${window.innerWidth <= 768 ? 'calc(100vw - 30px)' : '350px'};
+            width: ${window.innerWidth <= 768 ? 'calc(100vw - 30px)' : 'auto'};
+            max-height: ${window.innerHeight <= 600 ? '300px' : '400px'};
             overflow-y: auto;
             color: white;
             font-size: 14px;
@@ -183,7 +252,13 @@ class ReservationHistoryManager {
             transition: all 0.2s ease;
             transform: translateY(-10px);
             opacity: 0;
+            ${position.transform ? `transform-origin: ${position.transform};` : ''}
         `;
+
+        // Aggiungi classe freccia in base alla posizione
+        if (position.arrowClass) {
+            popup.classList.add(position.arrowClass);
+        }
 
         document.body.appendChild(popup);
 
@@ -289,7 +364,8 @@ class ReservationHistoryManager {
         const popup = document.createElement('div');
         popup.className = 'reservation-history-popup error';
 
-        const rect = button.getBoundingClientRect();
+        // Usa il sistema di posizionamento intelligente
+        const position = this.calculatePopupPosition(button, 250, 120); // popup più piccolo per errori
 
         popup.innerHTML = `
             <div class="p-4 text-center">
@@ -302,8 +378,8 @@ class ReservationHistoryManager {
 
         popup.style.cssText = `
             position: fixed;
-            top: ${rect.top - 10}px;
-            left: ${rect.right + 10}px;
+            top: ${position.top}px;
+            left: ${position.left}px;
             z-index: 9999;
             background: linear-gradient(135deg, #7f1d1d 0%, #450a0a 100%);
             border: 1px solid #dc2626;
@@ -312,7 +388,13 @@ class ReservationHistoryManager {
             max-width: 250px;
             color: white;
             backdrop-filter: blur(10px);
+            ${position.transform ? `transform-origin: ${position.transform};` : ''}
         `;
+
+        // Aggiungi classe freccia per popup di errore
+        if (position.arrowClass) {
+            popup.classList.add(position.arrowClass);
+        }
 
         document.body.appendChild(popup);
         this.currentPopup = popup;

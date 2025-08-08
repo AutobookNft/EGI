@@ -89,7 +89,7 @@ return [
     ],
 
     // Livelli di priorità
-        'priority' => [
+    'priority' => [
         'highest' => 'Prenotazione Attiva',
         'superseded' => 'Superata',
     ],

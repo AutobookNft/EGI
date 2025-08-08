@@ -32,6 +32,9 @@ let isInitialized = false;
  * @accessibility-trait Ensures keyboard navigation for reservation actions
  */
 export async function initialize(): Promise<void> {
+    console.log('🚫 ReservationFeature: DISABLED - Using server-side rendering');
+    return; // EXIT EARLY - Disabilita completamente questo sistema
+
     if (isInitialized) return;
 
     try {

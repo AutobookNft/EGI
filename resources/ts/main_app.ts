@@ -4,7 +4,13 @@
  * 📜 Oracode TypeScript Module: Unified Application Entry Point (FlorenceEGI + Dependencies)
  * @version 5.0.0 (Unified Orchestrated Initialization)
  * @date 2025-07-02
- * @author Padmin D. Curtis (AI Partner OS2.0-Compliant) for Fabio Cherici
+ * @author Padmin D. Curtis (AI Partner OS2.0-Comp        // RIABILITATO TEMPORANEAMENTE PER DEBUG
+        if (reservationButtons && typeof reservationButtons.initialize === 'function') {
+            await reservationButtons.initialize();
+            console.log('Padmin Main: reservationButtons initialized successfully');
+        } else {
+            console.warn('Padmin Main: reservationButtons or its initialize method not found.');
+        } for Fabio Cherici
  * 🎯 Purpose: Single point orchestrated initialization respecting dependency order
  * 🛡️ Security: Proactive error handling and dependency validation
  * 🧱 Core Logic: Translations → UEM → Enums → Wallet Modules → Ultra Coordination → FEGI System
@@ -298,11 +304,13 @@ async function initializeFEGISystemOrchestrated(): Promise<void> {
         }
 
         // 9. Inizializza il sistema di prenotazione
-        if (reservationFeature && typeof reservationFeature.initialize === 'function') {
-            console.log('Padmin Main: Reservation feature initialized.');
-        } else {
-            console.warn('Padmin Main: reservationFeature or its initialize method not found.');
-        }
+        // DISABILITATO: Sistema di prenotazioni gestito dal server
+        // if (reservationFeature && typeof reservationFeature.initialize === 'function') {
+        //     await reservationFeature.initialize();
+        //     console.log('Padmin Main: reservationFeature initialized successfully');
+        // } else {
+        //     console.warn('Padmin Main: reservationFeature or its initialize method not found.');
+        // }
 
         // 10. Inizializza i bottoni di prenotazione
         if (reservationButtons && typeof reservationButtons.initialize === 'function') {
@@ -486,9 +494,10 @@ function setupEventListeners(): void {
     DOMElements.walletDisconnectButtonEl?.addEventListener('click', () => {
         handleDisconnect(mainAppConfig, DOMElements, UEM, () => {
             updateNavbarUI(mainAppConfig, DOMElements, UEM);
-            if (reservationFeature && typeof reservationFeature.updateReservationButtonStates === 'function') {
-                reservationFeature.updateReservationButtonStates();
-            }
+            // DISABILITATO: Sistema di prenotazioni gestito dal server
+            // if (reservationFeature && typeof reservationFeature.updateReservationButtonStates === 'function') {
+            //     reservationFeature.updateReservationButtonStates();
+            // }
         });
     });
 
@@ -528,9 +537,10 @@ function setupFegiCustomEvents(): void {
     document.addEventListener('fegiConnectionComplete', (event) => {
         const customEvent = event as CustomEvent;
         updateNavbarUI(mainAppConfig, DOMElements, UEM);
-        if (reservationFeature && typeof reservationFeature.updateReservationButtonStates === 'function') {
-            reservationFeature.updateReservationButtonStates();
-        }
+        // DISABILITATO: Sistema di prenotazioni gestito dal server
+        // if (reservationFeature && typeof reservationFeature.updateReservationButtonStates === 'function') {
+        //     reservationFeature.updateReservationButtonStates();
+        // }
         console.log('Padmin Main: UI updated after FEGI connection');
 
         // Opzionalmente usa i dati dell'evento

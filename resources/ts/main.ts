@@ -4,8 +4,13 @@
  * 📜 Oracode TypeScript Module: Unified Application Entry Point (FlorenceEGI + Dependencies)
  * @version 5.0.0 (Unified Orchestrated Initialization)
  * @date 2025-07-02
- * @author Padmin D. Curtis (AI Partner OS2.0-Compliant) for Fabio Cherici
- * 🎯 Purpose: Single point orchestrated initialization respecting dependency order
+ * @author Padmin D. Curtis (AI Partner OS2.0-Compliant) for Fabio Cheri                // DISABILITATO: Sistema di prenotazioni gestito dal server
+        // if (reservationFeature && typeof reservationFeature.initialize === 'function') {
+        //     await reservationFeature.initialize();
+        //     console.log('Padmin Main: reservationFeature initialized successfully');
+        // } else {
+        //     console.warn('Padmin Main: reservationFeature or its initialize method not found.');
+        // }🎯 Purpose: Single point orchestrated initialization respecting dependency order
  * 🛡️ Security: Proactive error handling and dependency validation
  * 🧱 Core Logic: Translations → UEM → Enums → Wallet Modules → Ultra Coordination → FEGI System
  */
