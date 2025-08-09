@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8bfa3554040a2e994395d6760463caa5",
+    "content-hash": "dbfd2f7a15fecc9a7b3918c6fd046a7a",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -8137,6 +8137,55 @@
                 "source": "https://github.com/tijsverkoyen/CssToInlineStyles/tree/v2.3.0"
             },
             "time": "2024-12-21T16:25:41+00:00"
+        },
+        {
+            "name": "tuqqu/gender-detector",
+            "version": "v0.5.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/tuqqu/gender-detector.git",
+                "reference": "f9439b636d6f20225d3f02be2aba480fd4515132"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/tuqqu/gender-detector/zipball/f9439b636d6f20225d3f02be2aba480fd4515132",
+                "reference": "f9439b636d6f20225d3f02be2aba480fd4515132",
+                "shasum": ""
+            },
+            "require": {
+                "ext-mbstring": "*",
+                "php": "^8.1"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^3.23",
+                "phpunit/phpunit": "^10.3",
+                "vimeo/psalm": "^5.14"
+            },
+            "bin": [
+                "bin/get-gender"
+            ],
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "GenderDetector\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Arthur Kurbidaev",
+                    "email": "artkurbidaev@gmail.com"
+                }
+            ],
+            "description": "Get gender from first name",
+            "support": {
+                "issues": "https://github.com/tuqqu/gender-detector/issues",
+                "source": "https://github.com/tuqqu/gender-detector/tree/v0.5.2"
+            },
+            "time": "2023-09-04T20:50:04+00:00"
         },
         {
             "name": "ultra/egi-module",

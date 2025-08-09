@@ -8,6 +8,9 @@
  * @author Padmin D. Curtis (for Fabio Cherici)
  */
 
+// Import reservation modal system
+import { initReservationModal } from '../../services/reservationService';
+
 // --- Types ---
 interface ReservationUpdate {
     type: 'outbid' | 'winning' | 'expired';
@@ -101,6 +104,7 @@ export class PortfolioManager {
      */
     private async checkReservationUpdates(): Promise<void> {
         try {
+            console.log('🔍 Checking for portfolio updates...');
             const response = await fetch('/api/portfolio/status-updates', {
                 method: 'GET',
                 headers: {
@@ -111,20 +115,25 @@ export class PortfolioManager {
             });
 
             if (!response.ok) {
+                console.error('❌ Portfolio API error:', response.status);
                 throw new Error(`HTTP ${response.status}`);
             }
 
             const data = await response.json();
+            console.log('📊 Portfolio API response:', data);
 
             if (data.success && data.updates && data.updates.length > 0) {
+                console.log('🚨 Found updates:', data.updates.length);
                 this.handleStatusUpdates(data.updates);
                 this.updatePortfolioStats(data.stats);
+            } else {
+                console.log('✅ No new updates found');
             }
 
             this.lastUpdateCheck = new Date();
 
         } catch (error) {
-            console.error('❌ Error checking reservation updates:', error);
+            console.error('❌ Error checking portfolio updates:', error);
         }
     }
 
@@ -156,6 +165,7 @@ export class PortfolioManager {
      * Handle outbid notifications
      */
     private handleOutbidNotification(update: ReservationUpdate): void {
+        console.log('🚨 Showing outbid notification for EGI:', update.egi_id);
         this.showNotification({
             type: 'warning',
             title: 'You\'ve been outbid!',
@@ -163,7 +173,7 @@ export class PortfolioManager {
             actions: [
                 {
                     label: 'Make Counter-Offer',
-                    action: () => this.openRebidModal(update.egi_id)
+                    action: () => this.makeCounterOffer(update.egi_id, update.new_amount || 0)
                 },
                 {
                     label: 'View Details',
@@ -361,7 +371,45 @@ export class PortfolioManager {
     }
 
     /**
-     * Open rebid modal for EGI
+     * Make a counter-offer for an EGI using the reservation modal
+     */
+    private makeCounterOffer(egiId: number, currentHighestBid: number): void {
+        // Calculate suggested counter-offer (10% higher than current highest bid)
+        const suggestedAmount = Math.ceil(currentHighestBid * 1.1);
+        
+        console.log(`🎯 Opening counter-offer modal for EGI ${egiId} with suggested amount: €${suggestedAmount}`);
+        
+        // Open the reservation modal
+        const modal = initReservationModal(egiId);
+        modal.open();
+        
+        // Pre-fill the offer amount after modal opens
+        setTimeout(() => {
+            this.setModalOfferAmount(suggestedAmount);
+        }, 100); // Small delay to ensure modal is fully rendered
+    }
+
+    /**
+     * Set the offer amount in the reservation modal
+     */
+    private setModalOfferAmount(amount: number): void {
+        const offerInput = document.querySelector('#reservation-modal input[name="offer_amount_eur"]') as HTMLInputElement;
+        if (offerInput) {
+            offerInput.value = amount.toString();
+            offerInput.focus();
+            
+            // Trigger input event to update any computed values (like ALGO equivalent)
+            const event = new Event('input', { bubbles: true });
+            offerInput.dispatchEvent(event);
+            
+            console.log(`✅ Pre-filled offer amount: €${amount}`);
+        } else {
+            console.error('❌ Could not find offer input field in reservation modal');
+        }
+    }
+
+    /**
+     * Open rebid modal for EGI (legacy method, now redirects to makeCounterOffer)
      */
     private openRebidModal(egiId: number): void {
         // Navigate to EGI page

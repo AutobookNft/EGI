@@ -12,7 +12,8 @@
     {{-- SEO & Semantica --}}
     <title>{{ $title ?? __('collection.default_page_title') }}</title>
     <meta name="description" content="{{ $metaDescription ?? __('collection.default_meta_description') }}">
-    {!! $headMetaExtra ?? '<meta name="robots" content="index, follow">' !!}
+    {!! $headMetaExtra ?? '
+    <meta name="robots" content="index, follow">' !!}
 
     {{-- Favicon --}}
     <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
@@ -73,14 +74,16 @@
 
 <body class="flex flex-col min-h-screen antialiased text-gray-300 bg-gray-900 font-body">
 
-    <header class="navbar-simple-hide sticky top-0 z-50 w-full border-b border-gray-800 shadow-lg bg-gray-900/90 backdrop-blur-md"
+    <header
+        class="sticky top-0 z-50 w-full border-b border-gray-800 shadow-lg navbar-simple-hide bg-gray-900/90 backdrop-blur-md"
         role="banner" aria-label="{{ __('guest_layout.header_aria_label') }}">
         <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16 md:h-20">
 
                 @php
-                    $navLinkClasses =
-                        'text-gray-300 hover:text-emerald-400 transition px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-800/40';
+                $navLinkClasses =
+                'text-gray-300 hover:text-emerald-400 transition px-3 py-2 rounded-md text-sm font-medium
+                hover:bg-gray-800/40';
                 @endphp
 
 
@@ -91,7 +94,8 @@
                         <img src="{{ asset('images/logo/logo_1.webp') }}" alt="Frangette Logo"
                             class="w-auto h-7 sm:h-8 md:h-9" loading="lazy" decoding="async">
                         <span
-                            class="hidden text-base font-semibold text-gray-400 transition group-hover:text-emerald-400 sm:inline md:text-lg">{{ __('Frangette') }}</span>
+                            class="hidden text-base font-semibold text-gray-400 transition group-hover:text-emerald-400 sm:inline md:text-lg">{{
+                            __('Frangette') }}</span>
                     </a>
                 </div>
 
@@ -100,13 +104,29 @@
                     <x-natan-assistant :suffix="'-desktop'" />
                 </div>
 
-                <button type="button"
-                    id="open-butler-assistant"
+                <button type="button" id="open-butler-assistant"
                     class="{{ $navLinkClasses }} w-full text-left items-center gap-1 hidden ml-6 md:block"
                     aria-label="{{ __('assistant.open_butler_aria') }}">
-                    <span class="material-symbols-outlined" aria-hidden="true" style="font-size: 1.1em;">support_agent</span>
+                    <span class="material-symbols-outlined" aria-hidden="true"
+                        style="font-size: 1.1em;">support_agent</span>
                     <span>{{ __('assistant.open_butler') }}</span>
                 </button>
+
+                @php
+                $authType = App\Helpers\FegiAuth::getAuthType(); // 'strong', 'weak', 'guest'
+                $user = App\Helpers\FegiAuth::user(); // User object or null
+                $canCreateEgi = $user && $user->can('create_egi');
+                @endphp
+
+                {{-- User Welcome Message - Solo per utenti loggati --}}
+                @if ($user)
+                <div class='px-3 py-1 text-center' }}">
+                    <span class="text-sm font-medium text-emerald-600">
+                        {{ App\Helpers\FegiAuth::getWelcomeMessage() }}
+                    </span>
+                </div>
+                @endif
+
 
                 {{-- Nav Desktop --}}
                 <nav class="items-center hidden space-x-1 md:flex" role="navigation"
@@ -134,7 +154,8 @@
                                 {{ __('collection.loading_galleries') }}</div>
                             <div id="collection-list-empty" class="hidden px-4 py-3 text-sm text-center text-gray-400">
                                 {{ __('collection.no_galleries_found') }} <a href="{{ route('collections.create') }}"
-                                    class="underline hover:text-emerald-400">{{ __('collection.create_one_question') }}</a>
+                                    class="underline hover:text-emerald-400">{{ __('collection.create_one_question')
+                                    }}</a>
                             </div>
                             <div id="collection-list-error" class="hidden px-4 py-3 text-sm text-center text-red-400">
                                 {{ __('collection.error_loading_galleries') }}</div>
@@ -170,13 +191,13 @@
                             <button id="wallet-dropdown-button" type="button"
                                 class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
                                 aria-expanded="false" aria-haspopup="true">
-                                <svg class="w-5 h-5 mr-2 -ml-1" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                                <svg class="w-5 h-5 mr-2 -ml-1" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                    stroke="currentColor" aria-hidden="true">
                                     <path stroke-linecap="round" stroke-linejoin="round"
                                         d="M21 12a2.25 2.25 0 0 0-2.25-2.25H15a3 3 0 1 1-6 0H5.25A2.25 2.25 0 0 0 3 12m18 0v6a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 18v-6m18 0V9M3 12V9m18 3a2.25 2.25 0 0 0-2.25-2.25H15a3 3 0 1 0-6 0H5.25A2.25 2.25 0 0 0 3 12m15-3a3 3 0 0 0-3-3H6a3 3 0 0 0-3 3m12 6v2.25a2.25 2.25 0 0 1-2.25 2.25H9a2.25 2.25 0 0 1-2.25-2.25V15m3 0a3 3 0 0 0-3-3H6a3 3 0 0 0-3 3m9 0a3 3 0 0 0 3-3h1.5a3 3 0 0 0 3 3" />
                                 </svg>
-                                <span id="wallet-display-text"
-                                    class="hidden sm:inline">{{ __('collection.wallet.wallet') }}</span>
+                                <span id="wallet-display-text" class="hidden sm:inline">{{
+                                    __('collection.wallet.wallet') }}</span>
                                 <svg class="w-4 h-4 ml-1 -mr-1" fill="currentColor" viewBox="0 0 20 20"
                                     aria-hidden="true">
                                     <path fill-rule="evenodd"
@@ -207,10 +228,11 @@
                             </div>
                         </div>
                     </div>
-                    <a href="{{ route('login') }}" id="login-link-desktop"
-                        class="{{ $navLinkClasses }}">{{ __('collection.login') }}</a>
+                    <a href="{{ route('login') }}" id="login-link-desktop" class="{{ $navLinkClasses }}">{{
+                        __('collection.login') }}</a>
                     <a href="{{ route('register') }}" id="register-link-desktop"
-                        class="inline-flex items-center px-4 py-2 ml-2 text-sm font-medium text-gray-300 bg-gray-800 border border-gray-700 rounded-md hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">{{ __('collection.register') }}</a>
+                        class="inline-flex items-center px-4 py-2 ml-2 text-sm font-medium text-gray-300 bg-gray-800 border border-gray-700 rounded-md hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">{{
+                        __('collection.register') }}</a>
                 </nav>
 
                 {{-- Menu Mobile Button --}}
@@ -220,7 +242,8 @@
                         class="hidden px-4 py-3 text-center border-t border-gray-800">
                         <a href="#" id="current-collection-badge-link-mobile"
                             class="inline-flex items-center px-3 py-2 text-xs font-medium text-center transition border rounded-full border-sky-700 bg-sky-900/60 text-sky-300 hover:border-sky-600 hover:bg-sky-800">
-                            <span class="material-symbols-outlined mr-1.5 text-sm" aria-hidden="true">folder_managed</span>
+                            <span class="material-symbols-outlined mr-1.5 text-sm"
+                                aria-hidden="true">folder_managed</span>
                             <span id="current-collection-badge-name-mobile"></span>
                         </a>
                     </div>
@@ -232,11 +255,11 @@
                     </div>
 
                     {{-- Butler Assistant Menu su mobile non lo mostro --}}
-                    {{-- <button type="button"
-                        id="open-butler-assistant"
+                    {{-- <button type="button" id="open-butler-assistant"
                         class="{{ $navLinkClasses }} flex items-center gap-1"
                         aria-label="{{ __('assistant.open_butler_aria') }}">
-                        <span class="material-symbols-outlined" aria-hidden="true" style="font-size: 1.1em;">support_agent</span>
+                        <span class="material-symbols-outlined" aria-hidden="true"
+                            style="font-size: 1.1em;">support_agent</span>
                         <span>{{ __('assistant.open_butler') }}</span>
                     </button> --}}
 
@@ -304,9 +327,11 @@
                 </div>
                 <div class="flex justify-center gap-3" id="mobile-login-register-buttons">
                     <a href="{{ route('login') }}"
-                        class="flex-1 rounded-md border border-gray-700 bg-gray-800 px-4 py-2.5 text-center text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">{{ __('collection.login') }}</a>
+                        class="flex-1 rounded-md border border-gray-700 bg-gray-800 px-4 py-2.5 text-center text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">{{
+                        __('collection.login') }}</a>
                     <a href="{{ route('register') }}"
-                        class="flex-1 rounded-md border border-green-600 bg-green-800 px-4 py-2.5 text-center text-sm font-medium text-white hover:bg-green-700">{{ __('collection.register') }}</a>
+                        class="flex-1 rounded-md border border-green-600 bg-green-800 px-4 py-2.5 text-center text-sm font-medium text-white hover:bg-green-700">{{
+                        __('collection.register') }}</a>
                 </div>
             </div>
             {{-- <div id="current-collection-badge-container-mobile"
@@ -319,12 +344,12 @@
             </div> --}}
         </div>
     </header>
-<script>
-    window.addEventListener('load', function() {
+    <script>
+        window.addEventListener('load', function() {
         const header = document.querySelector('header[role="banner"]');
         if (header) {
             header.classList.remove('navbar-simple-hide');
             header.classList.add('navbar-simple-show');
         }
     });
-</script>
+    </script>

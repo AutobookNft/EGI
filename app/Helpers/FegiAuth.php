@@ -22,8 +22,7 @@ use Throwable;
  * @utility-class Facade-style access to unified authentication
  * @single-source-truth Uses Spatie permissions instead of hardcoded lists
  */
-class FegiAuth
-{
+class FegiAuth {
     /**
      * Cache dell'utente risolto per la richiesta corrente.
      * @var User|null
@@ -45,8 +44,7 @@ class FegiAuth
      *
      * @unified-auth Returns user from any auth type
      */
-    public static function user(): ?User
-    {
+    public static function user(): ?User {
         // Se l'utente è già stato risolto per questa richiesta, restituisci il risultato cachato.
         if (static::$userResolutionAttempted) {
             return static::$resolvedUser;
@@ -92,8 +90,7 @@ class FegiAuth
      *
      * @unified-auth Checks both traditional and weak auth
      */
-    public static function check(): bool
-    {
+    public static function check(): bool {
         return static::user() !== null;
     }
 
@@ -104,21 +101,136 @@ class FegiAuth
      *
      * @return int|null
      */
-    public static function id(): ?int
-    {
+    public static function id(): ?int {
         $user = static::user();
         return $user ? $user->id : null;
     }
 
     /**
+     * @Oracode Get user name
+     * 🎯 Purpose: Return user name for any auth type.
+     * 📤 Output: User full name (name + last_name) or email fallback
+     *
+     * @return string|null
+     */
+    public static function getUserName(): ?string {
+        $user = static::user();
+        if (!$user) {
+            return null;
+        }
+
+        // Combina nome e cognome se disponibili
+        $fullName = trim(($user->name ?? '') . ' ' . ($user->last_name ?? ''));
+
+        // Se il nome completo è vuoto o contiene solo spazi, usa l'email come fallback
+        if (empty($fullName)) {
+            return $user->email ?? 'Utente';
+        }
+
+        return $fullName;
+    }
+
+    /**
+     * @Oracode Get gendered welcome message
+     * 🎯 Purpose: Return gender-appropriate welcome message for user.
+     * 📤 Output: Localized welcome message based on user's gender
+     *
+     * @return string|null
+     */
+    public static function getWelcomeMessage(): ?string {
+        $user = static::user();
+        if (!$user) {
+            return null;
+        }
+
+        $userName = static::getUserName();
+        if (!$userName) {
+            return null;
+        }
+
+        // Ottieni il genere dall'utente o indovinalo dal nome
+        $gender = static::detectUserGender($user);
+
+        // Determina il saluto appropriato
+        $welcomeKey = match ($gender) {
+            'female' => 'guest_layout.welcome_female',
+            'male' => 'guest_layout.welcome_male',
+            'other' => 'guest_layout.welcome_neutral',
+            'prefer_not_say' => 'guest_layout.welcome_neutral',
+            'neutral' => 'guest_layout.welcome_neutral',
+            default => 'guest_layout.welcome_neutral' // Fallback neutro
+        };
+
+        $usertype = static::getFegiUserType();
+
+        return __($welcomeKey) . ', ' . $userName .
+            ' (' . __('guest_layout.fegi_user_type.' . $usertype) . ')';
+    }
+
+    /**
+     * @Oracode Detect user gender intelligently
+     * 🎯 Purpose: Determine user gender from database or name analysis.
+     * 📤 Output: Gender string (male, female, neutral)
+     *
+     * @return string
+     */
+    public static function detectUserGender($user): string {
+        // 1. Prima controlla se il genere è specificato nel database
+        $dbGender = $user->personalData?->gender ?? null;
+        if ($dbGender && in_array($dbGender, ['male', 'female', 'other', 'prefer_not_say'])) {
+            return $dbGender;
+        }
+
+        // 2. Se non c'è nel DB, analizza il nome
+        $firstName = trim($user->name ?? '');
+        if (empty($firstName)) {
+            return 'neutral'; // Fallback neutro se non c'è nome
+        }
+
+        return static::guessGenderFromName($firstName);
+    }
+
+    /**
+     * @Oracode Guess gender from first name
+     * 🎯 Purpose: Analyze first name using professional library for international names.
+     * 📤 Output: Gender guess (male, female, or neutral)
+     *
+     * @return string
+     */
+    public static function guessGenderFromName(string $firstName): string {
+        try {
+            $detector = new \GenderDetector\GenderDetector();
+            $result = $detector->getGender($firstName);
+
+            // Se non trova risultato, ritorna neutro
+            if ($result === null) {
+                return 'neutral';
+            }
+
+            // Mappa i risultati della libreria ai nostri valori
+            return match ($result) {
+                \GenderDetector\Gender::Male,
+                \GenderDetector\Gender::MostlyMale => 'male',
+                \GenderDetector\Gender::Female,
+                \GenderDetector\Gender::MostlyFemale => 'female',
+                \GenderDetector\Gender::Unisex => 'neutral',
+                default => 'neutral'
+            };
+        } catch (\Exception $e) {
+            // Fallback sicuro se la libreria ha problemi
+            return 'neutral';
+        }
+    }
+
+    /**
+     * @Oracode Check if user is guest    /**
      * @Oracode Check if user is guest
      * 🎯 Purpose: Unified guest check.
      * 📤 Output: Boolean guest status
      *
      * @return bool
      */
-    public static function guest(): bool
-    {
+    public static function guest(): bool {
         return ! static::check();
     }
 
@@ -129,8 +241,7 @@ class FegiAuth
      *
      * @return bool
      */
-    public static function isStrongAuth(): bool
-    {
+    public static function isStrongAuth(): bool {
         return Auth::guard('web')->check();
     }
 
@@ -143,12 +254,11 @@ class FegiAuth
      *
      * @fegi-specific Check for FEGI weak authentication via session data
      */
-    public static function isWeakAuth(): bool
-    {
+    public static function isWeakAuth(): bool {
         return !static::isStrongAuth() // Non è loggato forte con il guard web
-               && session('auth_status') === 'connected' // La sessione ha lo status "connected"
-               && session('connected_user_id') !== null // E c'è un ID utente nella sessione
-               && User::find(session('connected_user_id')) !== null; // Verifica che l'utente esista nel DB
+            && session('auth_status') === 'connected' // La sessione ha lo status "connected"
+            && session('connected_user_id') !== null // E c'è un ID utente nella sessione
+            && User::find(session('connected_user_id')) !== null; // Verifica che l'utente esista nel DB
     }
 
     /**
@@ -158,8 +268,7 @@ class FegiAuth
      *
      * @return string
      */
-    public static function getAuthType(): string
-    {
+    public static function getAuthType(): string {
         if (static::guest()) {
             return 'guest';
         }
@@ -172,6 +281,25 @@ class FegiAuth
         return 'unknown';
     }
 
+
+    /**
+     * @Oracode Get user platform type
+     * 🎯 Purpose: Return platform type based on auth status.
+     * 📤 Output: 'web' for strong auth, 'fegi' for weak auth, or 'guest'
+     *
+     * @return string
+     */
+    public static function getFegiUserType(): string {
+
+        // cerca e restituisce se 'utente è un "creator, collector, mecenate,
+        $user = static::user();
+
+        $user_type = $user->usertype ?? 'guest'; // Default to 'guest' if user_type is not set
+
+        return $user_type;
+    }
+
+
     /**
      * @Oracode Get connected wallet address
      * 🎯 Purpose: Return wallet address for any auth type.
@@ -179,8 +307,7 @@ class FegiAuth
      *
      * @return string|null
      */
-    public static function getWallet(): ?string
-    {
+    public static function getWallet(): ?string {
         if (static::isWeakAuth()) {
             return session('connected_wallet');
         }
@@ -201,8 +328,7 @@ class FegiAuth
      * @permission-aware Uses Spatie permissions consistently for both strong and weak auth
      * @single-source-truth No more hardcoded permission lists
      */
-    public static function can(string $permission): bool
-    {
+    public static function can(string $permission): bool {
         $user = static::user();
 
         if (!$user) {
@@ -230,8 +356,7 @@ class FegiAuth
      * @weak-auth-permissions Uses Spatie 'weak_connect' role as Single Source of Truth
      * @backward-compatible Maintains existing method signature
      */
-    protected static function canWeakAuth(string $permission): bool
-    {
+    protected static function canWeakAuth(string $permission): bool {
         $user = static::user();
 
         if (!$user) {
@@ -257,8 +382,7 @@ class FegiAuth
      * @role-management Ensures consistency between session state and Spatie roles
      * @idempotent Safe to call multiple times
      */
-    protected static function ensureWeakAuthRole(User $user): void
-    {
+    protected static function ensureWeakAuthRole(User $user): void {
         try {
             // Se l'utente non ha già il ruolo weak_connect, assegnalo
             if (!$user->hasRole('weak_connect')) {
@@ -283,8 +407,7 @@ class FegiAuth
      * @migration-helper Direct replacement for Auth::check() && Auth::user()->can()
      * @backward-compatible Works with existing permission strings
      */
-    public static function checkAndCan(string $permission): bool
-    {
+    public static function checkAndCan(string $permission): bool {
         return static::check() && static::can($permission);
     }
 
@@ -294,8 +417,7 @@ class FegiAuth
      *
      * @return void
      */
-    public static function logout(): void
-    {
+    public static function logout(): void {
         // Cancella i dati di sessione relativi all'autenticazione debole
         session()->forget([
             'auth_status',
@@ -324,8 +446,7 @@ class FegiAuth
      *
      * @single-point-assignment Centralized role assignment logic
      */
-    public static function assignRoleToUser($userId, $roleName): bool
-    {
+    public static function assignRoleToUser($userId, $roleName): bool {
         $user = User::find($userId);
         if (!$user) {
             return false;
@@ -348,8 +469,7 @@ class FegiAuth
      * Resetta lo stato cachato dell'helper. Utile solo per testing.
      * @internal
      */
-    public static function flushState(): void
-    {
+    public static function flushState(): void {
         static::$resolvedUser = null;
         static::$userResolutionAttempted = false;
     }

@@ -6,12 +6,10 @@ use App\Models\Collection;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class CollectionFactory extends Factory
-{
+class CollectionFactory extends Factory {
     protected $model = Collection::class;
 
-    public function definition()
-    {
+    public function definition() {
         return [
             'creator_id' => User::factory(), // Associa automaticamente un nuovo utente
             'owner_id' => null, // Sarà impostato manualmente
@@ -21,6 +19,8 @@ class CollectionFactory extends Factory
             'type' => 'image', // Default: standard collection
             'status' => 'draft', // Default: draft
             'is_published' => false,
+            'featured_in_guest' => false, // Default: non featured
+            'featured_position' => null, // Default: posizione automatica
             'position' => 1,
             'EGI_number' => $this->faker->randomDigit,
             'floor_price' => $this->faker->randomFloat(2, 0, 100), // Prezzo minimo casuale

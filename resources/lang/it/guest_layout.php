@@ -14,6 +14,17 @@ return [
     'schema_organization_name' => 'Frangette Associazione Promozione Culturale',
 
     // Header/Navbar
+    'fegi_user_type' => [
+        'committee' => 'Attivatore',
+        'collector' => 'Collezionista',
+        'creator' => 'Creator',
+        'patron' => 'Mecenate',
+        'epp' => 'EPP',
+        'company' => 'Azienda',
+        'trader_pro' => 'Trader Professionista',
+        'natan' => 'Natan',
+    ],
+
     'header_aria_label' => 'Intestazione del sito',
     'logo_aria_label' => 'Vai alla Homepage di Florence EGI',
     'logo_alt_text' => 'Logo piattaforma Florence EGI',
@@ -28,6 +39,10 @@ return [
     'home_link_aria_label' => 'Vai alla Homepage',
     'collections' => 'Collezioni',
     'collections_link_aria_label' => 'Visualizza tutte le collezioni pubbliche',
+    'welcome' => 'Benvenuto',
+    'welcome_male' => 'Benvenuto',
+    'welcome_female' => 'Benvenuta',
+    'welcome_neutral' => 'Benvenuto/a',
     'collectors_link_aria_label' => 'Visualizza tutti i collector EGI',
     'my_galleries' => 'Le mie Gallerie',
     'my_galleries_dropdown_aria_label' => 'Apri menu le mie gallerie',
@@ -208,10 +223,12 @@ return [
     'hero_featured_content_aria_label' => 'Contenuto in evidenza sotto l\'hero',
     'scroll_down_aria_label' => 'Scorri verso il basso',
 
-    // Sezione Attori (se i titoli fossero nel layout e non nel componente x-actors-section)
-    // Ho messo le chiavi per titolo/sottotitolo sezione in guest_home, ma se fossero più generiche, andrebbero qui.
-    // Per ora, le chiavi delle singole card attore sono in guest_home.php.
-    // Se decidi di avere un titolo/sottotitolo fisso per la <x-actors-section> quando è nel layout:
+    /*
+        Sezione Attori (se i titoli fossero nel layout e non nel componente x-actors-section)
+        Ho messo le chiavi per titolo/sottotitolo sezione in guest_home, ma se fossero più generiche, andrebbero qui.
+        Per ora, le chiavi delle singole card attore sono in guest_home.php.
+        Se decidi di avere un titolo/sottotitolo fisso per la <x-actors-section> quando è nel layout:
+    */
     'actors_section_title' => 'Unisciti all\'Ecosistema FlorenceEGI',
     'actors_section_subtitle' => 'Scopri come puoi partecipare e beneficiare del nostro modello di valore condiviso.',
 

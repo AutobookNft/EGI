@@ -383,6 +383,14 @@ class User extends Authenticatable implements HasMedia {
         return $this->belongsTo(Collection::class, 'current_collection_id');
     }
 
+    /**
+     * Get the user's personal data.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function personalData(): HasOne {
+        return $this->hasOne(UserPersonalData::class);
+    }
 
     public function wallets() {
         return $this->hasMany(Wallet::class);

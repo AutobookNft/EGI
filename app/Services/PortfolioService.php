@@ -109,7 +109,7 @@ class PortfolioService {
         // Get reservations that were recently superseded
         $recentlySuperseded = Reservation::where('user_id', $collector->id)
             ->whereNotNull('superseded_by_id')
-            ->where('updated_at', '>=', now()->subMinutes(5)) // Ultimi 5 minuti
+            ->where('updated_at', '>=', now()->subMinutes(60)) // Ultimi 60 minuti per test
             ->with(['egi', 'supersededBy.user'])
             ->get();
 

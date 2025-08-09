@@ -22,8 +22,7 @@ use Illuminate\View\View;
  * @seo-purpose Fornisce contenuti dinamici rilevanti per la homepage FlorenceEGI
  * @schema-type WebPage
  */
-class HomeController extends Controller
-{
+class HomeController extends Controller {
     /**
      * Visualizza la homepage con contenuti dinamici
      *
@@ -37,8 +36,7 @@ class HomeController extends Controller
      *
      * @return View La vista home popolata con i dati
      */
-    public function index(): View
-    {
+    public function index(): View {
         // Recupera dati per la homepage
         $randomEgis = $this->getRandomEgis();
         $featuredCollections = $this->getFeaturedCollections();
@@ -66,8 +64,7 @@ class HomeController extends Controller
      * @privacy-safe Utilizza solo EGI pubblicati pubblicamente
      * @return \Illuminate\Database\Eloquent\Collection
      */
-    private function getRandomEgis()
-    {
+    private function getRandomEgis() {
         return Egi::where('is_published', true)
             ->with(['collection'])
             ->inRandomOrder()
@@ -76,17 +73,22 @@ class HomeController extends Controller
     }
 
     /**
-     * Ottiene collezioni in evidenza
+     * Ottiene collezioni in evidenza basate su metriche di impatto e override manuale
+     *
+     * 🎯 Implementa algoritmo di selezione intelligente:
+     * - Filtra per featured_in_guest = true e is_published = true
+     * - Priorità alle posizioni forzate (featured_position 1-10)
+     * - Ordina le restanti per impatto stimato (quota EPP 20% delle prenotazioni più alte)
+     * - Limita a massimo 10 Collection nel carousel
      *
      * @privacy-safe Utilizza solo collezioni pubblicate pubblicamente
      * @return \Illuminate\Database\Eloquent\Collection
      */
-    private function getFeaturedCollections()
-    {
-        return Collection::where('is_published', true)
-            ->with(['creator'])
-            ->latest()
-            ->get();
+    private function getFeaturedCollections() {
+        // Utilizziamo il service dedicato per la logica complessa di selezione
+        $featuredService = app(\App\Services\FeaturedCollectionService::class);
+
+        return $featuredService->getFeaturedCollections(10);
     }
 
     /**
@@ -96,8 +98,7 @@ class HomeController extends Controller
      * @param \Illuminate\Support\Collection $excludeIds IDs da escludere (es. collezioni già in evidenza)
      * @return \Illuminate\Database\Eloquent\Collection
      */
-    private function getLatestCollections($excludeIds)
-    {
+    private function getLatestCollections($excludeIds) {
         return Collection::where('is_published', true)
             ->whereNotIn('id', $excludeIds)
             ->with(['creator'])
@@ -111,8 +112,7 @@ class HomeController extends Controller
      *
      * @return \Illuminate\Database\Eloquent\Collection
      */
-    private function getHighlightedEpps()
-    {
+    private function getHighlightedEpps() {
         return Epp::where('status', 'active')
             ->orderBy('created_at', 'desc')
             ->take(3)
@@ -125,8 +125,7 @@ class HomeController extends Controller
      * 🎯 Recupera utenti con usertype 'creator' in ordine casuale per la homepage
      * @return \Illuminate\Database\Eloquent\Collection
      */
-    private function getFeaturedCreators()
-    {
+    private function getFeaturedCreators() {
         return User::where('usertype', 'creator')
             // Assicurati che esista un campo 'is_published' o 'is_active' se necessario
             // ->where('is_published', true)
@@ -143,8 +142,7 @@ class HomeController extends Controller
      * @schema-type QuantitativeValue
      * @return float Quantità in kg di plastica recuperata dagli oceani
      */
-    private function getTotalPlasticRecovered(): float
-    {
+    private function getTotalPlasticRecovered(): float {
         // MVP: Valore hardcoded
         // TODO: In futuro, calcolare somma da transazioni o recuperare da API dedicata
         return 5241.38;

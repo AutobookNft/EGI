@@ -50,7 +50,7 @@ class SystemUsersSeeder extends Seeder {
             'id' => 1,
             'name' => 'natan',
             'email' => 'natan@gmail.com',
-            'usertype' => 'creator',
+            'usertype' => 'natan',
             'role' => 'superadmin'
         ],
         [
@@ -60,13 +60,6 @@ class SystemUsersSeeder extends Seeder {
             'usertype' => 'epp',
             'role' => 'epp_entity'
         ],
-        [
-            'id' => 3,
-            'name' => 'fabio',
-            'email' => 'fabio@gmail.com',
-            'usertype' => 'creator',
-            'role' => 'superadmin'
-        ]
     ];
 
     /**
