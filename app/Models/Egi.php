@@ -131,6 +131,7 @@ class Egi extends Model {
         'file_IPFS',
         'file_mime',
         'status',
+        'hyper',
         'is_public',
         'updated_by',
         // Note: 'id', 'created_at', 'updated_at', 'deleted_at' are typically not fillable
@@ -154,6 +155,7 @@ class Egi extends Model {
         'is_published'   => 'boolean',      // Cast 'is_published' to boolean
         'mint'           => 'boolean',      // Cast 'mint' to boolean
         'rebind'         => 'boolean',      // Cast 'rebind' to boolean
+        'hyper'          => 'boolean',      // Cast 'hyper' to boolean
         'is_public'      => 'boolean',      // Cast 'is_public' to boolean
         'created_at'     => 'datetime',     // Standard timestamp casting
         'updated_at'     => 'datetime',     // Standard timestamp casting

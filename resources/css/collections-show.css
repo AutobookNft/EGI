@@ -54,6 +54,34 @@
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
 
+/* === LIST VIEW STYLES === */
+.list-view {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.list-view .egi-item {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    background: rgba(17, 24, 39, 0.6);
+    border: 1px solid rgba(75, 85, 99, 0.3);
+    border-radius: 0.75rem;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+.list-view .egi-item:hover {
+    background: rgba(17, 24, 39, 0.8);
+    border-color: rgba(99, 102, 241, 0.5);
+    transform: translateX(8px);
+}
+
+.list-view .egi-item.list-item {
+    display: flex !important;
+}
+
 /* === RESPONSIVE GRID SYSTEM === */
 .egi-grid {
     display: grid;

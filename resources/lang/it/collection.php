@@ -383,4 +383,50 @@ return [
             'name' => 'Associazione di Promozione Culturale Frangette',
         ],
     ],
+
+    'show' => [
+        // Creator info
+        'collection_creator' => 'Creatore della Collezione',
+        'unknown_creator' => 'Creatore Sconosciuto',
+        'verified_creator' => 'Creatore Verificato',
+        
+        // Stats
+        'egis' => 'EGI',
+        'likes' => 'Mi Piace',
+        'reserved' => 'Prenotati',
+        'algo_floor' => 'Prezzo Min. ALGO',
+        'free_mint' => 'Gratuito',
+        
+        // Actions
+        'like_collection' => 'Mi Piace',
+        'liked' => 'Piaciuto',
+        'share' => 'Condividi',
+        'learn_more' => 'Scopri di più',
+        
+        // EPP section
+        'supporting_environmental_project' => 'Sostiene un Progetto Ambientale',
+        'of_sales_support_this_project' => 'delle vendite sostiene questo progetto',
+        
+        // Collection items
+        'collection_items' => 'Oggetti della Collezione',
+        'unique_digital_assets' => 'asset digitali unici',
+        
+        // Sorting and filters
+        'position' => 'Posizione',
+        'newest' => 'Più Recenti',
+        'oldest' => 'Meno Recenti',
+        'price_low_to_high' => 'Prezzo: Crescente',
+        'price_high_to_low' => 'Prezzo: Decrescente',
+        
+        // Empty state
+        'no_egis_yet' => 'Nessun EGI Ancora',
+        'no_egis_message' => 'Questa collezione sta aspettando il suo primo capolavoro. Torna presto!',
+        'add_first_egi' => 'Aggiungi Primo EGI',
+        
+        // Load more
+        'load_more_items' => 'Carica Altri Elementi',
+        
+        // Related collections
+        'more_from_this_creator' => 'Altri del Creatore',
+    ],
 ];

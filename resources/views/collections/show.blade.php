@@ -47,22 +47,22 @@
         <div class="grid grid-cols-2 gap-3 lg:grid-cols-4 sm:gap-4">
             <div class="p-3 text-center rounded-lg stat-card info-glass sm:p-4">
                 <div class="text-xl font-bold sm:text-2xl text-emerald-400">{{ $collection->EGI_number ?? $collection->egis_count ?? 0 }}</div>
-                <div class="text-xs tracking-wider text-gray-400 uppercase">EGIs</div>
+                <div class="text-xs tracking-wider text-gray-400 uppercase">{{ __('collection.show.egis') }}</div>
             </div>
             <div class="p-3 text-center rounded-lg stat-card info-glass sm:p-4">
                 <div class="text-xl font-bold text-pink-400 sm:text-2xl">{{ $collection->likes_count ?? 0 }}</div>
-                <div class="text-xs tracking-wider text-gray-400 uppercase">Likes</div>
+                <div class="text-xs tracking-wider text-gray-400 uppercase">{{ __('collection.show.likes') }}</div>
             </div>
             <div class="p-3 text-center rounded-lg stat-card info-glass sm:p-4">
                 <div class="text-xl font-bold text-blue-400 sm:text-2xl">{{ $collection->reservations_count ?? 0 }}</div>
-                <div class="text-xs tracking-wider text-gray-400 uppercase">Reserved</div>
+                <div class="text-xs tracking-wider text-gray-400 uppercase">{{ __('collection.show.reserved') }}</div>
             </div>
             <div class="p-3 text-center rounded-lg stat-card info-glass sm:p-4">
                 @if($collection->floor_price && $collection->floor_price > 0)
                     <div class="text-xl font-bold text-yellow-400 sm:text-2xl">{{ number_format($collection->floor_price, 2) }}</div>
-                    <div class="text-xs tracking-wider text-gray-400 uppercase">ALGO Floor</div>
+                    <div class="text-xs tracking-wider text-gray-400 uppercase">{{ __('collection.show.algo_floor') }}</div>
                 @else
-                    <div class="text-xl font-bold text-purple-400 sm:text-2xl">Free</div>
+                    <div class="text-xl font-bold text-purple-400 sm:text-2xl">{{ __('collection.show.free_mint') }}</div>
                     <div class="text-xs tracking-wider text-gray-400 uppercase">Mint</div>
                 @endif
             </div>
@@ -111,12 +111,12 @@
                         {{-- Creator Name + Badge --}}
                         <div>
                             <div class="flex items-center gap-2">
-                                <span class="font-semibold text-white transition-colors duration-200 group-hover:text-emerald-400">{{ $collection->creator->name ?? __('Unknown Creator') }}</span>
+                                <span class="font-semibold text-white transition-colors duration-200 group-hover:text-emerald-400">{{ $collection->creator->name ?? __('collection.show.unknown_creator') }}</span>
                                 @if ($collection->creator->usertype === 'verified')
-                                    <span class="text-lg text-blue-400 material-symbols-outlined" title="{{ __('Verified Creator') }}">verified</span>
+                                    <span class="text-lg text-blue-400 material-symbols-outlined" title="{{ __('collection.show.verified_creator') }}">verified</span>
                                 @endif
                             </div>
-                            <p class="text-sm text-gray-300 transition-colors duration-200 group-hover:text-gray-200">{{ __('Collection Creator') }}</p>
+                            <p class="text-sm text-gray-300 transition-colors duration-200 group-hover:text-gray-200">{{ __('collection.show.collection_creator') }}</p>
                         </div>
                     </a>
                 @else
@@ -132,9 +132,9 @@
                         {{-- Creator Name placeholder --}}
                         <div>
                             <div class="flex items-center gap-2">
-                                <span class="font-semibold text-white">{{ __('Unknown Creator') }}</span>
+                                <span class="font-semibold text-white">{{ __('collection.show.unknown_creator') }}</span>
                             </div>
-                            <p class="text-sm text-gray-300">{{ __('Collection Creator') }}</p>
+                            <p class="text-sm text-gray-300">{{ __('collection.show.collection_creator') }}</p>
                         </div>
                     </div>
                 @endif
@@ -180,7 +180,7 @@
                         data-resource-id="{{ $collection->id }}"
                         data-like-url="{{ route('api.toggle.collection.like', $collection->id) }}">
                     <span class="mr-2 material-symbols-outlined icon-heart">{{ $collection->is_liked ?? false ? 'favorite' : 'favorite_border' }}</span>
-                    <span class="like-text">{{ $collection->is_liked ?? false ? __('Liked') : __('Like Collection') }}</span>
+                    <span class="like-text">{{ $collection->is_liked ?? false ? __('collection.show.liked') : __('collection.show.like_collection') }}</span>
                     <span class="ml-2 like-count-display">({{ $collection->likes_count ?? 0 }})</span>
                     <span class="ml-2 like-count-display">Collection id ({{ $collection->id }})</span>
                 </button>
@@ -188,7 +188,7 @@
                 <button class="flex items-center justify-center px-6 py-3 text-sm font-semibold text-white transition-all duration-300 border rounded-lg bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/20 sm:text-base"
                         onclick="navigator.share ? navigator.share({title: '{{ $collection->collection_name }}', url: window.location.href}) : copyToClipboard(window.location.href)">
                     <span class="mr-2 material-symbols-outlined">share</span>
-                    {{ __('Share') }}
+                    {{ __('collection.show.share') }}
                 </button>
             </div>
         </div>
@@ -205,14 +205,14 @@
                     <span class="text-2xl text-green-400 material-symbols-outlined">eco</span>
                 </div>
                 <div class="flex-1 min-w-0">
-                    <h3 class="mb-2 text-lg font-semibold text-white">{{ __('Supporting Environmental Project') }}</h3>
+                    <h3 class="mb-2 text-lg font-semibold text-white">{{ __('collection.show.supporting_environmental_project') }}</h3>
                     <h4 class="mb-2 font-medium text-emerald-400">{{ $collection->epp->name }}</h4>
                     <p class="mb-3 text-sm text-gray-300 line-clamp-2">{{ $collection->epp->description }}</p>
                     <div class="flex items-center justify-between">
-                        <span class="text-xs font-medium text-green-400">20% {{ __('of sales support this project') }}</span>
+                        <span class="text-xs font-medium text-green-400">20% {{ __('collection.show.of_sales_support_this_project') }}</span>
                         <a href="{{ route('epps.show', $collection->epp_id) }}"
                            class="flex items-center gap-1 text-sm font-medium text-emerald-400 hover:text-emerald-300">
-                            {{ __('Learn more') }}
+                            {{ __('collection.show.learn_more') }}
                             <span class="text-sm material-symbols-outlined">arrow_forward</span>
                         </a>
                     </div>
@@ -230,10 +230,10 @@
         <div class="flex flex-col items-start justify-between gap-4 mb-8 sm:flex-row sm:items-center">
             <div>
                 <h2 class="mb-2 text-2xl font-bold text-white sm:text-3xl">
-                    {{ __('Collection Items') }}
+                    {{ __('collection.show.collection_items') }}
                 </h2>
                 <p class="text-sm text-gray-400">
-                    {{ $collection->egis_count ?? 0 }} {{ __('unique digital assets') }}
+                    {{ $collection->egis_count ?? 0 }} {{ __('collection.show.unique_digital_assets') }}
                 </p>
             </div>
 
@@ -241,11 +241,11 @@
             <div class="flex flex-col w-full gap-3 sm:flex-row sm:w-auto">
                 <select id="egis-sort"
                         class="px-4 py-2 text-sm text-white bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
-                    <option value="position">{{ __('Position') }}</option>
-                    <option value="newest">{{ __('Newest') }}</option>
-                    <option value="oldest">{{ __('Oldest') }}</option>
-                    <option value="price_low">{{ __('Price: Low to High') }}</option>
-                    <option value="price_high">{{ __('Price: High to Low') }}</option>
+                    <option value="position">{{ __('collection.show.position') }}</option>
+                    <option value="newest">{{ __('collection.show.newest') }}</option>
+                    <option value="oldest">{{ __('collection.show.oldest') }}</option>
+                    <option value="price_low">{{ __('collection.show.price_low_to_high') }}</option>
+                    <option value="price_high">{{ __('collection.show.price_high_to_low') }}</option>
                 </select>
 
                 {{-- View Toggle --}}
@@ -273,14 +273,14 @@
                         <div class="inline-flex items-center justify-center w-16 h-16 mb-6 bg-gray-800 rounded-full">
                             <span class="text-2xl text-gray-400 material-symbols-outlined">image</span>
                         </div>
-                        <h3 class="mb-2 text-xl font-semibold text-white">{{ __('No EGIs Yet') }}</h3>
+                        <h3 class="mb-2 text-xl font-semibold text-white">{{ __('collection.show.no_egis_yet') }}</h3>
                         <p class="max-w-md mx-auto mb-6 text-gray-400">
-                            {{ __("This collection is waiting for its first masterpiece. Check back soon!") }}
+                            {{ __('collection.show.no_egis_message') }}
                         </p>
                         @if(auth()->id() === $collection->creator_id)
                             <button class="px-6 py-3 font-semibold text-white rounded-lg btn-primary-glow">
                                 <span class="mr-2 material-symbols-outlined">add</span>
-                                {{ __('Add First EGI') }}
+                                {{ __('collection.show.add_first_egi') }}
                             </button>
                         @endif
                     </div>
@@ -292,7 +292,7 @@
         @if($collection->egis->count() >= 20)
             <div class="mt-12 text-center">
                 <button class="px-8 py-3 font-medium text-white transition-colors duration-200 bg-gray-800 rounded-lg hover:bg-gray-700">
-                    {{ __('Load More Items') }}
+                    {{ __('collection.show.load_more_items') }}
                 </button>
             </div>
         @endif
@@ -304,7 +304,7 @@
 <section class="py-12 bg-gray-800">
     <div class="container px-4 mx-auto sm:px-6 lg:px-8">
         <h2 class="mb-8 text-2xl font-bold text-center text-white">
-            {{ __('More from this Creator') }}
+            {{ __('collection.show.more_from_this_creator') }}
         </h2>
         <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             @foreach($relatedCollections->take(3) as $relatedCollection)
@@ -322,11 +322,11 @@
     <div class="flex items-center gap-3 px-4 py-3 border border-gray-700 rounded-full bg-gray-900/90 backdrop-blur-sm">
         <button class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white transition-colors bg-indigo-600 rounded-full hover:bg-indigo-700">
             <span class="text-sm material-symbols-outlined">favorite_border</span>
-            {{ __('Like') }}
+            {{ __('collection.show.like_collection') }}
         </button>
         <button class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white transition-colors bg-gray-700 rounded-full hover:bg-gray-600">
             <span class="text-sm material-symbols-outlined">share</span>
-            {{ __('Share') }}
+            {{ __('collection.show.share') }}
         </button>
     </div>
 </div>
@@ -334,142 +334,177 @@
 {{-- JavaScript Enhancements --}}
 @push('scripts')
 <script>
-// document.querySelectorAll('.like-button').forEach(button => {
-//         button.addEventListener('click', async function() {
-//             const collectionId = this.dataset.collectionId;
-//             const likeUrl = this.dataset.likeUrl;
-//             const icon = this.querySelector('.icon-heart');
-//             const text = this.querySelector('.like-text');
-//             const countDisplay = this.querySelector('.like-count-display');
+// Like button functionality
+document.querySelectorAll('.like-button').forEach(button => {
+    button.addEventListener('click', async function() {
+        const collectionId = this.dataset.collectionId;
+        const likeUrl = this.dataset.likeUrl;
+        const icon = this.querySelector('.icon-heart');
+        const text = this.querySelector('.like-text');
+        const countDisplay = this.querySelector('.like-count-display');
 
-//             // Visual feedback immediato
-//             this.style.transform = 'scale(0.95)';
-//             setTimeout(() => {
-//                 this.style.transform = 'scale(1)';
-//             }, 150);
+        // Visual feedback immediato
+        this.style.transform = 'scale(0.95)';
+        setTimeout(() => {
+            this.style.transform = 'scale(1)';
+        }, 150);
 
-//             try {
-//                 const response = await fetch(likeUrl, {
-//                     method: 'POST',
-//                     headers: {
-//                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-//                         'Accept': 'application/json',
-//                     },
-//                 });
+        try {
+            const response = await fetch(likeUrl, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json',
+                },
+            });
 
-//                 const data = await response.json();
+            const data = await response.json();
 
-//                 if (data.success) {
-//                     this.classList.toggle('is-liked', data.is_liked);
+            if (data.success) {
+                this.classList.toggle('is-liked', data.is_liked);
 
-//                     if (data.is_liked) {
-//                         icon.textContent = 'favorite';
-//                         text.textContent = 'Liked';
-//                         this.style.background = 'linear-gradient(135deg, #ec4899 0%, #be185d 100%)';
-//                     } else {
-//                         icon.textContent = 'favorite_border';
-//                         text.textContent = 'Like Collection';
-//                         this.style.background = 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)';
-//                     }
+                if (data.is_liked) {
+                    icon.textContent = 'favorite';
+                    text.textContent = '{{ __('collection.show.liked') }}';
+                    this.style.background = 'linear-gradient(135deg, #ec4899 0%, #be185d 100%)';
+                } else {
+                    icon.textContent = 'favorite_border';
+                    text.textContent = '{{ __('collection.show.like_collection') }}';
+                    this.style.background = 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)';
+                }
 
-//                     countDisplay.textContent = `(${data.likes_count ?? 0})`;
+                countDisplay.textContent = `(${data.likes_count ?? 0})`;
 
-//                     // Celebrazione visiva
-//                     if (data.is_liked) {
-//                         icon.style.animation = 'heartBeat 0.6s ease-in-out';
-//                         setTimeout(() => {
-//                             icon.style.animation = '';
-//                         }, 600);
-//                     }
-//                 }
-//             } catch (error) {
-//                 console.error('Error toggling like:', error);
-//             }
-//         });
-//     });
+                // Celebrazione visiva
+                if (data.is_liked) {
+                    icon.style.animation = 'heartBeat 0.6s ease-in-out';
+                    setTimeout(() => {
+                        icon.style.animation = '';
+                    }, 600);
+                }
+            }
+        } catch (error) {
+            console.error('Error toggling like:', error);
+        }
+    });
+});
 
-//     // View Toggle
-//     document.querySelectorAll('.view-toggle').forEach(button => {
-//         button.addEventListener('click', function() {
-//             const view = this.dataset.view;
-//             const container = document.getElementById('egis-container');
+// View Toggle - FIXED
+document.querySelectorAll('.view-toggle').forEach(button => {
+    button.addEventListener('click', function() {
+        const view = this.dataset.view;
+        const container = document.getElementById('egis-container');
 
-//             // Update buttons
-//             document.querySelectorAll('.view-toggle').forEach(btn => {
-//                 btn.classList.remove('active', 'bg-indigo-600', 'text-white');
-//                 btn.classList.add('text-gray-400');
-//             });
+        // Update buttons
+        document.querySelectorAll('.view-toggle').forEach(btn => {
+            btn.classList.remove('active', 'bg-indigo-600', 'text-white');
+            btn.classList.add('text-gray-400');
+        });
 
-//             this.classList.add('active', 'bg-indigo-600', 'text-white');
-//             this.classList.remove('text-gray-400');
+        this.classList.add('active', 'bg-indigo-600', 'text-white');
+        this.classList.remove('text-gray-400');
 
-//             // Update grid
-//             if (view === 'list') {
-//                 container.className = 'space-y-4';
-//             } else {
-//                 container.className = 'egi-grid';
-//             }
-//         });
-//     });
+        // Update grid layout
+        if (view === 'list') {
+            container.className = 'space-y-4 list-view';
+            // Apply list styling to items
+            container.querySelectorAll('.egi-item').forEach(item => {
+                item.classList.add('list-item');
+            });
+        } else {
+            container.className = 'egi-grid';
+            // Remove list styling from items
+            container.querySelectorAll('.egi-item').forEach(item => {
+                item.classList.remove('list-item');
+            });
+        }
+    });
+});
 
-//     // Parallax effect (performance-conscious)
-//     let ticking = false;
+// EGI sorting functionality
+document.getElementById('egis-sort').addEventListener('change', function() {
+    const sortValue = this.value;
+    const container = document.getElementById('egis-container');
+    const items = Array.from(container.querySelectorAll('.egi-item'));
+    
+    items.sort((a, b) => {
+        switch(sortValue) {
+            case 'newest':
+                // Assume data-created attribute exists or implement accordingly
+                return new Date(b.dataset.created || 0) - new Date(a.dataset.created || 0);
+            case 'oldest':
+                return new Date(a.dataset.created || 0) - new Date(b.dataset.created || 0);
+            case 'price_low':
+                return (parseFloat(a.dataset.price || 0) - parseFloat(b.dataset.price || 0));
+            case 'price_high':
+                return (parseFloat(b.dataset.price || 0) - parseFloat(a.dataset.price || 0));
+            default: // position
+                return (parseInt(a.dataset.position || 999) - parseInt(b.dataset.position || 999));
+        }
+    });
+    
+    // Re-append sorted items
+    items.forEach(item => container.appendChild(item));
+});
 
-//     function updateParallax() {
-//         const scrolled = window.pageYOffset;
-//         const parallax = document.querySelector('.parallax-banner');
+// Parallax effect (performance-conscious)
+let ticking = false;
 
-//         if (parallax) {
-//             const speed = scrolled * 0.5;
-//             parallax.style.transform = `translateY(${speed}px)`;
-//         }
+function updateParallax() {
+    const scrolled = window.pageYOffset;
+    const parallax = document.querySelector('.parallax-banner');
 
-//         ticking = false;
-//     }
+    if (parallax) {
+        const speed = scrolled * 0.5;
+        parallax.style.transform = `translateY(${speed}px)`;
+    }
 
-//     function requestTick() {
-//         if (!ticking) {
-//             requestAnimationFrame(updateParallax);
-//             ticking = true;
-//         }
-//     }
+    ticking = false;
+}
 
-//     window.addEventListener('scroll', requestTick);
+function requestTick() {
+    if (!ticking) {
+        requestAnimationFrame(updateParallax);
+        ticking = true;
+    }
+}
 
-//     // Copy to clipboard utility
-//     function copyToClipboard(text) {
-//         navigator.clipboard.writeText(text).then(() => {
-//             // Show toast notification
-//             const toast = document.createElement('div');
-//             toast.className = 'fixed z-50 px-4 py-2 text-sm font-medium text-white transform -translate-x-1/2 bg-green-600 rounded-lg bottom-4 left-1/2';
-//             toast.textContent = 'Link copied to clipboard!';
-//             document.body.appendChild(toast);
+window.addEventListener('scroll', requestTick);
 
-//             setTimeout(() => {
-//                 toast.remove();
-//             }, 3000);
-//         });
-//     }
+// Copy to clipboard utility
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        // Show toast notification
+        const toast = document.createElement('div');
+        toast.className = 'fixed z-50 px-4 py-2 text-sm font-medium text-white transform -translate-x-1/2 bg-green-600 rounded-lg bottom-4 left-1/2';
+        toast.textContent = 'Link copied to clipboard!';
+        document.body.appendChild(toast);
 
-//     // Enhanced scroll animations
-//     const observerOptions = {
-//         threshold: 0.1,
-//         rootMargin: '0px 0px -50px 0px'
-//     };
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
+    });
+}
 
-//     const observer = new IntersectionObserver((entries) => {
-//         entries.forEach(entry => {
-//             if (entry.isIntersecting) {
-//                 entry.target.style.animationPlayState = 'running';
-//             }
-//         });
-//     }, observerOptions);
+// Enhanced scroll animations
+const observerOptions = {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+};
 
-//     // Observe all animated elements
-//     document.querySelectorAll('.egi-item, .stat-card').forEach(el => {
-//         observer.observe(el);
-//     });
-    </script>
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.style.animationPlayState = 'running';
+        }
+    });
+}, observerOptions);
+
+// Observe all animated elements
+document.querySelectorAll('.egi-item, .stat-card').forEach(el => {
+    observer.observe(el);
+});
+</script>
 @endpush
 
 </x-collection-layout>
