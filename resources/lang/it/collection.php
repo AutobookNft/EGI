@@ -396,6 +396,10 @@ return [
         'algo_floor' => 'Prezzo Min. ALGO',
         'free_mint' => 'Gratuito',
 
+        // Prenotazioni
+        'highest_bid' => 'Offerta Più Alta',
+        'highest_bidder' => 'Miglior Offerente',
+
         // Actions
         'like_collection' => 'Mi Piace',
         'liked' => 'Piaciuto',

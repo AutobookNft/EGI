@@ -66,6 +66,12 @@ return [
         'purchased_for' => '💳 Acquistato per',
         'price' => '💰 Prezzo',
         'floor' => '📊 Floor',
+        'highest_bid' => '🏆 Offerta Più Alta',
+    ],
+
+    // Prenotazioni
+    'reservation' => [
+        'highest_bidder' => 'Miglior Offerente',
     ],
 
     // Stati

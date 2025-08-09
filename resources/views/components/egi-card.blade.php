@@ -39,7 +39,10 @@ $isHyper = $egi->hyper ?? false;
 
     @if($isHyper)
     <div class="egi-sparkles" aria-hidden="true"></div>
-    <div class="egi-hyper-badge">HYPER</div>
+    {{-- Badge HYPER normale solo se NON c'è badge composto --}}
+    @if(!$showPurchasePrice)
+    <div class="egi-hyper-badge">⭐ HYPER ⭐</div>
+    @endif
     @endif
     {{-- 🖼️ Sezione Immagine --}}
     <figure class="relative aspect-[4/5] w-full overflow-hidden bg-black">
@@ -86,13 +89,26 @@ $isHyper = $egi->hyper ?? false;
         {{-- Badges (Posizione, Media Type, Owned) --}}
         @if ($egi->position)
         <span
-            class="absolute left-2 top-2 inline-block rounded-full bg-black/50 px-2 py-0.5 text-xs font-semibold text-white backdrop-blur-sm">
+            class="position-badge absolute left-2 top-2 inline-block rounded-full bg-black/50 px-2 py-0.5 text-xs font-semibold text-white backdrop-blur-sm">
             #{{ $egi->position }}
         </span>
         @endif
 
-        {{-- Badge Owned se siamo nel portfolio collector --}}
-        @if ($showPurchasePrice)
+        {{-- 🌟 BADGE COMPOSTO HYPER + POSSEDUTO (SOLUZIONE MICHELIN) --}}
+        @if ($showPurchasePrice && $isHyper)
+        <div class="badge-composite">
+            <div class="hyper-overlay">⭐ HYPER ⭐</div>
+            <div class="owned-base">
+                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd"
+                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                        clip-rule="evenodd" />
+                </svg>
+                {{ __('egi.badge.owned') }}
+            </div>
+        </div>
+        {{-- Badge Owned normale (no HYPER) --}}
+        @elseif ($showPurchasePrice)
         <span
             class="absolute inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold text-white rounded-full right-2 top-2 bg-green-500/90 backdrop-blur-sm">
             <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
@@ -165,10 +181,11 @@ $isHyper = $egi->hyper ?? false;
                 <h3
                     class="flex-1 text-base font-bold leading-tight text-white transition-colors duration-200 group-hover:text-purple-300 {{ $egi->description ? 'has-description' : '' }}">
                     {{ Str::limit($egi->title ?? __('egi.title.untitled'), 45) }}
-                    
+
                     {{-- Tooltip descrizione (solo desktop con hover) --}}
                     @if($egi->description)
-                    <div class="absolute bottom-full left-1/2 mb-2 px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg shadow-xl text-sm font-normal text-white min-w-64 max-w-80 z-50">
+                    <div
+                        class="absolute z-50 px-3 py-2 mb-2 text-sm font-normal text-white bg-gray-900 border border-gray-700 rounded-lg shadow-xl bottom-full left-1/2 min-w-64 max-w-80">
                         {{ Str::limit($egi->description, 200) }}
                     </div>
                     @endif
@@ -239,23 +256,57 @@ $isHyper = $egi->hyper ?? false;
                         }}</span>
                 </div>
             </div>
+            {{-- EGI con prenotazioni attive: mostra prezzo e utente prenotazione più alta --}}
             @elseif ($egi->price && $egi->price > 0)
+            @php
+            // Ottengo la prenotazione con priorità più alta per questo EGI
+            $reservationService = app('App\Services\ReservationService');
+            $highestPriorityReservation = $reservationService->getHighestPriorityReservation($egi);
+            $displayPrice = $egi->price; // Prezzo base di default
+            $displayUser = null;
+            
+            // Se c'è una prenotazione attiva, uso il suo prezzo e utente
+            if ($highestPriorityReservation && $highestPriorityReservation->status === 'active') {
+                $displayPrice = $highestPriorityReservation->offer_amount_algo ?? $egi->price;
+                $displayUser = $highestPriorityReservation->user;
+            }
+            @endphp
+            
             <div
-                class="flex items-center justify-between p-3 border rounded-xl border-green-500/30 bg-gradient-to-r from-green-500/20 to-emerald-500/20">
-                <div class="flex items-center gap-2">
-                    <div class="flex items-center justify-center w-6 h-6 bg-green-500 rounded-full">
-                        <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd"
-                                d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z"
-                                clip-rule="evenodd" />
+                class="p-3 border rounded-xl border-green-500/30 bg-gradient-to-r from-green-500/20 to-emerald-500/20">
+                {{-- Prezzo e icona --}}
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-2">
+                        <div class="flex items-center justify-center w-6 h-6 bg-green-500 rounded-full">
+                            <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd"
+                                    d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <span class="text-xs font-medium text-green-300">
+                            {{ $highestPriorityReservation ? __('egi.price.highest_bid') : __('egi.price.price') }}
+                        </span>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-sm font-bold text-white">{{ number_format($displayPrice, 2) }}</span>
+                        <span class="ml-1 text-xs text-green-300">ALGO</span>
+                    </div>
+                </div>
+                
+                {{-- Utente prenotazione più alta --}}
+                @if ($displayUser)
+                <div class="flex items-center gap-2 pt-2 border-t border-green-500/20">
+                    <div class="flex items-center justify-center flex-shrink-0 w-4 h-4 bg-green-600 rounded-full">
+                        <svg class="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
                         </svg>
                     </div>
-                    <span class="text-xs font-medium text-green-300">{{ __('egi.price.price') }}</span>
+                    <span class="text-xs text-green-200 truncate">
+                        {{ __('egi.reservation.highest_bidder') }}: <span class="font-semibold">{{ $displayUser->name }}</span>
+                    </span>
                 </div>
-                <div class="text-right">
-                    <span class="text-sm font-bold text-white">{{ number_format($egi->price, 2) }}</span>
-                    <span class="ml-1 text-xs text-green-300">ALGO</span>
-                </div>
+                @endif
             </div>
             @elseif($egi->floorDropPrice && $egi->floorDropPrice > 0)
             <div

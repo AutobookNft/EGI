@@ -151,22 +151,127 @@
   transform: scale(1.04) translateY(-2px);
 }
 
-/* --- Badge HYPER --- */
+/* --- Badge HYPER TRES ESTRELLAS MICHELIN --- */
 .egi-hyper-badge {
   position: absolute;
   top: 8px;
   right: 8px;
-  background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
+  background: linear-gradient(
+    135deg,
+    #8b5cf6 0%,
+    #a78bfa 25%,
+    #c084fc 50%,
+    #a78bfa 75%,
+    #8b5cf6 100%
+  );
+  background-size: 200% 100%;
   color: white;
-  padding: 4px 8px;
-  border-radius: 12px;
+  padding: 6px 12px;
+  border-radius: 16px;
   font-size: 10px;
-  font-weight: 700;
+  font-weight: 900;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  z-index: 10;
-  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
-  animation: egi-badge-pulse 2s ease-in-out infinite alternate;
+  letter-spacing: 1px;
+  z-index: 20;
+  box-shadow: 
+    0 8px 32px rgba(139, 92, 246, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  animation: egi-hyper-shimmer 2s linear infinite, egi-badge-glow 3s ease-in-out infinite;
+  backdrop-filter: blur(8px);
+}
+
+@keyframes egi-badge-glow {
+  0%, 100% { 
+    box-shadow: 
+      0 8px 32px rgba(139, 92, 246, 0.4),
+      0 0 0 1px rgba(255, 255, 255, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    transform: scale(1);
+  }
+  50% { 
+    box-shadow: 
+      0 12px 40px rgba(139, 92, 246, 0.6),
+      0 0 0 2px rgba(255, 255, 255, 0.2),
+      inset 0 2px 0 rgba(255, 255, 255, 0.3);
+    transform: scale(1.02);
+  }
+}
+
+/* BADGE COMPOSTO HYPER + POSSEDUTO - SOLUZIONE MICHELIN */
+.egi-card--hiper .badge-composite {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  min-width: 120px;
+  z-index: 20;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 
+    0 8px 32px rgba(139, 92, 246, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  animation: egi-composite-glow 3s ease-in-out infinite;
+  backdrop-filter: blur(8px);
+}
+
+.egi-card--hiper .badge-composite .hyper-overlay {
+  background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 50%, #c084fc 100%);
+  padding: 3px 8px;
+  text-align: center;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: white;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  animation: egi-hyper-shimmer 2s linear infinite;
+}
+
+.egi-card--hiper .badge-composite .owned-base {
+  background: linear-gradient(135deg, #10b981 0%, rgba(139, 92, 246, 0.2) 100%);
+  padding: 4px 8px;
+  font-size: 9px;
+  font-weight: 600;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  justify-content: center;
+}
+
+@keyframes egi-composite-glow {
+  0%, 100% { 
+    box-shadow: 
+      0 8px 32px rgba(139, 92, 246, 0.4),
+      0 0 0 1px rgba(255, 255, 255, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    transform: scale(1);
+  }
+  50% { 
+    box-shadow: 
+      0 12px 40px rgba(139, 92, 246, 0.6),
+      0 0 0 2px rgba(255, 255, 255, 0.2),
+      inset 0 2px 0 rgba(255, 255, 255, 0.3);
+    transform: scale(1.02);
+  }
+}
+
+@keyframes egi-hyper-shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.egi-card--hiper .badge-composite .hyper-overlay {
+  background: linear-gradient(
+    135deg,
+    #8b5cf6 0%,
+    #a78bfa 25%,
+    #c084fc 50%,
+    #a78bfa 75%,
+    #8b5cf6 100%
+  );
+  background-size: 200% 100%;
 }
 
 @keyframes egi-badge-pulse {
