@@ -8,7 +8,7 @@
  */
 
 return [
-    // OS1 Modal Content
+    'my_galleries' => 'My Galleries',
     'create_new_collection' => 'Create New Collection',
     'create_modal_subtitle' => 'Start your artistic journey with a new collection',
     'close_modal' => 'Close modal',
@@ -124,6 +124,21 @@ return [
     'my_first_collection' => 'My First Collection',
     'default_collection_description' => 'Default collection for :name',
     'current_active_collection' => 'Current active collection',
+
+    // === HEADER & GENERIC NAVIGATION ===
+    'default_page_title' => 'Collection Details | FlorenceEGI',
+    'default_meta_description' => 'Details for this EGI collection on FlorenceEGI.',
+    'logo_home_link_aria_label' => 'FlorenceEGI Homepage',
+    'main_navigation_aria_label' => 'Main navigation',
+    'loading_galleries' => 'Loading galleries...',
+    'no_galleries_found' => 'No galleries found',
+    'create_one_question' => 'Create one?',
+    'error_loading_galleries' => 'Error loading galleries',
+    'dashboard' => 'Dashboard',
+    'login' => 'Login',
+    'register' => 'Register',
+    'open_main_menu' => 'Open main menu',
+
     'wallet' => [
         'copy_address' => 'Copy address',
         'donation' => 'Donation',
@@ -355,6 +370,52 @@ return [
         'no_collections_found' => 'No Collections Found',
         'no_collections_criteria_message' => 'Looks like no collections match your filters right now. Be the first to show yours!',
         'create_collection_button' => 'Create Your Collection',
+    ],
+
+    'show' => [
+        // Creator info
+        'collection_creator' => 'Collection Creator',
+        'unknown_creator' => 'Unknown Creator',
+        'verified_creator' => 'Verified Creator',
+
+        // Stats
+        'egis' => 'EGIs',
+        'likes' => 'Likes',
+        'reserved' => 'Reserved',
+        'algo_floor' => 'ALGO Floor',
+        'free_mint' => 'Free',
+
+        // Actions
+        'like_collection' => 'Like Collection',
+        'liked' => 'Liked',
+        'share' => 'Share',
+        'learn_more' => 'Learn More',
+
+        // EPP section
+        'supporting_environmental_project' => 'Supporting Environmental Project',
+        'of_sales_support_this_project' => 'of sales support this project',
+
+        // Collection items
+        'collection_items' => 'Collection Items',
+        'unique_digital_assets' => 'unique digital assets',
+
+        // Sorting and filters
+        'position' => 'Position',
+        'newest' => 'Newest',
+        'oldest' => 'Oldest',
+        'price_low_to_high' => 'Price: Low to High',
+        'price_high_to_low' => 'Price: High to Low',
+
+        // Empty state
+        'no_egis_yet' => 'No EGIs Yet',
+        'no_egis_message' => 'This collection is waiting for its first masterpiece. Check back soon!',
+        'add_first_egi' => 'Add First EGI',
+
+        // Load more
+        'load_more_items' => 'Load More Items',
+
+        // Related collections
+        'more_from_this_creator' => 'More from this Creator',
     ],
 
 ];

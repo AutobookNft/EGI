@@ -8,7 +8,7 @@
  */
 
 return [
-    // OS1 Modal Content
+    'my_galleries' => 'Mis galerías',
     'create_new_collection' => 'Crear Nueva Colección',
     'create_modal_subtitle' => 'Comienza tu viaje artístico con una nueva colección',
     'close_modal' => 'Cerrar modal',
@@ -125,6 +125,21 @@ return [
     'my_first_collection' => 'Mi primera colección',
     'default_collection_description' => 'Colección predeterminada para :name',
     'current_active_collection' => 'Colección activa actual',
+
+    // === HEADER & GENERIC NAVIGATION ===
+    'default_page_title' => 'Detalles de la Colección | FlorenceEGI',
+    'default_meta_description' => 'Detalles para esta colección EGI en FlorenceEGI.',
+    'logo_home_link_aria_label' => 'Página de inicio de FlorenceEGI',
+    'main_navigation_aria_label' => 'Navegación principal',
+    'loading_galleries' => 'Cargando galerías...',
+    'no_galleries_found' => 'No se encontraron galerías',
+    'create_one_question' => '¿Crear una?',
+    'error_loading_galleries' => 'Error al cargar las galerías',
+    'dashboard' => 'Panel',
+    'login' => 'Iniciar sesión',
+    'register' => 'Registrarse',
+    'open_main_menu' => 'Abrir menú principal',
+
     'wallet' => [
         'copy_address' => 'Copiar dirección',
         'donation' => 'Donación',
@@ -356,6 +371,52 @@ return [
         'no_collections_found' => 'No se Encontraron Colecciones',
         'no_collections_criteria_message' => 'Parece que no hay colecciones que coincidan con tus criterios. ¡Sé el primero en mostrar la tuya!',
         'create_collection_button' => 'Crea Tu Colección',
+    ],
+
+    'show' => [
+        // Creator info
+        'collection_creator' => 'Creador de la Colección',
+        'unknown_creator' => 'Creador Desconocido',
+        'verified_creator' => 'Creador Verificado',
+
+        // Stats
+        'egis' => 'EGIs',
+        'likes' => 'Me Gusta',
+        'reserved' => 'Reservados',
+        'algo_floor' => 'Precio Mínimo ALGO',
+        'free_mint' => 'Gratis',
+
+        // Actions
+        'like_collection' => 'Me Gusta la Colección',
+        'liked' => 'Me Gusta',
+        'share' => 'Compartir',
+        'learn_more' => 'Saber Más',
+
+        // EPP section
+        'supporting_environmental_project' => 'Apoya un Proyecto Ambiental',
+        'of_sales_support_this_project' => 'de las ventas apoyan este proyecto',
+
+        // Collection items
+        'collection_items' => 'Objetos de la Colección',
+        'unique_digital_assets' => 'assets digitales únicos',
+
+        // Sorting and filters
+        'position' => 'Posición',
+        'newest' => 'Más Recientes',
+        'oldest' => 'Más Antiguos',
+        'price_low_to_high' => 'Precio: Ascendente',
+        'price_high_to_low' => 'Precio: Descendente',
+
+        // Empty state
+        'no_egis_yet' => 'Aún No Hay EGIs',
+        'no_egis_message' => 'Esta colección está esperando su primera obra maestra. ¡Vuelve pronto!',
+        'add_first_egi' => 'Añadir Primer EGI',
+
+        // Load more
+        'load_more_items' => 'Cargar Más Elementos',
+
+        // Related collections
+        'more_from_this_creator' => 'Más de este Creador',
     ],
 
 ];

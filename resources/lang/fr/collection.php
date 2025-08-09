@@ -8,7 +8,7 @@
  */
 
 return [
-    // OS1 Modal Content
+    'my_galleries' => 'Mes galeries',
     'create_new_collection' => 'Créer une nouvelle collection',
     'create_modal_subtitle' => 'Commencez votre parcours artistique avec une nouvelle collection',
     'close_modal' => 'Fermer la modale',
@@ -125,6 +125,21 @@ return [
     'my_first_collection' => 'Ma première collection',
     'default_collection_description' => 'Collection par défaut pour :name',
     'current_active_collection' => 'Collection active actuelle',
+
+    // === HEADER & GENERIC NAVIGATION ===
+    'default_page_title' => 'Détails de la Collection | FlorenceEGI',
+    'default_meta_description' => 'Détails pour cette collection EGI sur FlorenceEGI.',
+    'logo_home_link_aria_label' => 'Page d\'accueil de FlorenceEGI',
+    'main_navigation_aria_label' => 'Navigation principale',
+    'loading_galleries' => 'Chargement des galeries...',
+    'no_galleries_found' => 'Aucune galerie trouvée',
+    'create_one_question' => 'En créer une ?',
+    'error_loading_galleries' => 'Erreur lors du chargement des galeries',
+    'dashboard' => 'Tableau de bord',
+    'login' => 'Se connecter',
+    'register' => 'S\'inscrire',
+    'open_main_menu' => 'Ouvrir le menu principal',
+
     'wallet' => [
         'copy_address' => 'Copier l\'adresse',
         'donation' => 'Donation',
@@ -356,6 +371,52 @@ return [
         'no_collections_found' => 'Aucune Collection Trouvée',
         'no_collections_criteria_message' => 'Il semble qu’il n’y ait aucune collection correspondant à vos critères. Soyez le premier à en présenter une !',
         'create_collection_button' => 'Créer Votre Collection',
+    ],
+
+    'show' => [
+        // Creator info
+        'collection_creator' => 'Créateur de la Collection',
+        'unknown_creator' => 'Créateur Inconnu',
+        'verified_creator' => 'Créateur Vérifié',
+
+        // Stats
+        'egis' => 'EGIs',
+        'likes' => 'J\'aime',
+        'reserved' => 'Réservés',
+        'algo_floor' => 'Prix Plancher ALGO',
+        'free_mint' => 'Gratuit',
+
+        // Actions
+        'like_collection' => 'Aimer la Collection',
+        'liked' => 'Aimé',
+        'share' => 'Partager',
+        'learn_more' => 'En Savoir Plus',
+
+        // EPP section
+        'supporting_environmental_project' => 'Soutient un Projet Environnemental',
+        'of_sales_support_this_project' => 'des ventes soutiennent ce projet',
+
+        // Collection items
+        'collection_items' => 'Objets de la Collection',
+        'unique_digital_assets' => 'assets numériques uniques',
+
+        // Sorting and filters
+        'position' => 'Position',
+        'newest' => 'Plus Récents',
+        'oldest' => 'Plus Anciens',
+        'price_low_to_high' => 'Prix: Croissant',
+        'price_high_to_low' => 'Prix: Décroissant',
+
+        // Empty state
+        'no_egis_yet' => 'Aucun EGI Encore',
+        'no_egis_message' => 'Cette collection attend son premier chef-d\'œuvre. Revenez bientôt !',
+        'add_first_egi' => 'Ajouter le Premier EGI',
+
+        // Load more
+        'load_more_items' => 'Charger Plus d\'Éléments',
+
+        // Related collections
+        'more_from_this_creator' => 'Plus de ce Créateur',
     ],
 
 ];
