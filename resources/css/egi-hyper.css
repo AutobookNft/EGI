@@ -1,175 +1,221 @@
 /* ==========================================================================
    EGI HYPER MODE STYLES
    ========================================================================== */
-/* 
+/*
    File dedicato per gli stili della modalità HYPER degli EGI.
    Questa modalità è riservata a EGI speciali che rispettano determinate condizioni.
-   
+
    Utilizzo: Questo file viene incluso direttamente nel component egi-card.blade.php
    quando l'EGI ha il campo hyper=true nel database.
 */
 
 .egi-card--hiper {
-  --energy: 0.95;
-  --foilHue: 260; 
-  --foilSat: 96%; 
-  --foilLight: 58%;
-  --edge: #8b5cf6; /* viola neon */
-  
-  position: relative; 
-  isolation: isolate; 
-  backface-visibility: hidden; 
-  transform-style: preserve-3d;
-  transition: transform .25s ease, filter .25s ease, box-shadow .25s ease, border-color .25s ease;
-  
-  /* glow base più forte */
-  box-shadow:
-    0 0 0 1px color-mix(in srgb, var(--edge), transparent 60%),
-    0 12px 32px -8px color-mix(in srgb, var(--edge), transparent 70%),
-    inset 0 0 28px color-mix(in srgb, var(--edge), transparent 80%);
+    --energy: 0.95;
+    --foilHue: 260;
+    --foilSat: 96%;
+    --foilLight: 58%;
+    --edge: #8b5cf6; /* viola neon */
+
+    position: relative;
+    isolation: isolate;
+    backface-visibility: hidden;
+    transform-style: preserve-3d;
+    transition: transform 0.25s ease, filter 0.25s ease, box-shadow 0.25s ease,
+        border-color 0.25s ease;
+
+    /* glow base più forte */
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--edge), transparent 60%),
+        0 12px 32px -8px color-mix(in srgb, var(--edge), transparent 70%),
+        inset 0 0 28px color-mix(in srgb, var(--edge), transparent 80%);
 }
 
 /* --- FOIL OLOGRAFICO ANIMATO --- */
 .egi-card--hiper::before {
-  content: "";
-  position: absolute; 
-  inset: -2px; 
-  border-radius: inherit; 
-  pointer-events: none; 
-  z-index: 1;
-  
-  background:
-    radial-gradient(120% 80% at 10% 0%,
-      hsla(var(--foilHue), var(--foilSat), calc(var(--foilLight) + 15%), .28), 
-      transparent 60%),
-    conic-gradient(from var(--a,0deg),
-      hsla(calc(var(--foilHue) - 60), 95%, 62%, .16),
-      hsla(calc(var(--foilHue) - 20), 92%, 60%, .22),
-      hsla(calc(var(--foilHue) + 20), 90%, 58%, .18),
-      hsla(calc(var(--foilHue) + 60), 88%, 60%, .16),
-      hsla(calc(var(--foilHue) + 120), 85%, 62%, .16),
-      hsla(calc(var(--foilHue) + 200), 88%, 58%, .18),
-      hsla(calc(var(--foilHue) + 280), 92%, 60%, .22),
-      hsla(calc(var(--foilHue) + 320), 95%, 62%, .16));
-      
-  mix-blend-mode: screen;
-  opacity: calc(.38 + var(--energy) * .42);
-  filter: saturate(1.25) contrast(1.05);
-  animation: egi-foil-rotate 7s linear infinite;
+    content: "";
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    pointer-events: none;
+    z-index: 1;
+
+    background: radial-gradient(
+            120% 80% at 10% 0%,
+            hsla(
+                var(--foilHue),
+                var(--foilSat),
+                calc(var(--foilLight) + 15%),
+                0.28
+            ),
+            transparent 60%
+        ),
+        conic-gradient(
+            from var(--a, 0deg),
+            hsla(calc(var(--foilHue) - 60), 95%, 62%, 0.16),
+            hsla(calc(var(--foilHue) - 20), 92%, 60%, 0.22),
+            hsla(calc(var(--foilHue) + 20), 90%, 58%, 0.18),
+            hsla(calc(var(--foilHue) + 60), 88%, 60%, 0.16),
+            hsla(calc(var(--foilHue) + 120), 85%, 62%, 0.16),
+            hsla(calc(var(--foilHue) + 200), 88%, 58%, 0.18),
+            hsla(calc(var(--foilHue) + 280), 92%, 60%, 0.22),
+            hsla(calc(var(--foilHue) + 320), 95%, 62%, 0.16)
+        );
+
+    mix-blend-mode: screen;
+    opacity: calc(0.38 + var(--energy) * 0.42);
+    filter: saturate(1.25) contrast(1.05);
+    animation: egi-foil-rotate 7s linear infinite;
 }
 
-@keyframes egi-foil-rotate { 
-  to { --a: 360deg; } 
+@keyframes egi-foil-rotate {
+    to {
+        --a: 360deg;
+    }
 }
 
 /* --- SHINE A SCANSIONE --- */
 .egi-card--hiper::after {
-  content: "";
-  position: absolute; 
-  inset: -20%; 
-  border-radius: inherit; 
-  pointer-events: none; 
-  z-index: 2;
-  
-  background: linear-gradient(100deg,
-    transparent 0%,
-    rgba(255,255,255,.06) 42%,
-    rgba(255,255,255,.28) 50%,
-    rgba(255,255,255,.06) 58%,
-    transparent 100%);
-    
-  transform: translateX(-140%) rotate(3deg);
-  filter: blur(1px);
-  opacity: .0;
-  animation: egi-shine 5.5s ease-in-out infinite;
+    content: "";
+    position: absolute;
+    inset: -20%;
+    border-radius: inherit;
+    pointer-events: none;
+    z-index: 2;
+
+    background: linear-gradient(
+        100deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.06) 42%,
+        rgba(255, 255, 255, 0.28) 50%,
+        rgba(255, 255, 255, 0.06) 58%,
+        transparent 100%
+    );
+
+    transform: translateX(-140%) rotate(3deg);
+    filter: blur(1px);
+    opacity: 0;
+    animation: egi-shine 5.5s ease-in-out infinite;
 }
 
 @keyframes egi-shine {
-  5%   { opacity: .0;   transform: translateX(-140%) rotate(3deg); }
-  12%  { opacity: .95;  transform: translateX(110%)  rotate(3deg); }
-  20%  { opacity: .0;   transform: translateX(140%)  rotate(3deg); }
-  100% { opacity: .0;   transform: translateX(140%)  rotate(3deg); }
+    5% {
+        opacity: 0;
+        transform: translateX(-140%) rotate(3deg);
+    }
+    12% {
+        opacity: 0.95;
+        transform: translateX(110%) rotate(3deg);
+    }
+    20% {
+        opacity: 0;
+        transform: translateX(140%) rotate(3deg);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(140%) rotate(3deg);
+    }
 }
 
 /* --- EDGE FLOW (bordo al neon in movimento) --- */
-.egi-card--hiper { 
-  border-color: color-mix(in srgb, var(--edge), transparent 70%); 
+.egi-card--hiper {
+    border-color: color-mix(in srgb, var(--edge), transparent 70%);
 }
 
-.egi-card--hiper .egi-card__edge { 
-  display: none; /* se esistesse un edge interno, non lo tocchiamo */
+.egi-card--hiper .egi-card__edge {
+    display: none; /* se esistesse un edge interno, non lo tocchiamo */
 }
 
-.egi-card--hiper::marker { 
-  content: none; /* safe */
+.egi-card--hiper::marker {
+    content: none; /* safe */
 }
 
 .egi-card--hiper:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--edge), transparent 45%);
-  outline-offset: 2px;
+    outline: 2px solid color-mix(in srgb, var(--edge), transparent 45%);
+    outline-offset: 2px;
 }
 
 .egi-card--hiper:hover {
-  transform: translateY(-3px) rotateX(.8deg) rotateY(.6deg);
-  filter: saturate(1.08);
-  box-shadow:
-    0 0 0 1px color-mix(in srgb, var(--edge), transparent 55%),
-    0 18px 48px -10px color-mix(in srgb, var(--edge), transparent 60%),
-    inset 0 0 34px color-mix(in srgb, var(--edge), transparent 74%);
+    transform: translateY(-3px) rotateX(0.8deg) rotateY(0.6deg);
+    filter: saturate(1.08);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--edge), transparent 55%),
+        0 18px 48px -10px color-mix(in srgb, var(--edge), transparent 60%),
+        inset 0 0 34px color-mix(in srgb, var(--edge), transparent 74%);
 }
 
 /* --- SPARKLES (punti luce che "respirano") --- */
 .egi-card--hiper .egi-sparkles {
-  position: absolute; 
-  inset: 0; 
-  pointer-events: none; 
-  z-index: 3; 
-  border-radius: inherit; 
-  overflow: hidden;
-  
-  background:
-    radial-gradient(circle at 20% 30%, rgba(255,255,255,.10), transparent 25%),
-    radial-gradient(circle at 80% 60%, rgba(255,255,255,.07), transparent 22%),
-    radial-gradient(circle at 55% 80%, rgba(255,255,255,.06), transparent 20%);
-    
-  mix-blend-mode: screen;
-  opacity: calc(.10 + var(--energy) * .15);
-  animation: egi-sparkle 6s ease-in-out infinite alternate;
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 3;
+    border-radius: inherit;
+    overflow: hidden;
+
+    background: radial-gradient(
+            circle at 20% 30%,
+            rgba(255, 255, 255, 0.1),
+            transparent 25%
+        ),
+        radial-gradient(
+            circle at 80% 60%,
+            rgba(255, 255, 255, 0.07),
+            transparent 22%
+        ),
+        radial-gradient(
+            circle at 55% 80%,
+            rgba(255, 255, 255, 0.06),
+            transparent 20%
+        );
+
+    mix-blend-mode: screen;
+    opacity: calc(0.1 + var(--energy) * 0.15);
+    animation: egi-sparkle 6s ease-in-out infinite alternate;
 }
 
 @keyframes egi-sparkle {
-  0%   { filter: brightness(1) blur(0px); transform: translate3d(0,0,0); }
-  100% { filter: brightness(1.25) blur(.3px); transform: translate3d(0,-1px,0); }
+    0% {
+        filter: brightness(1) blur(0px);
+        transform: translate3d(0, 0, 0);
+    }
+    100% {
+        filter: brightness(1.25) blur(0.3px);
+        transform: translate3d(0, -1px, 0);
+    }
 }
 
 /* --- Parallax solo sull'immagine (più "wow") --- */
 .egi-card--hiper figure > img {
-  transition: transform .35s ease;
+    transition: transform 0.35s ease;
 }
 
 .egi-card--hiper:hover figure > img {
-  transform: scale(1.04) translateY(-2px);
+    transform: scale(1.04) translateY(-2px);
 }
 
 /* --- Badge HYPER --- */
 .egi-hyper-badge {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
-  color: white;
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  z-index: 10;
-  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
-  animation: egi-badge-pulse 2s ease-in-out infinite alternate;
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
+    animation: egi-badge-pulse 2s ease-in-out infinite alternate;
 }
 
 @keyframes egi-badge-pulse {
-  0%   { transform: scale(1); opacity: 0.9; }
-  100% { transform: scale(1.05); opacity: 1; }
+    0% {
+        transform: scale(1);
+        opacity: 0.9;
+    }
+    100% {
+        transform: scale(1.05);
+        opacity: 1;
+    }
 }

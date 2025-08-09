@@ -1,0 +1,53 @@
+/* 📝 EGI Card Tooltip Styles */
+/* Tooltip per descrizione EGI - Solo desktop con hover */
+
+.egi-card .has-description {
+    position: relative;
+}
+
+/* Tooltip container - hidden by default */
+.egi-card .has-description > div {
+    visibility: hidden;
+    opacity: 0;
+    transform: translateX(-50%) translateY(-8px);
+    transition: all 0.2s ease-in-out;
+    z-index: 1000;
+}
+
+/* Show tooltip on hover - only on desktop */
+@media (min-width: 768px) {
+    .egi-card:hover .has-description > div {
+        visibility: visible;
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+/* Mobile: hide tooltip completely */
+@media (max-width: 767px) {
+    .egi-card .has-description > div {
+        display: none !important;
+    }
+}
+
+/* Tooltip animation improvements */
+.egi-card .has-description > div {
+    backdrop-filter: blur(8px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+    border-radius: 8px;
+    max-width: 320px;
+    word-wrap: break-word;
+    line-height: 1.4;
+}
+
+/* Tooltip arrow */
+.egi-card .has-description > div::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -4px;
+    border-width: 4px;
+    border-style: solid;
+    border-color: rgb(17, 24, 39) transparent transparent transparent;
+}
