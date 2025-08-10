@@ -1,9 +1,10 @@
-<x-creator-layout :title="$collector->name . ' - ' . __('collector.home.title_suffix')" :metaDescription="__('collector.home.meta_description', ['name' => $collector->name])">
+<x-creator-layout :title="$collector->name . ' - ' . __('collector.home.title_suffix')"
+    :metaDescription="__('collector.home.meta_description', ['name' => $collector->name])">
 
     {{-- Schema.org Markup --}}
     <x-slot name="schemaMarkup">
         <script type="application/ld+json">
-        {
+            {
             "@context": "https://schema.org",
             "@type": "ProfilePage",
             "mainEntity": {
@@ -64,11 +65,13 @@
 
         {{-- Hero Content --}}
         <div class="relative z-10 px-4 py-16 mx-auto max-w-7xl sm:px-6 md:py-24 lg:px-8">
-            {{-- Padmin: Aumentato il gap verticale su mobile per dare più respiro tra il blocco profilo e quello delle azioni/statistiche --}}
+            {{-- Padmin: Aumentato il gap verticale su mobile per dare più respiro tra il blocco profilo e quello delle
+            azioni/statistiche --}}
             <div class="grid items-end grid-cols-1 gap-12 md:grid-cols-12 md:gap-8">
 
                 {{-- Profile Section --}}
-                {{-- Padmin: Aumentato il gap e aggiunto `items-center` su mobile per un migliore allineamento verticale --}}
+                {{-- Padmin: Aumentato il gap e aggiunto `items-center` su mobile per un migliore allineamento verticale
+                --}}
                 <div class="flex flex-col items-center gap-6 sm:flex-row sm:items-end sm:gap-8 md:col-span-8">
                     {{-- Avatar --}}
                     {{-- Padmin: Aggiunto flex-shrink-0 per evitare che l'avatar si restringa su schermi stretti --}}
@@ -97,11 +100,12 @@
                             {{ $collector->name }}
                         </h1>
                         @if ($collector->tagline)
-                            <p class="text-lg italic text-oro-fiorentino font-source-sans md:text-xl">
-                                "{{ $collector->tagline }}"
-                            </p>
+                        <p class="text-lg italic text-oro-fiorentino font-source-sans md:text-xl">
+                            "{{ $collector->tagline }}"
+                        </p>
                         @endif
-                        {{-- Padmin: Separato in un div per un miglior controllo del layout e aggiunto un margine superiore. --}}
+                        {{-- Padmin: Separato in un div per un miglior controllo del layout e aggiunto un margine
+                        superiore. --}}
                         <div class="mt-3">
                             <p class="text-gray-400">
                                 {{ __('collector.home.collector_title') }} &middot;
@@ -112,53 +116,53 @@
                 </div>
 
                 {{-- Actions & Stats --}}
-                {{-- Padmin: Aggiunto un margine superiore su mobile (mt-8) che scompare su schermi medi (md:mt-0) quando il layout cambia. --}}
+                {{-- Padmin: Aggiunto un margine superiore su mobile (mt-8) che scompare su schermi medi (md:mt-0)
+                quando il layout cambia. --}}
                 <div class="flex flex-col items-center gap-6 md:col-span-4 md:items-end">
                     {{-- CTA Buttons --}}
                     <div class="flex gap-3">
                         @if (\App\Helpers\FegiAuth::check() && \App\Helpers\FegiAuth::id() !== $collector->id)
-                            <button type="button"
-                                class="bg-oro-fiorentino hover:bg-oro-fiorentino/90 rounded-full px-6 py-2.5 font-semibold text-gray-900 shadow-lg transition-all duration-300 hover:shadow-xl"
-                                aria-label="{{ __('collector.home.follow_aria', ['name' => $collector->name]) }}">
-                                <span class="flex items-center gap-2">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                    </svg>
-                                    {{ __('collector.home.follow_button') }}
-                                </span>
-                            </button>
-                            <button type="button"
-                                class="rounded-full bg-verde-rinascita px-6 py-2.5 font-semibold text-white shadow-lg transition-all duration-300 hover:bg-verde-rinascita/90 hover:shadow-xl"
-                                aria-label="{{ __('collector.home.message_aria', ['name' => $collector->name]) }}">
-                                {{ __('collector.home.message_button') }}
-                            </button>
+                        <button type="button"
+                            class="bg-oro-fiorentino hover:bg-oro-fiorentino/90 rounded-full px-6 py-2.5 font-semibold text-gray-900 shadow-lg transition-all duration-300 hover:shadow-xl"
+                            aria-label="{{ __('collector.home.follow_aria', ['name' => $collector->name]) }}">
+                            <span class="flex items-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                </svg>
+                                {{ __('collector.home.follow_button') }}
+                            </span>
+                        </button>
+                        <button type="button"
+                            class="rounded-full bg-verde-rinascita px-6 py-2.5 font-semibold text-white shadow-lg transition-all duration-300 hover:bg-verde-rinascita/90 hover:shadow-xl"
+                            aria-label="{{ __('collector.home.message_aria', ['name' => $collector->name]) }}">
+                            {{ __('collector.home.message_button') }}
+                        </button>
                         @elseif(\App\Helpers\FegiAuth::guest())
-                            <button type="button" onclick="window.location.href='{{ route('login') }}'"
-                                class="bg-oro-fiorentino hover:bg-oro-fiorentino/90 rounded-full px-6 py-2.5 font-semibold text-gray-900 shadow-lg transition-all duration-300 hover:shadow-xl">
-                                {{ __('collector.home.login_to_follow') }}
-                            </button>
+                        <button type="button" onclick="window.location.href='{{ route('login') }}'"
+                            class="bg-oro-fiorentino hover:bg-oro-fiorentino/90 rounded-full px-6 py-2.5 font-semibold text-gray-900 shadow-lg transition-all duration-300 hover:shadow-xl">
+                            {{ __('collector.home.login_to_follow') }}
+                        </button>
                         @endif
                     </div>
 
                     {{-- Quick Stats --}}
                     <div class="grid grid-cols-3 gap-6 text-center">
                         <div class="flex flex-col">
-                            <span
-                                class="text-2xl font-bold text-oro-fiorentino md:text-3xl">{{ $stats['total_owned_egis'] ?? 0 }}</span>
+                            <span class="text-2xl font-bold text-oro-fiorentino md:text-3xl">{{
+                                $stats['total_owned_egis'] ?? 0 }}</span>
                             <span class="text-xs text-gray-400 md:text-sm">{{ __('collector.home.owned_egis') }}</span>
                         </div>
                         <div class="flex flex-col">
-                            <span
-                                class="text-2xl font-bold text-oro-fiorentino md:text-3xl">{{ $stats['collections_represented'] ?? 0 }}</span>
-                            <span
-                                class="text-xs text-gray-400 md:text-sm">{{ __('collector.collections_represented') }}</span>
+                            <span class="text-2xl font-bold text-oro-fiorentino md:text-3xl">{{
+                                $stats['collections_represented'] ?? 0 }}</span>
+                            <span class="text-xs text-gray-400 md:text-sm">{{ __('collector.collections_represented')
+                                }}</span>
                         </div>
                         <div class="flex flex-col">
-                            <span
-                                class="text-2xl font-bold text-oro-fiorentino md:text-3xl">€{{ number_format($stats['total_spent_eur'] ?? 0, 2) }}</span>
-                            <span
-                                class="text-xs text-gray-400 md:text-sm">{{ __('collector.home.total_spent') }}</span>
+                            <span class="text-2xl font-bold text-oro-fiorentino md:text-3xl">€{{
+                                number_format($stats['total_spent_eur'] ?? 0, 2) }}</span>
+                            <span class="text-xs text-gray-400 md:text-sm">{{ __('collector.home.total_spent') }}</span>
                         </div>
                     </div>
                 </div>
@@ -205,107 +209,107 @@
         <div class="px-4 py-12 mx-auto max-w-7xl sm:px-6 lg:px-8">
             {{-- Portfolio Preview --}}
             @if ($featuredEgis->count() > 0)
-                <section class="mb-12">
-                    <div class="flex items-center justify-between mb-8">
-                        <h2 class="text-3xl font-bold text-white font-playfair">
-                            {{ __('collector.home.portfolio_preview_title') }}
-                        </h2>
-                        <a href="{{ route('collector.portfolio', $collector->id) }}"
-                            class="flex items-center font-medium text-purple-400 hover:text-purple-300">
-                            {{ __('collector.home.view_all_portfolio') }}
-                            <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                            </svg>
-                        </a>
-                    </div>
-
-                    <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-                        @foreach ($featuredEgis->take(8) as $egi)
-                            <x-egi-card :egi="$egi" :collection="$egi->collection" :portfolioContext="true" />
-                        @endforeach
-                    </div>
-                </section>
-            @else
-                {{-- Empty State --}}
-                <section class="py-12 text-center">
-                    <div class="max-w-md mx-auto">
-                        <svg class="w-24 h-24 mx-auto mb-6 text-gray-400" fill="none" stroke="currentColor"
-                            viewBox="0 0 24 24">
+            <section class="mb-12">
+                <div class="flex items-center justify-between mb-8">
+                    <h2 class="text-3xl font-bold text-white font-playfair">
+                        {{ __('collector.home.portfolio_preview_title') }}
+                    </h2>
+                    <a href="{{ route('collector.portfolio', $collector->id) }}"
+                        class="flex items-center font-medium text-purple-400 hover:text-purple-300">
+                        {{ __('collector.home.view_all_portfolio') }}
+                        <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                                d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
-                        <h3 class="mb-4 text-2xl font-bold text-white">
-                            {{ __('collector.home.empty_portfolio_title') }}
-                        </h3>
-                        <p class="mb-6 text-gray-400">
-                            {{ __('collector.home.empty_portfolio_description') }}
-                        </p>
-                        <a href="{{ route('home.collections.index') }}"
-                            class="px-6 py-3 font-medium text-white transition-colors duration-200 bg-purple-600 rounded-lg hover:bg-purple-700">
-                            {{ __('collector.home.discover_egis_button') }}
-                        </a>
-                    </div>
-                </section>
+                    </a>
+                </div>
+
+                <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+                    @foreach ($featuredEgis->take(8) as $egi)
+                    <x-egi-card :egi="$egi" :collection="$egi->collection" :portfolioContext="true"
+                        :portfolioOwner="$collector" />
+                    @endforeach
+                </div>
+            </section>
+            @else
+            {{-- Empty State --}}
+            <section class="py-12 text-center">
+                <div class="max-w-md mx-auto">
+                    <svg class="w-24 h-24 mx-auto mb-6 text-gray-400" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    </svg>
+                    <h3 class="mb-4 text-2xl font-bold text-white">
+                        {{ __('collector.home.empty_portfolio_title') }}
+                    </h3>
+                    <p class="mb-6 text-gray-400">
+                        {{ __('collector.home.empty_portfolio_description') }}
+                    </p>
+                    <a href="{{ route('home.collections.index') }}"
+                        class="px-6 py-3 font-medium text-white transition-colors duration-200 bg-purple-600 rounded-lg hover:bg-purple-700">
+                        {{ __('collector.home.discover_egis_button') }}
+                    </a>
+                </div>
+            </section>
             @endif
 
             {{-- Collections Preview --}}
             @if ($collectorCollections->count() > 0)
-                <section>
-                    <div class="flex items-center justify-between mb-8">
-                        <h2 class="text-3xl font-bold text-white font-playfair">
-                            {{ __('collector.home.collections_preview_title') }}
-                        </h2>
-                        <a href="{{ route('collector.collections', $collector->id) }}"
-                            class="flex items-center font-medium text-purple-400 hover:text-purple-300">
-                            {{ __('collector.home.view_all_collections') }}
-                            <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                            </svg>
-                        </a>
-                    </div>
+            <section>
+                <div class="flex items-center justify-between mb-8">
+                    <h2 class="text-3xl font-bold text-white font-playfair">
+                        {{ __('collector.home.collections_preview_title') }}
+                    </h2>
+                    <a href="{{ route('collector.collections', $collector->id) }}"
+                        class="flex items-center font-medium text-purple-400 hover:text-purple-300">
+                        {{ __('collector.home.view_all_collections') }}
+                        <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                    </a>
+                </div>
 
-                    <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                        @foreach ($collectorCollections->take(6) as $collection)
-                            <article
-                                class="overflow-hidden transition-all duration-300 bg-white shadow-lg rounded-xl hover:shadow-2xl">
-                                <div class="p-6">
-                                    <div class="flex items-center mb-4">
-                                        @if ($collection->creator && $collection->creator->profile_photo_url)
-                                            <img src="{{ $collection->creator->profile_photo_url }}"
-                                                alt="{{ $collection->creator->name }}"
-                                                class="w-12 h-12 mr-4 rounded-full">
-                                        @endif
-                                        <div>
-                                            <h3 class="text-xl font-bold text-grigio-pietra">
-                                                <a href="{{ route('collector.collection.show', [$collector->id, $collection->id]) }}"
-                                                    class="transition-colors duration-200 hover:text-blu-algoritmo">
-                                                    {{ $collection->title }}
-                                                </a>
-                                            </h3>
-                                            @if ($collection->creator)
-                                                <p class="text-sm text-gray-600">
-                                                    {{ __('collector.home.by_creator') }}
-                                                    <span class="font-medium">{{ $collection->creator->name }}</span>
-                                                </p>
-                                            @endif
-                                        </div>
-                                    </div>
-
-                                    <div class="flex items-center justify-between text-sm text-gray-600">
-                                        <span>{{ $collection->egis_count }}
-                                            {{ __('collector.home.owned_in_collection') }}</span>
-                                        @if ($collection->total_value)
-                                            <span
-                                                class="font-medium text-blu-algoritmo">€{{ number_format($collection->total_value, 2) }}</span>
-                                        @endif
-                                    </div>
+                <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    @foreach ($collectorCollections->take(6) as $collection)
+                    <article
+                        class="overflow-hidden transition-all duration-300 bg-white shadow-lg rounded-xl hover:shadow-2xl">
+                        <div class="p-6">
+                            <div class="flex items-center mb-4">
+                                @if ($collection->creator && $collection->creator->profile_photo_url)
+                                <img src="{{ $collection->creator->profile_photo_url }}"
+                                    alt="{{ $collection->creator->name }}" class="w-12 h-12 mr-4 rounded-full">
+                                @endif
+                                <div>
+                                    <h3 class="text-xl font-bold text-grigio-pietra">
+                                        <a href="{{ route('collector.collection.show', [$collector->id, $collection->id]) }}"
+                                            class="transition-colors duration-200 hover:text-blu-algoritmo">
+                                            {{ $collection->title }}
+                                        </a>
+                                    </h3>
+                                    @if ($collection->creator)
+                                    <p class="text-sm text-gray-600">
+                                        {{ __('collector.home.by_creator') }}
+                                        <span class="font-medium">{{ $collection->creator->name }}</span>
+                                    </p>
+                                    @endif
                                 </div>
-                            </article>
-                        @endforeach
-                    </div>
-                </section>
+                            </div>
+
+                            <div class="flex items-center justify-between text-sm text-gray-600">
+                                <span>{{ $collection->egis_count }}
+                                    {{ __('collector.home.owned_in_collection') }}</span>
+                                @if ($collection->total_value)
+                                <span class="font-medium text-blu-algoritmo">€{{ number_format($collection->total_value,
+                                    2) }}</span>
+                                @endif
+                            </div>
+                        </div>
+                    </article>
+                    @endforeach
+                </div>
+            </section>
             @endif
         </div>
     </div>

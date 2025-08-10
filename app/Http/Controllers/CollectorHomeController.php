@@ -139,8 +139,8 @@ class CollectorHomeController extends Controller {
         $sort = $request->input('sort', 'latest');
         $view = $request->input('view', 'grid'); // 'grid' or 'list'
 
-    // 🚀 FIX: Usa PortfolioService per ottenere tutti gli EGI su cui il collector ha fatto offerte (vincente o superato)
-    $activePortfolio = $this->portfolioService->getCollectorActivePortfolio($collector);
+        // 🚀 FIX: Usa PortfolioService per ottenere tutti gli EGI su cui il collector ha fatto offerte (vincente o superato)
+        $activePortfolio = $this->portfolioService->getCollectorActivePortfolio($collector);
 
         // Applica filtri e ordinamento alla collection
         $filteredEgis = $activePortfolio

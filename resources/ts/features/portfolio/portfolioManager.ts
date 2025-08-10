@@ -181,21 +181,24 @@ export class PortfolioManager {
             if (compositeBase) {
                 compositeBase.classList.remove('owned-base');
                 compositeBase.classList.add('not-owned-base');
-                // Trova l'icona (svg) e aggiorna solo il nodo di testo successivo
+                // Trova l'icona (svg)
                 const svg = compositeBase.querySelector('svg');
-                let textNode: Node | null = null;
-                if (svg && svg.nextSibling && svg.nextSibling.nodeType === Node.TEXT_NODE) {
-                    textNode = svg.nextSibling;
+                // Rimuovi tutti i nodi di testo
+                Array.from(compositeBase.childNodes).forEach(n => {
+                    if (n.nodeType === Node.TEXT_NODE) compositeBase.removeChild(n);
+                });
+                // Inserisci nuovo nodo di testo SEMPRE dopo svg se presente
+                if (svg) {
+                    // Trova la posizione dell'icona tra i child
+                    const children = Array.from(compositeBase.childNodes);
+                    const idx = children.indexOf(svg);
+                    if (idx >= 0 && children.length > idx + 1) {
+                        compositeBase.insertBefore(document.createTextNode(' ' + lbl), children[idx + 1]);
+                    } else {
+                        compositeBase.appendChild(document.createTextNode(' ' + lbl));
+                    }
                 } else {
-                    // Cerca un nodo di testo generico
-                    textNode = Array.from(compositeBase.childNodes).find(n => n.nodeType === Node.TEXT_NODE) || null;
-                }
-                if (textNode) {
-                    textNode.textContent = ' ' + lbl;
-                } else if (svg) {
-                    compositeBase.insertBefore(document.createTextNode(' ' + lbl), svg.nextSibling);
-                } else {
-                    compositeBase.append(' ' + lbl);
+                    compositeBase.appendChild(document.createTextNode(' ' + lbl));
                 }
             } else {
                 // Badge semplice: aggiorna classi e testo
@@ -203,6 +206,27 @@ export class PortfolioManager {
                 badge.classList.add('bg-red-600/90');
                 badge.textContent = lbl;
             }
+                    const isFirefox = navigator.userAgent.toLowerCase().includes('firefox');
+                    if (isFirefox) {
+                        const svg = compositeBase.querySelector('svg');
+                        compositeBase.innerHTML = svg ? svg.outerHTML + ' ' + lbl : lbl;
+                    } else {
+                        const svg = compositeBase.querySelector('svg');
+                        Array.from(compositeBase.childNodes).forEach(n => {
+                            if (n.nodeType === Node.TEXT_NODE) compositeBase.removeChild(n);
+                        });
+                        if (svg) {
+                            const children = Array.from(compositeBase.childNodes);
+                            const idx = children.indexOf(svg);
+                            if (idx >= 0 && children.length > idx + 1) {
+                                compositeBase.insertBefore(document.createTextNode(' ' + lbl), children[idx + 1]);
+                            } else {
+                                compositeBase.appendChild(document.createTextNode(' ' + lbl));
+                            }
+                        } else {
+                            compositeBase.appendChild(document.createTextNode(' ' + lbl));
+                        }
+                    }
             badge.setAttribute('title', lbl);
         }
     }
@@ -222,19 +246,26 @@ export class PortfolioManager {
             if (compositeBase) {
                 compositeBase.classList.remove('not-owned-base');
                 compositeBase.classList.add('owned-base');
-                const svg = compositeBase.querySelector('svg');
-                let textNode: Node | null = null;
-                if (svg && svg.nextSibling && svg.nextSibling.nodeType === Node.TEXT_NODE) {
-                    textNode = svg.nextSibling;
+                const isFirefox = navigator.userAgent.toLowerCase().includes('firefox');
+                if (isFirefox) {
+                    const svg = compositeBase.querySelector('svg');
+                    compositeBase.innerHTML = svg ? svg.outerHTML + ' ' + lbl : lbl;
                 } else {
-                    textNode = Array.from(compositeBase.childNodes).find(n => n.nodeType === Node.TEXT_NODE) || null;
-                }
-                if (textNode) {
-                    textNode.textContent = ' ' + lbl;
-                } else if (svg) {
-                    compositeBase.insertBefore(document.createTextNode(' ' + lbl), svg.nextSibling);
-                } else {
-                    compositeBase.append(' ' + lbl);
+                    const svg = compositeBase.querySelector('svg');
+                    Array.from(compositeBase.childNodes).forEach(n => {
+                        if (n.nodeType === Node.TEXT_NODE) compositeBase.removeChild(n);
+                    });
+                    if (svg) {
+                        const children = Array.from(compositeBase.childNodes);
+                        const idx = children.indexOf(svg);
+                        if (idx >= 0 && children.length > idx + 1) {
+                            compositeBase.insertBefore(document.createTextNode(' ' + lbl), children[idx + 1]);
+                        } else {
+                            compositeBase.appendChild(document.createTextNode(' ' + lbl));
+                        }
+                    } else {
+                        compositeBase.appendChild(document.createTextNode(' ' + lbl));
+                    }
                 }
             } else {
                 badge.classList.remove('bg-red-600/90');
@@ -383,7 +414,7 @@ export class PortfolioManager {
         // Create notification element
         const notificationEl = document.createElement('div');
         notificationEl.className = `notification notification-${notification.type} fixed top-4 right-4 z-50 max-w-md p-4 rounded-lg shadow-lg`;
-        
+
         const iconClass = {
             success: '✅',
             warning: '⚠️',
@@ -460,13 +491,13 @@ export class PortfolioManager {
     private makeCounterOffer(egiId: number, currentHighestBid: number): void {
         // Calculate suggested counter-offer (10% higher than current highest bid)
         const suggestedAmount = Math.ceil(currentHighestBid * 1.1);
-        
+
         console.log(`🎯 Opening counter-offer modal for EGI ${egiId} with suggested amount: €${suggestedAmount}`);
-        
+
         // Open the reservation modal
         const modal = initReservationModal(egiId);
         modal.open();
-        
+
         // Pre-fill the offer amount after modal opens
         setTimeout(() => {
             this.setModalOfferAmount(suggestedAmount);
@@ -481,11 +512,11 @@ export class PortfolioManager {
         if (offerInput) {
             offerInput.value = amount.toString();
             offerInput.focus();
-            
+
             // Trigger input event to update any computed values (like ALGO equivalent)
             const event = new Event('input', { bubbles: true });
             offerInput.dispatchEvent(event);
-            
+
             console.log(`✅ Pre-filled offer amount: €${amount}`);
         } else {
             console.error('❌ Could not find offer input field in reservation modal');

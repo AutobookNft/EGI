@@ -11,26 +11,38 @@
 'showPurchasePrice' => false,
 'hideReserveButton' => false,
 'portfolioContext' => false,
+'portfolioOwner' => null,
+'creatorPortfolioContext' => false, // 🆕 Nuovo prop per Creator Portfolio
 ]) {{-- 🚀 Nuovo prop per context portfolio --}}
 
 @php
 // 🔥 HYPER MODE: Leggiamo direttamente dal database il campo hyper dell'EGI
 $isHyper = $egi->hyper ?? false;
+
 // 📦 Portfolio: calcolo stato outbid per applicare opacità e badge corretti
 $portfolioOutbid = false;
-if ($portfolioContext && auth()->check()) {
-    try {
-        // Ultima prenotazione dell'utente su questo EGI
-        $userLastReservation = $egi->reservations()
-            ->where('user_id', auth()->id())
-            ->orderByDesc('created_at')
-            ->first();
+if ($portfolioContext && $portfolioOwner) {
+try {
+// Ultima prenotazione del proprietario del portfolio su questo EGI
+$ownerLastReservation = $egi->reservations()
+->where('user_id', $portfolioOwner->id)
+->orderByDesc('created_at')
+->first();
 
-        $isWinning = $userLastReservation && $userLastReservation->is_current && $userLastReservation->status === 'active' && !$userLastReservation->superseded_by_id;
-        $portfolioOutbid = $userLastReservation && !$isWinning;
-    } catch (\Throwable $th) {
-        $portfolioOutbid = false;
-    }
+$isWinning = $ownerLastReservation && $ownerLastReservation->is_current && $ownerLastReservation->status === 'active' &&
+!$ownerLastReservation->superseded_by_id;
+$portfolioOutbid = $ownerLastReservation && !$isWinning;
+} catch (\Throwable $th) {
+$portfolioOutbid = false;
+}
+}
+
+// 🎨 Creator Portfolio Context: gestione badge "DA ATTIVARE" per opere non attivate
+$showActivationBadge = false;
+if ($creatorPortfolioContext && $portfolioOwner) {
+// Nel Creator Portfolio, se l'EGI non ha prenotazioni attive, mostra "DA ATTIVARE"
+$hasActiveReservations = $egi->reservations()->where('is_current', true)->exists();
+$showActivationBadge = !$hasActiveReservations;
 }
 @endphp
 
@@ -137,60 +149,114 @@ if ($portfolioContext && auth()->check()) {
         {{-- 🚀 NEW: Context-aware badges per portfolio --}}
         @elseif ($portfolioContext)
         @php
-        // Determina lo status della prenotazione per questo EGI nel contesto portfolio
-        $userReservation = $egi->reservations()
-            ->where('user_id', auth()->id())
-            ->orderByDesc('created_at')
-            ->first();
-        $isWinning = $userReservation && $userReservation->is_current && $userReservation->status === 'active' && !$userReservation->superseded_by_id;
+        // CREATOR PORTFOLIO: Logica speciale per il portfolio del creator
+        if ($creatorPortfolioContext) {
+        // Nel Creator Portfolio, controlla se l'EGI ha prenotazioni attive (da chiunque)
+        $hasAnyActiveReservations = $egi->reservations()->where('is_current', true)->exists();
+        $isWinning = $hasAnyActiveReservations; // Se ha prenotazioni = "attivato"
+        } else {
+        // COLLECTOR PORTFOLIO: Logica normale per altri portfolio
+        $ownerReservation = $egi->reservations()
+        ->where('user_id', $portfolioOwner->id)
+        ->orderByDesc('created_at')
+        ->first();
+        $isWinning = $ownerReservation && $ownerReservation->is_current && $ownerReservation->status === 'active' &&
+        !$ownerReservation->superseded_by_id;
+        }
         @endphp
 
         @if ($isWinning)
-            @if ($isHyper)
-            {{-- Badge composto HYPER + OFFERTA VINCENTE (portfolio, winning) --}}
-            <div class="badge-composite" data-portfolio-badge="1" title="{{ __('egi.badge.winning_bid') }}" data-lbl-winning="{{ __('egi.badge.winning_bid') }}" data-lbl-not-owned="{{ __('egi.badge.not_owned') }}">
-                <div class="hyper-overlay">⭐ HYPER ⭐</div>
-                <div class="owned-base">
-                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                    </svg>
-                    {{ __('egi.badge.winning_bid') }}
-                </div>
-            </div>
-            @else
-            <span data-portfolio-badge="1" data-lbl-winning="{{ __('egi.badge.winning_bid') }}" data-lbl-not-owned="{{ __('egi.badge.not_owned') }}"
-                class="absolute inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold text-white rounded-full right-2 top-2 bg-green-500/90 backdrop-blur-sm"
-                title="You have the winning bid for this EGI">
+        @if ($isHyper)
+        {{-- Badge composto HYPER + (ATTIVATO nel Creator Portfolio / OFFERTA VINCENTE negli altri) --}}
+        <div class="badge-composite" data-portfolio-badge="1"
+            title="{{ $creatorPortfolioContext ? __('egi.badge.activated') : __('egi.badge.winning_bid') }}"
+            data-lbl-winning="{{ $creatorPortfolioContext ? __('egi.badge.activated') : __('egi.badge.winning_bid') }}"
+            data-lbl-not-owned="{{ $creatorPortfolioContext && $showActivationBadge ? __('egi.badge.to_activate') : __('egi.badge.not_owned') }}">
+            <div class="hyper-overlay">⭐ HYPER ⭐</div>
+            <div class="owned-base">
                 <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                    @if($creatorPortfolioContext)
+                    {{-- Icona "Attivato" (check con cerchio) --}}
                     <path fill-rule="evenodd"
                         d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
                         clip-rule="evenodd" />
+                    @else
+                    {{-- Icona "Offerta Vincente" originale --}}
+                    <path fill-rule="evenodd"
+                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                        clip-rule="evenodd" />
+                    @endif
                 </svg>
-                {{ __('egi.badge.winning_bid') }}
-            </span>
-            @endif
-        @else
-        @if ($isHyper)
-        {{-- Badge composto HYPER + NON POSSEDUTO (portfolio, outbid) --}}
-    <div class="badge-composite" data-portfolio-badge="1" title="{{ __('egi.badge.not_owned') }}" data-lbl-winning="{{ __('egi.badge.winning_bid') }}" data-lbl-not-owned="{{ __('egi.badge.not_owned') }}">
-            <div class="hyper-overlay">⭐ HYPER ⭐</div>
-            <div class="not-owned-base">
-                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M10 9a3 3 0 11-6 0 3 3 0 016 0zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
-                </svg>
-                {{ __('egi.badge.not_owned') }}
+                {{ $creatorPortfolioContext ? __('egi.badge.activated') : __('egi.badge.winning_bid') }}
             </div>
         </div>
         @else
-    <span data-portfolio-badge="1" data-lbl-winning="{{ __('egi.badge.winning_bid') }}" data-lbl-not-owned="{{ __('egi.badge.not_owned') }}"
-            class="absolute inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold text-white rounded-full right-2 top-2 bg-red-600/90 backdrop-blur-sm"
-            title="{{ __('egi.badge.not_owned') }}">
+        <span data-portfolio-badge="1"
+            data-lbl-winning="{{ $creatorPortfolioContext ? __('egi.badge.activated') : __('egi.badge.winning_bid') }}"
+            data-lbl-not-owned="{{ $creatorPortfolioContext && $showActivationBadge ? __('egi.badge.to_activate') : __('egi.badge.not_owned') }}"
+            class="absolute inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold text-white rounded-full right-2 top-2 bg-green-500/90 backdrop-blur-sm"
+            title="{{ $creatorPortfolioContext ? __('egi.badge.activated') : __('egi.badge.winning_bid') }}">
             <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                @if($creatorPortfolioContext)
+                {{-- Icona "Attivato" (check con cerchio) --}}
+                <path fill-rule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                    clip-rule="evenodd" />
+                @else
+                {{-- Icona "Offerta Vincente" originale --}}
+                <path fill-rule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                    clip-rule="evenodd" />
+                @endif
+            </svg>
+            {{ $creatorPortfolioContext ? __('egi.badge.activated') : __('egi.badge.winning_bid') }}
+        </span>
+        @endif
+        @else
+        @if ($isHyper)
+        {{-- Badge composto HYPER + (DA ATTIVARE / NON POSSEDUTO) --}}
+        <div class="badge-composite" data-portfolio-badge="1"
+            title="{{ $creatorPortfolioContext && $showActivationBadge ? __('egi.badge.to_activate') : __('egi.badge.not_owned') }}"
+            data-lbl-winning="{{ __('egi.badge.winning_bid') }}"
+            data-lbl-not-owned="{{ $creatorPortfolioContext && $showActivationBadge ? __('egi.badge.to_activate') : __('egi.badge.not_owned') }}">
+            <div class="hyper-overlay">⭐ HYPER ⭐</div>
+            <div class="not-owned-base">
+                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                    @if($creatorPortfolioContext && $showActivationBadge)
+                    {{-- Icona "Attivazione" (play/start) --}}
+                    <path fill-rule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8.108v3.784a1 1 0 001.555.94l3.108-1.892a1 1 0 000-1.688L9.555 7.168z"
+                        clip-rule="evenodd" />
+                    @else
+                    {{-- Icona "Non Posseduto" (persona) --}}
+                    <path fill-rule="evenodd" d="M10 9a3 3 0 11-6 0 3 3 0 016 0zm-7 9a7 7 0 1114 0H3z"
+                        clip-rule="evenodd" />
+                    @endif
+                </svg>
+                {{ $creatorPortfolioContext && $showActivationBadge ? __('egi.badge.to_activate') :
+                __('egi.badge.not_owned') }}
+            </div>
+        </div>
+        @else
+        <span data-portfolio-badge="1" data-lbl-winning="{{ __('egi.badge.winning_bid') }}"
+            data-lbl-not-owned="{{ $creatorPortfolioContext && $showActivationBadge ? __('egi.badge.to_activate') : __('egi.badge.not_owned') }}"
+            class="absolute inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold text-white rounded-full right-2 top-2 {{ $creatorPortfolioContext && $showActivationBadge ? 'bg-blue-600/90' : 'bg-red-600/90' }} backdrop-blur-sm"
+            title="{{ $creatorPortfolioContext && $showActivationBadge ? __('egi.badge.to_activate') : __('egi.badge.not_owned') }}">
+            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                @if($creatorPortfolioContext && $showActivationBadge)
+                {{-- Icona "Attivazione" (play/start) --}}
+                <path fill-rule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8.108v3.784a1 1 0 001.555.94l3.108-1.892a1 1 0 000-1.688L9.555 7.168z"
+                    clip-rule="evenodd" />
+                @else
+                {{-- Icona "Non Posseduto" (warning) --}}
                 <path fill-rule="evenodd"
                     d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
                     clip-rule="evenodd" />
+                @endif
             </svg>
-            {{ __('egi.badge.not_owned') }}
+            {{ $creatorPortfolioContext && $showActivationBadge ? __('egi.badge.to_activate') :
+            __('egi.badge.not_owned') }}
         </span>
         @endif
         @endif
@@ -305,16 +371,15 @@ if ($portfolioContext && auth()->check()) {
             $highestPriorityReservation = $reservationService->getHighestPriorityReservation($egi);
             $displayPrice = $egi->price; // Prezzo base di default
             $displayUser = null;
-            
+
             // Se c'è una prenotazione attiva, uso il suo prezzo e utente
             if ($highestPriorityReservation && $highestPriorityReservation->status === 'active') {
-                $displayPrice = $highestPriorityReservation->offer_amount_algo ?? $egi->price;
-                $displayUser = $highestPriorityReservation->user;
+            $displayPrice = $highestPriorityReservation->offer_amount_algo ?? $egi->price;
+            $displayUser = $highestPriorityReservation->user;
             }
             @endphp
-            
-            <div
-                class="p-3 border rounded-xl border-green-500/30 bg-gradient-to-r from-green-500/20 to-emerald-500/20">
+
+            <div class="p-3 border rounded-xl border-green-500/30 bg-gradient-to-r from-green-500/20 to-emerald-500/20">
                 {{-- Prezzo e icona --}}
                 <div class="flex items-center justify-between mb-2">
                     <div class="flex items-center gap-2">
@@ -327,9 +392,10 @@ if ($portfolioContext && auth()->check()) {
                         </div>
                         <span class="text-xs font-medium text-green-300">
                             @if ($highestPriorityReservation)
-                                {{ $highestPriorityReservation->type === 'weak' ? __('egi.reservation.fegi_reservation') : __('egi.reservation.highest_bid') }}
+                            {{ $highestPriorityReservation->type === 'weak' ? __('egi.reservation.fegi_reservation') :
+                            __('egi.reservation.highest_bid') }}
                             @else
-                                {{ __('egi.price.price') }}
+                            {{ __('egi.price.price') }}
                             @endif
                         </span>
                     </div>
@@ -338,7 +404,7 @@ if ($portfolioContext && auth()->check()) {
                         <span class="ml-1 text-xs text-green-300">ALGO</span>
                     </div>
                 </div>
-                
+
                 {{-- Utente/Codice prenotazione più alta (STRONG vs WEAK) --}}
                 @if ($displayUser || $highestPriorityReservation)
                 @php
@@ -347,24 +413,29 @@ if ($portfolioContext && auth()->check()) {
                 $textColor = $isWeakReservation ? 'text-amber-200' : 'text-green-200';
                 $borderColor = $isWeakReservation ? 'border-amber-500/20' : 'border-green-500/20';
                 @endphp
-                
+
                 <div class="flex items-center gap-2 pt-2 border-t {{ $borderColor }}">
                     <div class="flex items-center justify-center flex-shrink-0 w-4 h-4 {{ $badgeColor }} rounded-full">
                         @if ($isWeakReservation)
                         <svg class="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z" clip-rule="evenodd" />
+                            <path fill-rule="evenodd"
+                                d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"
+                                clip-rule="evenodd" />
                         </svg>
                         @else
                         <svg class="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                                clip-rule="evenodd" />
                         </svg>
                         @endif
                     </div>
                     <span class="text-xs {{ $textColor }} truncate">
                         @if ($isWeakReservation)
-                            {{ __('egi.reservation.weak_bidder') }}: <span class="font-semibold">{{ $highestPriorityReservation->fegi_code ?? 'FG#******' }}</span>
+                        {{ __('egi.reservation.weak_bidder') }}: <span class="font-semibold">{{
+                            $highestPriorityReservation->fegi_code ?? 'FG#******' }}</span>
                         @else
-                            {{ __('egi.reservation.strong_bidder') }}: <span class="font-semibold">{{ $displayUser->name }}</span>
+                        {{ __('egi.reservation.activator') }}: <span class="font-semibold">{{ $displayUser->name
+                            }}</span>
                         @endif
                     </span>
                 </div>

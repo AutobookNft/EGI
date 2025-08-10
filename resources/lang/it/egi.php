@@ -44,7 +44,9 @@ return [
         'media_content' => 'Contenuto Media',
         'winning_bid' => 'OFFERTA VINCENTE',
         'outbid' => 'SUPERATO',
-    'not_owned' => 'NON POSSEDUTO',
+        'not_owned' => 'NON POSSEDUTO',
+        'to_activate' => 'DA ATTIVARE',
+        'activated' => 'ATTIVATO',
     ],
 
     // Titoli
@@ -78,6 +80,8 @@ return [
         'fegi_reservation' => 'Prenotazione FEGI',
         'strong_bidder' => 'Miglior Offerente',
         'weak_bidder' => 'Codice FEGI',
+        'activator' => 'Attivatore',
+        'activated_by' => 'Attivato da',
     ],
 
     // Stati

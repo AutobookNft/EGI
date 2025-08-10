@@ -28,6 +28,7 @@ use Illuminate\Support\Facades\View;
 use Ultra\EgiModule\Contracts\UserRoleServiceInterface;
 use Ultra\EgiModule\Contracts\WalletServiceInterface;
 use Ultra\ErrorManager\Interfaces\ErrorManagerInterface;
+use App\Services\CollectorCarouselService;
 use Ultra\UltraLogManager\UltraLogManager;
 use Laravel\Fortify\Fortify;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
@@ -55,6 +56,7 @@ class AppServiceProvider extends ServiceProvider
     {
 
         $this->app->singleton(IconRepository::class);
+        $this->app->singleton(CollectorCarouselService::class);
 
         // Singletone di Ultralogmanager
         // $this->app->singleton(UltraLogManager::class);

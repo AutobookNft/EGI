@@ -6,6 +6,7 @@ use App\Models\Collection;
 use App\Models\Egi;
 use App\Models\Epp;
 use App\Models\User; // Importa il modello User
+use App\Services\CollectorCarouselService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -23,6 +24,14 @@ use Illuminate\View\View;
  * @schema-type WebPage
  */
 class HomeController extends Controller {
+    
+    protected CollectorCarouselService $collectorCarouselService;
+
+    public function __construct(CollectorCarouselService $collectorCarouselService)
+    {
+        $this->collectorCarouselService = $collectorCarouselService;
+    }
+
     /**
      * Visualizza la homepage con contenuti dinamici
      *
@@ -43,6 +52,7 @@ class HomeController extends Controller {
         $latestCollections = $this->getLatestCollections($featuredCollections->pluck('id'));
         $highlightedEpps = $this->getHighlightedEpps();
         $featuredCreators = $this->getFeaturedCreators(); // Nuovo: recupera i Creator
+        $topCollectors = $this->collectorCarouselService->getTopCollectors(10); // Nuovo: top collectors
 
         // Dati impatto ambientale - valore hardcoded per MVP
         // TODO: In futuro, recuperare da database o API dedicata
@@ -55,6 +65,7 @@ class HomeController extends Controller {
             'highlightedEpps' => $highlightedEpps,
             'totalPlasticRecovered' => $totalPlasticRecovered,
             'featuredCreators' => $featuredCreators, // Nuovo: passa i Creator alla vista
+            'topCollectors' => $topCollectors, // Nuovo: passa i Top Collectors alla vista
         ]);
     }
 

@@ -286,7 +286,23 @@
             <div class="egi-grid" id="egis-container">
                 @forelse($collection->egis as $index => $egi)
                 <div class="egi-item card-hover">
-                    <x-egi-card :egi="$egi" :collection="$collection" />
+                    @php
+                    // Determina se l'utente corrente è il creator di questa collezione
+                    $isCreatorViewing = false;
+                    if (auth()->check()) {
+                    $isCreatorViewing = auth()->id() === $collection->creator_id;
+                    } elseif (session('connected_user_id')) {
+                    $isCreatorViewing = session('connected_user_id') === $collection->creator_id;
+                    }
+
+                    // TEMPORARY: Forziamo per test se è la collezione del creator ID 4
+                    if ($collection->creator_id === 4) {
+                    $isCreatorViewing = true;
+                    }
+                    @endphp
+                    <x-egi-card :egi="$egi" :collection="$collection" :portfolioContext="$isCreatorViewing"
+                        :portfolioOwner="$isCreatorViewing ? $collection->creator : null"
+                        :creatorPortfolioContext="$isCreatorViewing" />
                 </div>
                 @empty
                 {{-- Stato Vuoto Migliorato --}}

@@ -7,7 +7,7 @@
  * @purpose Collector card with NFT-style mobile layout, based on creator-card
  --}}
 
-@props(['collector', 'imageType' => 'card', 'displayType' => 'default'])
+@props(['collector', 'imageType' => 'card', 'displayType' => 'default', 'rank' => null])
 
 @php
     $logo = config('app.logo');
@@ -41,6 +41,21 @@
             <img src="{{ $imageUrl }}" alt="{{ $collector->name }}"
                 class="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105" loading="lazy"
                 decoding="async">
+
+            {{-- Rank Badge (if provided) --}}
+            @if($rank)
+                <div class="absolute left-3 bottom-3 z-10">
+                    <div class="flex items-center justify-center w-8 h-8 rounded-full shadow-lg text-white text-sm font-bold
+                        {{ $rank <= 3 
+                            ? ($rank == 1 ? 'bg-gradient-to-r from-yellow-400 to-yellow-600' : 
+                               ($rank == 2 ? 'bg-gradient-to-r from-gray-300 to-gray-500' : 
+                                'bg-gradient-to-r from-amber-500 to-amber-700'))
+                            : 'bg-gradient-to-r from-blue-500 to-blue-700'
+                        }}">
+                        {{ $rank }}
+                    </div>
+                </div>
+            @endif
 
             {{-- Corner Badge "COLLECTOR" --}}
             <div class="absolute left-3 top-3">

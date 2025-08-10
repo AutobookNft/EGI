@@ -28,8 +28,8 @@ Route::prefix('creator')->name('creator.')->group(function () {
         ->where(['id' => '[0-9]+', 'collection' => '[0-9]+']) // Validiamo entrambi come numerici
         ->name('collection.show');
 
-    // Sezioni under construction
-    Route::get('/{id}/portfolio', [CreatorHomeController::class, 'underConstruction'])
+    // Portfolio reale
+    Route::get('/{id}/portfolio', [CreatorHomeController::class, 'portfolio'])
         ->where('id', '[0-9]+')
         ->name('portfolio');
 

@@ -14,25 +14,100 @@ use Illuminate\View\View;
  * 🛡️ Security: Public access with privacy controls
  * 🧱 Core Logic: Display creator's work with progressive enhancement
  *
+ * Architecture Note:
+ * - Creator Portfolio = EGI CREATI dal creator (con status vendite/prenotazioni)
+ * - Collection Portfolio = EGI ACQUISTATI dal creator (quando agisce da collector)
+ * - Un Creator contiene naturalmente le funzionalità di Collector (usertype hierarchical)
+ *
  * @package App\Http\Controllers
  * @author Padmin D. Curtis (AI Partner OS2.0-Compliant) for Fabio Cherici
- * @version 1.0.0 (FlorenceEGI MVP Creator Showcase)
- * @date 2025-06-29
+ * @version 2.0.0 (Usertype Architecture Compliant)
+ * @date 2025-08-10
  */
-class CreatorHomeController extends Controller
-{
+class CreatorHomeController extends Controller {
+    /**
+     * Portfolio del Creator: mostra tutti gli EGI CREATI dal creator
+     *
+     * IMPORTANTE: Questo portfolio mostra le OPERE CREATE, non acquistate
+     * - Mostra EGI delle collezioni dove il creator è il 'creator_id'
+     * - Include statistiche di vendita/prenotazioni per ogni EGI
+     * - Differente dal portfolio Collector che mostra EGI acquistati
+     */
+    public function portfolio(int $id, Request $request): View {
+        $creator = User::findOrFail($id);
+        if (!$creator->hasRole('creator')) {
+            abort(404);
+        }
+
+        $query = $request->input('query');
+        $collection_filter = $request->input('collection');
+        $sort = $request->input('sort', 'latest');
+
+        // Recupera tutti gli EGI pubblicati delle collezioni CREATE dal creator
+        // Nota: creator_id identifica CHI HA CREATO la collezione, non chi la possiede
+        $egis = Egi::with(['collection', 'reservations' => function ($q) {
+            $q->where('is_current', true); // Solo prenotazioni attive
+        }])
+            ->whereHas('collection', function ($q) use ($creator) {
+                $q->where('creator_id', $creator->id); // Collection create dal creator
+            })
+            ->where('is_published', true)
+            ->when($query, function ($q) use ($query) {
+                $q->where('title', 'like', "%$query%");
+            })
+            ->when($collection_filter, function ($q) use ($collection_filter) {
+                $q->where('collection_id', $collection_filter);
+            });
+
+        // Ordinamento
+        switch ($sort) {
+            case 'title':
+                $egis = $egis->orderBy('title');
+                break;
+            case 'price_high':
+                $egis = $egis->orderByDesc('price');
+                break;
+            case 'price_low':
+                $egis = $egis->orderBy('price');
+                break;
+            case 'latest':
+            default:
+                $egis = $egis->orderByDesc('created_at');
+                break;
+        }
+
+        $egis = $egis->get();
+
+        // Statistiche del Creator Portfolio (opere CREATE, non acquistate)
+        $stats = [
+            'total_egis' => $egis->count(),
+            'total_collections' => $creator->collections()->where('creator_id', $creator->id)->count(),
+            'total_value_eur' => $egis->sum('price'),
+            'total_reservations' => $egis->sum(function ($egi) {
+                return $egi->reservations->count();
+            }),
+            'highest_offer' => $egis->flatMap->reservations->max('offer_amount_eur') ?? 0,
+            'available_egis' => $egis->filter(function ($egi) {
+                return $egi->reservations->isEmpty(); // EGI senza prenotazioni
+            })->count(),
+            'reserved_egis' => $egis->filter(function ($egi) {
+                return $egi->reservations->isNotEmpty(); // EGI con prenotazioni
+            })->count(),
+        ];
+
+        return view('creator.portfolio', compact('creator', 'egis', 'stats', 'query', 'collection_filter', 'sort'));
+    }
     /**
      * @Oracode Method: Display Creator Home Page
      * 🎯 Purpose: Show creator's main showcase page
      * 📤 Output: Creator home view with stats and featured content
      */
-    public function home(int $id): View
-    {
-        $creator = User::with(['collections' => function($query) {
-                $query->where('is_published', true)
-                      ->latest()
-                      ->take(6);
-            }])
+    public function home(int $id): View {
+        $creator = User::with(['collections' => function ($query) {
+            $query->where('is_published', true)
+                ->latest()
+                ->take(6);
+        }])
             ->findOrFail($id);
 
         // Verifica se l'utente è un creator
@@ -43,7 +118,7 @@ class CreatorHomeController extends Controller
         // Stats del creator con supporto per animazioni
         $stats = [
             'total_collections' => $creator->collections()->count(),
-            'total_egis' => Egi::whereHas('collection', function($q) use ($creator) {
+            'total_egis' => Egi::whereHas('collection', function ($q) use ($creator) {
                 $q->where('user_id', $creator->id);
             })->count(),
             'total_likes' => 0, // TODO: Implementare quando avremo il sistema di likes
@@ -56,9 +131,9 @@ class CreatorHomeController extends Controller
 
         $featuredEgis = Egi::with(['collection'])
             ->where('is_published', true) // <-- Riga corretta
-            ->whereHas('collection', function($q) use ($creator) {
+            ->whereHas('collection', function ($q) use ($creator) {
                 $q->where('creator_id', $creator->id)
-                ->where('is_published', true);
+                    ->where('is_published', true);
             })
             ->latest()
             ->take(8)
@@ -76,8 +151,7 @@ class CreatorHomeController extends Controller
      * @param Request $request La richiesta HTTP contenente i parametri di filtro.
      * @return View La vista 'creators.index' con i dati dei Creator.
      */
-    public function index(Request $request): View
-    {
+    public function index(Request $request): View {
         $query = $request->input('query');
         $category = $request->input('category'); // Esempio di filtro per categoria
         $sort = $request->input('sort', 'latest'); // Ordine di default: 'latest'
@@ -88,7 +162,7 @@ class CreatorHomeController extends Controller
             // ->where('is_active', true)
             ->when($query, function ($q) use ($query) {
                 $q->where('name', 'like', '%' . $query . '%')
-                  ->orWhere('bio', 'like', '%' . $query . '%'); // Cerca anche nella bio
+                    ->orWhere('bio', 'like', '%' . $query . '%'); // Cerca anche nella bio
             })
             ->when($category, function ($q) use ($category) {
                 // TODO: Implementare logica di filtro per categoria.
@@ -116,7 +190,7 @@ class CreatorHomeController extends Controller
                     case 'random':
                         $q->inRandomOrder(); // Ordine casuale
                         break;
-                    // TODO: Aggiungere altri criteri di ordinamento se necessari (es. per numero di collezioni, popolarità)
+                        // TODO: Aggiungere altri criteri di ordinamento se necessari (es. per numero di collezioni, popolarità)
                 }
             }, function ($q) {
                 $q->latest(); // Default se nessun sort è specificato
@@ -143,8 +217,7 @@ class CreatorHomeController extends Controller
      * 🎯 Purpose: Redirect to the collections index, filtered by this creator.
      * 📤 Output: A redirect response.
      */
-    public function collections(int $id): \Illuminate\Http\RedirectResponse
-    {
+    public function collections(int $id): \Illuminate\Http\RedirectResponse {
         $creator = User::findOrFail($id);
 
         if (!$creator->hasRole('creator')) {
@@ -158,13 +231,12 @@ class CreatorHomeController extends Controller
         return redirect()->route('collections.index', ['creator' => $creator->id]);
     }
 
-     /**
+    /**
      * @Oracode Method: Show Single Collection
      * 🎯 Purpose: Display specific collection details
      * 📤 Output: Redirect to existing collection show route
      */
-    public function showCollection(int $id)
-    {
+    public function showCollection(int $id) {
         $creator = User::findOrFail($id);
 
         // La query ora cerca per ID della collezione, garantendo anche che appartenga al creator corretto.
@@ -182,8 +254,7 @@ class CreatorHomeController extends Controller
      * 🎯 Purpose: Placeholder for future sections
      * 📤 Output: Coming soon page with back navigation
      */
-    public function underConstruction(int $id): View
-    {
+    public function underConstruction(int $id): View {
         $creator = User::findOrFail($id);
 
         if (!$creator->hasRole('creator')) {

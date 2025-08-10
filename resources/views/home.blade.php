@@ -17,6 +17,11 @@
             bgClass="bg-gray-900" marginClass="mb-12" />
     </x-slot>
 
+    {{-- Carousel Top Collectors - Nuovo slot --}}
+    <x-slot name="belowHeroContent_0_5">
+        <x-collector-carousel :collectors="$topCollectors" />
+    </x-slot>
+
     {{-- Nuovo slot per il carousel dei Creator --}}
     <x-slot name="belowHeroContent_1">
         <x-collections-carousel :collections="$featuredCollections" title="Collezioni in Evidenza" bgClass="bg-gray-900"

@@ -83,6 +83,12 @@
                 {{ $belowHeroContent ?? '' }}
             </div>
 
+            {{-- Top Collectors Carousel --}}
+            <div class="below-hero-content relative z-10 mb-12 ml-10 mr-10 mt-12 w-11/12" role="region"
+                aria-label="Top Collectors Carousel"> 
+                {{ $belowHeroContent_0_5 ?? '' }}
+            </div>
+
             {{-- Contenuto sotto l'hero --}}
             <div class="below-hero-content relative z-10 mb-12 ml-10 mr-10 mt-12 w-11/12" role="region"
                 aria-label="{{ __('guest_layout.hero_featured_content_aria_label') }}"> {{-- Aggiunto z-10 e w-full --}}

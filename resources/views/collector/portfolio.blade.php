@@ -7,7 +7,7 @@
     {{-- Schema.org Markup --}}
     <x-slot name="schema">
         <script type="application/ld+json">
-        {
+            {
             "@context": "https://schema.org",
             "@type": "CollectionPage",
             "mainEntity": {
@@ -43,18 +43,18 @@
             {{-- Stats Bar --}}
             <div class="mt-6 grid grid-cols-3 gap-6 text-center">
                 <div>
-                    <span
-                        class="text-oro-fiorentino block text-2xl font-bold">{{ $stats['total_owned_egis'] ?? 0 }}</span>
+                    <span class="text-oro-fiorentino block text-2xl font-bold">{{ $stats['total_owned_egis'] ?? 0
+                        }}</span>
                     <span class="text-sm text-gray-300">{{ __('collector.portfolio.total_egis') }}</span>
                 </div>
                 <div>
-                    <span
-                        class="text-oro-fiorentino block text-2xl font-bold">{{ $stats['total_bids_made'] ?? 0 }}</span>
+                    <span class="text-oro-fiorentino block text-2xl font-bold">{{ $stats['total_bids_made'] ?? 0
+                        }}</span>
                     <span class="text-sm text-gray-300">{{ __('collector.portfolio.total_bids') }}</span>
                 </div>
                 <div>
-                    <span
-                        class="text-oro-fiorentino block text-2xl font-bold">€{{ $stats['total_spent_eur'] ?? 0 }}</span>
+                    <span class="text-oro-fiorentino block text-2xl font-bold">€{{ $stats['total_spent_eur'] ?? 0
+                        }}</span>
                     <span class="text-sm text-gray-300">{{ __('collector.portfolio.total_value') }}</span>
                 </div>
             </div>
@@ -132,10 +132,10 @@
                                 class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-white focus:border-purple-400 focus:ring-purple-400">
                                 <option value="">{{ __('collector.portfolio.all_collections') }}</option>
                                 @foreach ($availableCollections as $collection)
-                                    <option value="{{ $collection->id }}"
-                                        {{ $collection_filter == $collection->id ? 'selected' : '' }}>
-                                        {{ $collection->collection_name }}
-                                    </option>
+                                <option value="{{ $collection->id }}" {{ $collection_filter==$collection->id ?
+                                    'selected' : '' }}>
+                                    {{ $collection->collection_name }}
+                                </option>
                                 @endforeach
                             </select>
                             <input type="hidden" name="query" value="{{ $query }}">
@@ -153,10 +153,10 @@
                                 class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-white focus:border-purple-400 focus:ring-purple-400">
                                 <option value="">{{ __('collector.portfolio.all_creators') }}</option>
                                 @foreach ($availableCreators as $creator)
-                                    <option value="{{ $creator->id }}"
-                                        {{ $creator_filter == $creator->id ? 'selected' : '' }}>
-                                        {{ $creator->name }}
-                                    </option>
+                                <option value="{{ $creator->id }}" {{ $creator_filter==$creator->id ? 'selected' : ''
+                                    }}>
+                                    {{ $creator->name }}
+                                </option>
                                 @endforeach
                             </select>
                             <input type="hidden" name="query" value="{{ $query }}">
@@ -172,13 +172,13 @@
                             onchange="this.submit()">
                             <select name="sort"
                                 class="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-white focus:border-purple-400 focus:ring-purple-400">
-                                <option value="latest" {{ $sort == 'latest' ? 'selected' : '' }}>
+                                <option value="latest" {{ $sort=='latest' ? 'selected' : '' }}>
                                     {{ __('collector.portfolio.sort_latest') }}</option>
-                                <option value="title" {{ $sort == 'title' ? 'selected' : '' }}>
+                                <option value="title" {{ $sort=='title' ? 'selected' : '' }}>
                                     {{ __('collector.portfolio.sort_title') }}</option>
-                                <option value="price_high" {{ $sort == 'price_high' ? 'selected' : '' }}>
+                                <option value="price_high" {{ $sort=='price_high' ? 'selected' : '' }}>
                                     {{ __('collector.portfolio.sort_price_high') }}</option>
-                                <option value="price_low" {{ $sort == 'price_low' ? 'selected' : '' }}>
+                                <option value="price_low" {{ $sort=='price_low' ? 'selected' : '' }}>
                                     {{ __('collector.portfolio.sort_price_low') }}</option>
                             </select>
                             <input type="hidden" name="query" value="{{ $query }}">
@@ -211,161 +211,153 @@
 
             {{-- EGI Grid/List --}}
             @if ($purchasedEgis->count() > 0)
-                @if ($view == 'grid')
-                    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                        @foreach ($purchasedEgis as $egi)
-                            <x-egi-card :egi="$egi" :collection="$egi->collection" :portfolioContext="true" :hideReserveButton="false" />
-                        @endforeach
+            @if ($view == 'grid')
+            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                @foreach ($purchasedEgis as $egi)
+                <x-egi-card :egi="$egi" :collection="$egi->collection" :portfolioContext="true"
+                    :portfolioOwner="$collector" :hideReserveButton="false" />
+                @endforeach
+            </div>
+            @else
+            {{-- List View --}}
+            <div class="space-y-4">
+                @foreach ($purchasedEgis as $egi)
+                <article
+                    class="group flex overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-lg transition-all duration-300 hover:border-gray-200 hover:shadow-xl">
+                    <!-- Image -->
+                    <div
+                        class="relative h-32 w-32 flex-shrink-0 overflow-hidden bg-gradient-to-br from-gray-800 to-gray-900">
+                        @if ($egi->main_image_url)
+                        <img src="{{ $egi->main_image_url }}" alt="{{ $egi->title }}"
+                            class="h-full w-full bg-gray-800 object-contain transition-transform duration-300 group-hover:scale-110">
+                        @else
+                        <div
+                            class="flex h-full w-full items-center justify-center bg-gradient-to-br from-purple-100 to-blue-100">
+                            <svg class="h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        @endif
+
+                        <!-- Owned Badge -->
+                        <div class="absolute left-2 top-2">
+                            <span
+                                class="inline-flex items-center rounded-full bg-green-500/90 px-1.5 py-0.5 text-xs font-medium text-white backdrop-blur-sm">
+                                <svg class="mr-1 h-2.5 w-2.5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd"
+                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                                Owned
+                            </span>
+                        </div>
                     </div>
-                @else
-                    {{-- List View --}}
-                    <div class="space-y-4">
-                        @foreach ($purchasedEgis as $egi)
-                            <article
-                                class="group flex overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-lg transition-all duration-300 hover:border-gray-200 hover:shadow-xl">
-                                <!-- Image -->
-                                <div
-                                    class="relative h-32 w-32 flex-shrink-0 overflow-hidden bg-gradient-to-br from-gray-800 to-gray-900">
-                                    @if ($egi->main_image_url)
-                                        <img src="{{ $egi->main_image_url }}" alt="{{ $egi->title }}"
-                                            class="h-full w-full bg-gray-800 object-contain transition-transform duration-300 group-hover:scale-110">
-                                    @else
+
+                    <!-- Content -->
+                    <div class="flex-1 p-6">
+                        <div class="flex h-full items-start justify-between">
+                            <div class="min-w-0 flex-1">
+                                <!-- Title -->
+                                <h3
+                                    class="mb-2 text-xl font-bold text-gray-900 transition-colors duration-200 group-hover:text-purple-600">
+                                    <a href="{{ route('egis.show', $egi->id) }}" class="hover:underline">
+                                        {{ $egi->title }}
+                                    </a>
+                                </h3>
+
+                                <!-- Collection and Creator -->
+                                <div class="mb-3 flex flex-wrap items-center gap-4">
+                                    @if ($egi->collection)
+                                    <div class="flex items-center gap-2">
                                         <div
-                                            class="flex h-full w-full items-center justify-center bg-gradient-to-br from-purple-100 to-blue-100">
-                                            <svg class="h-12 w-12 text-gray-400" fill="none" stroke="currentColor"
-                                                viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    stroke-width="1.5"
-                                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                            class="flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-r from-purple-500 to-blue-500">
+                                            <svg class="h-2.5 w-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                <path
+                                                    d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" />
                                             </svg>
                                         </div>
+                                        <a href="{{ route('home.collections.show', $egi->collection->id) }}"
+                                            class="text-sm font-medium text-gray-600 transition-colors hover:text-purple-600">
+                                            {{ $egi->collection->collection_name }}
+                                        </a>
+                                    </div>
                                     @endif
 
-                                    <!-- Owned Badge -->
-                                    <div class="absolute left-2 top-2">
-                                        <span
-                                            class="inline-flex items-center rounded-full bg-green-500/90 px-1.5 py-0.5 text-xs font-medium text-white backdrop-blur-sm">
-                                            <svg class="mr-1 h-2.5 w-2.5" fill="currentColor" viewBox="0 0 20 20">
+                                    @if ($egi->collection && $egi->collection->creator)
+                                    <div class="flex items-center gap-2">
+                                        <div class="flex h-5 w-5 items-center justify-center rounded-full bg-gray-200">
+                                            <svg class="h-2.5 w-2.5 text-gray-600" fill="currentColor"
+                                                viewBox="0 0 20 20">
                                                 <path fill-rule="evenodd"
-                                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                    d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
                                                     clip-rule="evenodd" />
                                             </svg>
-                                            Owned
-                                        </span>
+                                        </div>
+                                        <span class="text-sm text-gray-500">{{ $egi->collection->creator->name }}</span>
                                     </div>
+                                    @endif
                                 </div>
 
-                                <!-- Content -->
-                                <div class="flex-1 p-6">
-                                    <div class="flex h-full items-start justify-between">
-                                        <div class="min-w-0 flex-1">
-                                            <!-- Title -->
-                                            <h3
-                                                class="mb-2 text-xl font-bold text-gray-900 transition-colors duration-200 group-hover:text-purple-600">
-                                                <a href="{{ route('egis.show', $egi->id) }}" class="hover:underline">
-                                                    {{ $egi->title }}
-                                                </a>
-                                            </h3>
-
-                                            <!-- Collection and Creator -->
-                                            <div class="mb-3 flex flex-wrap items-center gap-4">
-                                                @if ($egi->collection)
-                                                    <div class="flex items-center gap-2">
-                                                        <div
-                                                            class="flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-r from-purple-500 to-blue-500">
-                                                            <svg class="h-2.5 w-2.5 text-white" fill="currentColor"
-                                                                viewBox="0 0 20 20">
-                                                                <path
-                                                                    d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" />
-                                                            </svg>
-                                                        </div>
-                                                        <a href="{{ route('home.collections.show', $egi->collection->id) }}"
-                                                            class="text-sm font-medium text-gray-600 transition-colors hover:text-purple-600">
-                                                            {{ $egi->collection->collection_name }}
-                                                        </a>
-                                                    </div>
-                                                @endif
-
-                                                @if ($egi->collection && $egi->collection->creator)
-                                                    <div class="flex items-center gap-2">
-                                                        <div
-                                                            class="flex h-5 w-5 items-center justify-center rounded-full bg-gray-200">
-                                                            <svg class="h-2.5 w-2.5 text-gray-600" fill="currentColor"
-                                                                viewBox="0 0 20 20">
-                                                                <path fill-rule="evenodd"
-                                                                    d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                                                                    clip-rule="evenodd" />
-                                                            </svg>
-                                                        </div>
-                                                        <span
-                                                            class="text-sm text-gray-500">{{ $egi->collection->creator->name }}</span>
-                                                    </div>
-                                                @endif
-                                            </div>
-
-                                            <!-- Purchase Price -->
-                                            @if ($egi->pivot && $egi->pivot->offer_amount_eur)
-                                                <div
-                                                    class="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-green-50 to-emerald-50 px-3 py-2">
-                                                    <svg class="h-4 w-4 text-green-600" fill="currentColor"
-                                                        viewBox="0 0 20 20">
-                                                        <path fill-rule="evenodd"
-                                                            d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z"
-                                                            clip-rule="evenodd" />
-                                                    </svg>
-                                                    <span class="text-sm font-medium text-green-600">Purchased
-                                                        for</span>
-                                                    <span
-                                                        class="text-lg font-bold text-green-700">€{{ number_format($egi->pivot->offer_amount_eur, 2) }}</span>
-                                                </div>
-                                            @endif
-                                        </div>
-
-                                        <!-- View Button -->
-                                        <div class="ml-4 flex items-center">
-                                            <a href="{{ route('egis.show', $egi->id) }}"
-                                                class="inline-flex items-center rounded-full bg-gray-100 px-4 py-2 font-medium text-gray-700 transition-all duration-200 hover:bg-purple-100 hover:text-purple-700 group-hover:bg-purple-100 group-hover:text-purple-700">
-                                                <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor"
-                                                    viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2"
-                                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                                </svg>
-                                                View NFT
-                                            </a>
-                                        </div>
-                                    </div>
+                                <!-- Purchase Price -->
+                                @if ($egi->pivot && $egi->pivot->offer_amount_eur)
+                                <div
+                                    class="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-green-50 to-emerald-50 px-3 py-2">
+                                    <svg class="h-4 w-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd"
+                                            d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                    <span class="text-sm font-medium text-green-600">Purchased
+                                        for</span>
+                                    <span class="text-lg font-bold text-green-700">€{{
+                                        number_format($egi->pivot->offer_amount_eur, 2) }}</span>
                                 </div>
-                            </article>
-                        @endforeach
+                                @endif
+                            </div>
+
+                            <!-- View Button -->
+                            <div class="ml-4 flex items-center">
+                                <a href="{{ route('egis.show', $egi->id) }}"
+                                    class="inline-flex items-center rounded-full bg-gray-100 px-4 py-2 font-medium text-gray-700 transition-all duration-200 hover:bg-purple-100 hover:text-purple-700 group-hover:bg-purple-100 group-hover:text-purple-700">
+                                    <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                    View NFT
+                                </a>
+                            </div>
+                        </div>
                     </div>
-                @endif
+                </article>
+                @endforeach
+            </div>
+            @endif
 
-                {{-- TODO: Implement pagination for Collection-based results --}}
-                {{-- <div class="mt-8">
-                    {{ $purchasedEgis->withQueryString()->links() }}
-                </div> --}}
+            {{-- TODO: Implement pagination for Collection-based results --}}
+            {{-- <div class="mt-8">
+                {{ $purchasedEgis->withQueryString()->links() }}
+            </div> --}}
             @else
-                {{-- Empty State --}}
-                <div class="py-12 text-center">
-                    <svg class="mx-auto mb-6 h-24 w-24 text-gray-500" fill="none" stroke="currentColor"
-                        viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                    </svg>
-                    <h3 class="mb-4 text-2xl font-bold text-white">
-                        {{ __('collector.portfolio.empty_title') }}
-                    </h3>
-                    <p class="mb-6 text-gray-400">
-                        {{ __('collector.portfolio.empty_description') }}
-                    </p>
-                    <a href="{{ route('home.collections.index') }}"
-                        class="rounded-lg bg-purple-600 px-6 py-3 font-medium text-white transition-colors duration-200 hover:bg-purple-700">
-                        {{ __('collector.portfolio.discover_button') }}
-                    </a>
-                </div>
+            {{-- Empty State --}}
+            <div class="py-12 text-center">
+                <svg class="mx-auto mb-6 h-24 w-24 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+                <h3 class="mb-4 text-2xl font-bold text-white">
+                    {{ __('collector.portfolio.empty_title') }}
+                </h3>
+                <p class="mb-6 text-gray-400">
+                    {{ __('collector.portfolio.empty_description') }}
+                </p>
+                <a href="{{ route('home.collections.index') }}"
+                    class="rounded-lg bg-purple-600 px-6 py-3 font-medium text-white transition-colors duration-200 hover:bg-purple-700">
+                    {{ __('collector.portfolio.discover_button') }}
+                </a>
+            </div>
             @endif
         </div>
     </div>

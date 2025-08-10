@@ -306,7 +306,7 @@
                                     $isWeakReservation = $highestPriorityReservation && $highestPriorityReservation->type === 'weak';
                                     $textColor = $isWeakReservation ? 'text-amber-400' : 'text-emerald-400';
                                     @endphp
-                                    
+
                                     <div class="flex items-center gap-1 mt-2 text-xs {{ $textColor }}">
                                         @if ($isWeakReservation)
                                         <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
@@ -317,7 +317,7 @@
                                             <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
                                         </svg>
                                         @endif
-                                        
+
                                         @if ($isWeakReservation)
                                             {{ __('egi.reservation.by') }}: {{ $highestPriorityReservation->fegi_code ?? 'FG#******' }}
                                         @else
@@ -361,17 +361,17 @@
                             // Ottengo la prenotazione con priorità più alta per questo EGI
                             $reservationService = app('App\Services\ReservationService');
                             $highestPriorityReservation = $reservationService->getHighestPriorityReservation($egi);
-                            
+
                             // Determino il prezzo da mostrare
                             $displayPrice = $egi->price; // Prezzo base di default
                             $displayUser = null;
                             $priceLabel = __('egi.current_price');
-                            
+
                             // Se c'è una prenotazione attiva, uso il suo prezzo e utente
                             if ($highestPriorityReservation && $highestPriorityReservation->status === 'active') {
                                 $displayPrice = $highestPriorityReservation->offer_amount_algo ?? $egi->price;
                                 $displayUser = $highestPriorityReservation->user;
-                                
+
                                 // Label diversa per STRONG vs WEAK
                                 if ($highestPriorityReservation->type === 'weak') {
                                     $priceLabel = __('egi.reservation.fegi_reservation');
@@ -379,7 +379,7 @@
                                     $priceLabel = __('egi.reservation.highest_bid');
                                 }
                             }
-                            
+
                             $isForSale = $displayPrice && $displayPrice > 0 && !$egi->mint;
                             $canBeReserved = !$egi->mint && ($egi->is_published || (App\Helpers\FegiAuth::check() && App\Helpers\FegiAuth::id() === $collection->creator_id));
                         @endphp
@@ -392,7 +392,7 @@
                                         <span class="text-4xl font-bold text-white">{{ number_format($displayPrice, 2) }}</span>
                                         <span class="ml-2 text-lg font-medium text-gray-400">ALGO</span>
                                     </div>
-                                    
+
                                     {{-- Miglior offerente (STRONG vs WEAK) --}}
                                     @if($displayUser || $highestPriorityReservation)
                                     @php
@@ -402,7 +402,7 @@
                                     $iconBg = $isWeakReservation ? 'bg-amber-500' : 'bg-emerald-500';
                                     $textColor = $isWeakReservation ? 'text-amber-300' : 'text-emerald-300';
                                     @endphp
-                                    
+
                                     <div class="flex items-center justify-center gap-2 mt-3 p-2 {{ $bgColor }} border {{ $borderColor }} rounded-lg">
                                         <div class="flex items-center justify-center flex-shrink-0 w-5 h-5 {{ $iconBg }} rounded-full">
                                             @if ($isWeakReservation)

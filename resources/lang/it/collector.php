@@ -131,7 +131,33 @@ return [
     ],
 
     // Card Component
+        // Card Component
     'card' => [
         'collections' => 'collezioni',
+    ],
+
+    // Collector Carousel
+    'carousel' => [
+        'title' => 'Top Attivatori',
+        'subtitle' => 'I collezionisti che stanno investendo di più sulla piattaforma e che supportano attivamente i creator',
+        'stats' => [
+            'top_collectors' => 'Top Collectors',
+            'total_investment' => 'Investimento Totale',
+            'activated_egis' => 'EGI Attivati',
+        ],
+        'empty_state' => [
+            'title' => 'Nessun Attivatore al momento',
+            'subtitle' => 'Sii il primo a supportare i creator e ad entrare nella classifica dei top attivatori!',
+            'cta' => 'Inizia Ora',
+        ],
+        'navigation' => [
+            'previous' => 'Collectors precedenti',
+            'next' => 'Collectors successivi',
+            'slide' => 'Vai alla diapositiva :number',
+        ],
+        'cta' => [
+            'message' => '🎯 <strong>Vuoi entrare nella Top 10?</strong> Inizia ad attivare EGI e supporta i tuoi creator preferiti!',
+            'button' => 'Diventa un Attivatore',
+        ],
     ],
 ];

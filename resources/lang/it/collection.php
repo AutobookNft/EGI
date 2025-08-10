@@ -230,7 +230,7 @@ return [
         'royalty_mint_placeholder' => 'Inserisci la percentuale di royalty di minting',
         'royalty_rebind_placeholder' => 'Inserisci la percentuale di royalty di rebind',
         'validation' => [
-            'ceck_pending_wallet'=> 'Non è possibile eseguire l\'azione perché esiste già un wallet pending.',
+            'ceck_pending_wallet' => 'Non è possibile eseguire l\'azione perché esiste già un wallet pending.',
             'address_required' => 'L\'indirizzo del wallet è obbligatorio.',
             'mint_invalid' => 'Percentuale di royalty di minting non valida.',
             'rebind_invalid' => 'Percentuale di royalty di rebind non valida.',
