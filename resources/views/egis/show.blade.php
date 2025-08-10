@@ -291,14 +291,24 @@
                                 </div>
 
                                 <div class="p-4 rounded-lg bg-black/20">
-                                    <div class="mb-1 text-sm text-emerald-300">{{ __('egi.crud.current_price') }}</div>
+                                    <div class="mb-1 text-sm text-emerald-300">
+                                        {{ $highestPriorityReservation ? __('egi.price.highest_bid') : __('egi.crud.current_price') }}
+                                    </div>
                                     <div class="font-medium text-white">
-                                        @if($egi->price)
-                                            {{ number_format($egi->price, 2) }} ALGO
+                                        @if($displayPrice)
+                                            {{ number_format($displayPrice, 2) }} ALGO
                                         @else
                                             {{ __('egi.crud.price_not_set') }}
                                         @endif
                                     </div>
+                                    @if($displayUser)
+                                    <div class="flex items-center gap-1 mt-2 text-xs text-emerald-400">
+                                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                                        </svg>
+                                        {{ __('egi.reservation.by') }}: {{ $displayUser->name }}
+                                    </div>
+                                    @endif
                                 </div>
 
                                 <div class="p-4 rounded-lg bg-black/20">
@@ -332,18 +342,48 @@
 
                         {{-- Price & Purchase Section --}}
                         @php
-                            $isForSale = $egi->price && $egi->price > 0 && !$egi->mint;
+                            // Ottengo la prenotazione con priorità più alta per questo EGI
+                            $reservationService = app('App\Services\ReservationService');
+                            $highestPriorityReservation = $reservationService->getHighestPriorityReservation($egi);
+                            
+                            // Determino il prezzo da mostrare
+                            $displayPrice = $egi->price; // Prezzo base di default
+                            $displayUser = null;
+                            $priceLabel = __('egi.current_price');
+                            
+                            // Se c'è una prenotazione attiva, uso il suo prezzo e utente
+                            if ($highestPriorityReservation && $highestPriorityReservation->status === 'active') {
+                                $displayPrice = $highestPriorityReservation->offer_amount_algo ?? $egi->price;
+                                $displayUser = $highestPriorityReservation->user;
+                                $priceLabel = __('egi.price.highest_bid');
+                            }
+                            
+                            $isForSale = $displayPrice && $displayPrice > 0 && !$egi->mint;
                             $canBeReserved = !$egi->mint && ($egi->is_published || (App\Helpers\FegiAuth::check() && App\Helpers\FegiAuth::id() === $collection->creator_id));
                         @endphp
 
                         <div class="p-6 border bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl border-gray-700/30">
                             @if($isForSale)
                                 <div class="mb-6 text-center">
-                                    <p class="mb-2 text-sm text-gray-400">{{ __('egi.current_price') }}</p>
+                                    <p class="mb-2 text-sm text-gray-400">{{ $priceLabel }}</p>
                                     <div class="flex items-baseline justify-center">
-                                        <span class="text-4xl font-bold text-white">{{ number_format($egi->price, 2) }}</span>
+                                        <span class="text-4xl font-bold text-white">{{ number_format($displayPrice, 2) }}</span>
                                         <span class="ml-2 text-lg font-medium text-gray-400">ALGO</span>
                                     </div>
+                                    
+                                    {{-- Miglior offerente --}}
+                                    @if($displayUser)
+                                    <div class="flex items-center justify-center gap-2 mt-3 p-2 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
+                                        <div class="flex items-center justify-center flex-shrink-0 w-5 h-5 bg-emerald-500 rounded-full">
+                                            <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                                            </svg>
+                                        </div>
+                                        <span class="text-sm text-emerald-300">
+                                            {{ __('egi.reservation.highest_bidder') }}: <span class="font-semibold text-white">{{ $displayUser->name }}</span>
+                                        </span>
+                                    </div>
+                                    @endif
                                 </div>
                             @else
                                 <div class="mb-6 text-center">

@@ -72,6 +72,7 @@ return [
     // Prenotazioni
     'reservation' => [
         'highest_bidder' => 'Miglior Offerente',
+        'by' => 'da',
     ],
 
     // Stati
