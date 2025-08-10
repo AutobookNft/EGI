@@ -1,11 +1,11 @@
 {{-- resources/views/components/egi-card-list.blade.php --}}
 {{-- 📜 EGI List Card Component --}}
 {{-- Displays a single EGI in horizontal list format --}}
-{{-- Reusable for Collector, Creator, and Mecenate portfolios --}}
+{{-- Reusable for Collector, Creator, and Patron portfolios --}}
 
 @props([
     'egi',
-    'context' => 'collector', // 'collector', 'creator', 'mecenate'
+    'context' => 'collector', // 'collector', 'creator', 'patron'
     'portfolioOwner' => null,
     'showPurchasePrice' => true,
     'showOwnershipBadge' => true
@@ -28,10 +28,10 @@ $contextConfig = [
         'show_purchase' => false,
         'show_creator' => false
     ],
-    'mecenate' => [
+    'patron' => [
         'badge_color' => 'bg-yellow-500',
         'badge_icon' => 'heart',
-        'badge_title' => __('mecenate.portfolio.supported'),
+        'badge_title' => __('patron.portfolio.supported'),
         'show_purchase' => true,
         'show_creator' => true
     ]
@@ -122,9 +122,9 @@ $config = $contextConfig[$context] ?? $contextConfig['collector'];
                     <span class="text-gray-400">{{ __('collector.portfolio.purchased_for') }}</span>
                     <span class="font-bold text-green-400">€{{ number_format($egi->pivot->offer_amount_eur, 2) }}</span>
                 </div>
-                @elseif ($context === 'mecenate' && isset($egi->support_amount))
+                @elseif ($context === 'patron' && isset($egi->support_amount))
                 <div class="flex items-center gap-2 text-sm">
-                    <span class="text-gray-400">{{ __('mecenate.portfolio.supported_for') }}</span>
+                    <span class="text-gray-400">{{ __('patron.portfolio.supported_for') }}</span>
                     <span class="font-bold text-yellow-400">€{{ number_format($egi->support_amount, 2) }}</span>
                 </div>
                 @endif
