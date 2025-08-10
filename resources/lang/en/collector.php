@@ -105,6 +105,8 @@ return [
         'from_collection' => 'from collection',
         'by_creator' => 'by',
         'creator' => 'Creator',
+        'view_nft' => 'View NFT',
+        'total_bids' => 'Total Bids',
         'empty_title' => 'No EGIs Found',
         'empty_description' => 'No EGIs match current filters. Try adjusting your search criteria.',
         'discover_button' => 'Explore Marketplace',

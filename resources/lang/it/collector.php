@@ -109,6 +109,8 @@ return [
         'from_collection' => 'dalla collezione',
         'by_creator' => 'di',
         'creator' => 'Creator',
+        'view_nft' => 'Vedi NFT',
+        'total_bids' => 'Offerte Totali',
         'empty_title' => 'Nessun EGI Trovato',
         'empty_description' => 'Nessun EGI corrisponde ai filtri attuali. Prova ad adattare i criteri di ricerca.',
         'discover_button' => 'Esplora Marketplace',
