@@ -222,7 +222,7 @@
 
                     <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
                         @foreach ($featuredEgis->take(8) as $egi)
-                            <x-egi-card :egi="$egi" :collection="$egi->collection" :showPurchasePrice="true" />
+                            <x-egi-card :egi="$egi" :collection="$egi->collection" :portfolioContext="true" />
                         @endforeach
                     </div>
                 </section>

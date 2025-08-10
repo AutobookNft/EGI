@@ -44,6 +44,7 @@ return [
         'media_content' => 'Contenuto Media',
         'winning_bid' => 'OFFERTA VINCENTE',
         'outbid' => 'SUPERATO',
+    'not_owned' => 'NON POSSEDUTO',
     ],
 
     // Titoli

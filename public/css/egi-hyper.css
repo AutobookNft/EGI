@@ -207,6 +207,8 @@
   z-index: 20;
   border-radius: 16px;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
   box-shadow: 
     0 8px 32px rgba(139, 92, 246, 0.4),
     0 0 0 1px rgba(255, 255, 255, 0.1),
@@ -233,6 +235,19 @@
   padding: 4px 8px;
   font-size: 9px;
   font-weight: 600;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  justify-content: center;
+}
+
+/* Variante NON POSSEDUTO per badge composto (rosso) */
+.egi-card--hiper .badge-composite .not-owned-base {
+  background: linear-gradient(135deg, #dc2626 0%, rgba(139, 92, 246, 0.2) 100%);
+  padding: 4px 8px;
+  font-size: 9px;
+  font-weight: 700;
   color: white;
   display: flex;
   align-items: center;

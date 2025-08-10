@@ -64,12 +64,10 @@ class CollectorHomeController extends Controller {
         // 🚀 FIX: Usa PortfolioService per statistiche accurate
         $stats = $this->portfolioService->getCollectorPortfolioStats($collector);
 
-        // EGI in evidenza - acquistati dal collector
-        $featuredEgis = $collector->publicPurchasedEgis()
-            ->with(['collection.creator'])
-            ->latest('reservations.created_at')
-            ->take(8)
-            ->get();
+        // EGI in evidenza: mostra anche EGIs su cui il collector ha prenotato (vincenti o superati)
+        $featuredEgis = $this->portfolioService->getCollectorActivePortfolio($collector)
+            ->load(['collection.creator'])
+            ->take(8);
 
         // Collezioni del collector (raggruppate)
         $collectorCollections = $collector->getCollectorCollectionsAttribute();
@@ -141,8 +139,8 @@ class CollectorHomeController extends Controller {
         $sort = $request->input('sort', 'latest');
         $view = $request->input('view', 'grid'); // 'grid' or 'list'
 
-        // 🚀 FIX: Usa PortfolioService per ottenere solo EGI realmente posseduti
-        $activePortfolio = $this->portfolioService->getCollectorActivePortfolio($collector);
+    // 🚀 FIX: Usa PortfolioService per ottenere tutti gli EGI su cui il collector ha fatto offerte (vincente o superato)
+    $activePortfolio = $this->portfolioService->getCollectorActivePortfolio($collector);
 
         // Applica filtri e ordinamento alla collection
         $filteredEgis = $activePortfolio

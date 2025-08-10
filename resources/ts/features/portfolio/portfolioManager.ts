@@ -147,18 +147,102 @@ export class PortfolioManager {
             switch (update.type) {
                 case 'outbid':
                     this.handleOutbidNotification(update);
-                    this.removeEgiFromPortfolio(update.egi_id);
+                    this.markEgiAsOutbid(update.egi_id);
                     break;
                 case 'winning':
                     this.handleWinningNotification(update);
-                    this.addEgiToPortfolio(update.egi_id);
+                    this.markEgiAsWinning(update.egi_id);
                     break;
                 case 'expired':
                     this.handleExpiredNotification(update);
-                    this.removeEgiFromPortfolio(update.egi_id);
+                    this.markEgiAsOutbid(update.egi_id);
                     break;
             }
         });
+    }
+
+    /**
+     * Mark card as OUTBID: keep it visible, dim it, swap badge to NOT OWNED (red)
+     */
+    private markEgiAsOutbid(egiId: number): void {
+        const el = document.querySelector<HTMLElement>(`[data-egi-id="${egiId}"]`);
+        if (!el) return;
+        el.classList.add('opacity-35');
+        // On hover, slightly increase opacity
+        if (!el.classList.contains('hover:opacity-70')) {
+            el.classList.add('hover:opacity-70');
+        }
+        // Update portfolio badge if present
+        const badge = el.querySelector<HTMLElement>('[data-portfolio-badge="1"]');
+        if (badge) {
+            const lbl = badge.getAttribute('data-lbl-not-owned') || 'NON POSSEDUTO';
+            // Caso composito: aggiorna solo la base .not-owned-base
+            const compositeBase = badge.querySelector<HTMLElement>('.not-owned-base, .owned-base');
+            if (compositeBase) {
+                compositeBase.classList.remove('owned-base');
+                compositeBase.classList.add('not-owned-base');
+                // Trova l'icona (svg) e aggiorna solo il nodo di testo successivo
+                const svg = compositeBase.querySelector('svg');
+                let textNode: Node | null = null;
+                if (svg && svg.nextSibling && svg.nextSibling.nodeType === Node.TEXT_NODE) {
+                    textNode = svg.nextSibling;
+                } else {
+                    // Cerca un nodo di testo generico
+                    textNode = Array.from(compositeBase.childNodes).find(n => n.nodeType === Node.TEXT_NODE) || null;
+                }
+                if (textNode) {
+                    textNode.textContent = ' ' + lbl;
+                } else if (svg) {
+                    compositeBase.insertBefore(document.createTextNode(' ' + lbl), svg.nextSibling);
+                } else {
+                    compositeBase.append(' ' + lbl);
+                }
+            } else {
+                // Badge semplice: aggiorna classi e testo
+                badge.classList.remove('bg-green-500/90');
+                badge.classList.add('bg-red-600/90');
+                badge.textContent = lbl;
+            }
+            badge.setAttribute('title', lbl);
+        }
+    }
+
+    /**
+     * Mark card as WINNING again: restore opacity and badge
+     */
+    private markEgiAsWinning(egiId: number): void {
+        const el = document.querySelector<HTMLElement>(`[data-egi-id="${egiId}"]`);
+        if (!el) return;
+        el.classList.remove('opacity-35');
+        el.classList.remove('hover:opacity-70');
+        const badge = el.querySelector<HTMLElement>('[data-portfolio-badge="1"]');
+        if (badge) {
+            const lbl = badge.getAttribute('data-lbl-winning') || 'OFFERTA VINCENTE';
+            const compositeBase = badge.querySelector<HTMLElement>('.not-owned-base, .owned-base');
+            if (compositeBase) {
+                compositeBase.classList.remove('not-owned-base');
+                compositeBase.classList.add('owned-base');
+                const svg = compositeBase.querySelector('svg');
+                let textNode: Node | null = null;
+                if (svg && svg.nextSibling && svg.nextSibling.nodeType === Node.TEXT_NODE) {
+                    textNode = svg.nextSibling;
+                } else {
+                    textNode = Array.from(compositeBase.childNodes).find(n => n.nodeType === Node.TEXT_NODE) || null;
+                }
+                if (textNode) {
+                    textNode.textContent = ' ' + lbl;
+                } else if (svg) {
+                    compositeBase.insertBefore(document.createTextNode(' ' + lbl), svg.nextSibling);
+                } else {
+                    compositeBase.append(' ' + lbl);
+                }
+            } else {
+                badge.classList.remove('bg-red-600/90');
+                badge.classList.add('bg-green-500/90');
+                badge.textContent = lbl;
+            }
+            badge.setAttribute('title', lbl);
+        }
     }
 
     /**

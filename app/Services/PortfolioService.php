@@ -37,22 +37,25 @@ class PortfolioService {
     }
 
     /**
-     * Get collector's active portfolio (only EGIs with winning reservations)
+     * Get collector's active portfolio (includes winning and outbid EGIs)
+     * Criteria: any EGI with at least one reservation by the collector (current or past),
+     *           then mark status client-side (winning vs outbid).
      *
      * @param User $collector The collector
-     * @return EloquentCollection Collection of EGIs with winning reservations
+     * @return EloquentCollection Collection of EGIs reserved by the user
      */
     public function getCollectorActivePortfolio(User $collector): EloquentCollection {
         return Egi::whereHas('reservations', function ($query) use ($collector) {
-            $query->where('user_id', $collector->id)
-                ->where('is_current', true)
-                ->where('status', 'active')
-                ->whereNull('superseded_by_id');
+            $query->where('user_id', $collector->id);
         })
-            ->with(['collection', 'reservations' => function ($query) use ($collector) {
-                $query->where('user_id', $collector->id)
-                    ->where('is_current', true);
-            }])
+            ->with([
+                'collection',
+                // Carica tutte le prenotazioni dell'utente per l'EGI (per determinare stato)
+                'reservations' => function ($query) use ($collector) {
+                    $query->where('user_id', $collector->id)
+                        ->orderByDesc('created_at');
+                },
+            ])
             ->get();
     }
 

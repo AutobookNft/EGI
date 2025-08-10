@@ -16,6 +16,22 @@
 @php
 // 🔥 HYPER MODE: Leggiamo direttamente dal database il campo hyper dell'EGI
 $isHyper = $egi->hyper ?? false;
+// 📦 Portfolio: calcolo stato outbid per applicare opacità e badge corretti
+$portfolioOutbid = false;
+if ($portfolioContext && auth()->check()) {
+    try {
+        // Ultima prenotazione dell'utente su questo EGI
+        $userLastReservation = $egi->reservations()
+            ->where('user_id', auth()->id())
+            ->orderByDesc('created_at')
+            ->first();
+
+        $isWinning = $userLastReservation && $userLastReservation->is_current && $userLastReservation->status === 'active' && !$userLastReservation->superseded_by_id;
+        $portfolioOutbid = $userLastReservation && !$isWinning;
+    } catch (\Throwable $th) {
+        $portfolioOutbid = false;
+    }
+}
 @endphp
 
 {{-- Include CSS hyper se necessario --}}
@@ -32,7 +48,7 @@ $isHyper = $egi->hyper ?? false;
 
 {{-- 🧱 Card Container --}}
 <article
-    class="egi-card {{ $isHyper ? 'egi-card--hiper' : '' }} group relative w-full overflow-hidden rounded-2xl border-2 border-purple-500/30 bg-gray-900 transition-all duration-300 hover:border-purple-400 hover:shadow-2xl hover:shadow-purple-500/20"
+    class="egi-card {{ $isHyper ? 'egi-card--hiper' : '' }} group relative w-full overflow-hidden rounded-2xl border-2 border-purple-500/30 bg-gray-900 transition-all duration-300 hover:border-purple-400 hover:shadow-2xl hover:shadow-purple-500/20 {{ $portfolioOutbid ? 'opacity-35 hover:opacity-70' : '' }}"
     data-egi-id="{{ $egi->id }}" data-hyper="{{ $isHyper ? '1' : '0' }}" style="{{ $isHyper
         ? '--energy:0.95; --foilHue:265; --edge:#9b5cf6; --accent:#a78bfa;'
         : '' }}">
@@ -40,7 +56,7 @@ $isHyper = $egi->hyper ?? false;
     @if($isHyper)
     <div class="egi-sparkles" aria-hidden="true"></div>
     {{-- Badge HYPER normale solo se NON c'è badge composto --}}
-    @if(!$showPurchasePrice)
+    @if(!$showPurchasePrice && !$portfolioContext)
     <div class="egi-hyper-badge">⭐ HYPER ⭐</div>
     @endif
     @endif
@@ -122,36 +138,61 @@ $isHyper = $egi->hyper ?? false;
         @elseif ($portfolioContext)
         @php
         // Determina lo status della prenotazione per questo EGI nel contesto portfolio
-        $userReservation = $egi->reservations
-        ->where('user_id', auth()->id())
-        ->where('is_current', true)
-        ->first();
-        $isWinning =
-        $userReservation && !$userReservation->superseded_by_id && $userReservation->status === 'active';
+        $userReservation = $egi->reservations()
+            ->where('user_id', auth()->id())
+            ->orderByDesc('created_at')
+            ->first();
+        $isWinning = $userReservation && $userReservation->is_current && $userReservation->status === 'active' && !$userReservation->superseded_by_id;
         @endphp
 
         @if ($isWinning)
-        <span
-            class="absolute inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold text-white rounded-full right-2 top-2 bg-green-500/90 backdrop-blur-sm"
-            title="You have the winning bid for this EGI">
-            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                    clip-rule="evenodd" />
-            </svg>
-            {{ __('egi.badge.winning_bid') }}
-        </span>
+            @if ($isHyper)
+            {{-- Badge composto HYPER + OFFERTA VINCENTE (portfolio, winning) --}}
+            <div class="badge-composite" data-portfolio-badge="1" title="{{ __('egi.badge.winning_bid') }}" data-lbl-winning="{{ __('egi.badge.winning_bid') }}" data-lbl-not-owned="{{ __('egi.badge.not_owned') }}">
+                <div class="hyper-overlay">⭐ HYPER ⭐</div>
+                <div class="owned-base">
+                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                    </svg>
+                    {{ __('egi.badge.winning_bid') }}
+                </div>
+            </div>
+            @else
+            <span data-portfolio-badge="1" data-lbl-winning="{{ __('egi.badge.winning_bid') }}" data-lbl-not-owned="{{ __('egi.badge.not_owned') }}"
+                class="absolute inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold text-white rounded-full right-2 top-2 bg-green-500/90 backdrop-blur-sm"
+                title="You have the winning bid for this EGI">
+                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                        clip-rule="evenodd" />
+                </svg>
+                {{ __('egi.badge.winning_bid') }}
+            </span>
+            @endif
         @else
-        <span
-            class="absolute inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold text-white rounded-full right-2 top-2 bg-yellow-500/90 backdrop-blur-sm"
-            title="Your bid has been outbid">
+        @if ($isHyper)
+        {{-- Badge composto HYPER + NON POSSEDUTO (portfolio, outbid) --}}
+    <div class="badge-composite" data-portfolio-badge="1" title="{{ __('egi.badge.not_owned') }}" data-lbl-winning="{{ __('egi.badge.winning_bid') }}" data-lbl-not-owned="{{ __('egi.badge.not_owned') }}">
+            <div class="hyper-overlay">⭐ HYPER ⭐</div>
+            <div class="not-owned-base">
+                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 9a3 3 0 11-6 0 3 3 0 016 0zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                </svg>
+                {{ __('egi.badge.not_owned') }}
+            </div>
+        </div>
+        @else
+    <span data-portfolio-badge="1" data-lbl-winning="{{ __('egi.badge.winning_bid') }}" data-lbl-not-owned="{{ __('egi.badge.not_owned') }}"
+            class="absolute inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold text-white rounded-full right-2 top-2 bg-red-600/90 backdrop-blur-sm"
+            title="{{ __('egi.badge.not_owned') }}">
             <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd"
                     d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
                     clip-rule="evenodd" />
             </svg>
-            {{ __('egi.badge.outbid') }}
+            {{ __('egi.badge.not_owned') }}
         </span>
+        @endif
         @endif
         @elseif ($egi->media)
         <span

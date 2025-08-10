@@ -214,7 +214,7 @@
                 @if ($view == 'grid')
                     <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                         @foreach ($purchasedEgis as $egi)
-                            <x-egi-card :egi="$egi" :collection="$egi->collection" :portfolioContext="true" :hideReserveButton="true" />
+                            <x-egi-card :egi="$egi" :collection="$egi->collection" :portfolioContext="true" :hideReserveButton="false" />
                         @endforeach
                     </div>
                 @else
