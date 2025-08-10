@@ -10,22 +10,22 @@
 @props(['collectors' => collect()])
 
 <section class="py-12 bg-gradient-to-br from-gray-900 via-gray-800 to-black">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
 
         {{-- Header Section --}}
-        <div class="text-center mb-10">
-            <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">
-                🏆 <span class="bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">{{
+        <div class="mb-10 text-center">
+            <h2 class="mb-4 text-3xl font-bold text-white md:text-4xl">
+                🏆 <span class="text-transparent bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text">{{
                     __('collector.carousel.title') }}</span>
             </h2>
-            <p class="text-lg text-gray-300 max-w-2xl mx-auto">
+            <p class="max-w-2xl mx-auto text-lg text-gray-300">
                 {{ __('collector.carousel.subtitle') }}
             </p>
         </div>
 
         @if($collectors->count() > 0)
         {{-- Stats Bar --}}
-        <div class="flex justify-center space-x-8 mt-6 mb-10">
+        <div class="flex justify-center mt-6 mb-10 space-x-8">
             <div class="text-center">
                 <div class="text-2xl font-bold text-blue-400">{{ $collectors->count() }}</div>
                 <div class="text-sm text-gray-400">{{ __('collector.carousel.stats.top_collectors') }}</div>
@@ -46,7 +46,7 @@
         <div class="relative">
             {{-- Carousel Track --}}
             <div id="collectors-carousel" class="overflow-x-auto scrollbar-hide">
-                <div class="flex space-x-6 pb-6" style="width: max-content;">
+                <div class="flex pb-6 space-x-6" style="width: max-content;">
                     @foreach($collectors as $index => $collector)
                     <div class="flex-shrink-0" style="width: 280px; max-width: 280px;">
                         <x-collector-card :collector="$collector" :rank="$index + 1" displayType="carousel" />
@@ -57,7 +57,7 @@
 
             {{-- Navigation Buttons --}}
             <button id="prev-btn"
-                class="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 w-12 h-12 bg-gray-800 hover:bg-gray-700 text-white rounded-full shadow-lg transition-all duration-300 flex items-center justify-center group border border-gray-600 hover:border-gray-400"
+                class="absolute left-0 flex items-center justify-center w-12 h-12 text-white transition-all duration-300 -translate-x-4 -translate-y-1/2 bg-gray-800 border border-gray-600 rounded-full shadow-lg top-1/2 hover:bg-gray-700 group hover:border-gray-400"
                 aria-label="{{ __('collector.carousel.navigation.previous') }}">
                 <svg class="w-5 h-5 group-hover:-translate-x-0.5 transition-transform duration-200" fill="none"
                     stroke="currentColor" viewBox="0 0 24 24">
@@ -66,7 +66,7 @@
             </button>
 
             <button id="next-btn"
-                class="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 w-12 h-12 bg-gray-800 hover:bg-gray-700 text-white rounded-full shadow-lg transition-all duration-300 flex items-center justify-center group border border-gray-600 hover:border-gray-400"
+                class="absolute right-0 flex items-center justify-center w-12 h-12 text-white transition-all duration-300 translate-x-4 -translate-y-1/2 bg-gray-800 border border-gray-600 rounded-full shadow-lg top-1/2 hover:bg-gray-700 group hover:border-gray-400"
                 aria-label="{{ __('collector.carousel.navigation.next') }}">
                 <svg class="w-5 h-5 group-hover:translate-x-0.5 transition-transform duration-200" fill="none"
                     stroke="currentColor" viewBox="0 0 24 24">
@@ -79,15 +79,16 @@
         <div class="flex justify-center mt-8 space-x-2">
             @for($i = 0; $i < min(5, ceil($collectors->count() / 3)); $i++)
                 <button
-                    class="w-3 h-3 rounded-full bg-gray-600 hover:bg-blue-500 transition-colors duration-300 carousel-indicator"
+                    class="w-3 h-3 transition-colors duration-300 bg-gray-600 rounded-full hover:bg-blue-500 carousel-indicator"
                     data-slide="{{ $i }}"
                     aria-label="{{ __('collector.carousel.navigation.slide', ['number' => $i + 1]) }}"></button>
                 @endfor
         </div>
 
-        {{-- Call to Action --}}
-        <div class="text-center mt-10">
-            <p class="text-gray-300 mb-4">
+        {{-- Call to Action - Solo per visitatori non loggati --}}
+        @guest
+        <div class="mt-10 text-center">
+            <p class="mb-4 text-gray-300">
                 {!! __('collector.carousel.cta.message') !!}
             </p>
             <a href="{{ route('register') }}"
@@ -99,17 +100,18 @@
                 {{ __('collector.carousel.cta.button') }}
             </a>
         </div>
+        @endguest
         @else
         {{-- No Collectors State --}}
-        <div class="text-center py-12">
-            <div class="w-24 h-24 mx-auto mb-6 bg-gray-700 rounded-full flex items-center justify-center">
+        <div class="py-12 text-center">
+            <div class="flex items-center justify-center w-24 h-24 mx-auto mb-6 bg-gray-700 rounded-full">
                 <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
             </div>
-            <h3 class="text-xl font-semibold text-white mb-2">{{ __('collector.carousel.empty_state.title') }}</h3>
-            <p class="text-gray-400 mb-6 max-w-md mx-auto">
+            <h3 class="mb-2 text-xl font-semibold text-white">{{ __('collector.carousel.empty_state.title') }}</h3>
+            <p class="max-w-md mx-auto mb-6 text-gray-400">
                 {{ __('collector.carousel.empty_state.subtitle') }}
             </p>
             <a href="{{ route('register') }}"
