@@ -178,6 +178,9 @@ return [
         'wallet_change_expired' => 'Il wallet è scaduto',
 
         // Wallet connection
+        'fegi_connect_title' => 'Connetti alla Piattaforma',
+        'fegi_modal_subtitle' => 'Accedi con la tua chiave FEGI o crea un nuovo account',
+        'fegi_choose_option' => 'Scegli come vuoi procedere:',
         'save_secret_warning' => 'IMPORTANTE: Salva la tua chiave segreta in un luogo sicuro!',
         'secret_lost_warning' => 'Se perdi questa chiave, perderai l\'accesso al tuo account',
         'copy_secret_prompt' => 'Copia questa chiave prima di continuare',

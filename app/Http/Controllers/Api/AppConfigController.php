@@ -288,6 +288,8 @@ class AppConfigController extends Controller {
     private function getGuestLayoutTranslationMappings(): array {
         return [
             // Chiave semplificata => chiave completa Laravel
+            'fegi_connect_title' => 'collection.wallet.fegi_connect_title',
+            'fegi_modal_subtitle' => 'collection.wallet.fegi_modal_subtitle',
             'padminGreeting' => 'guest_layout.padminGreeting',
             'padminReady' => 'guest_layout.padminReady',
             'errorModalNotFoundConnectWallet' => 'guest_layout.errorModalNotFoundConnectWallet',

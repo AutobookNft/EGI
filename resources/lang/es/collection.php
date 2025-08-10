@@ -176,6 +176,9 @@ return [
         'wallet_change_expired' => 'El monedero ha caducado',
 
         // Wallet connection
+        'fegi_connect_title' => 'Conectar con la Plataforma',
+        'fegi_modal_subtitle' => 'Inicia sesión con tu clave FEGI o crea una nueva cuenta',
+        'fegi_choose_option' => 'Elige cómo quieres proceder:',
         'save_secret_warning' => '¡IMPORTANTE: Guarda tu clave secreta en un lugar seguro!',
         'secret_lost_warning' => 'Si pierdes esta clave, perderás el acceso a tu cuenta',
         'copy_secret_prompt' => 'Copia esta clave antes de continuar',

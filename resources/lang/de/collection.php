@@ -176,6 +176,9 @@ return [
         'wallet_change_expired' => 'Das Wallet ist abgelaufen',
 
         // Wallet connection
+        'fegi_connect_title' => 'Mit der Plattform verbinden',
+        'fegi_modal_subtitle' => 'Melden Sie sich mit Ihrem FEGI-Schlüssel an oder erstellen Sie ein neues Konto',
+        'fegi_choose_option' => 'Wählen Sie, wie Sie vorgehen möchten:',
         'save_secret_warning' => 'WICHTIG: Speichern Sie Ihren geheimen Schlüssel an einem sicheren Ort!',
         'secret_lost_warning' => 'Wenn Sie diesen Schlüssel verlieren, verlieren Sie den Zugriff auf Ihr Konto',
         'copy_secret_prompt' => 'Kopieren Sie diesen Schlüssel, bevor Sie fortfahren',

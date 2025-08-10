@@ -176,6 +176,9 @@ return [
         'wallet_change_expired' => 'Le portefeuille a expiré',
 
         // Wallet connection
+        'fegi_connect_title' => 'Connexion à la Plateforme',
+        'fegi_modal_subtitle' => 'Connectez-vous avec votre clé FEGI ou créez un nouveau compte',
+        'fegi_choose_option' => 'Choisissez comment vous voulez procéder:',
         'save_secret_warning' => 'IMPORTANT : Sauvegardez votre clé secrète dans un endroit sûr !',
         'secret_lost_warning' => 'Si vous perdez cette clé, vous perdrez l\'accès à votre compte',
         'copy_secret_prompt' => 'Copiez cette clé avant de continuer',

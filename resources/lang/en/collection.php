@@ -175,6 +175,9 @@ return [
         'wallet_change_expired' => 'The wallet has expired',
 
         // Wallet connection
+        'fegi_connect_title' => 'Connect to the Platform',
+        'fegi_modal_subtitle' => 'Sign in with your FEGI key or create a new account',
+        'fegi_choose_option' => 'Choose how you want to proceed:',
         'save_secret_warning' => 'IMPORTANT: Save your secret key in a safe place!',
         'secret_lost_warning' => 'If you lose this key, you will lose access to your account',
         'copy_secret_prompt' => 'Copy this key before continuing',

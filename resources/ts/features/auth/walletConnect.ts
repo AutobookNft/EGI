@@ -57,6 +57,7 @@ export function openSecureWalletModal(
 
     // Show modal
     DOM.connectWalletModalEl.classList.remove('hidden');
+    DOM.connectWalletModalEl.classList.add('flex');
     DOM.connectWalletModalEl.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
 
@@ -543,6 +544,7 @@ export function closeSecureWalletModal(DOM: typeof DOMElements): void {
 
     setTimeout(() => {
         DOM.connectWalletModalEl?.classList.add('hidden');
+        DOM.connectWalletModalEl?.classList.remove('flex');
         DOM.connectWalletModalEl?.setAttribute('aria-hidden', 'true');
         document.body.style.overflow = '';
 
