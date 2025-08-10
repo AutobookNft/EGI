@@ -5,10 +5,11 @@
 
 @props([
     'egi',
-    'context' => 'collector', // 'collector', 'creator', 'patron'
+    'context' => 'collector', // 'collector', 'creator', 'patron', 'collection'
     'portfolioOwner' => null,
     'showPurchasePrice' => true,
-    'showOwnershipBadge' => true
+    'showOwnershipBadge' => true,
+    'showBadge' => null // Override per nascondere badge se necessario
 ])
 
 @php
@@ -29,15 +30,25 @@ $contextConfig = [
         'show_creator' => false
     ],
     'patron' => [
-        'badge_color' => 'bg-yellow-500',
+        'badge_color' => 'bg-purple-500',
         'badge_icon' => 'heart',
         'badge_title' => __('patron.portfolio.supported'),
         'show_purchase' => true,
+        'show_creator' => true
+    ],
+    'collection' => [
+        'badge_color' => 'bg-indigo-500',
+        'badge_icon' => 'collections',
+        'badge_title' => __('collection.show.from_collection'),
+        'show_purchase' => false,
         'show_creator' => true
     ]
 ];
 
 $config = $contextConfig[$context] ?? $contextConfig['collector'];
+
+// Badge logic - può essere sovrascritto dal parametro showBadge
+$showBadge = $showBadge ?? $showOwnershipBadge;
 @endphp
 
 <article class="relative p-4 overflow-hidden transition-all duration-300 border border-gray-700 shadow-lg group rounded-xl bg-gradient-to-r from-gray-800 to-gray-900 hover:border-purple-500 hover:shadow-2xl hover:shadow-purple-500/20">
@@ -88,6 +99,12 @@ $config = $contextConfig[$context] ?? $contextConfig['collector'];
                     <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd"
                             d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
+                            clip-rule="evenodd" />
+                    </svg>
+                    @elseif ($config['badge_icon'] === 'collections')
+                    <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                            d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z"
                             clip-rule="evenodd" />
                     </svg>
                     @endif

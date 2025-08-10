@@ -18,6 +18,7 @@ return [
     'minimum_2_characters' => 'Minimo 2 caratteri',
     'create_collection' => 'Crea Collezione',
     'creating' => 'Creazione in corso...',
+    'from_collection' => 'Dalla Collezione',
     'create' => 'Crea',
     'new' => 'Nuovo',
 

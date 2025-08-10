@@ -283,27 +283,39 @@
                 </div>
             </div>
 
-            {{-- Griglia EGI Responsiva --}}
+            {{-- Container EGI Responsivo --}}
             <div class="egi-grid" id="egis-container">
                 @forelse($collection->egis as $index => $egi)
-                <div class="egi-item card-hover">
-                    @php
-                    // Determina se l'utente corrente è il creator di questa collezione
-                    $isCreatorViewing = false;
-                    if (auth()->check()) {
+                @php
+                // Determina se l'utente corrente è il creator di questa collezione
+                $isCreatorViewing = false;
+                if (auth()->check()) {
                     $isCreatorViewing = auth()->id() === $collection->creator_id;
-                    } elseif (session('connected_user_id')) {
+                } elseif (session('connected_user_id')) {
                     $isCreatorViewing = session('connected_user_id') === $collection->creator_id;
-                    }
+                }
 
-                    // TEMPORARY: Forziamo per test se è la collezione del creator ID 4
-                    if ($collection->creator_id === 4) {
+                // TEMPORARY: Forziamo per test se è la collezione del creator ID 4
+                if ($collection->creator_id === 4) {
                     $isCreatorViewing = true;
-                    }
-                    @endphp
+                }
+                @endphp
+
+                {{-- Grid Item (shown in grid mode) --}}
+                <div class="egi-item card-hover grid-view">
                     <x-egi-card :egi="$egi" :collection="$collection" :portfolioContext="$isCreatorViewing"
                         :portfolioOwner="$isCreatorViewing ? $collection->creator : null"
                         :creatorPortfolioContext="$isCreatorViewing" />
+                </div>
+
+                {{-- List Item (shown in list mode) --}}
+                <div class="egi-item list-view" style="display: none;">
+                    <x-egi-card-list 
+                        :egi="$egi"
+                        :context="'collection'"
+                        :showBadge="false"
+                        :showPurchasePrice="false"
+                        :showOwnershipBadge="false" />
                 </div>
                 @empty
                 {{-- Stato Vuoto Migliorato --}}
@@ -432,7 +444,7 @@ document.querySelectorAll('.like-button').forEach(button => {
     });
 });
 
-// View Toggle - FIXED
+// View Toggle - SIMPLIFIED with direct style control
 document.querySelectorAll('.view-toggle').forEach(button => {
     button.addEventListener('click', function() {
         const view = this.dataset.view;
@@ -447,18 +459,24 @@ document.querySelectorAll('.view-toggle').forEach(button => {
         this.classList.add('active', 'bg-indigo-600', 'text-white');
         this.classList.remove('text-gray-400');
 
-        // Update grid layout
+        // Toggle between grid and list items with direct style control
         if (view === 'list') {
-            container.className = 'space-y-4 list-view';
-            // Apply list styling to items
-            container.querySelectorAll('.egi-item').forEach(item => {
-                item.classList.add('list-item');
+            container.className = 'space-y-4';
+            // Hide grid items, show list items
+            container.querySelectorAll('.grid-view').forEach(item => {
+                item.style.display = 'none';
+            });
+            container.querySelectorAll('.list-view').forEach(item => {
+                item.style.display = 'block';
             });
         } else {
             container.className = 'egi-grid';
-            // Remove list styling from items
-            container.querySelectorAll('.egi-item').forEach(item => {
-                item.classList.remove('list-item');
+            // Show grid items, hide list items
+            container.querySelectorAll('.grid-view').forEach(item => {
+                item.style.display = 'block';
+            });
+            container.querySelectorAll('.list-view').forEach(item => {
+                item.style.display = 'none';
             });
         }
     });
