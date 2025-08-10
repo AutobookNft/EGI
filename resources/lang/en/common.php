@@ -3,6 +3,9 @@
 return [
     'view_egi' => 'View EGI',
     'view_collection' => 'View Collection',
+    'base_price' => 'Base Price',
+    'activator' => 'Activator',
+    'available' => 'Available',
     'loading' => 'Loading...',
     'error' => 'Error',
     'success' => 'Success',

@@ -3,6 +3,9 @@
 return [
     'view_egi' => 'Visualizza EGI',
     'view_collection' => 'Visualizza Collezione',
+    'base_price' => 'Prezzo Base',
+    'activator' => 'Attivatore',
+    'available' => 'Disponibile',
     'loading' => 'Caricamento...',
     'error' => 'Errore',
     'success' => 'Successo',

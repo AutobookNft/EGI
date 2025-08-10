@@ -42,9 +42,9 @@ $config = $contextConfig[$context] ?? $contextConfig['collector'];
 
 <article class="relative p-4 overflow-hidden transition-all duration-300 border border-gray-700 shadow-lg group rounded-xl bg-gradient-to-r from-gray-800 to-gray-900 hover:border-purple-500 hover:shadow-2xl hover:shadow-purple-500/20">
 
-    <div class="flex items-center gap-4">
+    <div class="flex items-start gap-4">
         <!-- Image Section -->
-        <div class="relative flex-shrink-0 w-20 h-20 overflow-hidden rounded-lg bg-gradient-to-br from-gray-700 to-gray-800">
+        <a href="{{ route('egis.show', $egi->id) }}" class="relative flex-shrink-0 w-28 h-28 overflow-hidden rounded-lg bg-gradient-to-br from-gray-700 to-gray-800 cursor-pointer group-hover:ring-2 group-hover:ring-purple-400 transition-all duration-300">
             @if ($egi->main_image_url)
             <img src="{{ $egi->main_image_url }}" alt="{{ $egi->title }}"
                 class="object-cover w-full h-full transition-transform duration-300 group-hover:scale-110">
@@ -56,6 +56,16 @@ $config = $contextConfig[$context] ?? $contextConfig['collector'];
                 </svg>
             </div>
             @endif
+
+            <!-- Hover overlay for visual feedback -->
+            <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" 
+                        d="M13.5 6H5.25A2.25 2.25 0 003 8.25v7.5A2.25 2.25 0 005.25 18h7.5A2.25 2.25 0 0015 15.75v-7.5A2.25 2.25 0 0013.5 6z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" 
+                        d="m15.75 9 3.75 3.75-3.75 3.75" />
+                </svg>
+            </div>
 
             <!-- Context Badge -->
             @if ($showOwnershipBadge)
@@ -84,7 +94,7 @@ $config = $contextConfig[$context] ?? $contextConfig['collector'];
                 </div>
             </div>
             @endif
-        </div>
+        </a>
 
         <!-- Content Section -->
         <div class="flex-1 min-w-0 mr-4">
@@ -115,42 +125,54 @@ $config = $contextConfig[$context] ?? $contextConfig['collector'];
                 @endif
             </div>
 
+            <!-- Activator Info -->
+            @if ($context === 'creator')
+                @php
+                // Find the current reservation (activated collector)
+                $currentReservation = $egi->reservations->where('is_current', true)->first();
+                @endphp
+                @if ($currentReservation && $currentReservation->user)
+                <div class="flex items-center gap-2 mb-1 text-sm">
+                    <svg class="w-4 h-4 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                    </svg>
+                    <span class="text-green-300 font-medium">{{ $currentReservation->user->name }}</span>
+                    <span class="text-gray-400 text-xs">({{ __('common.activator') }})</span>
+                </div>
+                @else
+                <div class="flex items-center gap-2 mb-1 text-sm">
+                    <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                    </svg>
+                    <span class="text-gray-400 text-sm">{{ __('common.available') }}</span>
+                </div>
+                @endif
+            @endif
+
+            <!-- Base Price Info -->
+            @if ($egi->price)
+            <div class="flex items-center gap-2 mb-1 text-sm">
+                <svg class="w-4 h-4 text-orange-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+                </svg>
+                <span class="text-orange-300 font-bold">€{{ number_format($egi->price, 0, ',', '.') }}</span>
+            </div>
+            @endif
+
             <!-- Purchase/Context Info -->
             @if ($config['show_purchase'] && $showPurchasePrice)
                 @if ($context === 'collector' && $egi->pivot && $egi->pivot->offer_amount_eur)
-                <div class="flex items-center gap-2 text-sm">
+                <div class="flex items-center gap-2 text-sm mt-1">
                     <span class="text-gray-400">{{ __('collector.portfolio.purchased_for') }}</span>
                     <span class="font-bold text-green-400">€{{ number_format($egi->pivot->offer_amount_eur, 2) }}</span>
                 </div>
                 @elseif ($context === 'patron' && isset($egi->support_amount))
-                <div class="flex items-center gap-2 text-sm">
+                <div class="flex items-center gap-2 text-sm mt-1">
                     <span class="text-gray-400">{{ __('patron.portfolio.supported_for') }}</span>
                     <span class="font-bold text-yellow-400">€{{ number_format($egi->support_amount, 2) }}</span>
                 </div>
                 @endif
             @endif
-
-            @if ($context === 'creator')
-                <!-- Creator-specific info (creation date, sales, etc.) -->
-                <div class="flex items-center gap-2 text-sm">
-                    <span class="text-gray-400">{{ __('creator.portfolio.created_on') }}</span>
-                    <span class="font-medium text-blue-400">{{ $egi->created_at->format('M Y') }}</span>
-                </div>
-            @endif
-        </div>
-
-        <!-- Action Button -->
-        <div class="self-center flex-shrink-0">
-            <a href="{{ route('egis.show', $egi->id) }}"
-                class="inline-flex items-center justify-center rounded-lg bg-purple-600 p-2.5 text-white transition-all duration-200 hover:bg-purple-700 group-hover:bg-purple-500 hover:scale-105"
-                title="{{ __('common.view_egi') }}">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M13.5 6H5.25A2.25 2.25 0 003 8.25v7.5A2.25 2.25 0 005.25 18h7.5A2.25 2.25 0 0015 15.75v-7.5A2.25 2.25 0 0013.5 6z" />
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="m15.75 9 3.75 3.75-3.75 3.75" />
-                </svg>
-            </a>
         </div>
     </div>
 </article>
