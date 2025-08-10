@@ -42,11 +42,14 @@
 
     {{-- Sezione: Progetti Ambientali (EPP) NFT Style --}}
 
-    <x-epp-cta-banner :title="__('guest_home.epp_banner_title')" :subtitle="__('guest_home.epp_banner_subtitle')" :message="__('guest_home.epp_banner_message_v2')" {{-- Usa un messaggio specifico che enfatizzi protezione/recupero --}} :ctaText="__('guest_home.epp_banner_cta')"
-        ctaLink="{{ route('archetypes.patron') }}" {{-- Scegli un'immagine di sfondo appropriata per gli EPP --}} {{-- backgroundImage="{{ asset('images/banners/forest_regeneration.jpg') }}" --}}
+    <x-epp-cta-banner :title="__('guest_home.epp_banner_title')" :subtitle="__('guest_home.epp_banner_subtitle')"
+        :message="__('guest_home.epp_banner_message_v2')" {{-- Usa un messaggio specifico che enfatizzi
+        protezione/recupero --}} :ctaText="__('guest_home.epp_banner_cta')" ctaLink="{{ route('archetypes.patron') }}"
+        {{-- Scegli un'immagine di sfondo appropriata per gli EPP --}} {{--
+        backgroundImage="{{ asset('images/banners/forest_regeneration.jpg') }}" --}}
         heightClass="min-h-[50vh] md:min-h-[65vh]"
-        overlayColor="bg-gradient-to-br from-gray-900/80 via-verde-rinascita/50 to-gray-900/80"
-        {{-- Overlay più brandizzato --}} />
+        overlayColor="bg-gradient-to-br from-gray-900/80 via-verde-rinascita/50 to-gray-900/80" {{-- Overlay più
+        brandizzato --}} />
 
 
     @vite(['resources/js/home-nft.js'])

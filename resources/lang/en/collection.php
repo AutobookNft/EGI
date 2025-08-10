@@ -373,6 +373,16 @@ return [
     ],
 
     'show' => [
+        // Breadcrumb
+        'collections_breadcrumb' => 'Collections',
+        
+        // Meta descriptions
+        'details_for_collection' => 'Details for the collection',
+        'unknown_creator_schema' => 'Unknown Creator',
+        
+        // EPP section
+        'epp_percentage' => '20%',
+        
         // Creator info
         'collection_creator' => 'Collection Creator',
         'unknown_creator' => 'Unknown Creator',
@@ -384,6 +394,7 @@ return [
         'reserved' => 'Reserved',
         'algo_floor' => 'ALGO Floor',
         'free_mint' => 'Free',
+        'mint_label' => 'Mint',
 
         // Actions
         'like_collection' => 'Like Collection',
@@ -416,6 +427,9 @@ return [
 
         // Related collections
         'more_from_this_creator' => 'More from this Creator',
+        
+        // JavaScript messages
+        'link_copied_to_clipboard' => 'Link copied to clipboard!',
     ],
 
 ];

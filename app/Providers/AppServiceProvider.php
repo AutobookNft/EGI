@@ -39,8 +39,7 @@ use Illuminate\Queue\Events\JobFailed;
 use Illuminate\Support\Facades\Log;
 use Spatie\ImageOptimizer\OptimizerChain;
 
-class AppServiceProvider extends ServiceProvider
-{
+class AppServiceProvider extends ServiceProvider {
 
     protected $policies = [
         User::class => ProfilePolicy::class,
@@ -52,8 +51,7 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Register any application services.
      */
-    public function register(): void
-    {
+    public function register(): void {
 
         $this->app->singleton(IconRepository::class);
         $this->app->singleton(CollectorCarouselService::class);
@@ -95,22 +93,19 @@ class AppServiceProvider extends ServiceProvider
                 $app->make(AuditLogService::class)
             );
         });
-
-
     }
 
     /**
      * Bootstrap any application services.
      */
-    public function boot(): void
-    {
+    public function boot(): void {
 
         // Debug log (only in local environment)
         // if (app()->environment('local')) {
         //     Log::channel('florenceegi')->info('FEGI Guard registered early in AppServiceProvider::register() with FIXED session access');
         // }
 
-         // 🎯 SOLUZIONE DEFINITIVA: Forziamo il sistema a usare sempre
+        // 🎯 SOLUZIONE DEFINITIVA: Forziamo il sistema a usare sempre
         //    una catena di ottimizzatori VUOTA, bypassando la logica della Factory.
         // $this->app->bind(OptimizerChain::class, fn () => new OptimizerChain()); // <-- 2. AGGIUNGI QUESTA RIGA
 

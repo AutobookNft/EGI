@@ -82,6 +82,7 @@ class Collection extends Model {
         return $this->hasMany(Egi::class);
     }
 
+
     /**
      * Relazione con gli utenti tramite la tabella pivot collection_user.
      */

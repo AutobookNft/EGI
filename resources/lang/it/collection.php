@@ -384,6 +384,16 @@ return [
     ],
 
     'show' => [
+        // Breadcrumb
+        'collections_breadcrumb' => 'Collezioni',
+
+        // Meta descriptions
+        'details_for_collection' => 'Dettagli per la collezione',
+        'unknown_creator_schema' => 'Creatore Sconosciuto',
+
+        // EPP section
+        'epp_percentage' => '20%',
+
         // Creator info
         'collection_creator' => 'Creatore della Collezione',
         'unknown_creator' => 'Creatore Sconosciuto',
@@ -395,6 +405,7 @@ return [
         'reserved' => 'Prenotati',
         'algo_floor' => 'Prezzo Min. ALGO',
         'free_mint' => 'Gratuito',
+        'mint_label' => 'Conio',
 
         // Prenotazioni
         'highest_bid' => 'Offerta Più Alta',
@@ -431,5 +442,8 @@ return [
 
         // Related collections
         'more_from_this_creator' => 'Altri del Creatore',
+
+        // JavaScript messages
+        'link_copied_to_clipboard' => 'Link copiato negli appunti!',
     ],
 ];

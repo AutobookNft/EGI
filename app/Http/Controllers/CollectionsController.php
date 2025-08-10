@@ -152,7 +152,9 @@ class CollectionsController extends Controller {
             'egis.user',
             'egis.owner',
             'likes'
-        ])->findOrFail($id);
+        ])
+        ->withCount(['egis', 'likes', 'reservations'])
+        ->findOrFail($id);
 
         // Verifica like per utente strong auth
         if (auth()->check()) {
@@ -169,7 +171,8 @@ class CollectionsController extends Controller {
             $collection->is_liked = false;
         }
 
-        $collection->likes_count = $collection->likes()->count();
+        // Usa il conteggio ottimizzato invece del query aggiuntivo
+        // $collection->likes_count è già disponibile tramite withCount
 
         return view('collections.show', compact('collection'));
     }

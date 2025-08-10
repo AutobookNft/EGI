@@ -131,7 +131,7 @@ return [
     ],
 
     // Card Component
-        // Card Component
+    // Card Component
     'card' => [
         'collections' => 'collezioni',
     ],

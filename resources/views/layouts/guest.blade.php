@@ -8,117 +8,119 @@
 
 <!-- Hero Section -->
 @unless (isset($noHero) && $noHero)
-    <section id="hero-section" class="relative flex min-h-[100vh] flex-col items-center overflow-hidden"
-        aria-labelledby="hero-main-title">
+<section id="hero-section" class="relative flex min-h-[100vh] flex-col items-center overflow-hidden"
+    aria-labelledby="hero-main-title">
 
-        <h1 id="hero-main-title" class="sr-only">{{ $title ?? __('guest_layout.default_title') }}</h1>
+    <h1 id="hero-main-title" class="sr-only">{{ $title ?? __('guest_layout.default_title') }}</h1>
 
-        @isset($heroFullWidth)
-            {{-- Layout a colonna intera --}}
-            <div class="relative z-10 mx-auto mb-auto mt-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-                {{ $heroFullWidth }}
-            </div>
+    @isset($heroFullWidth)
+    {{-- Layout a colonna intera --}}
+    <div class="relative z-10 mx-auto mb-auto mt-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+        {{ $heroFullWidth }}
+    </div>
 
-            <div class="natan-assistant fixed bottom-6 right-6 z-[100000] flex flex-col items-end" role="region"
-                aria-label="{{ __('guest_layout.hero_right_content_aria_label') }}">
-                {{ $heroNatanAssistant ?? '' }}
-            </div>
-        @else
-            {{-- Layout a colonne esistente (NON USATO DALLA HOME ATTUALE) --}}
-            <div
-                class="hero-content-overlay container relative z-10 mx-auto flex w-full flex-col items-center px-4 sm:px-6 lg:px-8">
-                <div class="mb-10 grid w-full grid-cols-1 gap-8 md:mb-12 md:grid-cols-12 lg:gap-6">
-                    {{-- Colonna mobile: sinistra+destra in un contenitore --}}
-                    <div class="flex flex-col items-center gap-8 md:hidden">
-                        {{-- Colonna sinistra (Natan) --}}
-                        <div class="w-full" role="region" aria-label="{{ __('guest_layout.hero_left_content_aria_label') }}">
-                            {{ $heroContentLeft ?? '' }}
-                        </div>
-
-                        {{-- Colonna destra (Badge impatto) --}}
-                        <div class="relative z-10 w-full" role="region"
-                            aria-label="{{ __('guest_layout.hero_right_content_aria_label') }}">
-                            {{ $heroContentRight ?? '' }}
-                        </div>
-                    </div>
-
-                    {{-- Colonna sinistra (25%) - Visibile solo su tablet+ --}}
-                    <div class="hidden md:col-span-3 md:block" role="region"
-                        aria-label="{{ __('guest_layout.hero_left_content_aria_label') }}">
-                        {{ $heroContentLeft ?? '' }}
-                    </div>
-
-                    {{-- Colonna centrale: Carousel (50% su desktop, 100% su tablet) --}}
-                    <div class="flex w-full flex-col items-center justify-center md:col-span-12 lg:col-span-6" role="region"
-                        aria-label="{{ __('guest_layout.hero_carousel_aria_label') }}">
-                        {{ $heroCarousel ?? '' }}
-                    </div>
-
-                    {{-- Colonna destra (25%) - Visibile solo su tablet+ --}}
-                    <div class="relative z-10 w-full" role="region"
-                        aria-label="{{ __('guest_layout.hero_right_content_aria_label') }}">
-                        {{ $heroContentRight ?? '' }}
-                    </div>
-
-                    {{-- Layout alternativo tablet: due colonne laterali affiancate sotto il carousel --}}
-                    <div class="hidden md:col-span-12 md:grid md:grid-cols-2 md:gap-6 lg:hidden">
-                        {{-- Colonna sinistra (Natan) - Ripetuta per layout tablet --}}
-                        <div class="flex items-center" role="region"
-                            aria-label="{{ __('guest_layout.hero_left_content_tablet_aria_label') }}">
-                            {{ $heroContentLeft ?? '' }}
-                        </div>
-
-                        {{-- Colonna destra (Badge impatto) - Ripetuta per layout tablet --}}
-                        <div class="flex items-center" role="region"
-                            aria-label="{{ __('guest_layout.hero_right_content_tablet_aria_label') }}">
-                            {{ $heroContentRight ?? '' }}
-                        </div>
-                    </div>
+    <div class="natan-assistant fixed bottom-6 right-6 z-[100000] flex flex-col items-end" role="region"
+        aria-label="{{ __('guest_layout.hero_right_content_aria_label') }}">
+        {{ $heroNatanAssistant ?? '' }}
+    </div>
+    @else
+    {{-- Layout a colonne esistente (NON USATO DALLA HOME ATTUALE) --}}
+    <div
+        class="hero-content-overlay container relative z-10 mx-auto flex w-full flex-col items-center px-4 sm:px-6 lg:px-8">
+        <div class="mb-10 grid w-full grid-cols-1 gap-8 md:mb-12 md:grid-cols-12 lg:gap-6">
+            {{-- Colonna mobile: sinistra+destra in un contenitore --}}
+            <div class="flex flex-col items-center gap-8 md:hidden">
+                {{-- Colonna sinistra (Natan) --}}
+                <div class="w-full" role="region" aria-label="{{ __('guest_layout.hero_left_content_aria_label') }}">
+                    {{ $heroContentLeft ?? '' }}
                 </div>
-            @endisset
 
-            {{-- Contenuto sotto l'hero --}}
-            <div class="below-hero-content relative z-10 mb-12 ml-10 mr-10 mt-12 w-11/12" role="region"
-                aria-label="{{ __('guest_layout.hero_featured_content_aria_label') }}"> {{-- Aggiunto z-10 e w-full --}}
-                {{ $belowHeroContent ?? '' }}
+                {{-- Colonna destra (Badge impatto) --}}
+                <div class="relative z-10 w-full" role="region"
+                    aria-label="{{ __('guest_layout.hero_right_content_aria_label') }}">
+                    {{ $heroContentRight ?? '' }}
+                </div>
             </div>
 
-            {{-- Top Collectors Carousel --}}
-            <div class="below-hero-content relative z-10 mb-12 ml-10 mr-10 mt-12 w-11/12" role="region"
-                aria-label="Top Collectors Carousel"> 
-                {{ $belowHeroContent_0_5 ?? '' }}
+            {{-- Colonna sinistra (25%) - Visibile solo su tablet+ --}}
+            <div class="hidden md:col-span-3 md:block" role="region"
+                aria-label="{{ __('guest_layout.hero_left_content_aria_label') }}">
+                {{ $heroContentLeft ?? '' }}
             </div>
 
-            {{-- Contenuto sotto l'hero --}}
-            <div class="below-hero-content relative z-10 mb-12 ml-10 mr-10 mt-12 w-11/12" role="region"
-                aria-label="{{ __('guest_layout.hero_featured_content_aria_label') }}"> {{-- Aggiunto z-10 e w-full --}}
-                {{ $belowHeroContent_1 ?? '' }}
+            {{-- Colonna centrale: Carousel (50% su desktop, 100% su tablet) --}}
+            <div class="flex w-full flex-col items-center justify-center md:col-span-12 lg:col-span-6" role="region"
+                aria-label="{{ __('guest_layout.hero_carousel_aria_label') }}">
+                {{ $heroCarousel ?? '' }}
             </div>
 
-            <div class="below-hero-content relative z-10 mb-12 ml-10 mr-10 mt-12 w-full" role="region"
-                aria-label="{{ __('guest_layout.hero_featured_content_aria_label') }}"> {{-- Aggiunto z-10, w-full e mt-12 --}}
-                {{ $belowHeroContent_2 ?? '' }}
+            {{-- Colonna destra (25%) - Visibile solo su tablet+ --}}
+            <div class="relative z-10 w-full" role="region"
+                aria-label="{{ __('guest_layout.hero_right_content_aria_label') }}">
+                {{ $heroContentRight ?? '' }}
             </div>
 
-            <div class="animate-bounce-slow absolute bottom-6 left-1/2 z-20 -translate-x-1/2 transform md:hidden">
-                <button type="button" aria-label="{{ __('guest_layout.scroll_down_aria_label') }}"
-                    class="flex h-10 w-10 items-center justify-center rounded-full bg-black bg-opacity-30 text-white hover:bg-opacity-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                    onclick="document.getElementById('main-content').scrollIntoView({behavior: 'smooth'});">
-                    <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                    </svg>
-                </button>
+            {{-- Layout alternativo tablet: due colonne laterali affiancate sotto il carousel --}}
+            <div class="hidden md:col-span-12 md:grid md:grid-cols-2 md:gap-6 lg:hidden">
+                {{-- Colonna sinistra (Natan) - Ripetuta per layout tablet --}}
+                <div class="flex items-center" role="region"
+                    aria-label="{{ __('guest_layout.hero_left_content_tablet_aria_label') }}">
+                    {{ $heroContentLeft ?? '' }}
+                </div>
+
+                {{-- Colonna destra (Badge impatto) - Ripetuta per layout tablet --}}
+                <div class="flex items-center" role="region"
+                    aria-label="{{ __('guest_layout.hero_right_content_tablet_aria_label') }}">
+                    {{ $heroContentRight ?? '' }}
+                </div>
             </div>
-    </section>
+        </div>
+        @endisset
+
+        {{-- Contenuto sotto l'hero --}}
+        <div class="below-hero-content relative z-10 mb-12 ml-10 mr-10 mt-12 w-11/12" role="region"
+            aria-label="{{ __('guest_layout.hero_featured_content_aria_label') }}"> {{-- Aggiunto z-10 e w-full --}}
+            {{ $belowHeroContent ?? '' }}
+        </div>
+
+        {{-- Top Collectors Carousel --}}
+        <div class="below-hero-content relative z-10 mb-12 ml-10 mr-10 mt-12 w-11/12" role="region"
+            aria-label="Top Collectors Carousel">
+            {{ $belowHeroContent_0_5 ?? '' }}
+        </div>
+
+        {{-- Contenuto sotto l'hero --}}
+        <div class="below-hero-content relative z-10 mb-12 ml-10 mr-10 mt-12 w-11/12" role="region"
+            aria-label="{{ __('guest_layout.hero_featured_content_aria_label') }}"> {{-- Aggiunto z-10 e w-full --}}
+            {{ $belowHeroContent_1 ?? '' }}
+        </div>
+
+        <div class="below-hero-content relative z-10 mb-12 ml-10 mr-10 mt-12 w-full" role="region"
+            aria-label="{{ __('guest_layout.hero_featured_content_aria_label') }}"> {{-- Aggiunto z-10, w-full e mt-12
+            --}}
+            {{ $belowHeroContent_2 ?? '' }}
+        </div>
+
+        <div class="animate-bounce-slow absolute bottom-6 left-1/2 z-20 -translate-x-1/2 transform md:hidden">
+            <button type="button" aria-label="{{ __('guest_layout.scroll_down_aria_label') }}"
+                class="flex h-10 w-10 items-center justify-center rounded-full bg-black bg-opacity-30 text-white hover:bg-opacity-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                onclick="document.getElementById('main-content').scrollIntoView({behavior: 'smooth'});">
+                <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                </svg>
+            </button>
+        </div>
+</section>
 @endunless
 
 {{-- SLOT PER IL CONTENUTO DEGLI ATTORI --}}
 @isset($actorContent)
-    <div id="guest-layout-actors-section-wrapper" class="relative z-10 w-full"> {{-- Wrapper opzionale per stili globali se necessario --}}
-        {{ $actorContent }}
-    </div>
+<div id="guest-layout-actors-section-wrapper" class="relative z-10 w-full"> {{-- Wrapper opzionale per stili globali se
+    necessario --}}
+    {{ $actorContent }}
+</div>
 @endisset
 
 <!-- Main Content -->

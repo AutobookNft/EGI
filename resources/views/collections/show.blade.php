@@ -6,7 +6,7 @@
 {{-- Questo layout gestisce il titolo, la descrizione e gli script condivisi --}}
 
 <x-collection-layout :title="$collection->collection_name . ' | FlorenceEGI'"
-    :metaDescription="Str::limit($collection->description, 155) ?? 'Details for the collection ' . $collection->collection_name">
+    :metaDescription="Str::limit($collection->description, 155) ?? __('collection.show.details_for_collection') . ' ' . $collection->collection_name">
 
     {{-- Schema.org ottimizzato --}}
     <x-slot name="schemaMarkup">
@@ -19,7 +19,7 @@
             "image": "{{ $collection->image_banner ? Storage::url($collection->image_banner) : asset('images/default_banner.jpg') }}",
             "author": {
                 "@type": "Person",
-                "name": "{{ $collection->creator->name ?? 'Unknown Creator' }}"
+                "name": "{{ $collection->creator->name ?? __('collection.show.unknown_creator_schema') }}"
             },
             "numberOfItems": "{{ $collection->egis_count ?? 0 }}",
             "mainEntity": {
@@ -38,7 +38,7 @@
                 <a href="{{ route('home.collections.index') }}"
                     class="transition-colors duration-200 hover:text-emerald-400">
                     <span class="mr-1 text-base material-symbols-outlined">collections</span>
-                    Collections
+                    {{ __('collection.show.collections_breadcrumb') }}
                 </a>
                 <span class="text-xs material-symbols-outlined">chevron_right</span>
                 <span class="font-medium text-gray-300">{{ Str::limit($collection->collection_name, 30) }}</span>
@@ -70,7 +70,8 @@
                     @else
                     <div class="text-xl font-bold text-purple-400 sm:text-2xl">{{ __('collection.show.free_mint') }}
                     </div>
-                    <div class="text-xs tracking-wider text-gray-400 uppercase">Mint</div>
+                    <div class="text-xs tracking-wider text-gray-400 uppercase">{{ __('collection.show.mint_label') }}
+                    </div>
                     @endif
                 </div>
             </div>
@@ -198,7 +199,6 @@
                         <span class="like-text">{{ $collection->is_liked ?? false ? __('collection.show.liked') :
                             __('collection.show.like_collection') }}</span>
                         <span class="ml-2 like-count-display">({{ $collection->likes_count ?? 0 }})</span>
-                        <span class="ml-2 like-count-display">Collection id ({{ $collection->id }})</span>
                     </button>
 
                     <button
@@ -227,7 +227,8 @@
                         <h4 class="mb-2 font-medium text-emerald-400">{{ $collection->epp->name }}</h4>
                         <p class="mb-3 text-sm text-gray-300 line-clamp-2">{{ $collection->epp->description }}</p>
                         <div class="flex items-center justify-between">
-                            <span class="text-xs font-medium text-green-400">20% {{
+                            <span class="text-xs font-medium text-green-400">{{ __('collection.show.epp_percentage') }}
+                                {{
                                 __('collection.show.of_sales_support_this_project') }}</span>
                             <a href="{{ route('epps.show', $collection->epp_id) }}"
                                 class="flex items-center gap-1 text-sm font-medium text-emerald-400 hover:text-emerald-300">
@@ -519,7 +520,7 @@ function copyToClipboard(text) {
         // Show toast notification
         const toast = document.createElement('div');
         toast.className = 'fixed z-50 px-4 py-2 text-sm font-medium text-white transform -translate-x-1/2 bg-green-600 rounded-lg bottom-4 left-1/2';
-        toast.textContent = 'Link copied to clipboard!';
+        toast.textContent = '{{ __('collection.show.link_copied_to_clipboard') }}';
         document.body.appendChild(toast);
 
         setTimeout(() => {

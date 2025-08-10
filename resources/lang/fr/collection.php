@@ -374,6 +374,16 @@ return [
     ],
 
     'show' => [
+        // Breadcrumb
+        'collections_breadcrumb' => 'Collections',
+
+        // Meta descriptions
+        'details_for_collection' => 'Détails pour la collection',
+        'unknown_creator_schema' => 'Créateur Inconnu',
+
+        // EPP section
+        'epp_percentage' => '20%',
+
         // Creator info
         'collection_creator' => 'Créateur de la Collection',
         'unknown_creator' => 'Créateur Inconnu',
@@ -385,6 +395,7 @@ return [
         'reserved' => 'Réservés',
         'algo_floor' => 'Prix Plancher ALGO',
         'free_mint' => 'Gratuit',
+        'mint_label' => 'Frappe',
 
         // Actions
         'like_collection' => 'Aimer la Collection',
@@ -417,6 +428,9 @@ return [
 
         // Related collections
         'more_from_this_creator' => 'Plus de ce Créateur',
+
+        // JavaScript messages
+        'link_copied_to_clipboard' => 'Lien copié dans le presse-papiers !',
     ],
 
 ];

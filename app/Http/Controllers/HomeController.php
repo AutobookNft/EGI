@@ -24,11 +24,10 @@ use Illuminate\View\View;
  * @schema-type WebPage
  */
 class HomeController extends Controller {
-    
+
     protected CollectorCarouselService $collectorCarouselService;
 
-    public function __construct(CollectorCarouselService $collectorCarouselService)
-    {
+    public function __construct(CollectorCarouselService $collectorCarouselService) {
         $this->collectorCarouselService = $collectorCarouselService;
     }
 

@@ -374,6 +374,16 @@ return [
     ],
 
     'show' => [
+        // Breadcrumb
+        'collections_breadcrumb' => 'Kollektionen',
+
+        // Meta descriptions
+        'details_for_collection' => 'Details für die Kollektion',
+        'unknown_creator_schema' => 'Unbekannter Ersteller',
+
+        // EPP section
+        'epp_percentage' => '20%',
+
         // Creator info
         'collection_creator' => 'Kollektion Ersteller',
         'unknown_creator' => 'Unbekannter Ersteller',
@@ -385,6 +395,7 @@ return [
         'reserved' => 'Reserviert',
         'algo_floor' => 'ALGO Mindestpreis',
         'free_mint' => 'Kostenlos',
+        'mint_label' => 'Prägen',
 
         // Actions
         'like_collection' => 'Kollektion Liken',
@@ -417,6 +428,9 @@ return [
 
         // Related collections
         'more_from_this_creator' => 'Mehr von diesem Ersteller',
+
+        // JavaScript messages
+        'link_copied_to_clipboard' => 'Link in die Zwischenablage kopiert!',
     ],
 
 ];
