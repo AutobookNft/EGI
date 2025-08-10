@@ -285,7 +285,11 @@ $isHyper = $egi->hyper ?? false;
                             </svg>
                         </div>
                         <span class="text-xs font-medium text-green-300">
-                            {{ $highestPriorityReservation ? __('egi.price.highest_bid') : __('egi.price.price') }}
+                            @if ($highestPriorityReservation)
+                                {{ $highestPriorityReservation->type === 'weak' ? __('egi.reservation.fegi_reservation') : __('egi.reservation.highest_bid') }}
+                            @else
+                                {{ __('egi.price.price') }}
+                            @endif
                         </span>
                     </div>
                     <div class="text-right">
@@ -294,16 +298,33 @@ $isHyper = $egi->hyper ?? false;
                     </div>
                 </div>
                 
-                {{-- Utente prenotazione più alta --}}
-                @if ($displayUser)
-                <div class="flex items-center gap-2 pt-2 border-t border-green-500/20">
-                    <div class="flex items-center justify-center flex-shrink-0 w-4 h-4 bg-green-600 rounded-full">
+                {{-- Utente/Codice prenotazione più alta (STRONG vs WEAK) --}}
+                @if ($displayUser || $highestPriorityReservation)
+                @php
+                $isWeakReservation = $highestPriorityReservation && $highestPriorityReservation->type === 'weak';
+                $badgeColor = $isWeakReservation ? 'bg-amber-600' : 'bg-green-600';
+                $textColor = $isWeakReservation ? 'text-amber-200' : 'text-green-200';
+                $borderColor = $isWeakReservation ? 'border-amber-500/20' : 'border-green-500/20';
+                @endphp
+                
+                <div class="flex items-center gap-2 pt-2 border-t {{ $borderColor }}">
+                    <div class="flex items-center justify-center flex-shrink-0 w-4 h-4 {{ $badgeColor }} rounded-full">
+                        @if ($isWeakReservation)
+                        <svg class="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z" clip-rule="evenodd" />
+                        </svg>
+                        @else
                         <svg class="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
                         </svg>
+                        @endif
                     </div>
-                    <span class="text-xs text-green-200 truncate">
-                        {{ __('egi.reservation.highest_bidder') }}: <span class="font-semibold">{{ $displayUser->name }}</span>
+                    <span class="text-xs {{ $textColor }} truncate">
+                        @if ($isWeakReservation)
+                            {{ __('egi.reservation.weak_bidder') }}: <span class="font-semibold">{{ $highestPriorityReservation->fegi_code ?? 'FG#******' }}</span>
+                        @else
+                            {{ __('egi.reservation.strong_bidder') }}: <span class="font-semibold">{{ $displayUser->name }}</span>
+                        @endif
                     </span>
                 </div>
                 @endif

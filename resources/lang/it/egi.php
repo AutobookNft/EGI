@@ -73,6 +73,10 @@ return [
     'reservation' => [
         'highest_bidder' => 'Miglior Offerente',
         'by' => 'da',
+        'highest_bid' => 'Offerta Più Alta',
+        'fegi_reservation' => 'Prenotazione FEGI',
+        'strong_bidder' => 'Miglior Offerente',
+        'weak_bidder' => 'Codice FEGI',
     ],
 
     // Stati

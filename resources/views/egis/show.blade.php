@@ -301,12 +301,28 @@
                                             {{ __('egi.crud.price_not_set') }}
                                         @endif
                                     </div>
-                                    @if($displayUser)
-                                    <div class="flex items-center gap-1 mt-2 text-xs text-emerald-400">
+                                    @if($displayUser || $highestPriorityReservation)
+                                    @php
+                                    $isWeakReservation = $highestPriorityReservation && $highestPriorityReservation->type === 'weak';
+                                    $textColor = $isWeakReservation ? 'text-amber-400' : 'text-emerald-400';
+                                    @endphp
+                                    
+                                    <div class="flex items-center gap-1 mt-2 text-xs {{ $textColor }}">
+                                        @if ($isWeakReservation)
+                                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z" clip-rule="evenodd" />
+                                        </svg>
+                                        @else
                                         <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                                             <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
                                         </svg>
-                                        {{ __('egi.reservation.by') }}: {{ $displayUser->name }}
+                                        @endif
+                                        
+                                        @if ($isWeakReservation)
+                                            {{ __('egi.reservation.by') }}: {{ $highestPriorityReservation->fegi_code ?? 'FG#******' }}
+                                        @else
+                                            {{ __('egi.reservation.by') }}: {{ $displayUser->name }}
+                                        @endif
                                     </div>
                                     @endif
                                 </div>
@@ -355,7 +371,13 @@
                             if ($highestPriorityReservation && $highestPriorityReservation->status === 'active') {
                                 $displayPrice = $highestPriorityReservation->offer_amount_algo ?? $egi->price;
                                 $displayUser = $highestPriorityReservation->user;
-                                $priceLabel = __('egi.price.highest_bid');
+                                
+                                // Label diversa per STRONG vs WEAK
+                                if ($highestPriorityReservation->type === 'weak') {
+                                    $priceLabel = __('egi.reservation.fegi_reservation');
+                                } else {
+                                    $priceLabel = __('egi.reservation.highest_bid');
+                                }
                             }
                             
                             $isForSale = $displayPrice && $displayPrice > 0 && !$egi->mint;
@@ -371,16 +393,34 @@
                                         <span class="ml-2 text-lg font-medium text-gray-400">ALGO</span>
                                     </div>
                                     
-                                    {{-- Miglior offerente --}}
-                                    @if($displayUser)
-                                    <div class="flex items-center justify-center gap-2 mt-3 p-2 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
-                                        <div class="flex items-center justify-center flex-shrink-0 w-5 h-5 bg-emerald-500 rounded-full">
+                                    {{-- Miglior offerente (STRONG vs WEAK) --}}
+                                    @if($displayUser || $highestPriorityReservation)
+                                    @php
+                                    $isWeakReservation = $highestPriorityReservation && $highestPriorityReservation->type === 'weak';
+                                    $bgColor = $isWeakReservation ? 'bg-amber-500/10' : 'bg-emerald-500/10';
+                                    $borderColor = $isWeakReservation ? 'border-amber-500/20' : 'border-emerald-500/20';
+                                    $iconBg = $isWeakReservation ? 'bg-amber-500' : 'bg-emerald-500';
+                                    $textColor = $isWeakReservation ? 'text-amber-300' : 'text-emerald-300';
+                                    @endphp
+                                    
+                                    <div class="flex items-center justify-center gap-2 mt-3 p-2 {{ $bgColor }} border {{ $borderColor }} rounded-lg">
+                                        <div class="flex items-center justify-center flex-shrink-0 w-5 h-5 {{ $iconBg }} rounded-full">
+                                            @if ($isWeakReservation)
+                                            <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z" clip-rule="evenodd" />
+                                            </svg>
+                                            @else
                                             <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                                                 <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
                                             </svg>
+                                            @endif
                                         </div>
-                                        <span class="text-sm text-emerald-300">
-                                            {{ __('egi.reservation.highest_bidder') }}: <span class="font-semibold text-white">{{ $displayUser->name }}</span>
+                                        <span class="text-sm {{ $textColor }}">
+                                            @if ($isWeakReservation)
+                                                {{ __('egi.reservation.weak_bidder') }}: <span class="font-semibold text-white">{{ $highestPriorityReservation->fegi_code ?? 'FG#******' }}</span>
+                                            @else
+                                                {{ __('egi.reservation.strong_bidder') }}: <span class="font-semibold text-white">{{ $displayUser->name }}</span>
+                                            @endif
                                         </span>
                                     </div>
                                     @endif
