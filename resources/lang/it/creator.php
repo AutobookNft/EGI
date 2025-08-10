@@ -58,6 +58,8 @@ return [
         'empty_title' => 'Portfolio Vuoto',
         'empty_description' => 'Non hai ancora creato nessuna opera. Inizia a creare per costruire il tuo portfolio artistico.',
         'discover_button' => 'Esplora Collezioni',
+        'created' => 'Creato',
+        'created_on' => 'Creato il',
     ],
     'under_construction' => [
         'title' => 'In Costruzione',

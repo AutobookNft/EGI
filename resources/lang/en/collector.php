@@ -106,6 +106,7 @@ return [
         'by_creator' => 'by',
         'creator' => 'Creator',
         'view_nft' => 'View NFT',
+        'view_egi' => 'View EGI',
         'total_bids' => 'Total Bids',
         'empty_title' => 'No EGIs Found',
         'empty_description' => 'No EGIs match current filters. Try adjusting your search criteria.',

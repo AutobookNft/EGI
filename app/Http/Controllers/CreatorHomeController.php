@@ -42,6 +42,7 @@ class CreatorHomeController extends Controller {
         $query = $request->input('query');
         $collection_filter = $request->input('collection');
         $sort = $request->input('sort', 'latest');
+        $view = $request->input('view', 'grid');
 
         // Recupera tutti gli EGI pubblicati delle collezioni CREATE dal creator
         // Nota: creator_id identifica CHI HA CREATO la collezione, non chi la possiede
@@ -95,7 +96,7 @@ class CreatorHomeController extends Controller {
             })->count(),
         ];
 
-        return view('creator.portfolio', compact('creator', 'egis', 'stats', 'query', 'collection_filter', 'sort'));
+        return view('creator.portfolio', compact('creator', 'egis', 'stats', 'query', 'collection_filter', 'sort', 'view'));
     }
     /**
      * @Oracode Method: Display Creator Home Page
