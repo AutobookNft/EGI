@@ -183,8 +183,9 @@
                     }
 
                     $isForSale = $displayPrice && $displayPrice > 0 && !$egi->mint;
-                    $canBeReserved = !$egi->mint && ($egi->is_published || (App\Helpers\FegiAuth::check() &&
-                    App\Helpers\FegiAuth::id() === $collection->creator_id));
+                    $canBeReserved = !$egi->mint && 
+                                     ($egi->is_published || (App\Helpers\FegiAuth::check() && App\Helpers\FegiAuth::id() === $collection->creator_id)) &&
+                                     $displayPrice && $displayPrice > 0;
                     @endphp
 
                     @if($canUpdateEgi)
