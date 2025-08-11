@@ -63,6 +63,7 @@ class FeaturedCollectionService {
                     $query->where('is_current', true)
                         ->orderBy('offer_amount_eur', 'desc');
                 }])
+                ->withCount('egis')
                 ->get();
 
             // Calcolo l'impatto per ogni Collection e ordino
@@ -240,6 +241,7 @@ class FeaturedCollectionService {
         return Collection::where('is_published', true)
             ->where('featured_in_guest', true)
             ->with(['creator'])
+            ->withCount('egis')
             ->orderByRaw('CASE WHEN featured_position IS NOT NULL THEN featured_position ELSE 999 END ASC')
             ->orderBy('updated_at', 'desc')
             ->take($limit)

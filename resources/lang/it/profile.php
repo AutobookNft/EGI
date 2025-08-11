@@ -17,7 +17,7 @@ return [
     'click_here_to_re-send_the_verification_email' => 'Clicca qui per inviare nuovamente l’email di verifica.',
     'a_new_verification_link_has_been_sent_to_your_email_address' => 'Un nuovo link di verifica è stato inviato al tuo indirizzo email.',
     'language' => 'Lingua',
-    'creator' => 'Creatore',
+    'creator' => 'Artista',
     'email_verified_at' => 'Email Verificata il',
     'password' => 'Password',
     'remember_token' => 'Token di Ricordo',

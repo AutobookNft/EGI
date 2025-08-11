@@ -9,6 +9,7 @@ use App\Enums\Gdpr\DataExportStatus;
 use App\Enums\Gdpr\GdprActivityCategory;
 use App\Enums\Gdpr\GdprRequestStatus;
 use App\Enums\Gdpr\GdprRequestType;
+use App\Models\Egi;
 use App\Traits\HasTeamRoles;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -135,6 +136,24 @@ class User extends Authenticatable implements HasMedia {
      */
     public function ownedCollections(): HasMany {
         return $this->hasMany(Collection::class, 'creator_id');
+    }
+
+    /**
+     * Get the EGIs created by the user.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function createdEgis(): HasMany {
+        return $this->hasMany(Egi::class, 'user_id');
+    }
+
+    /**
+     * Alias for ownedCollections for consistency
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function createdCollections(): HasMany {
+        return $this->ownedCollections();
     }
 
     // In app/Models/User.php

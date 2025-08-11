@@ -128,6 +128,7 @@ class HomeController extends Controller {
         return Collection::where('is_published', true)
             ->whereNotIn('id', $excludeIds)
             ->with(['creator'])
+            ->withCount('egis')
             ->latest()
             ->take(8)
             ->get();
@@ -148,13 +149,12 @@ class HomeController extends Controller {
     /**
      * Ottiene i Creator in evidenza per il carousel
      *
-     * 🎯 Recupera utenti con usertype 'creator' in ordine casuale per la homepage
+     * 🎯 Recupera utenti con usertype 'creator' con conteggi EGI e collezioni
      * @return \Illuminate\Database\Eloquent\Collection
      */
     private function getFeaturedCreators() {
         return User::where('usertype', 'creator')
-            // Assicurati che esista un campo 'is_published' o 'is_active' se necessario
-            // ->where('is_published', true)
+            ->withCount(['createdEgis as egis_count', 'createdCollections as collections_count'])
             ->inRandomOrder()
             ->take(8) // Puoi regolare il numero di creator da mostrare
             ->get();

@@ -23,6 +23,8 @@ return [
 
     // Stats
     'owned_egis' => 'EGI Posseduti',
+    'owned' => 'Posseduti',
+    'active' => 'Attivi',
     'collections' => 'Collezioni',
     'collections_represented' => 'Collezioni',
     'total_spent' => 'Totale Speso',
@@ -99,7 +101,7 @@ return [
         'total_value' => 'Valore Totale',
         'search_placeholder' => 'Cerca EGI...',
         'all_collections' => 'Tutte le Collezioni',
-        'all_creators' => 'Tutti i Creator',
+        'all_creators' => 'Tutti gli Artisti',
         'sort_latest' => 'Aggiunti di Recente',
         'sort_title' => 'Titolo A-Z',
         'sort_price_high' => 'Prezzo Alto-Basso',
@@ -108,7 +110,7 @@ return [
         'purchased_for' => 'Acquistato per',
         'from_collection' => 'dalla collezione',
         'by_creator' => 'di',
-        'creator' => 'Creator',
+        'creator' => 'Artista',
         'view_nft' => 'Visualizza NFT',
         'view_egi' => 'Visualizza EGI',
         'total_bids' => 'Totale offerte',
@@ -142,7 +144,7 @@ return [
     // Collector Carousel
     'carousel' => [
         'title' => 'Top Attivatori',
-        'subtitle' => 'I collezionisti che stanno investendo di più sulla piattaforma e che supportano attivamente i creator',
+        'subtitle' => 'I collezionisti che stanno investendo di più sulla piattaforma e che supportano attivamente gli artisti',
         'stats' => [
             'top_collectors' => 'Top Collectors',
             'total_investment' => 'Investimento Totale',
@@ -150,7 +152,7 @@ return [
         ],
         'empty_state' => [
             'title' => 'Nessun Attivatore al momento',
-            'subtitle' => 'Sii il primo a supportare i creator e ad entrare nella classifica dei top attivatori!',
+            'subtitle' => 'Sii il primo a supportare gli artisti e ad entrare nella classifica dei top attivatori!',
             'cta' => 'Inizia Ora',
         ],
         'navigation' => [
@@ -159,7 +161,7 @@ return [
             'slide' => 'Vai alla diapositiva :number',
         ],
         'cta' => [
-            'message' => '🎯 <strong>Vuoi entrare nella Top 10?</strong> Inizia ad attivare EGI e supporta i tuoi creator preferiti!',
+            'message' => '🎯 <strong>Vuoi entrare nella Top 10?</strong> Inizia ad attivare EGI e supporta i tuoi artisti preferiti!',
             'button' => 'Diventa un Attivatore',
         ],
     ],

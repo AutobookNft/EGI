@@ -66,6 +66,8 @@ class CollectorCarouselService {
                 // Add additional stats for each collector
                 $collector->winning_reservations_count = $this->getWinningReservationsCount($collector->id);
                 $collector->activated_egis_count = $this->getActivatedEgisCount($collector->id);
+                $collector->owned_egis_count = $this->getOwnedEgisCount($collector->id);
+                $collector->active_reservations_count = $this->getActiveReservationsCount($collector->id);
                 $collector->average_spending = $collector->winning_reservations_count > 0
                     ? $collector->total_spending / $collector->winning_reservations_count
                     : 0;
@@ -145,6 +147,28 @@ class CollectorCarouselService {
             'total_spending' => $totalSpending ?? 0,
             'winning_reservations_count' => $this->getWinningReservationsCount($userId),
             'activated_egis_count' => $this->getActivatedEgisCount($userId),
+            'owned_egis_count' => $this->getOwnedEgisCount($userId),
+            'active_reservations_count' => $this->getActiveReservationsCount($userId),
         ];
+    }
+
+    /**
+     * Get count of owned EGIs for a collector (simplified version for now)
+     */
+    private function getOwnedEgisCount(int $userId): int {
+        // For now, count winning reservations as "owned"
+        // In future, this could be based on actual ownership/purchase records
+        return $this->getWinningReservationsCount($userId);
+    }
+
+    /**
+     * Get count of active reservations for a collector
+     */
+    private function getActiveReservationsCount(int $userId): int {
+        return DB::table('reservations')
+            ->where('user_id', $userId)
+            ->where('is_current', true)
+            ->where('status', 'active')
+            ->count();
     }
 }

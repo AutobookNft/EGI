@@ -39,11 +39,11 @@ return [
 
     // === INIZIARE SUBITO ===
     'create_egi' => 'Voglio creare un EGI',
-    'create_egi_desc' => 'Guida step-by-step per Creator: come iniziare e pubblicare',
+    'create_egi_desc' => 'Guida step-by-step per Artisti: come iniziare e pubblicare',
     'reserve_egi' => 'Voglio prenotare un EGI',
     'reserve_egi_desc' => 'Scopri come esprimere il tuo interesse o impegno',
     'create_collection' => 'Voglio creare una Collection',
-    'create_collection_desc' => 'Panoramica sulle funzionalità per Creator avanzati',
+    'create_collection_desc' => 'Panoramica sulle funzionalità per Artisti avanzati',
 
     // === CONOSCERE I PROTAGONISTI ===
     'discover_archetypes' => 'Chi sono i protagonisti di FlorenceEGI?',
@@ -73,7 +73,7 @@ return [
     'start' => 'Inizia subito',
     'start_desc' => 'Registrati o accedi per iniziare il tuo percorso',
     'business' => 'Business granulare',
-    'business_desc' => 'Scopri le opportunità per aziende e creator',
+    'business_desc' => 'Scopri le opportunità per aziende e artisti',
     'create_egi_contextual' => 'Vuoi creare un EGI?',
     'create_artwork' => 'Voglio creare le mie opere digitali o fisiche',
     'buy_artwork' => 'Voglio acquistare un\'opera o un certificato',

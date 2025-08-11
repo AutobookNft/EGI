@@ -20,7 +20,7 @@ return [
 
     // Informazioni Base
     'by_author' => 'di :name',
-    'unknown_creator' => 'Creatore Sconosciuto',
+    'unknown_creator' => 'Artista Sconosciuto',
 
     // Azioni Principali
     'like_button_title' => 'Aggiungi ai Preferiti',
@@ -59,7 +59,7 @@ return [
         'powered_by' => 'Powered by :platform',
     ],
 
-    // Creatore
+    // Artista
     'creator' => [
         'created_by' => '👨‍🎨 Creato da:',
     ],
@@ -236,7 +236,7 @@ return [
             'title' => 'Nessun Contenuto Disponibile',
             'subtitle' => 'Torna presto per nuovi contenuti!',
             'no_egis' => 'Nessuna opera EGI disponibile al momento.',
-            'no_creators' => 'Nessun creatore disponibile al momento.',
+            'no_creators' => 'Nessun artista disponibile al momento.',
             'no_collections' => 'Nessuna collezione disponibile al momento.',
             'no_collectors' => 'Nessun collezionista disponibile al momento.'
         ],
@@ -245,13 +245,13 @@ return [
         'content_types' => [
             'egi_list' => 'Vista Elenco EGI',
             'egi_card' => 'Vista Scheda EGI',
-            'creators' => 'Creator in Evidenza',
+            'creators' => 'Artisti in Evidenza',
             'collections' => 'Collezioni d\'Arte',
             'collectors' => 'Top Collezionisti'
         ],
 
         // Content Labels
-        'creators' => 'Creator',
+        'creators' => 'Artisti',
         'collections' => 'Collezioni',
         'collectors' => 'Collezionisti',
 
@@ -266,7 +266,7 @@ return [
 
         // Title and subtitle for multi-content carousel
         'title' => 'Scopri il Rinascimento',
-        'subtitle' => 'Esplora opere, creator, collezioni e collezionisti nell\'ecosistema FlorenceEGI',
+        'subtitle' => 'Esplora opere, artisti, collezioni e collezionisti nell\'ecosistema FlorenceEGI',
     ],
 
     /*

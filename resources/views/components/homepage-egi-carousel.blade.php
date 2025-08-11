@@ -146,13 +146,13 @@
                     @endif
                 </div>
 
-                {{-- Creator Cards --}}
+                {{-- Creator List Cards --}}
                 <div class="hidden grid-cols-1 gap-4 transition-all duration-300 mobile-content content-creator lg:hidden"
                     data-content="creator">
                     @if($creators->count() > 0)
                     @foreach($creators as $creator)
                     <div class="mobile-item">
-                        <x-creator-card :creator="$creator" />
+                        <x-creator-card-list :creator="$creator" :context="'carousel'" :showBadge="true" />
                     </div>
                     @endforeach
                     @else
@@ -162,13 +162,13 @@
                     @endif
                 </div>
 
-                {{-- Collection Cards --}}
+                {{-- Collection List Cards --}}
                 <div class="hidden grid-cols-1 gap-4 transition-all duration-300 mobile-content content-collection lg:hidden"
                     data-content="collection">
                     @if($collections->count() > 0)
                     @foreach($collections as $collection)
                     <div class="mobile-item">
-                        <x-collection-card :id="$collection->id" />
+                        <x-collection-card-list :collection="$collection" :context="'default'" :showBadge="true" />
                     </div>
                     @endforeach
                     @else
@@ -178,13 +178,13 @@
                     @endif
                 </div>
 
-                {{-- Collector Cards --}}
+                {{-- Collector List Cards --}}
                 <div class="hidden grid-cols-1 gap-4 transition-all duration-300 mobile-content content-collector lg:hidden"
                     data-content="collector">
                     @if($collectors->count() > 0)
                     @foreach($collectors as $collector)
                     <div class="mobile-item">
-                        <x-collector-card :collector="$collector" />
+                        <x-collector-card-list :collector="$collector" :context="'default'" :showBadge="true" />
                     </div>
                     @endforeach
                     @else
@@ -249,7 +249,7 @@
     // Header text mapping
     const headerTexts = {
         'egi-list': '{{ __('egi.carousel.headers.egi_list') }}',
-        'egi-card': '{{ __('egi.carousel.headers.egi_card') }}', 
+        'egi-card': '{{ __('egi.carousel.headers.egi_card') }}',
         'creator': '{{ __('egi.carousel.headers.creators') }}',
         'collection': '{{ __('egi.carousel.headers.collections') }}',
         'collector': '{{ __('egi.carousel.headers.collectors') }}'

@@ -24,6 +24,7 @@ return [
             'works' => 'Opere',
             'collections' => 'Collezioni',
             'patrons' => 'Mecenati',
+            'followers' => 'Follower',
         ],
         'nav_aria_label' => 'Navigazione profilo creator',
         'nav' => [
