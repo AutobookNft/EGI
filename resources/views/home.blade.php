@@ -13,7 +13,8 @@
 
     {{-- EGI Carousel - Prima cosa visibile su mobile --}}
     <x-slot name="egiCarousel">
-        <x-homepage-egi-carousel :egis="$featuredEgis" />
+        <x-homepage-egi-carousel :egis="$featuredEgis" :creators="$featuredCreators" :collections="$featuredCollections"
+            :collectors="$topCollectors" />
     </x-slot>
 
     {{-- Contenuto SOTTO il testo hero: Collezioni in Evidenza NFT Style --}}

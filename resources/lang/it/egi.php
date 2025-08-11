@@ -233,9 +233,31 @@ return [
             'slide' => 'Vai alla diapositiva :number',
         ],
         'empty_state' => [
-            'title' => 'Nessuna Opera Disponibile',
-            'subtitle' => 'Non ci sono opere da mostrare al momento. Torna presto per scoprire nuove creazioni!',
+            'title' => 'Nessun Contenuto Disponibile',
+            'subtitle' => 'Torna presto per nuovi contenuti!',
+            'no_egis' => 'Nessuna opera EGI disponibile al momento.',
+            'no_creators' => 'Nessun creatore disponibile al momento.',
+            'no_collections' => 'Nessuna collezione disponibile al momento.',
+            'no_collectors' => 'Nessun collezionista disponibile al momento.'
         ],
+
+        // Content Type Buttons
+        'content_types' => [
+            'egi_list' => 'Vista Elenco EGI',
+            'egi_card' => 'Vista Scheda EGI',
+            'creators' => 'Creator in Evidenza',
+            'collections' => 'Collezioni d\'Arte',
+            'collectors' => 'Top Collezionisti'
+        ],
+
+        // Content Labels
+        'creators' => 'Creator',
+        'collections' => 'Collezioni',
+        'collectors' => 'Collezionisti',
+
+        // Title and subtitle for multi-content carousel
+        'title' => 'Scopri il Rinascimento',
+        'subtitle' => 'Esplora opere, creator, collezioni e collezionisti nell\'ecosistema FlorenceEGI',
     ],
 
     /*

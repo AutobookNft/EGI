@@ -196,4 +196,50 @@ return [
         'optional_field' => 'Optional field',
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Homepage Multi-Content Carousel
+    |--------------------------------------------------------------------------
+    */
+
+    'carousel' => [
+        'title' => 'Discover the Renaissance',
+        'subtitle' => 'Explore artworks, creators, collections, and collectors in the FlorenceEGI ecosystem',
+
+        // Content Type Buttons
+        'content_types' => [
+            'egi_list' => 'EGI List View',
+            'egi_card' => 'EGI Card View',
+            'creators' => 'Featured Creators',
+            'collections' => 'Art Collections',
+            'collectors' => 'Top Collectors'
+        ],
+
+        // Content Labels
+        'creators' => 'Creators',
+        'collections' => 'Collections',
+        'collectors' => 'Collectors',
+
+        // Navigation
+        'navigation' => [
+            'previous' => 'Previous',
+            'next' => 'Next',
+            'slide' => 'Go to slide :number'
+        ],
+
+        // Empty States
+        'empty_state' => [
+            'title' => 'No Content Available',
+            'subtitle' => 'Check back soon for new content!',
+            'no_egis' => 'No EGI artworks available at the moment.',
+            'no_creators' => 'No creators available at the moment.',
+            'no_collections' => 'No collections available at the moment.',
+            'no_collectors' => 'No collectors available at the moment.'
+        ],
+
+        // Legacy (for backwards compatibility)
+        'two_columns' => 'List View',
+        'three_columns' => 'Card View'
+    ],
+
 ];

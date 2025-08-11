@@ -1,91 +1,98 @@
 @props([
-    'collections' => collect(),
-    'autoplayInterval' => 8000,
-    'componentElementId' => null
+'collections' => collect(),
+'autoplayInterval' => 8000,
+'componentElementId' => null
 ])
 
 @php
-    $instanceId = $attributes->get('id', $componentElementId ?: 'chb_'.uniqid());
-    $logo = "15.jpg";
-    if (is_array($collections)) {
-        $collections = collect($collections);
-    }
-    $hasCollections = $collections->isNotEmpty();
-    $firstCollection = $hasCollections ? $collections->first() : null;
+$instanceId = $attributes->get('id', $componentElementId ?: 'chb_'.uniqid());
+$logo = "15.jpg";
+if (is_array($collections)) {
+$collections = collect($collections);
+}
+$hasCollections = $collections->isNotEmpty();
+$firstCollection = $hasCollections ? $collections->first() : null;
 
-    // ... ($jsCollectionsData come definito precedentemente) ...
-    $jsCollectionsData = [];
-    if ($hasCollections) {
-        $jsCollectionsData = $collections->map(function($c) use($logo) {
-            $creatorName = $c->creator ? $c->creator->name : null;
-            $bannerPath = $c->image_banner;
-            return [
-                'id' => $c->id,
-                'name' => $c->collection_name ?? '',
-                'creator' => $creatorName ?: __('guest_home.unknown_artist'),
-                'banner' => $bannerPath ? asset($bannerPath) : asset("images/default/random_background/$logo"),
-            ];
-        })->values()->all();
-    }
+// ... ($jsCollectionsData come definito precedentemente) ...
+$jsCollectionsData = [];
+if ($hasCollections) {
+$jsCollectionsData = $collections->map(function($c) use($logo) {
+$creatorName = $c->creator ? $c->creator->name : null;
+$bannerPath = $c->image_banner;
+return [
+'id' => $c->id,
+'name' => $c->collection_name ?? '',
+'creator' => $creatorName ?: __('guest_home.unknown_artist'),
+'banner' => $bannerPath ? asset($bannerPath) : asset("images/default/random_background/$logo"),
+];
+})->values()->all();
+}
 @endphp
 
 
 <div class="relative w-full overflow-hidden hero-banner-container"
-     style="height: 60vh; min-height: 450px; max-height: 700px;"
-     id="heroBannerContainer_{{ $instanceId }}">
+    style="height: 60vh; min-height: 450px; max-height: 700px;" id="heroBannerContainer_{{ $instanceId }}">
 
     {{-- ... (div hero-banner-background come prima) ... --}}
     <div class="absolute inset-0 transition-opacity duration-700 ease-in-out bg-center bg-cover hero-banner-background"
-         id="heroBannerBackground_{{ $instanceId }}"
-         style="background-image: url('{{ $hasCollections && $firstCollection && $firstCollection->image_banner ? asset($firstCollection->image_banner) : asset("images/default/random_background/$logo") }}')">
+        id="heroBannerBackground_{{ $instanceId }}"
+        style="background-image: url('{{ $hasCollections && $firstCollection && $firstCollection->image_banner ? asset($firstCollection->image_banner) : asset("
+        images/default/random_background/$logo") }}')">
         <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10"></div>
         <div class="absolute inset-0 opacity-75 bg-gradient-to-r from-black/50 via-transparent to-transparent"></div>
     </div>
 
     {{-- CTA Ambientale - CENTRATA COMPLETAMENTE --}}
     <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <p class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-green-300 font-bold max-w-4xl leading-tight text-center px-8">
+        <p
+            class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-green-300 font-bold max-w-4xl leading-tight text-center px-8">
             {{ __('guest_home.hero_banner_cta') }}
         </p>
     </div>
 
     <!-- Contenuto Hero -->
-    <div class="absolute inset-0 flex flex-col justify-between p-4 text-white sm:p-6 md:p-8 lg:p-10"> {{-- Ridotto padding mobile p-4 sm:p-6 --}}
+    <div class="absolute inset-0 flex flex-col justify-between p-4 text-white sm:p-6 md:p-8 lg:p-10"> {{-- Ridotto
+        padding mobile p-4 sm:p-6 --}}
         {{-- Riga Superiore: Titolo, Creator, Indicatori --}}
-        <div class="flex flex-col items-center w-full gap-4 text-center md:text-left md:flex-row md:items-start md:justify-between">
+        <div
+            class="flex flex-col items-center w-full gap-4 text-center md:text-left md:flex-row md:items-start md:justify-between">
             {{-- ^ MODIFICHE PRINCIPALI QUI:
-                Default (mobile): flex-col items-center text-center
-                Da md in su: md:text-left md:flex-row md:items-start md:justify-between
+            Default (mobile): flex-col items-center text-center
+            Da md in su: md:text-left md:flex-row md:items-start md:justify-between
             --}}
 
             <!-- Titolo e creator info -->
             <div class="max-w-xl"> {{-- max-w-xl è già restrittivo, va bene per il centro --}}
-                <h1 class="text-2xl font-bold sm:text-3xl md:text-4xl lg:text-5xl font-display" id="collectionName_{{ $instanceId }}"> {{-- Ridotta dimensione font base mobile --}}
+                <h1 class="text-2xl font-bold sm:text-3xl md:text-4xl lg:text-5xl font-display"
+                    id="collectionName_{{ $instanceId }}"> {{-- Ridotta dimensione font base mobile --}}
                     {{ __('guest_home.hero_banner_title') }}
                 </h1>
-                <p class="mt-2 text-base opacity-90 sm:text-lg md:text-xl font-body" id="collectionSubText_{{ $instanceId }}"> {{-- Ridotta dimensione font base mobile --}}
+                <p class="mt-2 text-base opacity-90 sm:text-lg md:text-xl font-body"
+                    id="collectionSubText_{{ $instanceId }}"> {{-- Ridotta dimensione font base mobile --}}
                     @if($hasCollections && $firstCollection)
-                        {{ $firstCollection->collection_name }} {{ __('guest_home.by') }} {{ $firstCollection->creator?->name ?: __('guest_home.unknown_artist') }}
+                    {{ $firstCollection->collection_name }} {{ __('guest_home.by') }} {{
+                    $firstCollection->creator?->name ?: __('guest_home.unknown_artist') }}
                     @else
-                        {{ __('guest_home.hero_banner_subtitle') }}
+                    {{ __('guest_home.hero_banner_subtitle') }}
                     @endif
                 </p>
             </div>
 
             {{-- Indicatori di scorrimento (pallini) --}}
             @if($collections->count() > 1)
-                {{-- Su mobile, questo div sarà centrato perché il genitore ha items-center.
-                     Su md+, md:self-start lo allinea all'inizio del contenitore flex laterale (a destra).
-                     Aggiunto md:mt-0 per resettare il margine su schermi più grandi se il titolo è corto.
-                --}}
-                <div class="flex items-center p-2 mt-4 space-x-2 rounded-full md:mt-0 md:self-start bg-black/30 backdrop-blur-sm" id="slideIndicators_{{ $instanceId }}">
-                    @foreach($collections as $index => $collection)
-                        <button data-index="{{ $index }}"
-                                aria-label="{{ __('guest_home.go_to_slide', ['index' => $index + 1]) }}"
-                                class="slide-indicator w-2.5 h-2.5 rounded-full transition-all duration-300 {{ $index === 0 ? 'bg-white scale-125' : 'bg-white/50 hover:bg-white/75' }}">
-                        </button>
-                    @endforeach
-                </div>
+            {{-- Su mobile, questo div sarà centrato perché il genitore ha items-center.
+            Su md+, md:self-start lo allinea all'inizio del contenitore flex laterale (a destra).
+            Aggiunto md:mt-0 per resettare il margine su schermi più grandi se il titolo è corto.
+            --}}
+            <div class="flex items-center p-2 mt-4 space-x-2 rounded-full md:mt-0 md:self-start bg-black/30 backdrop-blur-sm"
+                id="slideIndicators_{{ $instanceId }}">
+                @foreach($collections as $index => $collection)
+                <button data-index="{{ $index }}"
+                    aria-label="{{ __('guest_home.go_to_slide', ['index' => $index + 1]) }}"
+                    class="slide-indicator w-2.5 h-2.5 rounded-full transition-all duration-300 {{ $index === 0 ? 'bg-white scale-125' : 'bg-white/50 hover:bg-white/75' }}">
+                </button>
+                @endforeach
+            </div>
             @endif
         </div>
 
@@ -94,30 +101,32 @@
         <div class="flex flex-col items-center w-full gap-4 sm:gap-6 md:flex-row md:items-end md:justify-between">
             <!-- Pulsanti di navigazione (prev/next) -->
             @if($collections->count() > 1)
-                <div class="flex order-2 space-x-3 md:order-1">
-                    {{-- ... (codice bottoni prev/next come prima) ... --}}
-                     <button id="prevSlide_{{ $instanceId }}" aria-label="{{ __('guest_home.previous_slide') }}"
-                            class="p-2 text-white transition-colors duration-300 rounded-full sm:p-3 bg-black/40 hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/50">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-                        </svg>
-                    </button>
-                    <button id="nextSlide_{{ $instanceId }}" aria-label="{{ __('guest_home.next_slide') }}"
-                            class="p-2 text-white transition-colors duration-300 rounded-full sm:p-3 bg-black/40 hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/50">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                        </svg>
-                    </button>
-                </div>
+            <div class="flex order-2 space-x-3 md:order-1">
+                {{-- ... (codice bottoni prev/next come prima) ... --}}
+                <button id="prevSlide_{{ $instanceId }}" aria-label="{{ __('guest_home.previous_slide') }}"
+                    class="p-2 text-white transition-colors duration-300 rounded-full sm:p-3 bg-black/40 hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/50">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 sm:w-6 sm:h-6" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </button>
+                <button id="nextSlide_{{ $instanceId }}" aria-label="{{ __('guest_home.next_slide') }}"
+                    class="p-2 text-white transition-colors duration-300 rounded-full sm:p-3 bg-black/40 hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/50">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 sm:w-6 sm:h-6" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                    </svg>
+                </button>
+            </div>
             @else
-                <div class="order-2 md:order-1"></div> {{-- Placeholder per mantenere layout --}}
+            <div class="order-2 md:order-1"></div> {{-- Placeholder per mantenere layout --}}
             @endif
 
             <!-- Pulsante Reserve -->
             {{-- @include('partials.collection-hero-banner-reserve-button', [
-                'instanceId' => $instanceId,
-                'hasCollections' => $hasCollections,
-                'firstCollection' => $firstCollection
+            'instanceId' => $instanceId,
+            'hasCollections' => $hasCollections,
+            'firstCollection' => $firstCollection
             ]) --}}
 
         </div>
