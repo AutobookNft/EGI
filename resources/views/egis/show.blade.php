@@ -183,9 +183,10 @@
                     }
 
                     $isForSale = $displayPrice && $displayPrice > 0 && !$egi->mint;
-                    $canBeReserved = !$egi->mint && 
-                                     ($egi->is_published || (App\Helpers\FegiAuth::check() && App\Helpers\FegiAuth::id() === $collection->creator_id)) &&
-                                     $displayPrice && $displayPrice > 0;
+                    $canBeReserved = !$egi->mint &&
+                    ($egi->is_published || (App\Helpers\FegiAuth::check() && App\Helpers\FegiAuth::id() ===
+                    $collection->creator_id)) &&
+                    $displayPrice && $displayPrice > 0;
                     @endphp
 
                     @if($canUpdateEgi)
@@ -284,8 +285,7 @@
                                             <input type="hidden" name="is_published" value="0">
                                             <input type="checkbox" id="is_published" name="is_published" value="1" {{
                                                 old('is_published', $egi->is_published) ? 'checked' : '' }}
-                                            class="w-4 h-4 rounded text-emerald-600 bg-black/30 border-emerald-700/50
-                                            focus:ring-emerald-500 focus:ring-2">
+                                            class="w-4 h-4 rounded text-emerald-600 bg-black/30 border-emerald-700/50 focus:ring-emerald-500 focus:ring-2">
                                             <span class="ml-3 text-sm font-medium text-emerald-300">
                                                 {{ __('egi.crud.is_published') }}
                                             </span>
