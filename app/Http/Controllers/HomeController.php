@@ -52,6 +52,7 @@ class HomeController extends Controller {
         $highlightedEpps = $this->getHighlightedEpps();
         $featuredCreators = $this->getFeaturedCreators(); // Nuovo: recupera i Creator
         $topCollectors = $this->collectorCarouselService->getTopCollectors(10); // Nuovo: top collectors
+        $featuredEgis = $this->getFeaturedEgis(); // Nuovo: ultimi 20 EGI per carousel homepage
 
         // Dati impatto ambientale - valore hardcoded per MVP
         // TODO: In futuro, recuperare da database o API dedicata
@@ -65,6 +66,7 @@ class HomeController extends Controller {
             'totalPlasticRecovered' => $totalPlasticRecovered,
             'featuredCreators' => $featuredCreators, // Nuovo: passa i Creator alla vista
             'topCollectors' => $topCollectors, // Nuovo: passa i Top Collectors alla vista
+            'featuredEgis' => $featuredEgis, // Nuovo: ultimi 20 EGI per carousel homepage
         ]);
     }
 
@@ -99,6 +101,20 @@ class HomeController extends Controller {
         $featuredService = app(\App\Services\FeaturedCollectionService::class);
 
         return $featuredService->getFeaturedCollections(10);
+    }
+
+    /**
+     * Ottiene gli ultimi EGI inseriti per il carousel homepage
+     *
+     * @privacy-safe Utilizza solo EGI pubblicati pubblicamente
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    private function getFeaturedEgis() {
+        return Egi::where('is_published', true)
+            ->with(['collection'])
+            ->latest()
+            ->take(20)
+            ->get();
     }
 
     /**

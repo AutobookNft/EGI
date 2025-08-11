@@ -218,6 +218,28 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | EGI Carousel - Homepage Featured EGIs
+    |--------------------------------------------------------------------------
+    */
+
+    'carousel' => [
+        'title' => 'Opere in Evidenza',
+        'subtitle' => 'Scopri le ultime creazioni digitali dei nostri artisti',
+        'two_columns' => 'Vista Lista',
+        'three_columns' => 'Vista Card',
+        'navigation' => [
+            'previous' => 'Precedente',
+            'next' => 'Successivo',
+            'slide' => 'Vai alla diapositiva :number',
+        ],
+        'empty_state' => [
+            'title' => 'Nessuna Opera Disponibile',
+            'subtitle' => 'Non ci sono opere da mostrare al momento. Torna presto per scoprire nuove creazioni!',
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Accessibility Labels - Screen Readers
     |--------------------------------------------------------------------------
     */

@@ -11,6 +11,11 @@
 
     </x-slot>
 
+    {{-- EGI Carousel - Prima cosa visibile su mobile --}}
+    <x-slot name="egiCarousel">
+        <x-homepage-egi-carousel :egis="$featuredEgis" />
+    </x-slot>
+
     {{-- Contenuto SOTTO il testo hero: Collezioni in Evidenza NFT Style --}}
     <x-slot name="belowHeroContent">
         <x-creators-carousel :creators="$featuredCreators" title="{{ __('guest_home.featured_creators_title') }}"
@@ -37,7 +42,7 @@
     {{-- Sezione: Protagonisti e Attori dell'Ecosistema --}}
     {{-- POPOLIAMO IL NUOVO SLOT $actorContent CON IL NOSTRO COMPONENTE actors-section --}}
     <x-slot name="actorContent">
-        <x-actors-section /> Il componente che contiene la griglia delle 4 card attore
+        <x-actors-section />
     </x-slot>
 
     {{-- Sezione: Progetti Ambientali (EPP) NFT Style --}}

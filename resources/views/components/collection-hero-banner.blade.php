@@ -106,6 +106,7 @@
                 <div class="order-2 md:order-1"></div> {{-- Placeholder per mantenere layout --}}
             @endif
 
+            {{-- Bottone per la prenotazione eliminato --}}
             {{-- @include('partials.collection-hero-banner-reserve-button', [
                 'instanceId' => $instanceId,
                 'hasCollections' => $hasCollections,
