@@ -83,6 +83,13 @@
             </div>
         </div>
 
+        {{-- Dynamic Content Header for Mobile --}}
+        <div class="mb-6 text-center lg:hidden">
+            <h3 id="content-type-header" class="text-xl font-bold text-white transition-all duration-300">
+                {{ __('egi.carousel.headers.egi_list') }}
+            </h3>
+        </div>
+
         {{-- Carousel Container --}}
         <div class="relative">
             {{-- Desktop Navigation Buttons --}}
@@ -237,6 +244,16 @@
     // Mobile Content Type Switcher
     const contentTypeBtns = document.querySelectorAll('.content-type-btn');
     const mobileContents = document.querySelectorAll('.mobile-content');
+    const contentHeader = document.getElementById('content-type-header');
+
+    // Header text mapping
+    const headerTexts = {
+        'egi-list': '{{ __('egi.carousel.headers.egi_list') }}',
+        'egi-card': '{{ __('egi.carousel.headers.egi_card') }}', 
+        'creator': '{{ __('egi.carousel.headers.creators') }}',
+        'collection': '{{ __('egi.carousel.headers.collections') }}',
+        'collector': '{{ __('egi.carousel.headers.collectors') }}'
+    };
 
     contentTypeBtns.forEach(btn => {
         btn.addEventListener('click', function() {
@@ -249,6 +266,15 @@
             });
             this.classList.add('active', 'bg-purple-600', 'text-white');
             this.classList.remove('text-gray-400');
+
+            // Update header text with smooth transition
+            if (contentHeader) {
+                contentHeader.style.opacity = '0.5';
+                setTimeout(() => {
+                    contentHeader.textContent = headerTexts[contentType] || headerTexts['egi-list'];
+                    contentHeader.style.opacity = '1';
+                }, 150);
+            }
 
             // Hide all content containers
             mobileContents.forEach(content => {

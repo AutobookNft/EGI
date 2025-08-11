@@ -220,6 +220,15 @@ return [
         'collections' => 'Collections',
         'collectors' => 'Collectors',
 
+        // Dynamic Headers
+        'headers' => [
+            'egi_list' => 'EGI',
+            'egi_card' => 'EGI',
+            'creators' => 'Artists',
+            'collections' => 'Collections',
+            'collectors' => 'Collectors'
+        ],
+
         // Navigation
         'navigation' => [
             'previous' => 'Previous',

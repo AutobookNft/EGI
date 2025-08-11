@@ -255,6 +255,15 @@ return [
         'collections' => 'Collezioni',
         'collectors' => 'Collezionisti',
 
+        // Dynamic Headers
+        'headers' => [
+            'egi_list' => 'EGI',
+            'egi_card' => 'EGI',
+            'creators' => 'Artisti',
+            'collections' => 'Collezioni',
+            'collectors' => 'Collezionisti'
+        ],
+
         // Title and subtitle for multi-content carousel
         'title' => 'Scopri il Rinascimento',
         'subtitle' => 'Esplora opere, creator, collezioni e collezionisti nell\'ecosistema FlorenceEGI',

@@ -49,4 +49,15 @@ return [
         'reserve' => 'Reservar',
     ],
 
+    'carousel' => [
+        // Dynamic Headers
+        'headers' => [
+            'egi_list' => 'EGI',
+            'egi_card' => 'EGI',
+            'creators' => 'Artistas',
+            'collections' => 'Colecciones',
+            'collectors' => 'Coleccionistas'
+        ],
+    ],
+
 ];
