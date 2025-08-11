@@ -285,21 +285,22 @@
 
             {{-- Container EGI Responsivo --}}
             <div class="egi-grid" id="egis-container">
-                @forelse($collection->egis as $index => $egi)
                 @php
                 // Determina se l'utente corrente è il creator di questa collezione
                 $isCreatorViewing = false;
                 if (auth()->check()) {
-                    $isCreatorViewing = auth()->id() === $collection->creator_id;
+                $isCreatorViewing = auth()->id() === $collection->creator_id;
                 } elseif (session('connected_user_id')) {
-                    $isCreatorViewing = session('connected_user_id') === $collection->creator_id;
+                $isCreatorViewing = session('connected_user_id') === $collection->creator_id;
                 }
 
                 // TEMPORARY: Forziamo per test se è la collezione del creator ID 4
                 if ($collection->creator_id === 4) {
-                    $isCreatorViewing = true;
+                $isCreatorViewing = true;
                 }
                 @endphp
+
+                @forelse($collection->egis as $index => $egi)
 
                 {{-- Grid Item (shown in grid mode) --}}
                 <div class="egi-item card-hover grid-view">
@@ -310,11 +311,7 @@
 
                 {{-- List Item (shown in list mode) --}}
                 <div class="egi-item list-view" style="display: none;">
-                    <x-egi-card-list 
-                        :egi="$egi"
-                        :context="'collection'"
-                        :showBadge="false"
-                        :showPurchasePrice="false"
+                    <x-egi-card-list :egi="$egi" :context="'collection'" :showBadge="false" :showPurchasePrice="false"
                         :showOwnershipBadge="false" />
                 </div>
                 @empty

@@ -109,7 +109,7 @@ return [
         'from_collection' => 'dalla collezione',
         'by_creator' => 'di',
         'creator' => 'Creator',
-                'view_nft' => 'Visualizza NFT',
+        'view_nft' => 'Visualizza NFT',
         'view_egi' => 'Visualizza EGI',
         'total_bids' => 'Totale offerte',
         'empty_title' => 'Nessun EGI Trovato',

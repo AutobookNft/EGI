@@ -6,7 +6,7 @@ return [
     'meta_description' => 'Perfil mecenas de :name - Portfolio y apoyo EGI en vitrina',
     'default_bio' => 'Mecenas EGI y patrocinador de arte digital en el perfil de :name.',
 
-    // Hero Section  
+    // Hero Section
     'hero_aria_label' => 'Sección hero del perfil mecenas de :name',
     'avatar_alt' => 'Avatar del perfil de :name',
     'patron_badge_title' => 'Mecenas Verificado',

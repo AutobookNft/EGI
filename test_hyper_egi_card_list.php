@@ -1,6 +1,6 @@
 <?php
 
-// Test script per verificare l'integrazione degli effetti HYPER 
+// Test script per verificare l'integrazione degli effetti HYPER
 // nel componente egi-card-list.blade.php
 
 echo "🔥 HYPER EGI Card List - Test di integrazione\n";
@@ -44,5 +44,3 @@ echo "• Mantiene la compatibilità con EGI normali\n";
 echo "• Gli effetti visivi sono consistenti tra grid e list view\n\n";
 
 echo "✨ Test completato! Il componente egi-card-list ora supporta gli effetti HYPER.\n";
-
-?>

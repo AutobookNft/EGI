@@ -6,7 +6,7 @@ return [
     'meta_description' => 'Mäzen Profil von :name - EGI Portfolio und Unterstützung Showcase',
     'default_bio' => 'EGI Mäzen und Unterstützer digitaler Kunst im Profil von :name.',
 
-    // Hero Section  
+    // Hero Section
     'hero_aria_label' => 'Hero Bereich des Mäzen Profils von :name',
     'avatar_alt' => ':name Profil Avatar',
     'patron_badge_title' => 'Verifizierter Mäzen',

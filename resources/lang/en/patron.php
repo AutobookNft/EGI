@@ -6,7 +6,7 @@ return [
     'meta_description' => 'Patron profile of :name - EGI portfolio and support showcase',
     'default_bio' => 'EGI Patron and digital art supporter in :name profile.',
 
-    // Hero Section  
+    // Hero Section
     'hero_aria_label' => 'Hero section of :name patron profile',
     'avatar_alt' => ':name profile avatar',
     'patron_badge_title' => 'Verified Patron',

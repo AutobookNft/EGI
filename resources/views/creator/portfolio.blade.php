@@ -79,7 +79,7 @@
     {{-- EGI Grid/List --}}
     <div class="min-h-screen bg-gray-800">
         <div class="px-4 py-8 mx-auto max-w-7xl sm:px-6 lg:px-8">
-            
+
             {{-- View Toggle --}}
             <div class="mb-8 flex justify-end">
                 <div class="flex space-x-1">
@@ -113,11 +113,7 @@
             {{-- List View --}}
             <div class="space-y-3">
                 @foreach ($egis as $egi)
-                <x-egi-card-list 
-                    :egi="$egi" 
-                    context="creator" 
-                    :portfolioOwner="$creator"
-                    :showPurchasePrice="false"
+                <x-egi-card-list :egi="$egi" context="creator" :portfolioOwner="$creator" :showPurchasePrice="false"
                     :showOwnershipBadge="true" />
                 @endforeach
             </div>
