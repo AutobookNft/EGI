@@ -28,20 +28,16 @@
         {{-- Mobile Layout Controls --}}
         <div class="flex justify-center mb-6 lg:hidden">
             <div class="flex p-1 bg-gray-800 rounded-lg border border-gray-700">
-                <button 
-                    class="layout-btn px-3 py-2 text-sm font-medium rounded transition-all duration-200 active"
-                    data-layout="2"
-                    aria-label="{{ __('egi.carousel.two_columns') }}">
+                <button class="layout-btn px-3 py-2 text-sm font-medium rounded transition-all duration-200 active"
+                    data-layout="2" aria-label="{{ __('egi.carousel.two_columns') }}">
                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M3 4h18v2H3V4zm0 7h18v2H3v-2zm0 7h18v2H3v-2z"/>
+                        <path d="M3 4h18v2H3V4zm0 7h18v2H3v-2zm0 7h18v2H3v-2z" />
                     </svg>
                 </button>
-                <button 
-                    class="layout-btn px-3 py-2 text-sm font-medium rounded transition-all duration-200 ml-1"
-                    data-layout="3"
-                    aria-label="{{ __('egi.carousel.three_columns') }}">
+                <button class="layout-btn px-3 py-2 text-sm font-medium rounded transition-all duration-200 ml-1"
+                    data-layout="3" aria-label="{{ __('egi.carousel.three_columns') }}">
                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M4 4h16v16H4V4zm2 2v12h12V6H6z"/>
+                        <path d="M4 4h16v16H4V4zm2 2v12h12V6H6z" />
                     </svg>
                 </button>
             </div>
@@ -71,29 +67,32 @@
             {{-- Carousel Track --}}
             <div id="homepage-egi-carousel" class="overflow-hidden">
                 {{-- Mobile Grid Vista Lista (card-list) --}}
-                <div class="mobile-grid-2 grid grid-cols-1 gap-4 lg:hidden transition-all duration-300" id="mobile-grid-2">
+                <div class="mobile-grid-2 grid grid-cols-1 gap-4 lg:hidden transition-all duration-300"
+                    id="mobile-grid-2">
                     @foreach($egis as $egi)
-                        <div class="mobile-item">
-                            <x-egi-card-list :egi="$egi" :context="'carousel'" :showBadge="true" />
-                        </div>
+                    <div class="mobile-item">
+                        <x-egi-card-list :egi="$egi" :context="'carousel'" :showBadge="true" />
+                    </div>
                     @endforeach
                 </div>
 
                 {{-- Mobile Grid Vista Card (card) --}}
-                <div class="mobile-grid-3 hidden grid-cols-1 gap-4 lg:hidden transition-all duration-300" id="mobile-grid-3">
+                <div class="mobile-grid-3 hidden grid-cols-1 gap-4 lg:hidden transition-all duration-300"
+                    id="mobile-grid-3">
                     @foreach($egis as $egi)
-                        <div class="mobile-item">
-                            <x-egi-card :egi="$egi" :showPurchasePrice="true" />
-                        </div>
+                    <div class="mobile-item">
+                        <x-egi-card :egi="$egi" :showPurchasePrice="true" />
+                    </div>
                     @endforeach
                 </div>
 
                 {{-- Desktop Carousel --}}
-                <div class="desktop-carousel hidden lg:flex space-x-4 pb-4 overflow-x-auto scrollbar-hide" id="desktop-carousel-track">
+                <div class="desktop-carousel hidden lg:flex space-x-4 pb-4 overflow-x-auto scrollbar-hide"
+                    id="desktop-carousel-track">
                     @foreach($egis as $egi)
-                        <div class="flex-shrink-0" style="width: 280px;">
-                            <x-egi-card :egi="$egi" :showPurchasePrice="true" />
-                        </div>
+                    <div class="flex-shrink-0" style="width: 280px;">
+                        <x-egi-card :egi="$egi" :showPurchasePrice="true" />
+                    </div>
                     @endforeach
                 </div>
             </div>
@@ -104,10 +103,9 @@
             @for($i = 0; $i < min(5, ceil($egis->count() / 4)); $i++)
                 <button
                     class="w-2 h-2 rounded-full bg-gray-600 hover:bg-purple-500 transition-colors duration-300 carousel-indicator"
-                    data-slide="{{ $i }}"
-                    aria-label="{{ __('egi.carousel.navigation.slide', ['number' => $i + 1]) }}">
+                    data-slide="{{ $i }}" aria-label="{{ __('egi.carousel.navigation.slide', ['number' => $i + 1]) }}">
                 </button>
-            @endfor
+                @endfor
         </div>
 
         @else
@@ -131,16 +129,16 @@
 {{-- Carousel JavaScript --}}
 @if($egis->count() > 0)
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function() {
     // Mobile Layout Switcher
     const layoutBtns = document.querySelectorAll('.layout-btn');
     const mobileGrid2 = document.getElementById('mobile-grid-2');
     const mobileGrid3 = document.getElementById('mobile-grid-3');
-    
+
     layoutBtns.forEach(btn => {
         btn.addEventListener('click', function() {
             const layout = this.dataset.layout;
-            
+
             // Update active button
             layoutBtns.forEach(b => {
                 b.classList.remove('active', 'bg-purple-600', 'text-white');
@@ -148,7 +146,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             this.classList.add('active', 'bg-purple-600', 'text-white');
             this.classList.remove('text-gray-400');
-            
+
             // Toggle between grids
             if (layout === '2') {
                 mobileGrid2.classList.remove('hidden');
@@ -190,7 +188,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const visibleCards = Math.floor(carousel.offsetWidth / cardWidth);
             const currentSlide = Math.floor(currentPosition / cardWidth);
             const maxSlides = Math.max(1, totalCards - visibleCards + 1);
-            
+
             indicators.forEach((indicator, index) => {
                 indicator.classList.toggle('bg-purple-500', index === currentSlide);
                 indicator.classList.toggle('bg-gray-600', index !== currentSlide);
@@ -245,38 +243,42 @@ document.addEventListener('DOMContentLoaded', function() {
 
 {{-- Custom Styles --}}
 <style>
-.scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-}
-
-.scrollbar-hide::-webkit-scrollbar {
-    display: none;
-}
-
-.carousel-indicator {
-    transition: all 0.3s ease;
-}
-
-.carousel-indicator:hover {
-    transform: scale(1.2);
-}
-
-.layout-btn.active {
-    background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
-}
-
-@media (max-width: 1023px) {
-    .mobile-grid-2, .mobile-grid-3 {
-        max-height: 70vh;
-        overflow-y: auto;
+    .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
     }
-}
 
-@media (min-width: 1024px) {
-    .mobile-grid-2, .mobile-grid-3 {
-        display: none !important;
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
     }
-}
+
+    .carousel-indicator {
+        transition: all 0.3s ease;
+    }
+
+    .carousel-indicator:hover {
+        transform: scale(1.2);
+    }
+
+    .layout-btn.active {
+        background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
+    }
+
+    @media (max-width: 1023px) {
+
+        .mobile-grid-2,
+        .mobile-grid-3 {
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+    }
+
+    @media (min-width: 1024px) {
+
+        .mobile-grid-2,
+        .mobile-grid-3 {
+            display: none !important;
+        }
+    }
 </style>
 @endif

@@ -41,6 +41,9 @@ return [
     'meta_description' => 'Discover FlorenceEGI, the ecosystem where art generates shared value and actively contributes to environmental protection and restoration. Join the change.',
 
     // Collection Hero Banner (collection-hero-banner.blade.php)
+    'hero_banner_title' => 'FlorenceEGI – The new digital ecological Renaissance.',
+    'hero_banner_subtitle' => 'Where participation transforms the market into virtue.',
+    'hero_banner_cta' => 'Every artwork you purchase funds real initiatives to protect our environment.',
     'by' => 'by',
     'unknown_artist' => 'Unknown Artist',
     'reserve_this_egi_now' => 'Reserve this EGI Now',

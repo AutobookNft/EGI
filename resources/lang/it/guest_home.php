@@ -41,8 +41,12 @@ return [
     'meta_description' => 'Scopri FlorenceEGI, l\'ecosistema dove l\'arte genera valore condiviso e contribuisce attivamente alla protezione e al ripristino ambientale. Partecipa al cambiamento.',
 
     // Collection Hero Banner (collection-hero-banner.blade.php)
+    'hero_banner_title' => 'FlorenceEGI – Il nuovo Rinascimento ecologico digitale.',
+    'hero_banner_subtitle' => 'Dove la partecipazione trasforma il mercato in virtù.',
+    'hero_banner_cta' => 'Ogni opera che acquisti finanzia iniziative reali per salvaguardare il nostro ambiente.',
     'by' => 'di', // Usato in "Nome Collezione di Nome Artista"
     'unknown_artist' => 'Artista Sconosciuto',
+    'no_collections_available' => 'Nessuna collezione disponibile',
     'reserve_this_egi_now' => 'Prenota questo EGI Ora',
     'no_egi_available_for_reservation' => 'Nessun EGI disponibile per la prenotazione',
     'go_to_slide' => 'Vai alla slide :index', // Per aria-label indicatori

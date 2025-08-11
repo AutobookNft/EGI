@@ -42,6 +42,13 @@
         <div class="absolute inset-0 opacity-75 bg-gradient-to-r from-black/50 via-transparent to-transparent"></div>
     </div>
 
+    {{-- CTA Ambientale - CENTRATA COMPLETAMENTE --}}
+    <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <p class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-green-300 font-bold max-w-4xl leading-tight text-center px-8">
+            {{ __('guest_home.hero_banner_cta') }}
+        </p>
+    </div>
+
     <!-- Contenuto Hero -->
     <div class="absolute inset-0 flex flex-col justify-between p-4 text-white sm:p-6 md:p-8 lg:p-10"> {{-- Ridotto padding mobile p-4 sm:p-6 --}}
         {{-- Riga Superiore: Titolo, Creator, Indicatori --}}
@@ -54,13 +61,13 @@
             <!-- Titolo e creator info -->
             <div class="max-w-xl"> {{-- max-w-xl è già restrittivo, va bene per il centro --}}
                 <h1 class="text-2xl font-bold sm:text-3xl md:text-4xl lg:text-5xl font-display" id="collectionName_{{ $instanceId }}"> {{-- Ridotta dimensione font base mobile --}}
-                    {{ __('FlorenceEGI – Il nuovo Rinascimento ecologico digitale.') }}
+                    {{ __('guest_home.hero_banner_title') }}
                 </h1>
                 <p class="mt-2 text-base opacity-90 sm:text-lg md:text-xl font-body" id="collectionSubText_{{ $instanceId }}"> {{-- Ridotta dimensione font base mobile --}}
                     @if($hasCollections && $firstCollection)
-                        {{ $firstCollection->collection_name }} {{ __('by') }} {{ $firstCollection->creator?->name ?: __('guest_home.unknown_artist') }}
+                        {{ $firstCollection->collection_name }} {{ __('guest_home.by') }} {{ $firstCollection->creator?->name ?: __('guest_home.unknown_artist') }}
                     @else
-                        {{ __('Dove la partecipazione trasforma il mercato in virtù.') }}
+                        {{ __('guest_home.hero_banner_subtitle') }}
                     @endif
                 </p>
             </div>
@@ -74,7 +81,7 @@
                 <div class="flex items-center p-2 mt-4 space-x-2 rounded-full md:mt-0 md:self-start bg-black/30 backdrop-blur-sm" id="slideIndicators_{{ $instanceId }}">
                     @foreach($collections as $index => $collection)
                         <button data-index="{{ $index }}"
-                                aria-label="{{ __('Go to slide :index', ['index' => $index + 1]) }}"
+                                aria-label="{{ __('guest_home.go_to_slide', ['index' => $index + 1]) }}"
                                 class="slide-indicator w-2.5 h-2.5 rounded-full transition-all duration-300 {{ $index === 0 ? 'bg-white scale-125' : 'bg-white/50 hover:bg-white/75' }}">
                         </button>
                     @endforeach
@@ -89,13 +96,13 @@
             @if($collections->count() > 1)
                 <div class="flex order-2 space-x-3 md:order-1">
                     {{-- ... (codice bottoni prev/next come prima) ... --}}
-                     <button id="prevSlide_{{ $instanceId }}" aria-label="{{ __('Previous slide') }}"
+                     <button id="prevSlide_{{ $instanceId }}" aria-label="{{ __('guest_home.previous_slide') }}"
                             class="p-2 text-white transition-colors duration-300 rounded-full sm:p-3 bg-black/40 hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/50">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
                         </svg>
                     </button>
-                    <button id="nextSlide_{{ $instanceId }}" aria-label="{{ __('Next slide') }}"
+                    <button id="nextSlide_{{ $instanceId }}" aria-label="{{ __('guest_home.next_slide') }}"
                             class="p-2 text-white transition-colors duration-300 rounded-full sm:p-3 bg-black/40 hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/50">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
@@ -106,12 +113,13 @@
                 <div class="order-2 md:order-1"></div> {{-- Placeholder per mantenere layout --}}
             @endif
 
-            {{-- Bottone per la prenotazione eliminato --}}
+            <!-- Pulsante Reserve -->
             {{-- @include('partials.collection-hero-banner-reserve-button', [
                 'instanceId' => $instanceId,
                 'hasCollections' => $hasCollections,
                 'firstCollection' => $firstCollection
             ]) --}}
+
         </div>
     </div>
 </div>
@@ -193,7 +201,7 @@
             }
 
             if (collectionSubTextElement) {
-                collectionSubTextElement.textContent = `${currentCollection.name} {{ __('by') }} ${currentCollection.creator}`;
+                collectionSubTextElement.textContent = `${currentCollection.name} {{ __('guest_home.by') }} ${currentCollection.creator}`;
             }
 
             if (reserveButton) {
