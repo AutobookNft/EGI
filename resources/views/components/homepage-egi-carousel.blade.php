@@ -84,8 +84,7 @@ $activatorsCount = \DB::table('users')
                 <button class="px-3 py-2 text-xs font-medium transition-all duration-200 rounded content-type-btn"
                     data-content="collector" aria-label="{{ __('egi.carousel.content_types.collectors') }}">
                     <svg class="inline w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
-                        <path
-                            d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        <path d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
                     <span class="hidden sm:inline">{{ __('egi.carousel.collectors') }}</span>
                 </button>
