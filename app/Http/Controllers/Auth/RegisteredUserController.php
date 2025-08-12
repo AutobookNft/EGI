@@ -200,11 +200,29 @@ class RegisteredUserController extends Controller {
      * @oracode-pillar: Interrogabilità Totale
      */
     protected function validateRegistration(Request $request): array {
+        // 🎯 Dynamic user types from config with fallback
+        $allowedUserTypes = config('app.fegi_user_type', []);
+
+        // 🛡️ Fallback to default user types if config is empty or missing
+        if (empty($allowedUserTypes)) {
+            $allowedUserTypes = [
+                'commissioner',
+                'collector',
+                'creator',
+                'patron',
+                'epp',
+                'company',
+                'trader_pro'
+            ];
+        }
+
+        $userTypeRule = ['required', 'in:' . implode(',', $allowedUserTypes)];
+
         return $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'user_type' => ['required', 'in:creator,patron,collector,enterprise,trader_pro,epp_entity'],
+            'user_type' => $userTypeRule,
 
             // ═══ GDPR REQUIRED ═══
             'privacy_policy_accepted' => ['required', 'accepted'],

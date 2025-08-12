@@ -66,11 +66,29 @@ class RegistrationRequest extends FormRequest
      */
     public function rules(): array
     {
+        // 🎯 Dynamic user types from config with fallback
+        $allowedUserTypes = config('app.fegi_user_type', []);
+        
+        // 🛡️ Fallback to default user types if config is empty or missing
+        if (empty($allowedUserTypes)) {
+            $allowedUserTypes = [
+                'commissioner',
+                'collector', 
+                'creator',
+                'patron',
+                'epp',
+                'company',
+                'trader_pro'
+            ];
+        }
+        
+        $userTypeRule = 'required|in:' . implode(',', $allowedUserTypes);
+
         return [
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
-            'user_type' => 'required|in:collector,creator,patron,enterprise,trader_pro,epp_entity',
+            'user_type' => $userTypeRule,
             'terms_accepted' => 'required|accepted',
         ];
     }
