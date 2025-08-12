@@ -2347,7 +2347,7 @@ class GdprController extends Controller {
         $pdf->SetCreator('FlorenceEGI - Rinascimento Digitale');
         $pdf->SetAuthor('FlorenceEGI');
         $pdf->SetTitle($policy->title);
-        $pdf->SetSubject('Privacy Policy - FlorenceEGI Marketplace NFT Sostenibile');
+        $pdf->SetSubject('Privacy Policy - FlorenceEGI Marketplace EGI Sostenibile');
         $pdf->SetKeywords('Privacy, GDPR, NFT, Blockchain, Sostenibilità, FlorenceEGI');
 
         // ===== HEADER/FOOTER SETUP =====
