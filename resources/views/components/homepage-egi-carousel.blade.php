@@ -80,25 +80,26 @@ $activatorsCount = \DB::table('users')
                     <span class="hidden sm:inline">{{ __('egi.carousel.creators') }}</span>
                 </button>
 
-                {{-- Collection Button --}}
-                <button class="px-3 py-2 text-xs font-medium transition-all duration-200 rounded content-type-btn"
-                    data-content="collection" aria-label="{{ __('egi.carousel.content_types.collections') }}">
-                    <svg class="inline w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
-                        <path
-                            d="M20 6h-2.18c.11-.31.18-.65.18-1a2.996 2.996 0 0 0-5.5-1.65l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-5-2c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM9 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1z" />
-                    </svg>
-                    <span class="hidden sm:inline">{{ __('egi.carousel.collections') }}</span>
-                </button>
-
                 {{-- Collector Button --}}
                 <button class="px-3 py-2 text-xs font-medium transition-all duration-200 rounded content-type-btn"
                     data-content="collector" aria-label="{{ __('egi.carousel.content_types.collectors') }}">
                     <svg class="inline w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
                         <path
-                            d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                            d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
                     <span class="hidden sm:inline">{{ __('egi.carousel.collectors') }}</span>
                 </button>
+
+                {{-- Collection Button --}}
+                <button class="px-3 py-2 text-xs font-medium transition-all duration-200 rounded content-type-btn"
+                    data-content="collection" aria-label="{{ __('egi.carousel.content_types.collections') }}">
+                    <svg class="inline w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
+                        <path
+                            d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-4h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zm-3-3h2c.55 0 1-.45 1-1s-.45-1-1-1H8c-.55 0-1 .45-1 1s.45 1 1 1zm6 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zm-3-3h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1z" />
+                    </svg>
+                    <span class="hidden sm:inline">{{ __('egi.carousel.collections') }}</span>
+                </button>
+
             </div>
         </div>
 

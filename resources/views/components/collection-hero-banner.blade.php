@@ -78,13 +78,13 @@ return [
                 </p>
             </div>
 
-            {{-- Indicatori di scorrimento (pallini) --}}
+            {{-- Indicatori di scorrimento (pallini) - NASCOSTI su mobile --}}
             @if($collections->count() > 1)
-            {{-- Su mobile, questo div sarà centrato perché il genitore ha items-center.
+            {{-- Su mobile, questo div sarà NASCOSTO.
             Su md+, md:self-start lo allinea all'inizio del contenitore flex laterale (a destra).
             Aggiunto md:mt-0 per resettare il margine su schermi più grandi se il titolo è corto.
             --}}
-            <div class="flex items-center p-2 mt-4 space-x-2 rounded-full md:mt-0 md:self-start bg-black/30 backdrop-blur-sm"
+            <div class="hidden md:flex items-center p-2 mt-4 space-x-2 rounded-full md:mt-0 md:self-start bg-black/30 backdrop-blur-sm"
                 id="slideIndicators_{{ $instanceId }}">
                 @foreach($collections as $index => $collection)
                 <button data-index="{{ $index }}"

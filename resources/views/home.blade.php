@@ -17,27 +17,35 @@
             :collectors="$topCollectors" />
     </x-slot>
 
-    {{-- Contenuto SOTTO il testo hero: Collezioni in Evidenza NFT Style --}}
+    {{-- Contenuto SOTTO il testo hero: Collezioni in Evidenza NFT Style - NASCOSTO su mobile --}}
     <x-slot name="belowHeroContent">
-        <x-creators-carousel :creators="$featuredCreators" title="{{ __('guest_home.featured_creators_title') }}"
-            bgClass="bg-gray-900" marginClass="mb-12" />
+        <div class="hidden lg:block">
+            <x-creators-carousel :creators="$featuredCreators" title="{{ __('guest_home.featured_creators_title') }}"
+                bgClass="bg-gray-900" marginClass="mb-12" />
+        </div>
     </x-slot>
 
-    {{-- Carousel Top Collectors - Nuovo slot --}}
+    {{-- Carousel Top Collectors - Nuovo slot - NASCOSTO su mobile --}}
     <x-slot name="belowHeroContent_0_5">
-        <x-collector-carousel :collectors="$topCollectors" />
+        <div class="hidden lg:block">
+            <x-collector-carousel :collectors="$topCollectors" />
+        </div>
     </x-slot>
 
-    {{-- Nuovo slot per il carousel dei Creator --}}
+    {{-- Nuovo slot per il carousel dei Creator - NASCOSTO su mobile --}}
     <x-slot name="belowHeroContent_1">
-        <x-collections-carousel :collections="$featuredCollections" title="Collezioni in Evidenza" bgClass="bg-gray-900"
-            marginClass="mb-12" />
+        <div class="hidden lg:block">
+            <x-collections-carousel :collections="$featuredCollections" title="Collezioni in Evidenza" bgClass="bg-gray-900"
+                marginClass="mb-12" />
+        </div>
     </x-slot>
 
     <x-slot name="belowHeroContent_2">
-        {{-- Sezione: Ultime Gallerie Arrivate con effetti NFT --}}
-        <x-collections-carousel :collections="$latestCollections" title={{ __('guest_home.latest_galleries_title') }}
-            bgClass="bg-gray-900" marginClass="mb-12" />
+        {{-- Sezione: Ultime Gallerie Arrivate con effetti NFT - NASCOSTO su mobile --}}
+        <div class="hidden lg:block">
+            <x-collections-carousel :collections="$latestCollections" title={{ __('guest_home.latest_galleries_title') }}
+                bgClass="bg-gray-900" marginClass="mb-12" />
+        </div>
     </x-slot>
 
     {{-- Sezione: Protagonisti e Attori dell'Ecosistema --}}
