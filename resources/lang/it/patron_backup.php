@@ -1,18 +1,26 @@
 <?php
 
-return [
-    // Informazioni pagina
-    'page_lang' => 'it',
-    'page_title' => 'Diventa Mecenate - Il Nuovo Rinascimento dell\'Arte Digitale | FlorenceEGI',
-    'page_description' => 'Scopri come diventare Mecenate in FlorenceEGI e trasforma la tua passione per l\'arte in una professione gratificante e sostenibile.',
-    'page_keywords' => 'mecenate, arte digitale, FlorenceEGI, blockchain, NFT, arte sostenibile, Rinascimento Digitale',
+/**
+ * Traduzioni per il minisito Patron/Mecenate
+ * 
+ * @package FlorenceEGI
+ * @author AI Assistant for Fabio Cherici  
+ * @version 1.0.0
+ * @date 2025-01-25
+ * @purpose Traduzioni complete per la pagina archetipo Mecenate
+ */
 
-    // Sezione hero
+return [
+    // Meta e Header
+    'page_title' => 'FlorenceEGI per il Mecenate: Ponte tra Arte e Futuro Virtuoso',
+    'page_lang' => 'it',
+    
+    // Header principale
     'hero' => [
-        'title' => 'Il Mecenate: Architetto del Nuovo Rinascimento',
-        'subtitle' => 'Trasforma la tua passione per l\'arte in una carriera gratificante e sostenibile',
-        'cta_button' => 'Inizia il Tuo Viaggio',
-        'intro_subtitle' => 'Il ponte tra talento artistico e successo sostenibile',
+        'title' => 'Il Mecenate del Nuovo Rinascimento',
+        'subtitle' => 'Trasforma la tua passione per l\'arte in un impatto concreto e duraturo',
+        'cta_button' => 'Scopri il Tuo Ruolo nel Nuovo Rinascimento',
+        'intro_subtitle' => 'Oltre il collezionista. Oltre l\'investitore. Un catalizzatore di valore.'
     ],
 
     // Navigazione sidebar
@@ -36,49 +44,56 @@ return [
     'global_nav' => [
         'home' => 'Home',
         'creator' => 'Creator',
-        'collectors' => 'Collectors',
+        'collectors' => 'Collezionisti',
         'trader_pro' => 'Trader Pro',
         'epp' => 'EPP',
-        'companies' => 'Companies',
+        'companies' => 'Aziende',
         'vip' => 'VIP',
     ],
 
     // Sezione introduzione
     'intro' => [
-        'title' => 'Il Mecenate in FlorenceEGI: Una Nuova Espressione di Curatela e Impatto',
-        'description' => 'Il Mecenate in FlorenceEGI incarna una figura innovativa e dinamica nel panorama dell\'arte digitale. Non è un gallerista nel senso tradizionale, né unicamente un investitore; è molto di più.',
-        'facilitator_title' => 'Facilitatore di Connessioni',
-        'facilitator_desc' => 'Connetti artisti con opportunità e collezionisti, creando valore per tutti.',
-        'promoter_title' => 'Promotore di Talenti',
-        'promoter_desc' => 'Aiuti gli artisti a emergere e a far conoscere il loro lavoro al mondo.',
-        'partner_title' => 'Partner Strategico',
-        'partner_desc' => 'Partecipi attivamente al successo delle opere che promuovi.',
-        'agent_title' => 'Agente di Cambiamento',
-        'agent_desc' => 'Contribuisci al Rinascimento Ecologico Digitale dell\'arte.',
+        'facilitator_title' => 'Un Facilitatore Culturale',
+        'facilitator_desc' => 'Aiuta gli artisti a esplorare e a prosperare nel contesto digitale, offrendo supporto nel navigare le nuove frontiere espressive.',
+        
+        'promoter_title' => 'Un Promotore Illuminato', 
+        'promoter_desc' => 'Utilizza la propria rete di relazioni per amplificare la risonanza delle opere, connettendo artisti e collezionisti.',
+        
+        'partner_title' => 'Un Partner per la Crescita',
+        'partner_desc' => 'Cresce in sinergia con gli artisti che decide di sostenere, creando relazioni durature e significative.',
+        
+        'agent_title' => 'Un Agente di Trasformazione',
+        'agent_desc' => 'Ogni azione intrapresa genera un impatto ambientale positivo e misurabile, contribuendo alla rigenerazione del pianeta.',
     ],
 
-    // Sezione ruolo
+    // Sezione ruolo concreto
     'role' => [
         'title' => 'Il Tuo Ruolo Concreto nel Nuovo Rinascimento',
-        'discovery_title' => 'Scoperta e Selezione',
-        'discovery_desc' => 'Identifica artisti emergenti con potenziale unico, <strong>senza necessità di conoscenze tecniche avanzate</strong>.',
-        'technical_title' => 'Supporto Tecnico Semplificato',
-        'technical_desc' => 'Aiuti gli artisti nella <strong>digitalizzazione delle opere</strong> utilizzando strumenti intuitivi forniti da FlorenceEGI.',
-        'publication_title' => 'Pubblicazione e Presentazione',
-        'publication_desc' => 'Curi la <strong>presentazione delle opere</strong> sulla piattaforma, con descrizioni coinvolgenti e storytelling efficace.',
-        'network_title' => 'Attivazione del Network',
-        'network_desc' => 'Sfrutti la <strong>tua rete personale</strong> e quella di FlorenceEGI per promuovere le opere e trovare collezionisti.',
-        'relationships_title' => 'Gestione delle Relazioni',
-        'relationships_desc' => 'Mantieni <strong>rapporti continuativi</strong> con artisti e collezionisti, costruendo un ecosistema duraturo.',
-        'earning_title' => 'Guadagno Sostenibile',
-        'earning_desc' => 'Generi <strong>entrate immediate e passive</strong> per ogni vendita facilitata, con royalty perpetue sulle rivendite.',
+        
+        'discovery_title' => 'Scoperta e Valorizzazione',
+        'discovery_desc' => '<strong>Identificare e valorizzare talenti</strong> artistici nel tuo contesto locale o attraverso le piattaforme digitali.',
+        
+        'technical_title' => 'Assistenza Tecnica',
+        'technical_desc' => '<strong>Assistere gli artisti nella dimensione tecnica</strong>, permettendo loro di focalizzarsi sulla creazione.',
+        
+        'publication_title' => 'Pubblicazione Opere',
+        'publication_desc' => '<strong>Contestualizzare e pubblicare le opere</strong> sulla piattaforma FlorenceEGI.',
+        
+        'network_title' => 'Attivazione Network',
+        'network_desc' => '<strong>Attivare la tua rete di contatti</strong> per agevolare la vendita delle opere.',
+        
+        'relationships_title' => 'Costruzione Relazioni',
+        'relationships_desc' => '<strong>Costruire relazioni durature</strong> con artisti e collezionisti, diventando un punto di riferimento nel settore.',
+        
+        'earning_title' => 'Guadagno Attivo',
+        'earning_desc' => '<strong>Realizzare un guadagno percentuale</strong> su ogni successo generato. E tutto questo è accessibile <strong>SENZA richiedere alcun investimento economico iniziale</strong>.',
     ],
 
     // Sezione diventare mecenate
     'becoming' => [
         'title' => 'Diventare Mecenate: La Via al Nuovo Rinascimento aperta a Tutti',
         'subtitle' => 'Non è richiesto un percorso accademico tradizionale o esperienze pregresse nel settore.',
-
+        
         'not_required' => [
             'title' => 'Non Servono:',
             'item1' => 'Laurea in storia dell\'arte o discipline affini.',
@@ -87,7 +102,7 @@ return [
             'item4' => 'Ufficio o uno spazio espositivo fisico.',
             'item5' => 'Connessioni preesistenti nell\'élite artistica.',
         ],
-
+        
         'required' => [
             'title' => 'Ciò che davvero alimenta il successo di un Mecenate:',
             'item1' => 'Una sincera e profonda passione per l\'arte.',
@@ -96,23 +111,23 @@ return [
             'item4' => 'La disponibilità di poche ore alla settimana.',
             'item5' => 'Un semplice smartphone o un computer.',
         ],
-
+        
         'conclusion' => 'FlorenceEGI democratizza l\'accesso al mondo dell\'arte, permettendo a chiunque, con la giusta dedizione, di diventare un Mecenate.',
     ],
 
     // Sezione percorso di successo
     'success_path' => [
         'title' => 'Il Percorso da zero a Mecenate di Successo: Passo dopo Passo',
-
+        
         'phase1_title' => 'Fase 1: Inizia (Prime 1-2 Settimane)',
         'phase1_desc' => 'Iscrizione gratuita, training online di 2 ore, ricezione del kit digitale completo, ingresso nella community Mecenati.',
-
-        'phase2_title' => 'Fase 2: Scopri (Primo Mese)',
+        
+        'phase2_title' => 'Fase 2: Scopri (Primo Mese)', 
         'phase2_desc' => 'Identificazione di 2-3 artisti nel tuo network o territorio, contatto e spiegazione dell\'opportunità, utilizzo dei materiali forniti da FlorenceEGI. Nessuna spesa richiesta.',
-
+        
         'phase3_title' => 'Fase 3: Attiva (Mesi 2-3)',
         'phase3_desc' => 'Aiuto agli artisti nel caricamento delle prime opere, redazione descrizioni con AI, condivisione nel network personale, sfruttamento marketing gratuito della piattaforma.',
-
+        
         'phase4_title' => 'Fase 4: Cresci (Dal Mese 4 in poi)',
         'phase4_desc' => 'Le prime vendite generano commissioni, possibilità di reinvestire (opzionalmente) in strategie di marketing più mirate, espansione del portfolio artisti, costruzione della tua reputazione.',
     ],
@@ -122,7 +137,7 @@ return [
         'title' => 'Il Modello Economico: Come Generare Valore Fin da Subito',
         'subtitle' => 'Le Tue Entrate come Mecenate',
         'intro' => 'Quando faciliti una vendita, sia attraverso la TUA rete di contatti che sfruttando quella di FlorenceEGI, il valore viene distribuito secondo lo schema seguente:',
-
+        
         'primary_market' => [
             'title' => 'Mercato Primario (Prima Vendita dell\'Opera)',
             'table' => [
@@ -134,7 +149,7 @@ return [
             ],
             'note' => '* _Tu e l\'artista definirete liberamente la suddivisione di questa percentuale. Tipicamente, la quota del Mecenate si attesta tra il 15% e il 30%._',
         ],
-
+        
         'secondary_market' => [
             'title' => 'Mercato Secondario (Rivendite) - Rendita Passiva Perpetua',
             'table' => [
@@ -153,7 +168,7 @@ return [
     'success_stories' => [
         'title' => 'Storie di Successo: Da Appassionato a Imprenditore dell\'Arte Virtuosa',
         'subtitle' => 'Scopri come diverse persone hanno trasformato la loro passione in una professione gratificante, contribuendo attivamente al nostro Rinascimento Ecologico Digitale.',
-
+        
         'maria' => [
             'title' => 'Maria, 35 anni, Social Media Manager',
             'context_label' => 'Contesto',
@@ -167,7 +182,7 @@ return [
             'result_y2_label' => 'Anno 2',
             'result_y2' => 'Lascia il part-time, 40.000€ di ricavi.',
         ],
-
+        
         'giuseppe' => [
             'title' => 'Giuseppe, 28 anni, Neolaureato in Economia',
             'context_label' => 'Contesto',
@@ -181,7 +196,7 @@ return [
             'today_label' => 'Oggi',
             'today' => 'Mecenate di riferimento per crypto art.',
         ],
-
+        
         'anna' => [
             'title' => 'Anna, 45 anni, Insegnante',
             'context_label' => 'Contesto',
@@ -200,7 +215,7 @@ return [
     // Sezione strumenti e supporto
     'tools_support' => [
         'title' => 'Gli Strumenti e il Supporto che FlorenceEGI ti Offre GRATUITAMENTE',
-
+        
         'training' => [
             'title' => 'Formazione Completa e Certificata',
             'item1' => 'Video corso "Da Zero a Mecenate".',
@@ -208,7 +223,7 @@ return [
             'item3' => 'Certificazione FlorenceEGI Mecenate.',
             'item4' => 'Aggiornamenti continui sul mercato.',
         ],
-
+        
         'marketing' => [
             'title' => 'Kit Marketing Professionale',
             'item1' => 'Template per presentazioni.',
@@ -216,7 +231,7 @@ return [
             'item3' => 'Email sequences testate.',
             'item4' => 'Media kit per artisti.',
         ],
-
+        
         'technology' => [
             'title' => 'Tecnologia All-Inclusive',
             'item1' => 'Dashboard gestione artisti.',
@@ -224,7 +239,7 @@ return [
             'item3' => 'AI per descrizioni opere.',
             'item4' => 'Tool per virtual gallery.',
         ],
-
+        
         'community' => [
             'title' => 'Supporto e Comunità Dedicata',
             'item1' => 'Gruppo privato Mecenati.',
@@ -233,11 +248,42 @@ return [
             'item4' => 'Eventi networking.',
         ],
     ],
+        
+        'marketing' => [
+            'title' => 'Kit Marketing Professionale',
+            'items' => [
+                'Template per presentazioni e email.',
+                'Materiali grafici personalizzabili.',
+                'Script di vendita e guida alla comunicazione.',
+                'Accesso alle campagne di marketing globali.',
+            ],
+        ],
+        
+        'technology' => [
+            'title' => 'Tecnologia All-Inclusive',
+            'items' => [
+                'Piattaforma completa per la gestione degli artisti.',
+                'Strumenti AI per la creazione di descrizioni.',
+                'Dashboard analytics per monitorare le performance.',
+                'App mobile per gestire tutto ovunque tu sia.',
+            ],
+        ],
+        
+        'support' => [
+            'title' => 'Supporto e Comunità Dedicata',
+            'items' => [
+                'Mentoring personalizzato nei primi 90 giorni.',
+                'Community privata di Mecenati per condivisione esperienze.',
+                'Supporto tecnico 24/7 in italiano.',
+                'Eventi networking mensili (online e offline).',
+            ],
+        ],
+    ],
 
     // Sezione sfaccettature del ruolo
     'role_facets' => [
         'title' => 'Le Diverse Sfaccettature del Ruolo di Mecenate',
-
+        
         'local' => [
             'title' => 'Il Mecenate Locale',
             'item1' => 'Focus su artisti del territorio.',
@@ -246,7 +292,7 @@ return [
             'earning' => 'Guadagno tipico',
             'earning_amount' => '20-30K€/anno.',
         ],
-
+        
         'digital' => [
             'title' => 'Il Mecenate Digitale',
             'item1' => 'Lavora 100% online.',
@@ -255,7 +301,7 @@ return [
             'potential' => 'Potenziale',
             'potential_amount' => '50-100K€/anno.',
         ],
-
+        
         'social' => [
             'title' => 'Il Mecenate Social',
             'item1' => 'Usa Instagram/TikTok per promuovere.',
@@ -264,7 +310,7 @@ return [
             'mix' => 'Mix',
             'mix_desc' => 'commissioni + sponsorship.',
         ],
-
+        
         'educator' => [
             'title' => 'Il Mecenate Formatore (Educator)',
             'item1' => 'Organizza workshop per artisti.',
@@ -275,10 +321,16 @@ return [
         ],
     ],
 
-    // Sezione FAQ
+    // Sezione intro aggiuntiva
+    'intro' => [
+        'title' => 'Il Mecenate in FlorenceEGI: Una Nuova Espressione di Curatela e Impatto',
+        'description' => 'Il Mecenate in FlorenceEGI incarna una figura innovativa e dinamica nel panorama dell\'arte digitale. Non è un gallerista nel senso tradizionale, né unicamente un investitore; è molto di più.',
+    ],
+
+    // Sezione FAQ aggiornata
     'faq' => [
         'title' => 'Domande Frequenti: Chiarimenti sul Tuo Percorso di Mecenate',
-
+        
         'blockchain' => [
             'q' => '"Ma io non capisco nulla di blockchain e NFT..."',
             'a' => 'Assolutamente no. Il 90% degli artisti, così come molti aspiranti Mecenati, non ha questa conoscenza approfondita. Il tuo ruolo è proprio quello di facilitare l\'aspetto umano e relazionale. La complessità tecnologica è interamente gestita da FlorenceEGI.',
@@ -316,6 +368,140 @@ return [
         'requirement1' => 'Completare il training entro 30 giorni.',
         'requirement2' => 'Attivare almeno 1 artista entro 60 giorni.',
         'requirement3' => 'Partecipare alla community attivamente.',
+    ],
+                'a' => 'Non è richiesto alcun investimento iniziale. Potrai sfruttare il TUO network, i TUOI canali social e le strategie di marketing gratuito offerte da FlorenceEGI. I guadagni arriveranno una volta che le opere saranno vendute.',
+            ],
+            'find_artists' => [
+                'q' => 'Come faccio a trovare artisti se non conosco nessuno nel settore?',
+                'a' => 'Gli artisti sono ovunque: su Instagram, nei mercatini d\'arte locali, nelle scuole d\'arte, nelle associazioni culturali. Ti forniremo guide e script per contattarli e presentarli l\'opportunità.',
+            ],
+            'artist_leaves' => [
+                'q' => 'Cosa succede se un artista che seguo decide di lasciare FlorenceEGI?',
+                'a' => 'Gli accordi sono tutelati tramite blockchain. Le royalty che hai già maturato rimangono tue in modo permanente. Avrai inoltre acquisito un\'esperienza preziosa per le future collaborazioni.',
+            ],
+            'time_commitment' => [
+                'q' => 'Quanto tempo devo dedicare settimanalmente per avere successo?',
+                'a' => 'La flessibilità è uno dei punti di forza. Alcuni Mecenati dedicano 5 ore settimanali e generano un reddito extra. Altri ne fanno una vera e propria carriera a tempo pieno. Dipende dalle tue ambizioni e dalla tua disponibilità.',
+            ],
+        ],
+    ],
+
+    // Sezione programma pioneer
+    'pioneer' => [
+        'title' => 'Il Programma Pioneer: Un Vantaggio Esclusivo per i Primi Mecenati',
+        'intro' => 'Per coloro che abbracciano questa visione fin da subito, abbiamo riservato un programma con benefici unici.',
+        'exclusive_title' => 'Vantaggi Esclusivi per i Primi 100 Mecenati:',
+        'benefits' => [
+            'Commissione maggiorata del 20% (invece del 15% standard).',
+            'Royalty passive del 3% (invece del 2% standard).',
+            'Accesso prioritario agli artisti emergenti più promettenti.',
+            'Mentoring individuale con i founder di FlorenceEGI.',
+            'Riconoscimento ufficiale come "Pioneer Patron" sulla piattaforma.',
+            'Partecipazione al consiglio consultivo per le future evoluzioni.',
+        ],
+        'requirements_title' => 'Requisiti per Accedere al Programma Pioneer:',
+        'requirements' => [
+            'Completare la formazione entro 30 giorni dall\'iscrizione.',
+            'Portare almeno 3 artisti attivi nei primi 60 giorni.',
+            'Partecipare attivamente alla community e agli eventi.',
+            'Mantenere standard qualitativi elevati nella selezione degli artisti.',
+        ],
+    ],
+
+    // Sezione inizia oggi
+    'start_today' => [
+        'title' => 'Inizia Oggi il Tuo Percorso nel Nuovo Rinascimento',
+        
+        'step1' => [
+            'title' => 'Informati',
+            'desc' => 'Prenota una chiamata gratuita di 30 minuti con il nostro team per chiarire dubbi e valutare la tua situazione specifica.',
+        ],
+        
+        'step2' => [
+            'title' => 'Candidati', 
+            'desc' => 'Compila il form di candidatura. Ti contatteremo entro 48 ore per una prima valutazione.',
+        ],
+        
+        'step3' => [
+            'title' => 'Formati',
+            'desc' => 'Accedi al percorso formativo completo. 2 ore di video + materiali + accesso alla community.',
+        ],
+        
+        'step4' => [
+            'title' => 'Lancia',
+            'desc' => 'Inizia a identificare e contattare i primi artisti con il supporto del nostro team per i primi 90 giorni.',
+        ],
+    ],
+
+    // Sezione contatti
+    'contacts' => [
+        'title' => 'Contatti e Risorse: Siamo Qui per Te',
+        
+        'contact_info' => [
+            'title' => 'Contatti',
+            'email' => 'academy@florenceegi.com',
+            'whatsapp' => '[numero] - Scrivi "MECENATE"',
+            'website' => 'www.florenceegi.com/diventa-mecenate',
+            'youtube' => 'FlorenceEGI Academy',
+        ],
+        
+        'resources' => [
+            'title' => 'Risorse Utili',
+            'items' => [
+                'Guida PDF gratuita: "I Primi 10 Passi del Mecenate"',
+                'Video-testimonianze dei Mecenati Pioneer',
+                'Calcolatore di guadagni potenziali',
+                'Template per il primo contatto con gli artisti',
+            ],
+        ],
+        
+        'cta' => [
+            'title' => 'Non aspettare. Il Nuovo Rinascimento inizia oggi.',
+            'subtitle' => 'E tu puoi esserne protagonista.',
+            'button' => 'CANDIDATI COME MECENATE PIONEER',
+        ],
+    ],
+
+    // Call to Action finali
+    'final_cta' => [
+        'vision' => 'La nostra visione è ambiziosa: creare un ecosistema dove l\'arte diventa un catalizzatore per la sostenibilità ambientale, dove ogni creazione contribuisce attivamente alla rigenerazione del pianeta.',
+        'role_importance' => 'Il tuo ruolo è fondamentale per realizzare questa visione.',
+        'waiting' => 'Ti stiamo aspettando.',
+    ],
+
+    // Traduzioni esistenti del profilo (mantenute per compatibilità)
+    'title_suffix' => 'Profilo Mecenate',
+    'meta_description' => 'Profilo mecenate di :name - Portfolio e supporto EGI in vetrina',
+    'default_bio' => 'Mecenate EGI e sostenitore di arte digitale nel profilo di :name.',
+    'hero_aria_label' => 'Sezione hero del profilo mecenate di :name',
+    'avatar_alt' => 'Avatar del profilo di :name',
+    'patron_badge_title' => 'Mecenate Verificato',
+    'patron_sr' => 'Badge Mecenate Verificato',
+    'patron_title' => 'Mecenate EGI',
+    'member_since' => 'Membro dal :year',
+    'follow_aria' => 'Segui il mecenate :name',
+    'follow_button' => 'Segui',
+    'message_aria' => 'Invia messaggio a :name',
+    
+    'home' => [
+        'navigation_aria' => 'Navigazione principale profilo mecenate',
+        'overview_tab' => 'Panoramica',
+        'portfolio_tab' => 'Portfolio',
+        'collections_tab' => 'Collezioni',
+    ],
+    
+    'portfolio' => [
+        'title' => 'Portfolio',
+        'subtitle' => 'Portfolio Supporto EGI',
+        'meta_description' => 'Portfolio EGI supportati da :name - Vetrina supporto completo',
+        'total_egis' => 'EGI Supportati',
+        'collections' => 'Collezioni',
+        'total_value' => 'Valore Totale Supporto',
+        'supported' => 'Supportato',
+        'supported_for' => 'Supportato per',
+        'empty_title' => 'Nessun EGI Supportato',
+        'empty_description' => 'Questo mecenate non ha ancora supportato nessun EGI. Esplora il marketplace per scoprire arte digitale straordinaria da supportare.',
+        'discover_button' => 'Esplora Marketplace',
     ],
 
     'start_today' => [

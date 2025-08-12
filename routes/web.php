@@ -145,6 +145,11 @@ Route::get('/archetypes/patron', function () {
     return view('archetypes.patron');
 })->name('archetypes.patron');
 
+Route::get('/archetypes/collector', function () {
+    return view('archetypes.collector');
+})->name('archetypes.collector');
+
+
 /*
 |--------------------------------------------------------------------------
 | Collector Routes - Public Profiles & Portfolios

@@ -13,6 +13,19 @@ return [
     'schema_website_description' => 'Platform for the creation and exchange of Ecological Goods Invent (EGI) that fund environmental projects.',
     'schema_organization_name' => 'Frangette Cultural Promotion Association',
 
+    // User Types
+    'fegi_user_type' => [
+        'committee' => 'Activator',
+        'collector' => 'Collector',
+        'commissioner' => 'Commissioner',
+        'creator' => 'Creator',
+        'patron' => 'Patron',
+        'epp' => 'EPP',
+        'company' => 'Company',
+        'trader_pro' => 'Professional Trader',
+        'natan' => 'Natan',
+    ],
+
     // Header/Navbar
     'header_aria_label' => 'Site header',
     'logo_aria_label' => 'Go to Florence EGI Homepage',

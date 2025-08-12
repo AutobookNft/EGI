@@ -38,7 +38,7 @@ return [
     |--------------------------------------------------------------------------
     */
     'fegi_user_type' => [
-        'committee',
+        'commissioner',
         'collector',
         'creator',
         'patron',
@@ -48,6 +48,7 @@ return [
     ],
 
     'role_mapping' => [
+        'commissioner' => 'commissioner',
         'creator' => 'creator',
         'patron' => 'patron',
         'collector' => 'collector',

@@ -190,6 +190,11 @@ class RolesAndPermissionsSeeder extends Seeder
         // Legal Compliance Monitoring
         'legal.compliance.monitor',
         'legal.compliance.report',
+
+        // ✅ NUOVI PERMESSI PER VISIBILITÀ COMMISSIONER
+        'display_public_avatar_on_egi', // Permette di mostrare l'avatar (Spatie) sull'EGI
+        'display_public_name_on_egi',   // Permette di mostrare nome e cognome sull'EGI 
+
     ];
 
     private $roles = [
@@ -348,6 +353,40 @@ class RolesAndPermissionsSeeder extends Seeder
             'can_request_deletion',
             'manage_own_biographies',
             'manage_bio_profile',
+        ],
+
+        // ═══ NUOVO RUOLO COMMISSIONER (AGGIUNTO) ═══
+        'commissioner' => [
+            // Eredita TUTTI i permessi del Collector...
+            'access_dashboard', 'view_dashboard', 'view_collection', 'view_EGI',
+            'view_statistics', 'view_documentation', 'view_collection_header',
+            'buy_egi', 'manage_personal_collection', 'trade_egi', 'collection_wishlist',
+            'view_marketplace', 'browse_marketplace', 'make_offers', 'accept_offers', 'rate_transactions',
+            'manage_profile', 'manage_account', 'view_profile',
+            'manage_consents', 'manage_privacy', 'export_personal_data', 'delete_account',
+            'view_activity_log', 'view_privacy_policy', 'edit_personal_data', 'limit_data_processing',
+            'edit_own_profile_data',
+            'edit_own_personal_data',
+            'manage_own_documents',
+            'manage_own_invoice_preferences',
+            'upload_identity_documents',
+            'verify_document_status',
+            'download_own_documents',
+            'configure_invoice_preferences',
+            'view_own_invoices',
+            'download_own_invoices',
+            'access_full_dashboard',
+            'view_own_wallet_address',
+            'priority_reservations',
+            'full_auction_access',
+            'can_request_export',
+            'can_request_deletion',
+            'manage_own_biographies',
+            'manage_bio_profile',
+
+            // ...e in più ha i permessi di visibilità pubblica.
+            'display_public_avatar_on_egi',
+            'display_public_name_on_egi',
         ],
 
         'enterprise' => [
@@ -589,8 +628,9 @@ class RolesAndPermissionsSeeder extends Seeder
         $this->createLegalUser();
 
         $this->command->info('Ruoli e permessi creati/aggiornati con successo.');
-        $this->command->info('Nuovi ruoli aggiunti: patron, collector, enterprise, trader_pro, epp_entity');
+        $this->command->info('Nuovi ruoli aggiunti: patron, collector, enterprise, trader_pro, epp_entity, commissioner');
         $this->command->info('create_collection permission assegnato a: creator, patron, enterprise');
+
     }
 
     private function createLegalUser(): void

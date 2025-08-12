@@ -64,20 +64,20 @@ $imageUrl = asset("images/logo/$logo");
 @if ($creator)
 {{-- Creator Card List Component --}}
 <article
-    class="creator-card-list group relative bg-gray-800/50 rounded-xl p-4 border border-gray-700/50 hover:border-gray-600 hover:bg-gray-800/70 transition-all duration-300"
+    class="relative p-4 transition-all duration-300 border creator-card-list group bg-gray-800/50 rounded-xl border-gray-700/50 hover:border-gray-600 hover:bg-gray-800/70"
     data-creator-id="{{ $creator->id }}">
 
     <div class="flex items-start gap-4">
         <!-- Avatar Section -->
         <a href="{{ route('creator.home', ['id' => $creator->id]) }}"
-            class="relative flex-shrink-0 w-28 h-28 overflow-hidden rounded-lg bg-gradient-to-br from-gray-700 to-gray-800 cursor-pointer group-hover:ring-2 group-hover:ring-purple-400 transition-all duration-300">
+            class="relative flex-shrink-0 overflow-hidden transition-all duration-300 rounded-lg cursor-pointer w-28 h-28 bg-gradient-to-br from-gray-700 to-gray-800 group-hover:ring-2 group-hover:ring-purple-400">
 
             <img src="{{ $imageUrl }}" alt="{{ $creator->first_name }} {{ $creator->last_name }}"
                 class="object-cover w-full h-full transition-transform duration-300 group-hover:scale-110">
 
             <!-- Hover overlay for visual feedback -->
             <div
-                class="absolute inset-0 bg-purple-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                class="absolute inset-0 flex items-center justify-center transition-opacity duration-300 opacity-0 bg-purple-400/20 group-hover:opacity-100">
                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round"
                         d="M13.5 6H5.25A2.25 2.25 0 003 8.25v7.5A2.25 2.25 0 005.25 18h7.5A2.25 2.25 0 0015 15.75v-7.5A2.25 2.25 0 0013.5 6z" />
@@ -89,7 +89,7 @@ $imageUrl = asset("images/logo/$logo");
             @if ($rank)
             <div class="absolute -left-2 -top-2">
                 <div
-                    class="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 ring-2 ring-gray-800 text-white font-bold text-sm">
+                    class="flex items-center justify-center w-8 h-8 text-sm font-bold text-white rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 ring-2 ring-gray-800">
                     #{{ $rank }}
                 </div>
             </div>
@@ -134,12 +134,12 @@ $imageUrl = asset("images/logo/$logo");
             </h3>
 
             @if ($creator->username)
-            <p class="text-sm text-gray-400 mb-2">@{{ $creator->username }}</p>
+            <p class="mb-2 text-sm text-gray-400">@{{ $creator->username }}</p>
             @endif
 
             <!-- Bio/Description -->
             @if ($creator->bio)
-            <p class="text-sm text-gray-400 mb-2 line-clamp-2">
+            <p class="mb-2 text-sm text-gray-400 line-clamp-2">
                 {{ Str::limit($creator->bio, 120) }}
             </p>
             @endif
@@ -153,7 +153,7 @@ $imageUrl = asset("images/logo/$logo");
                             d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
                             clip-rule="evenodd" />
                     </svg>
-                    <span class="text-purple-300 font-medium">{{ $creator->egis_count ?? 0 }}</span>
+                    <span class="font-medium text-purple-300">{{ $creator->egis_count ?? 0 }}</span>
                     <span>EGI</span>
                 </div>
 
@@ -164,7 +164,7 @@ $imageUrl = asset("images/logo/$logo");
                             d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z"
                             clip-rule="evenodd" />
                     </svg>
-                    <span class="text-blue-300 font-medium">{{ $creator->collections_count ?? 0 }}</span>
+                    <span class="font-medium text-blue-300">{{ $creator->collections_count ?? 0 }}</span>
                     <span>{{ __('egi.carousel.collections') }}</span>
                 </div>
 
@@ -175,7 +175,7 @@ $imageUrl = asset("images/logo/$logo");
                         <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
                             clip-rule="evenodd" />
                     </svg>
-                    <span class="text-green-300 font-medium">{{ $creator->followers_count }}</span>
+                    <span class="font-medium text-green-300">{{ $creator->followers_count }}</span>
                     <span>{{ __('creator.home.stats.followers') }}</span>
                 </div>
                 @endif
@@ -185,7 +185,7 @@ $imageUrl = asset("images/logo/$logo");
             <div class="flex items-center justify-between mt-2">
                 <div class="flex items-center gap-2">
                     <span
-                        class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-purple-500 to-pink-500 text-white">
+                        class="inline-flex items-center px-2 py-1 text-xs font-medium text-white rounded-full bg-gradient-to-r from-purple-500 to-pink-500">
                         {{ __('profile.creator') }}
                     </span>
                 </div>

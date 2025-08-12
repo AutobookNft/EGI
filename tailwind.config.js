@@ -54,6 +54,14 @@ export default {
                     dark: '#374151',       // gray-700 Tailwind, per testi scuri o bordi
                     extradark: '#1F2937',  // gray-800 Tailwind, per sfondi card scure
                 },
+                'rosso-committente': {
+                    extralight: '#FBE9E9',  // Una tonalità molto chiara, quasi rosa, per sfondi leggeri
+                    light: '#D97F81',       // Un rosso più chiaro per hover o elementi meno prominenti
+                    DEFAULT: '#A12C2F',     // Il colore principale del Commissioner
+                    dark: '#802225',        // Un rosso più profondo per stati attivi o bordi
+                    extradark: '#5E1A1C',   // Un rosso molto scuro, quasi marrone, per testi o elementi scuri
+                    text: '#FFFFFF',        // Colore del testo ad alto contrasto da usare su sfondi rosso-committente
+                },
                 // Colori Secondari / Di Stato (Brand Guidelines)
                 'rosso-urgenza': {
                     DEFAULT: '#C13120', // (Era #C13120) Simile a Tailwind red-600/700
@@ -69,6 +77,7 @@ export default {
                 },
                 'verde-trading': '#10B981', // Emerald-500
                 'verde-trading-dark': '#059669', // Emerald-600
+               
 
                 // --- COLORI DI STATO STANDARD (per DaisyUI e utility Tailwind) ---
                 // Questi dovrebbero avere buon contrasto sul nostro "base-100" scuro
@@ -167,6 +176,7 @@ export default {
         'bg-florence-gold', 'text-florence-gold',
         'bg-verde-rinascita', 'text-verde-rinascita',
         'bg-blu-algoritmo', 'text-blu-algoritmo',
+        'bg-rosso-committente', 'text-rosso-committente',
         // ... etc. per gli altri colori e le loro varianti (light, dark, text) se usate dinamicamente
         // Pattern per i colori di stato (se non coperti da DaisyUI)
         {

@@ -726,6 +726,16 @@ class AppConfigController extends Controller {
             'assistant.become_patron_desc' => 'assistant.become_patron_desc',
             'assistant.become_collector' => 'assistant.become_collector',
             'assistant.become_collector_desc' => 'assistant.become_collector_desc',
+            'assistant.become_creator' => 'assistant.become_creator',
+            'assistant.become_creator_desc' => 'assistant.become_creator_desc',
+            'assistant.become_commissioner' => 'assistant.become_commissioner',
+            'assistant.become_commissioner_desc' => 'assistant.become_commissioner_desc',
+            'assistant.become_epp' => 'assistant.become_epp',
+            'assistant.become_epp_desc' => 'assistant.become_epp_desc',
+            'assistant.become_company' => 'assistant.become_company',
+            'assistant.become_company_desc' => 'assistant.become_company_desc',
+            'assistant.become_trader_pro' => 'assistant.become_trader_pro',
+            'assistant.become_trader_pro_desc' => 'assistant.become_trader_pro_desc',
 
             // === IDENTITÀ NARRATIVA ===
             'assistant.who_is_natan' => 'assistant.who_is_natan',

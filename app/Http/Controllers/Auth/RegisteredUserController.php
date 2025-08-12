@@ -78,7 +78,8 @@ class RegisteredUserController extends Controller {
                 'brandColors' => [
                     'oro_fiorentino' => '#D4A574',
                     'verde_rinascita' => '#2D5016',
-                    'blu_algoritmo' => '#1B365D'
+                    'blu_algoritmo' => '#1B365D',
+                    'rosso_committente' => '#A12C2F' // <-- Colore aggiunto per il Commissioner
                 ]
             ]);
         } catch (\Exception $e) {
@@ -463,7 +464,6 @@ class RegisteredUserController extends Controller {
             'creator' => "{$firstName}'s Arte",
             'enterprise' => "{$firstName} Corporate Gallery",
             'patron' => "Patronato di {$firstName}",
-            'collector' => "Collezione di {$firstName}",
         ];
 
         return $typeNames[$userType] ?? "{$firstName}'s Collection";
@@ -476,6 +476,7 @@ class RegisteredUserController extends Controller {
     private function determineCollectionRole(string $userType): string {
         // Map user types to their collection roles
         $collectionRoleMapping = [
+            'commissioner' => 'commissioner',
             'creator' => 'creator',
             'enterprise' => 'creator', // Enterprise users are creators of their collections
             'patron' => 'patron',

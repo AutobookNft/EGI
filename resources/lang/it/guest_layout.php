@@ -17,6 +17,7 @@ return [
     'fegi_user_type' => [
         'committee' => 'Attivatore',
         'collector' => 'Collezionista',
+        'commissioner' => 'Committente',
         'creator' => 'Creator',
         'patron' => 'Mecenate',
         'epp' => 'EPP',

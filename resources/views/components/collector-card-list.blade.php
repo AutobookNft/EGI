@@ -191,7 +191,7 @@ $stats = $collector->getCollectorStats();
                     <span class="font-medium text-yellow-300">€{{ number_format($stats['total_value'], 0) }}</span>
                 </div>
                 @endif
-            </div>            <!-- Recent Activity -->
+            </div> <!-- Recent Activity -->
             @if ($config['show_activity'] && isset($collector->latest_activity))
             <div class="flex items-center gap-2 mb-2 text-sm">
                 <div class="w-3 h-3 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500"></div>

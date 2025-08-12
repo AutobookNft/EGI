@@ -54,6 +54,14 @@
             --grigio-pietra: #6B6B6B;  /* Grigio Pietra Serena */
             --rosso-urgenza: #C13120;  /* Rosso Urgenza Segnaletica */
             --amber-500: #f59e0b;      /* Amber per Trader Pro */
+
+             /* Palette Commissioner */
+            --rosso-committente-extralight: #FBE9E9;
+            --rosso-committente-light: #D97F81;
+            --rosso-committente: #A12C2F; /* DEFAULT */
+            --rosso-committente-dark: #802225;
+            --rosso-committente-extradark: #5E1A1C;
+            --rosso-committente-text: #FFFFFF;
         }
 
         .font-rinascimento { font-family: 'Playfair Display', serif; }
@@ -183,6 +191,7 @@
         .bg-verde-rinascita { background-color: var(--verde-rinascita); }
         .bg-blu-algoritmo { background-color: var(--blu-algoritmo); }
         .bg-grigio-pietra { background-color: var(--grigio-pietra); }
+        .bg-rosso-committente { background-color: var(--rosso-committente); }
         .bg-teal-500 { background-color: #14b8a6; }
         .bg-amber-500 { background-color: var(--amber-500); }
     </style>
@@ -267,6 +276,10 @@
                                             'icon_svg_path' => 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1',
                                             'color' => 'verde-rinascita'
                                         ],
+                                        'commissioner' => [ // <-- 'collector' rinominato in 'commissioner'
+                                            'icon_svg_path' => 'M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z', // <-- Icona aggiornata con stile outline
+                                            'color' => 'rosso-committente' // <-- Colore rosso per il Commissioner
+                                        ],
                                         'collector' => [
                                             'icon_svg_path' => 'M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z',
                                             'color' => 'blu-algoritmo'
@@ -286,7 +299,6 @@
                                     ];
                                     $selectedUserType = old('user_type', 'creator');
                                 @endphp
-
                                 @foreach ($userTypes as $type => $details)
                                 <label class="p-4 transition-all duration-300 ease-in-out cursor-pointer consent-card group {{ $selectedUserType === $type ? 'selected' : '' }}" for="user_type_{{ $type }}" data-user-type="{{ $type }}">
                                     <input type="radio" id="user_type_{{ $type }}" name="user_type" value="{{ $type }}"
@@ -571,7 +583,8 @@
                     'text-yellow-600',
                     'text-verde-rinascita',
                     'text-verde-rinascita',
-                    'text-verde-rinascita'
+                    'text-verde-rinascita',
+                    
                 ];
 
                 if (length === 0) {

@@ -205,17 +205,32 @@ $showBadge = $showBadge ?? $showOwnershipBadge;
             $currentReservation = $egi->reservations ? $egi->reservations->where('is_current', true)->first() : null;
             @endphp
             @if ($currentReservation && $currentReservation->user)
+            @php
+            $activatorDisplay = formatActivatorDisplay($currentReservation->user);
+            @endphp
             <div class="flex items-center gap-2 mb-1 text-sm">
-                <svg class="w-4 h-4 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                        clip-rule="evenodd" />
-                </svg>
-                <span class="text-green-300 font-medium">
-                    @if($currentReservation->user->first_name && $currentReservation->user->last_name)
-                    {{ $currentReservation->user->first_name }} {{ $currentReservation->user->last_name }}
+                @if ($activatorDisplay['is_commissioner'])
+                    {{-- Commissioner: Show avatar or profile icon --}}
+                    @if ($activatorDisplay['avatar'])
+                        <img src="{{ $activatorDisplay['avatar'] }}" 
+                             alt="{{ $activatorDisplay['name'] }}" 
+                             class="w-4 h-4 rounded-full object-cover border border-green-400/30">
                     @else
-                    {{ $currentReservation->user->name ?? 'N/A' }}
+                        <div class="w-4 h-4 rounded-full bg-green-500 flex items-center justify-center">
+                            <svg class="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </div>
                     @endif
+                @else
+                    {{-- Regular collector: Show generic icon --}}
+                    <div class="w-4 h-4 rounded-full bg-gray-600 flex items-center justify-center">
+                        {!! getGenericActivatorIcon('w-2 h-2 text-gray-300') !!}
+                    </div>
+                @endif
+                <span class="text-green-300 font-medium">
+                    {{ $activatorDisplay['name'] }}
                 </span>
                 <span class="text-gray-400 text-xs">({{ __('common.activator') }})</span>
             </div>

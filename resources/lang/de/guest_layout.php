@@ -13,6 +13,19 @@ return [
     'schema_website_description' => 'Plattform für die Erstellung und den Austausch von Ökologischen Güterinventaren (EGI), die Umweltprojekte finanzieren.',
     'schema_organization_name' => 'Frangette Verein zur Förderung von Kultur',
 
+    // User Types
+    'fegi_user_type' => [
+        'committee' => 'Aktivator',
+        'collector' => 'Sammler',
+        'commissioner' => 'Auftraggeber',
+        'creator' => 'Schöpfer',
+        'patron' => 'Mäzen',
+        'epp' => 'EPP',
+        'company' => 'Unternehmen',
+        'trader_pro' => 'Professioneller Trader',
+        'natan' => 'Natan',
+    ],
+
     // Header/Navbar
     'header_aria_label' => 'Kopfzeile der Website',
     'logo_aria_label' => 'Zur Homepage von Florence EGI gehen',

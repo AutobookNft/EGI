@@ -13,6 +13,19 @@ return [
     'schema_website_description' => 'Plataforma para la creación e intercambio de Inventarios de Bienes Ecológicos (EGI) que financian proyectos ambientales.',
     'schema_organization_name' => 'Frangette Asociación de Promoción Cultural',
 
+    // User Types
+    'fegi_user_type' => [
+        'committee' => 'Activador',
+        'collector' => 'Coleccionista',
+        'commissioner' => 'Comisionado',
+        'creator' => 'Creador',
+        'patron' => 'Mecenas',
+        'epp' => 'EPP',
+        'company' => 'Empresa',
+        'trader_pro' => 'Trader Profesional',
+        'natan' => 'Natan',
+    ],
+
     // Header/Navbar
     'header_aria_label' => 'Encabezado del sitio',
     'logo_aria_label' => 'Ir a la página de inicio de Florence EGI',

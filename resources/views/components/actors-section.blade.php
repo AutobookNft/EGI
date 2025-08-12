@@ -57,7 +57,7 @@
                 :title="__('guest_home.actor_collector_title')"
                 :message="__('guest_home.actor_collector_message')"
                 :ctaText="__('guest_home.actor_collector_cta')"
-                ctaLink="{{ route('home.collections.index') }}"
+                ctaLink="{{ route('archetypes.collector') }}"
                 ctaIcon="travel_explore"
                 accentColorClass="border-t-4 border-blu-algoritmo"
                 iconColorClass="text-blu-algoritmo"

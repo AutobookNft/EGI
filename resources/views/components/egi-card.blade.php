@@ -423,10 +423,22 @@ $showActivationBadge = !$hasActiveReservations;
                                 clip-rule="evenodd" />
                         </svg>
                         @else
-                        <svg class="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                                clip-rule="evenodd" />
-                        </svg>
+                        @php
+                        $activatorDisplay = formatActivatorDisplay($displayUser);
+                        @endphp
+                        
+                        @if ($activatorDisplay['is_commissioner'] && $activatorDisplay['avatar'])
+                            {{-- Commissioner with avatar --}}
+                            <img src="{{ $activatorDisplay['avatar'] }}" 
+                                 alt="{{ $activatorDisplay['name'] }}" 
+                                 class="w-4 h-4 rounded-full object-cover border border-white/20">
+                        @else
+                            {{-- Regular collector or commissioner without avatar --}}
+                            <svg class="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        @endif
                         @endif
                     </div>
                     <span class="text-xs {{ $textColor }} truncate">
@@ -434,8 +446,12 @@ $showActivationBadge = !$hasActiveReservations;
                         {{ __('egi.reservation.weak_bidder') }}: <span class="font-semibold">{{
                             $highestPriorityReservation->fegi_code ?? 'FG#******' }}</span>
                         @else
-                        {{ __('egi.reservation.activator') }}: <span class="font-semibold">{{ $displayUser->name
-                            }}</span>
+                        @php
+                        if (!isset($activatorDisplay)) {
+                            $activatorDisplay = formatActivatorDisplay($displayUser);
+                        }
+                        @endphp
+                        {{ __('egi.reservation.activator') }}: <span class="font-semibold">{{ $activatorDisplay['name'] }}</span>
                         @endif
                     </span>
                 </div>

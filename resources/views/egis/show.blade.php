@@ -356,19 +356,28 @@
                                                     d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"
                                                     clip-rule="evenodd" />
                                             </svg>
-                                            @else
-                                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd"
-                                                    d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                                                    clip-rule="evenodd" />
-                                            </svg>
-                                            @endif
-
-                                            @if ($isWeakReservation)
                                             {{ __('egi.reservation.by') }}: {{ $highestPriorityReservation->fegi_code ??
                                             'FG#******' }}
                                             @else
-                                            {{ __('egi.reservation.by') }}: {{ $displayUser->name }}
+                                            @php
+                                            $activatorDisplay = formatActivatorDisplay($displayUser);
+                                            @endphp
+                                            
+                                            @if ($activatorDisplay['is_commissioner'] && $activatorDisplay['avatar'])
+                                                {{-- Commissioner with avatar --}}
+                                                <img src="{{ $activatorDisplay['avatar'] }}" 
+                                                     alt="{{ $activatorDisplay['name'] }}" 
+                                                     class="w-3 h-3 rounded-full object-cover border border-emerald-400/30">
+                                            @else
+                                                {{-- Regular collector or commissioner without avatar --}}
+                                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd"
+                                                        d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                                                        clip-rule="evenodd" />
+                                                </svg>
+                                            @endif
+                                            
+                                            {{ __('egi.reservation.by') }}: {{ $activatorDisplay['name'] }}
                                             @endif
                                         </div>
                                         @endif
@@ -430,6 +439,12 @@
                                     $borderColor = $isWeakReservation ? 'border-amber-500/20' : 'border-emerald-500/20';
                                     $iconBg = $isWeakReservation ? 'bg-amber-500' : 'bg-emerald-500';
                                     $textColor = $isWeakReservation ? 'text-amber-300' : 'text-emerald-300';
+                                    
+                                    // Prepare activator display for both icon and text
+                                    $activatorDisplayTop = null;
+                                    if ($displayUser && !$isWeakReservation) {
+                                        $activatorDisplayTop = formatActivatorDisplay($displayUser);
+                                    }
                                     @endphp
 
                                     <div
@@ -443,11 +458,18 @@
                                                     clip-rule="evenodd" />
                                             </svg>
                                             @else
-                                            <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd"
-                                                    d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                                                    clip-rule="evenodd" />
-                                            </svg>
+                                            {{-- Check if commissioner has avatar --}}
+                                            @if ($activatorDisplayTop && $activatorDisplayTop['is_commissioner'] && $activatorDisplayTop['avatar'])
+                                                <img src="{{ $activatorDisplayTop['avatar'] }}" 
+                                                     alt="{{ $activatorDisplayTop['name'] }}" 
+                                                     class="w-5 h-5 rounded-full object-cover">
+                                            @else
+                                                <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd"
+                                                        d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                                                        clip-rule="evenodd" />
+                                                </svg>
+                                            @endif
                                             @endif
                                         </div>
                                         <span class="text-sm {{ $textColor }}">
@@ -457,7 +479,7 @@
                                                 $highestPriorityReservation->fegi_code ?? 'FG#******' }}</span>
                                             @else
                                             {{ __('egi.reservation.strong_bidder') }}: <span
-                                                class="font-semibold text-white">{{ $displayUser->name }}</span>
+                                                class="font-semibold text-white">{{ $activatorDisplayTop['name'] }}</span>
                                             @endif
                                         </span>
                                     </div>

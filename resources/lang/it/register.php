@@ -51,6 +51,10 @@ return [
     'user_type_collector' => 'Collezionista',
     'user_type_collector_desc' => 'Appassionati che acquistano e collezionano opere d\'arte e asset culturali',
 
+    // Commissioner (new)
+    'user_type_commissioner' => 'Commissioner',
+    'user_type_commissioner_desc' => 'Primi acquirenti che attivano le opere, iscrivendo il proprio nome nella loro storia per ottenere visibilità e riconoscimento.',
+
     // Enterprise (was: azienda)
     'user_type_enterprise' => 'Azienda',
     'user_type_enterprise_desc' => 'Organizzazioni e imprese interessate ad investimenti culturali e sostenibili',
