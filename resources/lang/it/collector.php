@@ -24,7 +24,7 @@ return [
     // Stats
     'owned_egis' => 'EGI Posseduti',
     'owned' => 'Posseduti',
-    'active' => 'Attivi',
+    'active' => 'Attivati',
     'collections' => 'Collezioni',
     'collections_represented' => 'Collezioni',
     'total_spent' => 'Totale Speso',
@@ -325,5 +325,3 @@ return [
         'subtitle' => 'I Committenti che stanno investendo di più sulla piattaforma e che supportano attivamente gli artisti',
     ],
 ];
-
-    

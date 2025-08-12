@@ -23,6 +23,8 @@ return [
 
     // Stats
     'owned_egis' => 'Besessene EGIs',
+    'owned' => 'Besessen',
+    'active' => 'Aktiviert',
     'collections' => 'Sammlungen',
     'collections_represented' => 'Sammlungen',
     'total_spent' => 'Insgesamt Ausgegeben',

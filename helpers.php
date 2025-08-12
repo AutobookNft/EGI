@@ -23,8 +23,7 @@ if (!function_exists('getDynamicBucketUrl')) {
      *
      * @return string
      */
-    function getDynamicBucketUrl(): string
-    {
+    function getDynamicBucketUrl(): string {
         $doUrl = config('paths.hosting.Digital_Ocean.url');
         $cdnUrl = config('paths.hosting.CDN.url');
 
@@ -52,8 +51,7 @@ if (!function_exists('getDynamicBucketUrl')) {
      * @param string $url
      * @return bool
      */
-    function checkUrlAvailability(string $url): bool
-    {
+    function checkUrlAvailability(string $url): bool {
         try {
             $response = Http::head($url);
             return $response->successful();
@@ -71,8 +69,7 @@ if (!function_exists('hasPendingWallet')) {
      * @param int $proposerId
      * @return bool
      */
-    function hasPendingWallet(int $proposerId): bool
-    {
+    function hasPendingWallet(int $proposerId): bool {
 
         Log::channel('florenceegi')->info('hasPendingWallet: Verifica wallet pending', [
             'proposerId' => $proposerId
@@ -99,27 +96,25 @@ if (!function_exists('formatActivatorDisplay')) {
      * @param \App\Models\User $user
      * @return array ['name' => string, 'avatar' => string|null, 'is_commissioner' => bool]
      */
-    function formatActivatorDisplay($user)
-    {
+    function formatActivatorDisplay($user) {
         $isCommissioner = $user && $user->can('display_public_name_on_egi') && $user->can('display_public_avatar_on_egi');
-        
+
         if ($isCommissioner) {
             // Commissioner: show real name and avatar
-            $name = ($user->first_name && $user->last_name) 
-                ? $user->first_name . ' ' . $user->last_name 
+            $name = ($user->first_name && $user->last_name)
+                ? $user->first_name . ' ' . $user->last_name
                 : ($user->name ?? 'N/A');
-            
+
             // Get avatar using User model's profile_photo_url attribute
             $avatar = null;
             try {
                 // Use the User model's profile_photo_url attribute which handles all the logic
                 $profileUrl = $user->profile_photo_url;
-                
+
                 // Only use if it's not the default DiceBear avatar
                 if ($profileUrl && !str_contains($profileUrl, 'dicebear.com')) {
                     $avatar = $profileUrl;
                 }
-                
             } catch (\Exception $e) {
                 // Log error but continue without avatar
                 \Log::warning('Failed to get user avatar', [
@@ -128,7 +123,7 @@ if (!function_exists('formatActivatorDisplay')) {
                 ]);
                 $avatar = null;
             }
-            
+
             return [
                 'name' => $name,
                 'avatar' => $avatar,
@@ -138,10 +133,10 @@ if (!function_exists('formatActivatorDisplay')) {
         } else {
             // Regular collector: show abbreviated wallet address
             $walletAddress = $user->wallet ?? '';
-            $abbreviated = strlen($walletAddress) >= 10 
+            $abbreviated = strlen($walletAddress) >= 10
                 ? substr($walletAddress, 0, 6) . '...' . substr($walletAddress, -4)
                 : $walletAddress;
-            
+
             return [
                 'name' => $abbreviated,
                 'avatar' => null,
@@ -159,11 +154,46 @@ if (!function_exists('getGenericActivatorIcon')) {
      * @param string $classes
      * @return string
      */
-    function getGenericActivatorIcon($classes = 'w-4 h-4')
-    {
+    function getGenericActivatorIcon($classes = 'w-4 h-4') {
         return '<svg class="' . $classes . ' text-gray-400" fill="currentColor" viewBox="0 0 20 20">
             <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z" clip-rule="evenodd" />
         </svg>';
     }
 }
 
+if (!function_exists('getActivatorsCount')) {
+    /**
+     * Get total count of activators (collectors + commissioners)
+     * 
+     * @return int
+     */
+    function getActivatorsCount(): int {
+        return \App\Models\User::whereHas('roles', function ($query) {
+            $query->whereIn('name', ['collector', 'commissioner']);
+        })->count();
+    }
+}
+
+if (!function_exists('getCreatorsCount')) {
+    /**
+     * Get total count of creators
+     * 
+     * @return int
+     */
+    function getCreatorsCount(): int {
+        return \App\Models\User::whereHas('roles', function ($query) {
+            $query->where('name', 'creator');
+        })->orWhere('usertype', 'creator')->count();
+    }
+}
+
+if (!function_exists('getCollectionsCount')) {
+    /**
+     * Get total count of published collections
+     * 
+     * @return int
+     */
+    function getCollectionsCount(): int {
+        return \App\Models\Collection::where('is_published', true)->count();
+    }
+}

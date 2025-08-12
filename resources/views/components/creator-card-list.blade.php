@@ -129,7 +129,7 @@ $imageUrl = asset("images/logo/$logo");
             <!-- Name and Username -->
             <h3 class="mb-1 text-lg font-bold text-white truncate transition-colors group-hover:text-purple-300">
                 <a href="{{ route('creator.home', ['id' => $creator->id]) }}" class="hover:underline">
-                    {{ $creator->first_name }} {{ $creator->last_name }}
+                    {{ $creator->name }} {{ $creator->last_name }}
                 </a>
             </h3>
 
@@ -181,15 +181,102 @@ $imageUrl = asset("images/logo/$logo");
                 @endif
             </div>
 
-            <!-- Creator Badge and Join Date -->
-            <div class="flex items-center justify-between mt-2">
-                <div class="flex items-center gap-2">
-                    <span
-                        class="inline-flex items-center px-2 py-1 text-xs font-medium text-white rounded-full bg-gradient-to-r from-purple-500 to-pink-500">
-                        {{ __('profile.creator') }}
-                    </span>
+            <!-- 🎯 Top Activator Section - Sistema Commissioner Integration -->
+            @php
+            // Trova il top activator per questo creator (utente con più EGI attivati)
+            $topActivator = null;
+            $activatorEgiCount = 0;
+
+            if ($creator && $creator->id) {
+            try {
+            // Query per trovare l'utente che ha più prenotazioni attive sui EGI di questo creator
+            $topActivatorData = \DB::table('reservations as r')
+            ->join('egis as e', 'r.egi_id', '=', 'e.id')
+            ->join('collections as c', 'e.collection_id', '=', 'c.id')
+            ->join('users as u', 'r.user_id', '=', 'u.id')
+            ->where('c.creator_id', $creator->id)
+            ->where('r.is_current', true)
+            ->where('r.status', 'active')
+            ->whereNull('r.superseded_by_id')
+            ->select('r.user_id', \DB::raw('COUNT(*) as egi_count'))
+            ->groupBy('r.user_id')
+            ->orderByDesc('egi_count')
+            ->first();
+
+            if ($topActivatorData && $topActivatorData->egi_count > 0) {
+            $topActivator = \App\Models\User::find($topActivatorData->user_id);
+            $activatorEgiCount = $topActivatorData->egi_count;
+            }
+            } catch (\Throwable $th) {
+            // Gestione errori silente
+            $topActivator = null;
+            $activatorEgiCount = 0;
+            }
+            }
+            @endphp
+
+            @if ($topActivator && $activatorEgiCount > 0)
+            @php
+            // 🎯 Sistema Commissioner: Formattiamo le informazioni del top activator
+            $activatorDisplay = formatActivatorDisplay($topActivator);
+            @endphp
+            <div class="p-2 mb-2 border border-gray-700/50 rounded-lg bg-gray-800/30">
+                <!-- Header con stella e testo -->
+                <div class="flex items-center gap-2 mb-2">
+                    <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                            d="M10 15.585l-6.16 3.251a.5.5 0 01-.725-.527l1.176-6.859L.146 7.41a.5.5 0 01.277-.854l6.877-.999L10.44.69a.5.5 0 01.894 0l3.14 6.367 6.877.999a.5.5 0 01.277-.854l-4.972 4.04 1.176 6.859a.5.5 0 01-.725.527L10 15.585z"
+                            clip-rule="evenodd" />
+                    </svg>
+                    <span class="text-xs text-yellow-300 font-medium">{{ __('creator.top_activator') }}</span>
                 </div>
-                @if ($creator->created_at)
+
+                <!-- Attivatore su riga separata -->
+                <div class="flex items-center gap-2">
+                    @if ($activatorDisplay && $activatorDisplay['is_commissioner'])
+                    {{-- 👤 Commissioner: Mostra avatar personalizzato --}}
+                    @if ($activatorDisplay['avatar'])
+                    <img src="{{ $activatorDisplay['avatar'] }}" alt="{{ $activatorDisplay['name'] }}"
+                        class="w-5 h-5 rounded-full object-cover border border-yellow-400/30 shadow-sm flex-shrink-0">
+                    @else
+                    {{-- Fallback per commissioner senza avatar --}}
+                    <div
+                        class="w-5 h-5 rounded-full bg-yellow-500 flex items-center justify-center shadow-sm flex-shrink-0">
+                        <svg class="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    @endif
+                    <span class="text-sm text-yellow-200 font-medium truncate">
+                        {{ $activatorDisplay['name'] }}
+                    </span>
+                    @else
+                    {{-- 💰 Regular Collector: Icona generica + nome abbreviato --}}
+                    <div class="w-5 h-5 rounded-full bg-gray-600 flex items-center justify-center flex-shrink-0">
+                        <svg class="w-2.5 h-2.5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <span class="text-sm text-gray-300 font-medium truncate">
+                        {{ $activatorDisplay ? $activatorDisplay['name'] : ($topActivator->wallet_address ?
+                        Str::limit($topActivator->wallet_address, 12, '...') : $topActivator->first_name . ' ' .
+                        $topActivator->last_name) }}
+                    </span>
+                    @endif
+
+                    <div class="flex items-center gap-1 ml-auto">
+                        <span class="text-xs text-gray-400">{{ $activatorEgiCount }}</span>
+                        <span class="text-xs text-gray-500">EGI</span>
+                    </div>
+                </div>
+            </div>
+            @endif
+
+            <!-- Join Date Only -->
+            @if ($creator->created_at)
+            <div class="flex items-center justify-end mt-2">
                 <div class="flex items-center gap-1 text-xs text-gray-500">
                     <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd"
@@ -198,8 +285,8 @@ $imageUrl = asset("images/logo/$logo");
                     </svg>
                     <span>{{ $creator->created_at->format('M Y') }}</span>
                 </div>
-                @endif
             </div>
+            @endif
         </div>
     </div>
 </article>

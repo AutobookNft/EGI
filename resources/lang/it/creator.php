@@ -71,6 +71,9 @@ return [
         'back_to_profile' => 'Torna al profilo',
     ],
 
+    // 🎯 Sistema Commissioner - Top Activator
+    'top_activator' => 'Miglior Attivatore',
+
     'index' => [ // Tutte le stringhe per la pagina index
         'page_title' => 'Esplora i Creator - FlorenceEGI',
         'meta_description' => 'Scopri i talentuosi creator che danno vita alle collezioni NFT su FlorenceEGI. Filtra per categoria, nome o popolarità.',

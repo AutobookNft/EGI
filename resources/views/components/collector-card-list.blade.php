@@ -135,7 +135,7 @@ $stats = $collector->getCollectorStats();
             <!-- Name and Username -->
             <h3 class="mb-1 text-lg font-bold text-white truncate transition-colors group-hover:text-emerald-300">
                 <a href="{{ route('collector.home', ['id' => $collector->id]) }}" class="hover:underline">
-                    {{ $collector->first_name }} {{ $collector->last_name }}
+                    {{ $collector->name }} {{ $collector->last_name }}
                 </a>
             </h3>
 
@@ -232,9 +232,15 @@ $stats = $collector->getCollectorStats();
             <!-- Collector Badge and Join Date -->
             <div class="flex items-center justify-between mt-2">
                 <div class="flex items-center gap-2">
+                    @php
+                    // 🎯 Sistema Commissioner: Determina il tipo di utente e badge appropriato
+                    $collectorDisplay = formatActivatorDisplay($collector);
+                    $badgeText = $collectorDisplay && $collectorDisplay['is_commissioner'] ? __('common.commissioner') : __('common.collector');
+                    $badgeColor = $collectorDisplay && $collectorDisplay['is_commissioner'] ? 'from-purple-500 to-indigo-500' : 'from-emerald-500 to-teal-500';
+                    @endphp
                     <span
-                        class="inline-flex items-center px-2 py-1 text-xs font-medium text-white rounded-full bg-gradient-to-r from-emerald-500 to-teal-500">
-                        {{ __('common.collector') }}
+                        class="inline-flex items-center px-2 py-1 text-xs font-medium text-white rounded-full bg-gradient-to-r {{ $badgeColor }}">
+                        {{ $badgeText }}
                     </span>
                 </div>
                 @if ($collector->created_at)

@@ -14,6 +14,25 @@
 'collectors' => collect()
 ])
 
+@php
+// 🧮 Contatori dinamici per il database
+$creatorsCount = \App\Models\User::where('usertype', 'creator')->count();
+$collectionsCount = \App\Models\Collection::count();
+
+// 📊 EGI Count: Conta tutti gli EGI nel database
+$egisCount = \App\Models\Egi::count();
+
+// 🎯 Attivatori: User che hanno attualmente almeno 1 EGI con miglior offerta attiva
+// Query per trovare utenti con prenotazioni attive che sono la miglior offerta
+$activatorsCount = \DB::table('users')
+->join('reservations', 'users.id', '=', 'reservations.user_id')
+->where('reservations.is_current', true)
+->where('reservations.status', 'active')
+->whereNull('reservations.superseded_by_id')
+->distinct('users.id')
+->count('users.id');
+@endphp
+
 <section class="py-8 bg-gradient-to-br from-gray-900 via-gray-800 to-black lg:py-12">
     <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
 
@@ -85,9 +104,37 @@
 
         {{-- Dynamic Content Header for Mobile --}}
         <div class="mb-6 text-center lg:hidden">
-            <h3 id="content-type-header" class="text-xl font-bold text-white transition-all duration-300">
-                {{ __('egi.carousel.headers.egi_list') }}
-            </h3>
+            @php
+            // 🔗 Mapping route per ogni tipo di contenuto
+            $routeMapping = [
+            'egi-list' => null, // EGI non ha una pagina index specifica
+            'egi-card' => null,
+            'creator' => route('creator.index'),
+            'collection' => route('collections.index'),
+            'collector' => route('collector.index')
+            ];
+
+            // 📊 Mapping contatori per ogni tipo
+            $countMapping = [
+            'egi-list' => $egisCount,
+            'egi-card' => $egisCount,
+            'creator' => $creatorsCount,
+            'collection' => $collectionsCount,
+            'collector' => $activatorsCount
+            ];
+            @endphp
+
+            <div id="content-type-header-container" class="inline-flex items-center gap-2">
+                <h3 id="content-type-header"
+                    class="text-xl font-bold text-white transition-all duration-300 cursor-pointer hover:text-purple-300"
+                    data-route="" onclick="navigateToContent(this)">
+                    {{ __('egi.carousel.headers.egi_list') }}
+                </h3>
+                <span id="content-type-count"
+                    class="inline-flex items-center px-2 py-1 text-sm font-medium text-purple-300 border rounded-full bg-purple-900/30 border-purple-500/20">
+                    {{ $egisCount }}
+                </span>
+            </div>
         </div>
 
         {{-- Carousel Container --}}
@@ -245,6 +292,7 @@
     const contentTypeBtns = document.querySelectorAll('.content-type-btn');
     const mobileContents = document.querySelectorAll('.mobile-content');
     const contentHeader = document.getElementById('content-type-header');
+    const contentCount = document.getElementById('content-type-count');
 
     // Header text mapping
     const headerTexts = {
@@ -253,6 +301,24 @@
         'creator': '{{ __('egi.carousel.headers.creators') }}',
         'collection': '{{ __('egi.carousel.headers.collections') }}',
         'collector': '{{ __('egi.carousel.headers.collectors') }}'
+    };
+
+    // 🔗 Route mapping per navigazione
+    const routeMapping = {
+        'egi-list': null,
+        'egi-card': null,
+        'creator': '{{ route('creator.index') }}',
+        'collection': '{{ route('collections.index') }}',
+        'collector': '{{ route('collector.index') }}'
+    };
+
+    // 📊 Count mapping per contatori
+    const countMapping = {
+        'egi-list': {{ $egisCount }},
+        'egi-card': {{ $egisCount }},
+        'creator': {{ $creatorsCount }},
+        'collection': {{ $collectionsCount }},
+        'collector': {{ $activatorsCount }}
     };
 
     contentTypeBtns.forEach(btn => {
@@ -267,12 +333,33 @@
             this.classList.add('active', 'bg-purple-600', 'text-white');
             this.classList.remove('text-gray-400');
 
-            // Update header text with smooth transition
-            if (contentHeader) {
+            // Update header text and route with smooth transition
+            if (contentHeader && contentCount) {
                 contentHeader.style.opacity = '0.5';
+                contentCount.style.opacity = '0.5';
+                
                 setTimeout(() => {
+                    // Update header text
                     contentHeader.textContent = headerTexts[contentType] || headerTexts['egi-list'];
+                    
+                    // Update count
+                    contentCount.textContent = countMapping[contentType] || 0;
+                    
+                    // Update route data attribute
+                    const route = routeMapping[contentType];
+                    contentHeader.setAttribute('data-route', route || '');
+                    
+                    // Update cursor style based on route availability
+                    if (route) {
+                        contentHeader.classList.add('cursor-pointer', 'hover:text-purple-300');
+                        contentHeader.classList.remove('cursor-default');
+                    } else {
+                        contentHeader.classList.add('cursor-default');
+                        contentHeader.classList.remove('cursor-pointer', 'hover:text-purple-300');
+                    }
+                    
                     contentHeader.style.opacity = '1';
+                    contentCount.style.opacity = '1';
                 }, 150);
             }
 
@@ -373,6 +460,14 @@
     }
     @endif
 });
+
+// 🔗 Funzione globale per navigazione header
+function navigateToContent(element) {
+    const route = element.getAttribute('data-route');
+    if (route && route !== '') {
+        window.location.href = route;
+    }
+}
 </script>
 
 {{-- Custom Styles --}}

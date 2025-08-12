@@ -5,6 +5,7 @@ return [
     'view_collection' => 'View Collection',
     'base_price' => 'Base Price',
     'activator' => 'Activator',
+    'commissioner' => 'Commissioner',
     'available' => 'Available',
     'collector' => 'Collector',
     'collection' => 'Collection',

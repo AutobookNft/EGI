@@ -23,7 +23,10 @@ return [
 
     // Stats
     'owned_egis' => 'Owned EGIs',
+    'owned' => 'Owned',
+    'active' => 'Activated',
     'collections' => 'Collections',
+    'collections_represented' => 'Collections',
     'total_spent' => 'Total Spent',
 
     // Navigation

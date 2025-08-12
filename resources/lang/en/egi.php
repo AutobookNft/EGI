@@ -226,7 +226,7 @@ return [
             'egi_card' => 'EGI',
             'creators' => 'Artists',
             'collections' => 'Collections',
-            'collectors' => 'Collectors'
+            'collectors' => 'Activators'
         ],
 
         // Navigation

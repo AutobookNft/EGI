@@ -56,7 +56,7 @@ return [
             'egi_card' => 'EGI',
             'creators' => 'Künstler',
             'collections' => 'Sammlungen',
-            'collectors' => 'Sammler'
+            'collectors' => 'Aktivatoren'
         ],
     ],
 

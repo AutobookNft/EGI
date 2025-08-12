@@ -261,7 +261,7 @@ return [
             'egi_card' => 'EGI',
             'creators' => 'Artisti',
             'collections' => 'Collezioni',
-            'collectors' => 'Collezionisti'
+            'collectors' => 'Attivatori'
         ],
 
         // Title and subtitle for multi-content carousel

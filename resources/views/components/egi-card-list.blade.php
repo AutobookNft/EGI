@@ -206,33 +206,43 @@ $showBadge = $showBadge ?? $showOwnershipBadge;
             @endphp
             @if ($currentReservation && $currentReservation->user)
             @php
+            // 🎯 Sistema Commissioner: Formattiamo le informazioni dell'attivatore
             $activatorDisplay = formatActivatorDisplay($currentReservation->user);
             @endphp
             <div class="flex items-center gap-2 mb-1 text-sm">
-                @if ($activatorDisplay['is_commissioner'])
-                    {{-- Commissioner: Show avatar or profile icon --}}
-                    @if ($activatorDisplay['avatar'])
-                        <img src="{{ $activatorDisplay['avatar'] }}" 
-                             alt="{{ $activatorDisplay['name'] }}" 
-                             class="w-4 h-4 rounded-full object-cover border border-green-400/30">
-                    @else
-                        <div class="w-4 h-4 rounded-full bg-green-500 flex items-center justify-center">
-                            <svg class="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                                    clip-rule="evenodd" />
-                            </svg>
-                        </div>
-                    @endif
+                @if ($activatorDisplay && $activatorDisplay['is_commissioner'])
+                {{-- 👤 Commissioner: Mostra avatar personalizzato --}}
+                @if ($activatorDisplay['avatar'])
+                <img src="{{ $activatorDisplay['avatar'] }}" alt="{{ $activatorDisplay['name'] }}"
+                    class="w-4 h-4 rounded-full object-cover border border-green-400/30 shadow-sm">
                 @else
-                    {{-- Regular collector: Show generic icon --}}
-                    <div class="w-4 h-4 rounded-full bg-gray-600 flex items-center justify-center">
-                        {!! getGenericActivatorIcon('w-2 h-2 text-gray-300') !!}
-                    </div>
+                {{-- Fallback per commissioner senza avatar --}}
+                <div class="w-4 h-4 rounded-full bg-green-500 flex items-center justify-center shadow-sm">
+                    <svg class="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                            clip-rule="evenodd" />
+                    </svg>
+                </div>
                 @endif
                 <span class="text-green-300 font-medium">
                     {{ $activatorDisplay['name'] }}
                 </span>
                 <span class="text-gray-400 text-xs">({{ __('common.activator') }})</span>
+                @else
+                {{-- 💰 Regular Collector: Icona generica + wallet abbreviato --}}
+                <div class="w-4 h-4 rounded-full bg-gray-600 flex items-center justify-center">
+                    <svg class="w-2 h-2 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                            clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <span class="text-green-300 font-medium">
+                    {{ $activatorDisplay ? $activatorDisplay['name'] : ($currentReservation->user->wallet_address ?
+                    Str::limit($currentReservation->user->wallet_address, 12, '...') :
+                    $currentReservation->user->first_name . ' ' . $currentReservation->user->last_name) }}
+                </span>
+                <span class="text-gray-400 text-xs">({{ __('common.activator') }})</span>
+                @endif
             </div>
             @elseif ($context === 'creator')
             <div class="flex items-center gap-2 mb-1 text-sm">

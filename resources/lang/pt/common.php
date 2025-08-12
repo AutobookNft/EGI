@@ -5,6 +5,7 @@ return [
     'view_collection' => 'Ver Coleção',
     'base_price' => 'Preço Base',
     'activator' => 'Ativador',
+    'commissioner' => 'Comitente',
     'available' => 'Disponível',
     'collector' => 'Colecionador',
     'loading' => 'Carregando...',
