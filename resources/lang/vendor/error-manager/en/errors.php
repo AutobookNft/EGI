@@ -118,6 +118,7 @@ return [
         // Dev message for reservations sistem
         'reservation_egi_not_available' => 'The EGI with ID :egi_id is not available for reservation. It may be already minted or not published.',
         'reservation_amount_too_low' => 'The offer amount of :amount EUR is below the minimum required for this EGI.',
+        'reservation_relaunch_amount_too_low' => 'Invalid relaunch attempt with amount :new_amount EUR. User :user_id already has a reservation of :previous_amount EUR for EGI :egi_id.',
         'reservation_unauthorized' => 'Unauthorized attempt to reserve EGI :egi_id. User must be authenticated or have a connected wallet.',
         'reservation_certificate_generation_failed' => 'Failed to generate certificate for reservation :reservation_id. Error: :error',
         'reservation_certificate_not_found' => 'Certificate with UUID :uuid not found.',
@@ -367,6 +368,7 @@ return [
         // user messages for reservations system
         'reservation_egi_not_available' => 'This EGI is not available for reservation at the moment.',
         'reservation_amount_too_low' => 'Your offer amount is too low. Please enter a higher amount.',
+        'reservation_relaunch_amount_too_low' => 'For a relaunch, the amount must be higher than your previous reservation of €:previous_amount.',
         'reservation_unauthorized' => 'You need to connect your wallet or log in to make a reservation.',
         'reservation_certificate_generation_failed' => 'We couldn\'t generate your reservation certificate. Our team has been notified.',
         'reservation_certificate_not_found' => 'The requested certificate could not be found.',

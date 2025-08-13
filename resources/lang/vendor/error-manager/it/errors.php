@@ -118,6 +118,7 @@ return [
         // Dev message for reservations system
         'reservation_egi_not_available' => 'L\'EGI con ID :egi_id non è disponibile per la prenotazione. Potrebbe essere già stato coniato o non pubblicato.',
         'reservation_amount_too_low' => 'L\'importo offerto di :amount EUR è inferiore al minimo richiesto per questo EGI.',
+        'reservation_relaunch_amount_too_low' => 'Tentativo di rilancio con importo :new_amount EUR non valido. L\'utente :user_id ha già una prenotazione di :previous_amount EUR per l\'EGI :egi_id.',
         'reservation_unauthorized' => 'Tentativo non autorizzato di prenotare l\'EGI :egi_id. L\'utente deve essere autenticato o avere un wallet connesso.',
         'reservation_certificate_generation_failed' => 'Impossibile generare il certificato per la prenotazione :reservation_id. Errore: :error',
         'reservation_certificate_not_found' => 'Certificato con UUID :uuid non trovato.',
@@ -372,6 +373,7 @@ return [
         // User messages for reservations system
         'reservation_egi_not_available' => 'Questo EGI non è attualmente disponibile per la prenotazione.',
         'reservation_amount_too_low' => 'L\'importo offerto è troppo basso. Inserisci un importo più alto.',
+        'reservation_relaunch_amount_too_low' => 'Per un rilancio, l\'importo deve essere superiore alla tua prenotazione precedente di €:previous_amount.',
         'reservation_unauthorized' => 'Devi connettere il tuo wallet o accedere per effettuare una prenotazione.',
         'reservation_certificate_generation_failed' => 'Non siamo riusciti a generare il tuo certificato di prenotazione. Il nostro team è stato informato.',
         'reservation_certificate_not_found' => 'Il certificato richiesto non è stato trovato.',

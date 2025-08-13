@@ -374,8 +374,23 @@ $showActivationBadge = !$hasActiveReservations;
 
             // Se c'è una prenotazione attiva, uso il suo prezzo e utente
             if ($highestPriorityReservation && $highestPriorityReservation->status === 'active') {
-            $displayPrice = $highestPriorityReservation->offer_amount_algo ?? $egi->price;
+            // 🚀 DEBUG: Log per capire il prezzo mostrato nella card
+            \Log::info('🎯 EGI CARD PRICE DEBUG', [
+            'egi_id' => $egi->id,
+            'base_price' => $egi->price,
+            'reservation_id' => $highestPriorityReservation->id,
+            'reservation_offer_eur' => $highestPriorityReservation->offer_amount_eur,
+            'reservation_offer_algo' => $highestPriorityReservation->offer_amount_algo,
+            'display_price_before' => $displayPrice,
+            ]);
+
+            // 🚀 FIX: Usa EUR per il display, non ALGO!
+            $displayPrice = $highestPriorityReservation->offer_amount_eur ?? $egi->price;
             $displayUser = $highestPriorityReservation->user;
+
+            \Log::info('🎯 EGI CARD PRICE DEBUG AFTER', [
+            'final_display_price_eur' => $displayPrice
+            ]);
             }
             @endphp
 
@@ -400,8 +415,7 @@ $showActivationBadge = !$hasActiveReservations;
                         </span>
                     </div>
                     <div class="text-right">
-                        <span class="text-sm font-bold text-white">{{ number_format($displayPrice, 2) }}</span>
-                        <span class="ml-1 text-xs text-green-300">ALGO</span>
+                        <span class="text-sm font-bold text-white">€{{ number_format($displayPrice, 2) }}</span>
                     </div>
                 </div>
 
@@ -426,18 +440,17 @@ $showActivationBadge = !$hasActiveReservations;
                         @php
                         $activatorDisplay = formatActivatorDisplay($displayUser);
                         @endphp
-                        
+
                         @if ($activatorDisplay['is_commissioner'] && $activatorDisplay['avatar'])
-                            {{-- Commissioner with avatar --}}
-                            <img src="{{ $activatorDisplay['avatar'] }}" 
-                                 alt="{{ $activatorDisplay['name'] }}" 
-                                 class="w-4 h-4 rounded-full object-cover border border-white/20">
+                        {{-- Commissioner with avatar --}}
+                        <img src="{{ $activatorDisplay['avatar'] }}" alt="{{ $activatorDisplay['name'] }}"
+                            class="w-4 h-4 rounded-full object-cover border border-white/20">
                         @else
-                            {{-- Regular collector or commissioner without avatar --}}
-                            <svg class="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                                    clip-rule="evenodd" />
-                            </svg>
+                        {{-- Regular collector or commissioner without avatar --}}
+                        <svg class="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                                clip-rule="evenodd" />
+                        </svg>
                         @endif
                         @endif
                     </div>
@@ -448,10 +461,11 @@ $showActivationBadge = !$hasActiveReservations;
                         @else
                         @php
                         if (!isset($activatorDisplay)) {
-                            $activatorDisplay = formatActivatorDisplay($displayUser);
+                        $activatorDisplay = formatActivatorDisplay($displayUser);
                         }
                         @endphp
-                        {{ __('egi.reservation.activator') }}: <span class="font-semibold">{{ $activatorDisplay['name'] }}</span>
+                        {{ __('egi.reservation.activator') }}: <span class="font-semibold">{{ $activatorDisplay['name']
+                            }}</span>
                         @endif
                     </span>
                 </div>

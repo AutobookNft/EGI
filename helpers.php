@@ -92,7 +92,7 @@ if (!function_exists('hasPendingWallet')) {
 if (!function_exists('formatActivatorDisplay')) {
     /**
      * Format activator display based on user permissions
-     * 
+     *
      * @param \App\Models\User $user
      * @return array ['name' => string, 'avatar' => string|null, 'is_commissioner' => bool]
      */
@@ -150,7 +150,7 @@ if (!function_exists('formatActivatorDisplay')) {
 if (!function_exists('getGenericActivatorIcon')) {
     /**
      * Get generic activator icon SVG
-     * 
+     *
      * @param string $classes
      * @return string
      */
@@ -164,7 +164,7 @@ if (!function_exists('getGenericActivatorIcon')) {
 if (!function_exists('getActivatorsCount')) {
     /**
      * Get total count of activators (collectors + commissioners)
-     * 
+     *
      * @return int
      */
     function getActivatorsCount(): int {
@@ -177,7 +177,7 @@ if (!function_exists('getActivatorsCount')) {
 if (!function_exists('getCreatorsCount')) {
     /**
      * Get total count of creators
-     * 
+     *
      * @return int
      */
     function getCreatorsCount(): int {
@@ -190,10 +190,96 @@ if (!function_exists('getCreatorsCount')) {
 if (!function_exists('getCollectionsCount')) {
     /**
      * Get total count of published collections
-     * 
+     *
      * @return int
      */
     function getCollectionsCount(): int {
         return \App\Models\Collection::where('is_published', true)->count();
+    }
+}
+
+if (!function_exists('getEgiActivationStatus')) {
+    /**
+     * Get EGI activation status with activator information
+     *
+     * @param \App\Models\Egi $egi
+     * @return array
+     */
+    function getEgiActivationStatus($egi): array {
+        // Trova la prenotazione attiva vincente (se esiste)
+        $winningReservation = \App\Models\Reservation::where('egi_id', $egi->id)
+            ->where('is_current', true)
+            ->where('status', 'active')
+            ->whereNull('superseded_by_id')
+            ->with('user')
+            ->orderByDesc('offer_amount_eur')
+            ->first();
+
+        if ($winningReservation && $winningReservation->user) {
+            $activator = $winningReservation->user;
+
+            // Determina se è un commissioner (ha il ruolo o i permessi)
+            $isCommissioner = $activator->hasRole('commissioner') ||
+                $activator->can('display_public_name_on_egi');
+
+            return [
+                'status' => 'activated',
+                'highest_bid' => $winningReservation->offer_amount_eur,
+                'can_reserve' => false, // Non può più essere prenotato
+                'reservations_count' => 1,
+                'activator' => [
+                    'name' => $isCommissioner ?
+                        ($activator->first_name && $activator->last_name ?
+                            $activator->first_name . ' ' . $activator->last_name :
+                            $activator->name) :
+                        'Attivatore',
+                    'avatar' => $isCommissioner ? $activator->profile_photo_url : null,
+                    'is_commissioner' => $isCommissioner,
+                    'id' => $activator->id
+                ]
+            ];
+        }
+
+        // Verifica se ci sono prenotazioni in competizione
+        $competingReservationsCount = \App\Models\Reservation::where('egi_id', $egi->id)
+            ->where('is_current', true)
+            ->where('status', 'active')
+            ->count();
+
+        if ($competingReservationsCount > 1) {
+            // Trova la miglior offerta in competizione
+            $highestBid = \App\Models\Reservation::where('egi_id', $egi->id)
+                ->where('is_current', true)
+                ->where('status', 'active')
+                ->max('offer_amount_eur');
+
+            return [
+                'status' => 'in_competition',
+                'highest_bid' => $highestBid,
+                'can_reserve' => true, // Può ancora fare offerte
+                'reservations_count' => $competingReservationsCount,
+                'activator' => null
+            ];
+        }
+
+        // EGI disponibile per attivazione
+        return [
+            'status' => 'available',
+            'highest_bid' => null,
+            'can_reserve' => true, // Può essere prenotato
+            'reservations_count' => 0,
+            'activator' => null
+        ];
+    }
+
+    /**
+     * Formatta un prezzo in euro con il simbolo della valuta
+     */
+    function formatPrice($price): string {
+        if ($price === null || $price === '') {
+            return '€ 0,00';
+        }
+
+        return '€ ' . number_format((float) $price, 2, ',', '.');
     }
 }

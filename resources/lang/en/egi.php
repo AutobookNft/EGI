@@ -77,6 +77,7 @@ return [
         'view' => 'View',
         'view_details' => 'View EGI details',
         'reserve' => 'Reserve',
+        'outbid' => 'Outbid',
     ],
 
     // Information Sections

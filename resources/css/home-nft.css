@@ -85,13 +85,13 @@ main#main-content {
 
 
 /* Forza la visualizzazione di tutti gli elementi principali */
-/* section, .section, .py-16, .py-20 {
+section, .section, .py-16, .py-20 {
     display: block !important;
     height: auto !important;
     min-height: unset !important;
     overflow: visible !important;
     position: relative !important;
-} */
+}
 
 /* Fix per il footer */
 footer {
@@ -171,16 +171,16 @@ body::after {
 }
 
 /* Effetto di caricamento pagina */
-.page-transition {
+/* .page-transition {
     opacity: 0;
     transform: translateY(20px);
     transition: opacity 0.5s ease, transform 0.5s ease;
-}
+} */
 
-.page-loaded {
+/* .page-loaded {
     opacity: 1;
     transform: translateY(0);
-}
+} */
 
 /* Stili dal secondo blocco <style> */
 main#main-content {

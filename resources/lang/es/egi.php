@@ -47,6 +47,7 @@ return [
         'view' => 'Ver',
         'view_details' => 'Ver detalles del EGI',
         'reserve' => 'Reservar',
+        'outbid' => 'Pujar más',
     ],
 
     'carousel' => [

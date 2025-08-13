@@ -165,11 +165,12 @@ $activatorsCount = \DB::table('users')
                 <div class="grid grid-cols-1 gap-4 transition-all duration-300 mobile-content content-egi-list lg:hidden"
                     data-content="egi-list">
                     @if($egis->count() > 0)
-                    @foreach($egis as $egi)
-                    <div class="mobile-item">
-                        <x-egi-card-list :egi="$egi" :context="'carousel'" :showBadge="true" />
+                    <div class="space-y-3">
+                        @foreach($egis as $egi)
+                        <x-egi-card-list :egi="$egi" context="creator" :showPurchasePrice="false"
+                            :showOwnershipBadge="false" />
+                        @endforeach
                     </div>
-                    @endforeach
                     @else
                     <div class="py-8 text-center text-gray-400">
                         {{ __('egi.carousel.empty_state.no_egis') }}
@@ -337,18 +338,18 @@ $activatorsCount = \DB::table('users')
             if (contentHeader && contentCount) {
                 contentHeader.style.opacity = '0.5';
                 contentCount.style.opacity = '0.5';
-                
+
                 setTimeout(() => {
                     // Update header text
                     contentHeader.textContent = headerTexts[contentType] || headerTexts['egi-list'];
-                    
+
                     // Update count
                     contentCount.textContent = countMapping[contentType] || 0;
-                    
+
                     // Update route data attribute
                     const route = routeMapping[contentType];
                     contentHeader.setAttribute('data-route', route || '');
-                    
+
                     // Update cursor style based on route availability
                     if (route) {
                         contentHeader.classList.add('cursor-pointer', 'hover:text-purple-300');
@@ -357,7 +358,7 @@ $activatorsCount = \DB::table('users')
                         contentHeader.classList.add('cursor-default');
                         contentHeader.classList.remove('cursor-pointer', 'hover:text-purple-300');
                     }
-                    
+
                     contentHeader.style.opacity = '1';
                     contentCount.style.opacity = '1';
                 }, 150);

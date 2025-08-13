@@ -97,7 +97,7 @@ $showBadge = $showBadge ?? $showOwnershipBadge;
     <div class="egi-sparkles" aria-hidden="true"></div>
 
     {{-- Badge HYPER per modalità lista --}}
-    <div class="absolute -top-2 -right-2 z-10">
+    <div class="absolute z-10 -top-2 -right-2">
         <div class="egi-hyper-badge-small">⭐ HYPER ⭐</div>
     </div>
     @endif
@@ -214,72 +214,122 @@ $showBadge = $showBadge ?? $showOwnershipBadge;
                 {{-- 👤 Commissioner: Mostra avatar personalizzato --}}
                 @if ($activatorDisplay['avatar'])
                 <img src="{{ $activatorDisplay['avatar'] }}" alt="{{ $activatorDisplay['name'] }}"
-                    class="w-4 h-4 rounded-full object-cover border border-green-400/30 shadow-sm">
+                    class="object-cover w-4 h-4 border rounded-full shadow-sm border-green-400/30">
                 @else
                 {{-- Fallback per commissioner senza avatar --}}
-                <div class="w-4 h-4 rounded-full bg-green-500 flex items-center justify-center shadow-sm">
+                <div class="flex items-center justify-center w-4 h-4 bg-green-500 rounded-full shadow-sm">
                     <svg class="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
                             clip-rule="evenodd" />
                     </svg>
                 </div>
                 @endif
-                <span class="text-green-300 font-medium">
+                <span class="font-medium text-green-300">
                     {{ $activatorDisplay['name'] }}
                 </span>
-                <span class="text-gray-400 text-xs">({{ __('common.activator') }})</span>
+                <span class="text-xs text-gray-400">({{ __('common.activator') }})</span>
                 @else
                 {{-- 💰 Regular Collector: Icona generica + wallet abbreviato --}}
-                <div class="w-4 h-4 rounded-full bg-gray-600 flex items-center justify-center">
+                <div class="flex items-center justify-center w-4 h-4 bg-gray-600 rounded-full">
                     <svg class="w-2 h-2 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
                             clip-rule="evenodd" />
                     </svg>
                 </div>
-                <span class="text-green-300 font-medium">
+                <span class="font-medium text-green-300">
                     {{ $activatorDisplay ? $activatorDisplay['name'] : ($currentReservation->user->wallet_address ?
                     Str::limit($currentReservation->user->wallet_address, 12, '...') :
                     $currentReservation->user->first_name . ' ' . $currentReservation->user->last_name) }}
                 </span>
-                <span class="text-gray-400 text-xs">({{ __('common.activator') }})</span>
+                <span class="text-xs text-gray-400">({{ __('common.activator') }})</span>
                 @endif
             </div>
             @elseif ($context === 'creator')
-            <div class="flex items-center gap-2 mb-1 text-sm">
-                <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd"
-                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                        clip-rule="evenodd" />
-                </svg>
-                <span class="text-gray-400 text-sm">{{ __('common.available') }}</span>
+            <div class="flex items-center justify-between gap-2 mb-1 text-sm">
+                <div class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                            clip-rule="evenodd" />
+                    </svg>
+                    <span class="text-sm font-medium text-green-300">{{ __('common.available') }}</span>
+                </div>
+                <button type="button"
+                    class="reserve-button inline-flex items-center px-3 py-1.5 text-xs font-medium text-white bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all transform hover:scale-105 shadow-sm"
+                    data-egi-id="{{ $egi->id }}">
+                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                    {{ __('egi.actions.reserve') ?? 'Prenota' }}
+                </button>
             </div>
             @endif
             @endif
 
             <!-- Base Price Info -->
             @if ($egi->price)
-            <div class="flex items-center gap-2 mb-1 text-sm">
-                <svg class="w-4 h-4 {{ $isHyper ? 'text-yellow-400' : 'text-orange-400' }}" fill="currentColor"
-                    viewBox="0 0 20 20">
-                    <path fill-rule="evenodd"
-                        d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z"
-                        clip-rule="evenodd" />
-                </svg>
-                <span class="font-bold {{ $isHyper ? 'text-yellow-300' : 'text-orange-300' }}">€{{
-                    number_format($egi->price, 0, ',', '.') }}</span>
+            @php
+            // 🚀 FIX: Calcola il prezzo da mostrare basato sulla prenotazione più alta
+            $reservationService = app('App\Services\ReservationService');
+            $highestPriorityReservation = $reservationService->getHighestPriorityReservation($egi);
+            $displayPriceEur = $egi->price; // Default al prezzo base
+
+            // Se c'è una prenotazione attiva, usa il suo prezzo EUR
+            if ($highestPriorityReservation && $highestPriorityReservation->status === 'active') {
+            $displayPriceEur = $highestPriorityReservation->offer_amount_eur;
+
+            \Log::info('🎯 EGI CARD LIST PRICE DEBUG', [
+            'egi_id' => $egi->id,
+            'base_price_eur' => $egi->price,
+            'reservation_id' => $highestPriorityReservation->id,
+            'reservation_offer_eur' => $highestPriorityReservation->offer_amount_eur,
+            'final_display_price_eur' => $displayPriceEur
+            ]);
+            }
+
+            // Controlla se c'è una prenotazione corrente per mostrare il pulsante Rilancia
+            $hasCurrentReservation = ($context === 'creator' || $context === 'collection') &&
+            $egi->reservations &&
+            $egi->reservations->where('is_current', true)->first();
+            @endphp
+            <div class="flex items-center justify-between gap-2 mb-1 text-sm">
+                <div class="flex items-center gap-2">
+                    <svg class="w-4 h-4 {{ $isHyper ? 'text-yellow-400' : 'text-orange-400' }}" fill="currentColor"
+                        viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                            d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z"
+                            clip-rule="evenodd" />
+                    </svg>
+                    <span class="font-bold {{ $isHyper ? 'text-yellow-300' : 'text-orange-300' }}">€{{
+                        number_format($displayPriceEur, 0, ',', '.') }}</span>
+                </div>
+
+                {{-- Pulsante Rilancia se l'EGI è già prenotato --}}
+                @if ($hasCurrentReservation)
+                <button type="button"
+                    class="reserve-button inline-flex items-center px-3 py-1.5 text-xs font-medium text-white bg-gradient-to-r from-amber-500 to-orange-600 rounded-lg hover:from-amber-600 hover:to-orange-700 transition-all transform hover:scale-105 shadow-sm"
+                    data-egi-id="{{ $egi->id }}">
+                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                    {{ __('egi.actions.outbid') ?? 'Rilancia' }}
+                </button>
+                @endif
             </div>
             @endif
 
             <!-- Purchase/Context Info -->
             @if ($config['show_purchase'] && $showPurchasePrice)
             @if ($context === 'collector' && $egi->pivot && $egi->pivot->offer_amount_eur)
-            <div class="flex items-center gap-2 text-sm mt-1">
+            <div class="flex items-center gap-2 mt-1 text-sm">
                 <span class="text-gray-400">{{ __('collector.portfolio.purchased_for') }}</span>
                 <span class="font-bold {{ $isHyper ? 'text-yellow-400' : 'text-green-400' }}">€{{
                     number_format($egi->pivot->offer_amount_eur, 2) }}</span>
             </div>
             @elseif ($context === 'patron' && isset($egi->support_amount))
-            <div class="flex items-center gap-2 text-sm mt-1">
+            <div class="flex items-center gap-2 mt-1 text-sm">
                 <span class="text-gray-400">{{ __('patron.portfolio.supported_for') }}</span>
                 <span class="font-bold {{ $isHyper ? 'text-yellow-300' : 'text-yellow-400' }}">€{{
                     number_format($egi->support_amount, 2) }}</span>

@@ -1,0 +1,26 @@
+/*
+ * Homepage-specific modal fixes
+ * Overrides z-index conflicts from home-nft.css
+ */
+
+/* Only apply when home-nft.css is loaded (body will have specific styling) */
+body[style*="z-index: 0"] #reservation-modal,
+body #reservation-modal {
+    z-index: 10000 !important;
+}
+
+/* Ensure modal backdrop is above everything */
+body #reservation-modal .fixed.inset-0 {
+    z-index: 9999 !important;
+}
+
+/* Ensure modal content is above backdrop */
+body #reservation-modal .relative {
+    z-index: 10001 !important;
+}
+
+/* Prevent any homepage z-index interference */
+body #reservation-modal * {
+    position: relative;
+    z-index: inherit;
+}

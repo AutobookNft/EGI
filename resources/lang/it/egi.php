@@ -96,6 +96,7 @@ return [
         'view_details' => 'Visualizza dettagli EGI',
         'reserve' => 'Prenota',
         'reserved' => 'Prenotato',
+        'outbid' => 'Rilancia',
         'view_history' => 'Cronologia',
         'reserve_egi' => 'Prenota :title',
     ],

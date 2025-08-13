@@ -171,7 +171,20 @@
 
                     // Se c'è una prenotazione attiva, uso il suo prezzo e utente
                     if ($highestPriorityReservation && $highestPriorityReservation->status === 'active') {
-                    $displayPrice = $highestPriorityReservation->offer_amount_algo ?? $egi->price;
+                    // 🚀 DEBUG: Log per capire quale prenotazione viene selezionata
+                    \Log::info('EGI Show Debug', [
+                    'egi_id' => $egi->id,
+                    'reservation_id' => $highestPriorityReservation->id,
+                    'user_id' => $highestPriorityReservation->user_id,
+                    'offer_amount_eur' => $highestPriorityReservation->offer_amount_eur,
+                    'offer_amount_algo' => $highestPriorityReservation->offer_amount_algo,
+                    'is_current' => $highestPriorityReservation->is_current,
+                    'status' => $highestPriorityReservation->status,
+                    'created_at' => $highestPriorityReservation->created_at,
+                    'base_price' => $egi->price
+                    ]);
+
+                    $displayPrice = $highestPriorityReservation->offer_amount_eur ?? ($egi->price * 0.30);
                     $displayUser = $highestPriorityReservation->user;
 
                     // Label diversa per STRONG vs WEAK
@@ -263,7 +276,8 @@
                                                 placeholder="{{ __('egi.crud.price_placeholder') }}">
                                             <span class="absolute text-sm text-gray-400 right-3 top-2">ALGO</span>
                                         </div>
-                                        <div class="mt-1 text-xs text-gray-400">{{ __('egi.crud.price_hint') }}</div>
+                                        <div class="mt-1 text-xs text-gray-400">{{ __('egi.crud.price_hint') }} (Prezzo
+                                            base in ALGO)</div>
                                     </div>
 
                                     {{-- Creation Date Field --}}
@@ -285,7 +299,8 @@
                                             <input type="hidden" name="is_published" value="0">
                                             <input type="checkbox" id="is_published" name="is_published" value="1" {{
                                                 old('is_published', $egi->is_published) ? 'checked' : '' }}
-                                            class="w-4 h-4 rounded text-emerald-600 bg-black/30 border-emerald-700/50 focus:ring-emerald-500 focus:ring-2">
+                                            class="w-4 h-4 rounded text-emerald-600 bg-black/30 border-emerald-700/50
+                                            focus:ring-emerald-500 focus:ring-2">
                                             <span class="ml-3 text-sm font-medium text-emerald-300">
                                                 {{ __('egi.crud.is_published') }}
                                             </span>
@@ -337,7 +352,7 @@
                                         </div>
                                         <div class="font-medium text-white">
                                             @if($displayPrice)
-                                            {{ number_format($displayPrice, 2) }} ALGO
+                                            €{{ number_format($displayPrice, 2) }}
                                             @else
                                             {{ __('egi.crud.price_not_set') }}
                                             @endif
@@ -362,21 +377,21 @@
                                             @php
                                             $activatorDisplay = formatActivatorDisplay($displayUser);
                                             @endphp
-                                            
+
                                             @if ($activatorDisplay['is_commissioner'] && $activatorDisplay['avatar'])
-                                                {{-- Commissioner with avatar --}}
-                                                <img src="{{ $activatorDisplay['avatar'] }}" 
-                                                     alt="{{ $activatorDisplay['name'] }}" 
-                                                     class="w-3 h-3 rounded-full object-cover border border-emerald-400/30">
+                                            {{-- Commissioner with avatar --}}
+                                            <img src="{{ $activatorDisplay['avatar'] }}"
+                                                alt="{{ $activatorDisplay['name'] }}"
+                                                class="object-cover w-3 h-3 border rounded-full border-emerald-400/30">
                                             @else
-                                                {{-- Regular collector or commissioner without avatar --}}
-                                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path fill-rule="evenodd"
-                                                        d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                                                        clip-rule="evenodd" />
-                                                </svg>
+                                            {{-- Regular collector or commissioner without avatar --}}
+                                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd"
+                                                    d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                                                    clip-rule="evenodd" />
+                                            </svg>
                                             @endif
-                                            
+
                                             {{ __('egi.reservation.by') }}: {{ $activatorDisplay['name'] }}
                                             @endif
                                         </div>
@@ -425,9 +440,9 @@
                                 <div class="mb-6 text-center">
                                     <p class="mb-2 text-sm text-gray-400">{{ $priceLabel }}</p>
                                     <div class="flex items-baseline justify-center">
-                                        <span class="text-4xl font-bold text-white">{{ number_format($displayPrice, 2)
+                                        <span class="text-4xl font-bold text-white">€{{ number_format($displayPrice, 2)
                                             }}</span>
-                                        <span class="ml-2 text-lg font-medium text-gray-400">ALGO</span>
+                                        <span class="ml-2 text-lg font-medium text-gray-400">EUR</span>
                                     </div>
 
                                     {{-- Miglior offerente (STRONG vs WEAK) --}}
@@ -439,11 +454,11 @@
                                     $borderColor = $isWeakReservation ? 'border-amber-500/20' : 'border-emerald-500/20';
                                     $iconBg = $isWeakReservation ? 'bg-amber-500' : 'bg-emerald-500';
                                     $textColor = $isWeakReservation ? 'text-amber-300' : 'text-emerald-300';
-                                    
+
                                     // Prepare activator display for both icon and text
                                     $activatorDisplayTop = null;
                                     if ($displayUser && !$isWeakReservation) {
-                                        $activatorDisplayTop = formatActivatorDisplay($displayUser);
+                                    $activatorDisplayTop = formatActivatorDisplay($displayUser);
                                     }
                                     @endphp
 
@@ -459,16 +474,17 @@
                                             </svg>
                                             @else
                                             {{-- Check if commissioner has avatar --}}
-                                            @if ($activatorDisplayTop && $activatorDisplayTop['is_commissioner'] && $activatorDisplayTop['avatar'])
-                                                <img src="{{ $activatorDisplayTop['avatar'] }}" 
-                                                     alt="{{ $activatorDisplayTop['name'] }}" 
-                                                     class="w-5 h-5 rounded-full object-cover">
+                                            @if ($activatorDisplayTop && $activatorDisplayTop['is_commissioner'] &&
+                                            $activatorDisplayTop['avatar'])
+                                            <img src="{{ $activatorDisplayTop['avatar'] }}"
+                                                alt="{{ $activatorDisplayTop['name'] }}"
+                                                class="object-cover w-5 h-5 rounded-full">
                                             @else
-                                                <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path fill-rule="evenodd"
-                                                        d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                                                        clip-rule="evenodd" />
-                                                </svg>
+                                            <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd"
+                                                    d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                                                    clip-rule="evenodd" />
+                                            </svg>
                                             @endif
                                             @endif
                                         </div>
@@ -479,7 +495,8 @@
                                                 $highestPriorityReservation->fegi_code ?? 'FG#******' }}</span>
                                             @else
                                             {{ __('egi.reservation.strong_bidder') }}: <span
-                                                class="font-semibold text-white">{{ $activatorDisplayTop['name'] }}</span>
+                                                class="font-semibold text-white">{{ $activatorDisplayTop['name']
+                                                }}</span>
                                             @endif
                                         </span>
                                     </div>

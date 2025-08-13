@@ -139,6 +139,13 @@ class ReservationController extends Controller {
             return redirect()->route('egi-certificates.show', $reservation->certificate->certificate_uuid)
                 ->with('success', __('reservation.success'));
         } catch (\Exception $e) {
+            // Handle relaunch amount validation errors specifically
+            if (str_contains($e->getMessage(), 'rilancio deve essere superiore')) {
+                return redirect()->back()
+                    ->withInput()
+                    ->withErrors(['offer_amount_eur' => $e->getMessage()]);
+            }
+
             // Handle unauthorized access and any other reservation creation errors
             if (str_contains($e->getMessage(), 'Unauthorized access')) {
                 return $this->errorManager->handle(
@@ -292,15 +299,26 @@ class ReservationController extends Controller {
                         'status' => $reservation->status,
                         'is_current' => $reservation->is_current
                     ],
-                    'certificate' => [
+                    'certificate' => $reservation->certificate ? [
                         'uuid' => $reservation->certificate->certificate_uuid,
                         'url' => $reservation->certificate->getPublicUrlAttribute(),
                         'verification_url' => $reservation->certificate->getVerificationUrl(),
                         'pdf_url' => $reservation->certificate->getPdfUrl()
-                    ]
+                    ] : null
                 ]
             ]);
         } catch (\Exception $e) {
+            // Handle relaunch amount validation errors specifically
+            if (str_contains($e->getMessage(), 'rilancio deve essere superiore')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $e->getMessage(),
+                    'errors' => [
+                        'offer_amount_eur' => [$e->getMessage()]
+                    ]
+                ], 422);
+            }
+
             // Handle unauthorized access and any other reservation creation errors
             if (str_contains($e->getMessage(), 'Unauthorized access')) {
                 return $this->errorManager->handle(

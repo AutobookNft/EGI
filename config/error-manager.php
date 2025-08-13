@@ -1761,6 +1761,16 @@ return [
             'notify_slack' => false,
             'msg_to' => 'toast'
         ],
+        'RESERVATION_RELAUNCH_AMOUNT_TOO_LOW' => [
+            'type' => 'warning',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'errors.dev.reservation_relaunch_amount_too_low',
+            'user_message_key' => 'errors.user.reservation_relaunch_amount_too_low',
+            'http_status_code' => 400,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'sweet-alert'
+        ],
         'RESERVATION_UNAUTHORIZED' => [
             'type' => 'error',
             'blocking' => 'blocking',

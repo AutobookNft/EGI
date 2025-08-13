@@ -1,0 +1,117 @@
+/**
+ * Fix per il posizionamento del modal di prenotazione
+ * Assicura che il modal sia sempre visibile e centrato
+ * Sovrascrive interferenze dal CSS della homepage
+ */
+
+#reservation-modal {
+    /* Posizionamento fisso sempre in primo piano */
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    z-index: 9999 !important;
+
+    /* Centramento perfetto */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    /* Background */
+    background-color: rgba(0, 0, 0, 0.75) !important;
+
+    /* Padding di sicurezza */
+    padding: 1rem !important;
+    box-sizing: border-box !important;
+
+    /* Reset eventuali interferenze */
+    transform: none !important;
+    margin: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    max-width: 100vw !important;
+    max-height: 100vh !important;
+    overflow: hidden !important;
+}
+
+#reservation-modal.hidden {
+    display: none !important;
+}
+
+/* Container del modal */
+#reservation-modal > div[role="document"] {
+    /* Posizionamento relativo centrato */
+    position: relative !important;
+
+    /* Dimensioni controllate */
+    max-height: calc(100vh - 2rem) !important;
+    max-width: calc(100vw - 2rem) !important;
+    width: 95% !important;
+
+    /* Reset margin/padding problematici */
+    margin: 0 !important;
+
+    /* Background e styling */
+    background: white !important;
+    border-radius: 0.5rem !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+
+    /* Scrolling interno */
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+
+    /* Reset transform eventuali */
+    transform: none !important;
+}
+
+@media (min-width: 768px) {
+    #reservation-modal > div[role="document"] {
+        width: 75% !important;
+        max-width: 28rem !important;
+    }
+}
+
+@media (min-width: 1024px) {
+    #reservation-modal > div[role="document"] {
+        width: 40% !important;
+        max-width: 32rem !important;
+    }
+}
+
+/* Fix per il bottone di chiusura */
+#close-reservation-modal {
+    position: absolute !important;
+    top: 1rem !important;
+    right: 1rem !important;
+    z-index: 10 !important;
+    background: rgba(255, 255, 255, 0.9) !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    border-radius: 50% !important;
+    width: 2rem !important;
+    height: 2rem !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    font-size: 1.2rem !important;
+    line-height: 1 !important;
+    color: rgba(0, 0, 0, 0.7) !important;
+    transition: all 0.2s ease !important;
+}
+
+#close-reservation-modal:hover {
+    background: rgba(255, 255, 255, 1) !important;
+    color: rgba(0, 0, 0, 0.9) !important;
+    transform: scale(1.05) !important;
+}
+
+/* Reset eventuali interferenze dal CSS della homepage */
+body:has(#reservation-modal:not(.hidden)) {
+    overflow: hidden !important;
+}
+
+/* Assicura che il modal sia sopra tutto */
+#reservation-modal {
+    isolation: isolate !important;
+}

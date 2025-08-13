@@ -84,6 +84,77 @@ class ReservationService {
                 ]);
             }
 
+            // Convert EUR amount to ALGO before checking previous reservations
+            $offerAmountEur = (float) $data['offer_amount_eur'];
+
+            \Log::info('🚀 RELAUNCH CHECK STARTED', [
+                'user_id' => $user?->id,
+                'egi_id' => $data['egi_id'],
+                'new_offer_amount_eur' => $offerAmountEur,
+                'has_user' => $user !== null
+            ]);
+
+            // 🚀 FIX: Verifica rilancio - importo deve essere più alto (PRIMA di disattivare le prenotazioni)
+            if ($user) {
+                // Prima controlliamo TUTTE le prenotazioni dell'utente per questo EGI
+                $allUserReservations = Reservation::where('user_id', $user->id)
+                    ->where('egi_id', $data['egi_id'])
+                    ->orderBy('created_at', 'desc')
+                    ->get();
+
+                \Log::info('🔍 ALL USER RESERVATIONS FOR EGI', [
+                    'user_id' => $user->id,
+                    'egi_id' => $data['egi_id'],
+                    'total_reservations' => $allUserReservations->count(),
+                    'reservations' => $allUserReservations->map(function ($r) {
+                        return [
+                            'id' => $r->id,
+                            'offer_amount_eur' => $r->offer_amount_eur,
+                            'is_current' => $r->is_current,
+                            'status' => $r->status,
+                            'created_at' => $r->created_at,
+                            'superseded_by_id' => $r->superseded_by_id
+                        ];
+                    })->toArray()
+                ]);
+
+                // Cerchiamo l'ultima prenotazione dell'utente per questo EGI (anche se superseded)
+                $previousReservation = Reservation::where('user_id', $user->id)
+                    ->where('egi_id', $data['egi_id'])
+                    ->where('status', 'active')  // Solo status attivo, non importa is_current
+                    ->orderBy('created_at', 'desc') // La più recente
+                    ->first();
+
+                \Log::info('🔍 PREVIOUS RESERVATION CHECK (UPDATED)', [
+                    'user_id' => $user->id,
+                    'egi_id' => $data['egi_id'],
+                    'previous_reservation_found' => $previousReservation !== null,
+                    'previous_reservation_id' => $previousReservation?->id,
+                    'previous_amount' => $previousReservation?->offer_amount_eur,
+                    'previous_is_current' => $previousReservation?->is_current,
+                    'new_amount' => $offerAmountEur,
+                    'should_block' => $previousReservation && $offerAmountEur <= $previousReservation->offer_amount_eur
+                ]);
+
+                if ($previousReservation && $offerAmountEur <= $previousReservation->offer_amount_eur) {
+                    $this->logger->warning('Relaunch attempt with insufficient amount', [
+                        'user_id' => $user->id,
+                        'egi_id' => $data['egi_id'],
+                        'previous_amount' => $previousReservation->offer_amount_eur,
+                        'new_amount' => $offerAmountEur
+                    ]);
+
+                    \Log::error('🚫 RELAUNCH BLOCKED', [
+                        'user_id' => $user->id,
+                        'egi_id' => $data['egi_id'],
+                        'previous_amount' => $previousReservation->offer_amount_eur,
+                        'new_amount' => $offerAmountEur
+                    ]);
+
+                    throw new \Exception('Il tuo rilancio deve essere superiore alla tua prenotazione precedente di €' . number_format($previousReservation->offer_amount_eur, 2) . '. Hai inserito €' . number_format($offerAmountEur, 2) . '.');
+                }
+            }
+
             // 🚀 FIX: Disattiva prenotazioni precedenti dello stesso user per questo EGI
             if ($user) {
                 $previousReservations = Reservation::where('user_id', $user->id)
@@ -122,7 +193,6 @@ class ReservationService {
             }
 
             // Convert EUR amount to ALGO
-            $offerAmountEur = (float) $data['offer_amount_eur'];
             $offerAmountAlgo = $this->currencyService->convertEurToAlgo($offerAmountEur);
 
             // Create the reservation
@@ -178,11 +248,12 @@ class ReservationService {
      * @return void
      */
     public function processReservationPriorities(Reservation $newReservation): void {
-        // Get all active reservations for the same EGI
+        // Get all active reservations for the same EGI, excluding same user reservations
         $existingReservations = Reservation::where('egi_id', $newReservation->egi_id)
             ->where('id', '!=', $newReservation->id)
             ->where('is_current', true)
             ->where('status', 'active')
+            ->where('user_id', '!=', $newReservation->user_id) // 🚀 FIX: Esclude prenotazioni dello stesso user
             ->get();
 
         foreach ($existingReservations as $existingReservation) {
