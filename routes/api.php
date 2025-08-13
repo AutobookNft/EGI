@@ -49,29 +49,8 @@ Route::prefix('currency')->name('api.currency.')->group(function () {
         ->name('legacy.algo-rate');
 });
 
-// === PROTECTED User Preference Routes (Authentication Required) ===
-Route::middleware(['auth:sanctum'])->prefix('user')->name('api.user.')->group(function () {
-    // Currency preferences
-    Route::post('/preferred-currency', [App\Http\Controllers\Api\UserPreferenceController::class, 'updatePreferredCurrency'])
-        ->name('currency.update');
-
-    Route::get('/preferences', [App\Http\Controllers\Api\UserPreferenceController::class, 'getPreferences'])
-        ->name('preferences.get');
-
-    // User-specific exchange rate (uses user's preferred currency)
-    Route::get('/exchange-rate', [App\Http\Controllers\Api\UserPreferenceController::class, 'getUserExchangeRate'])
-        ->name('exchange-rate.get');
-
-    // Comprehensive user currency data for dashboard
-    Route::get('/currency-data', [App\Http\Controllers\Api\UserPreferenceController::class, 'getUserCurrencyData'])
-        ->name('currency-data.get');
-});
-
 // === PROTECTED Legacy Currency Route (for authenticated users) ===
-Route::middleware(['auth:sanctum'])->group(function () {
-    Route::get('/currency/user-rate', [App\Http\Controllers\Api\CurrencyController::class, 'getCurrentUserRate'])
-        ->name('api.currency.user-rate');
-});
+// MOVED TO web.php - queste sono chiamate interne, non API esterne
 
 // 🚀 Portfolio API Routes - NEW (usando auth session invece di sanctum per ora)
 Route::middleware(['web'])->group(function () {
@@ -123,6 +102,10 @@ Route::name('api.')->group(function () {
     // API di configurazione per le definizioni degli errori
     Route::get('/error-definitions', [App\Http\Controllers\Api\AppConfigController::class, 'getErrorDefinitions'])
         ->name('error.definitions');
+
+    // Currency system configuration
+    Route::get('/currency-config', [App\Http\Controllers\Api\AppConfigController::class, 'getCurrencyConfig'])
+        ->name('currency.config');
 });
 
 

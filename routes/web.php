@@ -455,6 +455,26 @@ Route::get('/biographies/{biography:slug}', [BiographyWebController::class, 'sho
 */
 
 Route::middleware(['auth'])->group(function () {
+    /*
+    |--------------------------------------------------------------------------
+    | Multi-Currency User Preferences (WEB Routes)
+    |--------------------------------------------------------------------------
+    |
+    | Internal routes called by the frontend components via AJAX.
+    | Uses session authentication (not API tokens).
+    |
+    */
+
+    // User currency preference routes
+    Route::get('/user/preferences/currency', [App\Http\Controllers\Api\CurrencyController::class, 'getUserPreference'])
+        ->name('user.currency.get');
+    Route::put('/user/preferences/currency', [App\Http\Controllers\Api\CurrencyController::class, 'updateUserPreference'])
+        ->name('user.currency.update');
+
+    // Legacy compatibility
+    Route::post('/user/preferred-currency', [App\Http\Controllers\Api\UserPreferenceController::class, 'updatePreferredCurrency'])
+        ->name('user.currency.update.legacy');
+
     // Biography management (user's own biographies)
     Route::get('/biography/manage', [App\Http\Controllers\Web\BiographyController::class, 'manage'])
         ->name('biography.manage');
@@ -795,3 +815,19 @@ if (app()->environment(['local', 'development'])) {
         return view('test.heic-test');
     });
 }
+
+/*
+|--------------------------------------------------------------------------
+| Currency User Preferences (Web Routes with CSRF)
+|--------------------------------------------------------------------------
+|
+| Routes web per la gestione delle preferenze currency utente.
+| Usano autenticazione web standard con protezione CSRF.
+|
+*/
+Route::middleware(['web', 'auth'])->prefix('user/preferences')->name('web.user.preferences.')->group(function () {
+    Route::get('/currency', [App\Http\Controllers\Api\CurrencyController::class, 'getUserPreference'])
+        ->name('currency.get');
+    Route::put('/currency', [App\Http\Controllers\Api\CurrencyController::class, 'updateUserPreference'])
+        ->name('currency.update');
+});

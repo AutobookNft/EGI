@@ -359,8 +359,9 @@ $showActivationBadge = !$hasActiveReservations;
                     <span class="text-xs font-medium text-blue-300">{{ __('egi.price.purchased_for') }}</span>
                 </div>
                 <div class="text-right">
-                    <span class="text-sm font-bold text-white">€{{ number_format($egi->pivot->offer_amount_fiat, 2)
-                        }}</span>
+                    <span class="text-sm font-bold text-white">
+                        <x-currency-price :price="$egi->pivot->offer_amount_fiat" currency="EUR" />
+                    </span>
                 </div>
             </div>
             {{-- EGI con prenotazioni attive: mostra prezzo e utente prenotazione più alta --}}
@@ -415,7 +416,9 @@ $showActivationBadge = !$hasActiveReservations;
                         </span>
                     </div>
                     <div class="text-right">
-                        <span class="text-sm font-bold text-white">€{{ number_format($displayPrice, 2) }}</span>
+                        <span class="text-sm font-bold text-white">
+                            <x-currency-price :price="$displayPrice" currency="EUR" />
+                        </span>
                     </div>
                 </div>
 

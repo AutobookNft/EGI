@@ -352,7 +352,7 @@
                                         </div>
                                         <div class="font-medium text-white">
                                             @if($displayPrice)
-                                            €{{ number_format($displayPrice, 2) }}
+                                            <x-currency-price :price="$displayPrice" currency="EUR" />
                                             @else
                                             {{ __('egi.crud.price_not_set') }}
                                             @endif
@@ -440,8 +440,8 @@
                                 <div class="mb-6 text-center">
                                     <p class="mb-2 text-sm text-gray-400">{{ $priceLabel }}</p>
                                     <div class="flex items-baseline justify-center">
-                                        <span class="text-4xl font-bold text-white">€{{ number_format($displayPrice, 2)
-                                            }}</span>
+                                        <x-currency-price :price="$displayPrice" currency="EUR"
+                                            class="text-4xl font-bold text-white" :show-original="true" />
                                         <span class="ml-2 text-lg font-medium text-gray-400">EUR</span>
                                     </div>
 

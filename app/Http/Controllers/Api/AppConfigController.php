@@ -1085,4 +1085,37 @@ class AppConfigController extends Controller {
             ],
         ];
     }
+
+    /**
+     * Get currency system configuration
+     * 🎯 Purpose: Provide currency settings to frontend
+     * 📤 Output: Currency configuration including supported currencies
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getCurrencyConfig(): \Illuminate\Http\JsonResponse {
+        try {
+            $currencyConfig = [
+                'supported_currencies' => config('app.currency.supported_currencies', ['USD', 'EUR', 'GBP']),
+                'default_currency' => config('app.currency.default_currency', 'USD'),
+                'api_source' => config('app.currency.api_source', 'coingecko'),
+                'cache_ttl_seconds' => config('app.currency.cache_ttl_seconds', 60),
+            ];
+
+            return response()->json([
+                'success' => true,
+                'data' => $currencyConfig,
+            ]);
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to get currency configuration', [
+                'error' => $e->getMessage(),
+                'channel' => $this->channel,
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'error' => 'Failed to load currency configuration',
+            ], 500);
+        }
+    }
 }

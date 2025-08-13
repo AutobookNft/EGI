@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Helpers\FegiAuth;
 use App\Http\Controllers\Controller;
 use App\Services\CurrencyService;
 use Ultra\ErrorManager\Interfaces\ErrorManagerInterface;
@@ -9,7 +10,6 @@ use Ultra\UltraLogManager\UltraLogManager;
 use Ultra\ErrorManager\UltraError;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 /**
  * @Oracode Controller: CurrencyController (Mixed Security Approach)
@@ -34,7 +34,7 @@ class CurrencyController extends Controller {
      *
      * @param CurrencyService $currencyService
      * @param ErrorManagerInterface $errorManager
-     * @param LogManagerInterface $logger
+     * @param UltraLogManager $logger
      */
     public function __construct(
         CurrencyService $currencyService,
@@ -63,7 +63,7 @@ class CurrencyController extends Controller {
             }
 
             // Validate supported currencies
-            $supportedCurrencies = ['EUR', 'USD', 'GBP'];
+            $supportedCurrencies = config('app.currency.supported_currencies', ['USD', 'EUR', 'GBP']);
             if (!in_array($fiatCurrency, $supportedCurrencies)) {
                 return response()->json([
                     'error' => 'CURRENCY_UNSUPPORTED_CURRENCY',
@@ -98,19 +98,11 @@ class CurrencyController extends Controller {
                 ]
             ]);
         } catch (\Exception $e) {
-            $this->logger->error('Currency rate fetch failed', [
+            return $this->errorManager->handle('CURRENCY_EXCHANGE_SERVICE_UNAVAILABLE', [
+                'operation' => 'fetch_currency_rate',
                 'fiat_currency' => $fiatCurrency ?? 'unknown',
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-
-            return response()->json([
-                'error' => 'CURRENCY_EXCHANGE_SERVICE_UNAVAILABLE',
-                'message' => 'Failed to fetch exchange rate',
-                'data' => [
-                    'fiat_currency' => $fiatCurrency ?? 'unknown'
-                ]
-            ], 500);
+                'supported_currencies' => config('app.currency.supported_currencies', ['USD', 'EUR', 'GBP'])
+            ], $e);
         }
     }
 
@@ -123,7 +115,7 @@ class CurrencyController extends Controller {
      */
     public function getAllRates(Request $request): JsonResponse {
         try {
-            $supportedCurrencies = ['EUR', 'USD', 'GBP'];
+            $supportedCurrencies = config('app.currency.supported_currencies', ['USD', 'EUR', 'GBP']);
             $rates = [];
 
             foreach ($supportedCurrencies as $currency) {
@@ -135,6 +127,7 @@ class CurrencyController extends Controller {
                         'is_cached' => $rateData['is_cached'] ?? false
                     ];
                 } catch (\Exception $e) {
+                    // Log warning but continue with other currencies
                     $this->logger->warning('Failed to get rate for currency in public endpoint', [
                         'currency' => $currency,
                         'error' => $e->getMessage()
@@ -150,8 +143,8 @@ class CurrencyController extends Controller {
             $this->logger->info('Public all rates retrieved', [
                 'currencies_requested' => $supportedCurrencies,
                 'currencies_retrieved' => array_keys(array_filter($rates, fn($r) => isset($r['rate']))),
-                'is_authenticated' => Auth::check(),
-                'user_id' => Auth::id()
+                'is_authenticated' => FegiAuth::check(),
+                'user_id' => FegiAuth::id()
             ]);
 
             return response()->json([
@@ -166,17 +159,10 @@ class CurrencyController extends Controller {
                 ]
             ]);
         } catch (\Exception $e) {
-            $this->logger->error('Failed to get all currency rates', [
-                'action' => 'get_all_rates_public',
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-
-            return response()->json([
-                'error' => 'CURRENCY_EXCHANGE_SERVICE_UNAVAILABLE',
-                'message' => 'Unable to fetch all currency rates',
-                'data' => []
-            ], 503);
+            return $this->errorManager->handle('CURRENCY_EXCHANGE_SERVICE_UNAVAILABLE', [
+                'operation' => 'get_all_rates_public',
+                'supported_currencies' => config('app.currency.supported_currencies', ['USD', 'EUR', 'GBP'])
+            ], $e);
         }
     }
 
@@ -189,13 +175,13 @@ class CurrencyController extends Controller {
      */
     public function getDefaultRate(Request $request): JsonResponse {
         try {
-            $defaultCurrency = 'USD';
+            $defaultCurrency = config('app.currency.default_currency', 'USD');
             $rateData = $this->currencyService->getAlgoToFiatRate($defaultCurrency);
 
             $this->logger->info('Default rate for anonymous users retrieved', [
                 'currency' => $defaultCurrency,
                 'rate' => $rateData['rate'] ?? null,
-                'is_authenticated' => Auth::check()
+                'is_authenticated' => FegiAuth::check()
             ]);
 
             return response()->json([
@@ -211,17 +197,10 @@ class CurrencyController extends Controller {
                 ]
             ]);
         } catch (\Exception $e) {
-            $this->logger->error('Failed to get default rate for anonymous user', [
-                'action' => 'get_default_rate_anonymous',
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-
-            return response()->json([
-                'error' => 'CURRENCY_EXCHANGE_SERVICE_UNAVAILABLE',
-                'message' => 'Unable to fetch default currency rate',
-                'data' => []
-            ], 503);
+            return $this->errorManager->handle('CURRENCY_EXCHANGE_SERVICE_UNAVAILABLE', [
+                'operation' => 'get_default_rate_anonymous',
+                'default_currency' => config('app.currency.default_currency', 'USD')
+            ], $e);
         }
     }
 
@@ -234,7 +213,7 @@ class CurrencyController extends Controller {
      */
     public function getCurrentUserRate(Request $request): JsonResponse {
         try {
-            $user = Auth::user();
+            $user = FegiAuth::user();
 
             if (!$user) {
                 return response()->json([
@@ -244,7 +223,7 @@ class CurrencyController extends Controller {
                 ], 401);
             }
 
-            $currency = $user->preferred_currency ?? 'EUR';
+            $currency = $user->preferred_currency ?? config('app.currency.default_currency', 'USD');
             $rateData = $this->currencyService->getAlgoToFiatRate($currency);
 
             $this->logger->info('User-specific rate retrieved via CurrencyController', [
@@ -266,18 +245,11 @@ class CurrencyController extends Controller {
                 ]
             ]);
         } catch (\Exception $e) {
-            $this->logger->error('Failed to get user-specific currency rate', [
-                'action' => 'get_current_user_rate',
-                'user_id' => Auth::id(),
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-
-            return response()->json([
-                'error' => 'CURRENCY_EXCHANGE_SERVICE_UNAVAILABLE',
-                'message' => 'Unable to fetch user currency rate',
-                'data' => []
-            ], 503);
+            return $this->errorManager->handle('CURRENCY_EXCHANGE_SERVICE_UNAVAILABLE', [
+                'operation' => 'get_current_user_rate',
+                'user_id' => FegiAuth::id(),
+                'currency' => FegiAuth::user()->preferred_currency ?? 'USD'
+            ], $e);
         }
     }
 
@@ -290,9 +262,10 @@ class CurrencyController extends Controller {
      */
     public function convertFiatToAlgo(Request $request): JsonResponse {
         try {
+            $supportedCurrencies = config('app.currency.supported_currencies', ['USD', 'EUR', 'GBP']);
             $request->validate([
                 'amount' => 'required|numeric|min:0',
-                'currency' => 'required|string|in:EUR,USD,GBP'
+                'currency' => 'required|string|in:' . implode(',', $supportedCurrencies)
             ]);
 
             $amount = $request->input('amount');
@@ -317,8 +290,8 @@ class CurrencyController extends Controller {
                 'amount' => $amount,
                 'currency' => $currency,
                 'micro_algo' => $microAlgo,
-                'is_authenticated' => Auth::check(),
-                'user_id' => Auth::id()
+                'is_authenticated' => FegiAuth::check(),
+                'user_id' => FegiAuth::id()
             ]);
 
             return response()->json([
@@ -337,31 +310,116 @@ class CurrencyController extends Controller {
                 ]
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
-            $this->logger->error('Currency conversion validation failed', [
+            return $this->errorManager->handle('CURRENCY_CONVERSION_VALIDATION_ERROR', [
+                'operation' => 'convert_fiat_to_algo_validation',
                 'validation_errors' => $e->errors(),
                 'input_data' => $request->all()
-            ]);
-
-            return response()->json([
-                'error' => 'CURRENCY_CONVERSION_VALIDATION_ERROR',
-                'message' => 'Invalid input data for conversion',
-                'data' => [
-                    'validation_errors' => $e->errors()
-                ]
-            ], 422);
+            ], $e);
         } catch (\Exception $e) {
-            $this->logger->error('Currency conversion failed', [
-                'action' => 'convert_fiat_to_algo',
-                'input_data' => $request->all(),
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+            return $this->errorManager->handle('CURRENCY_CONVERSION_ERROR', [
+                'operation' => 'convert_fiat_to_algo',
+                'input_data' => $request->all()
+            ], $e);
+        }
+    }
+
+    /**
+     * Get user's currency preference (PROTECTED)
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function getUserPreference(Request $request): JsonResponse {
+        try {
+            $user = FegiAuth::user();
+
+            if (!$user) {
+                return response()->json([
+                    'error' => 'USER_UNAUTHENTICATED',
+                    'message' => 'Authentication required',
+                    'data' => []
+                ], 401);
+            }
+
+            $defaultCurrency = config('app.currency.default_currency', 'USD');
+
+            $this->logger->info('User currency preference retrieved', [
+                'user_id' => $user->id,
+                'preferred_currency' => $user->preferred_currency ?? $defaultCurrency
             ]);
 
             return response()->json([
-                'error' => 'CURRENCY_CONVERSION_ERROR',
-                'message' => 'Failed to convert currency',
-                'data' => []
-            ], 500);
+                'success' => true,
+                'message' => 'User currency preference retrieved successfully',
+                'data' => [
+                    'preferred_currency' => $user->preferred_currency ?? $defaultCurrency,
+                    'user_id' => $user->id
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return $this->errorManager->handle('USER_PREFERENCE_FETCH_ERROR', [
+                'operation' => 'get_user_currency_preference',
+                'user_id' => FegiAuth::id()
+            ], $e);
+        }
+    }
+
+    /**
+     * Update user's currency preference (PROTECTED)
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function updateUserPreference(Request $request): JsonResponse {
+        try {
+            $user = FegiAuth::user();
+
+            if (!$user) {
+                return response()->json([
+                    'error' => 'USER_UNAUTHENTICATED',
+                    'message' => 'Authentication required',
+                    'data' => []
+                ], 401);
+            }
+
+            $supportedCurrencies = config('app.currency.supported_currencies', ['USD', 'EUR', 'GBP']);
+            $request->validate([
+                'currency' => 'required|string|in:' . implode(',', $supportedCurrencies)
+            ]);
+
+            $newCurrency = strtoupper($request->input('currency'));
+            $oldCurrency = $user->preferred_currency ?? config('app.currency.default_currency', 'USD');
+
+            // Update user preference
+            $user->update(['preferred_currency' => $newCurrency]);
+
+            $this->logger->info('User currency preference updated', [
+                'user_id' => $user->id,
+                'old_currency' => $oldCurrency,
+                'new_currency' => $newCurrency
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Currency preference updated successfully',
+                'data' => [
+                    'old_currency' => $oldCurrency,
+                    'new_currency' => $newCurrency,
+                    'user_id' => $user->id
+                ]
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->errorManager->handle('CURRENCY_PREFERENCE_VALIDATION_ERROR', [
+                'operation' => 'update_user_currency_preference_validation',
+                'user_id' => FegiAuth::id(),
+                'validation_errors' => $e->errors()
+            ], $e);
+        } catch (\Exception $e) {
+            return $this->errorManager->handle('USER_PREFERENCE_UPDATE_FAILED', [
+                'operation' => 'update_user_currency_preference',
+                'user_id' => FegiAuth::id(),
+                'requested_currency' => $request->input('currency')
+            ], $e);
         }
     }
 

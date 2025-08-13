@@ -192,10 +192,25 @@ class ReservationService {
                 ]);
             }
 
+            // Get exchange rate data
+            $fiatCurrency = $data['fiat_currency'] ?? 'USD';
+            $rateData = $this->currencyService->getAlgoToFiatRate($fiatCurrency);
+
+            if (!$rateData) {
+                throw UltraError::handle('CURRENCY_EXCHANGE_SERVICE_UNAVAILABLE', [
+                    'operation' => 'create_reservation',
+                    'fiat_currency' => $fiatCurrency,
+                    'user_id' => $user?->id,
+                    'egi_id' => $egi->id
+                ]);
+            }
+
+            $exchangeRate = $rateData['rate'];
+
             // Convert FIAT amount to ALGO (microALGO)
             $offerAmountAlgo = $this->currencyService->convertFiatToMicroAlgo(
                 $offerAmountFiat,
-                $this->currencyService->getExchangeRate($data['fiat_currency'] ?? 'USD', 'ALGO')
+                $exchangeRate
             );
 
             // Create the reservation
@@ -205,15 +220,30 @@ class ReservationService {
                 'type' => $reservationType,
                 'status' => 'active',
                 'offer_amount_fiat' => $offerAmountFiat,
-                'fiat_currency' => $data['fiat_currency'] ?? 'USD',
+                'fiat_currency' => $fiatCurrency,
                 'offer_amount_algo' => $offerAmountAlgo,
-                'exchange_rate' => $this->currencyService->getExchangeRate($data['fiat_currency'] ?? 'USD', 'ALGO'),
-                'exchange_timestamp' => now(),
+                'exchange_rate' => $exchangeRate,
+                'exchange_timestamp' => $rateData['timestamp'],
                 'is_current' => true,
                 'contact_data' => $data['contact_data'] ?? null
             ]);
 
             $reservation->save();
+
+            // Log financial operation for audit trail
+            $this->logger->info('[FINANCIAL] Reservation created with currency conversion', [
+                'reservation_id' => $reservation->id,
+                'egi_id' => $egi->id,
+                'user_id' => $user?->id,
+                'wallet_address' => $walletAddress ?? ($user?->wallet ?? 'unknown'),
+                'offer_amount_fiat' => $offerAmountFiat,
+                'fiat_currency' => $fiatCurrency,
+                'offer_amount_algo' => $offerAmountAlgo,
+                'exchange_rate' => $exchangeRate,
+                'exchange_timestamp' => $rateData['timestamp'],
+                'conversion_source' => 'coingecko',
+                'type' => $reservationType
+            ]);
 
             // Process existing reservations to maintain priority
             $this->processReservationPriorities($reservation);

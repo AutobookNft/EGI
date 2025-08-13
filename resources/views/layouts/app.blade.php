@@ -5,15 +5,18 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="user-authenticated" content="{{ auth()->check() ? 'true' : 'false' }}">
+    <meta name="user-preferred-currency"
+        content="{{ auth()->check() ? (auth()->user()->preferred_currency ?? 'USD') : 'USD' }}">>
 
     {{--
-            @oracode-dimension technical
-            @value-flow Core layout infrastructure - distributes UI value across all platform pages
-            @community-impact Primary navigation and accessibility foundation for all users
-            @transparency-level Full structural transparency - semantic HTML5 landmarks
-            @sustainability-factor High reuse efficiency - single layout serves entire platform
-            @narrative-coherence Embodies FlorenceEGI's commitment to accessible, dignified user experience
-        --}}
+    @oracode-dimension technical
+    @value-flow Core layout infrastructure - distributes UI value across all platform pages
+    @community-impact Primary navigation and accessibility foundation for all users
+    @transparency-level Full structural transparency - semantic HTML5 landmarks
+    @sustainability-factor High reuse efficiency - single layout serves entire platform
+    @narrative-coherence Embodies FlorenceEGI's commitment to accessible, dignified user experience
+    --}}
 
     {{-- Oracode 3.0: SEO & Metadata (Pillar #1 - Explicitly Intentional) --}}
     <title>{{ isset($pageTitle) ? $pageTitle . ' - ' . config('app.name') : config('app.name', 'FlorenceEGI') }}</title>
@@ -31,7 +34,7 @@
     <meta property="og:url" content="{{ url()->current() }}">
     <meta property="og:site_name" content="{{ config('app.name') }}">
     @if (isset($ogImage))
-        <meta property="og:image" content="{{ $ogImage }}">
+    <meta property="og:image" content="{{ $ogImage }}">
     @endif
 
     {{-- Twitter Card Meta Tags --}}
@@ -60,7 +63,8 @@
         media="print" onload="this.media='all'">
 
     {{-- Application Assets --}}
-    @vite(['resources/css/app.css', 'resources/css/gdpr.css', 'resources/css/reservation-history.css', 'resources/js/app.js', 'resources/js/components/create-collection-modal.js', 'resources/js/reservation-history.js'])
+    @vite(['resources/css/app.css', 'resources/css/gdpr.css', 'resources/css/reservation-history.css',
+    'resources/js/app.js', 'resources/js/components/create-collection-modal.js', 'resources/js/reservation-history.js'])
 
     {{-- Oracode 3.0: Allow child views to inject custom styles (Pillar #5 - Predisposed to Variation) --}}
     @stack('styles')
@@ -70,12 +74,12 @@
 
     {{-- Schema.org Structured Data (Pillar #2 - Semantically Coherent) --}}
     @if (isset($schemaData))
-        <script type="application/ld+json">
-                {!! json_encode($schemaData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) !!}
-            </script>
+    <script type="application/ld+json">
+        {!! json_encode($schemaData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) !!}
+    </script>
     @else
-        <script type="application/ld+json">
-                {
+    <script type="application/ld+json">
+        {
                     "@context": "https://schema.org",
                     "@type": "WebApplication",
                     "name": "{{ config('app.name') }}",
@@ -89,14 +93,14 @@
                         "priceCurrency": "EUR"
                     }
                 }
-            </script>
+    </script>
     @endif
 </head>
 
 {{--
-        Oracode 3.0: Semantic HTML Structure (Pillar #2 - Semantically Coherent)
-        Using proper HTML5 landmarks for accessibility (Pillar #4 - Interpretable by Assistive Tech)
-    --}}
+Oracode 3.0: Semantic HTML Structure (Pillar #2 - Semantically Coherent)
+Using proper HTML5 landmarks for accessibility (Pillar #4 - Interpretable by Assistive Tech)
+--}}
 {{-- MODIFICHE AL BODY: font-body per Source Sans Pro, text-base-content e bg-base-100 dal tema DaisyUI --}}
 
 <body class="bg-base-100 font-body text-base-content antialiased" itemscope itemtype="https://schema.org/WebPage">
@@ -107,9 +111,9 @@
     </a>
 
     {{--
-            Main Application Container
-            Oracode 3.0: Maintains existing drawer structure for backward compatibility
-        --}}
+    Main Application Container
+    Oracode 3.0: Maintains existing drawer structure for backward compatibility
+    --}}
     <div class="drawer lg:drawer-open" role="application" aria-label="FlorenceEGI Application Interface">
         {{-- Drawer toggle checkbox (DaisyUI pattern) --}}
         <input id="main-drawer" type="checkbox" class="drawer-toggle" aria-label="Toggle navigation menu">
@@ -124,35 +128,40 @@
 
             {{-- Page Header Section (Optional) --}}
             @if (isset($header))
-                {{-- MODIFICA: Stile base per la sezione header, il contenuto $header userà font-display e colori chiari --}}
-                <section class="bg-base-200 shadow" role="complementary" aria-label="Page header">
-                    <div class="mx-auto max-w-7xl px-4 py-6 text-base-content sm:px-6 lg:px-8"> {{-- Usare text-base-content per coerenza --}}
-                        {{ $header }}
-                    </div>
-                </section>
+            {{-- MODIFICA: Stile base per la sezione header, il contenuto $header userà font-display e colori chiari
+            --}}
+            <section class="bg-base-200 shadow" role="complementary" aria-label="Page header">
+                <div class="mx-auto max-w-7xl px-4 py-6 text-base-content sm:px-6 lg:px-8"> {{-- Usare text-base-content
+                    per coerenza --}}
+                    {{ $header }}
+                </div>
+            </section>
             @endif
 
             {{--
-                    Main Content Area
-                    Oracode 3.0: Semantic main landmark with proper ARIA labeling
-                --}}
+            Main Content Area
+            Oracode 3.0: Semantic main landmark with proper ARIA labeling
+            --}}
             <main id="main-content" class="flex-1 p-4 lg:p-8" role="main" aria-label="Main content" tabindex="-1">
                 {{--
-                        Content Slot - All page content goes here
-                        Oracode 3.0: Preserves existing slot mechanism for backward compatibility
-                    --}}
+                Content Slot - All page content goes here
+                Oracode 3.0: Preserves existing slot mechanism for backward compatibility
+                --}}
                 {{ $slot }}
 
             </main>
         </div>
 
         {{--
-                Navigation Sidebar
-                Oracode 3.0: Semantic navigation landmark (DaisyUI drawer structure preserved)
-                MODIFICA: La sidebar di DaisyUI usa bg-base-100, potremmo volerla bg-base-200/300 per stacco.
-                          Questa personalizzazione va fatta nel componente livewire:sidebar o con CSS specifici.
-            --}}
-        <livewire:sidebar /> {{-- Esempio: <aside class="drawer-side"><label for="main-drawer" class="drawer-overlay"></label><ul class="min-h-full p-4 menu w-80 bg-base-200 text-base-content">...</aside> --}}
+        Navigation Sidebar
+        Oracode 3.0: Semantic navigation landmark (DaisyUI drawer structure preserved)
+        MODIFICA: La sidebar di DaisyUI usa bg-base-100, potremmo volerla bg-base-200/300 per stacco.
+        Questa personalizzazione va fatta nel componente livewire:sidebar o con CSS specifici.
+        --}}
+        <livewire:sidebar /> {{-- Esempio: <aside class="drawer-side"><label for="main-drawer"
+                class="drawer-overlay"></label>
+            <ul class="min-h-full p-4 menu w-80 bg-base-200 text-base-content">...
+        </aside> --}}
 
         {{-- Modal Stack (for Livewire/Alpine modals) --}}
         @stack('modals')
@@ -167,8 +176,8 @@
             <div class="gdpr-subtitle flex items-center justify-between text-sm">
                 <p>&copy; {{ date('Y') }} {{ config('app.name') }}. {{ __('profile.all_rights_reserved') }}</p>
                 <div class="flex space-x-4">
-                    <a href="{{ route('gdpr.privacy-policy') }}"
-                        class="gdpr-link">{{ __('profile.privacy_policy') }}</a>
+                    <a href="{{ route('gdpr.privacy-policy') }}" class="gdpr-link">{{ __('profile.privacy_policy')
+                        }}</a>
                     <a href="{{ route('gdpr.terms') }}" class="gdpr-link">{{ __('profile.terms_of_service') }}</a>
                 </div>
             </div>
@@ -176,9 +185,9 @@
     </footer>
 
     {{--
-            Application Configuration
-            Oracode 3.0: Contextually autonomous - provides necessary config to client-side
-        --}}
+    Application Configuration
+    Oracode 3.0: Contextually autonomous - provides necessary config to client-side
+    --}}
     <script>
         // Global app configuration for client-side scripts
         window.appConfig = @json(config('app')); // Mantenuto com'era
@@ -203,13 +212,13 @@
 
     <!-- OS1 User Collection Data for Dashboard Context -->
     @auth
-        <script type="application/json" id="user-collection-data">
+    <script type="application/json" id="user-collection-data">
         {
             "total_collections": {{ auth()->user()->collections()->count() }},
             "max_allowed": {{ config('egi.max_collections_per_user', 10) }},
             "context": "dashboard"
         }
-        </script>
+    </script>
     @endauth
 
     {{-- Oracode 3.0: Allow child views to inject custom scripts --}}

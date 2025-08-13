@@ -48,6 +48,12 @@ import reservationButtons from './features/reservations/reservationButtons';
 import { initPortfolioManager } from './features/portfolio/portfolioManager'; // 🚀 NEW
 import { NatanAssistant } from './components/natan-assistant';
 
+// --- 💰 IMPORTAZIONI SISTEMA MULTI-VALUTA (Enterprise Financial System) ---
+import { currencyService } from './services/currencyService';
+import { currencyDisplayManager } from './ui/currencyDisplayManager';
+import { CurrencySelectorComponent } from './components/currencySelectorComponent';
+import { CurrencyDisplayComponent } from './components/CurrencyDisplayComponent';
+
 // --- 📦 IMPORTAZIONI DIPENDENZE ESTERNE (ora gestite da app.js) ---
 // jQuery, SweetAlert2, etc. sono già disponibili globalmente via app.js
 
@@ -177,6 +183,61 @@ async function initializeUEMOrchestrated(): Promise<void> {
 }
 
 /**
+ * 📜 Oracode Function: initializeCurrencySystemOrchestrated
+ * 🎯 Purpose: Initializes multi-currency system for enterprise financial operations
+ * 🛡️ Security: Handles REAL MONEY operations with proper error management
+ * 💱 Multi-Currency: Sets up currency display manager and selector components
+ */
+async function initializeCurrencySystemOrchestrated(): Promise<void> {
+    try {
+        console.log('Padmin Main: Initializing Multi-Currency System (Enterprise Financial)...');
+
+        // Initialize currency display manager
+        await currencyDisplayManager.initialize();
+        console.log('Padmin Main: Currency display manager initialized successfully.');
+
+        // Initialize currency selector for badge
+        const currencyBadge = document.getElementById('currency-badge-desktop');
+        if (currencyBadge) {
+            const currencySelector = new CurrencySelectorComponent();
+            await currencySelector.initialize();
+            console.log('Padmin Main: Currency selector component initialized successfully.');
+        } else {
+            console.log('Padmin Main: No currency badge found, skipping selector initialization.');
+        }
+
+        // Initialize FAST currency display component with proper async handling
+        const currencyDisplay = new CurrencyDisplayComponent();
+        await currencyDisplay.initialize();
+        console.log('Padmin Main: FAST Currency display component initialized successfully.');
+
+        // Test currency service connectivity
+        const testRate = await currencyService.getExchangeRate('USD');
+        if (testRate) {
+            console.log('Padmin Main: Currency service connectivity test successful', { rate: testRate.rate });
+        } else {
+            console.warn('Padmin Main: Currency service connectivity test failed, but system will continue with fallbacks.');
+        }
+
+        console.log('Padmin Main: Multi-Currency System initialization complete.');
+
+    } catch (error) {
+        console.error('Padmin Main: Multi-Currency System initialization error:', error);
+
+        // Log to UEM if available
+        if (UEM && typeof UEM.handleClientError === 'function') {
+            UEM.handleClientError('CURRENCY_SYSTEM_INIT_ERROR', {
+                error: error instanceof Error ? error.message : String(error),
+                stack: error instanceof Error ? error.stack : undefined
+            });
+        }
+
+        // Don't throw - let app continue without currency features
+        console.log('Padmin Main: Continuing without multi-currency features due to initialization error.');
+    }
+}
+
+/**
  * 📜 Oracode Function: initializeEnumsOrchestrated
  * 🎯 Purpose: Inizializza sistema enum con disponibilità globale
  * 🧱 Core Logic: Terza fase - enum e utilities di stato
@@ -285,7 +346,7 @@ async function initializeFEGISystemOrchestrated(): Promise<void> {
 
         // 3. Carica configurazione dal server
         mainAppConfig = await initializeAppConfig();
-        console.log(`${appTranslate('padminGreeting', mainAppConfig?.translations || {padminGreeting:'Padmin'})} FEGI Configuration loaded successfully.`);
+        console.log(`${appTranslate('padminGreeting', mainAppConfig?.translations || { padminGreeting: 'Padmin' })} FEGI Configuration loaded successfully.`);
 
         // 4. Conferma riferimenti DOM
         DOMElements.confirmDOMReferencesLoaded();
@@ -426,8 +487,12 @@ async function initializeApplicationOrchestrated(): Promise<void> {
         // NON chiamiamo initializeUltraUploadManager() qui - troppo presto!
         console.log('Padmin Main: Ultra Upload Manager preparation complete (deferred initialization).');
 
-        // FASE 6: Sistema FEGI (include UploadModalManager + Ultra Upload Manager on-demand)
-        console.log('Padmin Main: Phase 6 - Initializing FEGI system...');
+        // FASE 6: Sistema Multi-Valuta (Enterprise Financial System)
+        console.log('Padmin Main: Phase 6 - Initializing Multi-Currency System...');
+        await initializeCurrencySystemOrchestrated();
+
+        // FASE 7: Sistema FEGI (include UploadModalManager + Ultra Upload Manager on-demand)
+        console.log('Padmin Main: Phase 7 - Initializing FEGI system...');
         await initializeFEGISystemOrchestrated();
 
         // FASE INDIPENDENTE: Animazione Three.js (se necessaria)
@@ -438,7 +503,7 @@ async function initializeApplicationOrchestrated(): Promise<void> {
 
         // Setup listeners per transizioni pagina
         document.querySelectorAll('a[href^="/"]').forEach(link => {
-            link.addEventListener('click', function(e) {
+            link.addEventListener('click', function (e) {
                 if (this.hostname === window.location.hostname) {
                     e.preventDefault();
                     document.body.classList.add('page-transitioning');

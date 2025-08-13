@@ -95,6 +95,23 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Multi-Currency System
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for the multi-currency system that supports FIAT to ALGO
+    | conversions. These settings define supported currencies and defaults.
+    | "Think FIAT, Operate ALGO" architecture implementation.
+    |
+    */
+    'currency' => [
+        'supported_currencies' => ['USD', 'EUR', 'GBP'],
+        'default_currency' => env('DEFAULT_CURRENCY', 'USD'),
+        'cache_ttl_seconds' => env('CURRENCY_CACHE_TTL', 60),
+        'api_source' => env('CURRENCY_API_SOURCE', 'coingecko'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     |
     | This value is the name of your application. This value is used when the
     | framework needs to place the application's name in a notification or
@@ -140,8 +157,8 @@ return [
     | Threshold royalty for Creator
     |--------------------------------------------------------------------------
     */
-    'creator_royalty_mint_threshold'=> env('CREATOR_ROYALTY_MINT_THRESHOLD'),
-    'creator_royalty_rebind_threshold'=> env('CREATOR_ROYALTY_REBIND_THRESHOLD'),
+    'creator_royalty_mint_threshold' => env('CREATOR_ROYALTY_MINT_THRESHOLD'),
+    'creator_royalty_rebind_threshold' => env('CREATOR_ROYALTY_REBIND_THRESHOLD'),
 
 
     /*
@@ -347,7 +364,7 @@ return [
     */
 
     'notifications' => [
-      'expiration_hours' => env('NOTIFICATION_EXPIRATION_HOURS', 72),
+        'expiration_hours' => env('NOTIFICATION_EXPIRATION_HOURS', 72),
     ],
 
     /*
@@ -383,7 +400,7 @@ return [
 
     'redirect_to_url_after_upload' => env('UPLOAD_REDIRECT_TO_URL_AFTER_UPLOAD', 'home'),
 
-   /*
+    /*
     |--------------------------------------------------------------------------
     | Redirect to upload page after login
     |--------------------------------------------------------------------------

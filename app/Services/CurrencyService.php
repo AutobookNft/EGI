@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Helpers\FegiAuth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Ultra\ErrorManager\Interfaces\ErrorManagerInterface;
@@ -21,7 +22,6 @@ use Ultra\UltraLogManager\UltraLogManager;
  */
 class CurrencyService {
     private const CACHE_KEY_PREFIX = 'currency_rate_';
-    private const CACHE_TTL_SECONDS = 60; // Cache per 1 minuto
 
     /**
      * Constructor with dependency injection
@@ -44,8 +44,9 @@ class CurrencyService {
      */
     public function getAlgoToFiatRate(string $fiatCurrency = 'USD'): ?array {
         $cacheKey = self::CACHE_KEY_PREFIX . strtoupper($fiatCurrency);
+        $cacheTTL = config('app.currency.cache_ttl_seconds', 60);
 
-        return Cache::remember($cacheKey, self::CACHE_TTL_SECONDS, function () use ($fiatCurrency) {
+        return Cache::remember($cacheKey, $cacheTTL, function () use ($fiatCurrency) {
             try {
                 $response = Http::get('https://api.coingecko.com/api/v3/simple/price', [
                     'ids' => 'algorand',
@@ -113,8 +114,9 @@ class CurrencyService {
      * @return array|null
      */
     public function getCurrentUserCurrencyRate(): ?array {
-        $preferredCurrency = auth()->check()
-            ? (auth()->user()->preferred_currency ?? 'USD')
+        $user = FegiAuth::getAuthenticatedUser();
+        $preferredCurrency = $user
+            ? ($user->preferred_currency ?? 'USD')
             : 'USD';
 
         return $this->getAlgoToFiatRate($preferredCurrency);
@@ -126,8 +128,9 @@ class CurrencyService {
      * @return string
      */
     public function getCurrentUserCurrency(): string {
-        return auth()->check()
-            ? (auth()->user()->preferred_currency ?? 'USD')
+        $user = FegiAuth::getAuthenticatedUser();
+        return $user
+            ? ($user->preferred_currency ?? 'USD')
             : 'USD';
     }
 

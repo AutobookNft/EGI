@@ -9,6 +9,10 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
+    {{-- Multi-Currency System Meta Tags --}}
+    <meta name="user-preferred-currency"
+        content="{{ auth()->check() ? (auth()->user()->preferred_currency ?? 'USD') : 'USD' }}">
+
     {{-- SEO & Semantica --}}
     <title>{{ $title ?? __('collection.default_page_title') }}</title>
     <meta name="description" content="{{ $metaDescription ?? __('collection.default_meta_description') }}">
@@ -122,23 +126,25 @@
 
                     {{-- Welcome Message Desktop - Solo per utenti autenticati - Dopo Assistenza --}}
                     @if ($user)
-                    <div class="hidden md:flex items-center ml-4">
-                        <span class="text-sm text-emerald-400 font-medium">{{ App\Helpers\FegiAuth::getWelcomeMessage()
+                    <div class="items-center hidden ml-4 md:flex">
+                        <span class="text-sm font-medium text-emerald-400">{{ App\Helpers\FegiAuth::getWelcomeMessage()
                             }}</span>
                     </div>
                     @endif
 
-                    {{-- Professional Currency Badge (Desktop) --}}
-                    <div id="currency-badge-container-desktop" class="hidden md:flex items-center ml-3">
+                    {{-- Professional Currency Badge (Desktop) - Now Clickable Selector --}}
+                    <div id="currency-badge-container-desktop" class="items-center hidden ml-3 md:flex">
                         <div class="relative group">
-                            {{-- Desktop Badge --}}
-                            <div id="currency-badge-desktop"
-                                class="inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-slate-800/90 to-slate-700/90 backdrop-blur-sm border border-slate-600/50 rounded-lg shadow-lg hover:shadow-slate-900/30 transition-all duration-300 cursor-pointer"
-                                title="Live Exchange Rate">
+                            {{-- Desktop Badge (Clickable) --}}
+                            <button id="currency-badge-desktop"
+                                class="inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-slate-800/90 to-slate-700/90 backdrop-blur-sm border border-slate-600/50 rounded-lg shadow-lg hover:shadow-slate-900/30 transition-all duration-300 cursor-pointer hover:border-emerald-500/50 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+                                title="Click to change currency / Clicca per cambiare valuta" aria-expanded="false"
+                                aria-haspopup="true">
 
                                 {{-- Status Dot --}}
                                 <div class="relative mr-2">
-                                    <span class="w-1.5 h-1.5 bg-green-400 rounded-full block animate-pulse"></span>
+                                    <span id="currency-status-dot"
+                                        class="w-1.5 h-1.5 bg-green-400 rounded-full block animate-pulse"></span>
                                     <span
                                         class="absolute inset-0 w-1.5 h-1.5 bg-green-400 rounded-full animate-ping opacity-60"></span>
                                 </div>
@@ -157,65 +163,89 @@
                                 </div>
 
                                 {{-- Rate Display --}}
-                                <div class="ml-3 flex items-center">
+                                <div class="flex items-center ml-3">
                                     <span id="currency-rate-value"
-                                        class="text-sm font-mono font-medium text-white">--</span>
+                                        class="font-mono text-sm font-medium text-white">--</span>
                                 </div>
-                            </div>
 
-                            {{-- Desktop Tooltip --}}
-                            <div
-                                class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-80 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
+                                {{-- Dropdown Arrow --}}
+                                <svg id="currency-badge-arrow"
+                                    class="w-4 h-4 ml-2 transition-transform duration-200 text-slate-400"
+                                    fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd"
+                                        d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                            </button>
+
+                            {{-- Currency Selector Dropdown --}}
+                            <div id="currency-badge-dropdown"
+                                class="absolute right-0 z-50 invisible w-64 mt-2 transition-all duration-300 transform scale-95 opacity-0">
                                 <div
-                                    class="bg-slate-900/95 backdrop-blur-xl border border-slate-700/50 rounded-xl shadow-2xl overflow-hidden">
+                                    class="overflow-hidden border shadow-2xl bg-slate-900/95 backdrop-blur-xl border-slate-700/50 rounded-xl">
                                     {{-- Header --}}
                                     <div
-                                        class="bg-gradient-to-r from-emerald-600/20 to-blue-600/20 p-4 border-b border-slate-700/50">
-                                        <div class="flex items-center justify-between">
-                                            <div>
-                                                <h3 class="text-sm font-semibold text-white">Multi-Currency Exchange
-                                                </h3>
-                                                <p class="text-xs text-slate-400 mt-1">"Think FIAT, Operate ALGO"</p>
-                                            </div>
-                                            <div class="text-right">
-                                                <div class="text-xs text-emerald-400 font-medium">LIVE</div>
-                                                <div id="currency-last-updated" class="text-xs text-slate-500 mt-0.5">--
+                                        class="p-4 border-b bg-gradient-to-r from-emerald-600/20 to-blue-600/20 border-slate-700/50">
+                                        <h3 class="text-sm font-semibold text-white">Select Currency</h3>
+                                        <p class="mt-1 text-xs text-slate-400">"Think FIAT, Operate ALGO"</p>
+                                    </div>
+
+                                    {{-- Currency Options --}}
+                                    <div class="p-2">
+                                        <button
+                                            class="flex items-center justify-between w-full px-3 py-2 text-left transition-colors duration-200 rounded-lg currency-option hover:bg-slate-800/50"
+                                            data-currency="USD">
+                                            <div class="flex items-center">
+                                                <span class="mr-3 text-base">🇺🇸</span>
+                                                <div>
+                                                    <span class="text-sm font-medium text-white">USD</span>
+                                                    <div class="text-xs text-slate-400">US Dollar</div>
                                                 </div>
                                             </div>
-                                        </div>
+                                            <span class="font-mono text-xs currency-rate text-slate-300">--</span>
+                                        </button>
+
+                                        <button
+                                            class="flex items-center justify-between w-full px-3 py-2 text-left transition-colors duration-200 rounded-lg currency-option hover:bg-slate-800/50"
+                                            data-currency="EUR">
+                                            <div class="flex items-center">
+                                                <span class="mr-3 text-base">🇪🇺</span>
+                                                <div>
+                                                    <span class="text-sm font-medium text-white">EUR</span>
+                                                    <div class="text-xs text-slate-400">Euro</div>
+                                                </div>
+                                            </div>
+                                            <span class="font-mono text-xs currency-rate text-slate-300">--</span>
+                                        </button>
+
+                                        <button
+                                            class="flex items-center justify-between w-full px-3 py-2 text-left transition-colors duration-200 rounded-lg currency-option hover:bg-slate-800/50"
+                                            data-currency="GBP">
+                                            <div class="flex items-center">
+                                                <span class="mr-3 text-base">🇬🇧</span>
+                                                <div>
+                                                    <span class="text-sm font-medium text-white">GBP</span>
+                                                    <div class="text-xs text-slate-400">British Pound</div>
+                                                </div>
+                                            </div>
+                                            <span class="font-mono text-xs currency-rate text-slate-300">--</span>
+                                        </button>
                                     </div>
 
-                                    {{-- Content --}}
-                                    <div class="p-4">
-                                        <div class="grid grid-cols-2 gap-3 text-xs">
-                                            <div>
-                                                <span class="text-slate-400">Update:</span>
-                                                <span class="text-white ml-1">30s</span>
-                                            </div>
-                                            <div>
-                                                <span class="text-slate-400">Source:</span>
-                                                <span class="text-emerald-400 ml-1">CoinGecko</span>
-                                            </div>
-                                            <div>
-                                                <span class="text-slate-400">Precision:</span>
-                                                <span class="text-white ml-1">6 decimals</span>
-                                            </div>
-                                            <div>
-                                                <span class="text-slate-400">Status:</span>
-                                                <span class="text-green-400 ml-1 flex items-center">
-                                                    <span class="w-1.5 h-1.5 bg-green-400 rounded-full mr-1"></span>
-                                                    Active
-                                                </span>
+                                    {{-- Footer --}}
+                                    <div class="p-3 border-t border-slate-700/50 bg-slate-800/30">
+                                        <div class="flex items-center justify-between text-xs text-slate-500">
+                                            <span>Last updated: <span id="currency-last-updated">--</span></span>
+                                            <div class="flex items-center">
+                                                <div class="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse mr-1">
+                                                </div>
+                                                <span class="text-emerald-400">LIVE</span>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-
-                                {{-- Tooltip Arrow --}}
-                                <div
-                                    class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-slate-900/95">
                                 </div>
                             </div>
+
                         </div>
                     </div>
 
@@ -331,23 +361,26 @@
                     {{-- Menu Mobile Button --}}
                     <div class="flex items-center gap-2 -mr-2 md:hidden">
 
-                        {{-- Professional Currency Badge (Mobile Always Visible) --}}
-                        <div id="currency-badge-container" class="flex items-center">
+                        {{-- Professional Currency Badge (Mobile Always Visible) - Clickable Selector --}}
+                        <div id="currency-badge-container-mobile" class="flex items-center">
                             <div class="relative group">
-                                {{-- Compact Mobile Badge --}}
-                                <div id="currency-badge"
-                                    class="inline-flex items-center px-1.5 py-1 bg-gradient-to-r from-slate-800/90 to-slate-700/90 backdrop-blur-sm border border-slate-600/50 rounded-md shadow-lg transition-all duration-300 cursor-pointer"
-                                    title="Live Exchange Rate">
+                                {{-- Compact Mobile Badge (Clickable) --}}
+                                <button id="currency-badge-mobile"
+                                    class="inline-flex items-center px-1.5 py-1 bg-gradient-to-r from-slate-800/90 to-slate-700/90 backdrop-blur-sm border border-slate-600/50 rounded-md shadow-lg transition-all duration-300 cursor-pointer hover:border-emerald-500/50 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+                                    title="Tap to change currency / Tocca per cambiare valuta" aria-expanded="false"
+                                    aria-haspopup="true">
 
                                     {{-- Status Dot --}}
                                     <div class="relative mr-1">
-                                        <span class="w-1 h-1 bg-green-400 rounded-full block animate-pulse"></span>
+                                        <span id="currency-status-dot-mobile"
+                                            class="block w-1 h-1 bg-green-400 rounded-full animate-pulse"></span>
                                     </div>
 
                                     {{-- Currency Display --}}
                                     <div class="flex items-center space-x-1">
-                                        <span id="currency-symbol-mobile"
-                                            class="text-xs font-bold text-white">USD</span>
+                                        <span id="currency-symbol-mobile" class="text-xs font-bold text-white">{{
+                                            auth()->check() ? (auth()->user()->preferred_currency ?? 'USD') : 'USD'
+                                            }}</span>
                                         <svg class="w-2.5 h-2.5 text-slate-400" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -357,9 +390,89 @@
                                     </div>
 
                                     {{-- Rate Display --}}
-                                    <div class="ml-1 flex items-center">
+                                    <div class="flex items-center ml-1">
                                         <span id="currency-rate-value-mobile"
-                                            class="text-xs font-mono font-medium text-white">--</span>
+                                            class="font-mono text-xs font-medium text-white">--</span>
+                                    </div>
+
+                                    {{-- Dropdown Arrow --}}
+                                    <svg id="currency-badge-arrow-mobile"
+                                        class="w-3 h-3 ml-1 transition-transform duration-200 text-slate-400"
+                                        fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd"
+                                            d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                </button>
+
+                                {{-- Mobile Currency Selector Dropdown --}}
+                                <div id="currency-badge-dropdown-mobile"
+                                    class="absolute right-0 z-50 invisible w-56 mt-2 transition-all duration-300 transform scale-95 opacity-0">
+                                    <div
+                                        class="overflow-hidden border shadow-2xl bg-slate-900/95 backdrop-blur-xl border-slate-700/50 rounded-xl">
+                                        {{-- Header --}}
+                                        <div
+                                            class="p-3 border-b bg-gradient-to-r from-emerald-600/20 to-blue-600/20 border-slate-700/50">
+                                            <h3 class="text-sm font-semibold text-white">Select Currency</h3>
+                                            <p class="mt-1 text-xs text-slate-400">Mobile-optimized selector</p>
+                                        </div>
+
+                                        {{-- Currency Options --}}
+                                        <div class="p-2">
+                                            <button
+                                                class="flex items-center justify-between w-full px-3 py-3 text-left transition-colors duration-200 rounded-lg currency-option-mobile hover:bg-slate-800/50"
+                                                data-currency="USD">
+                                                <div class="flex items-center">
+                                                    <span class="mr-3 text-lg">🇺🇸</span>
+                                                    <div>
+                                                        <span class="text-sm font-medium text-white">USD</span>
+                                                        <div class="text-xs text-slate-400">US Dollar</div>
+                                                    </div>
+                                                </div>
+                                                <span
+                                                    class="font-mono text-xs currency-rate-mobile text-slate-300">--</span>
+                                            </button>
+
+                                            <button
+                                                class="flex items-center justify-between w-full px-3 py-3 text-left transition-colors duration-200 rounded-lg currency-option-mobile hover:bg-slate-800/50"
+                                                data-currency="EUR">
+                                                <div class="flex items-center">
+                                                    <span class="mr-3 text-lg">🇪🇺</span>
+                                                    <div>
+                                                        <span class="text-sm font-medium text-white">EUR</span>
+                                                        <div class="text-xs text-slate-400">Euro</div>
+                                                    </div>
+                                                </div>
+                                                <span
+                                                    class="font-mono text-xs currency-rate-mobile text-slate-300">--</span>
+                                            </button>
+
+                                            <button
+                                                class="flex items-center justify-between w-full px-3 py-3 text-left transition-colors duration-200 rounded-lg currency-option-mobile hover:bg-slate-800/50"
+                                                data-currency="GBP">
+                                                <div class="flex items-center">
+                                                    <span class="mr-3 text-lg">🇬🇧</span>
+                                                    <div>
+                                                        <span class="text-sm font-medium text-white">GBP</span>
+                                                        <div class="text-xs text-slate-400">British Pound</div>
+                                                    </div>
+                                                </div>
+                                                <span
+                                                    class="font-mono text-xs currency-rate-mobile text-slate-300">--</span>
+                                            </button>
+                                        </div>
+
+                                        {{-- Footer --}}
+                                        <div class="p-2 border-t border-slate-700/50 bg-slate-800/30">
+                                            <div class="flex items-center justify-between text-xs text-slate-500">
+                                                <span>Updated: <span id="currency-last-updated-mobile">--</span></span>
+                                                <div class="flex items-center">
+                                                    <div class="w-1 h-1 mr-1 bg-green-400 rounded-full animate-pulse">
+                                                    </div>
+                                                    <span class="text-emerald-400">LIVE</span>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -414,7 +527,7 @@
                 {{-- Seconda Riga: Solo per utenti autenticati (Mobile) --}}
                 @if ($user)
                 <div
-                    class="flex items-center justify-between py-2 px-4 bg-gray-800/30 border-t border-gray-700/50 md:hidden">
+                    class="flex items-center justify-between px-4 py-2 border-t bg-gray-800/30 border-gray-700/50 md:hidden">
                     {{-- Welcome Message --}}
                     <div class="flex-1">
                         <span class="text-xs font-medium text-emerald-500">
@@ -430,8 +543,8 @@
                     {{-- Collection Badge (spostato qui dalla prima riga) --}}
                     <div id="current-collection-badge-container" class="items-center hidden ml-2">
                         <a href="#" id="current-collection-badge-link"
-                            class="flex items-center rounded-full border border-sky-700 bg-sky-900/60 px-2 py-1 text-xs font-semibold text-sky-300 transition hover:border-sky-600 hover:bg-sky-800">
-                            <span class="material-symbols-outlined mr-1 text-xs leading-none"
+                            class="flex items-center px-2 py-1 text-xs font-semibold transition border rounded-full border-sky-700 bg-sky-900/60 text-sky-300 hover:border-sky-600 hover:bg-sky-800">
+                            <span class="mr-1 text-xs leading-none material-symbols-outlined"
                                 aria-hidden="true">folder_managed</span>
                             <span id="current-collection-badge-name"></span>
                         </a>
@@ -548,21 +661,22 @@
 
         async fetchAndUpdateRate() {
             try {
-                // Mixed Security Architecture: try authenticated endpoint first, fallback to public
+                // FIXED: Use web routes instead of API routes
                 const isAuthenticated = {{ auth()->check() ? 'true' : 'false' }};
 
                 let endpoint, response;
 
                 if (isAuthenticated) {
-                    // Try protected endpoint for authenticated users
-                    response = await fetch('/api/currency/user-rate', {
+                    // Use web endpoint for authenticated users 
+                    response = await fetch('/user/preferences/currency', {
                         headers: {
                             'Accept': 'application/json',
-                            'X-Requested-With': 'XMLHttpRequest'
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
                         }
                     });
                 } else {
-                    // Use public endpoint for anonymous users (default USD)
+                    // Use public API endpoint for anonymous users (default USD)
                     response = await fetch('/api/currency/rate/default', {
                         headers: {
                             'Accept': 'application/json',

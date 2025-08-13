@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Services\CurrencyService;
-use App\Contracts\ErrorManagerInterface;
-use App\Contracts\LogManagerInterface;
+use Ultra\ErrorManager\Interfaces\ErrorManagerInterface;;
+use Ultra\UltraLogManager\UltraLogManager;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -29,12 +29,12 @@ use Illuminate\Validation\Rule;
 class UserPreferenceController extends Controller {
     private CurrencyService $currencyService;
     private ErrorManagerInterface $errorManager;
-    private LogManagerInterface $logger;
+    private UltraLogManager $logger;
 
     public function __construct(
         CurrencyService $currencyService,
         ErrorManagerInterface $errorManager,
-        LogManagerInterface $logger
+        UltraLogManager $logger
     ) {
         $this->currencyService = $currencyService;
         $this->errorManager = $errorManager;

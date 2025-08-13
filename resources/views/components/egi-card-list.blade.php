@@ -301,8 +301,9 @@ $showBadge = $showBadge ?? $showOwnershipBadge;
                             d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z"
                             clip-rule="evenodd" />
                     </svg>
-                    <span class="font-bold {{ $isHyper ? 'text-yellow-300' : 'text-orange-300' }}">€{{
-                        number_format($displayPriceEur, 0, ',', '.') }}</span>
+                    <span class="font-bold {{ $isHyper ? 'text-yellow-300' : 'text-orange-300' }}">
+                        <x-currency-price :price="$displayPriceEur" currency="EUR" />
+                    </span>
                 </div>
 
                 {{-- Pulsante Rilancia se l'EGI è già prenotato --}}
@@ -325,14 +326,16 @@ $showBadge = $showBadge ?? $showOwnershipBadge;
             @if ($context === 'collector' && $egi->pivot && $egi->pivot->offer_amount_fiat)
             <div class="flex items-center gap-2 mt-1 text-sm">
                 <span class="text-gray-400">{{ __('collector.portfolio.purchased_for') }}</span>
-                <span class="font-bold {{ $isHyper ? 'text-yellow-400' : 'text-green-400' }}">€{{
-                    number_format($egi->pivot->offer_amount_fiat, 2) }}</span>
+                <span class="font-bold {{ $isHyper ? 'text-yellow-400' : 'text-green-400' }}">
+                    <x-currency-price :price="$egi->pivot->offer_amount_fiat" currency="EUR" />
+                </span>
             </div>
             @elseif ($context === 'patron' && isset($egi->support_amount))
             <div class="flex items-center gap-2 mt-1 text-sm">
                 <span class="text-gray-400">{{ __('patron.portfolio.supported_for') }}</span>
-                <span class="font-bold {{ $isHyper ? 'text-yellow-300' : 'text-yellow-400' }}">€{{
-                    number_format($egi->support_amount, 2) }}</span>
+                <span class="font-bold {{ $isHyper ? 'text-yellow-300' : 'text-yellow-400' }}">
+                    <x-currency-price :price="$egi->support_amount" currency="EUR" />
+                </span>
             </div>
             @endif
             @endif
