@@ -1408,7 +1408,7 @@ return [
         'REGISTRATION_PAGE_LOAD_ERROR' => [
             'type' => 'error',
             'blocking' => 'blocking',
-            'dev_message_key' => 'error-manager::errors.dev.registration_page_load_error',
+            'dev_message_key' => 'error-manager::errors.dev.registration_page_load_errorUndefined variable $user',
             'user_message_key' => 'error-manager::errors.user.registration_page_load_error',
             'http_status_code' => 500,
             'devTeam_email_need' => true,
@@ -1830,6 +1830,88 @@ return [
             'devTeam_email_need' => false,
             'notify_slack' => false,
             'msg_to' => 'toast'
+        ],
+
+        // ====================================================
+        // Currency & Multi-Currency System Errors
+        // ====================================================
+
+        'CURRENCY_EXCHANGE_SERVICE_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.currency_exchange_service_failed',
+            'user_message_key' => 'error-manager::errors.user.currency_exchange_service_failed',
+            'http_status_code' => 503,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+            'recovery_action' => 'retry_currency_service',
+        ],
+
+        'CURRENCY_UNSUPPORTED' => [
+            'type' => 'warning',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.currency_unsupported',
+            'user_message_key' => 'error-manager::errors.user.currency_unsupported',
+            'http_status_code' => 400,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'div',
+        ],
+
+        'CURRENCY_RATE_EXPIRED' => [
+            'type' => 'warning',
+            'blocking' => 'not',
+            'dev_message_key' => 'error-manager::errors.dev.currency_rate_expired',
+            'user_message_key' => 'error-manager::errors.user.currency_rate_expired',
+            'http_status_code' => 503,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'log-only',
+        ],
+
+        'CURRENCY_CONVERSION_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.currency_conversion_failed',
+            'user_message_key' => 'error-manager::errors.user.currency_conversion_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'RESERVATION_RELAUNCH_INSUFFICIENT_AMOUNT' => [
+            'type' => 'warning',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.reservation_relaunch_insufficient_amount',
+            'user_message_key' => 'error-manager::errors.user.reservation_relaunch_insufficient_amount',
+            'http_status_code' => 400,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'EGI_NOT_RESERVABLE' => [
+            'type' => 'warning',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.egi_not_reservable',
+            'user_message_key' => 'error-manager::errors.user.egi_not_reservable',
+            'http_status_code' => 400,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'USER_CURRENCY_UPDATE_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.user_currency_update_failed',
+            'user_message_key' => 'error-manager::errors.user.user_currency_update_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => false,
+            'msg_to' => 'toast',
         ],
         'RESERVATION_STATUS_FAILED' => [
             'type' => 'error',
@@ -3057,6 +3139,76 @@ return [
             'devTeam_email_need' => false,
             'notify_slack' => false,
             'msg_to' => 'sweet-alert',
+        ],
+
+        // ====================================================
+        // Multi-Currency System Error Codes
+        // ====================================================
+
+        'CURRENCY_EXCHANGE_SERVICE_UNAVAILABLE' => [
+            'type' => 'error',
+            'blocking' => 'not',
+            'dev_message_key' => 'error-manager::errors.dev.currency_exchange_service_unavailable',
+            'user_message_key' => 'error-manager::errors.user.currency_exchange_service_unavailable',
+            'http_status_code' => 503,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'log-only',
+        ],
+
+        'CURRENCY_RATE_CACHE_ERROR' => [
+            'type' => 'warning',
+            'blocking' => 'not',
+            'dev_message_key' => 'error-manager::errors.dev.currency_rate_cache_error',
+            'user_message_key' => null,
+            'http_status_code' => 500,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'log-only',
+        ],
+
+        'CURRENCY_INVALID_RATE_DATA' => [
+            'type' => 'error',
+            'blocking' => 'not',
+            'dev_message_key' => 'error-manager::errors.dev.currency_invalid_rate_data',
+            'user_message_key' => 'error-manager::errors.user.currency_invalid_rate_data',
+            'http_status_code' => 502,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'json',
+        ],
+
+        'CURRENCY_CONVERSION_ERROR' => [
+            'type' => 'error',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.currency_conversion_error',
+            'user_message_key' => 'error-manager::errors.user.currency_conversion_error',
+            'http_status_code' => 400,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'json',
+        ],
+
+        'CURRENCY_UNSUPPORTED_CURRENCY' => [
+            'type' => 'warning',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.currency_unsupported_currency',
+            'user_message_key' => 'error-manager::errors.user.currency_unsupported_currency',
+            'http_status_code' => 400,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'json',
+        ],
+
+        'USER_PREFERENCE_UPDATE_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.user_preference_update_failed',
+            'user_message_key' => 'error-manager::errors.user.user_preference_update_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'json',
         ],
 
     ]

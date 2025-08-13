@@ -10,8 +10,68 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-// Currency routes
-Route::get('/algo-exchange-rate', [App\Http\Controllers\Api\CurrencyController::class, 'getAlgoExchangeRate']);
+/*
+|--------------------------------------------------------------------------
+| Multi-Currency API Routes (Mixed Security Approach)
+|--------------------------------------------------------------------------
+|
+| Implements "Think FIAT, Operate ALGO" architecture with mixed security:
+| - PUBLIC routes: Anonymous users can access default USD rates for header badge
+| - PROTECTED routes: Authenticated users get personalized currency preferences
+|
+| Security Model:
+| 🔓 Public: /currency/* (no auth required)
+| 🔒 Protected: /user/* (auth required)
+|
+*/
+
+// === PUBLIC Currency Routes (No Authentication Required) ===
+// Perfect for anonymous users viewing header currency badge
+Route::prefix('currency')->name('api.currency.')->group(function () {
+    // Get specific currency rate (EUR, USD, GBP)
+    Route::get('/rate/{fiatCurrency}', [App\Http\Controllers\Api\CurrencyController::class, 'getRate'])
+        ->name('rate.specific');
+
+    // Get all supported currency rates
+    Route::get('/rates/all', [App\Http\Controllers\Api\CurrencyController::class, 'getAllRates'])
+        ->name('rates.all');
+
+    // Get default USD rate for anonymous users
+    Route::get('/rate/default', [App\Http\Controllers\Api\CurrencyController::class, 'getDefaultRate'])
+        ->name('rate.default');
+
+    // FIAT to ALGO conversion utility
+    Route::post('/convert/fiat-to-algo', [App\Http\Controllers\Api\CurrencyController::class, 'convertFiatToAlgo'])
+        ->name('convert.fiat-to-algo');
+
+    // Legacy route per retrocompatibilità
+    Route::get('/algo-exchange-rate', [App\Http\Controllers\Api\CurrencyController::class, 'getAlgoExchangeRate'])
+        ->name('legacy.algo-rate');
+});
+
+// === PROTECTED User Preference Routes (Authentication Required) ===
+Route::middleware(['auth:sanctum'])->prefix('user')->name('api.user.')->group(function () {
+    // Currency preferences
+    Route::post('/preferred-currency', [App\Http\Controllers\Api\UserPreferenceController::class, 'updatePreferredCurrency'])
+        ->name('currency.update');
+
+    Route::get('/preferences', [App\Http\Controllers\Api\UserPreferenceController::class, 'getPreferences'])
+        ->name('preferences.get');
+
+    // User-specific exchange rate (uses user's preferred currency)
+    Route::get('/exchange-rate', [App\Http\Controllers\Api\UserPreferenceController::class, 'getUserExchangeRate'])
+        ->name('exchange-rate.get');
+
+    // Comprehensive user currency data for dashboard
+    Route::get('/currency-data', [App\Http\Controllers\Api\UserPreferenceController::class, 'getUserCurrencyData'])
+        ->name('currency-data.get');
+});
+
+// === PROTECTED Legacy Currency Route (for authenticated users) ===
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get('/currency/user-rate', [App\Http\Controllers\Api\CurrencyController::class, 'getCurrentUserRate'])
+        ->name('api.currency.user-rate');
+});
 
 // 🚀 Portfolio API Routes - NEW (usando auth session invece di sanctum per ora)
 Route::middleware(['web'])->group(function () {

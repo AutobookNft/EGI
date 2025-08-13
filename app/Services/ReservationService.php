@@ -84,13 +84,13 @@ class ReservationService {
                 ]);
             }
 
-            // Convert EUR amount to ALGO before checking previous reservations
-            $offerAmountEur = (float) $data['offer_amount_eur'];
+            // Convert FIAT amount to appropriate format before checking previous reservations
+            $offerAmountFiat = (float) $data['offer_amount_fiat'];
 
             \Log::info('🚀 RELAUNCH CHECK STARTED', [
                 'user_id' => $user?->id,
                 'egi_id' => $data['egi_id'],
-                'new_offer_amount_eur' => $offerAmountEur,
+                'new_offer_amount_fiat' => $offerAmountFiat,
                 'has_user' => $user !== null
             ]);
 
@@ -109,7 +109,7 @@ class ReservationService {
                     'reservations' => $allUserReservations->map(function ($r) {
                         return [
                             'id' => $r->id,
-                            'offer_amount_eur' => $r->offer_amount_eur,
+                            'offer_amount_fiat' => $r->offer_amount_fiat,
                             'is_current' => $r->is_current,
                             'status' => $r->status,
                             'created_at' => $r->created_at,
@@ -130,28 +130,28 @@ class ReservationService {
                     'egi_id' => $data['egi_id'],
                     'previous_reservation_found' => $previousReservation !== null,
                     'previous_reservation_id' => $previousReservation?->id,
-                    'previous_amount' => $previousReservation?->offer_amount_eur,
+                    'previous_amount' => $previousReservation?->offer_amount_fiat,
                     'previous_is_current' => $previousReservation?->is_current,
-                    'new_amount' => $offerAmountEur,
-                    'should_block' => $previousReservation && $offerAmountEur <= $previousReservation->offer_amount_eur
+                    'new_amount' => $offerAmountFiat,
+                    'should_block' => $previousReservation && $offerAmountFiat <= $previousReservation->offer_amount_fiat
                 ]);
 
-                if ($previousReservation && $offerAmountEur <= $previousReservation->offer_amount_eur) {
+                if ($previousReservation && $offerAmountFiat <= $previousReservation->offer_amount_fiat) {
                     $this->logger->warning('Relaunch attempt with insufficient amount', [
                         'user_id' => $user->id,
                         'egi_id' => $data['egi_id'],
-                        'previous_amount' => $previousReservation->offer_amount_eur,
-                        'new_amount' => $offerAmountEur
+                        'previous_amount' => $previousReservation->offer_amount_fiat,
+                        'new_amount' => $offerAmountFiat
                     ]);
 
                     \Log::error('🚫 RELAUNCH BLOCKED', [
                         'user_id' => $user->id,
                         'egi_id' => $data['egi_id'],
-                        'previous_amount' => $previousReservation->offer_amount_eur,
-                        'new_amount' => $offerAmountEur
+                        'previous_amount' => $previousReservation->offer_amount_fiat,
+                        'new_amount' => $offerAmountFiat
                     ]);
 
-                    throw new \Exception('Il tuo rilancio deve essere superiore alla tua prenotazione precedente di €' . number_format($previousReservation->offer_amount_eur, 2) . '. Hai inserito €' . number_format($offerAmountEur, 2) . '.');
+                    throw new \Exception('Il tuo rilancio deve essere superiore alla tua prenotazione precedente di €' . number_format($previousReservation->offer_amount_fiat, 2) . '. Hai inserito €' . number_format($offerAmountFiat, 2) . '.');
                 }
             }
 
@@ -192,8 +192,11 @@ class ReservationService {
                 ]);
             }
 
-            // Convert EUR amount to ALGO
-            $offerAmountAlgo = $this->currencyService->convertEurToAlgo($offerAmountEur);
+            // Convert FIAT amount to ALGO (microALGO)
+            $offerAmountAlgo = $this->currencyService->convertFiatToMicroAlgo(
+                $offerAmountFiat,
+                $this->currencyService->getExchangeRate($data['fiat_currency'] ?? 'USD', 'ALGO')
+            );
 
             // Create the reservation
             $reservation = new Reservation([
@@ -201,8 +204,11 @@ class ReservationService {
                 'egi_id' => $egi->id,
                 'type' => $reservationType,
                 'status' => 'active',
-                'offer_amount_eur' => $offerAmountEur,
+                'offer_amount_fiat' => $offerAmountFiat,
+                'fiat_currency' => $data['fiat_currency'] ?? 'USD',
                 'offer_amount_algo' => $offerAmountAlgo,
+                'exchange_rate' => $this->currencyService->getExchangeRate($data['fiat_currency'] ?? 'USD', 'ALGO'),
+                'exchange_timestamp' => now(),
                 'is_current' => true,
                 'contact_data' => $data['contact_data'] ?? null
             ]);
@@ -223,7 +229,8 @@ class ReservationService {
                 'reservation_id' => $reservation->id,
                 'egi_id' => $egi->id,
                 'type' => $reservationType,
-                'offer_amount_eur' => $offerAmountEur
+                'offer_amount_fiat' => $offerAmountFiat,
+                'fiat_currency' => $data['fiat_currency'] ?? 'USD'
             ]);
 
             return $reservation;
@@ -311,11 +318,11 @@ class ReservationService {
         }
 
         // If same type, higher offer amount wins
-        if ($a->offer_amount_eur > $b->offer_amount_eur) {
+        if ($a->offer_amount_fiat > $b->offer_amount_fiat) {
             return true;
         }
 
-        if ($a->offer_amount_eur < $b->offer_amount_eur) {
+        if ($a->offer_amount_fiat < $b->offer_amount_fiat) {
             return false;
         }
 
@@ -334,7 +341,7 @@ class ReservationService {
         $strongReservation = $egi->reservations()
             ->where('type', 'strong')
             ->where('is_current', true)
-            ->orderBy('offer_amount_eur', 'desc')
+            ->orderBy('offer_amount_fiat', 'desc')
             ->orderBy('created_at', 'asc')
             ->first();
 
@@ -346,7 +353,7 @@ class ReservationService {
         return $egi->reservations()
             ->where('type', 'weak')
             ->where('is_current', true)
-            ->orderBy('offer_amount_eur', 'desc')
+            ->orderBy('offer_amount_fiat', 'desc')
             ->orderBy('created_at', 'asc')
             ->first();
     }
@@ -435,7 +442,7 @@ class ReservationService {
             ->where('is_current', true)
             ->where('status', 'active')
             ->orderBy('type', 'desc') // 'strong' comes before 'weak'
-            ->orderBy('offer_amount_eur', 'desc')
+            ->orderBy('offer_amount_fiat', 'desc')
             ->orderBy('created_at', 'asc')
             ->get();
 

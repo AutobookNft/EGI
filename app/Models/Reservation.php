@@ -10,17 +10,21 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @Oracode Eloquent Model: Reservation (Extended)
- * 🎯 Purpose: Manages reservations for EGIs with enhanced offering capabilities
+ * 🎯 Purpose: Manages reservations for EGIs with multi-currency support
  * 🧱 Core Logic: Tracks reservation status, priority, and certificate generation
  * 🛡️ GDPR: Minimizes data collection, records only what's needed for the reservation
+ * 💱 Currency Logic: Think FIAT, Operate ALGO - ALGO as immutable source of truth
  *
  * @property int $id
  * @property int $user_id
  * @property int $egi_id
  * @property string $type
  * @property string $status
- * @property float|null $offer_amount_eur
- * @property float|null $offer_amount_algo
+ * @property float $offer_amount_fiat Amount in FIAT currency (user-friendly)
+ * @property string $fiat_currency FIAT currency code (EUR, USD, etc.)
+ * @property int $offer_amount_algo Amount in microALGO (source of truth)
+ * @property float $exchange_rate Exchange rate ALGO->FIAT at transaction time
+ * @property \Illuminate\Support\Carbon $exchange_timestamp Timestamp of exchange rate
  * @property \Illuminate\Support\Carbon|null $expires_at
  * @property bool $is_current
  * @property int|null $superseded_by_id
@@ -34,8 +38,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Reservation[] $supersededReservations
  * @property-read \App\Models\EgiReservationCertificate|null $certificate
  */
-class Reservation extends Model
-{
+class Reservation extends Model {
     use HasFactory;
 
     /**
@@ -48,8 +51,11 @@ class Reservation extends Model
         'egi_id',
         'type',
         'status',
-        'offer_amount_eur',
+        'offer_amount_fiat',
+        'fiat_currency',
         'offer_amount_algo',
+        'exchange_rate',
+        'exchange_timestamp',
         'expires_at',
         'is_current',
         'superseded_by_id',
@@ -63,9 +69,11 @@ class Reservation extends Model
      */
     protected $casts = [
         'expires_at' => 'datetime',
+        'exchange_timestamp' => 'datetime',
         'contact_data' => 'json',
-        'offer_amount_eur' => 'decimal:2',
-        'offer_amount_algo' => 'decimal:8',
+        'offer_amount_fiat' => 'decimal:2',
+        'offer_amount_algo' => 'integer', // Trattato come intero (microALGO)
+        'exchange_rate' => 'decimal:8',
         'is_current' => 'boolean',
     ];
 
@@ -74,8 +82,7 @@ class Reservation extends Model
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function user()
-    {
+    public function user() {
         return $this->belongsTo(User::class);
     }
 
@@ -84,8 +91,7 @@ class Reservation extends Model
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function egi()
-    {
+    public function egi() {
         return $this->belongsTo(Egi::class);
     }
 
@@ -94,8 +100,7 @@ class Reservation extends Model
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function supersededBy()
-    {
+    public function supersededBy() {
         return $this->belongsTo(Reservation::class, 'superseded_by_id');
     }
 
@@ -104,8 +109,7 @@ class Reservation extends Model
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function supersededReservations()
-    {
+    public function supersededReservations() {
         return $this->hasMany(Reservation::class, 'superseded_by_id');
     }
 
@@ -114,8 +118,7 @@ class Reservation extends Model
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
-    public function certificate()
-    {
+    public function certificate() {
         return $this->hasOne(EgiReservationCertificate::class);
     }
 
@@ -124,8 +127,7 @@ class Reservation extends Model
      *
      * @return bool
      */
-    public function isExpired(): bool
-    {
+    public function isExpired(): bool {
         // Strong reservations don't expire
         if ($this->type === 'strong') {
             return false;
@@ -140,8 +142,7 @@ class Reservation extends Model
      *
      * @return bool
      */
-    public function isActive(): bool
-    {
+    public function isActive(): bool {
         return $this->status === 'active' && !$this->isExpired() && $this->is_current;
     }
 
@@ -151,15 +152,14 @@ class Reservation extends Model
      *
      * @return int
      */
-    public function getReservationPriority(): int
-    {
+    public function getReservationPriority(): int {
         $priority = 0;
 
         // Type priority: Strong always has higher base priority than weak
         $priority += ($this->type === 'strong') ? 1000 : 0;
 
-        // Amount priority: Higher offer gets higher priority
-        $priority += (int)($this->offer_amount_eur * 10);
+        // Amount priority: Higher offer gets higher priority (use FIAT amount)
+        $priority += (int)($this->offer_amount_fiat * 10);
 
         // Time priority: Earlier reservations get slightly higher priority
         $ageInDays = Carbon::now()->diffInDays($this->created_at);
@@ -174,8 +174,7 @@ class Reservation extends Model
      * @param Reservation $otherReservation
      * @return int Positive if this reservation has higher priority, negative if lower, 0 if equal
      */
-    public function comparePriorityWith(Reservation $otherReservation): int
-    {
+    public function comparePriorityWith(Reservation $otherReservation): int {
         return $this->getReservationPriority() - $otherReservation->getReservationPriority();
     }
 
@@ -185,8 +184,7 @@ class Reservation extends Model
      * @param Reservation $otherReservation
      * @return bool
      */
-    public function hasHigherPriorityThan(Reservation $otherReservation): bool
-    {
+    public function hasHigherPriorityThan(Reservation $otherReservation): bool {
         return $this->comparePriorityWith($otherReservation) > 0;
     }
 
@@ -196,8 +194,7 @@ class Reservation extends Model
      * @param Reservation $newReservation
      * @return bool
      */
-    public function markAsSuperseded(Reservation $newReservation): bool
-    {
+    public function markAsSuperseded(Reservation $newReservation): bool {
         $this->is_current = false;
         $this->superseded_by_id = $newReservation->id;
 
@@ -215,8 +212,7 @@ class Reservation extends Model
      * @param array $additionalData Additional data for the certificate
      * @return \App\Models\EgiReservationCertificate
      */
-    public function createCertificate(array $additionalData = []): EgiReservationCertificate
-    {
+    public function createCertificate(array $additionalData = []): EgiReservationCertificate {
         // Create base certificate data
         $certificateData = [
             'reservation_id' => $this->id,
@@ -224,8 +220,10 @@ class Reservation extends Model
             'user_id' => $this->user_id,
             'wallet_address' => $this->user->wallet ?? $additionalData['wallet_address'] ?? '',
             'reservation_type' => $this->type,
-            'offer_amount_eur' => $this->offer_amount_eur,
+            'offer_amount_fiat' => $this->offer_amount_fiat,
+            'fiat_currency' => $this->fiat_currency,
             'offer_amount_algo' => $this->offer_amount_algo,
+            'exchange_rate' => $this->exchange_rate,
             'is_current_highest' => $this->is_current,
         ];
 
@@ -252,8 +250,7 @@ class Reservation extends Model
      * @param \Illuminate\Database\Eloquent\Builder $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeActive($query)
-    {
+    public function scopeActive($query) {
         return $query->where('status', 'active')
             ->where('is_current', true)
             ->where(function ($query) {
@@ -274,8 +271,7 @@ class Reservation extends Model
      * @param \Illuminate\Database\Eloquent\Builder $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeWeak($query)
-    {
+    public function scopeWeak($query) {
         return $query->where('type', 'weak');
     }
 
@@ -285,8 +281,7 @@ class Reservation extends Model
      * @param \Illuminate\Database\Eloquent\Builder $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeStrong($query)
-    {
+    public function scopeStrong($query) {
         return $query->where('type', 'strong');
     }
 
@@ -296,8 +291,7 @@ class Reservation extends Model
      * @param \Illuminate\Database\Eloquent\Builder $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeCurrent($query)
-    {
+    public function scopeCurrent($query) {
         return $query->where('is_current', true);
     }
 }

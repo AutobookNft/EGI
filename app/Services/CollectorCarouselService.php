@@ -3,29 +3,38 @@
 namespace App\Services;
 
 use App\Models\User;
+use App\Services\CurrencyService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 /**
- * @Oracode Service: Top Collectors Carousel for Guest Homepage
+ * @Oracode Service: Top Collectors Carousel for Guest Homepage (Multi-Currency)
  * 🎯 Purpose: Calculate and retrieve top collectors based on total spending
  * 🛡️ Strategy: Marketing visibility for top spenders to incentivize purchases
- * 🧱 Core Logic: Rank collectors by sum of their winning reservations
+ * 🧱 Core Logic: Rank collectors by sum of their winning reservations in FIAT
+ * 💱 Multi-Currency: Supports EUR, USD, GBP with "Think FIAT, Operate ALGO" architecture
  *
  * Business Logic:
- * - Collectors ranked by total spending (winning reservations)
+ * - Collectors ranked by total spending (winning reservations in FIAT)
+ * - Uses offer_amount_fiat instead of deprecated offer_amount_eur
  * - Future evolution: Include completed purchases
  * - Top 10 collectors get homepage visibility
  * - Incentivizes higher spending for social recognition
  *
  * @package App\Services
- * @author Padmin D. Curtis (AI Partner OS2.0-Compliant) for Fabio Cherici
- * @version 1.0.0 (Top Collectors Marketing Strategy)
- * @date 2025-08-10
+ * @author Padmin D. Curtis + Fabio Cherici (Multi-Currency Enhancement)
+ * @version 2.0.0 (Multi-Currency Architecture)
+ * @date 2025-08-13
  */
 class CollectorCarouselService {
+    private CurrencyService $currencyService;
+
+    public function __construct(CurrencyService $currencyService) {
+        $this->currencyService = $currencyService;
+    }
+
     /**
-     * Get top collectors ranked by total spending
+     * Get top collectors ranked by total spending in FIAT
      *
      * @param int $limit Number of top collectors to retrieve
      * @return Collection Collection of collectors with spending stats
@@ -35,7 +44,7 @@ class CollectorCarouselService {
             'users.*',
             DB::raw('
                     COALESCE((
-                        SELECT SUM(reservations.offer_amount_eur)
+                        SELECT SUM(reservations.offer_amount_fiat)
                         FROM reservations
                         WHERE reservations.user_id = users.id
                         AND reservations.is_current = 1
@@ -44,7 +53,7 @@ class CollectorCarouselService {
                             SELECT 1
                             FROM reservations r2
                             WHERE r2.egi_id = reservations.egi_id
-                            AND r2.offer_amount_eur > reservations.offer_amount_eur
+                            AND r2.offer_amount_fiat > reservations.offer_amount_fiat
                             AND r2.is_current = 1
                             AND r2.status = "active"
                         )
@@ -77,7 +86,7 @@ class CollectorCarouselService {
     }
 
     /**
-     * Get count of winning reservations for a collector
+     * Get count of winning reservations for a collector (Multi-Currency)
      */
     private function getWinningReservationsCount(int $userId): int {
         return DB::table('reservations')
@@ -88,7 +97,7 @@ class CollectorCarouselService {
                 $query->select(DB::raw(1))
                     ->from('reservations as r2')
                     ->whereColumn('r2.egi_id', 'reservations.egi_id')
-                    ->whereColumn('r2.offer_amount_eur', '>', 'reservations.offer_amount_eur')
+                    ->whereColumn('r2.offer_amount_fiat', '>', 'reservations.offer_amount_fiat')
                     ->where('r2.is_current', true)
                     ->where('r2.status', 'active');
             })
@@ -111,7 +120,7 @@ class CollectorCarouselService {
                         $subquery->select(DB::raw(1))
                             ->from('reservations as r2')
                             ->whereColumn('r2.egi_id', 'reservations.egi_id')
-                            ->whereColumn('r2.offer_amount_eur', '>', 'reservations.offer_amount_eur')
+                            ->whereColumn('r2.offer_amount_fiat', '>', 'reservations.offer_amount_fiat')
                             ->where('r2.is_current', true)
                             ->where('r2.status', 'active');
                     });
@@ -120,7 +129,7 @@ class CollectorCarouselService {
     }
 
     /**
-     * Get collector stats for display
+     * Get collector stats for display (Multi-Currency)
      */
     public function getCollectorStats(int $userId): array {
         $collector = User::find($userId);
@@ -137,11 +146,11 @@ class CollectorCarouselService {
                 $query->select(DB::raw(1))
                     ->from('reservations as r2')
                     ->whereColumn('r2.egi_id', 'reservations.egi_id')
-                    ->whereColumn('r2.offer_amount_eur', '>', 'reservations.offer_amount_eur')
+                    ->whereColumn('r2.offer_amount_fiat', '>', 'reservations.offer_amount_fiat')
                     ->where('r2.is_current', true)
                     ->where('r2.status', 'active');
             })
-            ->sum('offer_amount_eur');
+            ->sum('offer_amount_fiat');
 
         return [
             'total_spending' => $totalSpending ?? 0,

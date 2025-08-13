@@ -212,7 +212,7 @@ if (!function_exists('getEgiActivationStatus')) {
             ->where('status', 'active')
             ->whereNull('superseded_by_id')
             ->with('user')
-            ->orderByDesc('offer_amount_eur')
+            ->orderByDesc('offer_amount_fiat')
             ->first();
 
         if ($winningReservation && $winningReservation->user) {
@@ -224,7 +224,8 @@ if (!function_exists('getEgiActivationStatus')) {
 
             return [
                 'status' => 'activated',
-                'highest_bid' => $winningReservation->offer_amount_eur,
+                'highest_bid' => $winningReservation->offer_amount_fiat,
+                'currency' => $winningReservation->fiat_currency,
                 'can_reserve' => false, // Non può più essere prenotato
                 'reservations_count' => 1,
                 'activator' => [
@@ -248,14 +249,16 @@ if (!function_exists('getEgiActivationStatus')) {
 
         if ($competingReservationsCount > 1) {
             // Trova la miglior offerta in competizione
-            $highestBid = \App\Models\Reservation::where('egi_id', $egi->id)
+            $highestReservation = \App\Models\Reservation::where('egi_id', $egi->id)
                 ->where('is_current', true)
                 ->where('status', 'active')
-                ->max('offer_amount_eur');
+                ->orderByDesc('offer_amount_fiat')
+                ->first();
 
             return [
                 'status' => 'in_competition',
-                'highest_bid' => $highestBid,
+                'highest_bid' => $highestReservation->offer_amount_fiat ?? 0,
+                'currency' => $highestReservation->fiat_currency ?? 'EUR',
                 'can_reserve' => true, // Può ancora fare offerte
                 'reservations_count' => $competingReservationsCount,
                 'activator' => null

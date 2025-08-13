@@ -78,7 +78,15 @@
         class="sticky top-0 z-50 w-full border-b border-gray-800 shadow-lg navbar-simple-hide bg-gray-900/90 backdrop-blur-md"
         role="banner" aria-label="{{ __('guest_layout.header_aria_label') }}">
         <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16 md:h-20">
+            @php
+            $user = App\Helpers\FegiAuth::user(); // User object or null
+            @endphp
+            
+            {{-- Container principale - adattivo per auth --}}
+            <div class="@if($user) flex flex-col @else h-16 @endif md:h-20">
+                
+                {{-- Prima riga: sempre presente --}}
+                <div class="flex items-center justify-between h-16 md:h-20">
 
                 @php
                 $navLinkClasses =
@@ -105,28 +113,106 @@
                 </div>
 
                 <button type="button" id="open-butler-assistant"
-                    class="{{ $navLinkClasses }} w-full text-left items-center gap-1 hidden ml-6 md:block"
+                    class="{{ $navLinkClasses }} items-center gap-1 hidden ml-6 md:flex"
                     aria-label="{{ __('assistant.open_butler_aria') }}">
                     <span class="material-symbols-outlined" aria-hidden="true"
                         style="font-size: 1.1em;">support_agent</span>
                     <span>{{ __('assistant.open_butler') }}</span>
                 </button>
 
-                @php
-                $authType = App\Helpers\FegiAuth::getAuthType(); // 'strong', 'weak', 'guest'
-                $user = App\Helpers\FegiAuth::user(); // User object or null
-                $canCreateEgi = $user && $user->can('create_egi');
-                @endphp
-
-                {{-- User Welcome Message - Solo per utenti loggati --}}
+                {{-- Welcome Message Desktop - Solo per utenti autenticati - Dopo Assistenza --}}
                 @if ($user)
-                <div class='px-3 py-1 text-center' }}">
-                    <span class="text-sm font-medium text-emerald-600">
-                        {{ App\Helpers\FegiAuth::getWelcomeMessage() }}
-                    </span>
+                <div class="hidden md:flex items-center ml-4">
+                    <span class="text-sm text-emerald-400 font-medium">{{ App\Helpers\FegiAuth::getWelcomeMessage() }}</span>
                 </div>
                 @endif
 
+                {{-- Professional Currency Badge (Desktop) --}}
+                <div id="currency-badge-container-desktop" class="hidden md:flex items-center ml-3">
+                    <div class="relative group">
+                        {{-- Desktop Badge --}}
+                        <div id="currency-badge-desktop"
+                            class="inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-slate-800/90 to-slate-700/90 backdrop-blur-sm border border-slate-600/50 rounded-lg shadow-lg hover:shadow-slate-900/30 transition-all duration-300 cursor-pointer"
+                            title="Live Exchange Rate">
+                            
+                            {{-- Status Dot --}}
+                            <div class="relative mr-2">
+                                <span class="w-1.5 h-1.5 bg-green-400 rounded-full block animate-pulse"></span>
+                                <span class="absolute inset-0 w-1.5 h-1.5 bg-green-400 rounded-full animate-ping opacity-60"></span>
+                            </div>
+
+                            {{-- Currency Display --}}
+                            <div class="flex items-center space-x-2">
+                                <span id="currency-symbol" class="text-sm font-bold text-white">
+                                    {{ auth()->check() ? (auth()->user()->preferred_currency ?? 'USD') : 'USD' }}
+                                </span>
+                                <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                                </svg>
+                                <span class="text-sm font-bold text-emerald-400">ALGO</span>
+                            </div>
+
+                            {{-- Rate Display --}}
+                            <div class="ml-3 flex items-center">
+                                <span id="currency-rate-value" class="text-sm font-mono font-medium text-white">--</span>
+                            </div>
+                        </div>
+
+                        {{-- Desktop Tooltip --}}
+                        <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-80 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
+                            <div class="bg-slate-900/95 backdrop-blur-xl border border-slate-700/50 rounded-xl shadow-2xl overflow-hidden">
+                                {{-- Header --}}
+                                <div class="bg-gradient-to-r from-emerald-600/20 to-blue-600/20 p-4 border-b border-slate-700/50">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <h3 class="text-sm font-semibold text-white">Multi-Currency Exchange</h3>
+                                            <p class="text-xs text-slate-400 mt-1">"Think FIAT, Operate ALGO"</p>
+                                        </div>
+                                        <div class="text-right">
+                                            <div class="text-xs text-emerald-400 font-medium">LIVE</div>
+                                            <div id="currency-last-updated" class="text-xs text-slate-500 mt-0.5">--</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                {{-- Content --}}
+                                <div class="p-4">
+                                    <div class="grid grid-cols-2 gap-3 text-xs">
+                                        <div>
+                                            <span class="text-slate-400">Update:</span>
+                                            <span class="text-white ml-1">30s</span>
+                                        </div>
+                                        <div>
+                                            <span class="text-slate-400">Source:</span>
+                                            <span class="text-emerald-400 ml-1">CoinGecko</span>
+                                        </div>
+                                        <div>
+                                            <span class="text-slate-400">Precision:</span>
+                                            <span class="text-white ml-1">6 decimals</span>
+                                        </div>
+                                        <div>
+                                            <span class="text-slate-400">Status:</span>
+                                            <span class="text-green-400 ml-1 flex items-center">
+                                                <span class="w-1.5 h-1.5 bg-green-400 rounded-full mr-1"></span>
+                                                Active
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {{-- Tooltip Arrow --}}
+                            <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-slate-900/95"></div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Professional Currency Badge (Always Visible - Mobile First) --}}
+                
+                @php
+                $authType = App\Helpers\FegiAuth::getAuthType(); // 'strong', 'weak', 'guest'
+                $canCreateEgi = $user && $user->can('create_egi');
+                @endphp
 
                 {{-- Nav Desktop --}}
                 <nav class="items-center hidden space-x-1 md:flex" role="navigation"
@@ -167,15 +253,6 @@
 
                     {{-- Wallet e Auth --}}
                     <span class="h-6 mx-2 border-l border-gray-700" aria-hidden="true"></span>
-
-                    <div id="current-collection-badge-container" class="items-center hidden ml-2">
-                        <a href="#" id="current-collection-badge-link"
-                            class="flex items-center rounded-full border border-sky-700 bg-sky-900/60 px-3 py-1.5 text-xs font-semibold text-sky-300 transition hover:border-sky-600 hover:bg-sky-800">
-                            <span class="material-symbols-outlined mr-1.5 text-sm leading-none"
-                                aria-hidden="true">folder_managed</span>
-                            <span id="current-collection-badge-name"></span>
-                        </a>
-                    </div>
 
                     <div id="wallet-cta-container" class="ml-2">
                         <button id="connect-wallet-button" type="button"
@@ -238,17 +315,48 @@
                 {{-- Menu Mobile Button --}}
                 <div class="flex items-center gap-2 -mr-2 md:hidden">
 
-                    <div id="current-collection-badge-container-mobile"
-                        class="hidden px-4 py-3 text-center border-t border-gray-800">
-                        <a href="#" id="current-collection-badge-link-mobile"
-                            class="inline-flex items-center px-3 py-2 text-xs font-medium text-center transition border rounded-full border-sky-700 bg-sky-900/60 text-sky-300 hover:border-sky-600 hover:bg-sky-800">
-                            <span class="material-symbols-outlined mr-1.5 text-sm"
-                                aria-hidden="true">folder_managed</span>
-                            <span id="current-collection-badge-name-mobile"></span>
-                        </a>
+                    {{-- Professional Currency Badge (Mobile Always Visible) --}}
+                    <div id="currency-badge-container" class="flex items-center">
+                        <div class="relative group">
+                            {{-- Compact Mobile Badge --}}
+                            <div id="currency-badge"
+                                class="inline-flex items-center px-1.5 py-1 bg-gradient-to-r from-slate-800/90 to-slate-700/90 backdrop-blur-sm border border-slate-600/50 rounded-md shadow-lg transition-all duration-300 cursor-pointer"
+                                title="Live Exchange Rate">
+                                
+                                {{-- Status Dot --}}
+                                <div class="relative mr-1">
+                                    <span class="w-1 h-1 bg-green-400 rounded-full block animate-pulse"></span>
+                                </div>
+
+                                {{-- Currency Display --}}
+                                <div class="flex items-center space-x-1">
+                                    <span id="currency-symbol-mobile" class="text-xs font-bold text-white">USD</span>
+                                    <svg class="w-2.5 h-2.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                                    </svg>
+                                    <span class="text-xs font-bold text-emerald-400">ALGO</span>
+                                </div>
+
+                                {{-- Rate Display --}}
+                                <div class="ml-1 flex items-center">
+                                    <span id="currency-rate-value-mobile" class="text-xs font-mono font-medium text-white">--</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-
+                    {{-- Menu Mobile Button --}}
+                    
+                    {{-- Bottone Accedi (Solo per guest su mobile) --}}
+                    @guest
+                    <div class="block md:hidden">
+                        <a href="{{ route('login') }}" 
+                           class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-300 bg-gray-800 border border-gray-700 rounded-md hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                            {{ __('collection.login') }}
+                        </a>
+                    </div>
+                    @endguest
+                    
                     {{-- Natan Assistant Mobile --}}
                     <div class="block md:hidden">
                         <x-natan-assistant :suffix="'-mobile'" />
@@ -280,6 +388,36 @@
                         </svg>
                     </button>
                 </div>
+                {{-- Fine Prima Riga --}}
+                </div>
+
+                {{-- Seconda Riga: Solo per utenti autenticati (Mobile) --}}
+                @if ($user)
+                <div class="flex items-center justify-between py-2 px-4 bg-gray-800/30 border-t border-gray-700/50 md:hidden">
+                    {{-- Welcome Message --}}
+                    <div class="flex-1">
+                        <span class="text-xs font-medium text-emerald-500">
+                            @php
+                                $welcomeMessage = App\Helpers\FegiAuth::getWelcomeMessage();
+                                // Rimuovi "Benvenuto/a," dalla versione mobile
+                                $mobileMessage = preg_replace('/^Benvenuto\/a,?\s*/i', '', $welcomeMessage);
+                            @endphp
+                            {{ $mobileMessage }}
+                        </span>
+                    </div>
+                    
+                    {{-- Collection Badge (spostato qui dalla prima riga) --}}
+                    <div id="current-collection-badge-container" class="items-center hidden ml-2">
+                        <a href="#" id="current-collection-badge-link"
+                            class="flex items-center rounded-full border border-sky-700 bg-sky-900/60 px-2 py-1 text-xs font-semibold text-sky-300 transition hover:border-sky-600 hover:bg-sky-800">
+                            <span class="material-symbols-outlined mr-1 text-xs leading-none"
+                                aria-hidden="true">folder_managed</span>
+                            <span id="current-collection-badge-name"></span>
+                        </a>
+                    </div>
+                </div>
+                @endif
+                {{-- Fine Container Principale --}}
             </div>
         </div>
 
@@ -325,10 +463,8 @@
                         </div>
                     </div>
                 </div>
-                <div class="flex justify-center gap-3" id="mobile-login-register-buttons">
-                    <a href="{{ route('login') }}"
-                        class="flex-1 rounded-md border border-gray-700 bg-gray-800 px-4 py-2.5 text-center text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">{{
-                        __('collection.login') }}</a>
+                {{-- Solo il bottone Registrati rimane nel menu mobile --}}
+                <div class="flex justify-center" id="mobile-register-button">
                     <a href="{{ route('register') }}"
                         class="flex-1 rounded-md border border-green-600 bg-green-800 px-4 py-2.5 text-center text-sm font-medium text-white hover:bg-green-700">{{
                         __('collection.register') }}</a>
@@ -350,6 +486,327 @@
         if (header) {
             header.classList.remove('navbar-simple-hide');
             header.classList.add('navbar-simple-show');
+        }
+    });
+
+    // Currency Badge Manager
+    class CurrencyBadgeManager {
+        constructor() {
+            this.elements = {
+                // Desktop elements
+                symbol: document.getElementById('currency-symbol'),
+                rateValue: document.getElementById('currency-rate-value'),
+                lastUpdated: document.getElementById('currency-last-updated'),
+                // Mobile elements
+                symbolMobile: document.getElementById('currency-symbol-mobile'),
+                rateValueMobile: document.getElementById('currency-rate-value-mobile'),
+                lastUpdatedMobile: document.getElementById('currency-last-updated-mobile'),
+                // Switch elements (future use)
+                switchButton: document.getElementById('currency-switch-button'),
+                switchMenu: document.getElementById('currency-switch-menu'),
+                currencyOptions: document.querySelectorAll('.currency-option')
+            };
+
+            this.currentCurrency = '{{ auth()->check() ? (auth()->user()->preferred_currency ?? "USD") : "USD" }}';
+            this.updateInterval = null;
+            this.init();
+        }
+
+        init() {
+            this.fetchAndUpdateRate();
+            this.startAutoUpdate();
+            this.bindEvents();
+        }
+
+        startAutoUpdate() {
+            // Update every 30 seconds
+            this.updateInterval = setInterval(() => {
+                this.fetchAndUpdateRate();
+            }, 30000);
+        }
+
+        async fetchAndUpdateRate() {
+            try {
+                // Mixed Security Architecture: try authenticated endpoint first, fallback to public
+                const isAuthenticated = {{ auth()->check() ? 'true' : 'false' }};
+                
+                let endpoint, response;
+                
+                if (isAuthenticated) {
+                    // Try protected endpoint for authenticated users
+                    response = await fetch('/api/currency/user-rate', {
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+                } else {
+                    // Use public endpoint for anonymous users (default USD)
+                    response = await fetch('/api/currency/rate/default', {
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+                }
+
+                if (!response.ok) {
+                    // Fallback to public endpoint if protected fails
+                    if (isAuthenticated) {
+                        response = await fetch('/api/currency/rate/default', {
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        });
+                    }
+                    
+                    if (!response.ok) throw new Error('Network response was not ok');
+                }
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Handle both response formats (user-rate vs rate/default)
+                    const currency = data.data?.currency || data.data?.fiat_currency || 'USD';
+                    const rate = data.data?.rate || data.data?.rate_to_algo || 0;
+                    const timestamp = data.data?.timestamp || new Date().toISOString();
+                    
+                    this.updateBadge(currency, rate, timestamp);
+                } else {
+                    this.showError();
+                }
+            } catch (error) {
+                console.error('Failed to fetch currency rate:', error);
+                this.showError();
+            }
+        }
+
+        updateBadge(currency, rate, updatedAt) {
+            // Animate currency symbol change (Desktop)
+            if (this.elements.symbol && this.elements.symbol.textContent !== currency) {
+                this.animateValueChange(this.elements.symbol, currency);
+            }
+
+            // Animate currency symbol change (Mobile)
+            if (this.elements.symbolMobile && this.elements.symbolMobile.textContent !== currency) {
+                this.animateValueChange(this.elements.symbolMobile, currency);
+            }
+
+            // Format and animate rate change (Desktop)
+            if (this.elements.rateValue) {
+                const formattedRate = this.formatRate(rate);
+                if (this.elements.rateValue.textContent !== formattedRate) {
+                    this.animateValueChange(this.elements.rateValue, formattedRate);
+                }
+            }
+
+            // Format and animate rate change (Mobile)
+            if (this.elements.rateValueMobile) {
+                const formattedRate = this.formatRate(rate);
+                if (this.elements.rateValueMobile.textContent !== formattedRate) {
+                    this.animateValueChange(this.elements.rateValueMobile, formattedRate);
+                }
+            }
+
+            // Update timestamp with elegant formatting (Desktop)
+            if (this.elements.lastUpdated) {
+                const time = this.formatTimestamp(updatedAt);
+                this.elements.lastUpdated.textContent = time;
+            }
+
+            // Update timestamp with elegant formatting (Mobile)
+            if (this.elements.lastUpdatedMobile) {
+                const time = this.formatTimestamp(updatedAt);
+                this.elements.lastUpdatedMobile.textContent = time;
+            }
+
+            this.currentCurrency = currency;
+            
+            // Add success flash animation
+            this.flashSuccess();
+        }
+
+        formatRate(rate) {
+            if (rate === 0 || !rate) return '--';
+            
+            // Professional number formatting with appropriate decimals
+            if (rate >= 1) {
+                return rate.toFixed(4);
+            } else if (rate >= 0.01) {
+                return rate.toFixed(6);
+            } else {
+                return rate.toFixed(8);
+            }
+        }
+
+        formatTimestamp(timestamp) {
+            try {
+                const date = new Date(timestamp);
+                const now = new Date();
+                const diffMs = now - date;
+                const diffSecs = Math.floor(diffMs / 1000);
+                
+                if (diffSecs < 30) return 'Just now';
+                if (diffSecs < 60) return `${diffSecs}s ago`;
+                if (diffSecs < 3600) return `${Math.floor(diffSecs / 60)}m ago`;
+                
+                return date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            } catch (e) {
+                return 'Updated';
+            }
+        }
+
+        animateValueChange(element, newValue) {
+            // Professional fade-in animation for value changes
+            element.style.opacity = '0.5';
+            element.style.transform = 'scale(0.95)';
+            
+            setTimeout(() => {
+                element.textContent = newValue;
+                element.style.opacity = '1';
+                element.style.transform = 'scale(1)';
+                element.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+            }, 150);
+        }
+
+        flashSuccess() {
+            // Add subtle success animation to badge
+            const badge = document.getElementById('currency-badge');
+            if (badge) {
+                badge.style.boxShadow = '0 20px 25px -5px rgba(16, 185, 129, 0.3), 0 10px 10px -5px rgba(16, 185, 129, 0.2)';
+                setTimeout(() => {
+                    badge.style.boxShadow = '';
+                    badge.style.transition = 'box-shadow 1s ease-out';
+                }, 500);
+            }
+        }
+
+        showError() {
+            // Professional error state with visual feedback
+            const badge = document.getElementById('currency-badge');
+            
+            // Desktop elements
+            if (this.elements.rateValue) {
+                this.animateValueChange(this.elements.rateValue, 'ERROR');
+            }
+            
+            if (this.elements.lastUpdated) {
+                this.elements.lastUpdated.textContent = 'Connection failed';
+            }
+
+            // Mobile elements
+            if (this.elements.rateValueMobile) {
+                this.animateValueChange(this.elements.rateValueMobile, 'ERROR');
+            }
+            
+            if (this.elements.lastUpdatedMobile) {
+                this.elements.lastUpdatedMobile.textContent = 'Connection failed';
+            }
+
+            // Add error visual feedback
+            if (badge) {
+                badge.style.boxShadow = '0 20px 25px -5px rgba(239, 68, 68, 0.3), 0 10px 10px -5px rgba(239, 68, 68, 0.2)';
+                badge.style.borderColor = 'rgba(239, 68, 68, 0.5)';
+                
+                setTimeout(() => {
+                    badge.style.boxShadow = '';
+                    badge.style.borderColor = '';
+                    badge.style.transition = 'all 1s ease-out';
+                }, 2000);
+            }
+
+            // Retry after a short delay
+            setTimeout(() => {
+                this.fetchAndUpdateRate();
+            }, 5000);
+        }
+
+        bindEvents() {
+            // Currency switch dropdown
+            if (this.elements.switchButton && this.elements.switchMenu) {
+                this.elements.switchButton.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.elements.switchMenu.classList.toggle('hidden');
+                });
+
+                // Close dropdown when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (!this.elements.switchButton.contains(e.target) &&
+                        !this.elements.switchMenu.contains(e.target)) {
+                        this.elements.switchMenu.classList.add('hidden');
+                    }
+                });
+            }
+
+            // Currency option clicks
+            this.elements.currencyOptions.forEach(option => {
+                option.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    const newCurrency = option.getAttribute('data-currency');
+                    await this.switchCurrency(newCurrency);
+                    this.elements.switchMenu.classList.add('hidden');
+                });
+            });
+        }
+
+        async switchCurrency(newCurrency) {
+            try {
+                const response = await fetch('/api/user/preferred-currency', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({ preferred_currency: newCurrency })
+                });
+
+                if (response.ok) {
+                    // Immediately fetch new rate
+                    this.fetchAndUpdateRate();
+
+                    // Show success feedback
+                    this.showSuccess(`Currency switched to ${newCurrency}`);
+                } else {
+                    throw new Error('Failed to update currency preference');
+                }
+            } catch (error) {
+                console.error('Failed to switch currency:', error);
+                this.showError('Failed to switch currency');
+            }
+        }
+
+        showSuccess(message) {
+            // Simple success indicator - you can enhance this
+            const badge = document.getElementById('currency-badge');
+            if (badge) {
+                badge.classList.add('ring-2', 'ring-emerald-400');
+                setTimeout(() => {
+                    badge.classList.remove('ring-2', 'ring-emerald-400');
+                }, 1500);
+            }
+        }
+
+        destroy() {
+            if (this.updateInterval) {
+                clearInterval(this.updateInterval);
+            }
+        }
+    }
+
+    // Initialize Currency Badge Manager
+    let currencyBadgeManager;
+    document.addEventListener('DOMContentLoaded', function() {
+        currencyBadgeManager = new CurrencyBadgeManager();
+    });
+
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', function() {
+        if (currencyBadgeManager) {
+            currencyBadgeManager.destroy();
         }
     });
     </script>

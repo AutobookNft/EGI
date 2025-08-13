@@ -19,8 +19,7 @@ use Illuminate\Support\Facades\DB;
  * @schema-type QuantitativeValue
  * @accessibility-trait Presenta statistiche con etichette descrittive
  */
-class EnvironmentalStats extends Component
-{
+class EnvironmentalStats extends Component {
     /**
      * Quantità totale di plastica recuperata in kg
      *
@@ -99,8 +98,7 @@ class EnvironmentalStats extends Component
      * @param bool $useRealData Flag per utilizzare dati reali dal database invece di hardcoded
      * @return void
      */
-    public function __construct(string $format = 'full', string $textColor = 'cyan', bool $useRealData = true)
-    {
+    public function __construct(string $format = 'full', string $textColor = 'cyan', bool $useRealData = true) {
         $this->format = $format;
         $this->textColor = $textColor;
         $this->useRealData = $useRealData;
@@ -120,8 +118,7 @@ class EnvironmentalStats extends Component
      *
      * @return \Illuminate\Contracts\View\View|\Closure|string
      */
-    public function render()
-    {
+    public function render() {
         return view('components.environmental-stats');
     }
 
@@ -131,8 +128,7 @@ class EnvironmentalStats extends Component
      * @privacy-safe Non contiene dati personali
      * @return float
      */
-    private function getTotalPlasticRecovered(): float
-    {
+    private function getTotalPlasticRecovered(): float {
         if (!$this->useRealData) {
             // MVP: Valore hardcoded
             return 5241.38;
@@ -155,8 +151,7 @@ class EnvironmentalStats extends Component
      * @privacy-safe Non contiene dati personali
      * @return int
      */
-    private function getActiveProjects(): int
-    {
+    private function getActiveProjects(): int {
         if (!$this->useRealData) {
             // MVP: Valore hardcoded
             return 42;
@@ -172,8 +167,7 @@ class EnvironmentalStats extends Component
      * @privacy-safe Non contiene dati personali
      * @return int
      */
-    private function getTotalItems(): int
-    {
+    private function getTotalItems(): int {
         if (!$this->useRealData) {
             // MVP: Valore hardcoded
             return 721;
@@ -189,8 +183,7 @@ class EnvironmentalStats extends Component
      * @privacy-safe Non contiene dati personali
      * @return int
      */
-    private function getTotalOwners(): int
-    {
+    private function getTotalOwners(): int {
         if (!$this->useRealData) {
             // MVP: Valore hardcoded
             return 143;
@@ -208,8 +201,7 @@ class EnvironmentalStats extends Component
      * @privacy-safe Non contiene dati personali
      * @return int
      */
-    private function getTotalCollections(): int
-    {
+    private function getTotalCollections(): int {
         if (!$this->useRealData) {
             // MVP: Valore hardcoded
             return 57;
@@ -225,8 +217,7 @@ class EnvironmentalStats extends Component
      * @privacy-safe Non contiene dati personali
      * @return array Associative array con i totali ['weak' => x, 'strong' => y, 'total' => z]
      */
-    private function getTotalReservations(): array
-    {
+    private function getTotalReservations(): array {
         if (!$this->useRealData) {
             // MVP: Valori hardcoded
             return [
@@ -238,7 +229,7 @@ class EnvironmentalStats extends Component
 
         // Query per ottenere la prenotazione con l'offerta più alta per ogni EGI e tipo
         $highestReservations = DB::table('reservations')
-            ->select('egi_id', 'type', DB::raw('MAX(offer_amount_eur) as highest_offer'))
+            ->select('egi_id', 'type', DB::raw('MAX(offer_amount_fiat) as highest_offer'))
             ->where('status', 'active') // Solo prenotazioni attive
             ->groupBy('egi_id', 'type') // Raggruppa per EGI e tipo
             ->get();
@@ -270,8 +261,7 @@ class EnvironmentalStats extends Component
      * @privacy-safe Non contiene dati personali
      * @return float Ammontare dell'Equilibrium in EUR
      */
-    private function getEquilibrium(): float
-    {
+    private function getEquilibrium(): float {
         if (!$this->useRealData) {
             // MVP: Valore hardcoded (calcolato come 20% di 65250)
             return 13050.00;
@@ -289,8 +279,7 @@ class EnvironmentalStats extends Component
      * @param int $decimals Numero di decimali da mostrare
      * @return string
      */
-    public function formatNumber(float $value, int $decimals = 2): string
-    {
+    public function formatNumber(float $value, int $decimals = 2): string {
         return number_format($value, $decimals, ',', '.');
     }
 
@@ -300,8 +289,7 @@ class EnvironmentalStats extends Component
      * @param int $decimals Numero di decimali da mostrare
      * @return string
      */
-    public function formattedTotal(int $decimals = 2): string
-    {
+    public function formattedTotal(int $decimals = 2): string {
         return $this->formatNumber($this->totalPlasticRecovered, $decimals);
     }
 
@@ -311,8 +299,7 @@ class EnvironmentalStats extends Component
      * @param int $decimals Numero di decimali da mostrare
      * @return string
      */
-    public function formattedEquilibrium(int $decimals = 2): string
-    {
+    public function formattedEquilibrium(int $decimals = 2): string {
         return $this->formatNumber($this->equilibrium, $decimals);
     }
 
@@ -323,8 +310,7 @@ class EnvironmentalStats extends Component
      * @param int $decimals Numero di decimali da mostrare
      * @return string
      */
-    public function formattedReservations(string $type = 'total', int $decimals = 2): string
-    {
+    public function formattedReservations(string $type = 'total', int $decimals = 2): string {
         $value = $this->reservations[$type] ?? $this->reservations['total'];
         return $this->formatNumber($value, $decimals);
     }

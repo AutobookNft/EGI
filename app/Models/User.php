@@ -49,6 +49,7 @@ class User extends Authenticatable implements HasMedia {
         'name',
         'last_name',
         'email',
+        'preferred_currency',
         'avatar_url',
         'password',
         'usertype',
@@ -1236,7 +1237,7 @@ class User extends Authenticatable implements HasMedia {
             ->wherePivotIn('status', ['active', 'completed'])
             ->wherePivot('is_current', true)
             ->whereNull('reservations.superseded_by_id')
-            ->withPivot(['offer_amount_eur', 'created_at', 'id', 'status'])
+            ->withPivot(['offer_amount_fiat', 'fiat_currency', 'offer_amount_algo', 'exchange_rate', 'created_at', 'id', 'status'])
             ->withTimestamps();
     }
 
@@ -1298,7 +1299,7 @@ class User extends Authenticatable implements HasMedia {
         $purchasedEgis = $this->purchasedEgis()->count();
         $activeReservations = $this->activeReservations()->count();
         $completedPurchases = $this->completedReservations()->count();
-        $totalSpent = $this->validReservations()->sum('offer_amount_eur');
+        $totalSpent = $this->validReservations()->sum('offer_amount_fiat');
 
         // Get unique creators supported through purchases
         $creatorsSupported = $this->purchasedEgis()
