@@ -14,8 +14,16 @@ return new class extends Migration {
             $table->string('name');
             $table->string('last_name')->nullable();
             $table->string('email')->unique();
+            $table->string('preferred_currency', 3)->default('EUR')->comment('Preferred currency for price display');
+            $table->string('avatar_url')->nullable(); // Avatar image URL
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            
+            // Two-factor authentication
+            $table->text('two_factor_secret')->nullable();
+            $table->text('two_factor_recovery_codes')->nullable();
+            $table->timestamp('two_factor_confirmed_at')->nullable();
+            
             $table->string('usertype', 20)->default('creator'); // Default creator type
             $table->foreignId('current_collection_id')->nullable();
             $table->json('consent_summary')->nullable(); // Quick consent lookup
@@ -68,6 +76,7 @@ return new class extends Migration {
             $table->index('last_gdpr_request_at');
             $table->index('data_retention_until');
             $table->index(['gdpr_compliant', 'has_pending_gdpr_requests']);
+            $table->index('preferred_currency');
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {

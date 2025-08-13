@@ -187,7 +187,13 @@ class RegisteredUserController extends Controller {
             // Determine specific error code based on exception message
             $errorCode = $this->determineErrorCode($e->getMessage());
 
-            return $this->errorManager->handle($errorCode, $errorContext, $e);
+            // Log the error using errorManager
+            $this->errorManager->handle($errorCode, $errorContext, $e);
+            
+            // Always return a RedirectResponse for registration errors
+            return redirect()->back()
+                ->withInput($request->except('password', 'password_confirmation'))
+                ->with('error', __('Registration failed. Please try again or contact support if the problem persists.'));
         }
     }
 

@@ -40,6 +40,10 @@ return new class extends Migration
         $table->string('status')->default('draft')->index();       // Stato: draft, pending_approval, published
         $table->string('created_via', 255)->nullable();                        // Metodo di creazione (es. web, api)
         $table->boolean('is_published')->default(false)->index();  // Booleano per indicare se è pubblicata
+        
+        // Featured carousel fields
+        $table->boolean('featured_in_guest')->default(false)->index()->comment('Indica se la Collection può essere inclusa nel carousel guest');
+        $table->tinyInteger('featured_position')->nullable()->index()->comment('Posizione forzata nel carousel guest (1-10), null = posizione automatica');
 
         // Dati associati agli EGI
         $table->integer('position')->nullable();                  // Posizione della collection

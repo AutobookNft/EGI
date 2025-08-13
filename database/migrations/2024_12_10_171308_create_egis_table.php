@@ -55,6 +55,7 @@ return new class extends Migration
 
             // Nuovi campi suggeriti
             $table->string('status', 20)->default('draft');
+            $table->boolean('hyper')->default(false)->comment('Indicates if this is a hyper EGI');
             $table->boolean('is_public')->default(true);
             $table->foreignId('updated_by')->nullable()->constrained('users');
 
