@@ -109,7 +109,7 @@ class PortfolioApiController extends Controller {
                         'collection_name' => $egi->collection?->collection_name,
                         'current_reservation' => $egi->reservations->first() ? [
                             'id' => $egi->reservations->first()->id,
-                            'offer_amount_eur' => $egi->reservations->first()->offer_amount_eur,
+                            'offer_amount_fiat ' => $egi->reservations->first()->offer_amount_fiat ,
                             'created_at' => $egi->reservations->first()->created_at->toIso8601String(),
                             'status' => 'winning'
                         ] : null
@@ -123,7 +123,7 @@ class PortfolioApiController extends Controller {
                             'title' => $reservation->egi->title,
                             'collection_name' => $reservation->egi->collection?->collection_name
                         ],
-                        'offer_amount_eur' => $reservation->offer_amount_eur,
+                        'offer_amount_fiat ' => $reservation->offer_amount_fiat ,
                         'status' => $reservation->is_current && !$reservation->superseded_by_id ? 'winning' : 'outbid',
                         'created_at' => $reservation->created_at->toIso8601String()
                     ];

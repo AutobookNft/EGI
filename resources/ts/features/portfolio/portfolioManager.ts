@@ -33,7 +33,7 @@ interface PortfolioStats {
 interface EgiReservationStatus {
     has_reservation: boolean;
     status: 'none' | 'winning' | 'outbid';
-    offer_amount_eur?: number;
+    offer_amount_fiat?: number;
     is_winning?: boolean;
     reservation_id?: number;
 }
@@ -508,7 +508,7 @@ export class PortfolioManager {
      * Set the offer amount in the reservation modal
      */
     private setModalOfferAmount(amount: number): void {
-        const offerInput = document.querySelector('#reservation-modal input[name="offer_amount_eur"]') as HTMLInputElement;
+        const offerInput = document.querySelector('#reservation-modal input[name="offer_amount_fiat"]') as HTMLInputElement;
         if (offerInput) {
             offerInput.value = amount.toString();
             offerInput.focus();

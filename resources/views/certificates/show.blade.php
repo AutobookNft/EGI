@@ -105,8 +105,8 @@
                                 </div>
 
                                 <div class="grid grid-cols-3 gap-4">
-                                    <dt class="text-sm font-medium text-gray-500">{{ __('certificate.details.offer_amount_eur') }}</dt>
-                                    <dd class="col-span-2 text-sm text-gray-900">€{{ number_format($certificate->offer_amount_eur, 2) }}</dd>
+                                    <dt class="text-sm font-medium text-gray-500">{{ __('certificate.details.offer_amount_fiat') }}</dt>
+                                    <dd class="col-span-2 text-sm text-gray-900">€{{ number_format($certificate->offer_amount_fiat, 2) }}</dd>
                                 </div>
 
                                 <div class="grid grid-cols-3 gap-4">

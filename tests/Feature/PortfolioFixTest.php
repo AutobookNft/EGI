@@ -49,13 +49,13 @@ class PortfolioFixTest extends TestCase {
         // Act - User fa prima prenotazione
         $firstReservation = $this->reservationService->createReservation([
             'egi_id' => $egi->id,
-            'offer_amount_eur' => 100.00
+            'offer_amount_fiat' => 100.00
         ], $user);
 
         // User fa seconda prenotazione stesso EGI
         $secondReservation = $this->reservationService->createReservation([
             'egi_id' => $egi->id,
-            'offer_amount_eur' => 150.00
+            'offer_amount_fiat' => 150.00
         ], $user);
 
         // Assert - Solo una prenotazione is_current=true
@@ -91,7 +91,7 @@ class PortfolioFixTest extends TestCase {
         // Act - User A prenota EGI
         $reservationA = $this->reservationService->createReservation([
             'egi_id' => $egi->id,
-            'offer_amount_eur' => 100.00
+            'offer_amount_fiat' => 100.00
         ], $userA);
 
         // Verifica che EGI appare nel portfolio User A
@@ -101,7 +101,7 @@ class PortfolioFixTest extends TestCase {
         // User B prenota con offerta maggiore
         $reservationB = $this->reservationService->createReservation([
             'egi_id' => $egi->id,
-            'offer_amount_eur' => 150.00
+            'offer_amount_fiat' => 150.00
         ], $userB);
 
         // Assert - EGI sparisce da portfolio User A
@@ -130,18 +130,18 @@ class PortfolioFixTest extends TestCase {
         // Act - User fa diverse prenotazioni
         $reservation1 = $this->reservationService->createReservation([
             'egi_id' => $egi1->id,
-            'offer_amount_eur' => 100.00
+            'offer_amount_fiat' => 100.00
         ], $user);
 
         $reservation2 = $this->reservationService->createReservation([
             'egi_id' => $egi2->id,
-            'offer_amount_eur' => 200.00
+            'offer_amount_fiat' => 200.00
         ], $user);
 
         // Other user supera una prenotazione
         $reservation3 = $this->reservationService->createReservation([
             'egi_id' => $egi1->id,
-            'offer_amount_eur' => 150.00
+            'offer_amount_fiat' => 150.00
         ], $otherUser);
 
         // Assert - Stats riflettono solo portfolio attivo
@@ -171,7 +171,7 @@ class PortfolioFixTest extends TestCase {
         // 1. User A prenota EGI → Appare nel portfolio
         $reservationA1 = $this->reservationService->createReservation([
             'egi_id' => $egi->id,
-            'offer_amount_eur' => 100.00
+            'offer_amount_fiat' => 100.00
         ], $userA);
 
         $portfolioA = $this->portfolioService->getCollectorActivePortfolio($userA);
@@ -180,7 +180,7 @@ class PortfolioFixTest extends TestCase {
         // 2. User B prenota con offerta maggiore → EGI sparisce da portfolio User A
         $reservationB = $this->reservationService->createReservation([
             'egi_id' => $egi->id,
-            'offer_amount_eur' => 150.00
+            'offer_amount_fiat' => 150.00
         ], $userB);
 
         $portfolioA = $this->portfolioService->getCollectorActivePortfolio($userA);
@@ -189,7 +189,7 @@ class PortfolioFixTest extends TestCase {
         // 3. User A fa controfferta maggiore → EGI riappare in portfolio User A
         $reservationA2 = $this->reservationService->createReservation([
             'egi_id' => $egi->id,
-            'offer_amount_eur' => 200.00
+            'offer_amount_fiat' => 200.00
         ], $userA);
 
         $portfolioA = $this->portfolioService->getCollectorActivePortfolio($userA);
@@ -236,7 +236,7 @@ class PortfolioFixTest extends TestCase {
         // Create winning reservation
         $reservation = $this->reservationService->createReservation([
             'egi_id' => $egi->id,
-            'offer_amount_eur' => 100.00
+            'offer_amount_fiat' => 100.00
         ], $user);
 
         $this->actingAs($user);

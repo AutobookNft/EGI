@@ -53,7 +53,7 @@ class HomeControllerFeaturedTest extends TestCase {
         Reservation::factory()->create([
             'egi_id' => $egi->id,
             'user_id' => $user->id,
-            'offer_amount_eur' => 2000,
+            'offer_amount_fiat' => 2000,
             'is_current' => true,
             'status' => 'active'
         ]);

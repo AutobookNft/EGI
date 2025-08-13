@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\DB;
  *
  * Business Logic:
  * - Collectors ranked by total spending (winning reservations in FIAT)
- * - Uses offer_amount_fiat instead of deprecated offer_amount_eur
+ * - Uses offer_amount_fiat instead of deprecated offer_amount_fiat
  * - Future evolution: Include completed purchases
  * - Top 10 collectors get homepage visibility
  * - Incentivizes higher spending for social recognition

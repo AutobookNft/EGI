@@ -128,7 +128,7 @@ echo "- Testing if required database tables/fields exist...\n";
 try {
     // This would need a database connection in a real test
     echo "  ℹ️  Skipping database checks (requires active DB connection)\n";
-    echo "     Required: reservations table (user_id, egi_id, status, offer_amount_eur)\n";
+    echo "     Required: reservations table (user_id, egi_id, status, offer_amount_fiat)\n";
     echo "     Required: egis table (owner_id, is_published)\n";
     echo "     Required: users table (standard fields)\n";
 } catch (Exception $e) {

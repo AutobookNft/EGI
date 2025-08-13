@@ -10,9 +10,9 @@ return new class extends Migration {
      */
     public function up(): void {
         Schema::table('reservations', function (Blueprint $table) {
-            // 1. Rimuovere il vecchio campo offer_amount_eur se esiste ancora
-            if (Schema::hasColumn('reservations', 'offer_amount_eur')) {
-                $table->dropColumn('offer_amount_eur');
+            // 1. Rimuovere il vecchio campo offer_amount_fiat se esiste ancora
+            if (Schema::hasColumn('reservations', 'offer_amount_fiat')) {
+                $table->dropColumn('offer_amount_fiat');
             }
 
             // 2. Aggiungere prima il campo fiat_currency
@@ -20,7 +20,7 @@ return new class extends Migration {
                 $table->string('fiat_currency', 3)->default('USD')->comment('Valuta FIAT per l\'offerta (ISO 4217)');
             }
 
-            // 3. Aggiungere offer_amount_fiat 
+            // 3. Aggiungere offer_amount_fiat
             if (!Schema::hasColumn('reservations', 'offer_amount_fiat')) {
                 $table->decimal('offer_amount_fiat', 10, 2)->comment('Prezzo in valuta FIAT');
             }
@@ -59,7 +59,7 @@ return new class extends Migration {
             $table->dropColumn(['offer_amount_fiat', 'fiat_currency', 'offer_amount_algo', 'exchange_rate', 'exchange_timestamp']);
 
             // Ripristinare il vecchio campo (opzionale, per sicurezza)
-            $table->decimal('offer_amount_eur', 10, 2)->nullable()->comment('Importo offerta in EUR (deprecato)');
+            $table->decimal('offer_amount_fiat', 10, 2)->nullable()->comment('Importo offerta in EUR (deprecato)');
         });
     }
 };

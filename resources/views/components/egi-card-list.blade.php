@@ -277,13 +277,13 @@ $showBadge = $showBadge ?? $showOwnershipBadge;
 
             // Se c'è una prenotazione attiva, usa il suo prezzo EUR
             if ($highestPriorityReservation && $highestPriorityReservation->status === 'active') {
-            $displayPriceEur = $highestPriorityReservation->offer_amount_eur;
+            $displayPriceEur = $highestPriorityReservation->offer_amount_fiat;
 
             \Log::info('🎯 EGI CARD LIST PRICE DEBUG', [
             'egi_id' => $egi->id,
             'base_price_eur' => $egi->price,
             'reservation_id' => $highestPriorityReservation->id,
-            'reservation_offer_eur' => $highestPriorityReservation->offer_amount_eur,
+            'reservation_offer_eur' => $highestPriorityReservation->offer_amount_fiat,
             'final_display_price_eur' => $displayPriceEur
             ]);
             }
@@ -322,11 +322,11 @@ $showBadge = $showBadge ?? $showOwnershipBadge;
 
             <!-- Purchase/Context Info -->
             @if ($config['show_purchase'] && $showPurchasePrice)
-            @if ($context === 'collector' && $egi->pivot && $egi->pivot->offer_amount_eur)
+            @if ($context === 'collector' && $egi->pivot && $egi->pivot->offer_amount_fiat)
             <div class="flex items-center gap-2 mt-1 text-sm">
                 <span class="text-gray-400">{{ __('collector.portfolio.purchased_for') }}</span>
                 <span class="font-bold {{ $isHyper ? 'text-yellow-400' : 'text-green-400' }}">€{{
-                    number_format($egi->pivot->offer_amount_eur, 2) }}</span>
+                    number_format($egi->pivot->offer_amount_fiat, 2) }}</span>
             </div>
             @elseif ($context === 'patron' && isset($egi->support_amount))
             <div class="flex items-center gap-2 mt-1 text-sm">

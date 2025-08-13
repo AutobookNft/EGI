@@ -81,200 +81,165 @@
             @php
             $user = App\Helpers\FegiAuth::user(); // User object or null
             @endphp
-            
+
             {{-- Container principale - adattivo per auth --}}
             <div class="@if($user) flex flex-col @else h-16 @endif md:h-20">
-                
+
                 {{-- Prima riga: sempre presente --}}
                 <div class="flex items-center justify-between h-16 md:h-20">
 
-                @php
-                $navLinkClasses =
-                'text-gray-300 hover:text-emerald-400 transition px-3 py-2 rounded-md text-sm font-medium
-                hover:bg-gray-800/40';
-                @endphp
+                    @php
+                    $navLinkClasses =
+                    'text-gray-300 hover:text-emerald-400 transition px-3 py-2 rounded-md text-sm font-medium
+                    hover:bg-gray-800/40';
+                    @endphp
 
 
-                {{-- Logo --}}
-                <div class="flex items-center flex-shrink-0">
-                    <a href="{{ url('/home') }}" class="flex items-center gap-2 group"
-                        aria-label="{{ __('collection.logo_home_link_aria_label') }}">
-                        <img src="{{ asset('images/logo/logo_1.webp') }}" alt="Frangette Logo"
-                            class="w-auto h-7 sm:h-8 md:h-9" loading="lazy" decoding="async">
-                        <span
-                            class="hidden text-base font-semibold text-gray-400 transition group-hover:text-emerald-400 sm:inline md:text-lg">{{
-                            __('Frangette') }}</span>
-                    </a>
-                </div>
+                    {{-- Logo --}}
+                    <div class="flex items-center flex-shrink-0">
+                        <a href="{{ url('/home') }}" class="flex items-center gap-2 group"
+                            aria-label="{{ __('collection.logo_home_link_aria_label') }}">
+                            <img src="{{ asset('images/logo/logo_1.webp') }}" alt="Frangette Logo"
+                                class="w-auto h-7 sm:h-8 md:h-9" loading="lazy" decoding="async">
+                            <span
+                                class="hidden text-base font-semibold text-gray-400 transition group-hover:text-emerald-400 sm:inline md:text-lg">{{
+                                __('Frangette') }}</span>
+                        </a>
+                    </div>
 
-                {{-- Natan Assistant - Posizionato vicino al logo --}}
-                <div class="hidden ml-6 md:block">
-                    <x-natan-assistant :suffix="'-desktop'" />
-                </div>
+                    {{-- Natan Assistant - Posizionato vicino al logo --}}
+                    <div class="hidden ml-6 md:block">
+                        <x-natan-assistant :suffix="'-desktop'" />
+                    </div>
 
-                <button type="button" id="open-butler-assistant"
-                    class="{{ $navLinkClasses }} items-center gap-1 hidden ml-6 md:flex"
-                    aria-label="{{ __('assistant.open_butler_aria') }}">
-                    <span class="material-symbols-outlined" aria-hidden="true"
-                        style="font-size: 1.1em;">support_agent</span>
-                    <span>{{ __('assistant.open_butler') }}</span>
-                </button>
+                    <button type="button" id="open-butler-assistant"
+                        class="{{ $navLinkClasses }} items-center gap-1 hidden ml-6 md:flex"
+                        aria-label="{{ __('assistant.open_butler_aria') }}">
+                        <span class="material-symbols-outlined" aria-hidden="true"
+                            style="font-size: 1.1em;">support_agent</span>
+                        <span>{{ __('assistant.open_butler') }}</span>
+                    </button>
 
-                {{-- Welcome Message Desktop - Solo per utenti autenticati - Dopo Assistenza --}}
-                @if ($user)
-                <div class="hidden md:flex items-center ml-4">
-                    <span class="text-sm text-emerald-400 font-medium">{{ App\Helpers\FegiAuth::getWelcomeMessage() }}</span>
-                </div>
-                @endif
+                    {{-- Welcome Message Desktop - Solo per utenti autenticati - Dopo Assistenza --}}
+                    @if ($user)
+                    <div class="hidden md:flex items-center ml-4">
+                        <span class="text-sm text-emerald-400 font-medium">{{ App\Helpers\FegiAuth::getWelcomeMessage()
+                            }}</span>
+                    </div>
+                    @endif
 
-                {{-- Professional Currency Badge (Desktop) --}}
-                <div id="currency-badge-container-desktop" class="hidden md:flex items-center ml-3">
-                    <div class="relative group">
-                        {{-- Desktop Badge --}}
-                        <div id="currency-badge-desktop"
-                            class="inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-slate-800/90 to-slate-700/90 backdrop-blur-sm border border-slate-600/50 rounded-lg shadow-lg hover:shadow-slate-900/30 transition-all duration-300 cursor-pointer"
-                            title="Live Exchange Rate">
-                            
-                            {{-- Status Dot --}}
-                            <div class="relative mr-2">
-                                <span class="w-1.5 h-1.5 bg-green-400 rounded-full block animate-pulse"></span>
-                                <span class="absolute inset-0 w-1.5 h-1.5 bg-green-400 rounded-full animate-ping opacity-60"></span>
+                    {{-- Professional Currency Badge (Desktop) --}}
+                    <div id="currency-badge-container-desktop" class="hidden md:flex items-center ml-3">
+                        <div class="relative group">
+                            {{-- Desktop Badge --}}
+                            <div id="currency-badge-desktop"
+                                class="inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-slate-800/90 to-slate-700/90 backdrop-blur-sm border border-slate-600/50 rounded-lg shadow-lg hover:shadow-slate-900/30 transition-all duration-300 cursor-pointer"
+                                title="Live Exchange Rate">
+
+                                {{-- Status Dot --}}
+                                <div class="relative mr-2">
+                                    <span class="w-1.5 h-1.5 bg-green-400 rounded-full block animate-pulse"></span>
+                                    <span
+                                        class="absolute inset-0 w-1.5 h-1.5 bg-green-400 rounded-full animate-ping opacity-60"></span>
+                                </div>
+
+                                {{-- Currency Display --}}
+                                <div class="flex items-center space-x-2">
+                                    <span id="currency-symbol" class="text-sm font-bold text-white">
+                                        {{ auth()->check() ? (auth()->user()->preferred_currency ?? 'USD') : 'USD' }}
+                                    </span>
+                                    <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                                    </svg>
+                                    <span class="text-sm font-bold text-emerald-400">ALGO</span>
+                                </div>
+
+                                {{-- Rate Display --}}
+                                <div class="ml-3 flex items-center">
+                                    <span id="currency-rate-value"
+                                        class="text-sm font-mono font-medium text-white">--</span>
+                                </div>
                             </div>
 
-                            {{-- Currency Display --}}
-                            <div class="flex items-center space-x-2">
-                                <span id="currency-symbol" class="text-sm font-bold text-white">
-                                    {{ auth()->check() ? (auth()->user()->preferred_currency ?? 'USD') : 'USD' }}
-                                </span>
-                                <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-                                </svg>
-                                <span class="text-sm font-bold text-emerald-400">ALGO</span>
-                            </div>
-
-                            {{-- Rate Display --}}
-                            <div class="ml-3 flex items-center">
-                                <span id="currency-rate-value" class="text-sm font-mono font-medium text-white">--</span>
-                            </div>
-                        </div>
-
-                        {{-- Desktop Tooltip --}}
-                        <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-80 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
-                            <div class="bg-slate-900/95 backdrop-blur-xl border border-slate-700/50 rounded-xl shadow-2xl overflow-hidden">
-                                {{-- Header --}}
-                                <div class="bg-gradient-to-r from-emerald-600/20 to-blue-600/20 p-4 border-b border-slate-700/50">
-                                    <div class="flex items-center justify-between">
-                                        <div>
-                                            <h3 class="text-sm font-semibold text-white">Multi-Currency Exchange</h3>
-                                            <p class="text-xs text-slate-400 mt-1">"Think FIAT, Operate ALGO"</p>
+                            {{-- Desktop Tooltip --}}
+                            <div
+                                class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-80 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
+                                <div
+                                    class="bg-slate-900/95 backdrop-blur-xl border border-slate-700/50 rounded-xl shadow-2xl overflow-hidden">
+                                    {{-- Header --}}
+                                    <div
+                                        class="bg-gradient-to-r from-emerald-600/20 to-blue-600/20 p-4 border-b border-slate-700/50">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <h3 class="text-sm font-semibold text-white">Multi-Currency Exchange
+                                                </h3>
+                                                <p class="text-xs text-slate-400 mt-1">"Think FIAT, Operate ALGO"</p>
+                                            </div>
+                                            <div class="text-right">
+                                                <div class="text-xs text-emerald-400 font-medium">LIVE</div>
+                                                <div id="currency-last-updated" class="text-xs text-slate-500 mt-0.5">--
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="text-right">
-                                            <div class="text-xs text-emerald-400 font-medium">LIVE</div>
-                                            <div id="currency-last-updated" class="text-xs text-slate-500 mt-0.5">--</div>
+                                    </div>
+
+                                    {{-- Content --}}
+                                    <div class="p-4">
+                                        <div class="grid grid-cols-2 gap-3 text-xs">
+                                            <div>
+                                                <span class="text-slate-400">Update:</span>
+                                                <span class="text-white ml-1">30s</span>
+                                            </div>
+                                            <div>
+                                                <span class="text-slate-400">Source:</span>
+                                                <span class="text-emerald-400 ml-1">CoinGecko</span>
+                                            </div>
+                                            <div>
+                                                <span class="text-slate-400">Precision:</span>
+                                                <span class="text-white ml-1">6 decimals</span>
+                                            </div>
+                                            <div>
+                                                <span class="text-slate-400">Status:</span>
+                                                <span class="text-green-400 ml-1 flex items-center">
+                                                    <span class="w-1.5 h-1.5 bg-green-400 rounded-full mr-1"></span>
+                                                    Active
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                                
-                                {{-- Content --}}
-                                <div class="p-4">
-                                    <div class="grid grid-cols-2 gap-3 text-xs">
-                                        <div>
-                                            <span class="text-slate-400">Update:</span>
-                                            <span class="text-white ml-1">30s</span>
-                                        </div>
-                                        <div>
-                                            <span class="text-slate-400">Source:</span>
-                                            <span class="text-emerald-400 ml-1">CoinGecko</span>
-                                        </div>
-                                        <div>
-                                            <span class="text-slate-400">Precision:</span>
-                                            <span class="text-white ml-1">6 decimals</span>
-                                        </div>
-                                        <div>
-                                            <span class="text-slate-400">Status:</span>
-                                            <span class="text-green-400 ml-1 flex items-center">
-                                                <span class="w-1.5 h-1.5 bg-green-400 rounded-full mr-1"></span>
-                                                Active
-                                            </span>
-                                        </div>
-                                    </div>
+
+                                {{-- Tooltip Arrow --}}
+                                <div
+                                    class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-slate-900/95">
                                 </div>
                             </div>
-                            
-                            {{-- Tooltip Arrow --}}
-                            <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-slate-900/95"></div>
                         </div>
                     </div>
-                </div>
 
-                {{-- Professional Currency Badge (Always Visible - Mobile First) --}}
-                
-                @php
-                $authType = App\Helpers\FegiAuth::getAuthType(); // 'strong', 'weak', 'guest'
-                $canCreateEgi = $user && $user->can('create_egi');
-                @endphp
+                    {{-- Professional Currency Badge (Always Visible - Mobile First) --}}
 
-                {{-- Nav Desktop --}}
-                <nav class="items-center hidden space-x-1 md:flex" role="navigation"
-                    aria-label="{{ __('collection.main_navigation_aria_label') }}">
-                    @include('partials.nav-links', ['isMobile' => false])
+                    @php
+                    $authType = App\Helpers\FegiAuth::getAuthType(); // 'strong', 'weak', 'guest'
+                    $canCreateEgi = $user && $user->can('create_egi');
+                    @endphp
 
-                    {{-- Dropdown My Galleries --}}
-                    @can('create_collection')
-                    <div id="collection-list-dropdown-container" class="relative hidden">
-                        <button id="collection-list-dropdown-button" type="button"
-                            class="{{ $navLinkClasses }} inline-flex items-center" aria-expanded="false"
-                            aria-haspopup="true">
-                            <span class="mr-1 text-base material-symbols-outlined"
-                                aria-hidden="true">view_carousel</span>
-                            <span id="collection-list-button-text">{{ __('collection.my_galleries') }}</span>
-                            <svg class="w-4 h-4 ml-1 -mr-1" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                                <path fill-rule="evenodd"
-                                    d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
-                                    clip-rule="evenodd" />
-                            </svg>
-                        </button>
-                        <div id="collection-list-dropdown-menu"
-                            class="absolute right-0 z-20 mt-2 hidden max-h-[60vh] w-72 origin-top-right overflow-y-auto rounded-md border border-gray-800 bg-gray-900 py-1 shadow-xl ring-1 ring-gray-700 backdrop-blur-sm focus:outline-none">
-                            <div id="collection-list-loading" class="px-4 py-3 text-sm text-center text-gray-400">
-                                {{ __('collection.loading_galleries') }}</div>
-                            <div id="collection-list-empty" class="hidden px-4 py-3 text-sm text-center text-gray-400">
-                                {{ __('collection.no_galleries_found') }} <a href="{{ route('collections.create') }}"
-                                    class="underline hover:text-emerald-400">{{ __('collection.create_one_question')
-                                    }}</a>
-                            </div>
-                            <div id="collection-list-error" class="hidden px-4 py-3 text-sm text-center text-red-400">
-                                {{ __('collection.error_loading_galleries') }}</div>
-                        </div>
-                    </div>
-                    @endcan
+                    {{-- Nav Desktop --}}
+                    <nav class="items-center hidden space-x-1 md:flex" role="navigation"
+                        aria-label="{{ __('collection.main_navigation_aria_label') }}">
+                        @include('partials.nav-links', ['isMobile' => false])
 
-                    {{-- Create EGI Button - Solo per utenti con permesso --}}
-
-                    {{-- Wallet e Auth --}}
-                    <span class="h-6 mx-2 border-l border-gray-700" aria-hidden="true"></span>
-
-                    <div id="wallet-cta-container" class="ml-2">
-                        <button id="connect-wallet-button" type="button"
-                            class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-                            <svg class="w-5 h-5 mr-2 -ml-1" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                stroke="currentColor" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M21 12a2.25 2.25 0 0 0-2.25-2.25H15a3 3 0 1 1-6 0H5.25A2.25 2.25 0 0 0 3 12m18 0v6a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 18v-6m18 0V9M3 12V9m18 3a2.25 2.25 0 0 0-2.25-2.25H15a3 3 0 1 0-6 0H5.25A2.25 2.25 0 0 0 3 12m15-3a3 3 0 0 0-3-3H6a3 3 0 0 0-3 3m12 6v2.25a2.25 2.25 0 0 1-2.25 2.25H9a2.25 2.25 0 0 1-2.25-2.25V15m3 0a3 3 0 0 0-3-3H6a3 3 0 0 0-3 3m9 0a3 3 0 0 0 3-3h1.5a3 3 0 0 0 3 3" />
-                            </svg>
-                            {{ __('collection.wallet.button_wallet_connect') }}
-                        </button>
-                        <div id="wallet-dropdown-container" class="relative hidden">
-                            <button id="wallet-dropdown-button" type="button"
-                                class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-                                aria-expanded="false" aria-haspopup="true">
-                                <svg class="w-5 h-5 mr-2 -ml-1" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                    stroke="currentColor" aria-hidden="true">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M21 12a2.25 2.25 0 0 0-2.25-2.25H15a3 3 0 1 1-6 0H5.25A2.25 2.25 0 0 0 3 12m18 0v6a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 18v-6m18 0V9M3 12V9m18 3a2.25 2.25 0 0 0-2.25-2.25H15a3 3 0 1 0-6 0H5.25A2.25 2.25 0 0 0 3 12m15-3a3 3 0 0 0-3-3H6a3 3 0 0 0-3 3m12 6v2.25a2.25 2.25 0 0 1-2.25 2.25H9a2.25 2.25 0 0 1-2.25-2.25V15m3 0a3 3 0 0 0-3-3H6a3 3 0 0 0-3 3m9 0a3 3 0 0 0 3-3h1.5a3 3 0 0 0 3 3" />
-                                </svg>
-                                <span id="wallet-display-text" class="hidden sm:inline">{{
-                                    __('collection.wallet.wallet') }}</span>
+                        {{-- Dropdown My Galleries --}}
+                        @can('create_collection')
+                        <div id="collection-list-dropdown-container" class="relative hidden">
+                            <button id="collection-list-dropdown-button" type="button"
+                                class="{{ $navLinkClasses }} inline-flex items-center" aria-expanded="false"
+                                aria-haspopup="true">
+                                <span class="mr-1 text-base material-symbols-outlined"
+                                    aria-hidden="true">view_carousel</span>
+                                <span id="collection-list-button-text">{{ __('collection.my_galleries') }}</span>
                                 <svg class="w-4 h-4 ml-1 -mr-1" fill="currentColor" viewBox="0 0 20 20"
                                     aria-hidden="true">
                                     <path fill-rule="evenodd"
@@ -282,130 +247,186 @@
                                         clip-rule="evenodd" />
                                 </svg>
                             </button>
-                            <div id="wallet-dropdown-menu"
-                                class="absolute right-0 z-20 hidden w-56 py-1 mt-2 origin-top-right bg-gray-900 border border-gray-800 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 backdrop-blur-sm focus:outline-none">
-                                <a href="{{ route('dashboard') }}" id="wallet-dashboard-link"
-                                    class="flex items-center w-full px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white">
-                                    <span class="w-5 h-5 mr-2 text-gray-400 material-symbols-outlined"
-                                        aria-hidden="true">dashboard</span>
-                                    {{ __('collection.dashboard') }}
-                                </a>
-                                <button id="wallet-copy-address"
-                                    class="flex items-center w-full px-4 py-2 text-sm text-left text-gray-300 hover:bg-gray-800 hover:text-white">
-                                    <span class="w-5 h-5 mr-2 text-gray-400 material-symbols-outlined"
-                                        aria-hidden="true">content_copy</span>
-                                    {{ __('collection.wallet.copy_address') }}
-                                </button>
-                                <button id="wallet-disconnect"
-                                    class="flex items-center w-full px-4 py-2 text-sm text-left text-gray-300 hover:bg-gray-800 hover:text-white">
-                                    <span class="w-5 h-5 mr-2 text-gray-400 material-symbols-outlined"
-                                        aria-hidden="true">logout</span>
-                                    {{ __('collection.wallet.button_wallet_disconnect') }}
-                                </button>
+                            <div id="collection-list-dropdown-menu"
+                                class="absolute right-0 z-20 mt-2 hidden max-h-[60vh] w-72 origin-top-right overflow-y-auto rounded-md border border-gray-800 bg-gray-900 py-1 shadow-xl ring-1 ring-gray-700 backdrop-blur-sm focus:outline-none">
+                                <div id="collection-list-loading" class="px-4 py-3 text-sm text-center text-gray-400">
+                                    {{ __('collection.loading_galleries') }}</div>
+                                <div id="collection-list-empty"
+                                    class="hidden px-4 py-3 text-sm text-center text-gray-400">
+                                    {{ __('collection.no_galleries_found') }} <a
+                                        href="{{ route('collections.create') }}"
+                                        class="underline hover:text-emerald-400">{{ __('collection.create_one_question')
+                                        }}</a>
+                                </div>
+                                <div id="collection-list-error"
+                                    class="hidden px-4 py-3 text-sm text-center text-red-400">
+                                    {{ __('collection.error_loading_galleries') }}</div>
                             </div>
                         </div>
-                    </div>
-                    <a href="{{ route('login') }}" id="login-link-desktop" class="{{ $navLinkClasses }}">{{
-                        __('collection.login') }}</a>
-                    <a href="{{ route('register') }}" id="register-link-desktop"
-                        class="inline-flex items-center px-4 py-2 ml-2 text-sm font-medium text-gray-300 bg-gray-800 border border-gray-700 rounded-md hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">{{
-                        __('collection.register') }}</a>
-                </nav>
+                        @endcan
 
-                {{-- Menu Mobile Button --}}
-                <div class="flex items-center gap-2 -mr-2 md:hidden">
+                        {{-- Create EGI Button - Solo per utenti con permesso --}}
 
-                    {{-- Professional Currency Badge (Mobile Always Visible) --}}
-                    <div id="currency-badge-container" class="flex items-center">
-                        <div class="relative group">
-                            {{-- Compact Mobile Badge --}}
-                            <div id="currency-badge"
-                                class="inline-flex items-center px-1.5 py-1 bg-gradient-to-r from-slate-800/90 to-slate-700/90 backdrop-blur-sm border border-slate-600/50 rounded-md shadow-lg transition-all duration-300 cursor-pointer"
-                                title="Live Exchange Rate">
-                                
-                                {{-- Status Dot --}}
-                                <div class="relative mr-1">
-                                    <span class="w-1 h-1 bg-green-400 rounded-full block animate-pulse"></span>
-                                </div>
+                        {{-- Wallet e Auth --}}
+                        <span class="h-6 mx-2 border-l border-gray-700" aria-hidden="true"></span>
 
-                                {{-- Currency Display --}}
-                                <div class="flex items-center space-x-1">
-                                    <span id="currency-symbol-mobile" class="text-xs font-bold text-white">USD</span>
-                                    <svg class="w-2.5 h-2.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                        <div id="wallet-cta-container" class="ml-2">
+                            <button id="connect-wallet-button" type="button"
+                                class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                <svg class="w-5 h-5 mr-2 -ml-1" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                    stroke="currentColor" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M21 12a2.25 2.25 0 0 0-2.25-2.25H15a3 3 0 1 1-6 0H5.25A2.25 2.25 0 0 0 3 12m18 0v6a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 18v-6m18 0V9M3 12V9m18 3a2.25 2.25 0 0 0-2.25-2.25H15a3 3 0 1 0-6 0H5.25A2.25 2.25 0 0 0 3 12m15-3a3 3 0 0 0-3-3H6a3 3 0 0 0-3 3m12 6v2.25a2.25 2.25 0 0 1-2.25 2.25H9a2.25 2.25 0 0 1-2.25-2.25V15m3 0a3 3 0 0 0-3-3H6a3 3 0 0 0-3 3m9 0a3 3 0 0 0 3-3h1.5a3 3 0 0 0 3 3" />
+                                </svg>
+                                {{ __('collection.wallet.button_wallet_connect') }}
+                            </button>
+                            <div id="wallet-dropdown-container" class="relative hidden">
+                                <button id="wallet-dropdown-button" type="button"
+                                    class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                                    aria-expanded="false" aria-haspopup="true">
+                                    <svg class="w-5 h-5 mr-2 -ml-1" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                        stroke="currentColor" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M21 12a2.25 2.25 0 0 0-2.25-2.25H15a3 3 0 1 1-6 0H5.25A2.25 2.25 0 0 0 3 12m18 0v6a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 18v-6m18 0V9M3 12V9m18 3a2.25 2.25 0 0 0-2.25-2.25H15a3 3 0 1 0-6 0H5.25A2.25 2.25 0 0 0 3 12m15-3a3 3 0 0 0-3-3H6a3 3 0 0 0-3 3m12 6v2.25a2.25 2.25 0 0 1-2.25 2.25H9a2.25 2.25 0 0 1-2.25-2.25V15m3 0a3 3 0 0 0-3-3H6a3 3 0 0 0-3 3m9 0a3 3 0 0 0 3-3h1.5a3 3 0 0 0 3 3" />
                                     </svg>
-                                    <span class="text-xs font-bold text-emerald-400">ALGO</span>
-                                </div>
-
-                                {{-- Rate Display --}}
-                                <div class="ml-1 flex items-center">
-                                    <span id="currency-rate-value-mobile" class="text-xs font-mono font-medium text-white">--</span>
+                                    <span id="wallet-display-text" class="hidden sm:inline">{{
+                                        __('collection.wallet.wallet') }}</span>
+                                    <svg class="w-4 h-4 ml-1 -mr-1" fill="currentColor" viewBox="0 0 20 20"
+                                        aria-hidden="true">
+                                        <path fill-rule="evenodd"
+                                            d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                </button>
+                                <div id="wallet-dropdown-menu"
+                                    class="absolute right-0 z-20 hidden w-56 py-1 mt-2 origin-top-right bg-gray-900 border border-gray-800 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 backdrop-blur-sm focus:outline-none">
+                                    <a href="{{ route('dashboard') }}" id="wallet-dashboard-link"
+                                        class="flex items-center w-full px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white">
+                                        <span class="w-5 h-5 mr-2 text-gray-400 material-symbols-outlined"
+                                            aria-hidden="true">dashboard</span>
+                                        {{ __('collection.dashboard') }}
+                                    </a>
+                                    <button id="wallet-copy-address"
+                                        class="flex items-center w-full px-4 py-2 text-sm text-left text-gray-300 hover:bg-gray-800 hover:text-white">
+                                        <span class="w-5 h-5 mr-2 text-gray-400 material-symbols-outlined"
+                                            aria-hidden="true">content_copy</span>
+                                        {{ __('collection.wallet.copy_address') }}
+                                    </button>
+                                    <button id="wallet-disconnect"
+                                        class="flex items-center w-full px-4 py-2 text-sm text-left text-gray-300 hover:bg-gray-800 hover:text-white">
+                                        <span class="w-5 h-5 mr-2 text-gray-400 material-symbols-outlined"
+                                            aria-hidden="true">logout</span>
+                                        {{ __('collection.wallet.button_wallet_disconnect') }}
+                                    </button>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                        <a href="{{ route('login') }}" id="login-link-desktop" class="{{ $navLinkClasses }}">{{
+                            __('collection.login') }}</a>
+                        <a href="{{ route('register') }}" id="register-link-desktop"
+                            class="inline-flex items-center px-4 py-2 ml-2 text-sm font-medium text-gray-300 bg-gray-800 border border-gray-700 rounded-md hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">{{
+                            __('collection.register') }}</a>
+                    </nav>
 
                     {{-- Menu Mobile Button --}}
-                    
-                    {{-- Bottone Accedi (Solo per guest su mobile) --}}
-                    @guest
-                    <div class="block md:hidden">
-                        <a href="{{ route('login') }}" 
-                           class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-300 bg-gray-800 border border-gray-700 rounded-md hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
-                            {{ __('collection.login') }}
-                        </a>
-                    </div>
-                    @endguest
-                    
-                    {{-- Natan Assistant Mobile --}}
-                    <div class="block md:hidden">
-                        <x-natan-assistant :suffix="'-mobile'" />
-                    </div>
+                    <div class="flex items-center gap-2 -mr-2 md:hidden">
 
-                    {{-- Butler Assistant Menu su mobile non lo mostro --}}
-                    {{-- <button type="button" id="open-butler-assistant"
-                        class="{{ $navLinkClasses }} flex items-center gap-1"
-                        aria-label="{{ __('assistant.open_butler_aria') }}">
-                        <span class="material-symbols-outlined" aria-hidden="true"
-                            style="font-size: 1.1em;">support_agent</span>
-                        <span>{{ __('assistant.open_butler') }}</span>
-                    </button> --}}
+                        {{-- Professional Currency Badge (Mobile Always Visible) --}}
+                        <div id="currency-badge-container" class="flex items-center">
+                            <div class="relative group">
+                                {{-- Compact Mobile Badge --}}
+                                <div id="currency-badge"
+                                    class="inline-flex items-center px-1.5 py-1 bg-gradient-to-r from-slate-800/90 to-slate-700/90 backdrop-blur-sm border border-slate-600/50 rounded-md shadow-lg transition-all duration-300 cursor-pointer"
+                                    title="Live Exchange Rate">
 
-                    <button type="button"
-                        class="inline-flex items-center justify-center p-2 text-gray-400 bg-gray-900 rounded-md hover:bg-gray-800 hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
-                        aria-controls="mobile-menu" aria-expanded="false" id="mobile-menu-button">
-                        <span class="sr-only">{{ __('collection.open_main_menu') }}</span>
-                        <svg class="block w-6 h-6" id="hamburger-icon" aria-hidden="true"
-                            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-                        </svg>
-                        <svg class="hidden w-6 h-6" id="close-icon" aria-hidden="true"
-                            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
-                {{-- Fine Prima Riga --}}
+                                    {{-- Status Dot --}}
+                                    <div class="relative mr-1">
+                                        <span class="w-1 h-1 bg-green-400 rounded-full block animate-pulse"></span>
+                                    </div>
+
+                                    {{-- Currency Display --}}
+                                    <div class="flex items-center space-x-1">
+                                        <span id="currency-symbol-mobile"
+                                            class="text-xs font-bold text-white">USD</span>
+                                        <svg class="w-2.5 h-2.5 text-slate-400" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                                        </svg>
+                                        <span class="text-xs font-bold text-emerald-400">ALGO</span>
+                                    </div>
+
+                                    {{-- Rate Display --}}
+                                    <div class="ml-1 flex items-center">
+                                        <span id="currency-rate-value-mobile"
+                                            class="text-xs font-mono font-medium text-white">--</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Menu Mobile Button --}}
+
+                        {{-- Bottone Accedi (Solo per guest su mobile) --}}
+                        @guest
+                        <div class="block md:hidden">
+                            <a href="{{ route('login') }}"
+                                class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-300 bg-gray-800 border border-gray-700 rounded-md hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                                {{ __('collection.login') }}
+                            </a>
+                        </div>
+                        @endguest
+
+                        {{-- Natan Assistant Mobile --}}
+                        <div class="block md:hidden">
+                            <x-natan-assistant :suffix="'-mobile'" />
+                        </div>
+
+                        {{-- Butler Assistant Menu su mobile non lo mostro --}}
+                        {{-- <button type="button" id="open-butler-assistant"
+                            class="{{ $navLinkClasses }} flex items-center gap-1"
+                            aria-label="{{ __('assistant.open_butler_aria') }}">
+                            <span class="material-symbols-outlined" aria-hidden="true"
+                                style="font-size: 1.1em;">support_agent</span>
+                            <span>{{ __('assistant.open_butler') }}</span>
+                        </button> --}}
+
+                        <button type="button"
+                            class="inline-flex items-center justify-center p-2 text-gray-400 bg-gray-900 rounded-md hover:bg-gray-800 hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
+                            aria-controls="mobile-menu" aria-expanded="false" id="mobile-menu-button">
+                            <span class="sr-only">{{ __('collection.open_main_menu') }}</span>
+                            <svg class="block w-6 h-6" id="hamburger-icon" aria-hidden="true"
+                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                            </svg>
+                            <svg class="hidden w-6 h-6" id="close-icon" aria-hidden="true"
+                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                    {{-- Fine Prima Riga --}}
                 </div>
 
                 {{-- Seconda Riga: Solo per utenti autenticati (Mobile) --}}
                 @if ($user)
-                <div class="flex items-center justify-between py-2 px-4 bg-gray-800/30 border-t border-gray-700/50 md:hidden">
+                <div
+                    class="flex items-center justify-between py-2 px-4 bg-gray-800/30 border-t border-gray-700/50 md:hidden">
                     {{-- Welcome Message --}}
                     <div class="flex-1">
                         <span class="text-xs font-medium text-emerald-500">
                             @php
-                                $welcomeMessage = App\Helpers\FegiAuth::getWelcomeMessage();
-                                // Rimuovi "Benvenuto/a," dalla versione mobile
-                                $mobileMessage = preg_replace('/^Benvenuto\/a,?\s*/i', '', $welcomeMessage);
+                            $welcomeMessage = App\Helpers\FegiAuth::getWelcomeMessage();
+                            // Rimuovi "Benvenuto/a," dalla versione mobile
+                            $mobileMessage = preg_replace('/^Benvenuto\/a,?\s*/i', '', $welcomeMessage);
                             @endphp
                             {{ $mobileMessage }}
                         </span>
                     </div>
-                    
+
                     {{-- Collection Badge (spostato qui dalla prima riga) --}}
                     <div id="current-collection-badge-container" class="items-center hidden ml-2">
                         <a href="#" id="current-collection-badge-link"
@@ -529,9 +550,9 @@
             try {
                 // Mixed Security Architecture: try authenticated endpoint first, fallback to public
                 const isAuthenticated = {{ auth()->check() ? 'true' : 'false' }};
-                
+
                 let endpoint, response;
-                
+
                 if (isAuthenticated) {
                     // Try protected endpoint for authenticated users
                     response = await fetch('/api/currency/user-rate', {
@@ -560,7 +581,7 @@
                             }
                         });
                     }
-                    
+
                     if (!response.ok) throw new Error('Network response was not ok');
                 }
 
@@ -571,7 +592,7 @@
                     const currency = data.data?.currency || data.data?.fiat_currency || 'USD';
                     const rate = data.data?.rate || data.data?.rate_to_algo || 0;
                     const timestamp = data.data?.timestamp || new Date().toISOString();
-                    
+
                     this.updateBadge(currency, rate, timestamp);
                 } else {
                     this.showError();
@@ -622,14 +643,14 @@
             }
 
             this.currentCurrency = currency;
-            
+
             // Add success flash animation
             this.flashSuccess();
         }
 
         formatRate(rate) {
             if (rate === 0 || !rate) return '--';
-            
+
             // Professional number formatting with appropriate decimals
             if (rate >= 1) {
                 return rate.toFixed(4);
@@ -646,11 +667,11 @@
                 const now = new Date();
                 const diffMs = now - date;
                 const diffSecs = Math.floor(diffMs / 1000);
-                
+
                 if (diffSecs < 30) return 'Just now';
                 if (diffSecs < 60) return `${diffSecs}s ago`;
                 if (diffSecs < 3600) return `${Math.floor(diffSecs / 60)}m ago`;
-                
+
                 return date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
             } catch (e) {
                 return 'Updated';
@@ -661,7 +682,7 @@
             // Professional fade-in animation for value changes
             element.style.opacity = '0.5';
             element.style.transform = 'scale(0.95)';
-            
+
             setTimeout(() => {
                 element.textContent = newValue;
                 element.style.opacity = '1';
@@ -685,12 +706,12 @@
         showError() {
             // Professional error state with visual feedback
             const badge = document.getElementById('currency-badge');
-            
+
             // Desktop elements
             if (this.elements.rateValue) {
                 this.animateValueChange(this.elements.rateValue, 'ERROR');
             }
-            
+
             if (this.elements.lastUpdated) {
                 this.elements.lastUpdated.textContent = 'Connection failed';
             }
@@ -699,7 +720,7 @@
             if (this.elements.rateValueMobile) {
                 this.animateValueChange(this.elements.rateValueMobile, 'ERROR');
             }
-            
+
             if (this.elements.lastUpdatedMobile) {
                 this.elements.lastUpdatedMobile.textContent = 'Connection failed';
             }
@@ -708,7 +729,7 @@
             if (badge) {
                 badge.style.boxShadow = '0 20px 25px -5px rgba(239, 68, 68, 0.3), 0 10px 10px -5px rgba(239, 68, 68, 0.2)';
                 badge.style.borderColor = 'rgba(239, 68, 68, 0.5)';
-                
+
                 setTimeout(() => {
                     badge.style.boxShadow = '';
                     badge.style.borderColor = '';

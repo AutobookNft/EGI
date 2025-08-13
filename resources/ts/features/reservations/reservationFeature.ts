@@ -128,7 +128,7 @@ async function handleReservationButtonClick(e: Event, egiId: number): Promise<vo
                                 <p><strong>${appTranslate('reservation.already_reserved.details')}</strong></p>
                                 <ul class="mt-2 text-sm">
                                     <li><strong>${appTranslate('reservation.already_reserved.type')}:</strong> ${appTranslate(`reservation.type.${user_reservation.type}`)}</li>
-                                    <li><strong>${appTranslate('reservation.already_reserved.amount')}:</strong> €${user_reservation.offer_amount_eur.toFixed(2)}</li>
+                                    <li><strong>${appTranslate('reservation.already_reserved.amount')}:</strong> €${user_reservation.offer_amount_fiat.toFixed(2)}</li>
                                     <li><strong>${appTranslate('reservation.already_reserved.status')}:</strong> ${user_reservation.is_highest_priority
                                         ? appTranslate('reservation.priority.highest')
                                         : appTranslate('reservation.priority.superseded')}</li>

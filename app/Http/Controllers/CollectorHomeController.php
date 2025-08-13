@@ -109,7 +109,7 @@ class CollectorHomeController extends Controller {
                 $q->withCount('validReservations')->orderBy('valid_reservations_count', 'desc');
             })
             ->when($sort === 'most_spent', function ($q) {
-                $q->withSum('validReservations as total_spent', 'offer_amount_eur')
+                $q->withSum('validReservations as total_spent', 'offer_amount_fiat')
                     ->orderBy('total_spent', 'desc');
             })
             ->when($sort === 'latest', function ($q) {
@@ -167,12 +167,12 @@ class CollectorHomeController extends Controller {
                 break;
             case 'price_high':
                 $filteredEgis = $filteredEgis->sortByDesc(function ($egi) {
-                    return $egi->reservations->first()?->offer_amount_eur ?? 0;
+                    return $egi->reservations->first()?->offer_amount_fiat ?? 0;
                 });
                 break;
             case 'price_low':
                 $filteredEgis = $filteredEgis->sortBy(function ($egi) {
-                    return $egi->reservations->first()?->offer_amount_eur ?? 0;
+                    return $egi->reservations->first()?->offer_amount_fiat ?? 0;
                 });
                 break;
             case 'latest':

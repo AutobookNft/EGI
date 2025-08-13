@@ -19,7 +19,7 @@ return new class extends Migration
             // Reservation details
             $table->enum('type', ['weak', 'strong'])->default('weak');
             $table->enum('status', ['active', 'expired', 'completed', 'cancelled'])->default('active');
-            $table->decimal('offer_amount_eur', 10, 2)->nullable();
+            $table->decimal('offer_amount_fiat', 10, 2)->nullable();
             $table->decimal('offer_amount_algo', 18, 8)->nullable();
             $table->timestamp('expires_at')->nullable();
 

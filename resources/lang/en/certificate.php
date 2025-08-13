@@ -25,7 +25,7 @@ return [
         'collection' => 'Collection',
         'reservation_type' => 'Reservation Type',
         'wallet_address' => 'Wallet Address',
-        'offer_amount_eur' => 'Offer Amount (EUR)',
+        'offer_amount_fiat' => 'Offer Amount (EUR)',
         'offer_amount_algo' => 'Offer Amount (ALGO)',
         'certificate_uuid' => 'Certificate UUID',
         'signature_hash' => 'Signature Hash',

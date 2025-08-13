@@ -101,7 +101,7 @@ class FeaturedCollectionServiceTest extends TestCase {
         Reservation::factory()->create([
             'egi_id' => $egi1->id,
             'user_id' => $user->id,
-            'offer_amount_eur' => 1000,
+            'offer_amount_fiat' => 1000,
             'is_current' => true,
             'status' => 'active'
         ]);
@@ -109,7 +109,7 @@ class FeaturedCollectionServiceTest extends TestCase {
         Reservation::factory()->create([
             'egi_id' => $egi2->id,
             'user_id' => $user->id,
-            'offer_amount_eur' => 2000,
+            'offer_amount_fiat' => 2000,
             'is_current' => true,
             'status' => 'active'
         ]);
@@ -142,7 +142,7 @@ class FeaturedCollectionServiceTest extends TestCase {
         Reservation::factory()->create([
             'egi_id' => $egi1->id,
             'user_id' => $user->id,
-            'offer_amount_eur' => 1000,
+            'offer_amount_fiat' => 1000,
             'is_current' => true,
             'status' => 'active'
         ]);
@@ -150,7 +150,7 @@ class FeaturedCollectionServiceTest extends TestCase {
         Reservation::factory()->create([
             'egi_id' => $egi2->id,
             'user_id' => $user->id,
-            'offer_amount_eur' => 500,
+            'offer_amount_fiat' => 500,
             'is_current' => true,
             'status' => 'active'
         ]);
@@ -180,7 +180,7 @@ class FeaturedCollectionServiceTest extends TestCase {
         Reservation::factory()->create([
             'egi_id' => $egi->id,
             'user_id' => $user1->id,
-            'offer_amount_eur' => 500,
+            'offer_amount_fiat' => 500,
             'is_current' => true,
             'status' => 'active'
         ]);
@@ -188,7 +188,7 @@ class FeaturedCollectionServiceTest extends TestCase {
         Reservation::factory()->create([
             'egi_id' => $egi->id,
             'user_id' => $user2->id,
-            'offer_amount_eur' => 1200, // Questa è la più alta
+            'offer_amount_fiat' => 1200, // Questa è la più alta
             'is_current' => true,
             'status' => 'active'
         ]);
@@ -196,7 +196,7 @@ class FeaturedCollectionServiceTest extends TestCase {
         Reservation::factory()->create([
             'egi_id' => $egi->id,
             'user_id' => $user1->id,
-            'offer_amount_eur' => 800,
+            'offer_amount_fiat' => 800,
             'is_current' => true,
             'status' => 'active'
         ]);
@@ -225,7 +225,7 @@ class FeaturedCollectionServiceTest extends TestCase {
         Reservation::factory()->create([
             'egi_id' => $egi->id,
             'user_id' => $user->id,
-            'offer_amount_eur' => 1000,
+            'offer_amount_fiat' => 1000,
             'is_current' => false, // Non corrente
             'status' => 'active'
         ]);
@@ -234,7 +234,7 @@ class FeaturedCollectionServiceTest extends TestCase {
         Reservation::factory()->create([
             'egi_id' => $egi->id,
             'user_id' => $user->id,
-            'offer_amount_eur' => 300,
+            'offer_amount_fiat' => 300,
             'is_current' => true,
             'status' => 'active'
         ]);

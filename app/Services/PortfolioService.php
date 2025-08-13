@@ -94,7 +94,7 @@ class PortfolioService {
             'total_owned_egis' => $activeEgis->count(),
             'collections_represented' => $collectionsRepresented,
             'total_spent_eur' => $activeEgis->sum(function ($egi) {
-                return $egi->reservations->first()?->offer_amount_eur ?? 0;
+                return $egi->reservations->first()?->offer_amount_fiat ?? 0;
             }),
             'total_bids_made' => $totalBids,
             'active_winning_bids' => $activeBids,
@@ -122,8 +122,8 @@ class PortfolioService {
                 'type' => 'outbid',
                 'egi_id' => $reservation->egi_id,
                 'egi_title' => $reservation->egi->title,
-                'old_amount' => $reservation->offer_amount_eur,
-                'new_amount' => $reservation->supersededBy->offer_amount_eur,
+                'old_amount' => $reservation->offer_amount_fiat,
+                'new_amount' => $reservation->supersededBy->offer_amount_fiat,
                 'superseded_at' => $reservation->updated_at,
                 'message' => "Your bid on '{$reservation->egi->title}' has been outbid!"
             ];
@@ -205,7 +205,7 @@ class PortfolioService {
         return [
             'has_reservation' => true,
             'status' => $isWinning ? 'winning' : 'outbid',
-            'offer_amount_eur' => $reservation->offer_amount_eur,
+            'offer_amount_fiat' => $reservation->offer_amount_fiat,
             'created_at' => $reservation->created_at,
             'is_winning' => $isWinning,
             'reservation_id' => $reservation->id

@@ -26,7 +26,7 @@ class ReservationFactory extends Factory {
             'egi_id' => Egi::factory(),
             'type' => $this->faker->randomElement(['weak', 'strong']),
             'status' => 'active',
-            'offer_amount_eur' => $offerEur,
+            'offer_amount_fiat' => $offerEur,
             'offer_amount_algo' => $offerEur * 0.5, // Conversione approssimativa
             'is_current' => true,
             'expires_at' => now()->addDays(30),

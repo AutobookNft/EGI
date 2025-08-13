@@ -227,7 +227,7 @@ class Egi extends Model {
 
     /**
      * Relazione con i certificati di prenotazione
-     * Ordinamento: strong prima di weak, poi per offer_amount_eur decrescente
+     * Ordinamento: strong prima di weak, poi per offer_amount_fiat decrescente
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
@@ -238,7 +238,7 @@ class Egi extends Model {
                         WHEN reservation_type = 'weak' THEN 1
                         ELSE 2
                     END")
-            ->orderBy('offer_amount_eur', 'desc')
+            ->orderBy('offer_amount_fiat', 'desc')
             ->orderBy('created_at', 'desc'); // Tie-breaker per stesso prezzo
     }
 

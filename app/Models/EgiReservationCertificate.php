@@ -19,7 +19,7 @@ use Illuminate\Support\Str;
  * @property int|null $user_id
  * @property string $wallet_address
  * @property string $reservation_type
- * @property float $offer_amount_eur
+ * @property float $offer_amount_fiat
  * @property float $offer_amount_algo
  * @property string $certificate_uuid
  * @property string $signature_hash
@@ -49,7 +49,7 @@ class EgiReservationCertificate extends Model
         'user_id',
         'wallet_address',
         'reservation_type',
-        'offer_amount_eur',
+        'offer_amount_fiat',
         'offer_amount_algo',
         'certificate_uuid',
         'signature_hash',
@@ -65,7 +65,7 @@ class EgiReservationCertificate extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'offer_amount_eur' => 'decimal:2',
+        'offer_amount_fiat' => 'decimal:2',
         'offer_amount_algo' => 'decimal:8',
         'is_superseded' => 'boolean',
         'is_current_highest' => 'boolean',
@@ -149,7 +149,7 @@ class EgiReservationCertificate extends Model
             $this->egi_id,
             $this->wallet_address,
             $this->reservation_type,
-            $this->offer_amount_eur,
+            $this->offer_amount_fiat,
             $createdAt->toIso8601String()
         ]);
     }

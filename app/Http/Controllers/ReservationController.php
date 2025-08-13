@@ -74,7 +74,8 @@ class ReservationController extends Controller {
         try {
             // Validate inputs
             $validated = $request->validate([
-                'offer_amount_eur' => 'required|numeric|min:1',
+                'offer_amount_fiat' => 'required|numeric|min:1',
+                'fiat_currency' => 'string|size:3|in:USD,EUR,GBP',
                 'terms_accepted' => 'required|accepted',
                 'contact_data' => 'nullable|array'
             ]);
@@ -120,7 +121,8 @@ class ReservationController extends Controller {
             $reservation = $this->reservationService->createReservation(
                 [
                     'egi_id' => $egiId,
-                    'offer_amount_eur' => $validated['offer_amount_eur'],
+                    'offer_amount_fiat' => $validated['offer_amount_fiat'],
+                    'fiat_currency' => $validated['fiat_currency'] ?? 'USD',
                     'contact_data' => $validated['contact_data'] ?? null
                 ],
                 $user,
@@ -133,7 +135,8 @@ class ReservationController extends Controller {
                 'egi_id' => $egiId,
                 'user_id' => FegiAuth::id(),
                 'certificate_uuid' => $reservation->certificate?->certificate_uuid,
-                'offer_amount_eur' => $reservation->offer_amount_eur
+                'offer_amount_fiat' => $reservation->offer_amount_fiat,
+                'fiat_currency' => $reservation->fiat_currency
             ]);
 
             return redirect()->route('egi-certificates.show', $reservation->certificate->certificate_uuid)
@@ -143,7 +146,7 @@ class ReservationController extends Controller {
             if (str_contains($e->getMessage(), 'rilancio deve essere superiore')) {
                 return redirect()->back()
                     ->withInput()
-                    ->withErrors(['offer_amount_eur' => $e->getMessage()]);
+                    ->withErrors(['offer_amount_fiat' => $e->getMessage()]);
             }
 
             // Handle unauthorized access and any other reservation creation errors
@@ -220,7 +223,7 @@ class ReservationController extends Controller {
         try {
             // Validate inputs
             $validated = $request->validate([
-                'offer_amount_eur' => 'required|numeric|min:1',
+                'offer_amount_fiat' => 'required|numeric|min:1',
                 'terms_accepted' => 'required|accepted',
                 'contact_data' => 'nullable|array',
                 'wallet_address' => 'nullable|string|size:58'
@@ -271,7 +274,7 @@ class ReservationController extends Controller {
             $reservation = $this->reservationService->createReservation(
                 [
                     'egi_id' => $egiId,
-                    'offer_amount_eur' => $validated['offer_amount_eur'],
+                    'offer_amount_fiat' => $validated['offer_amount_fiat'],
                     'contact_data' => $validated['contact_data'] ?? null
                 ],
                 $user,
@@ -284,7 +287,7 @@ class ReservationController extends Controller {
                 'egi_id' => $egiId,
                 'user_id' => FegiAuth::id(),
                 'certificate_uuid' => $reservation->certificate?->certificate_uuid,
-                'offer_amount_eur' => $reservation->offer_amount_eur
+                'offer_amount_fiat' => $reservation->offer_amount_fiat
             ]);
 
             return response()->json([
@@ -294,7 +297,7 @@ class ReservationController extends Controller {
                     'reservation' => [
                         'id' => $reservation->id,
                         'type' => $reservation->type,
-                        'offer_amount_eur' => $reservation->offer_amount_eur,
+                        'offer_amount_fiat' => $reservation->offer_amount_fiat,
                         'offer_amount_algo' => $reservation->offer_amount_algo,
                         'status' => $reservation->status,
                         'is_current' => $reservation->is_current
@@ -314,7 +317,7 @@ class ReservationController extends Controller {
                     'success' => false,
                     'message' => $e->getMessage(),
                     'errors' => [
-                        'offer_amount_eur' => [$e->getMessage()]
+                        'offer_amount_fiat' => [$e->getMessage()]
                     ]
                 ], 422);
             }
@@ -475,7 +478,7 @@ class ReservationController extends Controller {
                         'collection_name' => $reservation->egi->collection->collection_name ?? null
                     ],
                     'type' => $reservation->type,
-                    'offer_amount_eur' => $reservation->offer_amount_eur,
+                    'offer_amount_fiat' => $reservation->offer_amount_fiat,
                     'offer_amount_algo' => $reservation->offer_amount_algo,
                     'created_at' => $reservation->created_at->toIso8601String(),
                     'certificate' => $reservation->certificate ? [
@@ -590,13 +593,13 @@ class ReservationController extends Controller {
                 'user_has_reservation' => $userReservation !== null,
                 'highest_priority_reservation' => $highestReservation ? [
                     'type' => $highestReservation->type,
-                    'offer_amount_eur' => $highestReservation->offer_amount_eur,
+                    'offer_amount_fiat' => $highestReservation->offer_amount_fiat,
                     'belongs_to_current_user' => $userReservation && $userReservation->id === $highestReservation->id
                 ] : null,
                 'user_reservation' => $userReservation ? [
                     'id' => $userReservation->id,
                     'type' => $userReservation->type,
-                    'offer_amount_eur' => $userReservation->offer_amount_eur,
+                    'offer_amount_fiat' => $userReservation->offer_amount_fiat,
                     'offer_amount_algo' => $userReservation->offer_amount_algo,
                     'is_highest_priority' => $highestReservation && $userReservation->id === $highestReservation->id,
                     'created_at' => $userReservation->created_at->toIso8601String(),
@@ -653,7 +656,7 @@ class ReservationController extends Controller {
                 return [
                     'id' => $reservation->id,
                     'type' => $reservation->type,
-                    'offer_amount_eur' => $reservation->offer_amount_eur,
+                    'offer_amount_fiat' => $reservation->offer_amount_fiat,
                     'offer_amount_algo' => $reservation->offer_amount_algo,
                     'created_at' => $reservation->created_at->toIso8601String(),
                     'is_current' => $reservation->is_current,

@@ -270,7 +270,7 @@ class CertificateGeneratorService
 
             <div class="section">
                 <span class="label">Offer Amount:</span>
-                <span class="value">€' . number_format($certificate->offer_amount_eur, 2) . ' (' . number_format($certificate->offer_amount_algo, 8) . ' ALGO)</span>
+                <span class="value">€' . number_format($certificate->offer_amount_fiat, 2) . ' (' . number_format($certificate->offer_amount_algo, 8) . ' ALGO)</span>
             </div>
 
             <div class="section">

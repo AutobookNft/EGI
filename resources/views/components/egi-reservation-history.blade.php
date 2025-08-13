@@ -119,7 +119,7 @@
                                         </div>
                                         <div class="text-right">
                                             <p class="text-sm font-bold text-gray-900">
-                                                €{{ number_format($certificate->offer_amount_eur, 2) }}
+                                                €{{ number_format($certificate->offer_amount_fiat, 2) }}
                                             </p>
                                             <p class="text-xs text-gray-500">
                                                 {{ number_format($certificate->offer_amount_algo, 8) }} ALGO

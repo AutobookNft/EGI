@@ -345,7 +345,7 @@ $showActivationBadge = !$hasActiveReservations;
                 </div>
             </div>
             {{-- Solo per EGI pubblicati: mostra prezzi o status --}}
-            @elseif ($showPurchasePrice && $egi->pivot && $egi->pivot->offer_amount_eur)
+            @elseif ($showPurchasePrice && $egi->pivot && $egi->pivot->offer_amount_fiat)
             <div
                 class="flex items-center justify-between p-3 border rounded-xl border-blue-500/30 bg-gradient-to-r from-blue-500/20 to-purple-500/20">
                 <div class="flex items-center gap-2">
@@ -359,7 +359,7 @@ $showActivationBadge = !$hasActiveReservations;
                     <span class="text-xs font-medium text-blue-300">{{ __('egi.price.purchased_for') }}</span>
                 </div>
                 <div class="text-right">
-                    <span class="text-sm font-bold text-white">€{{ number_format($egi->pivot->offer_amount_eur, 2)
+                    <span class="text-sm font-bold text-white">€{{ number_format($egi->pivot->offer_amount_fiat, 2)
                         }}</span>
                 </div>
             </div>
@@ -379,13 +379,13 @@ $showActivationBadge = !$hasActiveReservations;
             'egi_id' => $egi->id,
             'base_price' => $egi->price,
             'reservation_id' => $highestPriorityReservation->id,
-            'reservation_offer_eur' => $highestPriorityReservation->offer_amount_eur,
+            'reservation_offer_eur' => $highestPriorityReservation->offer_amount_fiat,
             'reservation_offer_algo' => $highestPriorityReservation->offer_amount_algo,
             'display_price_before' => $displayPrice,
             ]);
 
             // 🚀 FIX: Usa EUR per il display, non ALGO!
-            $displayPrice = $highestPriorityReservation->offer_amount_eur ?? $egi->price;
+            $displayPrice = $highestPriorityReservation->offer_amount_fiat ?? $egi->price;
             $displayUser = $highestPriorityReservation->user;
 
             \Log::info('🎯 EGI CARD PRICE DEBUG AFTER', [

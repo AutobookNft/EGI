@@ -49,19 +49,9 @@ class FeaturedCollectionService {
         try {
             // Approccio semplificato: prima ottengo le Collection candidate, poi calcolo l'impatto
             $candidateCollections = Collection::where('is_published', true)
-                ->where(function ($query) {
-                    $query->where('featured_in_guest', true)
-                        ->orWhereExists(function ($subquery) {
-                            $subquery->select(DB::raw(1))
-                                ->from('egis')
-                                ->join('reservations', 'reservations.egi_id', '=', 'egis.id')
-                                ->whereColumn('egis.collection_id', 'collections.id')
-                                ->where('reservations.is_current', true);
-                        });
-                })
                 ->with(['creator', 'egis.reservations' => function ($query) {
                     $query->where('is_current', true)
-                        ->orderBy('offer_amount_eur', 'desc');
+                        ->orderBy('offer_amount_fiat', 'desc');
                 }])
                 ->withCount('egis')
                 ->get();
@@ -70,7 +60,7 @@ class FeaturedCollectionService {
             $collections = $candidateCollections->map(function ($collection) {
                 $estimatedImpact = $collection->egis->sum(function ($egi) {
                     $highestReservation = $egi->reservations->first();
-                    return $highestReservation ? $highestReservation->offer_amount_eur * self::EPP_PERCENTAGE : 0;
+                    return $highestReservation ? $highestReservation->offer_amount_fiat * self::EPP_PERCENTAGE : 0;
                 });
 
                 $collection->estimated_impact = $estimatedImpact;
@@ -132,7 +122,7 @@ class FeaturedCollectionService {
                 })
                 ->with(['reservations' => function ($query) {
                     $query->where('is_current', true)
-                        ->orderBy('offer_amount_eur', 'desc')
+                        ->orderBy('offer_amount_fiat', 'desc')
                         ->orderBy('created_at', 'asc'); // Tiebreaker per stesso importo
                 }])
                 ->get()
@@ -144,7 +134,7 @@ class FeaturedCollectionService {
                     }
 
                     // Calcola la quota EPP
-                    return $highestReservation->offer_amount_eur * self::EPP_PERCENTAGE;
+                    return $highestReservation->offer_amount_fiat * self::EPP_PERCENTAGE;
                 });
 
             return round($impact, 2);

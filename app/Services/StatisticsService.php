@@ -36,8 +36,7 @@ use Throwable; // Per catturare eccezioni generiche
  * @version 2.0.0
  * @author Padmin D. Curtis & Fabio Cherici
  */
-class StatisticsService
-{
+class StatisticsService {
     protected User $user;
     protected UltraLogManager $logger;
     protected array $userCollectionIds = []; // Cache per gli ID delle collection dell'utente
@@ -55,8 +54,7 @@ class StatisticsService
      * @log: STATS_SERVICE_INIT - User ID for whom service is initialized.
      * @privacy-safe: Stores user object internally; operations are scoped to this user.
      */
-    public function __construct(User $user, UltraLogManager $logger)
-    {
+    public function __construct(User $user, UltraLogManager $logger) {
         $this->user = $user;
         $this->logger = $logger;
 
@@ -88,8 +86,7 @@ class StatisticsService
      * @error-boundary: Relies on the controller's try-catch for UEM handling of exceptions.
      *                  Internal exceptions are logged by this service.
      */
-    public function getComprehensiveStats(bool $forceRefresh = false): array
-    {
+    public function getComprehensiveStats(bool $forceRefresh = false): array {
         $cacheKey = 'user_stats_' . $this->user->id;
         // Controlla lo stato della cache *prima* di un potenziale Cache::forget
         $loadedFromCache = !$forceRefresh && Cache::has($cacheKey);
@@ -154,8 +151,7 @@ class StatisticsService
      * @context: Called internally by getComprehensiveStats when cache is missed or refreshed.
      * @privacy-safe: All sub-methods operate on user's own data or aggregates.
      */
-    private function calculateAllStatistics(): array
-    {
+    private function calculateAllStatistics(): array {
         if (empty($this->userCollectionIds)) {
             $this->logger->info('User has no collections, returning empty stats.', [
                 'user_id' => $this->user->id,
@@ -194,8 +190,7 @@ class StatisticsService
      * @context: Helper method used internally.
      * @privacy-safe: Returns IDs related to the authenticated user.
      */
-    private function getUserCollectionIds(): array
-    {
+    private function getUserCollectionIds(): array {
         return $this->userCollectionIds;
     }
 
@@ -209,8 +204,7 @@ class StatisticsService
      * @privacy-safe: Aggregates like counts.
      * @data-output: Array with total_likes, collection_likes, egi_likes, by_collection, top_egis.
      */
-    private function getLikesStatistics(): array
-    {
+    private function getLikesStatistics(): array {
         // 1. Like diretti alle collection dell'utente
         $collectionLikesCount = Like::where('likeable_type', Collection::class)
             ->whereIn('likeable_id', $this->userCollectionIds)
@@ -297,8 +291,7 @@ class StatisticsService
      * @privacy-safe: Processes reservation data for aggregation.
      * @data-output: Array with total, strong, weak counts, by_collection, by_egi, and 'valid_reservations_for_amount'.
      */
-    private function getReservationsStatistics(): array
-    {
+    private function getReservationsStatistics(): array {
         // La query con ROW_NUMBER() è definita qui.
         // Assicurati che la tua versione di MariaDB/MySQL la supporti.
         $sql = "
@@ -311,7 +304,7 @@ class StatisticsService
                         PARTITION BY r.egi_id
                         ORDER BY
                             CASE WHEN r.type = 'strong' THEN 1 ELSE 2 END ASC,
-                            r.offer_amount_eur DESC,
+                            r.offer_amount_fiat DESC,
                             r.id DESC
                     ) as rn
                 FROM reservations r
@@ -386,19 +379,18 @@ class StatisticsService
      * @data-input: Collection of pre-filtered valid reservation objects.
      * @data-output: Array with total_eur, by_collection, by_type.
      */
-    private function getAmountStatistics(SupportCollection $validReservations): array
-    {
-        $totalEur = $validReservations->sum('offer_amount_eur');
+    private function getAmountStatistics(SupportCollection $validReservations): array {
+        $totalEur = $validReservations->sum('offer_amount_fiat');
         $byType = [
-            'strong' => $validReservations->where('type', 'strong')->sum('offer_amount_eur'),
-            'weak' => $validReservations->where('type', 'weak')->sum('offer_amount_eur'),
+            'strong' => $validReservations->where('type', 'strong')->sum('offer_amount_fiat'),
+            'weak' => $validReservations->where('type', 'weak')->sum('offer_amount_fiat'),
         ];
 
         $byCollection = $validReservations->groupBy('collection.id')->map(function (SupportCollection $reservationsInCollection, $collectionId) {
             return [
                 'collection_id' => $collectionId,
                 'collection_name' => $reservationsInCollection->first()->collection->collection_name,
-                'total_amount_eur' => $reservationsInCollection->sum('offer_amount_eur'),
+                'total_amount_eur' => $reservationsInCollection->sum('offer_amount_fiat'),
             ];
         })->values()->all();
 
@@ -425,8 +417,7 @@ class StatisticsService
      * @data-input: Collection of pre-filtered valid reservation objects.
      * @data-output: Array with total_quota_eur, by_collection.
      */
-    private function getEppPotentialStatistics(SupportCollection $validReservations): array
-    {
+    private function getEppPotentialStatistics(SupportCollection $validReservations): array {
         if ($validReservations->isEmpty()) {
             return ['total_quota_eur' => 0.0, 'by_collection' => []];
         }
@@ -451,7 +442,7 @@ class StatisticsService
         foreach ($reservationsByCollectionId as $collectionId => $reservationsInCollection) {
             $collectionName = $reservationsInCollection->first()->collection->collection_name;
             $eppPercentage = $eppWallets->get($collectionId, self::DEFAULT_EPP_PERCENTAGE);
-            $collectionTotalAmount = $reservationsInCollection->sum('offer_amount_eur');
+            $collectionTotalAmount = $reservationsInCollection->sum('offer_amount_fiat');
             $collectionEppQuota = ($collectionTotalAmount * $eppPercentage) / 100.0;
 
             $totalEppQuotaEur += $collectionEppQuota;
@@ -506,8 +497,7 @@ class StatisticsService
      * @context: Helper method for initialization or when no user collections exist.
      * @privacy-safe: Returns a generic empty structure.
      */
-    private function getEmptyStatsStructure(): array
-    {
+    private function getEmptyStatsStructure(): array {
         $emptyNumericArray = ['total' => 0, 'collections_total' => 0, 'egis_total' => 0, 'by_collection' => [], 'top_egis' => []];
         $emptyReservations = ['total' => 0, 'strong' => 0, 'weak' => 0, 'by_collection' => [], 'valid_reservations_for_amount' => collect([])];
         $emptyAmounts = ['total_eur' => 0.0, 'by_collection' => [], 'by_type' => ['strong' => 0.0, 'weak' => 0.0]];
@@ -540,8 +530,7 @@ class StatisticsService
      * @log: STATS_CACHE_CLEARED_EXPLICIT - User ID for whom cache is cleared.
      * @privacy-safe: Operates on user-specific cache key.
      */
-    public function clearUserStatisticsCache(): bool
-    {
+    public function clearUserStatisticsCache(): bool {
         $cacheKey = 'user_stats_' . $this->user->id;
         $this->logger->info('User statistics cache explicitly cleared.', [
             'user_id' => $this->user->id,

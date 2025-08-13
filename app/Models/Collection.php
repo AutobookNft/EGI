@@ -176,7 +176,7 @@ class Collection extends Model {
             })
             ->with(['reservations' => function ($query) {
                 $query->where('is_current', true)
-                    ->orderBy('offer_amount_eur', 'desc')
+                    ->orderBy('offer_amount_fiat', 'desc')
                     ->orderBy('created_at', 'asc'); // Tiebreaker
             }])
             ->get()
@@ -188,7 +188,7 @@ class Collection extends Model {
                 }
 
                 // Calcola la quota EPP (20% del valore prenotato)
-                return $highestReservation->offer_amount_eur * 0.20;
+                return $highestReservation->offer_amount_fiat * 0.20;
             });
     }
 
@@ -205,7 +205,7 @@ class Collection extends Model {
             ->where('featured_in_guest', true)
             ->with(['creator', 'egis.reservations' => function ($query) {
                 $query->where('is_current', true)
-                    ->orderBy('offer_amount_eur', 'desc')
+                    ->orderBy('offer_amount_fiat', 'desc')
                     ->orderBy('created_at', 'asc');
             }])
             ->orderByRaw('CASE WHEN featured_position IS NOT NULL THEN featured_position ELSE 999 END ASC')

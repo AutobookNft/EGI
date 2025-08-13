@@ -25,7 +25,7 @@ return [
         'collection' => 'Colección',
         'reservation_type' => 'Tipo de Reserva',
         'wallet_address' => 'Dirección de la Cartera',
-        'offer_amount_eur' => 'Monto de la Oferta (EUR)',
+        'offer_amount_fiat' => 'Monto de la Oferta (EUR)',
         'offer_amount_algo' => 'Monto de la Oferta (ALGO)',
         'certificate_uuid' => 'UUID del Certificado',
         'signature_hash' => 'Hash de la Firma',

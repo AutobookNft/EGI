@@ -33,7 +33,7 @@ class CollectorHomeTest extends TestCase {
             'user_id' => $collector->id,
             'egi_id' => $egi->id,
             'status' => 'completed',
-            'offer_amount_eur' => 100.00
+            'offer_amount_fiat' => 100.00
         ]);
 
         // Visit collector home page
@@ -78,13 +78,13 @@ class CollectorHomeTest extends TestCase {
             'user_id' => $collector->id,
             'egi_id' => $egi1->id,
             'status' => 'completed',
-            'offer_amount_eur' => 150.00
+            'offer_amount_fiat' => 150.00
         ]);
         Reservation::factory()->create([
             'user_id' => $collector->id,
             'egi_id' => $egi2->id,
             'status' => 'completed',
-            'offer_amount_eur' => 200.00
+            'offer_amount_fiat' => 200.00
         ]);
 
         $response = $this->get(route('collector.home', $collector->id));

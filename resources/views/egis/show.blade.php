@@ -176,7 +176,7 @@
                     'egi_id' => $egi->id,
                     'reservation_id' => $highestPriorityReservation->id,
                     'user_id' => $highestPriorityReservation->user_id,
-                    'offer_amount_eur' => $highestPriorityReservation->offer_amount_eur,
+                    'offer_amount_fiat' => $highestPriorityReservation->offer_amount_fiat,
                     'offer_amount_algo' => $highestPriorityReservation->offer_amount_algo,
                     'is_current' => $highestPriorityReservation->is_current,
                     'status' => $highestPriorityReservation->status,
@@ -184,7 +184,7 @@
                     'base_price' => $egi->price
                     ]);
 
-                    $displayPrice = $highestPriorityReservation->offer_amount_eur ?? ($egi->price * 0.30);
+                    $displayPrice = $highestPriorityReservation->offer_amount_fiat ?? ($egi->price * 0.30);
                     $displayUser = $highestPriorityReservation->user;
 
                     // Label diversa per STRONG vs WEAK

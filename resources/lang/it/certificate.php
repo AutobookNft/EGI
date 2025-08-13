@@ -25,7 +25,7 @@ return [
         'collection' => 'Collezione',
         'reservation_type' => 'Tipo di Prenotazione',
         'wallet_address' => 'Indirizzo Wallet',
-        'offer_amount_eur' => 'Importo Offerta (EUR)',
+        'offer_amount_fiat' => 'Importo Offerta (EUR)',
         'offer_amount_algo' => 'Importo Offerta (ALGO)',
         'certificate_uuid' => 'UUID Certificato',
         'signature_hash' => 'Hash della Firma',

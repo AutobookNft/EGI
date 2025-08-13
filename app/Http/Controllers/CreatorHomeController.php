@@ -87,7 +87,7 @@ class CreatorHomeController extends Controller {
             'total_reservations' => $egis->sum(function ($egi) {
                 return $egi->reservations->count();
             }),
-            'highest_offer' => $egis->flatMap->reservations->max('offer_amount_eur') ?? 0,
+            'highest_offer' => $egis->flatMap->reservations->max('offer_amount_fiat') ?? 0,
             'available_egis' => $egis->filter(function ($egi) {
                 return $egi->reservations->isEmpty(); // EGI senza prenotazioni
             })->count(),

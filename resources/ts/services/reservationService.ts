@@ -18,7 +18,7 @@ import { getAuthStatus } from '../features/auth/authService';
 
 // --- TYPES ---
 export interface ReservationFormData {
-    offer_amount_eur: number;
+    offer_amount_fiat: number;
     terms_accepted: boolean;
     contact_data?: {
         name?: string;
@@ -34,7 +34,7 @@ export interface ReservationResponse {
     reservation?: {
         id: number;
         type: 'strong' | 'weak';
-        offer_amount_eur: number;
+        offer_amount_fiat: number;
         offer_amount_algo: number;
         status: string;
         is_current: boolean;
@@ -57,13 +57,13 @@ export interface ReservationStatusResponse {
         user_has_reservation: boolean;
         highest_priority_reservation?: {
             type: 'strong' | 'weak';
-            offer_amount_eur: number;
+            offer_amount_fiat: number;
             belongs_to_current_user: boolean;
         };
         user_reservation?: {
             id: number;
             type: 'strong' | 'weak';
-            offer_amount_eur: number;
+            offer_amount_fiat: number;
             offer_amount_algo: number;
             is_highest_priority: boolean;
             created_at: string;
@@ -133,7 +133,7 @@ class ReservationFormModal {
         this.modal = document.getElementById('reservation-modal');
         this.form = document.getElementById('reservation-form') as HTMLFormElement;
         this.closeButton = document.getElementById('close-reservation-modal');
-        this.offerInput = document.getElementById('offer_amount_eur') as HTMLInputElement;
+        this.offerInput = document.getElementById('offer_amount_fiat') as HTMLInputElement;
         this.algoEquivalentText = document.getElementById('algo-equivalent-text');
         this.submitButton = document.querySelector('#reservation-form button[type="submit"]') as HTMLButtonElement;
 
@@ -248,7 +248,7 @@ class ReservationFormModal {
             // Get form data
             const formData = new FormData(this.form);
             const data: ReservationFormData = {
-                offer_amount_eur: parseFloat(formData.get('offer_amount_eur') as string),
+                offer_amount_fiat: parseFloat(formData.get('offer_amount_fiat') as string),
                 terms_accepted: formData.get('terms_accepted') === 'on',
                 contact_data: {}
             };
@@ -417,14 +417,14 @@ class ReservationFormModal {
                     <input type="hidden" name="_token" value="${getCsrfTokenTS()}">
 
                     <div>
-                        <label for="offer_amount_eur" class="block text-sm font-medium text-gray-700">
+                        <label for="offer_amount_fiat" class="block text-sm font-medium text-gray-700">
                             ${appTranslate('reservation.form.offer_amount_label')}
                         </label>
                         <div class="mt-1 relative rounded-md shadow-sm">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                 <span class="text-gray-500 sm:text-sm">€</span>
                             </div>
-                            <input type="number" name="offer_amount_eur" id="offer_amount_eur"
+                            <input type="number" name="offer_amount_fiat" id="offer_amount_fiat"
                                    class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md"
                                    placeholder="${appTranslate('reservation.form.offer_amount_placeholder')}"
                                    step="0.01" min="1" required>

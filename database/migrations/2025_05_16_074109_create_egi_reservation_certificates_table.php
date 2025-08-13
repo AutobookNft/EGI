@@ -35,7 +35,7 @@ return new class extends Migration
             // Certificate data
             $table->string('wallet_address', 58); // Algorand address is 58 chars
             $table->enum('reservation_type', ['strong', 'weak']);
-            $table->decimal('offer_amount_eur', 10, 2);
+            $table->decimal('offer_amount_fiat', 10, 2);
             $table->decimal('offer_amount_algo', 18, 8);
             $table->char('certificate_uuid', 36)->unique(); // Modificato da uuid a char(36)
             $table->string('signature_hash', 64); // SHA-256 is 64 chars

@@ -343,7 +343,7 @@ class ReservationHistoryManager {
                             <span class="text-xs text-gray-400">${typeText}</span>
                         </div>
                         <div class="flex items-center justify-between">
-                            <span class="text-sm text-white font-semibold">€${parseFloat(reservation.offer_amount_eur).toFixed(2)}</span>
+                            <span class="text-sm text-white font-semibold">€${parseFloat(reservation.offer_amount_fiat).toFixed(2)}</span>
                             <span class="text-xs text-gray-400">${this.formatDate(reservation.created_at)}</span>
                         </div>
                     </div>
