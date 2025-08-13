@@ -661,50 +661,50 @@
 
         async fetchAndUpdateRate() {
             try {
-                // FIXED: Use web routes instead of API routes
                 const isAuthenticated = {{ auth()->check() ? 'true' : 'false' }};
+                let userCurrency = 'USD'; // Default
 
-                let endpoint, response;
-
+                // Step 1: Get user's preferred currency (only for authenticated users)
                 if (isAuthenticated) {
-                    // Use web endpoint for authenticated users 
-                    response = await fetch('/user/preferences/currency', {
-                        headers: {
-                            'Accept': 'application/json',
-                            'X-Requested-With': 'XMLHttpRequest',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
-                        }
-                    });
-                } else {
-                    // Use public API endpoint for anonymous users (default USD)
-                    response = await fetch('/api/currency/rate/default', {
-                        headers: {
-                            'Accept': 'application/json',
-                            'X-Requested-With': 'XMLHttpRequest'
-                        }
-                    });
-                }
-
-                if (!response.ok) {
-                    // Fallback to public endpoint if protected fails
-                    if (isAuthenticated) {
-                        response = await fetch('/api/currency/rate/default', {
+                    try {
+                        const prefResponse = await fetch('/user/preferences/currency', {
                             headers: {
                                 'Accept': 'application/json',
-                                'X-Requested-With': 'XMLHttpRequest'
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
                             }
                         });
-                    }
 
-                    if (!response.ok) throw new Error('Network response was not ok');
+                        if (prefResponse.ok) {
+                            const prefData = await prefResponse.json();
+                            if (prefData.success && prefData.data?.preferred_currency) {
+                                userCurrency = prefData.data.preferred_currency;
+                            }
+                        }
+                    } catch (prefError) {
+                        console.warn('Failed to fetch user currency preference:', prefError);
+                        // Continue with default USD
+                    }
+                }
+
+                // Step 2: Get rate for the user's currency
+                const response = await fetch(`/api/currency/rate/${userCurrency}`, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch rate for ${userCurrency}: ${response.status}`);
                 }
 
                 const data = await response.json();
 
                 if (data.success) {
-                    // Handle both response formats (user-rate vs rate/default)
-                    const currency = data.data?.currency || data.data?.fiat_currency || 'USD';
-                    const rate = data.data?.rate || data.data?.rate_to_algo || 0;
+                    // Use the standardized API response format
+                    const currency = data.data?.fiat_currency || userCurrency;
+                    const rate = data.data?.rate_to_algo || 0;
                     const timestamp = data.data?.timestamp || new Date().toISOString();
 
                     this.updateBadge(currency, rate, timestamp);
