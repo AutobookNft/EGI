@@ -79,9 +79,15 @@ export interface ReservationStatusResponse {
 
 export interface AlgoExchangeRateResponse {
     success: boolean;
-    message: string;
-    rate?: number;
-    updated_at?: string;
+    message?: string;
+    data?: {
+        fiat_currency: string;
+        rate_to_algo: number;
+        timestamp: string;
+        is_cached: boolean;
+    };
+    rate?: number; // Backward compatibility
+    updated_at?: string; // Backward compatibility
 }
 
 // --- STATE ---
@@ -601,7 +607,7 @@ export async function getEgiReservationStatus(egiId: number): Promise<Reservatio
  */
 export async function getAlgoExchangeRate(): Promise<number|null> {
     try {
-        const rateUrl = route('api/algo-exchange-rate', {});
+        const rateUrl = route('api/currency/algo-exchange-rate', {});
 
         if (UEM && typeof UEM.safeFetch === 'function') {
             const response = await UEM.safeFetch(rateUrl, {
@@ -615,7 +621,9 @@ export async function getAlgoExchangeRate(): Promise<number|null> {
             }
 
             const data = await response.json() as AlgoExchangeRateResponse;
-            return data.success && data.rate ? data.rate : null;
+            // Handle new API format with data.rate_to_algo or legacy format with rate
+            const rate = data.data?.rate_to_algo || data.rate;
+            return data.success && rate ? rate : null;
         } else {
             const response = await fetch(rateUrl, {
                 headers: {
@@ -628,7 +636,9 @@ export async function getAlgoExchangeRate(): Promise<number|null> {
             }
 
             const data = await response.json() as AlgoExchangeRateResponse;
-            return data.success && data.rate ? data.rate : null;
+            // Handle new API format with data.rate_to_algo or legacy format with rate
+            const rate = data.data?.rate_to_algo || data.rate;
+            return data.success && rate ? rate : null;
         }
     } catch (error) {
         console.error('ALGO exchange rate API error:', error);

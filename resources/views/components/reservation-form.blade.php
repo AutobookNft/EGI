@@ -95,12 +95,16 @@
         let algoRate = 0.2; // Default fallback rate: 1 EUR = 5 ALGO
 
         // Try to fetch current ALGO rate
-        fetch('/api/algo-exchange-rate')
+        fetch('/api/currency/algo-exchange-rate')
             .then(response => response.json())
             .then(data => {
-                if (data.success && data.rate) {
-                    algoRate = data.rate;
-                    updateAlgoEquivalent();
+                if (data.success) {
+                    // Handle new API format with data.rate_to_algo or legacy format with rate
+                    const rate = data.data?.rate_to_algo || data.rate;
+                    if (rate) {
+                        algoRate = rate;
+                        updateAlgoEquivalent();
+                    }
                 }
             })
             .catch(err => console.error('Failed to fetch ALGO rate:', err));

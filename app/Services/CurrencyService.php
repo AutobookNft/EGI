@@ -96,6 +96,23 @@ class CurrencyService {
     }
 
     /**
+     * Converte un importo FIAT in microALGO utilizzando la valuta specificata.
+     * Metodo helper che gestisce automaticamente il fetch del tasso di cambio.
+     *
+     * @param float $fiatAmount
+     * @param string $fiatCurrency
+     * @return int|null microALGO (null se il tasso non è disponibile)
+     */
+    public function convertFiatToMicroAlgoByCurrency(float $fiatAmount, string $fiatCurrency = 'USD'): ?int {
+        $rateData = $this->getAlgoToFiatRate($fiatCurrency);
+        if (!$rateData) {
+            return null;
+        }
+
+        return $this->convertFiatToMicroAlgo($fiatAmount, $rateData['rate']);
+    }
+
+    /**
      * Converte microALGO in un importo FIAT.
      *
      * @param int $microAlgoAmount
@@ -114,7 +131,7 @@ class CurrencyService {
      * @return array|null
      */
     public function getCurrentUserCurrencyRate(): ?array {
-        $user = FegiAuth::getAuthenticatedUser();
+        $user = FegiAuth::check() ? FegiAuth::user() : null;
         $preferredCurrency = $user
             ? ($user->preferred_currency ?? 'USD')
             : 'USD';
@@ -128,7 +145,7 @@ class CurrencyService {
      * @return string
      */
     public function getCurrentUserCurrency(): string {
-        $user = FegiAuth::getAuthenticatedUser();
+        $user = FegiAuth::check() ? FegiAuth::user() : null;
         return $user
             ? ($user->preferred_currency ?? 'USD')
             : 'USD';

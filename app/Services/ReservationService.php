@@ -219,10 +219,14 @@ class ReservationService {
                 'egi_id' => $egi->id,
                 'type' => $reservationType,
                 'status' => 'active',
+                'original_currency' => $fiatCurrency,
+                'original_price' => $offerAmountFiat,
+                'algo_price' => $offerAmountAlgo / 1_000_000, // Convert microALGO to ALGO
                 'offer_amount_fiat' => $offerAmountFiat,
                 'fiat_currency' => $fiatCurrency,
                 'offer_amount_algo' => $offerAmountAlgo,
                 'exchange_rate' => $exchangeRate,
+                'rate_timestamp' => $rateData['timestamp'],
                 'exchange_timestamp' => $rateData['timestamp'],
                 'is_current' => true,
                 'contact_data' => $data['contact_data'] ?? null

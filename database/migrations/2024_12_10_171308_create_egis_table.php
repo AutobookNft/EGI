@@ -4,21 +4,19 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
-    public function up(): void
-    {
+    public function up(): void {
         Schema::create('egis', function (Blueprint $table) {
             $table->id();
 
             // Relazione con la tabella collections
             $table->foreignId('collection_id')
-                  ->constrained('collections')
-                  ->onUpdate('cascade')
-                  ->onDelete('restrict');
+                ->constrained('collections')
+                ->onUpdate('cascade')
+                ->onDelete('restrict');
 
             // Campi esistenti
             $table->unsignedBigInteger('key_file')->nullable()->index();
@@ -69,8 +67,7 @@ return new class extends Migration
     /**
      * Reverse the migrations.
      */
-    public function down(): void
-    {
+    public function down(): void {
         Schema::dropIfExists('egi');
     }
 };

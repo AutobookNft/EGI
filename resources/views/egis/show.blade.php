@@ -195,6 +195,17 @@
                     }
                     }
 
+                    // Determino la valuta da mostrare
+                    $displayCurrency = 'EUR'; // Default fallback
+                    if ($highestPriorityReservation && $highestPriorityReservation->fiat_currency) {
+                    // Se c'è una prenotazione attiva, usa la sua valuta
+                    $displayCurrency = $highestPriorityReservation->fiat_currency;
+                    } elseif (App\Helpers\FegiAuth::check()) {
+                    // Se l'utente è autenticato, usa la sua preferenza
+                    $displayCurrency = App\Helpers\FegiAuth::user()->preferred_currency ?? 'EUR';
+                    }
+                    // Altrimenti mantieni EUR come default
+
                     $isForSale = $displayPrice && $displayPrice > 0 && !$egi->mint;
                     $canBeReserved = !$egi->mint &&
                     ($egi->is_published || (App\Helpers\FegiAuth::check() && App\Helpers\FegiAuth::id() ===
@@ -352,7 +363,7 @@
                                         </div>
                                         <div class="font-medium text-white">
                                             @if($displayPrice)
-                                            <x-currency-price :price="$displayPrice" currency="EUR" />
+                                            <x-currency-price :price="$displayPrice" :currency="$displayCurrency" />
                                             @else
                                             {{ __('egi.crud.price_not_set') }}
                                             @endif
@@ -440,9 +451,10 @@
                                 <div class="mb-6 text-center">
                                     <p class="mb-2 text-sm text-gray-400">{{ $priceLabel }}</p>
                                     <div class="flex items-baseline justify-center">
-                                        <x-currency-price :price="$displayPrice" currency="EUR"
+                                        <x-currency-price :price="$displayPrice" :currency="$displayCurrency"
                                             class="text-4xl font-bold text-white" :show-original="true" />
-                                        <span class="ml-2 text-lg font-medium text-gray-400">EUR</span>
+                                        <span class="ml-2 text-lg font-medium text-gray-400">{{ $displayCurrency
+                                            }}</span>
                                     </div>
 
                                     {{-- Miglior offerente (STRONG vs WEAK) --}}

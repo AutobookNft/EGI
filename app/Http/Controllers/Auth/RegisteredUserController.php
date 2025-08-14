@@ -189,7 +189,7 @@ class RegisteredUserController extends Controller {
 
             // Log the error using errorManager
             $this->errorManager->handle($errorCode, $errorContext, $e);
-            
+
             // Always return a RedirectResponse for registration errors
             return redirect()->back()
                 ->withInput($request->except('password', 'password_confirmation'))
