@@ -156,6 +156,7 @@ return [
         'price' => 'Prezzo',
         'price_placeholder' => '0.00',
         'price_hint' => 'Prezzo in ALGO (lascia vuoto se non in vendita)',
+        'price_locked_message' => 'Prezzo bloccato - EGI già prenotato',
 
         // Campo Creation Date
         'creation_date' => 'Data Creazione',

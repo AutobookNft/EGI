@@ -120,6 +120,7 @@ return [
         'price' => 'Price',
         'price_placeholder' => '0.00',
         'price_hint' => 'Price in ALGO (leave empty if not for sale)',
+        'price_locked_message' => 'Price locked - EGI already reserved',
 
         // Creation Date Field
         'creation_date' => 'Creation Date',
