@@ -28,7 +28,41 @@ exchange_timestamp    TIMESTAMP NOT NULL           -- Rate timestamp for audit
 preferred_currency    VARCHAR(3) DEFAULT 'USD'     -- User's preferred display currency
 ```
 
-### **2. CURRENCY SERVICE** ✅ **EXISTS**
+### **2. CREATOR AUTHORIZATION SYSTEM** ✅ **IMPLEMENTED**
+
+**Status**: Recently implemented and committed (commit 7338d92)
+**Implementation**: Creator detection logic across all EGI views
+
+**Files Updated**:
+
+```
+resources/views/egis/show.blade.php              // Main EGI detail page
+resources/views/components/egi-card.blade.php    // Individual EGI card component
+resources/views/components/egi-card-list.blade.php // List-style EGI card component
+```
+
+**Logic Implemented**:
+
+```php
+// Creator detection (VERIFIED in all three files):
+$isCreator = auth()->check() && auth()->id() === $egi->user_id;
+// OR (in egis/show.blade.php using FegiAuth):
+$isCreator = App\Helpers\FegiAuth::check() && App\Helpers\FegiAuth::id() === $egi->user_id;
+
+// Button hiding logic:
+@if(!$isCreator)
+  {{-- Reservation and like buttons only visible to non-creators --}}
+@endif
+```
+
+**Features**:
+
+-   ✅ **Reservation buttons hidden** for creators (Prenota/Rilancia/Reserve)
+-   ✅ **Like buttons hidden** for creators (both compact and full versions)
+-   ✅ **Applied across all EGI views** (detail page, card components, list components)
+-   ✅ **Prevents self-reservation** and **self-liking** of own EGIs
+
+### **3. CURRENCY SERVICE** ✅ **EXISTS**
 
 **Location**: `app/Services/CurrencyService.php`
 **VERIFIED Methods** (from existing code):
@@ -37,7 +71,7 @@ preferred_currency    VARCHAR(3) DEFAULT 'USD'     -- User's preferred display c
 -   FIAT to microALGO conversion
 -   Rate caching mechanisms
 
-### **3. API ENDPOINTS** ✅ **FUNCTIONAL**
+### **4. API ENDPOINTS** ✅ **FUNCTIONAL**
 
 **Location**: `app/Http/Controllers/Api/CurrencyController.php`
 **VERIFIED Endpoints**:
@@ -51,7 +85,7 @@ GET /api/user/preferences/currency     // User preference
 PUT /api/user/preferences/currency     // Update preference
 ```
 
-### **4. UEM/ULM INTEGRATION** ✅ **VERIFIED FROM ReservationController.php**
+### **5. UEM/ULM INTEGRATION** ✅ **VERIFIED FROM ReservationController.php**
 
 **ACTUAL Implementation Pattern**:
 
@@ -79,7 +113,7 @@ $this->logger->info('[OPERATION] Description', [
 ]);
 ```
 
-### **5. ERROR CODES** ✅ **DEFINED IN config/error-manager.php**
+### **6. ERROR CODES** ✅ **DEFINED IN config/error-manager.php**
 
 **ACTUAL Currency Error Codes** (VERIFIED from config file):
 

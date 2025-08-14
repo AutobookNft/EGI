@@ -29,7 +29,8 @@ $ownerLastReservation = $egi->reservations()
 ->orderByDesc('created_at')
 ->first();
 
-$isWinning = $ownerLastReservation && $ownerLastReservation->is_current && $ownerLastReservation->status === 'active' &&
+$isWinning = $ownerLastReservation && $ownerLastReservation->is_current && $ownerLastReservation->status ===
+'active' &&
 !$ownerLastReservation->superseded_by_id;
 $portfolioOutbid = $ownerLastReservation && !$isWinning;
 } catch (\Throwable $th) {
@@ -44,6 +45,10 @@ if ($creatorPortfolioContext && $portfolioOwner) {
 $hasActiveReservations = $egi->reservations()->where('is_current', true)->exists();
 $showActivationBadge = !$hasActiveReservations;
 }
+
+// 🔒 Creator check: Determina se l'utente corrente è il creatore dell'EGI
+$creatorId = $egi->user_id ?? $collection->creator_id ?? null;
+$isCreator = auth()->check() && auth()->id() === $creatorId;
 @endphp
 
 {{-- Include CSS hyper se necessario --}}
@@ -114,10 +119,16 @@ $showActivationBadge = !$hasActiveReservations;
         <div class="absolute inset-0 transition-opacity duration-300 opacity-0 bg-black/40 group-hover:opacity-100">
         </div>
 
-        {{-- Badges (Posizione, Media Type, Owned) --}}
+        {{-- Logo piattaforma posizionato fuori dal badge --}}
+        <img src="{{ asset('images/logo/logo_1.webp') }}" alt=""
+            class="absolute w-6 h-6 transition-opacity duration-200 left-2 top-2 opacity-70 hover:opacity-100"
+            loading="lazy" decoding="async" aria-hidden="true" role="img"
+            title="{{ __('egi.platform.powered_by', ['platform' => 'Frangette']) }}">
+
+        {{-- Badge del numero EGI --}}
         @if ($egi->position)
         <span
-            class="position-badge absolute left-2 top-2 inline-block rounded-full bg-black/50 px-2 py-0.5 text-xs font-semibold text-white backdrop-blur-sm">
+            class="position-badge absolute left-10 top-2 rounded-full bg-black/50 px-2 py-0.5 text-xs font-semibold text-white backdrop-blur-sm">
             #{{ $egi->position }}
         </span>
         @endif
@@ -260,6 +271,7 @@ $showActivationBadge = !$hasActiveReservations;
         </span>
         @endif
         @endif
+        {{-- Badge per contenuto media --}}
         @elseif ($egi->media)
         <span
             class="absolute inline-flex items-center justify-center w-6 h-6 text-white rounded-full right-2 top-2 bg-black/50 backdrop-blur-sm"
@@ -297,13 +309,22 @@ $showActivationBadge = !$hasActiveReservations;
                     </div>
                     @endif
                 </h3>
-                {{-- Logo piattaforma --}}
+                {{-- Like Button al posto del logo --}}
+                @if(!$isCreator)
                 <div class="flex-shrink-0">
-                    <img src="{{ asset('images/logo/logo_1.webp') }}" alt=""
-                        class="w-4 h-4 transition-opacity duration-200 opacity-60 group-hover:opacity-80" loading="lazy"
-                        decoding="async" aria-hidden="true" role="img"
-                        title="{{ __('egi.platform.powered_by', ['platform' => 'Frangette']) }}">
+                    <button
+                        class="p-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full transition-all duration-200 border border-white/20 like-button {{ $egi->is_liked ?? false ? 'is-liked bg-pink-500/20 border-pink-400/50' : '' }}"
+                        data-resource-type="egi" data-resource-id="{{ $egi->id }}"
+                        title="{{ __('egi.like_button_title') }}">
+                        <svg class="w-4 h-4 icon-heart {{ $egi->is_liked ?? false ? 'text-pink-400' : 'text-white' }}"
+                            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd"
+                                d="M3.172 5.172a4 4 0 0 1 5.656 0L10 6.343l1.172-1.171a4 4 0 1 1 5.656 5.656L10 17.657l-6.828-6.829a4 4 0 0 1 0-5.656Z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </button>
                 </div>
+                @endif
             </div>
 
             {{-- Creator EGI con badge stilizzato --}}
@@ -408,7 +429,8 @@ $showActivationBadge = !$hasActiveReservations;
                         </div>
                         <span class="text-xs font-medium text-green-300">
                             @if ($highestPriorityReservation)
-                            {{ $highestPriorityReservation->type === 'weak' ? __('egi.reservation.fegi_reservation') :
+                            {{ $highestPriorityReservation->type === 'weak' ? __('egi.reservation.fegi_reservation')
+                            :
                             __('egi.reservation.highest_bid') }}
                             @else
                             {{ __('egi.price.price') }}
@@ -447,7 +469,7 @@ $showActivationBadge = !$hasActiveReservations;
                         @if ($activatorDisplay['is_commissioner'] && $activatorDisplay['avatar'])
                         {{-- Commissioner with avatar --}}
                         <img src="{{ $activatorDisplay['avatar'] }}" alt="{{ $activatorDisplay['name'] }}"
-                            class="w-4 h-4 rounded-full object-cover border border-white/20">
+                            class="object-cover w-4 h-4 border rounded-full border-white/20">
                         @else
                         {{-- Regular collector or commissioner without avatar --}}
                         <svg class="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -467,7 +489,8 @@ $showActivationBadge = !$hasActiveReservations;
                         $activatorDisplay = formatActivatorDisplay($displayUser);
                         }
                         @endphp
-                        {{ __('egi.reservation.activator') }}: <span class="font-semibold">{{ $activatorDisplay['name']
+                        {{ __('egi.reservation.activator') }}: <span class="font-semibold">{{
+                            $activatorDisplay['name']
                             }}</span>
                         @endif
                     </span>
@@ -546,8 +569,6 @@ $showActivationBadge = !$hasActiveReservations;
                 // Controlla se ha un prezzo (quindi è effettivamente in vendita)
                 $hasPrice =
                 ($egi->price && $egi->price > 0) || ($egi->floorDropPrice && $egi->floorDropPrice > 0);
-                // L'utente è il creatore?
-                $isCreator = auth()->check() && auth()->id() === $creatorId;
 
                 // Il pulsante deve apparire SOLO se:
                 // 1. È pubblicato

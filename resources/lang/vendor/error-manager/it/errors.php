@@ -90,7 +90,7 @@ return [
         // COLLECTION_FIND_CREATE_FAILED
         'collection_find_create_failed' => 'Impossibile trovare o creare la collection per l\'utente :user_id. Dettagli errore: :error_details',
 
-         // Errori aggiornamento collezione corrente utente
+        // Errori aggiornamento collezione corrente utente
         'user_current_collection_update_failed' => 'Errore critico durante aggiornamento current_collection_id per utente :user_id verso collezione :collection_id. Operazione database fallita: :error_message. Questo impedisce la corretta associazione user-collection nel workflow FlorenceEGI.',
         'user_current_collection_validation_failed' => 'Validazione fallita durante aggiornamento collezione corrente per utente :user_id e collezione :collection_id. Tipo validazione: :validation_type. Errore: :validation_error. Questo indica problemi di integrità dati che devono essere risolti.',
 
@@ -166,7 +166,7 @@ return [
         'egi_session_auth_invalid' => 'Autenticazione session EGI non valida. Session status: :session_status, User ID: :user_id',
         'egi_wallet_auth_mismatch' => 'Mismatch wallet autenticazione. Session wallet: :session_wallet, User wallet: :user_wallet',
 
-         // Enhanced Registration Errors
+        // Enhanced Registration Errors
         'enhanced_registration_failed' => 'Fallimento registrazione avanzata con setup ecosistema: :error. User ID: :user_id, Collection ID: :collection_id, Components: :partial_creation',
         'registration_user_creation_failed' => 'Fallimento creazione utente durante registrazione: :error. Email: :email, User type: :user_type',
         'registration_collection_creation_failed' => 'Fallimento creazione collezione default durante registrazione: :error. User ID: :user_id, Collection name: :collection_name',
@@ -272,11 +272,11 @@ return [
         'biography_media_validation_failed' => 'Validazione media biografia fallita. Controlla file type validation, size limits.',
         'biography_media_delete_failed' => 'Fallimento eliminazione media biografia. Possibili cause: Spatie media library error.',
 
-         // Missing Chapter Error Codes - Developer Messages
+        // Missing Chapter Error Codes - Developer Messages
         'biography_chapter_index_failed' => 'Errore nel recupero dei capitoli biografia. Verifica la query di ordinamento e i filtri di pubblicazione. Context: biography_id, user_id, order_by.',
         'biography_chapter_show_failed' => 'Errore nel caricamento dettagli capitolo biografia. Possibili cause: relazione mancante, eager loading fallito, o corruzione dati capitolo. Context: biography_id, chapter_id, user_id.',
 
-     ],
+    ],
     'user' => [
         // == Existing Entries ==
         'authentication_error' => 'Non hai l\'autorizzazione per eseguire questa operazione.',

@@ -9,7 +9,7 @@
         ? asset(sprintf('storage/users_files/collections_%d/creator_%d/%d.%s',
         $egi->collection_id, $egi->user_id, $egi->key_file, $egi->extension))
         : asset('images/default_egi_placeholder.jpg');
-        
+
         // Controllo se l'utente loggato è il creator dell'EGI
         $isCreator = App\Helpers\FegiAuth::check() && App\Helpers\FegiAuth::id() === $egi->user_id;
         @endphp
@@ -315,8 +315,7 @@
                                             <input type="hidden" name="is_published" value="0">
                                             <input type="checkbox" id="is_published" name="is_published" value="1" {{
                                                 old('is_published', $egi->is_published) ? 'checked' : '' }}
-                                            class="w-4 h-4 rounded text-emerald-600 bg-black/30 border-emerald-700/50
-                                            focus:ring-emerald-500 focus:ring-2">
+                                            class="w-4 h-4 rounded text-emerald-600 bg-black/30 border-emerald-700/50 focus:ring-emerald-500 focus:ring-2">
                                             <span class="ml-3 text-sm font-medium text-emerald-300">
                                                 {{ __('egi.crud.is_published') }}
                                             </span>
