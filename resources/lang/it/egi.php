@@ -84,6 +84,10 @@ return [
         'activated_by' => 'Attivato da',
     ],
 
+    // Nota valuta originale
+        'originally_reserved_in' => 'Originalmente prenotato in :currency per :amount',
+    'originally_reserved_in_short' => 'Pren. :currency :amount',
+
     // Stati
     'status' => [
         'not_for_sale' => '🚫 Non in vendita',

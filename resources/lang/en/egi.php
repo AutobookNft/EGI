@@ -80,6 +80,10 @@ return [
         'outbid' => 'Outbid',
     ],
 
+    // Original currency note
+    'originally_reserved_in' => 'Originally reserved in :currency for :amount',
+    'originally_reserved_in_short' => 'Res. :currency :amount',
+
     // Information Sections
     'properties' => 'Properties',
     'supports_epp' => 'Supports EPP',

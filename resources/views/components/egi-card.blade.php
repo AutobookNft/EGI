@@ -396,23 +396,23 @@ $isCreator = auth()->check() && auth()->id() === $creatorId;
 
             // Se c'è una prenotazione attiva, uso il suo prezzo e utente
             if ($highestPriorityReservation && $highestPriorityReservation->status === 'active') {
-            // 🚀 DEBUG: Log per capire il prezzo mostrato nella card
-            \Log::info('🎯 EGI CARD PRICE DEBUG', [
-            'egi_id' => $egi->id,
-            'base_price' => $egi->price,
-            'reservation_id' => $highestPriorityReservation->id,
-            'reservation_offer_eur' => $highestPriorityReservation->offer_amount_fiat,
-            'reservation_offer_algo' => $highestPriorityReservation->offer_amount_algo,
-            'display_price_before' => $displayPrice,
-            ]);
+                $displayPrice = $highestPriorityReservation->offer_amount_fiat ?? $egi->price;
+                $displayUser = $highestPriorityReservation->user;
+                
+                // 🎯 CURRENCY LOGIC: Usa valuta originale prenotazione per conversione automatica
+                $displayCurrency = $highestPriorityReservation->fiat_currency ?? 'USD';
+            } else {
+                // Se NON c'è prenotazione, usa preferenza utente
+                $displayCurrency = 'EUR'; // Default fallback
+                if (App\Helpers\FegiAuth::check()) {
+                    $displayCurrency = App\Helpers\FegiAuth::user()->preferred_currency ?? 'EUR';
+                }
+            }
 
-            // 🚀 FIX: Usa EUR per il display, non ALGO!
-            $displayPrice = $highestPriorityReservation->offer_amount_fiat ?? $egi->price;
-            $displayUser = $highestPriorityReservation->user;
-
-            \Log::info('🎯 EGI CARD PRICE DEBUG AFTER', [
-            'final_display_price_eur' => $displayPrice
-            ]);
+            // 🎯 TARGET CURRENCY: Valuta finale desiderata (quella del badge utente)
+            $targetCurrency = 'EUR'; // Default fallback
+            if (App\Helpers\FegiAuth::check()) {
+                $targetCurrency = App\Helpers\FegiAuth::user()->preferred_currency ?? 'EUR';
             }
             @endphp
 
@@ -439,7 +439,13 @@ $isCreator = auth()->check() && auth()->id() === $creatorId;
                     </div>
                     <div class="text-right">
                         <span class="text-sm font-bold text-white">
-                            <x-currency-price :price="$displayPrice" currency="EUR" />
+                            <x-currency-price 
+                                :price="$displayPrice" 
+                                :currency="$displayCurrency"
+                                :reservation="$highestPriorityReservation"
+                                :target-currency="$targetCurrency"
+                                size="small"
+                            />
                         </span>
                     </div>
                 </div>

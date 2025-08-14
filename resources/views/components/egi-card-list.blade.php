@@ -299,15 +299,22 @@ $showBadge = $showBadge ?? $showOwnershipBadge;
 
             // Se c'è una prenotazione attiva, usa il suo prezzo EUR
             if ($highestPriorityReservation && $highestPriorityReservation->status === 'active') {
-            $displayPriceEur = $highestPriorityReservation->offer_amount_fiat;
+                $displayPriceEur = $highestPriorityReservation->offer_amount_fiat;
+                
+                // 🎯 CURRENCY LOGIC: Usa valuta originale prenotazione per conversione automatica
+                $displayCurrency = $highestPriorityReservation->fiat_currency ?? 'USD';
+            } else {
+                // Se NON c'è prenotazione, usa preferenza utente
+                $displayCurrency = 'EUR'; // Default fallback
+                if (App\Helpers\FegiAuth::check()) {
+                    $displayCurrency = App\Helpers\FegiAuth::user()->preferred_currency ?? 'EUR';
+                }
+            }
 
-            \Log::info('🎯 EGI CARD LIST PRICE DEBUG', [
-            'egi_id' => $egi->id,
-            'base_price_eur' => $egi->price,
-            'reservation_id' => $highestPriorityReservation->id,
-            'reservation_offer_eur' => $highestPriorityReservation->offer_amount_fiat,
-            'final_display_price_eur' => $displayPriceEur
-            ]);
+            // 🎯 TARGET CURRENCY: Valuta finale desiderata (quella del badge utente)
+            $targetCurrency = 'EUR'; // Default fallback
+            if (App\Helpers\FegiAuth::check()) {
+                $targetCurrency = App\Helpers\FegiAuth::user()->preferred_currency ?? 'EUR';
             }
 
             // Controlla se c'è una prenotazione corrente per mostrare il pulsante Rilancia
@@ -323,9 +330,37 @@ $showBadge = $showBadge ?? $showOwnershipBadge;
                             d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z"
                             clip-rule="evenodd" />
                     </svg>
-                    <span class="font-bold {{ $isHyper ? 'text-yellow-300' : 'text-orange-300' }}">
-                        <x-currency-price :price="$displayPriceEur" currency="EUR" />
-                    </span>
+                    <div class="flex items-center gap-1">
+                        <span class="font-bold {{ $isHyper ? 'text-yellow-300' : 'text-orange-300' }}">
+                            <x-currency-price 
+                                :price="$displayPriceEur" 
+                                :currency="$displayCurrency"
+                            />
+                        </span>
+                        {{-- Nota piccolissima accanto solo per le liste --}}
+                        @php
+                        $shouldShowListNote = false;
+                        $formattedListPrice = '';
+                        if ($highestPriorityReservation && $targetCurrency) {
+                            $originalCurrency = $highestPriorityReservation->fiat_currency ?? 'EUR';
+                            $shouldShowListNote = ($targetCurrency !== $originalCurrency);
+                            if ($shouldShowListNote) {
+                                $originalPrice = $highestPriorityReservation->offer_amount_fiat ?? 0;
+                                switch($originalCurrency) {
+                                    case 'USD': $formattedListPrice = '$' . number_format($originalPrice, 0); break;
+                                    case 'EUR': $formattedListPrice = '€' . number_format($originalPrice, 0); break;
+                                    case 'GBP': $formattedListPrice = '£' . number_format($originalPrice, 0); break;
+                                    default: $formattedListPrice = $originalCurrency . ' ' . number_format($originalPrice, 0); break;
+                                }
+                            }
+                        }
+                        @endphp
+                        @if($shouldShowListNote && $formattedListPrice)
+                            <span class="bg-amber-50 border border-amber-200 rounded px-1 py-0.5 text-xs text-amber-700 animate-pulse whitespace-nowrap font-normal">
+                                @lang('egi.originally_reserved_in_short', ['currency' => $originalCurrency, 'amount' => $formattedListPrice])
+                            </span>
+                        @endif
+                    </div>
                 </div>
 
                 {{-- Pulsante Rilancia se l'EGI è già prenotato --}}

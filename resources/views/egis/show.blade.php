@@ -194,25 +194,34 @@
                     $displayPrice = $highestPriorityReservation->offer_amount_fiat ?? $fallbackPrice;
                     $displayUser = $highestPriorityReservation->user;
 
+                    // 🎯 CURRENCY LOGIC CORRETTA: 
+                    // - displayPrice = prezzo della prenotazione (es. 1250)
+                    // - displayCurrency = valuta ORIGINALE della prenotazione (es. USD)
+                    // - Il JavaScript convertirà automaticamente nella valuta preferita dall'utente
+                    $displayCurrency = $highestPriorityReservation->fiat_currency ?? 'USD';
+
                     // Label diversa per STRONG vs WEAK
                     if ($highestPriorityReservation->type === 'weak') {
                     $priceLabel = __('egi.reservation.fegi_reservation');
                     } else {
                     $priceLabel = __('egi.reservation.highest_bid');
                     }
-                    }
-
-                    // Determino la valuta da mostrare
+                    } else {
+                    // Se NON c'è prenotazione, usa il prezzo base dell'EGI
+                    // Determina la valuta da mostrare (basata su preferenza utente/badge)  
                     $displayCurrency = 'EUR'; // Default fallback
-                    if ($highestPriorityReservation && $highestPriorityReservation->fiat_currency) {
-                    // Se c'è una prenotazione attiva, usa la sua valuta
-                    $displayCurrency = $highestPriorityReservation->fiat_currency;
-                    } elseif (App\Helpers\FegiAuth::check()) {
-                    // Se l'utente è autenticato, usa la sua preferenza
-                    $displayCurrency = App\Helpers\FegiAuth::user()->preferred_currency ?? 'EUR';
+                    if (App\Helpers\FegiAuth::check()) {
+                        // Se l'utente è autenticato, usa la sua preferenza
+                        $displayCurrency = App\Helpers\FegiAuth::user()->preferred_currency ?? 'EUR';
                     }
-                    // Altrimenti mantieni EUR come default
+                    }
 
+                    // 🎯 TARGET CURRENCY: Valuta finale desiderata (quella del badge utente)
+                    $targetCurrency = 'EUR'; // Default fallback
+                    if (App\Helpers\FegiAuth::check()) {
+                        $targetCurrency = App\Helpers\FegiAuth::user()->preferred_currency ?? 'EUR';
+                    }
+                    
                     // 🔧 VALIDATION: Assicuro che displayPrice sia sempre un numero valido
                     $displayPrice = is_numeric($displayPrice) ? (float)$displayPrice : 0;
 
@@ -313,7 +322,7 @@
                                                 class="absolute text-sm {{ $isPriceLocked ? 'text-gray-500' : 'text-gray-400' }} right-3 top-2">ALGO</span>
                                             @if($isPriceLocked)
                                             <div
-                                                class="absolute inset-0 flex items-center justify-center bg-black/20 rounded-lg">
+                                                class="absolute inset-0 flex items-center justify-center rounded-lg bg-black/20">
                                                 <svg class="w-6 h-6 text-yellow-500 opacity-80" fill="currentColor"
                                                     viewBox="0 0 20 20">
                                                     <path fill-rule="evenodd"
@@ -352,8 +361,7 @@
                                             <input type="hidden" name="is_published" value="0">
                                             <input type="checkbox" id="is_published" name="is_published" value="1" {{
                                                 old('is_published', $egi->is_published) ? 'checked' : '' }}
-                                            class="w-4 h-4 rounded text-emerald-600 bg-black/30 border-emerald-700/50
-                                            focus:ring-emerald-500 focus:ring-2">
+                                            class="w-4 h-4 rounded text-emerald-600 bg-black/30 border-emerald-700/50 focus:ring-emerald-500 focus:ring-2">
                                             <span class="ml-3 text-sm font-medium text-emerald-300">
                                                 {{ __('egi.crud.is_published') }}
                                             </span>
@@ -405,7 +413,12 @@
                                         </div>
                                         <div class="font-medium text-white">
                                             @if($displayPrice)
-                                            <x-currency-price :price="$displayPrice" :currency="$displayCurrency" />
+                                            <x-currency-price 
+                                                :price="$displayPrice" 
+                                                :currency="$displayCurrency"
+                                                :reservation="$highestPriorityReservation"
+                                                :target-currency="$targetCurrency"
+                                            />
                                             @else
                                             {{ __('egi.crud.price_not_set') }}
                                             @endif
@@ -493,8 +506,14 @@
                                 <div class="mb-6 text-center">
                                     <p class="mb-2 text-sm text-gray-400">{{ $priceLabel }}</p>
                                     <div class="flex items-baseline justify-center">
-                                        <x-currency-price :price="$displayPrice" :currency="$displayCurrency"
-                                            class="text-4xl font-bold text-white" :show-original="true" />
+                                        <x-currency-price 
+                                            :price="$displayPrice" 
+                                            :currency="$displayCurrency"
+                                            :reservation="$highestPriorityReservation"
+                                            :target-currency="$targetCurrency"
+                                            class="text-4xl font-bold text-white" 
+                                            :show-original="true" 
+                                        />
                                         <span class="ml-2 text-lg font-medium text-gray-400">{{ $displayCurrency
                                             }}</span>
                                     </div>
