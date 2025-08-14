@@ -59,12 +59,17 @@ export class CurrencyDisplayManager {
             selector: '.currency-amount',
             amountAttribute: 'data-amount',
             currencyAttribute: 'data-currency'
+        },
+        {
+            selector: '.currency-display',  // 🔧 FIX: Aggiungo il selettore del componente currency-price
+            amountAttribute: 'data-price',  // 🔧 FIX: Usa data-price invece di data-amount
+            currencyAttribute: 'data-currency',
+            formatAttribute: 'data-display-options'
         }
     ];
 
     constructor(service?: CurrencyService) {
         this.currencyService = service || currencyService;
-        console.log('CurrencyDisplayManager initialized - Enterprise UI Currency System');
     }
 
     // --- 🚀 INITIALIZATION METHODS ---
@@ -75,8 +80,6 @@ export class CurrencyDisplayManager {
      */
     public async initialize(): Promise<void> {
         try {
-            console.log('CurrencyDisplayManager: Initializing...');
-
             // Get user's preferred currency
             await this.loadUserCurrency();
 
@@ -93,7 +96,6 @@ export class CurrencyDisplayManager {
             await this.updateAllPriceDisplays();
 
             this.isInitialized = true;
-            console.log('CurrencyDisplayManager: Initialized successfully');
 
         } catch (error) {
             UEM.handleClientError('CURRENCY_DISPLAY_INIT_ERROR', {
@@ -108,7 +110,6 @@ export class CurrencyDisplayManager {
     private async loadUserCurrency(): Promise<void> {
         try {
             this.currentUserCurrency = await this.currencyService.getUserPreferredCurrency();
-            console.log(`CurrencyDisplayManager: User currency loaded: ${this.currentUserCurrency}`);
         } catch (error) {
             UEM.handleClientError('CURRENCY_USER_LOAD_ERROR', {
                 error: error instanceof Error ? error.message : 'Unknown error'
@@ -131,8 +132,6 @@ export class CurrencyDisplayManager {
                 this.registerPriceElement(element as HTMLElement, config, `${config.selector}-${index}`);
             });
         });
-
-        console.log(`CurrencyDisplayManager: Registered ${this.priceElements.size} price elements`);
     }
 
     /**
@@ -145,11 +144,11 @@ export class CurrencyDisplayManager {
         if (!amountStr) return;
 
         const amount = parseFloat(amountStr);
-        if (isNaN(amount)) return;
+        const safeAmount = isNaN(amount) ? 0 : amount;
 
         const priceElement: PriceElement = {
             element,
-            originalAmount: amount,
+            originalAmount: safeAmount,
             originalCurrency: currency.toUpperCase(),
             dataAttributes: {
                 priceAmount: amountStr,
@@ -167,14 +166,7 @@ export class CurrencyDisplayManager {
      * Updates all registered price displays with current user currency
      */
     public async updateAllPriceDisplays(): Promise<void> {
-        if (!this.isInitialized) {
-            console.warn('CurrencyDisplayManager: Not initialized, skipping display update');
-            return;
-        }
-
         try {
-            console.log(`CurrencyDisplayManager: Updating all prices to ${this.currentUserCurrency}`);
-
             const updatePromises: Promise<void>[] = [];
 
             for (const [key, priceElement] of this.priceElements.entries()) {
@@ -182,7 +174,6 @@ export class CurrencyDisplayManager {
             }
 
             await Promise.all(updatePromises);
-            console.log('CurrencyDisplayManager: All price displays updated');
 
         } catch (error) {
             UEM.handleClientError('CURRENCY_DISPLAY_UPDATE_ERROR', {
@@ -201,7 +192,8 @@ export class CurrencyDisplayManager {
 
             // If already in target currency, just format
             if (originalCurrency === this.currentUserCurrency) {
-                element.textContent = this.currencyService.formatCurrency(originalAmount, originalCurrency);
+                const formatted = this.currencyService.formatCurrency(originalAmount, originalCurrency);
+                element.textContent = formatted;
                 return;
             }
 
@@ -219,10 +211,12 @@ export class CurrencyDisplayManager {
             }
 
             // Update display with converted amount
-            element.textContent = this.currencyService.formatCurrency(
+            const finalFormatted = this.currencyService.formatCurrency(
                 conversion.converted_amount,
                 conversion.converted_currency
             );
+
+            element.textContent = finalFormatted;
 
             // Update data attributes
             element.setAttribute('data-converted-amount', conversion.converted_amount.toString());
@@ -248,7 +242,6 @@ export class CurrencyDisplayManager {
     private setupCurrencySelector(): void {
         const selector = document.getElementById('currency-selector') as HTMLSelectElement;
         if (!selector) {
-            console.log('CurrencyDisplayManager: No currency selector found, skipping setup');
             return;
         }
 
@@ -260,8 +253,6 @@ export class CurrencyDisplayManager {
             const target = event.target as HTMLSelectElement;
             await this.changeCurrency(target.value);
         });
-
-        console.log('CurrencyDisplayManager: Currency selector setup complete');
     }
 
     /**
@@ -270,16 +261,9 @@ export class CurrencyDisplayManager {
     public async changeCurrency(newCurrency: string): Promise<void> {
         try {
             const normalizedCurrency = newCurrency.toUpperCase();
-            console.log(`CurrencyDisplayManager: Changing currency to ${normalizedCurrency}`);
 
             // Update user preference on backend (if authenticated)
-            const updateSuccess = await this.currencyService.setUserPreferredCurrency(normalizedCurrency);
-
-            if (updateSuccess) {
-                console.log('CurrencyDisplayManager: User preference updated on backend');
-            } else {
-                console.log('CurrencyDisplayManager: Backend update failed, proceeding with frontend-only change');
-            }
+            await this.currencyService.setUserPreferredCurrency(normalizedCurrency);
 
             // Update local currency
             this.currentUserCurrency = normalizedCurrency;
@@ -295,8 +279,6 @@ export class CurrencyDisplayManager {
 
             // Dispatch custom event for other components
             this.dispatchCurrencyChangeEvent(normalizedCurrency);
-
-            console.log(`CurrencyDisplayManager: Currency changed successfully to ${normalizedCurrency}`);
 
         } catch (error) {
             UEM.handleClientError('CURRENCY_CHANGE_ERROR', {
@@ -347,8 +329,6 @@ export class CurrencyDisplayManager {
                 this.changeCurrency(event.detail.currency);
             }
         }) as EventListener);
-
-        console.log('CurrencyDisplayManager: Event listeners setup complete');
     }
 
     /**

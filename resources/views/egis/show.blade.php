@@ -189,7 +189,9 @@
                     'base_price' => $egi->price
                     ]);
 
-                    $displayPrice = $highestPriorityReservation->offer_amount_fiat ?? ($egi->price * 0.30);
+                    // 🔧 FIX: Proteggo da valori null o non numerici
+                    $fallbackPrice = ($egi->price && is_numeric($egi->price)) ? ($egi->price * 0.30) : 0;
+                    $displayPrice = $highestPriorityReservation->offer_amount_fiat ?? $fallbackPrice;
                     $displayUser = $highestPriorityReservation->user;
 
                     // Label diversa per STRONG vs WEAK
@@ -210,6 +212,9 @@
                     $displayCurrency = App\Helpers\FegiAuth::user()->preferred_currency ?? 'EUR';
                     }
                     // Altrimenti mantieni EUR come default
+
+                    // 🔧 VALIDATION: Assicuro che displayPrice sia sempre un numero valido
+                    $displayPrice = is_numeric($displayPrice) ? (float)$displayPrice : 0;
 
                     $isForSale = $displayPrice && $displayPrice > 0 && !$egi->mint;
                     $canBeReserved = !$egi->mint &&
@@ -286,30 +291,40 @@
 
                                     {{-- Price Field --}}
                                     <div>
-                                        <label for="price" class="block mb-2 text-sm font-medium text-emerald-300 {{ $isPriceLocked ? 'opacity-60' : '' }}">
+                                        <label for="price"
+                                            class="block mb-2 text-sm font-medium text-emerald-300 {{ $isPriceLocked ? 'opacity-60' : '' }}">
                                             {{ __('egi.crud.price') }}
                                             @if($isPriceLocked)
-                                            <svg class="inline w-4 h-4 ml-1 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
+                                            <svg class="inline w-4 h-4 ml-1 text-yellow-500" fill="currentColor"
+                                                viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd"
+                                                    d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
+                                                    clip-rule="evenodd" />
                                             </svg>
                                             @endif
                                         </label>
                                         <div class="relative">
                                             <input type="number" id="price" name="price"
-                                                value="{{ old('price', $egi->price) }}" step="0.01" min="0"
-                                                {{ $isPriceLocked ? 'disabled readonly' : '' }}
+                                                value="{{ old('price', $egi->price) }}" step="0.01" min="0" {{
+                                                $isPriceLocked ? 'disabled readonly' : '' }}
                                                 class="w-full px-3 py-2 text-white placeholder-gray-400 border rounded-lg {{ $isPriceLocked ? 'bg-black/10 opacity-60 cursor-not-allowed border-gray-600' : 'bg-black/30 border-emerald-700/50 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500' }}"
                                                 placeholder="{{ __('egi.crud.price_placeholder') }}">
-                                            <span class="absolute text-sm {{ $isPriceLocked ? 'text-gray-500' : 'text-gray-400' }} right-3 top-2">ALGO</span>
+                                            <span
+                                                class="absolute text-sm {{ $isPriceLocked ? 'text-gray-500' : 'text-gray-400' }} right-3 top-2">ALGO</span>
                                             @if($isPriceLocked)
-                                            <div class="absolute inset-0 flex items-center justify-center bg-black/20 rounded-lg">
-                                                <svg class="w-6 h-6 text-yellow-500 opacity-80" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
+                                            <div
+                                                class="absolute inset-0 flex items-center justify-center bg-black/20 rounded-lg">
+                                                <svg class="w-6 h-6 text-yellow-500 opacity-80" fill="currentColor"
+                                                    viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd"
+                                                        d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
+                                                        clip-rule="evenodd" />
                                                 </svg>
                                             </div>
                                             @endif
                                         </div>
-                                        <div class="mt-1 text-xs {{ $isPriceLocked ? 'text-yellow-400' : 'text-gray-400' }}">
+                                        <div
+                                            class="mt-1 text-xs {{ $isPriceLocked ? 'text-yellow-400' : 'text-gray-400' }}">
                                             @if($isPriceLocked)
                                             🔒 {{ __('egi.crud.price_locked_message') }}
                                             @else
@@ -337,7 +352,8 @@
                                             <input type="hidden" name="is_published" value="0">
                                             <input type="checkbox" id="is_published" name="is_published" value="1" {{
                                                 old('is_published', $egi->is_published) ? 'checked' : '' }}
-                                            class="w-4 h-4 rounded text-emerald-600 bg-black/30 border-emerald-700/50 focus:ring-emerald-500 focus:ring-2">
+                                            class="w-4 h-4 rounded text-emerald-600 bg-black/30 border-emerald-700/50
+                                            focus:ring-emerald-500 focus:ring-2">
                                             <span class="ml-3 text-sm font-medium text-emerald-300">
                                                 {{ __('egi.crud.is_published') }}
                                             </span>

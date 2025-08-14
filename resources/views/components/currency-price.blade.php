@@ -21,8 +21,13 @@ Esempio uso:
 'showConversionNote' => false
 ])
 
+@php
+// 🔧 VALIDATION: Assicuro che price sia sempre un numero valido
+$safePrice = is_numeric($price) ? (float)$price : 0;
+@endphp
+
 <span {{ $attributes->merge(['class' => "currency-display {$class}"]) }}
-    data-price="{{ $price }}"
+    data-price="{{ $safePrice }}"
     data-currency="{{ $currency }}"
     data-display-options="{{ json_encode([
     'showOriginalCurrency' => $showOriginal,
@@ -31,12 +36,12 @@ Esempio uso:
     >
     {{-- Fallback display mentre JS carica --}}
     @if($currency === 'EUR')
-    €{{ number_format($price, 2) }}
+    €{{ number_format($safePrice, 2) }}
     @elseif($currency === 'USD')
-    ${{ number_format($price, 2) }}
+    ${{ number_format($safePrice, 2) }}
     @elseif($currency === 'GBP')
-    £{{ number_format($price, 2) }}
+    £{{ number_format($safePrice, 2) }}
     @else
-    {{ $currency }} {{ number_format($price, 2) }}
+    {{ $currency }} {{ number_format($safePrice, 2) }}
     @endif
 </span>

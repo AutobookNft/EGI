@@ -718,6 +718,9 @@
         }
 
         updateBadge(currency, rate, updatedAt) {
+            // Check if currency has actually changed
+            const currencyChanged = this.currentCurrency !== currency;
+
             // Animate currency symbol change (Desktop)
             if (this.elements.symbol && this.elements.symbol.textContent !== currency) {
                 this.animateValueChange(this.elements.symbol, currency);
@@ -757,6 +760,14 @@
             }
 
             this.currentCurrency = currency;
+
+            // 🚀 NOTIFY CURRENCY DISPLAY COMPONENT IF CURRENCY CHANGED
+            if (currencyChanged) {
+                const currencyChangeEvent = new CustomEvent('currencyChanged', {
+                    detail: { currency: currency }
+                });
+                document.dispatchEvent(currencyChangeEvent);
+            }
 
             // Add success flash animation
             this.flashSuccess();
@@ -900,7 +911,10 @@
                 });
 
                 if (response.ok) {
-                    // Immediately fetch new rate
+                    // Update current currency
+                    this.currentCurrency = newCurrency;
+
+                    // Immediately fetch new rate (this will emit the currencyChanged event via updateBadge)
                     this.fetchAndUpdateRate();
 
                     // Show success feedback

@@ -35,11 +35,8 @@ export class CurrencyDisplayComponent {
     private readonly MIN_API_INTERVAL = 5000; // 5 secondi minimo tra API calls
 
     public async initialize(): Promise<void> {
-        console.log('💰 [Currency Display] Initializing Multi-Currency Display System...');
-
         // Carica valuta utente corrente PRIMA di tutto
         await this.loadUserCurrency();
-        console.log(`💰 [Currency Display] User currency loaded: ${this.currentCurrency}`);
 
         // Inizializza elementi price display esistenti
         this.initializeExistingElements();
@@ -74,8 +71,6 @@ export class CurrencyDisplayComponent {
 
         // Throttle: minimo 5 secondi tra cambi valuta
         if (now - this.lastApiCall < this.MIN_API_INTERVAL) {
-            console.log('💰 [Currency Display] Currency change throttled, waiting...');
-
             if (this.currencyChangeTimeout) {
                 clearTimeout(this.currencyChangeTimeout);
             }
@@ -99,33 +94,17 @@ export class CurrencyDisplayComponent {
      * @param originalCurrency - La valuta originale (default: 'EUR')
      * @param options - Opzioni per il display
      */
-    public registerPriceElement(
-        element: HTMLElement,
-        originalPrice: number,
-        originalCurrency: string = 'EUR',
-        options: PriceDisplayOptions = {}
-    ): void {
-
-        // Imposta attributi data per tracking
-        element.setAttribute('data-original-price', originalPrice.toString());
-        element.setAttribute('data-original-currency', originalCurrency);
-        element.setAttribute('data-currency-display', 'true');
-
-        // Store options
-        if (options) {
-            element.setAttribute('data-display-options', JSON.stringify(options));
-        }
-
+    public registerPriceElement(element: HTMLElement, originalPrice: number, originalCurrency: string = 'EUR', options: PriceDisplayOptions = {}): void {
+        // Aggiungi all'insieme degli elementi da aggiornare
         this.displayElements.add(element);
 
-        // REMOVED: Non fare update immediato! Causa cascata di API calls
-        // this.updatePriceElement(element);
+        // Store dei dati originali per conversioni future
+        element.setAttribute('data-original-price', originalPrice.toString());
+        element.setAttribute('data-original-currency', originalCurrency);
+        element.setAttribute('data-price-options', JSON.stringify(options));
 
-        console.log('💰 [Currency Display] Registered price element (deferred update):', {
-            original_price: originalPrice,
-            original_currency: originalCurrency,
-            target_currency: this.currentCurrency
-        });
+        // Aggiorna immediatamente se il sistema è inizializzato
+        this.debouncedInitialize();
     }
 
     /**
@@ -135,10 +114,7 @@ export class CurrencyDisplayComponent {
         // Cerca elementi con data-price attribute
         const priceElements = document.querySelectorAll('[data-price]');
 
-        console.log(`💰 [Currency Display] Found ${priceElements.length} price elements`);
-
         if (priceElements.length === 0) {
-            console.log('💰 [Currency Display] No price elements found, skipping initialization');
             return;
         }
 
@@ -154,7 +130,6 @@ export class CurrencyDisplayComponent {
         });
 
         // Batch update: aggiorna tutti insieme alla fine
-        console.log(`💰 [Currency Display] Batch updating ${this.displayElements.size} registered elements`);
         await this.updateAllPriceElements();
     }
 
@@ -162,15 +137,16 @@ export class CurrencyDisplayComponent {
      * Gestore cambio valuta dal selettore
      */
     private async onCurrencyChanged(newCurrency: string): Promise<void> {
-        console.log('💰 [Currency Display] Currency changed to:', newCurrency);
+        // Evita update inutili se la valuta non è cambiata
+        if (this.currentCurrency === newCurrency) {
+            return;
+        }
 
         this.currentCurrency = newCurrency;
 
         // Aggiorna tutti gli elementi price
         await this.updateAllPriceElements();
-    }
-
-    /**
+    }    /**
      * Carica la valuta utente corrente dai meta tag server-side (no API calls)
      */
     private async loadUserCurrency(): Promise<void> {
@@ -179,7 +155,6 @@ export class CurrencyDisplayComponent {
             const currencySymbolElement = document.getElementById('currency-symbol');
             if (currencySymbolElement && currencySymbolElement.textContent?.trim()) {
                 this.currentCurrency = currencySymbolElement.textContent.trim();
-                console.log(`💰 [Currency Display] Loaded from DOM currency-symbol: ${this.currentCurrency}`);
                 return;
             }
 
@@ -187,7 +162,6 @@ export class CurrencyDisplayComponent {
             const currencySymbolMobile = document.getElementById('currency-symbol-mobile');
             if (currencySymbolMobile && currencySymbolMobile.textContent?.trim()) {
                 this.currentCurrency = currencySymbolMobile.textContent.trim();
-                console.log(`💰 [Currency Display] Loaded from DOM currency-symbol-mobile: ${this.currentCurrency}`);
                 return;
             }
 
@@ -197,7 +171,6 @@ export class CurrencyDisplayComponent {
 
             if (serverCurrency) {
                 this.currentCurrency = serverCurrency;
-                console.log(`💰 [Currency Display] Loaded from meta tag: ${this.currentCurrency}`);
                 return;
             }
 
@@ -205,12 +178,10 @@ export class CurrencyDisplayComponent {
             const cached = localStorage.getItem('user_preferred_currency');
             if (cached) {
                 this.currentCurrency = cached;
-                console.log(`💰 [Currency Display] Using cached currency: ${cached}`);
                 return;
             }
 
             // FALLBACK: Default USD
-            console.log('💰 [Currency Display] Using default USD');
             this.currentCurrency = 'USD';
 
         } catch (error) {
@@ -222,8 +193,6 @@ export class CurrencyDisplayComponent {
      */
     private async updateAllPriceElements(): Promise<void> {
         if (this.displayElements.size === 0) return;
-
-        console.log(`💰 [Currency Display] Batch updating ${this.displayElements.size} elements`);
 
         // Pre-fetch tutti i tassi di cambio necessari in una volta sola
         const currencyPairs = new Set<string>();
@@ -243,7 +212,7 @@ export class CurrencyDisplayComponent {
         const rates = await Promise.all(ratePromises);
         const rateMap = new Map();
         rates.forEach(({ pair, rate }) => {
-            if (rate) rateMap.set(pair, rate);
+            if (rate) rateMap.set(pair, rate.rate); // Usa solo il numero del tasso, non l'oggetto completo
         });
 
         // Aggiorna tutti gli elementi usando i tassi pre-caricati
@@ -309,7 +278,6 @@ export class CurrencyDisplayComponent {
         // Rate limiting: evita chiamate API troppo frequenti
         const now = Date.now();
         if (now - this.lastApiCall < this.MIN_API_INTERVAL) {
-            console.log('💰 [Currency Display] API call rate limited, using cache or skipping');
             return this.exchangeRates.get(cacheKey) || null;
         }
 
@@ -396,8 +364,6 @@ export class CurrencyDisplayComponent {
      * Refresh ottimizzato: solo i tassi scaduti, non tutti
      */
     private async refreshAllRates(): Promise<void> {
-        console.log('💰 [Currency Display] Refreshing expired exchange rates only...');
-
         const now = Date.now();
         let expiredRates = 0;
 
@@ -410,15 +376,11 @@ export class CurrencyDisplayComponent {
             }
         }
 
-        console.log(`💰 [Currency Display] Removed ${expiredRates} expired rates`);
-
         // Re-update solo se necessario e se ci sono elementi
         if (expiredRates > 0 && this.displayElements.size > 0) {
             await this.updateAllPriceElements();
         }
-    }
-
-    /**
+    }    /**
      * Utility: Converte un elemento esistente in currency display
      */
     public static convertElement(element: HTMLElement, options?: PriceDisplayOptions): void {
@@ -454,11 +416,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const hasCurrencySelector = document.getElementById('currency-badge-desktop') !== null;
 
     if (hasPriceElements || hasCurrencySelector) {
-        console.log('💰 [Currency Display] Auto-initializing - found price elements or currency selector');
         window.currencyDisplay = new CurrencyDisplayComponent();
         await window.currencyDisplay.initialize();
-        console.log('💰 [Currency Display] Auto-initialization completed');
-    } else {
-        console.log('💰 [Currency Display] Auto-init skipped - no price elements detected');
     }
 });

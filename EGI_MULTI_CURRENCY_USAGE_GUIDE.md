@@ -4,6 +4,46 @@
 
 Il sistema Multi-Currency di EGI implementa l'architettura "Think FIAT, Operate ALGO" per gestire transazioni in denaro reale con conversioni accurate real-time.
 
+## ✅ AGGIORNAMENTO: PROBLEMI RISOLTI (Gennaio 2025)
+
+### 🛠️ Fix Implementati
+
+**1. RISOLTO: "NaN USD" nel Display delle Conversioni**
+
+-   **Problema**: Le conversioni mostravano "NaN USD" invece dei prezzi corretti
+-   **Cause**: Selettori mancanti, formula di conversione errata, bug nel refresh dei tassi
+-   **Soluzione**: Correzioni multiple in CurrencyDisplayManager, CurrencyService, e CurrencyDisplayComponent
+
+**2. RISOLTO: Sincronizzazione Header-Card**
+
+-   **Problema**: Cambiando valuta dal badge nell'header, le card non si aggiornava automaticamente
+-   **Soluzione**: Implementato sistema di eventi `currencyChanged` tra CurrencyBadgeManager e CurrencyDisplayComponent
+
+**3. RISOLTO: "Pulsazioni" delle Cifre**
+
+-   **Problema**: Dopo i refresh automatici, le cifre "pulsavano" continuamente (5 volte/secondo)
+-   **Soluzione**: Ottimizzato il rilevamento dei cambi valuta per evitare aggiornamenti inutili
+
+**4. RISOLTO: Loop Infiniti di Aggiornamento**
+
+-   **Problema**: Eventi multipli causavano loop infiniti di conversioni
+-   **Soluzione**: Eliminato doppio emit di eventi e migliorato controllo delle condizioni
+
+### 🔧 Componenti Modificati
+
+-   `resources/ts/ui/currencyDisplayManager.ts` - Selettori e inizializzazione
+-   `resources/ts/services/currencyService.ts` - Formula di conversione ALGO
+-   `resources/ts/components/CurrencyDisplayComponent.ts` - Gestione rate refresh e eventi
+-   `resources/views/layouts/partials/header.blade.php` - CurrencyBadgeManager sync
+
+### 📊 Risultati
+
+✅ Sistema completamente funzionante
+✅ Conversioni accurate in real-time  
+✅ Sincronizzazione perfetta header-card
+✅ Performance ottimizzate (refresh ogni 30s)
+✅ Zero loop infiniti o aggiornamenti inutili
+
 ## 🎯 Componenti Principali
 
 ### 1. CurrencySelectorComponent
@@ -151,6 +191,50 @@ document.dispatchEvent(
     })
 );
 ```
+
+## 🔍 ARCHITETTURA POST-FIX (Gennaio 2025)
+
+### Flusso di Sincronizzazione
+
+```
+1. USER ACTION: Click sul badge valuta nell'header
+   ↓
+2. CurrencyBadgeManager.switchCurrency()
+   ↓
+3. API Call: /api/user/preferred-currency
+   ↓
+4. CurrencyBadgeManager.fetchAndUpdateRate()
+   ↓
+5. CurrencyBadgeManager.updateBadge()
+   ↓ (solo se valuta effettivamente cambiata)
+6. Emit: CustomEvent('currencyChanged')
+   ↓
+7. CurrencyDisplayComponent riceve evento
+   ↓
+8. Aggiornamento automatico di tutte le card
+```
+
+### Refresh Automatico (ogni 30s)
+
+```
+CurrencyBadgeManager Timer (30s)
+   ↓
+fetchAndUpdateRate()
+   ↓
+updateBadge() (confronta con this.currentCurrency)
+   ↓ (solo se cambio rilevato)
+Emit: currencyChanged
+   ↓
+Aggiornamento card sincronizzato
+```
+
+### Cache e Performance
+
+-   **Rate Cache**: 5 minuti (CurrencyDisplayComponent)
+-   **Rate Cleanup**: 10 minuti (expired rates only)
+-   **API Throttling**: 5 secondi minimo tra chiamate
+-   **Header Refresh**: 30 secondi
+-   **Component Refresh**: 2 minuti (cleanup cache)
 
 ### Test Backend API
 

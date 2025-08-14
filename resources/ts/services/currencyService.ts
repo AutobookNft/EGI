@@ -7,7 +7,7 @@
  * 🛡️ Security: Handles REAL MONEY operations with proper error handling
  * 💱 Multi-Currency: Supports currencies from server config with real-time rates
  * 🧱 Core Logic: Think FIAT, Display in User's Preferred Currency
- * 
+ *
  * FIXES:
  * - Uses web routes instead of /api/currency
  * - Gets supported currencies from server config via appConfig
@@ -71,7 +71,6 @@ export class CurrencyService {
     private rateCache: Map<string, { data: CurrencyRate; expiry: number }> = new Map();
 
     constructor() {
-        console.log('CurrencyService initialized - Enterprise Multi-Currency System v2.0');
         this.loadCurrencyConfig();
     }
 
@@ -88,7 +87,6 @@ export class CurrencyService {
 
             if (data.success && data.data) {
                 this.currencyConfig = data.data;
-                console.log('💰 Currency config loaded:', this.currencyConfig);
             } else {
                 throw new Error('Invalid currency config response');
             }
@@ -279,6 +277,11 @@ export class CurrencyService {
      */
     public formatCurrency(amount: number, currency: string): string {
         try {
+            // 🔧 FIX: Validate amount before formatting
+            if (!amount || isNaN(amount) || !isFinite(amount)) {
+                return `0.00 ${currency.toUpperCase()}`;
+            }
+
             return new Intl.NumberFormat('it-IT', {
                 style: 'currency',
                 currency: currency.toUpperCase(),
@@ -286,6 +289,10 @@ export class CurrencyService {
                 maximumFractionDigits: 2
             }).format(amount);
         } catch (error) {
+            // 🔧 FIX: Validate amount in fallback too
+            if (!amount || isNaN(amount) || !isFinite(amount)) {
+                return `0.00 ${currency.toUpperCase()}`;
+            }
             // Fallback if currency not supported by Intl
             return `${amount.toFixed(2)} ${currency.toUpperCase()}`;
         }
@@ -295,11 +302,17 @@ export class CurrencyService {
      * Convert currency between different FIAT currencies
      * @param amount - Amount to convert
      * @param fromCurrency - Source currency
-     * @param toCurrency - Target currency  
+     * @param toCurrency - Target currency
      * @returns Promise<ConversionResult | null>
      */
     public async convertCurrency(amount: number, fromCurrency: string, toCurrency: string): Promise<ConversionResult | null> {
         try {
+            // 🔧 FIX: Validate amount before conversion
+            if (!amount || isNaN(amount) || !isFinite(amount)) {
+                console.warn('CurrencyService: Invalid amount for conversion:', amount);
+                return null;
+            }
+
             // Se stessa valuta, nessuna conversione necessaria
             if (fromCurrency.toUpperCase() === toCurrency.toUpperCase()) {
                 return {
@@ -321,8 +334,10 @@ export class CurrencyService {
             }
 
             // Conversione: amount -> ALGO -> target currency
-            const algoAmount = amount / fromRate.rate;
-            const convertedAmount = algoAmount * toRate.rate;
+            // rate_to_algo è quanto ALGO vale 1 FIAT
+            // Per convertire: FIAT -> ALGO -> FIAT
+            const algoAmount = amount * fromRate.rate;  // Converti FIAT a ALGO
+            const convertedAmount = algoAmount / toRate.rate;  // Converti ALGO a target FIAT
 
             return {
                 original_amount: amount,

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>Currency Conversion Test</title>
+</head>
+
+<body>
+    <h1>Test Currency Conversion</h1>
+    <div id="test-results"></div>
+
+    <script>
+        // Test currency conversion directly
+        async function testCurrency() {
+            try {
+                // Simulate the conversion logic
+                const amount = 250;
+                const fromCurrency = 'EUR';
+                const toCurrency = 'USD';
+
+                console.log('Testing conversion:', { amount, fromCurrency, toCurrency });
+
+                // Get rates from API
+                const fromResponse = await fetch(`/api/currency/rate/${fromCurrency}`);
+                const fromData = await fromResponse.json();
+
+                const toResponse = await fetch(`/api/currency/rate/${toCurrency}`);
+                const toData = await toResponse.json();
+
+                if (fromData.success && toData.success) {
+                    const fromRate = fromData.data.rate_to_algo;
+                    const toRate = toData.data.rate_to_algo;
+
+                    console.log('Rates:', { fromRate, toRate });
+
+                    // OLD LOGIC (wrong)
+                    const algoAmountOld = amount / fromRate;
+                    const convertedAmountOld = algoAmountOld * toRate;
+
+                    // NEW LOGIC (correct)
+                    const algoAmountNew = amount * fromRate;
+                    const convertedAmountNew = algoAmountNew / toRate;
+
+                    const results = `
+                        <h2>Conversion Results for ${amount} ${fromCurrency} to ${toCurrency}</h2>
+                        <p><strong>FROM Rate:</strong> ${fromRate} ALGO per 1 ${fromCurrency}</p>
+                        <p><strong>TO Rate:</strong> ${toRate} ALGO per 1 ${toCurrency}</p>
+
+                        <h3>OLD Logic (WRONG):</h3>
+                        <p>ALGO Amount: ${amount} / ${fromRate} = ${algoAmountOld.toFixed(6)}</p>
+                        <p>Converted: ${algoAmountOld.toFixed(6)} * ${toRate} = <strong>${convertedAmountOld.toFixed(2)} ${toCurrency}</strong></p>
+
+                        <h3>NEW Logic (CORRECT):</h3>
+                        <p>ALGO Amount: ${amount} * ${fromRate} = ${algoAmountNew.toFixed(6)}</p>
+                        <p>Converted: ${algoAmountNew.toFixed(6)} / ${toRate} = <strong>${convertedAmountNew.toFixed(2)} ${toCurrency}</strong></p>
+                    `;
+
+                    document.getElementById('test-results').innerHTML = results;
+                } else {
+                    document.getElementById('test-results').innerHTML = '<p>Error getting rates</p>';
+                }
+            } catch (error) {
+                console.error('Test error:', error);
+                document.getElementById('test-results').innerHTML = `<p>Error: ${error.message}</p>`;
+            }
+        }
+
+        // Run test when page loads
+        window.addEventListener('DOMContentLoaded', testCurrency);
+    </script>
+</body>
+
+</html>
