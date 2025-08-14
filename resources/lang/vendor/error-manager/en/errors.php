@@ -271,6 +271,22 @@ return [
         // Missing Chapter Error Codes - Developer Messages
         'biography_chapter_index_failed' => 'Error retrieving biography chapters. Check ordering query and publication filters. Context: biography_id, user_id, order_by.',
         'biography_chapter_show_failed' => 'Error loading biography chapter details. Possible causes: missing relationship, eager loading failure, or chapter data corruption. Context: biography_id, chapter_id, user_id.',
+
+        // Multi-Currency System Error Messages - Dev Messages
+        'currency_exchange_service_failed' => 'Currency exchange service unavailable. Fallback used for code :code.',
+        'currency_unsupported' => 'Unsupported currency requested: :currency. System configured to support: :supported.',
+        'currency_rate_expired' => 'Exchange rate expired for :currency. Last update: :timestamp.',
+        'currency_conversion_failed' => 'Currency conversion failed from :from to :to for amount :amount. Error: :error.',
+        'user_currency_update_failed' => 'User currency preference update failed for user_id :user_id. Attempted currency: :currency.',
+        'currency_exchange_service_unavailable' => 'CoinGecko service unreachable. HTTP Status: :status. Endpoint: :endpoint.',
+        'currency_rate_cache_error' => 'Redis cache error for currency rate key :key. Error: :error.',
+        'currency_invalid_rate_data' => 'Invalid currency rate data received from API. Response: :response.',
+        'currency_conversion_error' => 'Conversion error :amount :from_currency to :to_currency. Rate: :rate.',
+        'currency_unsupported_currency' => 'Currency :currency not supported by system. Supported: :supported_currencies.',
+        'user_preference_update_failed' => 'User preference update failed for user_id :user_id. DB Error: :error.',
+        'currency_conversion_validation_error' => 'Currency conversion validation failed. Parameters: :params. Errors: :errors.',
+        'user_preference_fetch_error' => 'Unable to fetch preferences for user_id :user_id. Error: :error.',
+        'currency_preference_validation_error' => 'Currency preference validation failed for :currency. Error: :validation_error.',
     ],
     'user' => [
         // == Existing Entries ==
@@ -484,6 +500,21 @@ return [
         // Missing Chapter Error Codes - User Messages
         'biography_chapter_index_failed' => 'Unable to load biography chapters. Please try again in a moment or refresh the page.',
         'biography_chapter_show_failed' => 'Unable to load chapter details. Please try again in a moment.',
+
+        // Multi-Currency System Error Messages - User Messages (User-Friendly)
+        'currency_exchange_service_failed' => 'The currency conversion service is temporarily unavailable. Please try again in a few minutes.',
+        'currency_unsupported' => 'The selected currency is not currently supported. Please choose from the available currencies.',
+        'currency_rate_expired' => 'Exchange rates have expired. We are updating the data, please try again in a few minutes.',
+        'currency_conversion_failed' => 'An error occurred during currency conversion. Please try again or contact support.',
+        'user_currency_update_failed' => 'Unable to save your currency preference. Please try again later.',
+        'currency_exchange_service_unavailable' => 'The currency exchange service is temporarily unavailable. Please try again in a few minutes.',
+        'currency_invalid_rate_data' => 'Exchange rate data is not available. Please try again later.',
+        'currency_conversion_error' => 'Error during currency conversion. Please check the amount and try again.',
+        'currency_unsupported_currency' => 'The selected currency is not supported. Please choose a different currency from the list.',
+        'user_preference_update_failed' => 'Unable to save your preferences. Please try again later.',
+        'currency_conversion_validation_error' => 'The data entered for conversion is not valid. Please check and try again.',
+        'user_preference_fetch_error' => 'Unable to load your preferences. Please try again or contact support.',
+        'currency_preference_validation_error' => 'The selected currency is not valid. Please choose a currency from the available list.',
     ],
 
     // Generic message (used by UserInterfaceHandler if no specific message found)

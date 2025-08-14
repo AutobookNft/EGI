@@ -493,6 +493,21 @@ return [
         // Missing Chapter Error Codes - User Messages
         'biography_chapter_index_failed' => 'Non è stato possibile caricare i capitoli della biografia. Riprova tra qualche momento o aggiorna la pagina.',
         'biography_chapter_show_failed' => 'Non è stato possibile caricare i dettagli del capitolo. Riprova tra qualche momento.',
+
+        // Multi-Currency System Error Messages - User Messages (User-Friendly)
+        'currency_exchange_service_failed' => 'Il servizio di conversione valuta è temporaneamente non disponibile. Riprova tra qualche minuto.',
+        'currency_unsupported' => 'La valuta selezionata non è attualmente supportata. Scegli tra le valute disponibili.',
+        'currency_rate_expired' => 'I tassi di cambio sono scaduti. Stiamo aggiornando i dati, riprova tra qualche minuto.',
+        'currency_conversion_failed' => 'Si è verificato un errore nella conversione della valuta. Riprova o contatta l\'assistenza.',
+        'user_currency_update_failed' => 'Non è stato possibile salvare la tua preferenza di valuta. Riprova più tardi.',
+        'currency_exchange_service_unavailable' => 'Il servizio di cambio valuta è temporaneamente non disponibile. Riprova tra qualche minuto.',
+        'currency_invalid_rate_data' => 'I dati dei tassi di cambio non sono disponibili. Riprova più tardi.',
+        'currency_conversion_error' => 'Errore durante la conversione della valuta. Verifica l\'importo e riprova.',
+        'currency_unsupported_currency' => 'La valuta selezionata non è supportata. Scegli una valuta diversa dall\'elenco.',
+        'user_preference_update_failed' => 'Non è stato possibile salvare le tue preferenze. Riprova più tardi.',
+        'currency_conversion_validation_error' => 'I dati inseriti per la conversione non sono validi. Controlla e riprova.',
+        'user_preference_fetch_error' => 'Non è stato possibile caricare le tue preferenze. Riprova o contatta l\'assistenza.',
+        'currency_preference_validation_error' => 'La valuta selezionata non è valida. Scegli una valuta dall\'elenco disponibile.',
     ],
 
     // Generic message (used by UserInterfaceHandler if no specific message found)

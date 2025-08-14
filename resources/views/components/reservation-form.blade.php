@@ -15,16 +15,15 @@
                         <span class="text-gray-500 sm:text-sm">€</span>
                     </div>
                     <input type="number" name="offer_amount_fiat" id="offer_amount_fiat"
-                           class="block w-full pr-12 border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 pl-7 sm:text-sm"
-                           placeholder="{{ __('reservation.form.offer_amount_placeholder') }}"
-                           step="0.01" min="1" required
-                           value="{{ old('offer_amount_fiat', '') }}">
+                        class="block w-full pr-12 border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 pl-7 sm:text-sm"
+                        placeholder="{{ __('reservation.form.offer_amount_placeholder') }}" step="0.01" min="1" required
+                        value="{{ old('offer_amount_fiat', '') }}">
                 </div>
                 <p class="mt-1 text-sm text-gray-500" id="algo-equivalent-text">
                     {{ __('reservation.form.algo_equivalent', ['amount' => '0.00']) }}
                 </p>
                 @error('offer_amount_fiat')
-                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror
             </div>
 
@@ -32,7 +31,7 @@
             <div class="flex items-start">
                 <div class="flex items-center h-5">
                     <input id="terms_accepted" name="terms_accepted" type="checkbox" required
-                           class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
+                        class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
                 </div>
                 <div class="ml-3 text-sm">
                     <label for="terms_accepted" class="font-medium text-gray-700">
@@ -41,7 +40,7 @@
                 </div>
             </div>
             @error('terms_accepted')
-                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
             @enderror
 
             {{-- Contact Data (Optional) --}}
@@ -53,7 +52,7 @@
                             {{ __('Name') }}
                         </label>
                         <input type="text" name="contact_data[name]" id="contact_data[name]"
-                               class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                            class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                     </div>
 
                     <div>
@@ -61,7 +60,7 @@
                             {{ __('Email') }}
                         </label>
                         <input type="email" name="contact_data[email]" id="contact_data[email]"
-                               class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                            class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                     </div>
 
                     <div>
@@ -69,7 +68,7 @@
                             {{ __('Message') }}
                         </label>
                         <textarea name="contact_data[message]" id="contact_data[message]" rows="3"
-                                  class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea>
+                            class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea>
                     </div>
                 </div>
             </div>
@@ -77,7 +76,7 @@
             {{-- Submit Button --}}
             <div>
                 <button type="submit"
-                        class="inline-flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    class="inline-flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                     {{ __('reservation.form.submit_button') }}
                 </button>
             </div>

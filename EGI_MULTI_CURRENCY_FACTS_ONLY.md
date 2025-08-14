@@ -89,71 +89,26 @@ $this->logger->info('[OPERATION] Description', [
 **ACTUAL Currency Error Codes** (VERIFIED from actual config file):
 
 ```php
-'CURRENCY_EXCHANGE_SERVICE_UNAVAILABLE' => [
-    'type' => 'error',
-    'blocking' => 'not',
-    'dev_message_key' => 'error-manager::errors.dev.currency_exchange_service_unavailable',
-    'user_message_key' => 'error-manager::errors.user.currency_exchange_service_unavailable',
-    'http_status_code' => 503,
-    'devTeam_email_need' => true,
-    'notify_slack' => true,
-    'msg_to' => 'log-only',
-],
+## 8. Error Management
 
-'CURRENCY_RATE_CACHE_ERROR' => [
-    'type' => 'warning',
-    'blocking' => 'not',
-    'dev_message_key' => 'error-manager::errors.dev.currency_rate_cache_error',
-    'user_message_key' => null,
-    'http_status_code' => 500,
-    'devTeam_email_need' => false,
-    'notify_slack' => false,
-    'msg_to' => 'log-only',
-],
+### Error Codes (UEM Integration)
+```php
+// Service Errors
+'CURRENCY_EXCHANGE_SERVICE_UNAVAILABLE' => 503,
+'CURRENCY_EXCHANGE_SERVICE_FAILED' => 503,
+'CURRENCY_RATE_CACHE_ERROR' => 500,
+'CURRENCY_INVALID_RATE_DATA' => 502,
 
-'CURRENCY_INVALID_RATE_DATA' => [
-    'type' => 'error',
-    'blocking' => 'not',
-    'dev_message_key' => 'error-manager::errors.dev.currency_invalid_rate_data',
-    'user_message_key' => 'error-manager::errors.user.currency_invalid_rate_data',
-    'http_status_code' => 502,
-    'devTeam_email_need' => true,
-    'notify_slack' => true,
-    'msg_to' => 'json',
-],
+// Conversion Errors
+'CURRENCY_CONVERSION_ERROR' => 400,
+'CURRENCY_CONVERSION_VALIDATION_ERROR' => 422,
+'CURRENCY_UNSUPPORTED_CURRENCY' => 400,
 
-'CURRENCY_CONVERSION_ERROR' => [
-    'type' => 'error',
-    'blocking' => 'semi-blocking',
-    'dev_message_key' => 'error-manager::errors.dev.currency_conversion_error',
-    'user_message_key' => 'error-manager::errors.user.currency_conversion_error',
-    'http_status_code' => 400,
-    'devTeam_email_need' => false,
-    'notify_slack' => false,
-    'msg_to' => 'json',
-],
-
-'CURRENCY_UNSUPPORTED_CURRENCY' => [
-    'type' => 'warning',
-    'blocking' => 'semi-blocking',
-    'dev_message_key' => 'error-manager::errors.dev.currency_unsupported_currency',
-    'user_message_key' => 'error-manager::errors.user.currency_unsupported_currency',
-    'http_status_code' => 400,
-    'devTeam_email_need' => false,
-    'notify_slack' => false,
-    'msg_to' => 'json',
-],
-
-'USER_PREFERENCE_UPDATE_FAILED' => [
-    'type' => 'error',
-    'blocking' => 'semi-blocking',
-    'dev_message_key' => 'error-manager::errors.dev.user_preference_update_failed',
-    'user_message_key' => 'error-manager::errors.user.user_preference_update_failed',
-    'http_status_code' => 500,
-    'devTeam_email_need' => true,
-    'notify_slack' => true,
-    'msg_to' => 'json',
-],
+// User Preference Errors
+'USER_PREFERENCE_UPDATE_FAILED' => 500,
+'USER_PREFERENCE_FETCH_ERROR' => 404,
+'CURRENCY_PREFERENCE_VALIDATION_ERROR' => 422,
+```,
 ````
 
 **Usage Pattern** (ACTUAL from ReservationController):

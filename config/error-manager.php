@@ -3211,5 +3211,38 @@ return [
             'msg_to' => 'json',
         ],
 
+        'CURRENCY_CONVERSION_VALIDATION_ERROR' => [
+            'type' => 'error',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.currency_conversion_validation_error',
+            'user_message_key' => 'error-manager::errors.user.currency_conversion_validation_error',
+            'http_status_code' => 422,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'json',
+        ],
+
+        'USER_PREFERENCE_FETCH_ERROR' => [
+            'type' => 'warning',
+            'blocking' => 'not',
+            'dev_message_key' => 'error-manager::errors.dev.user_preference_fetch_error',
+            'user_message_key' => 'error-manager::errors.user.user_preference_fetch_error',
+            'http_status_code' => 404,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'json',
+        ],
+
+        'CURRENCY_PREFERENCE_VALIDATION_ERROR' => [
+            'type' => 'error',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.currency_preference_validation_error',
+            'user_message_key' => 'error-manager::errors.user.currency_preference_validation_error',
+            'http_status_code' => 422,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'json',
+        ],
+
     ]
 ];

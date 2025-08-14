@@ -605,7 +605,7 @@ export async function getEgiReservationStatus(egiId: number): Promise<Reservatio
  *
  * @returns {Promise<number|null>} The exchange rate or null if unavailable
  */
-export async function getAlgoExchangeRate(): Promise<number|null> {
+export async function getAlgoExchangeRate(): Promise<number | null> {
     try {
         const rateUrl = route('api/currency/algo-exchange-rate', {});
 
@@ -652,7 +652,7 @@ export async function getAlgoExchangeRate(): Promise<number|null> {
  * @param {number} reservationId The ID of the reservation to cancel
  * @returns {Promise<{success: boolean, message: string}>} The cancellation response
  */
-export async function cancelReservation(reservationId: number): Promise<{success: boolean, message: string}> {
+export async function cancelReservation(reservationId: number): Promise<{ success: boolean, message: string }> {
     try {
         const cancelUrl = route('api.reservations.cancel', { id: reservationId });
 
