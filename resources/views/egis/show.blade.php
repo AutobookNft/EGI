@@ -9,6 +9,9 @@
         ? asset(sprintf('storage/users_files/collections_%d/creator_%d/%d.%s',
         $egi->collection_id, $egi->user_id, $egi->key_file, $egi->extension))
         : asset('images/default_egi_placeholder.jpg');
+        
+        // Controllo se l'utente loggato è il creator dell'EGI
+        $isCreator = App\Helpers\FegiAuth::check() && App\Helpers\FegiAuth::id() === $egi->user_id;
         @endphp
         <script type="application/ld+json">
             {
@@ -114,6 +117,7 @@
                                         {{-- Quick Actions in Title Area --}}
                                         <div class="flex items-center ml-4 space-x-2">
                                             {{-- Like Button - Compact Version --}}
+                                            @if(!$isCreator)
                                             <button
                                                 class="p-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full transition-all duration-200 border border-white/20 like-button {{ $egi->is_liked ?? false ? 'is-liked bg-pink-500/20 border-pink-400/50' : '' }}"
                                                 data-resource-type="egi" data-resource-id="{{ $egi->id }}"
@@ -126,6 +130,7 @@
                                                         clip-rule="evenodd" />
                                                 </svg>
                                             </button>
+                                            @endif
 
                                             {{-- Share Button --}}
                                             <button
@@ -210,7 +215,7 @@
                     $canBeReserved = !$egi->mint &&
                     ($egi->is_published || (App\Helpers\FegiAuth::check() && App\Helpers\FegiAuth::id() ===
                     $collection->creator_id)) &&
-                    $displayPrice && $displayPrice > 0;
+                    $displayPrice && $displayPrice > 0 && !$isCreator;
                     @endphp
 
                     @if($canUpdateEgi)
@@ -525,6 +530,7 @@
                                 {{-- Main Action Buttons --}}
                                 <div class="space-y-3">
                                     {{-- Like Button - Full Version --}}
+                                    @if(!$isCreator)
                                     <button
                                         class="w-full inline-flex items-center justify-center px-6 py-4 bg-gradient-to-r from-pink-600/80 to-purple-600/80 hover:from-pink-600 hover:to-purple-600 backdrop-blur-sm text-white font-medium rounded-lg transition-all duration-200 border border-pink-500/30 hover:border-pink-400/50 like-button {{ $egi->is_liked ?? false ? 'is-liked ring-2 ring-pink-400/50' : '' }}"
                                         data-resource-type="egi" data-resource-id="{{ $egi->id }}">
@@ -540,6 +546,7 @@
                                             class="ml-2 bg-white/20 px-2 py-0.5 rounded-full text-xs like-count-display">{{
                                             $egi->likes_count ?? 0 }}</span>
                                     </button>
+                                    @endif
 
                                     {{-- Reserve Button --}}
                                     @if($canBeReserved)

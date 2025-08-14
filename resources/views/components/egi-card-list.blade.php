@@ -50,6 +50,9 @@ $contextConfig = [
 
 $config = $contextConfig[$context] ?? $contextConfig['collector'];
 
+// Controllo se l'utente loggato è il creator dell'EGI
+$isCreator = auth()->check() && auth()->id() === $egi->user_id;
+
 // Badge logic - può essere sovrascritto dal parametro showBadge
 $showBadge = $showBadge ?? $showOwnershipBadge;
 @endphp
@@ -254,6 +257,7 @@ $showBadge = $showBadge ?? $showOwnershipBadge;
                     </svg>
                     <span class="text-sm font-medium text-green-300">{{ __('common.available') }}</span>
                 </div>
+                @if(!$isCreator)
                 <button type="button"
                     class="reserve-button inline-flex items-center px-3 py-1.5 text-xs font-medium text-white bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all transform hover:scale-105 shadow-sm"
                     data-egi-id="{{ $egi->id }}">
@@ -263,6 +267,7 @@ $showBadge = $showBadge ?? $showOwnershipBadge;
                     </svg>
                     {{ __('egi.actions.reserve') ?? 'Prenota' }}
                 </button>
+                @endif
             </div>
             @endif
             @endif
@@ -307,7 +312,7 @@ $showBadge = $showBadge ?? $showOwnershipBadge;
                 </div>
 
                 {{-- Pulsante Rilancia se l'EGI è già prenotato --}}
-                @if ($hasCurrentReservation)
+                @if ($hasCurrentReservation && !$isCreator)
                 <button type="button"
                     class="reserve-button inline-flex items-center px-3 py-1.5 text-xs font-medium text-white bg-gradient-to-r from-amber-500 to-orange-600 rounded-lg hover:from-amber-600 hover:to-orange-700 transition-all transform hover:scale-105 shadow-sm"
                     data-egi-id="{{ $egi->id }}">
