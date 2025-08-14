@@ -91,7 +91,7 @@ $showBadge = $showBadge ?? $showOwnershipBadge;
 
 {{-- EGI Card List Component --}}
 <article
-    class="egi-card-list {{ $isHyper ? 'egi-card--hiper' : '' }} group relative bg-gray-800/50 rounded-xl p-4 border border-gray-700/50 hover:border-gray-600 hover:bg-gray-800/70 transition-all duration-300"
+    class="egi-card-list {{ $isHyper ? 'egi-card--hiper' : '' }} group relative bg-gray-800/50 rounded-xl p-3 border border-gray-700/50 hover:border-gray-600 hover:bg-gray-800/70 transition-all duration-300"
     data-egi-id="{{ $egi->id }}" data-hyper="{{ $isHyper ? '1' : '0' }}"
     style="{{ $isHyper ? '--energy:0.95; --foilHue:265; --edge:#9b5cf6; --accent:#a78bfa;' : '' }}">
 
@@ -274,17 +274,7 @@ $showBadge = $showBadge ?? $showOwnershipBadge;
                     </svg>
                     <span class="text-sm font-medium text-green-300">{{ __('common.available') }}</span>
                 </div>
-                @if(!$isCreator)
-                <button type="button"
-                    class="reserve-button inline-flex items-center px-3 py-1.5 text-xs font-medium text-white bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all transform hover:scale-105 shadow-sm"
-                    data-egi-id="{{ $egi->id }}">
-                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                    </svg>
-                    {{ __('egi.actions.reserve') ?? 'Prenota' }}
-                </button>
-                @endif
+                {{-- RIMUOVO il pulsante Prenota da qui perché va in fondo alla card --}}
             </div>
             @endif
             @endif
@@ -363,18 +353,7 @@ $showBadge = $showBadge ?? $showOwnershipBadge;
                     </div>
                 </div>
 
-                {{-- Pulsante Rilancia se l'EGI è già prenotato --}}
-                @if ($hasCurrentReservation && !$isCreator)
-                <button type="button"
-                    class="reserve-button inline-flex items-center px-3 py-1.5 text-xs font-medium text-white bg-gradient-to-r from-amber-500 to-orange-600 rounded-lg hover:from-amber-600 hover:to-orange-700 transition-all transform hover:scale-105 shadow-sm"
-                    data-egi-id="{{ $egi->id }}">
-                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                    {{ __('egi.actions.outbid') ?? 'Rilancia' }}
-                </button>
-                @endif
+                {{-- RIMUOVO il pulsante Rilancia da qui perché va in fondo alla card --}}
             </div>
             @endif
 
@@ -398,4 +377,27 @@ $showBadge = $showBadge ?? $showOwnershipBadge;
             @endif
         </div>
     </div>
+    
+    {{-- 🔥 Pulsante Prenota/Rilancia in fondo alla card --}}
+    @if(!$isCreator)
+        <div class="mt-3">
+            <button type="button"
+                class="reserve-button w-full flex items-center justify-center px-4 py-2 text-sm font-medium text-white 
+                {{ $hasCurrentReservation ? 'bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700' : 'bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700' }}
+                rounded-t-none rounded-b-lg transition-all transform hover:scale-[1.01]"
+                data-egi-id="{{ $egi->id }}">
+                @if($hasCurrentReservation)
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                    {{ __('egi.actions.outbid') ?? 'Rilancia' }}
+                @else
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                    {{ __('egi.actions.reserve') ?? 'Prenota' }}
+                @endif
+            </button>
+        </div>
+    @endif
 </article>

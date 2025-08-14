@@ -105,8 +105,8 @@ $currentSize = $sizeClasses[$size] ?? $sizeClasses['normal'];
 
     {{-- 💰 RESERVATION CURRENCY NOTE: Nota di conversione quando necessario --}}
     @if($shouldShowReservationNote && $formattedOriginalPrice)
-        <div class="mt-1 bg-amber-50 border border-amber-200 rounded px-2 py-1 text-xs text-amber-700 animate-pulse">
-            @lang('egi.originally_reserved_in', ['currency' => $originalCurrency, 'amount' => $formattedOriginalPrice])
+        <div class="mt-1 bg-amber-50 border border-amber-200 rounded px-1.5 py-0.5 text-xs text-amber-700 animate-pulse font-normal inline-block whitespace-nowrap">
+            @lang('egi.originally_reserved_in_short', ['currency' => $originalCurrency, 'amount' => $formattedOriginalPrice])
         </div>
     @endif
 </div>
