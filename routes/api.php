@@ -96,9 +96,6 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
 // API Routes
 Route::name('api.')->group(function () {
 
-
-
-
     // API di configurazione per le definizioni degli errori
     Route::get('/error-definitions', [App\Http\Controllers\Api\AppConfigController::class, 'getErrorDefinitions'])
         ->name('error.definitions');
@@ -132,4 +129,33 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/biographies/{id}', [App\Http\Controllers\Api\BiographyController::class, 'fetch']);
     Route::delete('/biographies/{id}', [App\Http\Controllers\Api\BiographyController::class, 'delete']);
     Route::get('/biographies', [App\Http\Controllers\Api\BiographyController::class, 'list']);
+});
+
+/*
+|--------------------------------------------------------------------------
+| Pre-Launch Reservation API Routes
+|--------------------------------------------------------------------------
+*/
+
+Route::prefix('reservations/pre-launch')->group(function () {
+
+    // Public route - no auth required for viewing rankings
+    Route::get('/rankings/{egi}', [ReservationController::class, 'getPreLaunchRankings'])
+        ->name('api.reservations.prelaunch.rankings');
+
+    // Protected routes - require authentication
+    Route::middleware(['auth:sanctum'])->group(function () {
+
+        Route::post('/create', [ReservationController::class, 'createPreLaunchReservation'])
+            ->name('api.reservations.prelaunch.create');
+
+        Route::delete('/{reservation}/withdraw', [ReservationController::class, 'withdrawPreLaunchReservation'])
+            ->name('api.reservations.prelaunch.withdraw');
+
+        Route::get('/my-reservations', [ReservationController::class, 'getUserPreLaunchReservations'])
+            ->name('api.reservations.prelaunch.mine');
+
+        Route::get('/check-eligibility/{egi}', [ReservationController::class, 'checkPreLaunchReservationEligibility'])
+            ->name('api.reservations.prelaunch.check');
+    });
 });

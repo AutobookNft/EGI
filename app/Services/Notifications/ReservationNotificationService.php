@@ -4,437 +4,383 @@ namespace App\Services\Notifications;
 
 use App\Models\Reservation;
 use App\Models\User;
-use App\Models\CustomDatabaseNotification;
 use App\Models\NotificationPayloadReservation;
-use App\Notifications\Reservations\ReservationSuperseded;
 use App\Notifications\Reservations\ReservationHighest;
+use App\Notifications\Reservations\ReservationSuperseded;
 use App\Notifications\Reservations\RankChanged;
-use App\Notifications\Reservations\RankImproved;
 use App\Notifications\Reservations\CompetitorWithdrew;
-use App\Enums\NotificationStatus;
+use Ultra\ErrorManager\Interfaces\ErrorManagerInterface;
+use Ultra\UltraLogManager\UltraLogManager;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Collection;
 
 /**
+ * Service for managing reservation-related notifications
+ *
  * @package App\Services\Notifications
  * @author Padmin D. Curtis (AI Partner OS3.0) for Fabio Cherici
- * @version 1.0.0 (FlorenceEGI - Reservation Notifications)
+ * @version 1.0.0 (FlorenceEGI - Pre-Launch Reservation System)
  * @date 2025-08-15
- * @purpose Handle reservation-related notifications using existing notification system
+ * @purpose Handle all reservation notification flows with ranking system
  */
 class ReservationNotificationService
 {
     /**
-     * System user ID for platform notifications
+     * Constructor with dependency injection
+     *
+     * @param UltraLogManager $logger Ultra Log Manager for structured logging
+     * @param ErrorManagerInterface $errorManager Ultra Error Manager for error handling
      */
-    const SYSTEM_USER_ID = 1;
+    public function __construct(
+        private UltraLogManager $logger,
+        private ErrorManagerInterface $errorManager
+    ) {}
 
     /**
-     * Send notification when reservation becomes the highest
+     * Send notification when user becomes the highest bidder
+     *
+     * @param Reservation $reservation The reservation that became highest
+     * @return void
+     * @throws \Exception If notification fails
      */
     public function sendNewHighest(Reservation $reservation): void
     {
+        // Log operation start
+        $this->logger->info('[RESERVATION_NOTIFICATION] Starting sendNewHighest', [
+            'reservation_id' => $reservation->id,
+            'egi_id' => $reservation->egi_id,
+            'user_id' => $reservation->user_id,
+            'amount_eur' => $reservation->amount_eur,
+            'rank_position' => $reservation->rank_position
+        ]);
+
         try {
             DB::transaction(function () use ($reservation) {
-                // Get competitors count
-                $competitorsCount = $reservation->getCompetitors()->count();
+                // Load relationships
+                $reservation->load(['user', 'egi']);
 
-                // Create payload
+                // Create notification payload
                 $payload = NotificationPayloadReservation::create([
                     'reservation_id' => $reservation->id,
                     'egi_id' => $reservation->egi_id,
                     'user_id' => $reservation->user_id,
                     'type' => NotificationPayloadReservation::TYPE_HIGHEST,
-                    'status' => NotificationPayloadReservation::STATUS_SUCCESS,
+                    'status' => 'success',
                     'data' => [
-                        'egi_title' => $reservation->egi->title ?? 'EGI #' . $reservation->egi_id,
                         'amount_eur' => $reservation->amount_eur,
-                        'total_competitors' => $competitorsCount,
-                        'previous_rank' => $reservation->previous_rank,
+                        'egi_title' => $reservation->egi->title,
+                        'egi_slug' => $reservation->egi->slug,
+                        'previous_rank' => $reservation->getOriginal('rank_position'),
+                        'new_rank' => 1
                     ]
                 ]);
 
+                $this->logger->debug('[RESERVATION_NOTIFICATION] Payload created', [
+                    'payload_id' => $payload->id,
+                    'type' => $payload->type
+                ]);
+
                 // Send notification to user
-                $user = User::find($reservation->user_id);
-                if ($user) {
-                    Notification::send($user, new ReservationHighest($payload));
+                Notification::send($reservation->user, new ReservationHighest($payload));
 
-                    Log::channel('florenceegi')->info('[NOTIFICATION] New highest notification sent', [
-                        'reservation_id' => $reservation->id,
-                        'user_id' => $user->id,
-                        'amount_eur' => $reservation->amount_eur,
-                    ]);
-                }
-
-                // Record notification in reservation
-                $reservation->recordNotification('highest', [
-                    'amount_eur' => $reservation->amount_eur,
-                    'competitors' => $competitorsCount,
+                // Log success
+                $this->logger->info('[RESERVATION_NOTIFICATION] New highest notification sent', [
+                    'reservation_id' => $reservation->id,
+                    'payload_id' => $payload->id,
+                    'user_id' => $reservation->user_id
                 ]);
             });
+
         } catch (\Exception $e) {
-            Log::channel('florenceegi')->error('[NOTIFICATION] Failed to send new highest notification', [
+            $this->errorManager->handle('RESERVATION_NOTIFICATION_SEND_ERROR', [
+                'operation' => 'sendNewHighest',
                 'reservation_id' => $reservation->id,
-                'error' => $e->getMessage(),
-            ]);
+                'user_id' => $reservation->user_id,
+                'error_message' => $e->getMessage(),
+                'context' => [
+                    'method' => __METHOD__,
+                    'line' => __LINE__
+                ]
+            ], $e);
+
             throw $e;
         }
     }
 
     /**
-     * Send notification when reservation is superseded
+     * Send notification when user's reservation is superseded
+     *
+     * @param Reservation $supersededReservation The reservation that was superseded
+     * @param Reservation $newHighest The new highest reservation
+     * @return void
+     * @throws \Exception If notification fails
      */
     public function sendSuperseded(Reservation $supersededReservation, Reservation $newHighest): void
     {
+        $this->logger->info('[RESERVATION_NOTIFICATION] Starting sendSuperseded', [
+            'superseded_id' => $supersededReservation->id,
+            'new_highest_id' => $newHighest->id,
+            'egi_id' => $supersededReservation->egi_id
+        ]);
+
         try {
             DB::transaction(function () use ($supersededReservation, $newHighest) {
-                // Create payload
+                // Load relationships
+                $supersededReservation->load(['user', 'egi']);
+
+                // Create notification payload
                 $payload = NotificationPayloadReservation::create([
                     'reservation_id' => $supersededReservation->id,
                     'egi_id' => $supersededReservation->egi_id,
                     'user_id' => $supersededReservation->user_id,
                     'type' => NotificationPayloadReservation::TYPE_SUPERSEDED,
-                    'status' => NotificationPayloadReservation::STATUS_WARNING,
+                    'status' => 'warning',
                     'data' => [
-                        'egi_title' => $supersededReservation->egi->title ?? 'EGI #' . $supersededReservation->egi_id,
-                        'previous_amount' => $supersededReservation->amount_eur,
+                        'amount_eur' => $supersededReservation->amount_eur,
                         'new_highest_amount' => $newHighest->amount_eur,
-                        'new_rank' => $supersededReservation->rank_position,
-                        'superseded_by_user' => $newHighest->user->name ?? 'Un altro utente',
+                        'egi_title' => $supersededReservation->egi->title,
+                        'egi_slug' => $supersededReservation->egi->slug,
+                        'superseded_by_user' => $newHighest->user->name,
+                        'previous_rank' => $supersededReservation->getOriginal('rank_position'),
+                        'new_rank' => $supersededReservation->rank_position
                     ]
                 ]);
 
+                // Update superseded_by_id
+                $supersededReservation->update([
+                    'superseded_by_id' => $newHighest->id
+                ]);
+
                 // Send notification
-                $user = User::find($supersededReservation->user_id);
-                if ($user) {
-                    Notification::send($user, new ReservationSuperseded($payload));
+                Notification::send($supersededReservation->user, new ReservationSuperseded($payload));
 
-                    Log::channel('florenceegi')->info('[NOTIFICATION] Superseded notification sent', [
-                        'reservation_id' => $supersededReservation->id,
-                        'user_id' => $user->id,
-                        'new_highest' => $newHighest->amount_eur,
-                    ]);
-                }
-
-                // Record notification
-                $supersededReservation->recordNotification('superseded', [
-                    'new_highest' => $newHighest->amount_eur,
-                    'superseded_by' => $newHighest->user_id,
+                $this->logger->info('[RESERVATION_NOTIFICATION] Superseded notification sent', [
+                    'superseded_id' => $supersededReservation->id,
+                    'payload_id' => $payload->id,
+                    'user_id' => $supersededReservation->user_id
                 ]);
             });
+
         } catch (\Exception $e) {
-            Log::channel('florenceegi')->error('[NOTIFICATION] Failed to send superseded notification', [
-                'reservation_id' => $supersededReservation->id,
-                'error' => $e->getMessage(),
-            ]);
+            $this->errorManager->handle('RESERVATION_NOTIFICATION_SEND_ERROR', [
+                'operation' => 'sendSuperseded',
+                'superseded_id' => $supersededReservation->id,
+                'new_highest_id' => $newHighest->id,
+                'error_message' => $e->getMessage()
+            ], $e);
+
             throw $e;
         }
     }
 
     /**
-     * Send notification for rank change
+     * Send notification when user's rank changes significantly
+     *
+     * @param Reservation $reservation The reservation with changed rank
+     * @param int $previousRank The previous rank position
+     * @param int $threshold Minimum rank change to trigger notification (default: 3)
+     * @return void
      */
-    public function sendRankChanged(Reservation $reservation, int $oldRank, int $newRank): void
+    public function sendRankChanged(Reservation $reservation, int $previousRank, int $threshold = 3): void
     {
+        // Calculate rank change
+        $rankChange = abs($reservation->rank_position - $previousRank);
+
+        // Only notify if change is significant
+        if ($rankChange < $threshold) {
+            $this->logger->debug('[RESERVATION_NOTIFICATION] Rank change below threshold', [
+                'reservation_id' => $reservation->id,
+                'previous_rank' => $previousRank,
+                'new_rank' => $reservation->rank_position,
+                'change' => $rankChange,
+                'threshold' => $threshold
+            ]);
+            return;
+        }
+
+        $this->logger->info('[RESERVATION_NOTIFICATION] Starting sendRankChanged', [
+            'reservation_id' => $reservation->id,
+            'previous_rank' => $previousRank,
+            'new_rank' => $reservation->rank_position,
+            'change' => $rankChange
+        ]);
+
         try {
-            // Only send if change is significant (2+ positions)
-            if (abs($oldRank - $newRank) < 2) {
-                return;
-            }
+            DB::transaction(function () use ($reservation, $previousRank) {
+                $reservation->load(['user', 'egi']);
 
-            DB::transaction(function () use ($reservation, $oldRank, $newRank) {
-                $isImprovement = $newRank < $oldRank;
+                // Determine if improved or worsened
+                $improved = $reservation->rank_position < $previousRank;
 
-                // Create payload
+                // Create notification payload
                 $payload = NotificationPayloadReservation::create([
                     'reservation_id' => $reservation->id,
                     'egi_id' => $reservation->egi_id,
                     'user_id' => $reservation->user_id,
                     'type' => NotificationPayloadReservation::TYPE_RANK_CHANGED,
-                    'status' => $isImprovement
-                        ? NotificationPayloadReservation::STATUS_SUCCESS
-                        : NotificationPayloadReservation::STATUS_INFO,
+                    'status' => $improved ? 'success' : 'warning',
                     'data' => [
-                        'egi_title' => $reservation->egi->title ?? 'EGI #' . $reservation->egi_id,
                         'amount_eur' => $reservation->amount_eur,
-                        'old_rank' => $oldRank,
-                        'new_rank' => $newRank,
-                        'direction' => $isImprovement ? 'up' : 'down',
-                        'positions_changed' => abs($oldRank - $newRank),
+                        'egi_title' => $reservation->egi->title,
+                        'egi_slug' => $reservation->egi->slug,
+                        'previous_rank' => $previousRank,
+                        'new_rank' => $reservation->rank_position,
+                        'direction' => $improved ? 'up' : 'down',
+                        'positions_changed' => abs($reservation->rank_position - $previousRank)
                     ]
                 ]);
 
                 // Send notification
-                $user = User::find($reservation->user_id);
-                if ($user) {
-                    Notification::send($user, new RankChanged($payload));
+                Notification::send($reservation->user, new RankChanged($payload));
 
-                    Log::channel('florenceegi')->info('[NOTIFICATION] Rank changed notification sent', [
-                        'reservation_id' => $reservation->id,
-                        'old_rank' => $oldRank,
-                        'new_rank' => $newRank,
-                    ]);
-                }
-
-                // Record notification
-                $reservation->recordNotification('rank_changed', [
-                    'old_rank' => $oldRank,
-                    'new_rank' => $newRank,
-                ]);
-            });
-        } catch (\Exception $e) {
-            Log::channel('florenceegi')->error('[NOTIFICATION] Failed to send rank changed notification', [
-                'reservation_id' => $reservation->id,
-                'error' => $e->getMessage(),
-            ]);
-            throw $e;
-        }
-    }
-
-    /**
-     * Send notification when rank improves (specific positive message)
-     */
-    public function sendRankImproved(Reservation $reservation, int $oldRank): void
-    {
-        try {
-            DB::transaction(function () use ($reservation, $oldRank) {
-                $newRank = $reservation->rank_position;
-
-                // Create payload
-                $payload = NotificationPayloadReservation::create([
+                $this->logger->info('[RESERVATION_NOTIFICATION] Rank change notification sent', [
                     'reservation_id' => $reservation->id,
-                    'egi_id' => $reservation->egi_id,
-                    'user_id' => $reservation->user_id,
-                    'type' => NotificationPayloadReservation::TYPE_RANK_CHANGED,
-                    'status' => NotificationPayloadReservation::STATUS_SUCCESS,
-                    'data' => [
-                        'egi_title' => $reservation->egi->title ?? 'EGI #' . $reservation->egi_id,
-                        'amount_eur' => $reservation->amount_eur,
-                        'old_rank' => $oldRank,
-                        'new_rank' => $newRank,
-                        'direction' => 'up',
-                        'positions_gained' => $oldRank - $newRank,
-                    ],
-                    'message' => "Grande! Sei salito alla posizione #{$newRank} per " .
-                                ($reservation->egi->title ?? 'EGI #' . $reservation->egi_id),
+                    'payload_id' => $payload->id,
+                    'direction' => $improved ? 'improved' : 'worsened'
                 ]);
-
-                // Send notification
-                $user = User::find($reservation->user_id);
-                if ($user) {
-                    Notification::send($user, new RankImproved($payload));
-
-                    Log::channel('florenceegi')->info('[NOTIFICATION] Rank improved notification sent', [
-                        'reservation_id' => $reservation->id,
-                        'old_rank' => $oldRank,
-                        'new_rank' => $newRank,
-                    ]);
-                }
             });
+
         } catch (\Exception $e) {
-            Log::channel('florenceegi')->error('[NOTIFICATION] Failed to send rank improved notification', [
+            $this->errorManager->handle('RESERVATION_NOTIFICATION_SEND_ERROR', [
+                'operation' => 'sendRankChanged',
                 'reservation_id' => $reservation->id,
-                'error' => $e->getMessage(),
-            ]);
+                'previous_rank' => $previousRank,
+                'new_rank' => $reservation->rank_position,
+                'error_message' => $e->getMessage()
+            ], $e);
+
             throw $e;
         }
     }
 
     /**
-     * Send notification when rank improves due to competitor withdrawal
+     * Send notification when a competitor withdraws their reservation
+     *
+     * @param Collection $affectedReservations Reservations that improved rank
+     * @param Reservation $withdrawnReservation The reservation that was withdrawn
+     * @return void
      */
-    public function sendRankImprovedAfterWithdrawal(Reservation $reservation, int $oldRank, int $newRank): void
+    public function sendCompetitorWithdrew(Collection $affectedReservations, Reservation $withdrawnReservation): void
     {
+        $this->logger->info('[RESERVATION_NOTIFICATION] Starting sendCompetitorWithdrew', [
+            'withdrawn_id' => $withdrawnReservation->id,
+            'affected_count' => $affectedReservations->count(),
+            'egi_id' => $withdrawnReservation->egi_id
+        ]);
+
         try {
-            DB::transaction(function () use ($reservation, $oldRank, $newRank) {
-                // Create payload
-                $payload = NotificationPayloadReservation::create([
-                    'reservation_id' => $reservation->id,
-                    'egi_id' => $reservation->egi_id,
-                    'user_id' => $reservation->user_id,
-                    'type' => NotificationPayloadReservation::TYPE_COMPETITOR_WITHDREW,
-                    'status' => NotificationPayloadReservation::STATUS_SUCCESS,
-                    'data' => [
-                        'egi_title' => $reservation->egi->title ?? 'EGI #' . $reservation->egi_id,
-                        'amount_eur' => $reservation->amount_eur,
-                        'old_rank' => $oldRank,
-                        'new_rank' => $newRank,
-                        'positions_gained' => $oldRank - $newRank,
-                    ],
-                    'message' => "Un concorrente si è ritirato! Sei salito alla posizione #{$newRank}",
-                ]);
+            DB::transaction(function () use ($affectedReservations, $withdrawnReservation) {
+                $withdrawnReservation->load('egi');
 
-                // Send notification
-                $user = User::find($reservation->user_id);
-                if ($user) {
-                    Notification::send($user, new CompetitorWithdrew($payload));
+                foreach ($affectedReservations as $reservation) {
+                    $reservation->load('user');
 
-                    Log::channel('florenceegi')->info('[NOTIFICATION] Competitor withdrew notification sent', [
-                        'reservation_id' => $reservation->id,
-                        'new_rank' => $newRank,
-                    ]);
-                }
-            });
-        } catch (\Exception $e) {
-            Log::channel('florenceegi')->error('[NOTIFICATION] Failed to send competitor withdrew notification', [
-                'reservation_id' => $reservation->id,
-                'error' => $e->getMessage(),
-            ]);
-            throw $e;
-        }
-    }
-
-    /**
-     * Send pre-launch reminder (future use)
-     */
-    public function sendPreLaunchReminder(Reservation $reservation, int $daysUntilLaunch): void
-    {
-        try {
-            DB::transaction(function () use ($reservation, $daysUntilLaunch) {
-                // Create payload
-                $payload = NotificationPayloadReservation::create([
-                    'reservation_id' => $reservation->id,
-                    'egi_id' => $reservation->egi_id,
-                    'user_id' => $reservation->user_id,
-                    'type' => NotificationPayloadReservation::TYPE_PRE_LAUNCH_REMINDER,
-                    'status' => NotificationPayloadReservation::STATUS_INFO,
-                    'data' => [
-                        'egi_title' => $reservation->egi->title ?? 'EGI #' . $reservation->egi_id,
-                        'amount_eur' => $reservation->amount_eur,
-                        'rank_position' => $reservation->rank_position,
-                        'days_until_launch' => $daysUntilLaunch,
-                        'is_highest' => $reservation->is_highest,
-                    ],
-                    'message' => "Il mint on-chain inizierà tra {$daysUntilLaunch} giorni! " .
-                                "Sei in posizione #{$reservation->rank_position} per " .
-                                ($reservation->egi->title ?? 'questo EGI'),
-                ]);
-
-                // Send notification
-                $user = User::find($reservation->user_id);
-                if ($user) {
-                    // This would use a specific PreLaunchReminder notification class
-                    // For now, using the base notification
-                    CustomDatabaseNotification::create([
-                        'type' => 'App\\Notifications\\Reservations\\PreLaunchReminder',
-                        'view' => 'notifications.reservations.pre-launch-reminder',
-                        'notifiable_type' => User::class,
-                        'notifiable_id' => $user->id,
-                        'sender_id' => self::SYSTEM_USER_ID,
-                        'model_type' => get_class($payload),
-                        'model_id' => $payload->id,
-                        'data' => $payload->data,
-                    ]);
-
-                    Log::channel('florenceegi')->info('[NOTIFICATION] Pre-launch reminder sent', [
-                        'reservation_id' => $reservation->id,
-                        'days_until_launch' => $daysUntilLaunch,
-                    ]);
-                }
-
-                // Record notification
-                $reservation->recordNotification('pre_launch_reminder', [
-                    'days_until_launch' => $daysUntilLaunch,
-                ]);
-            });
-        } catch (\Exception $e) {
-            Log::channel('florenceegi')->error('[NOTIFICATION] Failed to send pre-launch reminder', [
-                'reservation_id' => $reservation->id,
-                'error' => $e->getMessage(),
-            ]);
-            throw $e;
-        }
-    }
-
-    /**
-     * Send bulk notifications for an EGI (e.g., when EGI details change)
-     */
-    public function sendEgiBulkNotification(int $egiId, string $message, string $type = 'info'): void
-    {
-        try {
-            $reservations = Reservation::active()->forEgi($egiId)->get();
-
-            foreach ($reservations as $reservation) {
-                DB::transaction(function () use ($reservation, $message, $type) {
-                    // Create payload
+                    // Create notification payload for each affected user
                     $payload = NotificationPayloadReservation::create([
                         'reservation_id' => $reservation->id,
                         'egi_id' => $reservation->egi_id,
                         'user_id' => $reservation->user_id,
-                        'type' => 'egi_update',
-                        'status' => $type,
+                        'type' => NotificationPayloadReservation::TYPE_COMPETITOR_WITHDREW,
+                        'status' => 'info',
                         'data' => [
-                            'egi_title' => $reservation->egi->title ?? 'EGI #' . $reservation->egi_id,
-                            'rank_position' => $reservation->rank_position,
-                        ],
-                        'message' => $message,
+                            'amount_eur' => $reservation->amount_eur,
+                            'egi_title' => $withdrawnReservation->egi->title,
+                            'egi_slug' => $withdrawnReservation->egi->slug,
+                            'previous_rank' => $reservation->getOriginal('rank_position'),
+                            'new_rank' => $reservation->rank_position,
+                            'withdrawn_amount' => $withdrawnReservation->amount_eur,
+                            'withdrawn_user' => $withdrawnReservation->user->name ?? 'Un utente'
+                        ]
                     ]);
 
                     // Send notification
-                    $user = User::find($reservation->user_id);
-                    if ($user) {
-                        CustomDatabaseNotification::create([
-                            'type' => 'App\\Notifications\\Reservations\\EgiUpdate',
-                            'view' => 'notifications.reservations.egi-update',
-                            'notifiable_type' => User::class,
-                            'notifiable_id' => $user->id,
-                            'sender_id' => self::SYSTEM_USER_ID,
-                            'model_type' => get_class($payload),
-                            'model_id' => $payload->id,
-                            'data' => $payload->data,
-                        ]);
-                    }
-                });
-            }
+                    Notification::send($reservation->user, new CompetitorWithdrew($payload));
+                }
 
-            Log::channel('florenceegi')->info('[NOTIFICATION] Bulk EGI notification sent', [
-                'egi_id' => $egiId,
-                'recipients_count' => $reservations->count(),
-                'message' => $message,
-            ]);
+                $this->logger->info('[RESERVATION_NOTIFICATION] Competitor withdrew notifications sent', [
+                    'withdrawn_id' => $withdrawnReservation->id,
+                    'notifications_sent' => $affectedReservations->count()
+                ]);
+            });
 
         } catch (\Exception $e) {
-            Log::channel('florenceegi')->error('[NOTIFICATION] Failed to send bulk EGI notification', [
-                'egi_id' => $egiId,
-                'error' => $e->getMessage(),
-            ]);
+            $this->errorManager->handle('RESERVATION_NOTIFICATION_SEND_ERROR', [
+                'operation' => 'sendCompetitorWithdrew',
+                'withdrawn_id' => $withdrawnReservation->id,
+                'affected_count' => $affectedReservations->count(),
+                'error_message' => $e->getMessage()
+            ], $e);
+
             throw $e;
         }
     }
 
     /**
-     * Get unread notifications count for user
+     * Process bulk rank changes and send appropriate notifications
+     *
+     * @param int $egiId The EGI ID to process
+     * @return void
      */
-    public function getUnreadCount(int $userId): int
+    public function processBulkRankChanges(int $egiId): void
     {
-        return NotificationPayloadReservation::unread()
-            ->forUser($userId)
-            ->count();
-    }
+        $this->logger->info('[RESERVATION_NOTIFICATION] Processing bulk rank changes', [
+            'egi_id' => $egiId
+        ]);
 
-    /**
-     * Mark notification as read
-     */
-    public function markAsRead(int $notificationId): bool
-    {
-        $payload = NotificationPayloadReservation::find($notificationId);
+        try {
+            // Get all active reservations for this EGI
+            $reservations = Reservation::active()
+                ->forEgi($egiId)
+                ->ranked()
+                ->with('user')
+                ->get();
 
-        if ($payload) {
-            return $payload->markAsRead();
+            if ($reservations->isEmpty()) {
+                $this->logger->debug('[RESERVATION_NOTIFICATION] No active reservations found', [
+                    'egi_id' => $egiId
+                ]);
+                return;
+            }
+
+            // Process each reservation
+            foreach ($reservations as $reservation) {
+                $previousRank = $reservation->getOriginal('rank_position');
+
+                // Skip if rank hasn't changed
+                if ($previousRank == $reservation->rank_position) {
+                    continue;
+                }
+
+                // Handle based on new rank
+                if ($reservation->rank_position === 1 && $previousRank !== 1) {
+                    // Became highest
+                    $this->sendNewHighest($reservation);
+                } elseif ($previousRank === 1 && $reservation->rank_position !== 1) {
+                    // Was highest, now superseded
+                    $newHighest = $reservations->firstWhere('rank_position', 1);
+                    if ($newHighest) {
+                        $this->sendSuperseded($reservation, $newHighest);
+                    }
+                } else {
+                    // Regular rank change
+                    $this->sendRankChanged($reservation, $previousRank);
+                }
+            }
+
+            $this->logger->info('[RESERVATION_NOTIFICATION] Bulk rank changes processed', [
+                'egi_id' => $egiId,
+                'reservations_processed' => $reservations->count()
+            ]);
+
+        } catch (\Exception $e) {
+            $this->errorManager->handle('RESERVATION_NOTIFICATION_BULK_ERROR', [
+                'operation' => 'processBulkRankChanges',
+                'egi_id' => $egiId,
+                'error_message' => $e->getMessage()
+            ], $e);
+
+            throw $e;
         }
-
-        return false;
-    }
-
-    /**
-     * Get user's notification history
-     */
-    public function getUserNotifications(int $userId, int $limit = 20): \Illuminate\Pagination\LengthAwarePaginator
-    {
-        return NotificationPayloadReservation::forUser($userId)
-            ->with(['reservation', 'egi'])
-            ->orderByDesc('created_at')
-            ->paginate($limit);
     }
 }

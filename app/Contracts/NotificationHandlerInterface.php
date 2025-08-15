@@ -1,29 +1,34 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Contracts;
 
-use App\Models\User;
-use App\Contracts\NotificationDataInterface;
+use Illuminate\Database\Eloquent\Model;
 
 /**
- * Interface NotificationHandlerInterface
+ * Interface for notification handlers
  *
- * Interfaccia per i gestori di notifiche.
- * Definisce il contratto che tutti gli handler di notifiche devono implementare.
- *
- * @package App\Contracts
+ * @package App\Interfaces
+ * @author Padmin D. Curtis (AI Partner OS3.0) for Fabio Cherici
+ * @version 1.0.0 (FlorenceEGI - Notification System v3)
+ * @date 2025-08-15
+ * @purpose Define contract for all notification handlers
  */
 interface NotificationHandlerInterface
 {
     /**
-     * Gestisce l'invio di una notifica a un utente.
+     * Handle notification response action
      *
-     * @param User                      $message_to   L'utente destinatario della notifica
-     * @param NotificationDataInterface $notification I dati della notifica da inviare
-     *
-     * @throws \Exception Se si verifica un errore durante l'invio della notifica
+     * @param string $action The action to perform
+     * @param Model $payload The notification payload model
+     * @param array $data Additional data for the action
+     * @return array Response array with success status and message
      */
-    public function handle(User $message_to, NotificationDataInterface $notification): void;
+    public function handle(string $action, Model $payload, array $data = []): array;
+
+    /**
+     * Get supported actions for this handler
+     *
+     * @return array List of supported actions
+     */
+    public function getSupportedActions(): array;
 }

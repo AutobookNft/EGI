@@ -989,4 +989,385 @@ class ReservationService
 
         return round($amount * ($fallbackRates[$currency] ?? 1.0), 2);
     }
+
+    /**
+     * EXTENSION METHODS FOR ReservationService
+     *
+     * ADD these methods to the existing app/Services/ReservationService.php
+     * DO NOT replace the existing file, just add these methods to it
+     *
+     * @author Padmin D. Curtis (AI Partner OS3.0) for Fabio Cherici
+     * @version 1.0.0 (FlorenceEGI - Pre-Launch Extension)
+     * @date 2025-08-15
+     */
+
+    // ============================================================================
+    // ADD THESE METHODS TO YOUR EXISTING ReservationService CLASS
+    // ============================================================================
+
+    /**
+     * Create or update a pre-launch reservation (PUBLIC RANKING SYSTEM)
+     * This is for the new pre-launch system with public rankings
+     *
+     * @param int $egiId The EGI ID
+     * @param int $userId The user ID
+     * @param float $amountEur The amount in EUR
+     * @return Reservation The created/updated reservation
+     */
+    public function createOrUpdatePreLaunchReservation(int $egiId, int $userId, float $amountEur): Reservation
+    {
+        $this->logger->info('[PRE_LAUNCH_RESERVATION] Creating/updating reservation', [
+            'egi_id' => $egiId,
+            'user_id' => $userId,
+            'amount_eur' => $amountEur
+        ]);
+
+        return DB::transaction(function () use ($egiId, $userId, $amountEur) {
+            $egi = Egi::lockForUpdate()->findOrFail($egiId);
+
+            // Check if EGI is available using existing method
+            if (!$this->canReserveEgi($egi)) {
+                throw new \Exception('EGI is not available for reservations');
+            }
+
+            // Check if user is the creator
+            if ($egi->user_id === $userId) {
+                throw new \Exception('Cannot reserve your own EGI');
+            }
+
+            // Look for existing reservation
+            $reservation = Reservation::where('egi_id', $egiId)
+                ->where('user_id', $userId)
+                ->where('status', 'active')
+                ->where('is_current', true)
+                ->first();
+
+            if ($reservation) {
+                // Update existing
+                $oldRank = $reservation->rank_position;
+
+                $reservation->update([
+                    'amount_eur' => $amountEur,
+                    'offer_amount_fiat' => $amountEur, // Legacy field
+                ]);
+
+                // Update rankings
+                $this->updatePreLaunchRankings($egiId);
+                $reservation->refresh();
+
+                // Handle notifications for rank change
+                if ($oldRank !== $reservation->rank_position) {
+                    $this->handleRankChangeNotifications($reservation, $oldRank);
+                }
+
+            } else {
+                // Create new reservation
+                $reservation = Reservation::create([
+                    'egi_id' => $egiId,
+                    'user_id' => $userId,
+                    'amount_eur' => $amountEur,
+                    'status' => 'active',
+                    'is_current' => true,
+                    'type' => 'weak', // Default for pre-launch
+
+                    // Legacy fields
+                    'fiat_currency' => 'EUR',
+                    'offer_amount_fiat' => $amountEur,
+                    'offer_amount_algo' => 0,
+                    'exchange_rate' => 0,
+                    'exchange_timestamp' => now()
+                ]);
+
+                // Update rankings
+                $this->updateEgiRankings($egiId);
+                $reservation->refresh();
+
+                // Send notifications if became highest
+                if ($reservation->is_highest) {
+                    $this->notificationService->sendNewHighest($reservation);
+                    $this->notifyPreviousHighest($egiId, $reservation);
+                }
+            }
+
+            $this->logger->info('[PRE_LAUNCH_RESERVATION] Reservation processed', [
+                'reservation_id' => $reservation->id,
+                'rank_position' => $reservation->rank_position,
+                'is_highest' => $reservation->is_highest
+            ]);
+
+            return $reservation;
+        });
+    }
+
+    /**
+     * Update pre-launch rankings for all active reservations of an EGI
+     * This is specifically for the new ranking system with public positions
+     *
+     * @param int $egiId The EGI ID
+     * @return void
+     */
+    public function updatePreLaunchRankings(int $egiId): void
+    {
+        $reservations = Reservation::where('egi_id', $egiId)
+            ->where('status', 'active')
+            ->where('is_current', true)
+            ->orderBy('amount_eur', 'desc')
+            ->orderBy('created_at', 'asc') // Tie-breaker
+            ->get();
+
+        $rank = 1;
+        foreach ($reservations as $reservation) {
+            $reservation->update([
+                'rank_position' => $rank,
+                'is_highest' => ($rank === 1)
+            ]);
+            $rank++;
+        }
+
+        $this->logger->debug('[PRE_LAUNCH_RESERVATION] Rankings updated', [
+            'egi_id' => $egiId,
+            'total_reservations' => $reservations->count()
+        ]);
+    }
+
+    /**
+     * Get EGI reservations with ranking
+     *
+     * @param int $egiId The EGI ID
+     * @param bool $activeOnly Whether to get only active reservations
+     * @return Collection
+     */
+    public function getEgiReservationsWithRanking(int $egiId, bool $activeOnly = true): Collection
+    {
+        $query = Reservation::where('egi_id', $egiId)
+            ->with(['user:id,name,email']);
+
+        if ($activeOnly) {
+            $query->where('status', 'active')
+                ->where('is_current', true);
+        }
+
+        return $query->orderBy('rank_position', 'asc')
+            ->orderBy('amount_eur', 'desc')
+            ->get();
+    }
+
+    /**
+     * Withdraw a pre-launch reservation
+     *
+     * @param int $reservationId The reservation ID
+     * @param int $userId The user ID for authorization
+     * @return bool Success status
+     */
+    public function withdrawPreLaunchReservation(int $reservationId, int $userId): bool
+    {
+        $this->logger->info('[PRE_LAUNCH_RESERVATION] Withdrawing reservation', [
+            'reservation_id' => $reservationId,
+            'user_id' => $userId
+        ]);
+
+        return DB::transaction(function () use ($reservationId, $userId) {
+            $reservation = Reservation::lockForUpdate()->findOrFail($reservationId);
+
+            // Verify ownership
+            if ($reservation->user_id !== $userId) {
+                throw new \Exception('Unauthorized: You can only withdraw your own reservations');
+            }
+
+            if ($reservation->status !== 'active') {
+                throw new \Exception('Reservation is not active');
+            }
+
+            $egiId = $reservation->egi_id;
+            $wasHighest = $reservation->is_highest;
+
+            // Mark as withdrawn
+            $reservation->update([
+                'status' => 'withdrawn',
+                'is_current' => false,
+                'withdrawn_at' => now()
+            ]);
+
+            // Get affected reservations before updating rankings
+            $affectedReservations = Reservation::where('egi_id', $egiId)
+                ->where('status', 'active')
+                ->where('is_current', true)
+                ->where('rank_position', '>', $reservation->rank_position)
+                ->get();
+
+            // Update rankings
+            $this->updatePreLaunchRankings($egiId);
+
+            // Send notifications
+            if ($affectedReservations->isNotEmpty()) {
+                $affectedReservations->each->refresh();
+                $this->notificationService->sendCompetitorWithdrew($affectedReservations, $reservation);
+            }
+
+            // If was highest, notify new highest
+            if ($wasHighest) {
+                $newHighest = Reservation::where('egi_id', $egiId)
+                    ->where('status', 'active')
+                    ->where('is_current', true)
+                    ->where('is_highest', true)
+                    ->first();
+
+                if ($newHighest) {
+                    $this->notificationService->sendNewHighest($newHighest);
+                }
+            }
+
+            $this->logger->info('[PRE_LAUNCH_RESERVATION] Reservation withdrawn', [
+                'reservation_id' => $reservationId,
+                'was_highest' => $wasHighest
+            ]);
+
+            return true;
+        });
+    }
+
+    /**
+     * Get ranking statistics for an EGI
+     *
+     * @param int $egiId The EGI ID
+     * @return array Statistics
+     */
+    public function getEgiRankingStats(int $egiId): array
+    {
+        $reservations = $this->getEgiReservationsWithRanking($egiId, true);
+
+        if ($reservations->isEmpty()) {
+            return [
+                'total_reservations' => 0,
+                'highest_amount' => 0,
+                'lowest_amount' => 0,
+                'average_amount' => 0,
+                'median_amount' => 0
+            ];
+        }
+
+        $amounts = $reservations->pluck('amount_eur')->sort()->values();
+
+        return [
+            'total_reservations' => $reservations->count(),
+            'highest_amount' => $amounts->max(),
+            'lowest_amount' => $amounts->min(),
+            'average_amount' => round($amounts->avg(), 2),
+            'median_amount' => $amounts->median()
+        ];
+    }
+
+    /**
+     * Check if user can make a pre-launch reservation
+     *
+     * @param int $egiId The EGI ID
+     * @param int $userId The user ID
+     * @return array Status and message
+     */
+    public function canUserMakePreLaunchReservation(int $egiId, int $userId): array
+    {
+        $egi = Egi::find($egiId);
+
+        if (!$egi) {
+            return [
+                'can_reserve' => false,
+                'reason' => 'egi_not_found',
+                'message' => 'EGI not found'
+            ];
+        }
+
+        // Check if user is the creator
+        if ($egi->user_id === $userId) {
+            return [
+                'can_reserve' => false,
+                'reason' => 'own_egi',
+                'message' => 'Cannot reserve your own EGI'
+            ];
+        }
+
+        // Use existing method to check availability
+        if (!$this->canReserveEgi($egi)) {
+            return [
+                'can_reserve' => false,
+                'reason' => 'egi_unavailable',
+                'message' => 'EGI is not available for reservations'
+            ];
+        }
+
+        // Check for existing active reservation
+        $existingReservation = Reservation::where('egi_id', $egiId)
+            ->where('user_id', $userId)
+            ->where('status', 'active')
+            ->where('is_current', true)
+            ->first();
+
+        return [
+            'can_reserve' => true,
+            'has_existing' => $existingReservation !== null,
+            'existing_reservation' => $existingReservation,
+            'message' => $existingReservation
+                ? 'You can update your existing reservation'
+                : 'You can place a reservation'
+        ];
+    }
+
+    /**
+     * Handle notifications for rank changes (PRIVATE HELPER)
+     *
+     * @param Reservation $reservation
+     * @param int|null $oldRank
+     * @return void
+     */
+    private function handleRankChangeNotifications(Reservation $reservation, ?int $oldRank): void
+    {
+        $newRank = $reservation->rank_position;
+
+        if ($oldRank === $newRank) {
+            return;
+        }
+
+        // Became highest
+        if ($newRank === 1 && $oldRank !== 1) {
+            $this->notificationService->sendNewHighest($reservation);
+            $this->notifyPreviousHighest($reservation->egi_id, $reservation);
+        }
+        // Was highest, now superseded
+        elseif ($oldRank === 1 && $newRank !== 1) {
+            $newHighest = Reservation::where('egi_id', $reservation->egi_id)
+                ->where('is_highest', true)
+                ->first();
+
+            if ($newHighest) {
+                $this->notificationService->sendSuperseded($reservation, $newHighest);
+            }
+        }
+        // Significant rank change (3+ positions)
+        elseif ($oldRank && abs($newRank - $oldRank) >= 3) {
+            $this->notificationService->sendRankChanged($reservation, $oldRank);
+        }
+    }
+
+    /**
+     * Notify the previous highest reservation (PRIVATE HELPER)
+     *
+     * @param int $egiId
+     * @param Reservation $newHighest
+     * @return void
+     */
+    private function notifyPreviousHighest(int $egiId, Reservation $newHighest): void
+    {
+        $previousHighest = Reservation::where('egi_id', $egiId)
+            ->where('id', '!=', $newHighest->id)
+            ->where('rank_position', 2)
+            ->first();
+
+        if ($previousHighest) {
+            $this->notificationService->sendSuperseded($previousHighest, $newHighest);
+            $previousHighest->update(['superseded_by_id' => $newHighest->id]);
+        }
+    }
+
+// ============================================================================
+// END OF EXTENSION METHODS
+// ============================================================================
 }

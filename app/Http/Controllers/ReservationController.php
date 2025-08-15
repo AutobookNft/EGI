@@ -685,7 +685,7 @@ class ReservationController extends Controller {
                     'ip_address' => $request->ip(),
                     'user_agent' => $request->userAgent()
                 ],
-                $e
+                $e instanceof \Throwable ? $e : null  // Cast sicuro
             );
         } catch (\Exception $e) {
             return $this->errorManager->handle(
@@ -758,4 +758,332 @@ class ReservationController extends Controller {
             ], 500);
         }
     }
+
+    /**
+     * EXTENSION METHODS FOR ReservationController
+     *
+     * ADD these methods to the existing app/Http/Controllers/ReservationController.php
+     * DO NOT replace the existing file, just add these methods to it
+     *
+     * @author Padmin D. Curtis (AI Partner OS3.0) for Fabio Cherici
+     * @version 1.0.0 (FlorenceEGI - Pre-Launch Extension)
+     * @date 2025-08-15
+     */
+
+    // ============================================================================
+    // ADD THESE METHODS TO YOUR EXISTING ReservationController CLASS
+    // ============================================================================
+
+    /**
+     * Create or update a pre-launch reservation with public ranking
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function createPreLaunchReservation(Request $request): JsonResponse
+    {
+        $this->logger->info('[PRE_LAUNCH_RESERVATION] Create/update request', [
+            'user_id' => FegiAuth::id(),
+            'ip' => $request->ip()
+        ]);
+
+        // Validate request
+        $validated = $request->validate([
+            'egi_id' => 'required|integer|exists:egis,id',
+            'amount_eur' => 'required|numeric|min:1|max:1000000'
+        ]);
+
+        $user = FegiAuth::user();
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Authentication required for reservations'
+            ], 401);
+        }
+
+        try {
+            // Check if user can reserve
+            $canReserve = $this->reservationService->canUserMakePreLaunchReservation(
+                $validated['egi_id'],
+                $user->id
+            );
+
+            if (!$canReserve['can_reserve']) {
+                return response()->json([
+                    'success' => false,
+                    'reason' => $canReserve['reason'],
+                    'message' => $canReserve['message']
+                ], 403);
+            }
+
+            // Create or update reservation
+            $reservation = $this->reservationService->createOrUpdatePreLaunchReservation(
+                $validated['egi_id'],
+                $user->id,
+                $validated['amount_eur']
+            );
+
+            $this->logger->info('[PRE_LAUNCH_RESERVATION] Reservation created/updated', [
+                'reservation_id' => $reservation->id,
+                'rank_position' => $reservation->rank_position,
+                'is_highest' => $reservation->is_highest
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => $reservation->is_highest
+                    ? 'Congratulations! You are now the highest bidder!'
+                    : 'Reservation created. You are in position #' . $reservation->rank_position,
+                'data' => [
+                    'reservation_id' => $reservation->id,
+                    'egi_id' => $reservation->egi_id,
+                    'amount_eur' => $reservation->amount_eur,
+                    'rank_position' => $reservation->rank_position,
+                    'is_highest' => $reservation->is_highest,
+                    'created_at' => $reservation->created_at->toIso8601String(),
+                    'updated_at' => $reservation->updated_at->toIso8601String()
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            return $this->errorManager->handle(
+                'PRE_LAUNCH_RESERVATION_CREATE_ERROR',
+                [
+                    'egi_id' => $validated['egi_id'],
+                    'user_id' => $user->id,
+                    'amount_eur' => $validated['amount_eur'],
+                    'error_message' => $e->getMessage()
+                ],
+                $e
+            );
+        }
+    }
+
+    /**
+     * Get pre-launch reservations with ranking for an EGI
+     *
+     * @param Request $request
+     * @param int $egiId
+     * @return JsonResponse
+     */
+    public function getPreLaunchRankings(Request $request, int $egiId): JsonResponse
+    {
+        $this->logger->info('[PRE_LAUNCH_RESERVATION] Rankings requested', [
+            'egi_id' => $egiId,
+            'user_id' => FegiAuth::id()
+        ]);
+
+        try {
+            // Verify EGI exists
+            $egi = Egi::findOrFail($egiId);
+
+            // Get reservations with ranking
+            $reservations = $this->reservationService->getEgiReservationsWithRanking($egiId);
+
+            // Get stats
+            $stats = $this->reservationService->getEgiRankingStats($egiId);
+
+            // Format response
+            $formattedReservations = $reservations->map(function ($reservation) {
+                $isCurrentUser = FegiAuth::check() && $reservation->user_id === FegiAuth::id();
+
+                return [
+                    'rank_position' => $reservation->rank_position,
+                    'amount_eur' => $reservation->amount_eur,
+                    'is_highest' => $reservation->is_highest,
+                    'is_mine' => $isCurrentUser,
+                    'user' => !$isCurrentUser ? [
+                        'name' => $reservation->user->name ?? 'Anonymous'
+                    ] : null,
+                    'created_at' => $reservation->created_at->toIso8601String()
+                ];
+            });
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'egi_id' => $egiId,
+                    'egi_title' => $egi->title,
+                    'total_reservations' => $reservations->count(),
+                    'rankings' => $formattedReservations,
+                    'stats' => $stats
+                ]
+            ]);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'EGI not found'
+            ], 404);
+        } catch (\Exception $e) {
+            return $this->errorManager->handle(
+                'PRE_LAUNCH_RANKINGS_ERROR',
+                [
+                    'egi_id' => $egiId,
+                    'error_message' => $e->getMessage()
+                ],
+                $e
+            );
+        }
+    }
+
+    /**
+     * Withdraw a pre-launch reservation
+     *
+     * @param Request $request
+     * @param int $reservationId
+     * @return JsonResponse
+     */
+    public function withdrawPreLaunchReservation(Request $request, int $reservationId): JsonResponse
+    {
+        $this->logger->info('[PRE_LAUNCH_RESERVATION] Withdraw request', [
+            'reservation_id' => $reservationId,
+            'user_id' => FegiAuth::id()
+        ]);
+
+        $user = FegiAuth::user();
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Authentication required'
+            ], 401);
+        }
+
+        try {
+            $success = $this->reservationService->withdrawPreLaunchReservation(
+                $reservationId,
+                $user->id
+            );
+
+            if ($success) {
+                $this->logger->info('[PRE_LAUNCH_RESERVATION] Reservation withdrawn', [
+                    'reservation_id' => $reservationId,
+                    'user_id' => $user->id
+                ]);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Reservation withdrawn successfully'
+                ]);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to withdraw reservation'
+            ], 500);
+
+        } catch (\Exception $e) {
+            return $this->errorManager->handle(
+                'PRE_LAUNCH_WITHDRAW_ERROR',
+                [
+                    'reservation_id' => $reservationId,
+                    'user_id' => $user->id,
+                    'error_message' => $e->getMessage()
+                ],
+                $e
+            );
+        }
+    }
+
+    /**
+     * Get user's pre-launch reservations
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function getUserPreLaunchReservations(Request $request): JsonResponse
+    {
+        $user = FegiAuth::user();
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Authentication required'
+            ], 401);
+        }
+
+        $this->logger->info('[PRE_LAUNCH_RESERVATION] User reservations requested', [
+            'user_id' => $user->id
+        ]);
+
+        try {
+            $reservations = $this->reservationService->getUserReservations($user->id);
+
+            $formattedReservations = $reservations->map(function ($reservation) {
+                return [
+                    'reservation_id' => $reservation->id,
+                    'egi' => [
+                        'id' => $reservation->egi->id,
+                        'title' => $reservation->egi->title,
+                        'slug' => $reservation->egi->slug,
+                        'image_url' => $reservation->egi->image_url
+                    ],
+                    'amount_eur' => $reservation->amount_eur,
+                    'rank_position' => $reservation->rank_position,
+                    'is_highest' => $reservation->is_highest,
+                    'status' => $reservation->status,
+                    'created_at' => $reservation->created_at->toIso8601String(),
+                    'updated_at' => $reservation->updated_at->toIso8601String()
+                ];
+            });
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'total_count' => $reservations->count(),
+                    'reservations' => $formattedReservations
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            return $this->errorManager->handle(
+                'USER_PRE_LAUNCH_RESERVATIONS_ERROR',
+                [
+                    'user_id' => $user->id,
+                    'error_message' => $e->getMessage()
+                ],
+                $e
+            );
+        }
+    }
+
+    /**
+     * Check if user can make a pre-launch reservation for an EGI
+     *
+     * @param Request $request
+     * @param int $egiId
+     * @return JsonResponse
+     */
+    public function checkPreLaunchReservationEligibility(Request $request, int $egiId): JsonResponse
+    {
+        $user = FegiAuth::user();
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Authentication required'
+            ], 401);
+        }
+
+        try {
+            $result = $this->reservationService->canUserMakePreLaunchReservation(
+                $egiId,
+                $user->id
+            );
+
+            return response()->json([
+                'success' => true,
+                'data' => $result
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error checking eligibility',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+// ============================================================================
+// END OF EXTENSION METHODS
+// ============================================================================
 }

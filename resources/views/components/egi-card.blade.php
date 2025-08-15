@@ -381,7 +381,7 @@ $isCreator = auth()->check() && auth()->id() === $creatorId;
                 </div>
                 <div class="text-right">
                     <span class="text-sm font-bold text-white">
-                        <x-currency-price :price="$egi->pivot->offer_amount_fiat" currency="EUR" />
+                        <x-currency-price :price="$egi->pivot->offer_amount_fiat" />
                     </span>
                 </div>
             </div>
@@ -399,21 +399,12 @@ $isCreator = auth()->check() && auth()->id() === $creatorId;
             $displayPrice = $highestPriorityReservation->offer_amount_fiat ?? $egi->price;
             $displayUser = $highestPriorityReservation->user;
 
-            // 🎯 CURRENCY LOGIC: Usa valuta originale prenotazione per conversione automatica
-            $displayCurrency = $highestPriorityReservation->fiat_currency ?? 'USD';
-            } else {
-            // Se NON c'è prenotazione, usa preferenza utente
-            $displayCurrency = 'EUR'; // Default fallback
-            if (App\Helpers\FegiAuth::check()) {
-            $displayCurrency = App\Helpers\FegiAuth::user()->preferred_currency ?? 'EUR';
+            // 🎯 EUR-ONLY SYSTEM: Convertiamo in EUR se necessario
+            if ($highestPriorityReservation->fiat_currency !== 'EUR') {
+            $displayPrice = $highestPriorityReservation->amount_eur ?? $displayPrice;
             }
             }
-
-            // 🎯 TARGET CURRENCY: Valuta finale desiderata (quella del badge utente)
-            $targetCurrency = 'EUR'; // Default fallback
-            if (App\Helpers\FegiAuth::check()) {
-            $targetCurrency = App\Helpers\FegiAuth::user()->preferred_currency ?? 'EUR';
-            }
+            // Altrimenti usa il prezzo base dell'EGI (sempre in EUR)
             @endphp
 
             <div class="p-3 border rounded-xl border-green-500/30 bg-gradient-to-r from-green-500/20 to-emerald-500/20">
@@ -439,8 +430,7 @@ $isCreator = auth()->check() && auth()->id() === $creatorId;
                     </div>
                     <div class="text-right">
                         <span class="text-sm font-bold text-white">
-                            <x-currency-price :price="$displayPrice" :currency="$displayCurrency"
-                                :reservation="$highestPriorityReservation" :target-currency="$targetCurrency"
+                            <x-currency-price :price="$displayPrice" :reservation="$highestPriorityReservation"
                                 size="small" />
                         </span>
                     </div>

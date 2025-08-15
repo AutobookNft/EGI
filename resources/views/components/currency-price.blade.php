@@ -1,109 +1,91 @@
 {{--
-Currency Price Display Component
+Currency Price Display Component - EUR Only System
 
-Mostra un prezzo con supporto per conversione multi-currency real-time.
+Mostra un prezzo in EUR con supporto opzionale per conversione ALGO.
 
-@param float $price - Il prezzo da mostrare
-@param string $currency - La valuta originale (default: EUR)
+@param float $price - Il prezzo da mostrare in EUR
 @param string $class - Classi CSS aggiuntive
-@param bool $showOriginal - Mostra la valuta originale come nota (default: false)
-@param bool $showConversionNote - Mostra un indicatore di conversione (default: false)
+@param bool $showAlgoConversion - Mostra la conversione in ALGO (default: false)
+@param string $reservation - Dati di prenotazione per note informative (opzionale)
+@param string $size - Dimensione del componente (small|normal|large)
 
 Esempio uso:
-<x-currency-price :price="$egi->price" currency="EUR" class="text-2xl font-bold" />
+<x-currency-price :price="$egi->price" class="text-2xl font-bold" :show-algo-conversion="true" />
 --}}
 
 @props([
 'price',
-'currency' => 'EUR',
 'class' => '',
-'showOriginal' => false,
-'showConversionNote' => false,
+'showAlgoConversion' => false,
 'reservation' => null,
-'targetCurrency' => null,
 'size' => 'normal'
 ])
 
 @php
-// 🔧 VALIDATION: Assicuro che price sia sempre un numero valido
-$safePrice = is_numeric($price) ? (float)$price : 0;
+    // 🔧 VALIDATION: Assicuro che price sia sempre un numero valido
+    $safePrice = is_numeric($price) ? (float)$price : 0;
 
-// 🏷️ RESERVATION NOTE LOGIC: Logica per mostrare la nota di prenotazione originale
-$shouldShowReservationNote = false;
-$originalCurrency = '';
-$originalPrice = 0;
-$formattedOriginalPrice = '';
+    // 🏷️ RESERVATION NOTE LOGIC: Nota di prenotazione originale (solo se diversa da EUR)
+    $shouldShowReservationNote = false;
+    $originalCurrency = '';
+    $originalPrice = 0;
+    $formattedOriginalPrice = '';
 
-if ($reservation && $targetCurrency) {
-$originalCurrency = $reservation->fiat_currency ?? 'EUR';
-$originalPrice = $reservation->offer_amount_fiat ?? $safePrice;
+    if ($reservation) {
+    $originalCurrency = $reservation->fiat_currency ?? 'EUR';
+    $originalPrice = $reservation->offer_amount_fiat ?? $safePrice;
 
-// Mostra la nota solo se la valuta target è diversa da quella originale
-$shouldShowReservationNote = ($targetCurrency !== $originalCurrency);
+    // Mostra la nota solo se la prenotazione era in una valuta diversa da EUR
+    $shouldShowReservationNote = ($originalCurrency !== 'EUR');
 
-if ($shouldShowReservationNote) {
-// Formato il prezzo originale con il simbolo corretto
-switch($originalCurrency) {
-case 'USD':
-$formattedOriginalPrice = '$' . number_format($originalPrice, 2);
-break;
-case 'EUR':
-$formattedOriginalPrice = '€' . number_format($originalPrice, 2);
-break;
-case 'GBP':
-$formattedOriginalPrice = '£' . number_format($originalPrice, 2);
-break;
-default:
-$formattedOriginalPrice = $originalCurrency . ' ' . number_format($originalPrice, 2);
-break;
-}
-}
-}
+    if ($shouldShowReservationNote) {
+    // Formato il prezzo originale con il simbolo corretto
+    switch($originalCurrency) {
+    case 'USD':
+    $formattedOriginalPrice = '$' . number_format($originalPrice, 2);
+    break;
+    case 'GBP':
+    $formattedOriginalPrice = '£' . number_format($originalPrice, 2);
+    break;
+    default:
+    $formattedOriginalPrice = $originalCurrency . ' ' . number_format($originalPrice, 2);
+    break;
+    }
+    }
+    }
 
-// 🎨 SIZE-BASED CLASSES: Classi CSS basate sulla dimensione
-$sizeClasses = [
-'small' => [
-'container' => 'mt-1 px-2 py-1 text-xs',
-'icon' => 'w-3 h-3',
-'text' => 'text-xs font-normal'
-],
-'normal' => [
-'container' => 'mt-2 px-2 py-1 text-xs',
-'icon' => 'w-3 h-3',
-'text' => 'text-xs font-medium'
-],
-'large' => [
-'container' => 'mt-3 px-3 py-1.5 text-sm',
-'icon' => 'w-4 h-4',
-'text' => 'text-sm font-medium'
-]
-];
+    // 🎨 SIZE-BASED CLASSES: Classi CSS basate sulla dimensione
+    $sizeClasses = [
+    'small' => [
+    'container' => 'mt-1 px-2 py-1 text-xs',
+    'text' => 'text-xs font-normal'
+    ],
+    'normal' => [
+    'container' => 'mt-2 px-2 py-1 text-xs',
+    'text' => 'text-xs font-medium'
+    ],
+    'large' => [
+    'container' => 'mt-3 px-3 py-1.5 text-sm',
+    'text' => 'text-sm font-medium'
+    ]
+    ];
 
-$currentSize = $sizeClasses[$size] ?? $sizeClasses['normal'];
+    $currentSize = $sizeClasses[$size] ?? $sizeClasses['normal'];
 @endphp
 
 <div class="currency-price-container">
-    <span {{ $attributes->merge(['class' => "currency-display {$class}"]) }}
-        data-price="{{ $safePrice }}"
-        data-currency="{{ $currency }}"
-        data-display-options="{{ json_encode([
-        'showOriginalCurrency' => $showOriginal,
-        'showConversionNote' => $showConversionNote
-        ]) }}"
-        >
-        {{-- Fallback display mentre JS carica --}}
-        @if($currency === 'EUR')
+    <span {{ $attributes->merge(['class' => "currency-display {$class}"]) }}>
+        {{-- Sempre EUR - Sistema semplificato --}}
         €{{ number_format($safePrice, 2) }}
-        @elseif($currency === 'USD')
-        ${{ number_format($safePrice, 2) }}
-        @elseif($currency === 'GBP')
-        £{{ number_format($safePrice, 2) }}
-        @else
-        {{ $currency }} {{ number_format($safePrice, 2) }}
-        @endif
     </span>
 
-    {{-- 💰 RESERVATION CURRENCY NOTE: Nota di conversione quando necessario --}}
+    {{-- 🪙 ALGO CONVERSION: Sempre visibile --}}
+    <div class="inline-flex items-center mt-1 space-x-1 text-xs font-medium text-emerald-600">
+        <span>≈</span>
+        <span data-eur-amount="{{ $safePrice }}" class="algo-conversion-display">-- ALGO</span>
+    </div>
+
+    {{-- 💰 RESERVATION CURRENCY NOTE: Nota se prenotazione era in altra valuta --}}
     @if($shouldShowReservationNote && $formattedOriginalPrice)
     <div
         class="mt-1 bg-amber-50 border border-amber-200 rounded px-1.5 py-0.5 text-xs text-amber-700 animate-pulse font-normal inline-block whitespace-nowrap">
@@ -112,3 +94,39 @@ $currentSize = $sizeClasses[$size] ?? $sizeClasses['normal'];
     </div>
     @endif
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Funzione per aggiornare la conversione ALGO
+    function updateAlgoConversion() {
+        const algoElements = document.querySelectorAll('.algo-conversion-display');
+        
+        // Prende il tasso dal badge nella navbar
+        const rateElement = document.getElementById('currency-rate-value');
+        if (!rateElement) return;
+        
+        const eurToAlgoRate = parseFloat(rateElement.textContent);
+        if (!eurToAlgoRate || eurToAlgoRate === 0) return;
+        
+        algoElements.forEach(element => {
+            const eurAmount = parseFloat(element.getAttribute('data-eur-amount'));
+            if (eurAmount && eurToAlgoRate) {
+                const algoAmount = eurAmount / eurToAlgoRate;
+                const formattedAlgo = formatAlgoAmount(algoAmount);
+                element.textContent = formattedAlgo + ' ALGO';
+            }
+        });
+    }
+    
+    function formatAlgoAmount(algoAmount) {
+        // Sempre formato numerico intero, senza K
+        return Math.round(algoAmount).toLocaleString();
+    }
+    
+    // Aggiorna immediatamente
+    setTimeout(updateAlgoConversion, 1000);
+    
+    // Aggiorna ogni volta che il tasso cambia
+    setInterval(updateAlgoConversion, 5000);
+});
+</script>

@@ -136,7 +136,7 @@ $showBadge = $showBadge ?? $showOwnershipBadge;
 
             <!-- Like Button - Top Right -->
             @if(!$isCreator)
-            <div class="absolute top-2 right-2 z-10">
+            <div class="absolute z-10 top-2 right-2">
                 <button
                     class="p-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full transition-all duration-200 border border-white/20 like-button {{ $egi->is_liked ?? false ? 'is-liked bg-pink-500/20 border-pink-400/50' : '' }}"
                     data-resource-type="egi" data-resource-id="{{ $egi->id }}"
@@ -291,21 +291,12 @@ $showBadge = $showBadge ?? $showOwnershipBadge;
             if ($highestPriorityReservation && $highestPriorityReservation->status === 'active') {
             $displayPriceEur = $highestPriorityReservation->offer_amount_fiat;
 
-            // 🎯 CURRENCY LOGIC: Usa valuta originale prenotazione per conversione automatica
-            $displayCurrency = $highestPriorityReservation->fiat_currency ?? 'USD';
-            } else {
-            // Se NON c'è prenotazione, usa preferenza utente
-            $displayCurrency = 'EUR'; // Default fallback
-            if (App\Helpers\FegiAuth::check()) {
-            $displayCurrency = App\Helpers\FegiAuth::user()->preferred_currency ?? 'EUR';
+            // 🎯 EUR-ONLY SYSTEM: Convertiamo in EUR se necessario
+            if ($highestPriorityReservation->fiat_currency !== 'EUR') {
+            $displayPriceEur = $highestPriorityReservation->amount_eur ?? $displayPriceEur;
             }
             }
-
-            // 🎯 TARGET CURRENCY: Valuta finale desiderata (quella del badge utente)
-            $targetCurrency = 'EUR'; // Default fallback
-            if (App\Helpers\FegiAuth::check()) {
-            $targetCurrency = App\Helpers\FegiAuth::user()->preferred_currency ?? 'EUR';
-            }
+            // Altrimenti usa il prezzo base dell'EGI (sempre in EUR)
 
             // Controlla se c'è una prenotazione corrente per mostrare il pulsante Rilancia
             $hasCurrentReservation = ($context === 'creator' || $context === 'collection') &&
@@ -322,34 +313,10 @@ $showBadge = $showBadge ?? $showOwnershipBadge;
                     </svg>
                     <div class="flex items-center gap-1">
                         <span class="font-bold {{ $isHyper ? 'text-yellow-300' : 'text-orange-300' }}">
-                            <x-currency-price :price="$displayPriceEur" :currency="$displayCurrency" />
+                            <x-currency-price :price="$displayPriceEur" />
                         </span>
-                        {{-- Nota piccolissima accanto solo per le liste --}}
-                        @php
-                        $shouldShowListNote = false;
-                        $formattedListPrice = '';
-                        if ($highestPriorityReservation && $targetCurrency) {
-                        $originalCurrency = $highestPriorityReservation->fiat_currency ?? 'EUR';
-                        $shouldShowListNote = ($targetCurrency !== $originalCurrency);
-                        if ($shouldShowListNote) {
-                        $originalPrice = $highestPriorityReservation->offer_amount_fiat ?? 0;
-                        switch($originalCurrency) {
-                        case 'USD': $formattedListPrice = '$' . number_format($originalPrice, 0); break;
-                        case 'EUR': $formattedListPrice = '€' . number_format($originalPrice, 0); break;
-                        case 'GBP': $formattedListPrice = '£' . number_format($originalPrice, 0); break;
-                        default: $formattedListPrice = $originalCurrency . ' ' . number_format($originalPrice, 0);
-                        break;
-                        }
-                        }
-                        }
-                        @endphp
-                        @if($shouldShowListNote && $formattedListPrice)
-                        <span
-                            class="bg-amber-50 border border-amber-200 rounded px-1 py-0.5 text-xs text-amber-700 animate-pulse whitespace-nowrap font-normal">
-                            @lang('egi.originally_reserved_in_short', ['currency' => $originalCurrency, 'amount' =>
-                            $formattedListPrice])
-                        </span>
-                        @endif
+                        {{-- EUR-only system: il componente currency-price gestisce automaticamente le note --}}
+                        
                     </div>
                 </div>
 
@@ -363,14 +330,14 @@ $showBadge = $showBadge ?? $showOwnershipBadge;
             <div class="flex items-center gap-2 mt-1 text-sm">
                 <span class="text-gray-400">{{ __('collector.portfolio.purchased_for') }}</span>
                 <span class="font-bold {{ $isHyper ? 'text-yellow-400' : 'text-green-400' }}">
-                    <x-currency-price :price="$egi->pivot->offer_amount_fiat" currency="EUR" />
+                    <x-currency-price :price="$egi->pivot->offer_amount_fiat" />
                 </span>
             </div>
             @elseif ($context === 'patron' && isset($egi->support_amount))
             <div class="flex items-center gap-2 mt-1 text-sm">
                 <span class="text-gray-400">{{ __('patron.portfolio.supported_for') }}</span>
                 <span class="font-bold {{ $isHyper ? 'text-yellow-300' : 'text-yellow-400' }}">
-                    <x-currency-price :price="$egi->support_amount" currency="EUR" />
+                    <x-currency-price :price="$egi->support_amount" />
                 </span>
             </div>
             @endif

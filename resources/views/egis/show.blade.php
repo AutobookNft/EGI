@@ -194,11 +194,15 @@
                     $displayPrice = $highestPriorityReservation->offer_amount_fiat ?? $fallbackPrice;
                     $displayUser = $highestPriorityReservation->user;
 
-                    // 🎯 CURRENCY LOGIC CORRETTA:
-                    // - displayPrice = prezzo della prenotazione (es. 1250)
-                    // - displayCurrency = valuta ORIGINALE della prenotazione (es. USD)
-                    // - Il JavaScript convertirà automaticamente nella valuta preferita dall'utente
-                    $displayCurrency = $highestPriorityReservation->fiat_currency ?? 'USD';
+                    // 🎯 EUR-ONLY SYSTEM: Sistema semplificato
+                    // - displayPrice = prezzo della prenotazione convertito in EUR
+                    // - Mostriamo sempre EUR con note per prenotazioni in altre valute
+
+                    // Convertiamo il prezzo della prenotazione in EUR se necessario
+                    if ($highestPriorityReservation->fiat_currency !== 'EUR') {
+                    // Per ora usiamo il prezzo EUR già convertito, in futuro potremo implementare conversione real-time
+                    $displayPrice = $highestPriorityReservation->amount_eur ?? $displayPrice;
+                    }
 
                     // Label diversa per STRONG vs WEAK
                     if ($highestPriorityReservation->type === 'weak') {
@@ -207,19 +211,8 @@
                     $priceLabel = __('egi.reservation.highest_bid');
                     }
                     } else {
-                    // Se NON c'è prenotazione, usa il prezzo base dell'EGI
-                    // Determina la valuta da mostrare (basata su preferenza utente/badge)
-                    $displayCurrency = 'EUR'; // Default fallback
-                    if (App\Helpers\FegiAuth::check()) {
-                    // Se l'utente è autenticato, usa la sua preferenza
-                    $displayCurrency = App\Helpers\FegiAuth::user()->preferred_currency ?? 'EUR';
-                    }
-                    }
-
-                    // 🎯 TARGET CURRENCY: Valuta finale desiderata (quella del badge utente)
-                    $targetCurrency = 'EUR'; // Default fallback
-                    if (App\Helpers\FegiAuth::check()) {
-                    $targetCurrency = App\Helpers\FegiAuth::user()->preferred_currency ?? 'EUR';
+                    // Se NON c'è prenotazione, usa il prezzo base dell'EGI (sempre in EUR)
+                    // Sistema semplificato: tutto in EUR
                     }
 
                     // 🔧 VALIDATION: Assicuro che displayPrice sia sempre un numero valido
@@ -414,9 +407,8 @@
                                         </div>
                                         <div class="font-medium text-white">
                                             @if($displayPrice)
-                                            <x-currency-price :price="$displayPrice" :currency="$displayCurrency"
-                                                :reservation="$highestPriorityReservation"
-                                                :target-currency="$targetCurrency" />
+                                            <x-currency-price :price="$displayPrice"
+                                                :reservation="$highestPriorityReservation" />
                                             @else
                                             {{ __('egi.crud.price_not_set') }}
                                             @endif
@@ -504,12 +496,10 @@
                                 <div class="mb-6 text-center">
                                     <p class="mb-2 text-sm text-gray-400">{{ $priceLabel }}</p>
                                     <div class="flex items-baseline justify-center">
-                                        <x-currency-price :price="$displayPrice" :currency="$displayCurrency"
+                                        <x-currency-price :price="$displayPrice"
                                             :reservation="$highestPriorityReservation"
-                                            :target-currency="$targetCurrency" class="text-4xl font-bold text-white"
-                                            :show-original="true" />
-                                        <span class="ml-2 text-lg font-medium text-gray-400">{{ $displayCurrency
-                                            }}</span>
+                                            class="text-4xl font-bold text-white" :show-algo-conversion="true" />
+                                        <span class="ml-2 text-lg font-medium text-gray-400">EUR</span>
                                     </div>
 
                                     {{-- Miglior offerente (STRONG vs WEAK) --}}

@@ -2,24 +2,34 @@
 
 namespace App\Notifications\Reservations;
 
-use App\Models\NotificationPayloadReservation;
-use App\Notifications\Channels\CustomDatabaseChannel;
+use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
-use Illuminate\Support\Facades\Log;
+use App\Models\NotificationPayloadReservation;
 
 /**
+ * Notification for when user becomes the highest bidder
+ *
  * @package App\Notifications\Reservations
  * @author Padmin D. Curtis (AI Partner OS3.0) for Fabio Cherici
- * @version 1.0.0 (FlorenceEGI - Reservation Notifications)
+ * @version 1.0.0 (FlorenceEGI - Pre-Launch Reservation System)
  * @date 2025-08-15
- * @purpose Notification when a reservation becomes the highest offer
+ * @purpose Notify user when their reservation becomes the highest
  */
 class ReservationHighest extends Notification
 {
+    use Queueable;
+
+    /**
+     * The notification payload
+     *
+     * @var NotificationPayloadReservation
+     */
     protected NotificationPayloadReservation $payload;
 
     /**
-     * Create a new notification instance
+     * Create a new notification instance.
+     *
+     * @param NotificationPayloadReservation $payload
      */
     public function __construct(NotificationPayloadReservation $payload)
     {
@@ -27,43 +37,35 @@ class ReservationHighest extends Notification
     }
 
     /**
-     * Get the notification's delivery channels
+     * Get the notification's delivery channels.
+     *
+     * @param mixed $notifiable
+     * @return array
      */
     public function via($notifiable): array
     {
-        return [CustomDatabaseChannel::class];
+        return ['database'];
     }
 
     /**
-     * Get the data for the custom database channel
+     * Get the array representation of the notification.
+     *
+     * @param mixed $notifiable
+     * @return array
      */
-    public function toCustomDatabase($notifiable): array
+    public function toArray($notifiable): array
     {
-        Log::channel('florenceegi')->info('ReservationHighest: Creating notification', [
-            'payload_id' => $this->payload->id,
-            'user_id' => $notifiable->id,
-            'reservation_id' => $this->payload->reservation_id,
-        ]);
-
         return [
-            'model_type' => get_class($this->payload),
-            'model_id' => $this->payload->id,
-            'view' => 'notifications.reservations.highest',
-            'sender_id' => 1, // System notification
-            'data' => [
-                'reservation_id' => $this->payload->reservation_id,
-                'egi_id' => $this->payload->egi_id,
-                'egi_title' => $this->payload->data['egi_title'] ?? 'EGI #' . $this->payload->egi_id,
-                'amount_eur' => $this->payload->data['amount_eur'] ?? 0,
-                'previous_highest' => $this->payload->data['previous_highest'] ?? null,
-                'total_competitors' => $this->payload->data['total_competitors'] ?? 0,
-                'message' => $this->payload->getFormattedMessage(),
-                'icon' => 'trophy',
-                'color' => 'green',
-                'cta_text' => 'Vedi Dettagli',
-                'cta_url' => route('egi.show', $this->payload->egi_id),
-            ],
-            'outcome' => null, // This is informative, no response needed
+            'type' => 'reservation_highest',
+            'payload_id' => $this->payload->id,
+            'payload_type' => NotificationPayloadReservation::class,
+            'reservation_id' => $this->payload->reservation_id,
+            'egi_id' => $this->payload->egi_id,
+            'amount_eur' => $this->payload->data['amount_eur'] ?? 0,
+            'egi_title' => $this->payload->data['egi_title'] ?? '',
+            'message' => $this->payload->getMessage(),
+            'icon' => '🏆',
+            'color' => '#10B981'
         ];
     }
 }

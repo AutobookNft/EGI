@@ -8,8 +8,8 @@
  *
  * @package Resources\Lang\It
  * @author Padmin D. Curtis (AI Partner OS3.0) for Fabio Cherici
- * @version 1.0.0 (FlorenceEGI - Biography System)
- * @date 2025-01-07
+ * @version 1.0.1 (FlorenceEGI - Biography System)
+ * @date 2025-01-08
  */
 
 return [
@@ -105,9 +105,9 @@ return [
 
     // === BIOGRAPHY TYPES ===
     'type' => [
-        'single' => 'Singola',
+        'single' => 'Biografia Singola',
         'single_description' => 'Una biografia in formato singolo, ideale per racconti brevi',
-        'chapters' => 'Capitoli',
+        'chapters' => 'Biografia a Capitoli',
         'chapters_description' => 'Biografia organizzata in capitoli, perfetta per storie lunghe e dettagliate',
     ],
 
@@ -288,6 +288,7 @@ return [
         'settings' => 'Impostazioni',
         'title_required' => 'Titolo *',
         'title_placeholder' => 'Inserisci il titolo della tua biografia',
+        'type_required' => 'Tipo *',
         'content_required' => 'Contenuto *',
         'content_placeholder' => 'Racconta la tua storia...',
         'excerpt' => 'Estratto',
@@ -296,8 +297,10 @@ return [
         'add_chapter' => 'Aggiungi Capitolo',
         'edit_chapter' => 'Modifica',
         'delete_chapter' => 'Elimina',
+        'delete_image_title' => 'Elimina immagine',
         'biography_images' => 'Immagini Biografia',
         'upload_images_help' => 'Carica le immagini per la tua biografia. Formati supportati: JPG, PNG, WEBP (Max 10MB ciascuna)',
+        'upload_images_help_create' => 'Carica le immagini per la tua biografia. Formati supportati: JPG, PNG, WEBP (Max 2MB ciascuna)',
         'uploading_images' => 'Caricamento immagini in corso...',
         'uploaded_images' => 'Immagini Caricate',
         'biography_public' => 'Biografia Pubblica',
@@ -305,5 +308,35 @@ return [
         'go_back' => 'Torna Indietro',
         'update_biography' => 'Aggiorna Biografia',
         'create_biography' => 'Crea Biografia',
+    ],
+
+    // === INDEX PAGE SPECIFIC ===
+    'index_page' => [
+        'breadcrumb_home' => 'Home',
+        'breadcrumb_biographies' => 'Biografie',
+        'title' => 'Storie del <span class="bg-gradient-to-r from-yellow-400 to-yellow-600 bg-clip-text text-transparent">Nuovo Rinascimento</span>',
+        'subtitle' => 'Scopri le biografie di creator, mecenati e visionari che stanno costruendo il futuro ecologico digitale',
+        'create_your_story' => 'Crea la tua Storia',
+        'connect_wallet' => 'Connetti Wallet',
+        'register' => 'Registrati',
+        'results_count_auth' => '(tue + pubbliche)',
+        'results_count_public' => '(pubbliche)',
+        'sort_by' => 'Ordina per:',
+        'sort_newest' => 'Più recenti',
+        'sort_oldest' => 'Meno recenti',
+        'sort_title_az' => 'Titolo A-Z',
+        'sort_title_za' => 'Titolo Z-A',
+        'sort_first_created' => 'Prima creazione',
+        'alt_biography_of' => 'Biografia di :name',
+        'private_badge' => 'Privata',
+        'meta_single_story' => 'Storia unica',
+        'read_biography' => 'Leggi biografia',
+        'empty_title' => 'Nessuna biografia trovata',
+        'empty_public_text' => 'Non ci sono ancora biografie pubbliche da mostrare. Sii il primo a condividere la tua storia!',
+        'empty_auth_text' => 'Non hai ancora creato biografie. Inizia a raccontare la tua storia nel Nuovo Rinascimento.',
+        'create_first_biography' => 'Crea la tua prima Biografia',
+        'modal_creation_title' => 'Creazione Biografia',
+        'modal_creation_text' => 'Funzionalità in sviluppo. Presto potrai creare la tua biografia!',
+        'modal_creation_button' => 'Ho capito',
     ],
 ];

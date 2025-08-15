@@ -2,61 +2,73 @@
 
 namespace App\Notifications\Reservations;
 
-use App\Notifications\Channels\CustomDatabaseChannel;
+use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
-use Illuminate\Support\Facades\Log;
+use App\Models\NotificationPayloadReservation;
 
 /**
+ * Notification for when a competitor withdraws their reservation
+ *
  * @package App\Notifications\Reservations
  * @author Padmin D. Curtis (AI Partner OS3.0) for Fabio Cherici
- * @version 1.0.0 (FlorenceEGI - Reservation Notifications)
+ * @version 1.0.0 (FlorenceEGI - Pre-Launch Reservation System)
  * @date 2025-08-15
- * @purpose Notification when competitor withdraws and user moves up
+ * @purpose Notify user when a competitor withdraws and their rank improves
  */
 class CompetitorWithdrew extends Notification
 {
-    protected $notification;
+    use Queueable;
 
     /**
-     * Create a new notification instance
+     * The notification payload
      *
-     * @param mixed $notification The NotificationPayloadReservation object
+     * @var NotificationPayloadReservation
      */
-    public function __construct($notification)
+    protected NotificationPayloadReservation $payload;
+
+    /**
+     * Create a new notification instance.
+     *
+     * @param NotificationPayloadReservation $payload
+     */
+    public function __construct(NotificationPayloadReservation $payload)
     {
-        $this->notification = $notification;
+        $this->payload = $payload;
     }
 
     /**
-     * Get the notification's delivery channels
+     * Get the notification's delivery channels.
      *
      * @param mixed $notifiable
      * @return array
      */
-    public function via($notifiable)
+    public function via($notifiable): array
     {
-        return [CustomDatabaseChannel::class];
+        return ['database'];
     }
 
     /**
-     * Get the data for custom database channel
+     * Get the array representation of the notification.
      *
      * @param mixed $notifiable
      * @return array
      */
-    public function toCustomDatabase($notifiable)
+    public function toArray($notifiable): array
     {
-        Log::channel('florenceegi')->info('CompetitorWithdrew:toCustomDatabase', [
-            'notificationPayloadReservation' => $this->notification,
-        ]);
-
         return [
-            'model_type' => get_class($this->notification),
-            'model_id' => $this->notification->id,
-            'view' => 'notifications.reservations.competitor-withdrew',
-            'sender_id' => 1, // System notification
-            'data' => $this->notification->data,
-            'outcome' => null, // This is informative only
+            'type' => 'competitor_withdrew',
+            'payload_id' => $this->payload->id,
+            'payload_type' => NotificationPayloadReservation::class,
+            'reservation_id' => $this->payload->reservation_id,
+            'egi_id' => $this->payload->egi_id,
+            'previous_rank' => $this->payload->data['previous_rank'] ?? 0,
+            'new_rank' => $this->payload->data['new_rank'] ?? 0,
+            'withdrawn_amount' => $this->payload->data['withdrawn_amount'] ?? 0,
+            'withdrawn_user' => $this->payload->data['withdrawn_user'] ?? 'Un utente',
+            'egi_title' => $this->payload->data['egi_title'] ?? '',
+            'message' => $this->payload->getMessage(),
+            'icon' => 'ℹ️',
+            'color' => '#3B82F6'
         ];
     }
 }

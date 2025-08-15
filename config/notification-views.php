@@ -1,6 +1,5 @@
 <?php
 
-
 return [
     'invitations' => [
         'accepted' => [
@@ -93,6 +92,55 @@ return [
         ],
         'default' => [
             'view' => 'notifications.gdpr.default',
+            'render' => 'include',
+            'type' => 'informational',
+        ],
+    ],
+
+    // === NUOVA SEZIONE: RESERVATIONS ===
+    'reservations' => [
+        'highest' => [
+            'view' => 'notifications.reservations.highest',
+            'render' => 'include',
+            'type' => 'informational',
+        ],
+        'superseded' => [
+            'view' => 'notifications.reservations.superseded',
+            'render' => 'include',
+            'type' => 'informational',
+        ],
+        'rank-changed' => [
+            'view' => 'notifications.reservations.rank-changed',
+            'render' => 'include',
+            'type' => 'informational',
+        ],
+        'competitor-withdrew' => [
+            'view' => 'notifications.reservations.competitor-withdrew',
+            'render' => 'include',
+            'type' => 'informational',
+        ],
+        'reservation-expired' => [
+            'view' => 'notifications.reservations.reservation-expired',
+            'render' => 'include',
+            'type' => 'informational',
+        ],
+        'pre-launch-reminder' => [
+            'view' => 'notifications.reservations.pre-launch-reminder',
+            'render' => 'include',
+            'type' => 'informational',
+        ],
+        'mint-window-open' => [
+            'view' => 'notifications.reservations.mint-window-open',
+            'render' => 'include',
+            'type' => 'informational',
+        ],
+        'mint-window-closing' => [
+            'view' => 'notifications.reservations.mint-window-closing',
+            'render' => 'include',
+            'type' => 'informational',
+        ],
+        'default' => [
+            'view' => 'notifications.reservations.default',
             'render' => 'include',
             'type' => 'informational',
         ],

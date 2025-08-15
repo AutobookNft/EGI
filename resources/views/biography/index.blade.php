@@ -7,9 +7,9 @@
  *
  * @package Resources\Views\Biography
  * @author Padmin D. Curtis (AI Partner OS3.0) for Fabio Cherici
- * @version 1.0.0 (FlorenceEGI Biography Web Display)
- * @date 2025-07-03
- * @purpose Biography listing page with hybrid authentication support
+ * @version 1.0.1 (FlorenceEGI Biography Web Display)
+ * @date 2025-08-15
+ * @purpose Biography listing page with hybrid authentication support and full i18n
  */
 --}}
 
@@ -52,13 +52,13 @@
                     {
                         "@type": "ListItem",
                         "position": 1,
-                        "name": "Home",
+                        "name": "{{ __('biography.index_page.breadcrumb_home') }}",
                         "item": "{{ url('/') }}"
                     },
                     {
                         "@type": "ListItem",
                         "position": 2,
-                        "name": "Biografie",
+                        "name": "{{ __('biography.index_page.breadcrumb_biographies') }}",
                         "item": "{{ route('biography.index') }}"
                     }
                 ]
@@ -74,17 +74,17 @@
     <div class="min-h-screen bg-gray-900">
 
         {{-- Header Section --}}
-        <section class="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 py-16">
+        <section class="relative py-16 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
             <div class="absolute inset-0 bg-gradient-to-r from-yellow-900/20 to-green-900/20"></div>
-            <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="relative px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
 
                 {{-- Breadcrumb --}}
                 <nav class="mb-8" aria-label="Breadcrumb">
                     <ol class="flex items-center space-x-4 text-sm">
                         <li>
                             <a href="{{ url('/') }}" class="text-gray-400 transition-colors hover:text-yellow-400">
-                                <span class="sr-only">Home</span>
-                                <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                                <span class="sr-only">{{ __('biography.index_page.breadcrumb_home') }}</span>
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                                     <path
                                         d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-3a1 1 0 011-1h2a1 1 0 011 1v3a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z">
                                     </path>
@@ -92,13 +92,13 @@
                             </a>
                         </li>
                         <li class="flex items-center">
-                            <svg class="h-5 w-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20"
+                            <svg class="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20"
                                 aria-hidden="true">
                                 <path fill-rule="evenodd"
                                     d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
                                     clip-rule="evenodd"></path>
                             </svg>
-                            <span class="ml-4 font-medium text-yellow-400">Biografie</span>
+                            <span class="ml-4 font-medium text-yellow-400">{{ __('biography.index_page.breadcrumb_biographies') }}</span>
                         </li>
                     </ol>
                 </nav>
@@ -106,14 +106,10 @@
                 {{-- Page Header --}}
                 <div class="text-center">
                     <h1 class="text-4xl font-bold text-white md:text-5xl lg:text-6xl">
-                        Storie del
-                        <span class="bg-gradient-to-r from-yellow-400 to-yellow-600 bg-clip-text text-transparent">
-                            Nuovo Rinascimento
-                        </span>
+                        {!! __('biography.index_page.title') !!}
                     </h1>
-                    <p class="mx-auto mt-6 max-w-3xl text-xl leading-relaxed text-gray-300">
-                        Scopri le biografie di creator, mecenati e visionari che stanno costruendo il futuro ecologico
-                        digitale
+                    <p class="max-w-3xl mx-auto mt-6 text-xl leading-relaxed text-gray-300">
+                        {{ __('biography.index_page.subtitle') }}
                     </p>
 
                     {{-- Auth-aware CTA --}}
@@ -121,37 +117,37 @@
                         @if ($canCreateBiography)
                             <div class="mt-8">
                                 <a href="#" onclick="createBiographyModal()"
-                                    class="inline-flex items-center rounded-full bg-yellow-400 px-8 py-3 text-lg font-semibold text-gray-900 shadow-lg transition-all duration-300 hover:bg-yellow-300 hover:shadow-xl">
-                                    <svg class="mr-2 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                    class="inline-flex items-center px-8 py-3 text-lg font-semibold text-gray-900 transition-all duration-300 bg-yellow-400 rounded-full shadow-lg hover:bg-yellow-300 hover:shadow-xl">
+                                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                                         aria-hidden="true">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M12 4v16m8-8H4"></path>
                                     </svg>
-                                    Crea la tua Storia
+                                    {{ __('biography.index_page.create_your_story') }}
                                 </a>
                             </div>
                         @endif
                     @else
                         <div
-                            class="mt-8 flex flex-col items-center space-y-4 sm:flex-row sm:justify-center sm:space-x-4 sm:space-y-0">
+                            class="flex flex-col items-center mt-8 space-y-4 sm:flex-row sm:justify-center sm:space-x-4 sm:space-y-0">
                             <button onclick="openWalletConnect()"
-                                class="inline-flex items-center rounded-full bg-indigo-600 px-6 py-3 text-base font-semibold text-white shadow-lg transition-all duration-300 hover:bg-indigo-700 hover:shadow-xl">
-                                <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                class="inline-flex items-center px-6 py-3 text-base font-semibold text-white transition-all duration-300 bg-indigo-600 rounded-full shadow-lg hover:bg-indigo-700 hover:shadow-xl">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                                     aria-hidden="true">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1">
                                     </path>
                                 </svg>
-                                Connetti Wallet
+                                {{ __('biography.index_page.connect_wallet') }}
                             </button>
                             <a href="{{ route('register') }}"
-                                class="inline-flex items-center rounded-full border-2 border-yellow-400 px-6 py-3 text-base font-semibold text-yellow-400 transition-all duration-300 hover:bg-yellow-400 hover:text-gray-900">
-                                <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                class="inline-flex items-center px-6 py-3 text-base font-semibold text-yellow-400 transition-all duration-300 border-2 border-yellow-400 rounded-full hover:bg-yellow-400 hover:text-gray-900">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                                     aria-hidden="true">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                                 </svg>
-                                Registrati
+                                {{ __('biography.index_page.register') }}
                             </a>
                         </div>
                     @endif
@@ -160,45 +156,45 @@
         </section>
 
         {{-- Filters & Sort Section --}}
-        <section class="border-b border-gray-700 bg-gray-800 py-8">
-            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <section class="py-8 bg-gray-800 border-b border-gray-700">
+            <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
                 <div class="flex flex-col items-center justify-between space-y-4 lg:flex-row lg:space-y-0">
 
                     {{-- Results Count --}}
                     <div class="text-gray-300">
                         <span class="text-lg font-semibold text-yellow-400">{{ $biographies->total() }}</span>
-                        {{ Str::plural('biografia', $biographies->total()) }}
+                        {{ Str::plural(__('biography.biography'), $biographies->total()) }}
                         @if ($accessLevel === 'authenticated')
-                            <span class="text-sm text-gray-400">(tue + pubbliche)</span>
+                            <span class="text-sm text-gray-400">{{ __('biography.index_page.results_count_auth') }}</span>
                         @else
-                            <span class="text-sm text-gray-400">(pubbliche)</span>
+                            <span class="text-sm text-gray-400">{{ __('biography.index_page.results_count_public') }}</span>
                         @endif
                     </div>
 
                     {{-- Sort Controls --}}
                     <div class="flex items-center space-x-4">
-                        <label for="sort-select" class="text-sm font-medium text-gray-300">Ordina per:</label>
+                        <label for="sort-select" class="text-sm font-medium text-gray-300">{{ __('biography.index_page.sort_by') }}</label>
                         <select id="sort-select" onchange="updateSort()"
-                            class="rounded-lg border border-gray-600 bg-gray-700 px-4 py-2 text-sm text-white focus:border-transparent focus:ring-2 focus:ring-yellow-400">
+                            class="px-4 py-2 text-sm text-white bg-gray-700 border border-gray-600 rounded-lg focus:border-transparent focus:ring-2 focus:ring-yellow-400">
                             <option value="updated_at-desc"
                                 {{ $currentSort === 'updated_at' && $currentDirection === 'desc' ? 'selected' : '' }}>
-                                Più recenti
+                                {{ __('biography.index_page.sort_newest') }}
                             </option>
                             <option value="updated_at-asc"
                                 {{ $currentSort === 'updated_at' && $currentDirection === 'asc' ? 'selected' : '' }}>
-                                Meno recenti
+                                {{ __('biography.index_page.sort_oldest') }}
                             </option>
                             <option value="title-asc"
                                 {{ $currentSort === 'title' && $currentDirection === 'asc' ? 'selected' : '' }}>
-                                Titolo A-Z
+                                {{ __('biography.index_page.sort_title_az') }}
                             </option>
                             <option value="title-desc"
                                 {{ $currentSort === 'title' && $currentDirection === 'desc' ? 'selected' : '' }}>
-                                Titolo Z-A
+                                {{ __('biography.index_page.sort_title_za') }}
                             </option>
                             <option value="created_at-desc"
                                 {{ $currentSort === 'created_at' && $currentDirection === 'desc' ? 'selected' : '' }}>
-                                Prima creazione
+                                {{ __('biography.index_page.sort_first_created') }}
                             </option>
                         </select>
                     </div>
@@ -208,26 +204,26 @@
 
         {{-- Biographies Grid --}}
         <section class="py-12">
-            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
 
                 @if ($biographies->count() > 0)
                     <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                         @foreach ($biographies as $biography)
                             <article
-                                class="group relative transform overflow-hidden rounded-xl border border-gray-700 bg-gray-800 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:border-yellow-400/50 hover:shadow-2xl">
+                                class="relative overflow-hidden transition-all duration-300 transform bg-gray-800 border border-gray-700 shadow-lg group rounded-xl hover:-translate-y-1 hover:border-yellow-400/50 hover:shadow-2xl">
 
                                 {{-- Biography Image --}}
                                 <div
                                     class="relative h-48 overflow-hidden bg-gradient-to-br from-yellow-900/30 to-green-900/30">
                                     @if ($biography->getFirstMediaUrl('featured_image'))
                                         <img src="{{ $biography->getFirstMediaUrl('featured_image', 'web') }}"
-                                            alt="Biografia di {{ $biography->user->name }}"
-                                            class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                            alt="{{ __('biography.index_page.alt_biography_of', ['name' => $biography->user->name]) }}"
+                                            class="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
                                             loading="lazy">
                                     @else
-                                        <div class="flex h-full w-full items-center justify-center">
+                                        <div class="flex items-center justify-center w-full h-full">
                                             <div class="text-center">
-                                                <svg class="mx-auto h-16 w-16 text-yellow-400/50" fill="none"
+                                                <svg class="w-16 h-16 mx-auto text-yellow-400/50" fill="none"
                                                     stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                                     <path stroke-linecap="round" stroke-linejoin="round"
                                                         stroke-width="1.5"
@@ -244,14 +240,14 @@
                                     @if (!$biography->is_public)
                                         <div class="absolute right-3 top-3">
                                             <span
-                                                class="inline-flex items-center rounded-full bg-gray-900/80 px-2 py-1 text-xs font-medium text-yellow-300 backdrop-blur-sm">
-                                                <svg class="mr-1 h-3 w-3" fill="currentColor" viewBox="0 0 20 20"
+                                                class="inline-flex items-center px-2 py-1 text-xs font-medium text-yellow-300 rounded-full bg-gray-900/80 backdrop-blur-sm">
+                                                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"
                                                     aria-hidden="true">
                                                     <path fill-rule="evenodd"
                                                         d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
                                                         clip-rule="evenodd"></path>
                                                 </svg>
-                                                Privata
+                                                {{ __('biography.index_page.private_badge') }}
                                             </span>
                                         </div>
                                     @endif
@@ -261,9 +257,9 @@
                                 <div class="p-6">
 
                                     {{-- Author Info --}}
-                                    <div class="mb-3 flex items-center">
+                                    <div class="flex items-center mb-3">
                                         <div
-                                            class="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600">
+                                            class="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600">
                                             <span class="text-sm font-bold text-gray-900">
                                                 {{ strtoupper(substr($biography->user->name, 0, 1)) }}
                                             </span>
@@ -278,19 +274,19 @@
 
                                     {{-- Biography Title --}}
                                     <h3
-                                        class="mb-2 line-clamp-2 text-lg font-bold text-white transition-colors group-hover:text-yellow-400">
+                                        class="mb-2 text-lg font-bold text-white transition-colors line-clamp-2 group-hover:text-yellow-400">
                                         {{ $biography->title }}
                                     </h3>
 
                                     {{-- Biography Preview --}}
-                                    <p class="mb-4 line-clamp-3 text-sm text-gray-300">
+                                    <p class="mb-4 text-sm text-gray-300 line-clamp-3">
                                         {{ $biography->contentPreview }}
                                     </p>
 
                                     {{-- Biography Meta --}}
-                                    <div class="mb-4 flex items-center justify-between text-xs text-gray-400">
+                                    <div class="flex items-center justify-between mb-4 text-xs text-gray-400">
                                         <div class="flex items-center">
-                                            <svg class="mr-1 h-4 w-4" fill="none" stroke="currentColor"
+                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
                                                 viewBox="0 0 24 24" aria-hidden="true">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
@@ -298,13 +294,13 @@
                                             </svg>
                                             @if ($biography->type === 'chapters')
                                                 {{ $biography->published_chapters_count }}
-                                                {{ Str::plural('capitolo', $biography->published_chapters_count) }}
+                                                {{ Str::plural(__('biography.chapter'), $biography->published_chapters_count) }}
                                             @else
-                                                Storia unica
+                                                {{ __('biography.index_page.meta_single_story') }}
                                             @endif
                                         </div>
                                         <div class="flex items-center">
-                                            <svg class="mr-1 h-4 w-4" fill="none" stroke="currentColor"
+                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
                                                 viewBox="0 0 24 24" aria-hidden="true">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -316,8 +312,8 @@
                                     {{-- Read More Link --}}
                                     <a href="{{ route('biography.public.show', $biography->slug) }}"
                                         class="inline-flex items-center text-sm font-semibold text-yellow-400 transition-colors hover:text-yellow-300">
-                                        Leggi biografia
-                                        <svg class="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1"
+                                        {{ __('biography.index_page.read_biography') }}
+                                        <svg class="w-4 h-4 ml-1 transition-transform group-hover:translate-x-1"
                                             fill="none" stroke="currentColor" viewBox="0 0 24 24"
                                             aria-hidden="true">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -340,33 +336,31 @@
                 @else
                     {{-- Empty State --}}
                     <div class="py-20 text-center">
-                        <div class="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-gray-800">
-                            <svg class="h-12 w-12 text-gray-600" fill="none" stroke="currentColor"
+                        <div class="flex items-center justify-center w-24 h-24 mx-auto mb-6 bg-gray-800 rounded-full">
+                            <svg class="w-12 h-12 text-gray-600" fill="none" stroke="currentColor"
                                 viewBox="0 0 24 24" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                                     d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
                                 </path>
                             </svg>
                         </div>
-                        <h3 class="mb-2 text-xl font-semibold text-white">Nessuna biografia trovata</h3>
-                        <p class="mx-auto mb-8 max-w-md text-gray-400">
+                        <h3 class="mb-2 text-xl font-semibold text-white">{{ __('biography.index_page.empty_title') }}</h3>
+                        <p class="max-w-md mx-auto mb-8 text-gray-400">
                             @if ($accessLevel === 'public')
-                                Non ci sono ancora biografie pubbliche da mostrare. Sii il primo a condividere la tua
-                                storia!
+                                {{ __('biography.index_page.empty_public_text') }}
                             @else
-                                Non hai ancora creato biografie. Inizia a raccontare la tua storia nel Nuovo
-                                Rinascimento.
+                                {{ __('biography.index_page.empty_auth_text') }}
                             @endif
                         </p>
                         @if ($canCreateBiography)
                             <button onclick="createBiographyModal()"
-                                class="inline-flex items-center rounded-full bg-yellow-400 px-6 py-3 text-base font-semibold text-gray-900 transition-all duration-300 hover:bg-yellow-300">
-                                <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                class="inline-flex items-center px-6 py-3 text-base font-semibold text-gray-900 transition-all duration-300 bg-yellow-400 rounded-full hover:bg-yellow-300">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                                     aria-hidden="true">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M12 4v16m8-8H4"></path>
                                 </svg>
-                                Crea la tua prima Biografia
+                                {{ __('biography.index_page.create_first_biography') }}
                             </button>
                         @endif
                     </div>
@@ -399,13 +393,13 @@
                 if (window.Swal) {
                     Swal.fire({
                         icon: 'info',
-                        title: 'Creazione Biografia',
-                        text: 'Funzionalità in sviluppo. Presto potrai creare la tua biografia!',
-                        confirmButtonText: 'Ho capito',
+                        title: "{{ __('biography.index_page.modal_creation_title') }}",
+                        text: "{{ __('biography.index_page.modal_creation_text') }}",
+                        confirmButtonText: "{{ __('biography.index_page.modal_creation_button') }}",
                         confirmButtonColor: '#D4A574'
                     });
                 } else {
-                    alert('Funzionalità in sviluppo. Presto potrai creare la tua biografia!');
+                    alert("{{ __('biography.index_page.modal_creation_text') }}");
                 }
             }
 

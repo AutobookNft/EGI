@@ -2,22 +2,14 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Reservation;
-use App\Services\ReservationService;
-use App\Services\Notifications\ReservationNotificationService;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
+use App\Models\Reservation;
+use App\Models\Egi;
+use App\Services\Notifications\ReservationNotificationService;
 use Ultra\ErrorManager\Interfaces\ErrorManagerInterface;
 use Ultra\UltraLogManager\UltraLogManager;
+use Illuminate\Support\Facades\DB;
 
-/**
- * @package App\Console\Commands
- * @author Padmin D. Curtis (AI Partner OS3.0) for Fabio Cherici
- * @version 2.0.0 (FlorenceEGI - Pre-Launch Queue System)
- * @date 2025-08-15
- * @purpose Process reservation rankings and send notifications for rank changes
- */
 class ProcessReservationRankings extends Command
 {
     /**
@@ -26,99 +18,128 @@ class ProcessReservationRankings extends Command
      * @var string
      */
     protected $signature = 'reservations:process-rankings
-                            {--dry-run : Run without making changes}
-                            {--verbose : Show detailed output}';
+                            {--egi= : Process specific EGI ID}
+                            {--dry-run : Run without sending notifications}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Update reservation rankings and notify users of changes';
-
-    /**
-     * Services
-     */
-    protected ReservationService $reservationService;
-    protected ReservationNotificationService $notificationService;
-    protected ErrorManagerInterface $errorManager;
-    protected UltraLogManager $logger;
-
-    /**
-     * Counters for reporting
-     */
-    protected array $stats = [
-        'rankings_updated' => 0,
-        'notifications_sent' => 0,
-        'superseded' => 0,
-        'new_highest' => 0,
-        'errors' => 0,
-    ];
-
-    /**
-     * Create a new command instance.
-     */
-    public function __construct(
-        ReservationService $reservationService,
-        ReservationNotificationService $notificationService,
-        ErrorManagerInterface $errorManager,
-        UltraLogManager $logger
-    ) {
-        parent::__construct();
-
-        $this->reservationService = $reservationService;
-        $this->notificationService = $notificationService;
-        $this->errorManager = $errorManager;
-        $this->logger = $logger;
-    }
+    protected $description = 'Process reservation rankings and send notifications for position changes';
 
     /**
      * Execute the console command.
-     *
-     * @return int
      */
-    public function handle(): int
+    public function handle()
     {
-        $isDryRun = $this->option('dry-run');
-        $isVerbose = $this->option('verbose');
+        // Get dependencies
+        $notificationService = app(ReservationNotificationService::class);
+        $logger = app(UltraLogManager::class);
+        $errorManager = app(ErrorManagerInterface::class);
 
-        $this->info('🔄 Processing reservation rankings' . ($isDryRun ? ' (DRY RUN)' : ''));
+        $startTime = microtime(true);
+        $dryRun = $this->option('dry-run');
+        $verbose = $this->output->isVerbose(); // Usa il verbose di Laravel
+        $specificEgi = $this->option('egi');
 
-        // Log start
-        $this->logger->info('[CRON] Reservation ranking processing started', [
-            'dry_run' => $isDryRun,
-            'timestamp' => now()->toIso8601String(),
+        $this->info('🚀 Starting reservation rankings processing...');
+
+        if ($dryRun) {
+            $this->warn('⚠️  DRY RUN MODE - No notifications will be sent');
+        }
+
+        $logger->info('[PROCESS_RANKINGS] Command started', [
+            'dry_run' => $dryRun,
+            'specific_egi' => $specificEgi,
+            'started_at' => now()->toIso8601String()
         ]);
 
         try {
-            // Get all EGIs with active reservations
-            $egisWithReservations = Reservation::active()
-                ->select('egi_id')
-                ->distinct()
-                ->pluck('egi_id');
+            // Get EGIs to process
+            $egisQuery = Egi::query()
+                ->whereHas('reservations', function ($query) {
+                    $query->where('status', 'active');
+                });
 
-            foreach ($egisWithReservations as $egiId) {
-                $this->processEgiRankings($egiId, $isDryRun, $isVerbose);
+            if ($specificEgi) {
+                $egisQuery->where('id', $specificEgi);
             }
 
-            // Output statistics
-            $this->outputStatistics();
+            $egis = $egisQuery->get();
 
-            // Log completion
-            $this->logger->info('[CRON] Reservation ranking processing completed', [
-                'stats' => $this->stats,
-                'dry_run' => $isDryRun,
+            if ($egis->isEmpty()) {
+                $this->info('No EGIs with active reservations found.');
+                return Command::SUCCESS;
+            }
+
+            $this->info("Processing {$egis->count()} EGI(s) with active reservations...");
+
+            $totalProcessed = 0;
+            $totalNotifications = 0;
+            $errors = 0;
+
+            foreach ($egis as $egi) {
+                try {
+                    $result = $this->processEgiRankings(
+                        $egi,
+                        $dryRun,
+                        $verbose,
+                        $notificationService,
+                        $logger,
+                        $errorManager
+                    );
+
+                    $totalProcessed += $result['processed'];
+                    $totalNotifications += $result['notifications'];
+
+                    if ($verbose) {
+                        $this->info("  ✓ EGI #{$egi->id} - {$egi->title}: {$result['processed']} reservations, {$result['notifications']} notifications");
+                    }
+
+                } catch (\Exception $e) {
+                    $errors++;
+                    $this->error("  ✗ Error processing EGI #{$egi->id}: {$e->getMessage()}");
+
+                    $errorManager->handle('PROCESS_RANKINGS_EGI_ERROR', [
+                        'egi_id' => $egi->id,
+                        'error_message' => $e->getMessage()
+                    ], $e);
+                }
+            }
+
+            $executionTime = round(microtime(true) - $startTime, 2);
+
+            // Summary
+            $this->newLine();
+            $this->info('📊 Processing Complete!');
+            $this->table(
+                ['Metric', 'Value'],
+                [
+                    ['EGIs Processed', $egis->count()],
+                    ['Reservations Updated', $totalProcessed],
+                    ['Notifications Sent', $dryRun ? "0 (dry run)" : $totalNotifications],
+                    ['Errors', $errors],
+                    ['Execution Time', "{$executionTime}s"],
+                ]
+            );
+
+            $logger->info('[PROCESS_RANKINGS] Command completed', [
+                'egis_processed' => $egis->count(),
+                'reservations_updated' => $totalProcessed,
+                'notifications_sent' => $totalNotifications,
+                'errors' => $errors,
+                'execution_time_seconds' => $executionTime
             ]);
 
-            return Command::SUCCESS;
+            return $errors > 0 ? Command::FAILURE : Command::SUCCESS;
 
         } catch (\Exception $e) {
-            $this->error('❌ Error processing rankings: ' . $e->getMessage());
+            $this->error('Fatal error: ' . $e->getMessage());
 
-            $this->errorManager->handle('RESERVATION_RANKING_CRON_ERROR', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'stats' => $this->stats,
+            $errorManager->handle('PROCESS_RANKINGS_FATAL_ERROR', [
+                'error_message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
             ], $e);
 
             return Command::FAILURE;
@@ -126,145 +147,135 @@ class ProcessReservationRankings extends Command
     }
 
     /**
-     * Process rankings for a specific EGI
+     * Update rankings for a specific EGI
+     *
+     * @param int $egiId
+     * @return void
      */
-    protected function processEgiRankings(int $egiId, bool $isDryRun, bool $isVerbose): void
+    private function updateRankingsForEgi(int $egiId): void
     {
-        if ($isVerbose) {
-            $this->info("  📊 Processing EGI #{$egiId}");
-        }
+        // Get all active reservations for this EGI ordered by amount DESC
+        $reservations = Reservation::where('egi_id', $egiId)
+            ->where('status', 'active')
+            ->where('is_current', true)
+            ->orderBy('amount_eur', 'desc')
+            ->orderBy('created_at', 'asc') // Tie-breaker: older reservations win
+            ->get();
 
-        try {
-            // Get current rankings
-            $currentRankings = Reservation::active()
-                ->forEgi($egiId)
-                ->orderBy('rank_position')
-                ->get()
-                ->keyBy('id');
-
-            // Calculate new rankings
-            $newRankings = Reservation::active()
-                ->forEgi($egiId)
-                ->orderByDesc('amount_eur')
-                ->orderBy('created_at')
-                ->get();
-
-            $changes = [];
-            $previousHighest = $currentRankings->where('is_highest', true)->first();
-
-            foreach ($newRankings as $index => $reservation) {
-                $newRank = $index + 1;
-                $oldRank = $currentRankings->get($reservation->id)?->rank_position;
-
-                if ($oldRank !== $newRank) {
-                    $changes[] = [
-                        'reservation' => $reservation,
-                        'old_rank' => $oldRank,
-                        'new_rank' => $newRank,
-                        'is_new_highest' => ($newRank === 1 && !$reservation->is_highest),
-                    ];
-                }
-            }
-
-            if (!$isDryRun && count($changes) > 0) {
-                $this->applyRankingChanges($changes, $previousHighest, $isVerbose);
-            }
-
-            $this->stats['rankings_updated'] += count($changes);
-
-        } catch (\Exception $e) {
-            $this->stats['errors']++;
-
-            if ($isVerbose) {
-                $this->error("    ❌ Error: " . $e->getMessage());
-            }
-
-            $this->errorManager->handle('EGI_RANKING_ERROR', [
-                'egi_id' => $egiId,
-                'error' => $e->getMessage(),
-            ], $e);
+        // Update rank positions
+        $rank = 1;
+        foreach ($reservations as $reservation) {
+            $reservation->update([
+                'rank_position' => $rank,
+                'is_highest' => ($rank === 1)
+            ]);
+            $rank++;
         }
     }
 
     /**
-     * Apply ranking changes and send notifications
+     * Process rankings for a specific EGI
      */
-    protected function applyRankingChanges(array $changes, ?Reservation $previousHighest, bool $isVerbose): void
-    {
-        DB::transaction(function () use ($changes, $previousHighest, $isVerbose) {
-            foreach ($changes as $change) {
-                $reservation = $change['reservation'];
-                $newRank = $change['new_rank'];
+    private function processEgiRankings(
+        Egi $egi,
+        bool $dryRun,
+        bool $verbose,
+        ReservationNotificationService $notificationService,
+        UltraLogManager $logger,
+        ErrorManagerInterface $errorManager
+    ): array {
+        $processed = 0;
+        $notifications = 0;
 
-                if ($isVerbose) {
-                    $this->line("      - Reservation #{$reservation->id}: Rank {$change['old_rank']} → {$newRank}");
+        DB::transaction(function () use ($egi, $dryRun, $verbose, &$processed, &$notifications, $notificationService, $logger) {
+            // Store original rankings
+            $originalRankings = Reservation::active()
+                ->forEgi($egi->id)
+                ->pluck('rank_position', 'id')
+                ->toArray();
+
+            // Update rankings for this EGI
+            $this->updateRankingsForEgi($egi->id);
+
+            // Get updated reservations
+            $reservations = Reservation::active()
+                ->forEgi($egi->id)
+                ->ranked()
+                ->get();
+
+            $processed = $reservations->count();
+
+            if ($verbose) {
+                $this->info("  Processing {$processed} reservations for EGI #{$egi->id}");
+            }
+
+            // Process each reservation for notifications
+            foreach ($reservations as $reservation) {
+                $oldRank = $originalRankings[$reservation->id] ?? null;
+                $newRank = $reservation->rank_position;
+
+                // Skip if rank hasn't changed
+                if ($oldRank === $newRank) {
+                    continue;
                 }
 
-                // Update reservation
-                $reservation->previous_rank = $reservation->rank_position;
-                $reservation->rank_position = $newRank;
+                if ($verbose) {
+                    $this->info("    Reservation #{$reservation->id}: Rank {$oldRank} → {$newRank}");
+                }
 
-                // Handle new highest
-                if ($change['is_new_highest']) {
-                    $reservation->is_highest = true;
-                    $reservation->sub_status = Reservation::SUB_STATUS_HIGHEST;
+                if (!$dryRun) {
+                    try {
+                        // New highest bidder
+                        if ($newRank === 1 && $oldRank !== 1) {
+                            $notificationService->sendNewHighest($reservation);
+                            $notifications++;
 
-                    // Send "you're now highest" notification
-                    $this->notificationService->sendNewHighest($reservation);
-                    $this->stats['new_highest']++;
-
-                    // Handle previous highest
-                    if ($previousHighest && $previousHighest->id !== $reservation->id) {
-                        $previousHighest->is_highest = false;
-                        $previousHighest->sub_status = Reservation::SUB_STATUS_SUPERSEDED;
-                        $previousHighest->superseded_by_id = $reservation->id;
-                        $previousHighest->superseded_at = now();
-                        $previousHighest->save();
-
-                        // Send "you've been superseded" notification
-                        $this->notificationService->sendSuperseded($previousHighest, $reservation);
-                        $this->stats['superseded']++;
-                    }
-                } else {
-                    // Just a rank change
-                    if ($reservation->rank_position === 1) {
-                        $reservation->is_highest = true;
-                        $reservation->sub_status = Reservation::SUB_STATUS_HIGHEST;
-                    } else {
-                        $reservation->is_highest = false;
-                        if ($reservation->sub_status === Reservation::SUB_STATUS_HIGHEST) {
-                            $reservation->sub_status = Reservation::SUB_STATUS_SUPERSEDED;
+                            if ($verbose) {
+                                $this->info("      → Sent 'New Highest' notification");
+                            }
                         }
+
+                        // Was highest, now superseded
+                        if ($oldRank === 1 && $newRank !== 1) {
+                            $newHighest = $reservations->firstWhere('rank_position', 1);
+                            if ($newHighest) {
+                                $notificationService->sendSuperseded($reservation, $newHighest);
+                                $notifications++;
+
+                                if ($verbose) {
+                                    $this->info("      → Sent 'Superseded' notification");
+                                }
+                            }
+                        }
+
+                        // Significant rank change (3+ positions)
+                        if ($oldRank && abs($newRank - $oldRank) >= 3) {
+                            $notificationService->sendRankChanged($reservation, $oldRank);
+                            $notifications++;
+
+                            if ($verbose) {
+                                $direction = $newRank < $oldRank ? 'improved' : 'dropped';
+                                $this->info("      → Sent 'Rank Changed' notification ({$direction})");
+                            }
+                        }
+
+                    } catch (\Exception $e) {
+                        $this->error("      ✗ Failed to send notification: {$e->getMessage()}");
+
+                        $logger->error('[PROCESS_RANKINGS] Notification failed', [
+                            'reservation_id' => $reservation->id,
+                            'old_rank' => $oldRank,
+                            'new_rank' => $newRank,
+                            'error' => $e->getMessage()
+                        ]);
                     }
-                }
-
-                $reservation->save();
-
-                // Send rank change notification (if significant)
-                if (abs($change['old_rank'] - $newRank) >= 2) {
-                    $this->notificationService->sendRankChanged($reservation, $change['old_rank'], $newRank);
-                    $this->stats['notifications_sent']++;
                 }
             }
         });
-    }
 
-    /**
-     * Output statistics
-     */
-    protected function outputStatistics(): void
-    {
-        $this->newLine();
-        $this->info('📊 Processing Statistics:');
-        $this->table(
-            ['Metric', 'Count'],
-            [
-                ['Rankings Updated', $this->stats['rankings_updated']],
-                ['New Highest Offers', $this->stats['new_highest']],
-                ['Superseded Offers', $this->stats['superseded']],
-                ['Notifications Sent', $this->stats['notifications_sent']],
-                ['Errors', $this->stats['errors']],
-            ]
-        );
+        return [
+            'processed' => $processed,
+            'notifications' => $notifications
+        ];
     }
 }

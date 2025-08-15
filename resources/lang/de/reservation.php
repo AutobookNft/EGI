@@ -1,58 +1,118 @@
 <?php
 
-return [
-    // Messaggi di successo
-    'success' => 'Ihre Reservierung war erfolgreich! Das Zertifikat wurde generiert.',
-    'cancel_success' => 'Ihre Reservierung wurde erfolgreich storniert.',
+/**
+ * Reservierungsnachrichten
+ * @package FlorenceEGI
+ * @subpackage Übersetzungen
+ * @language de
+ * @version 2.0.0
+ */
 
-    // Errori
-    'unauthorized' => 'Sie müssen Ihre Wallet verbinden oder sich anmelden, um eine Reservierung vorzunehmen.',
-    'validation_failed' => 'Bitte überprüfen Sie Ihre Eingaben und versuchen Sie es erneut.',
-    'auth_required' => 'Authentifizierung erforderlich, um Ihre Reservierungen anzuzeigen.',
+return [
+    // Erfolgsmeldungen
+    'success' => 'Ihre Reservierung wurde erfolgreich durchgeführt! Das Zertifikat wurde erstellt.',
+    'cancel_success' => 'Ihre Reservierung wurde erfolgreich storniert.',
+    'success_title' => 'Reservierung durchgeführt!',
+    'view_certificate' => 'Zertifikat anzeigen',
+    'close' => 'Schließen',
+
+    // Fehlermeldungen
+    'unauthorized' => 'Sie müssen Ihr Wallet verbinden oder sich anmelden, um eine Reservierung vorzunehmen.',
+    'validation_failed' => 'Bitte überprüfen Sie die eingegebenen Daten und versuchen Sie es erneut.',
+    'auth_required' => 'Eine Authentifizierung ist erforderlich, um Ihre Reservierungen anzuzeigen.',
     'list_failed' => 'Ihre Reservierungen konnten nicht abgerufen werden. Bitte versuchen Sie es später erneut.',
-    'status_failed' => 'Der Status der Reservierung konnte nicht abgerufen werden. Bitte versuchen Sie es später erneut.',
+    'status_failed' => 'Der Reservierungsstatus konnte nicht abgerufen werden. Bitte versuchen Sie es später erneut.',
     'unauthorized_cancel' => 'Sie haben keine Berechtigung, diese Reservierung zu stornieren.',
     'cancel_failed' => 'Die Reservierung konnte nicht storniert werden. Bitte versuchen Sie es später erneut.',
 
-    // Formulario
+    // UI-Schaltflächen
+    'button' => [
+        'reserve' => 'Reservieren',
+        'reserved' => 'Reserviert',
+        'make_offer' => 'Angebot machen'
+    ],
+
+    // Badges
+    'badge' => [
+        'highest' => 'Höchste Priorität',
+        'superseded' => 'Niedrigere Priorität',
+        'has_offers' => 'Reserviert'
+    ],
+
+    // Reservierungsdetails
+    'already_reserved' => [
+        'title' => 'Bereits Reserviert',
+        'text' => 'Sie haben bereits eine Reservierung für dieses EGI.',
+        'details' => 'Details Ihrer Reservierung:',
+        'type' => 'Typ',
+        'amount' => 'Betrag',
+        'status' => 'Status',
+        'view_certificate' => 'Zertifikat anzeigen',
+        'ok' => 'OK',
+        'new_reservation' => 'Neue Reservierung',
+        'confirm_new' => 'Möchten Sie eine neue Reservierung vornehmen?'
+    ],
+
+    // Reservierungshistorie
+    'history' => [
+        'title' => 'Reservierungshistorie',
+        'entries' => 'Reservierungseinträge',
+        'view_certificate' => 'Zertifikat anzeigen',
+        'no_entries' => 'Keine Reservierungen gefunden.',
+        'be_first' => 'Seien Sie der Erste, der dieses EGI reserviert!'
+    ],
+
+    // Fehlermeldungen
+    'errors' => [
+        'button_click_error' => 'Bei der Bearbeitung Ihrer Anfrage ist ein Fehler aufgetreten.',
+        'form_validation' => 'Bitte überprüfen Sie die eingegebenen Daten und versuchen Sie es erneut.',
+        'api_error' => 'Bei der Kommunikation mit dem Server ist ein Fehler aufgetreten.',
+        'unauthorized' => 'Sie müssen Ihr Wallet verbinden oder sich anmelden, um eine Reservierung vorzunehmen.'
+    ],
+
+    // Formular
     'form' => [
-        'title' => 'Diesen EGI reservieren',
+        'title' => 'Dieses EGI reservieren',
         'offer_amount_label' => 'Ihr Angebot (EUR)',
         'offer_amount_placeholder' => 'Betrag in EUR eingeben',
-        'algo_equivalent' => 'Ungefähr :amount ALGO',
-        'terms_accepted' => 'Ich akzeptiere die Bedingungen für EGI-Reservierungen',
-        'contact_info' => 'Zusätzliche Kontaktinformationen (optional)',
-        'submit_button' => 'Reservierung vornehmen',
+        'algo_equivalent' => 'Etwa :amount ALGO',
+        'terms_accepted' => 'Ich akzeptiere die Geschäftsbedingungen für EGI-Reservierungen',
+        'contact_info' => 'Zusätzliche Kontaktinformationen (Optional)',
+        'submit_button' => 'Reservierung durchführen',
         'cancel_button' => 'Abbrechen'
     ],
 
-    // Errori specifici
-    'errors' => [
-        'RESERVATION_EGI_NOT_AVAILABLE' => 'Dieser EGI ist derzeit nicht für eine Reservierung verfügbar.',
-        'RESERVATION_AMOUNT_TOO_LOW' => 'Ihr Angebot ist zu niedrig. Bitte geben Sie einen höheren Betrag ein.',
-        'RESERVATION_UNAUTHORIZED' => 'Sie müssen Ihre Wallet verbinden oder sich anmelden, um eine Reservierung vorzunehmen.',
-        'RESERVATION_CERTIFICATE_GENERATION_FAILED' => 'Wir konnten Ihr Reservierungszertifikat nicht generieren. Unser Team wurde informiert.',
-        'RESERVATION_CERTIFICATE_NOT_FOUND' => 'Das angeforderte Zertifikat wurde nicht gefunden.',
-        'RESERVATION_ALREADY_EXISTS' => 'Sie haben bereits eine aktive Reservierung für diesen EGI.',
-        'RESERVATION_CANCEL_FAILED' => 'Wir konnten Ihre Reservierung nicht stornieren. Bitte versuchen Sie es später erneut.',
-        'RESERVATION_UNAUTHORIZED_CANCEL' => 'Sie haben keine Berechtigung, diese Reservierung zu stornieren.',
-        'RESERVATION_STATUS_FAILED' => 'Der Status der Reservierung konnte nicht abgerufen werden. Bitte versuchen Sie es später erneut.',
-        'RESERVATION_UNKNOWN_ERROR' => 'Etwas ist mit Ihrer Reservierung schiefgelaufen. Unser Team wurde informiert.'
-    ],
-
-    // Badge e status descriptor
+    // Reservierungstyp
     'type' => [
         'strong' => 'Starke Reservierung',
-        'weak' => 'Grundlegende Reservierung'
+        'weak' => 'Schwache Reservierung'
     ],
+
+    // Prioritätsstufen
+    'priority' => [
+        'highest' => 'Aktive Reservierung',
+        'superseded' => 'Übertroffen',
+    ],
+
+    // Reservierungsstatus
     'status' => [
         'active' => 'Aktiv',
+        'pending' => 'Ausstehend',
         'cancelled' => 'Storniert',
-        'expired' => 'Abgelaufen',
-        'superseded' => 'Überschritten'
+        'expired' => 'Abgelaufen'
     ],
-    'priority' => [
-        'highest' => 'Höchste Priorität',
-        'superseded' => 'Niedrigere Priorität'
-    ]
+
+    // === NEUE SEKTION: BENACHRICHTIGUNGEN ===
+    'notifications' => [
+        'reservation_expired' => 'Ihre Reservierung von €:amount für :egi_title ist abgelaufen.',
+        'superseded' => 'Ihr Angebot für :egi_title wurde übertroffen. Neues höchstes Angebot: €:new_highest_amount',
+        'highest' => 'Herzlichen Glückwunsch! Ihr Angebot von €:amount für :egi_title ist jetzt das höchste!',
+        'rank_changed' => 'Ihre Position für :egi_title hat sich geändert: Sie sind jetzt auf Position #:new_rank',
+        'competitor_withdrew' => 'Ein Konkurrent hat sich zurückgezogen. Sie sind auf Position #:new_rank für :egi_title aufgerückt',
+        'pre_launch_reminder' => 'Das On-Chain-Mint beginnt bald! Bestätigen Sie Ihre Reservierung für :egi_title.',
+        'mint_window_open' => 'Sie sind dran! Sie haben 48 Stunden Zeit, um das Mint von :egi_title abzuschließen.',
+        'mint_window_closing' => 'Achtung! Nur noch :hours_remaining Stunden, um das Mint von :egi_title abzuschließen.',
+        'default' => 'Update zu Ihrer Reservierung für :egi_title',
+        'archived_success' => 'Benachrichtigung erfolgreich archiviert.'
+    ],
 ];

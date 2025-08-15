@@ -5,7 +5,7 @@
  * @package FlorenceEGI
  * @subpackage Traduzioni
  * @language it
- * @version 1.0.0
+ * @version 2.0.0
  */
 
 return [
@@ -17,9 +17,9 @@ return [
     'close' => 'Chiudi',
 
     // Messaggi di errore
-    'unauthorized' => 'Devi collegare il tuo wallet o effettuare l’accesso per prenotare.',
+    'unauthorized' => 'Devi collegare il tuo wallet o effettuare l\'accesso per prenotare.',
     'validation_failed' => 'Controlla i dati inseriti e riprova.',
-    'auth_required' => 'È richiesta l’autenticazione per visualizzare le tue prenotazioni.',
+    'auth_required' => 'È richiesta l\'autenticazione per visualizzare le tue prenotazioni.',
     'list_failed' => 'Impossibile recuperare le tue prenotazioni. Riprova più tardi.',
     'status_failed' => 'Impossibile recuperare lo stato della prenotazione. Riprova più tardi.',
     'unauthorized_cancel' => 'Non hai il permesso per annullare questa prenotazione.',
@@ -29,7 +29,7 @@ return [
     'button' => [
         'reserve' => 'Prenota',
         'reserved' => 'Prenotato',
-        'make_offer' => 'Fai un’offerta'
+        'make_offer' => 'Fai un\'offerta'
     ],
 
     // Badge
@@ -64,17 +64,17 @@ return [
 
     // Messaggi di errore
     'errors' => [
-        'button_click_error' => 'Si è verificato un errore nell’elaborazione della tua richiesta.',
+        'button_click_error' => 'Si è verificato un errore nell\'elaborazione della tua richiesta.',
         'form_validation' => 'Controlla i dati inseriti e riprova.',
         'api_error' => 'Si è verificato un errore nella comunicazione con il server.',
-        'unauthorized' => 'Devi collegare il tuo wallet o effettuare l’accesso per prenotare.'
+        'unauthorized' => 'Devi collegare il tuo wallet o effettuare l\'accesso per prenotare.'
     ],
 
     // Form
     'form' => [
         'title' => 'Prenota questo EGI',
         'offer_amount_label' => 'La tua Offerta (EUR)',
-        'offer_amount_placeholder' => 'Inserisci l’importo in EUR',
+        'offer_amount_placeholder' => 'Inserisci l\'importo in EUR',
         'algo_equivalent' => 'Circa :amount ALGO',
         'terms_accepted' => 'Accetto i termini e le condizioni per la prenotazione degli EGI',
         'contact_info' => 'Informazioni di Contatto Aggiuntive (Opzionale)',
@@ -100,5 +100,19 @@ return [
         'pending' => 'In attesa',
         'cancelled' => 'Annullata',
         'expired' => 'Scaduta'
-    ]
+    ],
+
+    // === NUOVA SEZIONE: NOTIFICHE ===
+    'notifications' => [
+        'reservation_expired' => 'La tua prenotazione di €:amount per :egi_title è scaduta.',
+        'superseded' => 'La tua offerta per :egi_title è stata superata. Nuova offerta più alta: €:new_highest_amount',
+        'highest' => 'Congratulazioni! La tua offerta di €:amount per :egi_title è ora la più alta!',
+        'rank_changed' => 'La tua posizione per :egi_title è cambiata: sei ora in posizione #:new_rank',
+        'competitor_withdrew' => 'Un concorrente si è ritirato. Sei salito in posizione #:new_rank per :egi_title',
+        'pre_launch_reminder' => 'Il mint on-chain inizierà presto! Conferma la tua prenotazione per :egi_title.',
+        'mint_window_open' => 'È il tuo turno! Hai 48 ore per completare il mint di :egi_title.',
+        'mint_window_closing' => 'Attenzione! Restano solo :hours_remaining ore per completare il mint di :egi_title.',
+        'default' => 'Aggiornamento sulla tua prenotazione per :egi_title',
+        'archived_success' => 'Notifica archiviata con successo.'
+    ],
 ];

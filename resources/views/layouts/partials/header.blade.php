@@ -9,10 +9,6 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-    {{-- Multi-Currency System Meta Tags --}}
-    <meta name="user-preferred-currency"
-        content="{{ auth()->check() ? (auth()->user()->preferred_currency ?? 'USD') : 'USD' }}">
-
     {{-- SEO & Semantica --}}
     <title>{{ $title ?? __('collection.default_page_title') }}</title>
     <meta name="description" content="{{ $metaDescription ?? __('collection.default_meta_description') }}">
@@ -132,120 +128,34 @@
                     </div>
                     @endif
 
-                    {{-- Professional Currency Badge (Desktop) - Now Clickable Selector --}}
-                    <div id="currency-badge-container-desktop" class="items-center hidden ml-3 md:flex">
-                        <div class="relative group">
-                            {{-- Desktop Badge (Clickable) --}}
-                            <button id="currency-badge-desktop"
-                                class="inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-slate-800/90 to-slate-700/90 backdrop-blur-sm border border-slate-600/50 rounded-lg shadow-lg hover:shadow-slate-900/30 transition-all duration-300 cursor-pointer hover:border-emerald-500/50 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
-                                title="Click to change currency / Clicca per cambiare valuta" aria-expanded="false"
-                                aria-haspopup="true">
-
-                                {{-- Status Dot --}}
-                                <div class="relative mr-2">
-                                    <span id="currency-status-dot"
-                                        class="w-1.5 h-1.5 bg-green-400 rounded-full block animate-pulse"></span>
-                                    <span
-                                        class="absolute inset-0 w-1.5 h-1.5 bg-green-400 rounded-full animate-ping opacity-60"></span>
-                                </div>
-
-                                {{-- Currency Display --}}
-                                <div class="flex items-center space-x-2">
-                                    <span id="currency-symbol" class="text-sm font-bold text-white">
-                                        {{ auth()->check() ? (auth()->user()->preferred_currency ?? 'USD') : 'USD' }}
-                                    </span>
-                                    <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-                                    </svg>
-                                    <span class="text-sm font-bold text-emerald-400">ALGO</span>
-                                </div>
-
-                                {{-- Rate Display --}}
-                                <div class="flex items-center ml-3">
-                                    <span id="currency-rate-value"
-                                        class="font-mono text-sm font-medium text-white">--</span>
-                                </div>
-
-                                {{-- Dropdown Arrow --}}
-                                <svg id="currency-badge-arrow"
-                                    class="w-4 h-4 ml-2 transition-transform duration-200 text-slate-400"
-                                    fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd"
-                                        d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                            </button>
-
-                            {{-- Currency Selector Dropdown --}}
-                            <div id="currency-badge-dropdown"
-                                class="absolute right-0 z-50 invisible w-64 mt-2 transition-all duration-300 transform scale-95 opacity-0">
-                                <div
-                                    class="overflow-hidden border shadow-2xl bg-slate-900/95 backdrop-blur-xl border-slate-700/50 rounded-xl">
-                                    {{-- Header --}}
-                                    <div
-                                        class="p-4 border-b bg-gradient-to-r from-emerald-600/20 to-blue-600/20 border-slate-700/50">
-                                        <h3 class="text-sm font-semibold text-white">Select Currency</h3>
-                                        <p class="mt-1 text-xs text-slate-400">"Think FIAT, Operate ALGO"</p>
-                                    </div>
-
-                                    {{-- Currency Options --}}
-                                    <div class="p-2">
-                                        <button
-                                            class="flex items-center justify-between w-full px-3 py-2 text-left transition-colors duration-200 rounded-lg currency-option hover:bg-slate-800/50"
-                                            data-currency="USD">
-                                            <div class="flex items-center">
-                                                <span class="mr-3 text-base">🇺🇸</span>
-                                                <div>
-                                                    <span class="text-sm font-medium text-white">USD</span>
-                                                    <div class="text-xs text-slate-400">US Dollar</div>
-                                                </div>
-                                            </div>
-                                            <span class="font-mono text-xs currency-rate text-slate-300">--</span>
-                                        </button>
-
-                                        <button
-                                            class="flex items-center justify-between w-full px-3 py-2 text-left transition-colors duration-200 rounded-lg currency-option hover:bg-slate-800/50"
-                                            data-currency="EUR">
-                                            <div class="flex items-center">
-                                                <span class="mr-3 text-base">🇪🇺</span>
-                                                <div>
-                                                    <span class="text-sm font-medium text-white">EUR</span>
-                                                    <div class="text-xs text-slate-400">Euro</div>
-                                                </div>
-                                            </div>
-                                            <span class="font-mono text-xs currency-rate text-slate-300">--</span>
-                                        </button>
-
-                                        <button
-                                            class="flex items-center justify-between w-full px-3 py-2 text-left transition-colors duration-200 rounded-lg currency-option hover:bg-slate-800/50"
-                                            data-currency="GBP">
-                                            <div class="flex items-center">
-                                                <span class="mr-3 text-base">🇬🇧</span>
-                                                <div>
-                                                    <span class="text-sm font-medium text-white">GBP</span>
-                                                    <div class="text-xs text-slate-400">British Pound</div>
-                                                </div>
-                                            </div>
-                                            <span class="font-mono text-xs currency-rate text-slate-300">--</span>
-                                        </button>
-                                    </div>
-
-                                    {{-- Footer --}}
-                                    <div class="p-3 border-t border-slate-700/50 bg-slate-800/30">
-                                        <div class="flex items-center justify-between text-xs text-slate-500">
-                                            <span>Last updated: <span id="currency-last-updated">--</span></span>
-                                            <div class="flex items-center">
-                                                <div class="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse mr-1">
-                                                </div>
-                                                <span class="text-emerald-400">LIVE</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                    {{-- EUR → ALGO Badge (Desktop) - Fixed Currency, Live Rate --}}
+                    <div class="items-center hidden ml-3 md:flex">
+                        <div
+                            class="inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-slate-800/90 to-slate-700/90 backdrop-blur-sm border border-slate-600/50 rounded-lg shadow-lg">
+                            {{-- Status Dot --}}
+                            <div class="relative mr-2">
+                                <span id="currency-status-dot"
+                                    class="w-1.5 h-1.5 bg-green-400 rounded-full block animate-pulse"></span>
+                                <span
+                                    class="absolute inset-0 w-1.5 h-1.5 bg-green-400 rounded-full animate-ping opacity-60"></span>
                             </div>
 
+                            {{-- EUR → ALGO Display --}}
+                            <div class="flex items-center space-x-2">
+                                <span class="text-sm font-bold text-white">EUR</span>
+                                <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                                </svg>
+                                <span class="text-sm font-bold text-emerald-400">ALGO</span>
+                            </div>
+
+                            {{-- Live Rate Display --}}
+                            <div class="flex items-center ml-3">
+                                <span id="currency-rate-value"
+                                    class="font-mono text-sm font-medium text-white">--</span>
+                            </div>
                         </div>
                     </div>
 
@@ -361,119 +271,31 @@
                     {{-- Menu Mobile Button --}}
                     <div class="flex items-center gap-2 -mr-2 md:hidden">
 
-                        {{-- Professional Currency Badge (Mobile Always Visible) - Clickable Selector --}}
-                        <div id="currency-badge-container-mobile" class="flex items-center">
-                            <div class="relative group">
-                                {{-- Compact Mobile Badge (Clickable) --}}
-                                <button id="currency-badge-mobile"
-                                    class="inline-flex items-center px-1.5 py-1 bg-gradient-to-r from-slate-800/90 to-slate-700/90 backdrop-blur-sm border border-slate-600/50 rounded-md shadow-lg transition-all duration-300 cursor-pointer hover:border-emerald-500/50 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
-                                    title="Tap to change currency / Tocca per cambiare valuta" aria-expanded="false"
-                                    aria-haspopup="true">
+                        {{-- EUR → ALGO Badge (Mobile) - Fixed Currency, Live Rate --}}
+                        <div class="flex items-center">
+                            <div
+                                class="inline-flex items-center px-1.5 py-1 bg-gradient-to-r from-slate-800/90 to-slate-700/90 backdrop-blur-sm border border-slate-600/50 rounded-md shadow-lg">
+                                {{-- Status Dot --}}
+                                <div class="relative mr-1">
+                                    <span id="currency-status-dot-mobile"
+                                        class="block w-1 h-1 bg-green-400 rounded-full animate-pulse"></span>
+                                </div>
 
-                                    {{-- Status Dot --}}
-                                    <div class="relative mr-1">
-                                        <span id="currency-status-dot-mobile"
-                                            class="block w-1 h-1 bg-green-400 rounded-full animate-pulse"></span>
-                                    </div>
-
-                                    {{-- Currency Display --}}
-                                    <div class="flex items-center space-x-1">
-                                        <span id="currency-symbol-mobile" class="text-xs font-bold text-white">{{
-                                            auth()->check() ? (auth()->user()->preferred_currency ?? 'USD') : 'USD'
-                                            }}</span>
-                                        <svg class="w-2.5 h-2.5 text-slate-400" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-                                        </svg>
-                                        <span class="text-xs font-bold text-emerald-400">ALGO</span>
-                                    </div>
-
-                                    {{-- Rate Display --}}
-                                    <div class="flex items-center ml-1">
-                                        <span id="currency-rate-value-mobile"
-                                            class="font-mono text-xs font-medium text-white">--</span>
-                                    </div>
-
-                                    {{-- Dropdown Arrow --}}
-                                    <svg id="currency-badge-arrow-mobile"
-                                        class="w-3 h-3 ml-1 transition-transform duration-200 text-slate-400"
-                                        fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
-                                            clip-rule="evenodd" />
+                                {{-- EUR → ALGO Display --}}
+                                <div class="flex items-center space-x-1">
+                                    <span class="text-xs font-bold text-white">EUR</span>
+                                    <svg class="w-2.5 h-2.5 text-slate-400" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
                                     </svg>
-                                </button>
+                                    <span class="text-xs font-bold text-emerald-400">ALGO</span>
+                                </div>
 
-                                {{-- Mobile Currency Selector Dropdown --}}
-                                <div id="currency-badge-dropdown-mobile"
-                                    class="absolute right-0 z-50 invisible w-56 mt-2 transition-all duration-300 transform scale-95 opacity-0">
-                                    <div
-                                        class="overflow-hidden border shadow-2xl bg-slate-900/95 backdrop-blur-xl border-slate-700/50 rounded-xl">
-                                        {{-- Header --}}
-                                        <div
-                                            class="p-3 border-b bg-gradient-to-r from-emerald-600/20 to-blue-600/20 border-slate-700/50">
-                                            <h3 class="text-sm font-semibold text-white">Select Currency</h3>
-                                            <p class="mt-1 text-xs text-slate-400">Mobile-optimized selector</p>
-                                        </div>
-
-                                        {{-- Currency Options --}}
-                                        <div class="p-2">
-                                            <button
-                                                class="flex items-center justify-between w-full px-3 py-3 text-left transition-colors duration-200 rounded-lg currency-option-mobile hover:bg-slate-800/50"
-                                                data-currency="USD">
-                                                <div class="flex items-center">
-                                                    <span class="mr-3 text-lg">🇺🇸</span>
-                                                    <div>
-                                                        <span class="text-sm font-medium text-white">USD</span>
-                                                        <div class="text-xs text-slate-400">US Dollar</div>
-                                                    </div>
-                                                </div>
-                                                <span
-                                                    class="font-mono text-xs currency-rate-mobile text-slate-300">--</span>
-                                            </button>
-
-                                            <button
-                                                class="flex items-center justify-between w-full px-3 py-3 text-left transition-colors duration-200 rounded-lg currency-option-mobile hover:bg-slate-800/50"
-                                                data-currency="EUR">
-                                                <div class="flex items-center">
-                                                    <span class="mr-3 text-lg">🇪🇺</span>
-                                                    <div>
-                                                        <span class="text-sm font-medium text-white">EUR</span>
-                                                        <div class="text-xs text-slate-400">Euro</div>
-                                                    </div>
-                                                </div>
-                                                <span
-                                                    class="font-mono text-xs currency-rate-mobile text-slate-300">--</span>
-                                            </button>
-
-                                            <button
-                                                class="flex items-center justify-between w-full px-3 py-3 text-left transition-colors duration-200 rounded-lg currency-option-mobile hover:bg-slate-800/50"
-                                                data-currency="GBP">
-                                                <div class="flex items-center">
-                                                    <span class="mr-3 text-lg">🇬🇧</span>
-                                                    <div>
-                                                        <span class="text-sm font-medium text-white">GBP</span>
-                                                        <div class="text-xs text-slate-400">British Pound</div>
-                                                    </div>
-                                                </div>
-                                                <span
-                                                    class="font-mono text-xs currency-rate-mobile text-slate-300">--</span>
-                                            </button>
-                                        </div>
-
-                                        {{-- Footer --}}
-                                        <div class="p-2 border-t border-slate-700/50 bg-slate-800/30">
-                                            <div class="flex items-center justify-between text-xs text-slate-500">
-                                                <span>Updated: <span id="currency-last-updated-mobile">--</span></span>
-                                                <div class="flex items-center">
-                                                    <div class="w-1 h-1 mr-1 bg-green-400 rounded-full animate-pulse">
-                                                    </div>
-                                                    <span class="text-emerald-400">LIVE</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                                {{-- Live Rate Display --}}
+                                <div class="flex items-center ml-1">
+                                    <span id="currency-rate-value-mobile"
+                                        class="font-mono text-xs font-medium text-white">--</span>
                                 </div>
                             </div>
                         </div>
@@ -641,7 +463,7 @@
                 currencyOptions: document.querySelectorAll('.currency-option')
             };
 
-            this.currentCurrency = '{{ auth()->check() ? (auth()->user()->preferred_currency ?? "USD") : "USD" }}';
+            this.currentCurrency = 'EUR'; // Fixed to EUR in simplified system
             this.updateInterval = null;
             this.init();
         }
@@ -661,34 +483,8 @@
 
         async fetchAndUpdateRate() {
             try {
-                const isAuthenticated = {{ auth()->check() ? 'true' : 'false' }};
-                let userCurrency = 'USD'; // Default
-
-                // Step 1: Get user's preferred currency (only for authenticated users)
-                if (isAuthenticated) {
-                    try {
-                        const prefResponse = await fetch('/user/preferences/currency', {
-                            headers: {
-                                'Accept': 'application/json',
-                                'X-Requested-With': 'XMLHttpRequest',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
-                            }
-                        });
-
-                        if (prefResponse.ok) {
-                            const prefData = await prefResponse.json();
-                            if (prefData.success && prefData.data?.preferred_currency) {
-                                userCurrency = prefData.data.preferred_currency;
-                            }
-                        }
-                    } catch (prefError) {
-                        console.warn('Failed to fetch user currency preference:', prefError);
-                        // Continue with default USD
-                    }
-                }
-
-                // Step 2: Get rate for the user's currency
-                const response = await fetch(`/api/currency/rate/${userCurrency}`, {
+                // Step 1: Always get EUR rate (simplified EUR-only system)
+                const response = await fetch('/api/currency/rate/EUR', {
                     headers: {
                         'Accept': 'application/json',
                         'X-Requested-With': 'XMLHttpRequest'
@@ -696,7 +492,7 @@
                 });
 
                 if (!response.ok) {
-                    throw new Error(`Failed to fetch rate for ${userCurrency}: ${response.status}`);
+                    throw new Error(`Failed to fetch EUR rate: ${response.status}`);
                 }
 
                 const data = await response.json();

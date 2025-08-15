@@ -2,24 +2,34 @@
 
 namespace App\Notifications\Reservations;
 
-use App\Models\NotificationPayloadReservation;
-use App\Notifications\Channels\CustomDatabaseChannel;
+use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
-use Illuminate\Support\Facades\Log;
+use App\Models\NotificationPayloadReservation;
 
 /**
+ * Notification for when user's reservation is superseded
+ *
  * @package App\Notifications\Reservations
  * @author Padmin D. Curtis (AI Partner OS3.0) for Fabio Cherici
- * @version 1.0.0 (FlorenceEGI - Reservation Notifications)
+ * @version 1.0.0 (FlorenceEGI - Pre-Launch Reservation System)
  * @date 2025-08-15
- * @purpose Notification when a reservation is superseded by a higher offer
+ * @purpose Notify user when their reservation is no longer the highest
  */
 class ReservationSuperseded extends Notification
 {
+    use Queueable;
+
+    /**
+     * The notification payload
+     *
+     * @var NotificationPayloadReservation
+     */
     protected NotificationPayloadReservation $payload;
 
     /**
-     * Create a new notification instance
+     * Create a new notification instance.
+     *
+     * @param NotificationPayloadReservation $payload
      */
     public function __construct(NotificationPayloadReservation $payload)
     {
@@ -27,42 +37,36 @@ class ReservationSuperseded extends Notification
     }
 
     /**
-     * Get the notification's delivery channels
+     * Get the notification's delivery channels.
+     *
+     * @param mixed $notifiable
+     * @return array
      */
     public function via($notifiable): array
     {
-        return [CustomDatabaseChannel::class];
+        return ['database'];
     }
 
     /**
-     * Get the data for the custom database channel
+     * Get the array representation of the notification.
+     *
+     * @param mixed $notifiable
+     * @return array
      */
-    public function toCustomDatabase($notifiable): array
+    public function toArray($notifiable): array
     {
-        Log::channel('florenceegi')->info('ReservationSuperseded: Creating notification', [
-            'payload_id' => $this->payload->id,
-            'user_id' => $notifiable->id,
-            'reservation_id' => $this->payload->reservation_id,
-        ]);
-
         return [
-            'model_type' => get_class($this->payload),
-            'model_id' => $this->payload->id,
-            'view' => 'notifications.reservations.superseded',
-            'sender_id' => 1, // System notification
-            'data' => [
-                'reservation_id' => $this->payload->reservation_id,
-                'egi_id' => $this->payload->egi_id,
-                'egi_title' => $this->payload->data['egi_title'] ?? 'EGI #' . $this->payload->egi_id,
-                'previous_amount' => $this->payload->data['previous_amount'] ?? 0,
-                'new_highest_amount' => $this->payload->data['new_highest_amount'] ?? 0,
-                'new_rank' => $this->payload->data['new_rank'] ?? null,
-                'superseded_by_user' => $this->payload->data['superseded_by_user'] ?? 'Un altro utente',
-                'message' => $this->payload->getFormattedMessage(),
-                'icon' => 'trending-down',
-                'color' => 'yellow',
-            ],
-            'outcome' => null, // This is informative, no response needed
+            'type' => 'reservation_superseded',
+            'payload_id' => $this->payload->id,
+            'payload_type' => NotificationPayloadReservation::class,
+            'reservation_id' => $this->payload->reservation_id,
+            'egi_id' => $this->payload->egi_id,
+            'amount_eur' => $this->payload->data['amount_eur'] ?? 0,
+            'new_highest_amount' => $this->payload->data['new_highest_amount'] ?? 0,
+            'egi_title' => $this->payload->data['egi_title'] ?? '',
+            'message' => $this->payload->getMessage(),
+            'icon' => '⚠️',
+            'color' => '#F59E0B'
         ];
     }
 }

@@ -1,13 +1,13 @@
 <x-app-layout>
-    <x-slot name="title">Crea Biografia</x-slot>
+    <x-slot name="title">{{ __('biography.edit_page.create_new_biography') }}</x-slot>
 
     <div class="max-w-4xl px-4 py-12 mx-auto sm:px-6 lg:px-8">
         <div class="p-8 border border-gray-700 shadow-2xl rounded-xl bg-gray-800/50 backdrop-blur-sm">
 
             <!-- Header -->
             <div class="mb-8">
-                <h1 class="mb-2 text-3xl font-bold text-white">Crea Nuova Biografia</h1>
-                <p class="text-gray-300">Racconta la tua storia e condividila con il mondo</p>
+                <h1 class="mb-2 text-3xl font-bold text-white">{{ __('biography.edit_page.create_new_biography') }}</h1>
+                <p class="text-gray-300">{{ __('biography.edit_page.tell_story_description') }}</p>
             </div>
 
             <!-- Error Messages -->
@@ -18,7 +18,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
-                        <h3 class="font-medium text-red-300">Errori di validazione</h3>
+                        <h3 class="font-medium text-red-300">{{ __('biography.edit_page.validation_errors') }}</h3>
                     </div>
                     <ul class="mt-2 space-y-1 text-sm text-red-200">
                         @foreach ($errors->all() as $error)
@@ -56,7 +56,7 @@
                                         d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
                                     </path>
                                 </svg>
-                                <span>Informazioni Base Idiota</span>
+                                <span>{{ __('biography.edit_page.basic_info') }}</span>
                             </div>
                         </button>
                         <button type="button" class="tab-button" data-tab="media">
@@ -66,7 +66,7 @@
                                         d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
                                     </path>
                                 </svg>
-                                <span>Media</span>
+                                <span>{{ __('biography.media_label') }}</span>
                             </div>
                         </button>
                         <button type="button" class="tab-button" data-tab="settings">
@@ -78,7 +78,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                 </svg>
-                                <span>Impostazioni</span>
+                                <span>{{ __('biography.edit_page.settings') }}</span>
                             </div>
                         </button>
                     </nav>
@@ -92,12 +92,12 @@
                         <!-- Title -->
                         <div>
                             <label for="title" class="block mb-2 text-sm font-medium text-gray-300">
-                                Titolo *
+                                {{ __('biography.edit_page.title_required') }}
                             </label>
                             <input type="text" id="title" name="title"
                                 value="{{ old('title', $biography->title ?? '') }}"
                                 class="w-full rounded-lg border border-gray-600 bg-gray-800 px-4 py-3 text-white placeholder-gray-400 transition-colors focus:border-[#D4A574] focus:ring-1 focus:ring-[#D4A574]"
-                                placeholder="Inserisci il titolo della tua biografia" required>
+                                placeholder="{{ __('biography.edit_page.title_placeholder') }}" required>
                             @error('title')
                                 <p class="mt-1 text-sm text-red-400">{{ $message }}</p>
                             @enderror
@@ -106,14 +106,13 @@
                         <!-- Type -->
                         <div>
                             <label for="type" class="block mb-2 text-sm font-medium text-gray-300">
-                                Tipo *
+                                {{ __('biography.edit_page.type_required') }}
                             </label>
                             <select id="type" name="type"
                                 class="w-full rounded-lg border border-gray-600 bg-gray-800 px-4 py-3 text-white transition-colors focus:border-[#D4A574] focus:ring-1 focus:ring-[#D4A574]">
-                                <option value="single" {{ old('type') == 'single' ? 'selected' : '' }}>Biografia
-                                    Singola</option>
+                                <option value="single" {{ old('type') == 'single' ? 'selected' : '' }}>{{ __('biography.type.single') }}</option>
                                 <option value="chapters" {{ old('type') == 'chapters' ? 'selected' : '' }}>
-                                    Biografia a Capitoli</option>
+                                    {{ __('biography.type.chapters') }}</option>
                             </select>
                             @error('type')
                                 <p class="mt-1 text-sm text-red-400">{{ $message }}</p>
@@ -123,13 +122,13 @@
                         <!-- Content -->
                         <div>
                             <label for="content" class="block mb-2 text-sm font-medium text-gray-300">
-                                Contenuto *
+                                {{ __('biography.edit_page.content_required') }}
                             </label>
                             <div class="trix-container">
                                 <input id="content-trix" name="content" type="hidden" value="{{ old('content') }}">
                                 <trix-editor input="content-trix"
                                     class="trix-editor-biography min-h-[300px] rounded-lg border border-gray-600 bg-gray-800 text-white transition-colors focus:border-[#D4A574] focus:ring-1 focus:ring-[#D4A574]"
-                                    placeholder="Racconta la tua storia...">
+                                    placeholder="{{ __('biography.edit_page.content_placeholder') }}">
                                 </trix-editor>
                             </div>
                             @error('content')
@@ -140,13 +139,13 @@
                         <!-- Excerpt -->
                         <div>
                             <label for="excerpt" class="block mb-2 text-sm font-medium text-gray-300">
-                                Estratto
+                                {{ __('biography.edit_page.excerpt') }}
                             </label>
                             <textarea id="excerpt" name="excerpt" rows="3" maxlength="500"
                                 class="w-full rounded-lg border border-gray-600 bg-gray-800 px-4 py-3 text-white placeholder-gray-400 transition-colors focus:border-[#D4A574] focus:ring-1 focus:ring-[#D4A574]"
-                                placeholder="Breve descrizione della tua biografia...">{{ old('excerpt') }}</textarea>
+                                placeholder="{{ __('biography.edit_page.excerpt_placeholder') }}">{{ old('excerpt') }}</textarea>
                             <p class="mt-1 text-xs text-gray-400">
-                                Descrizione breve che apparirà in anteprima (<span
+                                {{ __('biography.edit_page.excerpt_help') }} (<span
                                     id="excerpt-count">{{ strlen(old('excerpt') ?? '') }}</span>/500)
                             </p>
                             @error('excerpt')
@@ -159,18 +158,17 @@
                 <!-- Media Tab -->
                 <div id="media-tab" class="hidden">
                     <div class="space-y-6">
-                        <h3 class="text-lg font-medium text-white">Gestione Media</h3>
+                        <h3 class="text-lg font-medium text-white">{{ __('biography.edit_page.media_management') }}</h3>
 
                         <!-- Multiple Images Upload -->
                         <div>
                             <label class="block mb-2 text-sm font-medium text-gray-300">
-                                Immagini Biografia
+                                {{ __('biography.edit_page.biography_images') }}
                             </label>
                             <input type="file" id="multiple-images-input" multiple accept="image/*"
                                 class="w-full rounded-lg border border-gray-600 bg-gray-800 px-4 py-3 text-white transition-colors file:mr-4 file:rounded-lg file:border-0 file:bg-[#D4A574] file:px-4 file:py-2 file:text-sm file:font-medium file:text-gray-900 hover:file:bg-[#E6B885]">
                             <p class="text-xs text-gray-400">
-                                Carica le immagini per la tua biografia. Formati supportati: JPG, PNG, WEBP (Max
-                                2MB ciascuna)
+                                {{ __('biography.edit_page.upload_images_help_create') }}
                             </p>
 
                             <!-- Loading indicator -->
@@ -178,7 +176,7 @@
                                 class="mt-2 hidden items-center space-x-2 rounded-lg bg-[#D4A574]/10 p-3 text-[#D4A574]">
                                 <div class="h-4 w-4 animate-spin rounded-full border-b-2 border-[#D4A574]">
                                 </div>
-                                <span class="text-sm font-medium">Caricamento immagini in corso...</span>
+                                <span class="text-sm font-medium">{{ __('biography.edit_page.uploading_images') }}</span>
                             </div>
 
                             <!-- Error message -->
@@ -189,7 +187,7 @@
 
                             <!-- Images Gallery -->
                             <div id="images-gallery" class="mt-6 space-y-4">
-                                <h4 class="text-lg font-medium text-white">Immagini Caricate</h4>
+                                <h4 class="text-lg font-medium text-white">{{ __('biography.edit_page.uploaded_images') }}</h4>
                                 <div id="images-grid" class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                                     <!-- Images will be inserted here via JavaScript -->
                                 </div>
@@ -201,17 +199,17 @@
                 <!-- Settings Tab -->
                 <div id="settings-tab" class="hidden">
                     <div class="space-y-6">
-                        <h3 class="text-lg font-medium text-white">Impostazioni</h3>
+                        <h3 class="text-lg font-medium text-white">{{ __('biography.edit_page.settings') }}</h3>
 
                         <!-- Privacy Settings -->
                         <div class="space-y-4">
                             <div class="flex items-center justify-between">
                                 <div class="flex-1">
                                     <label class="text-sm font-medium text-gray-300">
-                                        Biografia Pubblica
+                                        {{ __('biography.edit_page.biography_public') }}
                                     </label>
                                     <p class="text-xs text-gray-400">
-                                        Rendi visibile la tua biografia a tutti gli utenti
+                                        {{ __('biography.edit_page.biography_public_help') }}
                                     </p>
                                 </div>
                                 <label class="relative inline-flex items-center cursor-pointer">
@@ -236,7 +234,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7">
                         </path>
                     </svg>
-                    Torna Indietro
+                    {{ __('biography.edit_page.go_back') }}
                 </a>
             </div>
 
@@ -247,7 +245,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
                         </path>
                     </svg>
-                    Crea Biografia
+                    {{ __('biography.edit_page.create_biography') }}
                 </button>
             </div>
         </div>

@@ -1,58 +1,118 @@
 <?php
 
-return [
-    // Messaggi di successo
-    'success' => '¡Tu reserva fue exitosa! El certificado ha sido generado.',
-    'cancel_success' => 'Tu reserva ha sido cancelada con éxito.',
+/**
+ * Mensajes de Reserva
+ * @package FlorenceEGI
+ * @subpackage Traducciones
+ * @language es
+ * @version 2.0.0
+ */
 
-    // Errori
-    'unauthorized' => 'Debes conectar tu cartera o iniciar sesión para hacer una reserva.',
-    'validation_failed' => 'Por favor, revisa los datos ingresados y vuelve a intentarlo.',
+return [
+    // Mensajes de éxito
+    'success' => 'Tu reserva se ha realizado con éxito. El certificado ha sido generado.',
+    'cancel_success' => 'Tu reserva se ha cancelado con éxito.',
+    'success_title' => '¡Reserva realizada!',
+    'view_certificate' => 'Ver Certificado',
+    'close' => 'Cerrar',
+
+    // Mensajes de error
+    'unauthorized' => 'Debes conectar tu wallet o iniciar sesión para hacer una reserva.',
+    'validation_failed' => 'Verifica los datos ingresados e inténtalo de nuevo.',
     'auth_required' => 'Se requiere autenticación para ver tus reservas.',
-    'list_failed' => 'No se pudieron recuperar tus reservas. Inténtalo de nuevo más tarde.',
-    'status_failed' => 'No se pudo recuperar el estado de la reserva. Inténtalo de nuevo más tarde.',
+    'list_failed' => 'No se pudieron recuperar tus reservas. Inténtalo más tarde.',
+    'status_failed' => 'No se pudo recuperar el estado de la reserva. Inténtalo más tarde.',
     'unauthorized_cancel' => 'No tienes permiso para cancelar esta reserva.',
-    'cancel_failed' => 'No se pudo cancelar la reserva. Inténtalo de nuevo más tarde.',
+    'cancel_failed' => 'No se pudo cancelar la reserva. Inténtalo más tarde.',
+
+    // Botones UI
+    'button' => [
+        'reserve' => 'Reservar',
+        'reserved' => 'Reservado',
+        'make_offer' => 'Hacer una oferta'
+    ],
+
+    // Insignias
+    'badge' => [
+        'highest' => 'Máxima Prioridad',
+        'superseded' => 'Prioridad Inferior',
+        'has_offers' => 'Reservado'
+    ],
+
+    // Detalles de reserva
+    'already_reserved' => [
+        'title' => 'Ya Reservado',
+        'text' => 'Ya tienes una reserva para este EGI.',
+        'details' => 'Detalles de tu reserva:',
+        'type' => 'Tipo',
+        'amount' => 'Cantidad',
+        'status' => 'Estado',
+        'view_certificate' => 'Ver Certificado',
+        'ok' => 'OK',
+        'new_reservation' => 'Nueva Reserva',
+        'confirm_new' => '¿Quieres hacer una nueva reserva?'
+    ],
+
+    // Historial de reservas
+    'history' => [
+        'title' => 'Historial de Reservas',
+        'entries' => 'Entradas de Reserva',
+        'view_certificate' => 'Ver Certificado',
+        'no_entries' => 'No se encontraron reservas.',
+        'be_first' => '¡Sé el primero en reservar este EGI!'
+    ],
+
+    // Mensajes de error
+    'errors' => [
+        'button_click_error' => 'Ocurrió un error al procesar tu solicitud.',
+        'form_validation' => 'Verifica los datos ingresados e inténtalo de nuevo.',
+        'api_error' => 'Ocurrió un error de comunicación con el servidor.',
+        'unauthorized' => 'Debes conectar tu wallet o iniciar sesión para hacer una reserva.'
+    ],
 
     // Formulario
     'form' => [
         'title' => 'Reservar este EGI',
-        'offer_amount_label' => 'Tu oferta (EUR)',
-        'offer_amount_placeholder' => 'Ingresa el monto en EUR',
+        'offer_amount_label' => 'Tu Oferta (EUR)',
+        'offer_amount_placeholder' => 'Ingresa la cantidad en EUR',
         'algo_equivalent' => 'Aproximadamente :amount ALGO',
         'terms_accepted' => 'Acepto los términos y condiciones para las reservas de EGI',
-        'contact_info' => 'Información de contacto adicional (opcional)',
-        'submit_button' => 'Hacer Reserva',
+        'contact_info' => 'Información de Contacto Adicional (Opcional)',
+        'submit_button' => 'Realizar Reserva',
         'cancel_button' => 'Cancelar'
     ],
 
-    // Errori specifici
-    'errors' => [
-        'RESERVATION_EGI_NOT_AVAILABLE' => 'Este EGI no está disponible para reservar en este momento.',
-        'RESERVATION_AMOUNT_TOO_LOW' => 'El monto de tu oferta es demasiado bajo. Ingresa un monto más alto.',
-        'RESERVATION_UNAUTHORIZED' => 'Debes conectar tu cartera o iniciar sesión para hacer una reserva.',
-        'RESERVATION_CERTIFICATE_GENERATION_FAILED' => 'No pudimos generar tu certificado de reserva. Nuestro equipo ha sido notificado.',
-        'RESERVATION_CERTIFICATE_NOT_FOUND' => 'No se encontró el certificado solicitado.',
-        'RESERVATION_ALREADY_EXISTS' => 'Ya tienes una reserva activa para este EGI.',
-        'RESERVATION_CANCEL_FAILED' => 'No pudimos cancelar tu reserva. Inténtalo de nuevo más tarde.',
-        'RESERVATION_UNAUTHORIZED_CANCEL' => 'No tienes permiso para cancelar esta reserva.',
-        'RESERVATION_STATUS_FAILED' => 'No se pudo recuperar el estado de la reserva. Inténtalo de nuevo más tarde.',
-        'RESERVATION_UNKNOWN_ERROR' => 'Algo salió mal con tu reserva. Nuestro equipo ha sido notificado.'
-    ],
-
-    // Badge e status descriptor
+    // Tipo de reserva
     'type' => [
         'strong' => 'Reserva Fuerte',
-        'weak' => 'Reserva Básica'
+        'weak' => 'Reserva Débil'
     ],
+
+    // Niveles de prioridad
+    'priority' => [
+        'highest' => 'Reserva Activa',
+        'superseded' => 'Superada',
+    ],
+
+    // Estado de la reserva
     'status' => [
         'active' => 'Activa',
+        'pending' => 'Pendiente',
         'cancelled' => 'Cancelada',
-        'expired' => 'Expirada',
-        'superseded' => 'Superada'
+        'expired' => 'Expirada'
     ],
-    'priority' => [
-        'highest' => 'Prioridad Máxima',
-        'superseded' => 'Prioridad Inferior'
-    ]
+
+    // === NUEVA SECCIÓN: NOTIFICACIONES ===
+    'notifications' => [
+        'reservation_expired' => 'Tu reserva de €:amount para :egi_title ha expirado.',
+        'superseded' => 'Tu oferta para :egi_title ha sido superada. Nueva oferta más alta: €:new_highest_amount',
+        'highest' => '¡Felicidades! Tu oferta de €:amount para :egi_title es ahora la más alta!',
+        'rank_changed' => 'Tu posición para :egi_title ha cambiado: ahora estás en la posición #:new_rank',
+        'competitor_withdrew' => 'Un competidor se ha retirado. Has subido a la posición #:new_rank para :egi_title',
+        'pre_launch_reminder' => '¡El mint on-chain comenzará pronto! Confirma tu reserva para :egi_title.',
+        'mint_window_open' => '¡Es tu turno! Tienes 48 horas para completar el mint de :egi_title.',
+        'mint_window_closing' => '¡Atención! Solo quedan :hours_remaining horas para completar el mint de :egi_title.',
+        'default' => 'Actualización sobre tu reserva para :egi_title',
+        'archived_success' => 'Notificación archivada con éxito.'
+    ],
 ];

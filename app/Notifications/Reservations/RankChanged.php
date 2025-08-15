@@ -2,61 +2,75 @@
 
 namespace App\Notifications\Reservations;
 
-use App\Notifications\Channels\CustomDatabaseChannel;
+use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
-use Illuminate\Support\Facades\Log;
+use App\Models\NotificationPayloadReservation;
 
 /**
+ * Notification for when user's rank changes significantly
+ *
  * @package App\Notifications\Reservations
  * @author Padmin D. Curtis (AI Partner OS3.0) for Fabio Cherici
- * @version 1.0.0 (FlorenceEGI - Reservation Notifications)
+ * @version 1.0.0 (FlorenceEGI - Pre-Launch Reservation System)
  * @date 2025-08-15
- * @purpose Notification when reservation rank changes significantly
+ * @purpose Notify user when their reservation rank changes significantly
  */
 class RankChanged extends Notification
 {
-    protected $notification;
+    use Queueable;
 
     /**
-     * Create a new notification instance
+     * The notification payload
      *
-     * @param mixed $notification The NotificationPayloadReservation object
+     * @var NotificationPayloadReservation
      */
-    public function __construct($notification)
+    protected NotificationPayloadReservation $payload;
+
+    /**
+     * Create a new notification instance.
+     *
+     * @param NotificationPayloadReservation $payload
+     */
+    public function __construct(NotificationPayloadReservation $payload)
     {
-        $this->notification = $notification;
+        $this->payload = $payload;
     }
 
     /**
-     * Get the notification's delivery channels
+     * Get the notification's delivery channels.
      *
      * @param mixed $notifiable
      * @return array
      */
-    public function via($notifiable)
+    public function via($notifiable): array
     {
-        return [CustomDatabaseChannel::class];
+        return ['database'];
     }
 
     /**
-     * Get the data for custom database channel
+     * Get the array representation of the notification.
      *
      * @param mixed $notifiable
      * @return array
      */
-    public function toCustomDatabase($notifiable)
+    public function toArray($notifiable): array
     {
-        Log::channel('florenceegi')->info('RankChanged:toCustomDatabase', [
-            'notificationPayloadReservation' => $this->notification,
-        ]);
+        $improved = $this->payload->data['direction'] === 'up';
 
         return [
-            'model_type' => get_class($this->notification),
-            'model_id' => $this->notification->id,
-            'view' => 'notifications.reservations.rank-changed',
-            'sender_id' => 1, // System notification
-            'data' => $this->notification->data,
-            'outcome' => null, // This is informative only
+            'type' => 'rank_changed',
+            'payload_id' => $this->payload->id,
+            'payload_type' => NotificationPayloadReservation::class,
+            'reservation_id' => $this->payload->reservation_id,
+            'egi_id' => $this->payload->egi_id,
+            'previous_rank' => $this->payload->data['previous_rank'] ?? 0,
+            'new_rank' => $this->payload->data['new_rank'] ?? 0,
+            'direction' => $this->payload->data['direction'] ?? 'unknown',
+            'positions_changed' => $this->payload->data['positions_changed'] ?? 0,
+            'egi_title' => $this->payload->data['egi_title'] ?? '',
+            'message' => $this->payload->getMessage(),
+            'icon' => $improved ? '📈' : '📉',
+            'color' => $improved ? '#10B981' : '#EF4444'
         ];
     }
 }

@@ -32,6 +32,7 @@ use App\Http\Controllers\IconAdminController;
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Notifications\Gdpr\GdprNotificationResponseController;
+use App\Http\Controllers\Notifications\NotificationReservationResponseController;
 use App\Http\Middleware\SetLanguage;
 use App\Livewire\Collections\CollectionOpen;
 use Illuminate\Support\Facades\Auth;
@@ -421,7 +422,18 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
                 Route::post('/archive', [NotificationInvitationResponseController::class, 'notificationArchive'])
                     ->name('notifications.invitations.notificationArchive');
             });
+
+            // Reservation notifications
+            Route::prefix('reservation')->group(function () {
+                Route::post('/response', [NotificationReservationResponseController::class, 'response']);
+                Route::post('/archive', [NotificationReservationResponseController::class, 'notificationArchive']);
+                Route::get('/details', [NotificationReservationResponseController::class, 'getDetails']);
+                Route::get('/ranking', [NotificationReservationResponseController::class, 'getRanking']);
+            });
+
         });
+
+
     });
 
 

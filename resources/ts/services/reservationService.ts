@@ -11,6 +11,17 @@
  * @author Padmin D. Curtis (for Fabio Cherici)
  */
 
+/**
+ * PRE-LAUNCH RESERVATION FUNCTIONS
+ *
+ * ADD these functions to your existing reservationService.ts file
+ * Place them BEFORE the final export default statement
+ *
+ * @author Padmin D. Curtis (AI Partner OS3.0) for Fabio Cherici
+ * @date 2025-08-15
+ * @version 1.0.0 (FlorenceEGI - Pre-Launch Addon)
+ */
+
 import { UEM_Client_TS_Placeholder as UEM } from './uemClientService';
 import { getAppConfig, route, appTranslate, ServerErrorResponse } from '../config/appConfig';
 import { getCsrfTokenTS } from '../utils/csrf';
@@ -88,6 +99,53 @@ export interface AlgoExchangeRateResponse {
     };
     rate?: number; // Backward compatibility
     updated_at?: string; // Backward compatibility
+}
+
+export interface PreLaunchReservationData {
+    egi_id: number;
+    amount_eur: number;
+}
+
+export interface PreLaunchReservationResponse {
+    success: boolean;
+    message: string;
+    data?: {
+        reservation_id: number;
+        egi_id: number;
+        amount_eur: number;
+        rank_position: number;
+        is_highest: boolean;
+        created_at: string;
+        updated_at: string;
+    };
+}
+
+export interface RankingEntry {
+    rank_position: number;
+    amount_eur: number;
+    is_highest: boolean;
+    is_mine: boolean;
+    user?: {
+        name: string;
+    };
+    created_at: string;
+}
+
+export interface RankingsResponse {
+    success: boolean;
+    data?: {
+        egi_id: number;
+        egi_title: string;
+        total_reservations: number;
+        rankings: RankingEntry[];
+        stats: {
+            total_reservations: number;
+            highest_amount: number;
+            lowest_amount: number;
+            average_amount: number;
+            median_amount: number;
+        };
+    };
 }
 
 // --- STATE ---
@@ -680,11 +738,170 @@ export async function cancelReservation(reservationId: number): Promise<{ succes
     }
 }
 
+// ============================================================================
+// ADD THESE FUNCTIONS BEFORE THE export default STATEMENT
+// ============================================================================
+
+/**
+ * Create or update a pre-launch reservation
+ *
+ * @param {number} egiId The EGI ID
+ * @param {number} amountEur The amount in EUR
+ * @returns {Promise<PreLaunchReservationResponse>} The reservation response
+ */
+export async function createPreLaunchReservation(
+    egiId: number,
+    amountEur: number
+): Promise<PreLaunchReservationResponse> {
+    try {
+        const response = await fetch('/api/reservations/pre-launch/create', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': getCsrfTokenTS()
+            },
+            body: JSON.stringify({
+                egi_id: egiId,
+                amount_eur: amountEur
+            })
+        });
+
+        if (!response.ok && !response.headers.get('content-type')?.includes('application/json')) {
+            throw new Error(`HTTP error: ${response.status} ${response.statusText}`);
+        }
+
+        const data = await response.json();
+
+        // Handle success with UI feedback
+        if (data.success && data.data) {
+            showPreLaunchSuccessModal(data.data);
+        }
+
+        return data;
+    } catch (error) {
+        console.error('Pre-launch reservation error:', error);
+        throw error;
+    }
+}
+
+/**
+ * Get current rankings for an EGI
+ *
+ * @param {number} egiId The EGI ID
+ * @returns {Promise<RankingsResponse>} The rankings response
+ */
+export async function getPreLaunchRankings(egiId: number): Promise<RankingsResponse> {
+    try {
+        const response = await fetch(`/api/reservations/pre-launch/rankings/${egiId}`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error: ${response.status} ${response.statusText}`);
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching rankings:', error);
+        return {
+            success: false,
+            data: undefined
+        };
+    }
+}
+
+/**
+ * Withdraw a pre-launch reservation
+ *
+ * @param {number} reservationId The reservation ID
+ * @returns {Promise<{success: boolean, message: string}>} The withdrawal response
+ */
+export async function withdrawPreLaunchReservation(
+    reservationId: number
+): Promise<{success: boolean, message: string}> {
+    try {
+        const response = await fetch(`/api/reservations/pre-launch/${reservationId}/withdraw`, {
+            method: 'DELETE',
+            headers: {
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': getCsrfTokenTS()
+            }
+        });
+
+        if (!response.ok && !response.headers.get('content-type')?.includes('application/json')) {
+            throw new Error(`HTTP error: ${response.status} ${response.statusText}`);
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Withdrawal error:', error);
+        return {
+            success: false,
+            message: 'Failed to withdraw reservation'
+        };
+    }
+}
+
+/**
+ * Show success modal after pre-launch reservation
+ *
+ * @param {any} data The reservation data
+ */
+function showPreLaunchSuccessModal(data: any): void {
+    const isHighest = data.is_highest;
+    const position = data.rank_position;
+
+    let title = '';
+    let message = '';
+    let icon = '';
+
+    if (isHighest) {
+        title = '🎉 Sei il Primo!';
+        message = `Complimenti! La tua offerta di €${data.amount_eur} è la più alta!`;
+        icon = '🏆';
+    } else {
+        title = '✅ Prenotazione Registrata';
+        message = `La tua offerta di €${data.amount_eur} ti posiziona al #${position} posto`;
+        icon = '📊';
+    }
+
+    // Create and show modal
+    const modalHtml = `
+        <div class="fixed inset-0 z-50 overflow-y-auto" id="success-modal">
+            <div class="fixed inset-0 bg-black opacity-50"></div>
+            <div class="flex items-center justify-center min-h-screen px-4">
+                <div class="relative bg-white rounded-lg max-w-md w-full p-6">
+                    <div class="text-center">
+                        <div class="text-6xl mb-4">${icon}</div>
+                        <h3 class="text-2xl font-bold mb-2">${title}</h3>
+                        <p class="text-gray-600 mb-6">${message}</p>
+                        <button onclick="document.getElementById('success-modal').remove(); location.reload();"
+                                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded">
+                            Chiudi
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+}
+
 // Export the main service functions and types
 export default {
     initReservationModal,
     reserveEgi,
     getEgiReservationStatus,
     getAlgoExchangeRate,
-    cancelReservation
+    cancelReservation,
+    // ADD THESE NEW FUNCTIONS:
+    createPreLaunchReservation,
+    getPreLaunchRankings,
+    withdrawPreLaunchReservation
 };
+

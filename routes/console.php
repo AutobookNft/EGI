@@ -40,4 +40,5 @@ Schedule::call(function () {
 Schedule::command('reservations:process-rankings')
     ->everyFiveMinutes()
     ->withoutOverlapping()
-    ->onOneServer();
+    ->onOneServer()
+    ->appendOutputTo(storage_path('logs/rankings.log'));
