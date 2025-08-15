@@ -35,3 +35,9 @@ Schedule::call(function () {
 ->everyMinute()
 ->withoutOverlapping()
 ->onOneServer();
+
+### 📌 3️⃣ JOB AUTOMATICO: NOTIFICHE SCADUTE ###
+Schedule::command('reservations:process-rankings')
+    ->everyFiveMinutes()
+    ->withoutOverlapping()
+    ->onOneServer();

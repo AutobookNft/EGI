@@ -85,7 +85,7 @@ return [
     ],
 
     // Nota valuta originale
-        'originally_reserved_in' => 'Originalmente prenotato in :currency per :amount',
+    'originally_reserved_in' => 'Originalmente prenotato in :currency per :amount',
     'originally_reserved_in_short' => 'Pren. :currency :amount',
 
     // Stati

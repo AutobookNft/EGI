@@ -289,22 +289,22 @@ $showBadge = $showBadge ?? $showOwnershipBadge;
 
             // Se c'è una prenotazione attiva, usa il suo prezzo EUR
             if ($highestPriorityReservation && $highestPriorityReservation->status === 'active') {
-                $displayPriceEur = $highestPriorityReservation->offer_amount_fiat;
-                
-                // 🎯 CURRENCY LOGIC: Usa valuta originale prenotazione per conversione automatica
-                $displayCurrency = $highestPriorityReservation->fiat_currency ?? 'USD';
+            $displayPriceEur = $highestPriorityReservation->offer_amount_fiat;
+
+            // 🎯 CURRENCY LOGIC: Usa valuta originale prenotazione per conversione automatica
+            $displayCurrency = $highestPriorityReservation->fiat_currency ?? 'USD';
             } else {
-                // Se NON c'è prenotazione, usa preferenza utente
-                $displayCurrency = 'EUR'; // Default fallback
-                if (App\Helpers\FegiAuth::check()) {
-                    $displayCurrency = App\Helpers\FegiAuth::user()->preferred_currency ?? 'EUR';
-                }
+            // Se NON c'è prenotazione, usa preferenza utente
+            $displayCurrency = 'EUR'; // Default fallback
+            if (App\Helpers\FegiAuth::check()) {
+            $displayCurrency = App\Helpers\FegiAuth::user()->preferred_currency ?? 'EUR';
+            }
             }
 
             // 🎯 TARGET CURRENCY: Valuta finale desiderata (quella del badge utente)
             $targetCurrency = 'EUR'; // Default fallback
             if (App\Helpers\FegiAuth::check()) {
-                $targetCurrency = App\Helpers\FegiAuth::user()->preferred_currency ?? 'EUR';
+            $targetCurrency = App\Helpers\FegiAuth::user()->preferred_currency ?? 'EUR';
             }
 
             // Controlla se c'è una prenotazione corrente per mostrare il pulsante Rilancia
@@ -322,33 +322,33 @@ $showBadge = $showBadge ?? $showOwnershipBadge;
                     </svg>
                     <div class="flex items-center gap-1">
                         <span class="font-bold {{ $isHyper ? 'text-yellow-300' : 'text-orange-300' }}">
-                            <x-currency-price 
-                                :price="$displayPriceEur" 
-                                :currency="$displayCurrency"
-                            />
+                            <x-currency-price :price="$displayPriceEur" :currency="$displayCurrency" />
                         </span>
                         {{-- Nota piccolissima accanto solo per le liste --}}
                         @php
                         $shouldShowListNote = false;
                         $formattedListPrice = '';
                         if ($highestPriorityReservation && $targetCurrency) {
-                            $originalCurrency = $highestPriorityReservation->fiat_currency ?? 'EUR';
-                            $shouldShowListNote = ($targetCurrency !== $originalCurrency);
-                            if ($shouldShowListNote) {
-                                $originalPrice = $highestPriorityReservation->offer_amount_fiat ?? 0;
-                                switch($originalCurrency) {
-                                    case 'USD': $formattedListPrice = '$' . number_format($originalPrice, 0); break;
-                                    case 'EUR': $formattedListPrice = '€' . number_format($originalPrice, 0); break;
-                                    case 'GBP': $formattedListPrice = '£' . number_format($originalPrice, 0); break;
-                                    default: $formattedListPrice = $originalCurrency . ' ' . number_format($originalPrice, 0); break;
-                                }
-                            }
+                        $originalCurrency = $highestPriorityReservation->fiat_currency ?? 'EUR';
+                        $shouldShowListNote = ($targetCurrency !== $originalCurrency);
+                        if ($shouldShowListNote) {
+                        $originalPrice = $highestPriorityReservation->offer_amount_fiat ?? 0;
+                        switch($originalCurrency) {
+                        case 'USD': $formattedListPrice = '$' . number_format($originalPrice, 0); break;
+                        case 'EUR': $formattedListPrice = '€' . number_format($originalPrice, 0); break;
+                        case 'GBP': $formattedListPrice = '£' . number_format($originalPrice, 0); break;
+                        default: $formattedListPrice = $originalCurrency . ' ' . number_format($originalPrice, 0);
+                        break;
+                        }
+                        }
                         }
                         @endphp
                         @if($shouldShowListNote && $formattedListPrice)
-                            <span class="bg-amber-50 border border-amber-200 rounded px-1 py-0.5 text-xs text-amber-700 animate-pulse whitespace-nowrap font-normal">
-                                @lang('egi.originally_reserved_in_short', ['currency' => $originalCurrency, 'amount' => $formattedListPrice])
-                            </span>
+                        <span
+                            class="bg-amber-50 border border-amber-200 rounded px-1 py-0.5 text-xs text-amber-700 animate-pulse whitespace-nowrap font-normal">
+                            @lang('egi.originally_reserved_in_short', ['currency' => $originalCurrency, 'amount' =>
+                            $formattedListPrice])
+                        </span>
                         @endif
                     </div>
                 </div>
@@ -377,27 +377,25 @@ $showBadge = $showBadge ?? $showOwnershipBadge;
             @endif
         </div>
     </div>
-    
+
     {{-- 🔥 Pulsante Prenota/Rilancia in fondo alla card --}}
     @if(!$isCreator)
-        <div class="mt-3">
-            <button type="button"
-                class="reserve-button w-full flex items-center justify-center px-4 py-2 text-sm font-medium text-white 
+    <div class="mt-3">
+        <button type="button" class="reserve-button w-full flex items-center justify-center px-4 py-2 text-sm font-medium text-white
                 {{ $hasCurrentReservation ? 'bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700' : 'bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700' }}
-                rounded-t-none rounded-b-lg transition-all transform hover:scale-[1.01]"
-                data-egi-id="{{ $egi->id }}">
-                @if($hasCurrentReservation)
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                    {{ __('egi.actions.outbid') ?? 'Rilancia' }}
-                @else
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                    </svg>
-                    {{ __('egi.actions.reserve') ?? 'Prenota' }}
-                @endif
-            </button>
-        </div>
+                rounded-t-none rounded-b-lg transition-all transform hover:scale-[1.01]" data-egi-id="{{ $egi->id }}">
+            @if($hasCurrentReservation)
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
+            {{ __('egi.actions.outbid') ?? 'Rilancia' }}
+            @else
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            {{ __('egi.actions.reserve') ?? 'Prenota' }}
+            @endif
+        </button>
+    </div>
     @endif
 </article>

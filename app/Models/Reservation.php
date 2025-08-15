@@ -2,303 +2,667 @@
 
 namespace App\Models;
 
-// Assumo che questi use statements siano già presenti
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 
 /**
- * @Oracode Eloquent Model: Reservation (Extended)
- * 🎯 Purpose: Manages reservations for EGIs with multi-currency support
- * 🧱 Core Logic: Tracks reservation status, priority, and certificate generation
- * 🛡️ GDPR: Minimizes data collection, records only what's needed for the reservation
- * 💱 Currency Logic: Think FIAT, Operate ALGO - ALGO as immutable source of truth
+ * @package App\Models
+ * @author Padmin D. Curtis (AI Partner OS3.0) for Fabio Cherici
+ * @version 2.0.0 (FlorenceEGI - Pre-Launch Queue System)
+ * @date 2025-08-15
+ * @purpose Reservation model for pre-launch ranking system with public queue
+ *
+ * Pre-Launch System:
+ * - No immediate payments, only reservation amounts
+ * - Public ranking visible to all users
+ * - Multiple active reservations per EGI
+ * - EUR as canonical currency
  *
  * @property int $id
- * @property int $user_id
+ * @property int|null $user_id
  * @property int $egi_id
  * @property string $type
  * @property string $status
- * @property float $offer_amount_fiat Amount in FIAT currency (user-friendly)
- * @property string $fiat_currency FIAT currency code (EUR, USD, etc.)
- * @property int $offer_amount_algo Amount in microALGO (source of truth)
- * @property float $exchange_rate Exchange rate ALGO->FIAT at transaction time
- * @property \Illuminate\Support\Carbon $exchange_timestamp Timestamp of exchange rate
- * @property \Illuminate\Support\Carbon|null $expires_at
+ * @property string $sub_status
+ * @property float $amount_eur
+ * @property int|null $rank_position
+ * @property int|null $previous_rank
+ * @property bool $is_highest
  * @property bool $is_current
+ * @property string $display_currency
+ * @property float|null $display_amount
+ * @property float|null $display_exchange_rate
+ * @property string $input_currency
+ * @property float $input_amount
+ * @property float|null $input_exchange_rate
+ * @property Carbon|null $input_timestamp
  * @property int|null $superseded_by_id
- * @property json|null $contact_data
- * @property \Illuminate\Support\Carbon $created_at
- * @property \Illuminate\Support\Carbon $updated_at
+ * @property Carbon|null $superseded_at
+ * @property Carbon|null $mint_window_starts_at
+ * @property Carbon|null $mint_window_ends_at
+ * @property bool $mint_confirmed
+ * @property Carbon|null $mint_confirmed_at
+ * @property array|null $metadata
+ * @property string|null $user_note
+ * @property string|null $admin_note
+ * @property Carbon|null $last_notification_at
+ * @property array|null $notification_history
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  *
- * @property-read \App\Models\User $user
- * @property-read \App\Models\Egi $egi
- * @property-read \App\Models\Reservation|null $supersededBy
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Reservation[] $supersededReservations
- * @property-read \App\Models\EgiReservationCertificate|null $certificate
+ * @property-read User|null $user
+ * @property-read Egi $egi
+ * @property-read Reservation|null $supersededBy
+ * @property-read Reservation[] $supersededReservations
  */
-class Reservation extends Model {
+class Reservation extends Model
+{
     use HasFactory;
 
     /**
+     * Status constants
+     */
+    const STATUS_ACTIVE = 'active';
+    const STATUS_EXPIRED = 'expired';
+    const STATUS_COMPLETED = 'completed';
+    const STATUS_CANCELLED = 'cancelled';
+    const STATUS_WITHDRAWN = 'withdrawn';
+
+    /**
+     * Sub-status constants
+     */
+    const SUB_STATUS_PENDING = 'pending';
+    const SUB_STATUS_HIGHEST = 'highest';
+    const SUB_STATUS_SUPERSEDED = 'superseded';
+    const SUB_STATUS_CONFIRMED = 'confirmed';
+    const SUB_STATUS_MINTED = 'minted';
+    const SUB_STATUS_WITHDRAWN = 'withdrawn';
+    const SUB_STATUS_EXPIRED = 'expired';
+
+    /**
+     * Type constants
+     */
+    const TYPE_WEAK = 'weak';
+    const TYPE_STRONG = 'strong';
+
+    /**
      * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
      */
     protected $fillable = [
         'user_id',
         'egi_id',
         'type',
         'status',
+        'sub_status',
+        // Amounts
+        'amount_eur',
+        'display_currency',
+        'display_amount',
+        'display_exchange_rate',
+        'input_currency',
+        'input_amount',
+        'input_exchange_rate',
+        'input_timestamp',
+        // Ranking
+        'rank_position',
+        'previous_rank',
+        'is_highest',
+        'is_current',
+        // Supersession
+        'superseded_by_id',
+        'superseded_at',
+        // Future mint fields
+        'mint_window_starts_at',
+        'mint_window_ends_at',
+        'mint_confirmed',
+        'mint_confirmed_at',
+        // Future payment fields
+        'payment_method',
+        'payment_amount_eur',
+        'payment_currency',
+        'payment_amount',
+        'payment_exchange_rate',
+        'payment_executed_at',
+        // Algorand fields
+        'algo_amount_micro',
+        'algo_tx_id',
+        'asa_id',
+        // Metadata
+        'metadata',
+        'user_note',
+        'admin_note',
+        'last_notification_at',
+        'notification_history',
+        // Legacy fields
         'original_currency',
         'original_price',
         'algo_price',
-        'offer_amount_fiat',
-        'fiat_currency',
-        'offer_amount_algo',
         'exchange_rate',
         'rate_timestamp',
+        'fiat_currency',
+        'offer_amount_fiat',
+        'offer_amount_algo',
         'exchange_timestamp',
         'expires_at',
-        'is_current',
-        'superseded_by_id',
         'contact_data',
     ];
 
     /**
      * The attributes that should be cast.
-     *
-     * @var array<string, string>
      */
     protected $casts = [
-        'expires_at' => 'datetime',
-        'exchange_timestamp' => 'datetime',
-        'rate_timestamp' => 'datetime',
-        'contact_data' => 'json',
-        'original_price' => 'decimal:2',
-        'algo_price' => 'decimal:6',
-        'offer_amount_fiat' => 'decimal:2',
-        'offer_amount_algo' => 'integer', // Trattato come intero (microALGO)
-        'exchange_rate' => 'decimal:8',
+        'amount_eur' => 'decimal:2',
+        'display_amount' => 'decimal:2',
+        'display_exchange_rate' => 'decimal:10',
+        'input_amount' => 'decimal:2',
+        'input_exchange_rate' => 'decimal:10',
+        'input_timestamp' => 'datetime',
+        'superseded_at' => 'datetime',
+        'mint_window_starts_at' => 'datetime',
+        'mint_window_ends_at' => 'datetime',
+        'mint_confirmed' => 'boolean',
+        'mint_confirmed_at' => 'datetime',
+        'payment_amount_eur' => 'decimal:2',
+        'payment_amount' => 'decimal:2',
+        'payment_exchange_rate' => 'decimal:10',
+        'payment_executed_at' => 'datetime',
+        'algo_amount_micro' => 'integer',
+        'metadata' => 'json',
+        'notification_history' => 'json',
+        'last_notification_at' => 'datetime',
+        'is_highest' => 'boolean',
         'is_current' => 'boolean',
+        // Legacy casts
+        'original_price' => 'decimal:8',
+        'algo_price' => 'integer',
+        'exchange_rate' => 'decimal:8',
+        'rate_timestamp' => 'datetime',
+        'offer_amount_fiat' => 'decimal:2',
+        'offer_amount_algo' => 'decimal:8',
+        'exchange_timestamp' => 'datetime',
+        'expires_at' => 'datetime',
+        'contact_data' => 'json',
     ];
 
     /**
-     * Define relationship to the User model.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * Boot method to handle model events
      */
-    public function user() {
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($reservation) {
+            // Set defaults
+            $reservation->input_timestamp = $reservation->input_timestamp ?? now();
+            $reservation->is_current = true;
+
+            // Set input tracking if not set
+            if (empty($reservation->input_currency)) {
+                $reservation->input_currency = $reservation->display_currency ?? 'EUR';
+            }
+            if (empty($reservation->input_amount)) {
+                $reservation->input_amount = $reservation->amount_eur;
+            }
+        });
+
+        static::created(function ($reservation) {
+            // Update rankings after new reservation
+            $reservation->updateEgiRankings();
+        });
+
+        static::updated(function ($reservation) {
+            // Update rankings if amount changed
+            if ($reservation->isDirty('amount_eur')) {
+                $reservation->updateEgiRankings();
+            }
+        });
+    }
+
+    // ===== RELATIONSHIPS =====
+
+    /**
+     * User who made the reservation
+     */
+    public function user(): BelongsTo
+    {
         return $this->belongsTo(User::class);
     }
 
     /**
-     * Define relationship to the Egi model.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * EGI being reserved
      */
-    public function egi() {
+    public function egi(): BelongsTo
+    {
         return $this->belongsTo(Egi::class);
     }
 
     /**
-     * Define relationship to the reservation that superseded this one.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * Reservation that superseded this one
      */
-    public function supersededBy() {
+    public function supersededBy(): BelongsTo
+    {
         return $this->belongsTo(Reservation::class, 'superseded_by_id');
     }
 
     /**
-     * Define relationship to all reservations superseded by this one.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * Reservations superseded by this one
      */
-    public function supersededReservations() {
+    public function supersededReservations(): HasMany
+    {
         return $this->hasMany(Reservation::class, 'superseded_by_id');
     }
 
     /**
-     * Define relationship to the certificate.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     * Certificate (future implementation)
      */
-    public function certificate() {
+    public function certificate(): HasOne
+    {
         return $this->hasOne(EgiReservationCertificate::class);
     }
 
+    // ===== RANKING METHODS =====
+
     /**
-     * Check if this reservation is expired.
-     *
-     * @return bool
+     * Update rankings for all reservations of this EGI
      */
-    public function isExpired(): bool {
-        // Strong reservations don't expire
-        if ($this->type === 'strong') {
+    public function updateEgiRankings(): void
+    {
+        DB::transaction(function () {
+            // Get all active reservations for this EGI ordered by amount
+            $reservations = static::where('egi_id', $this->egi_id)
+                ->where('status', self::STATUS_ACTIVE)
+                ->where('is_current', true)
+                ->orderByDesc('amount_eur')
+                ->orderBy('created_at') // Earlier reservation wins ties
+                ->get();
+
+            $previousHighest = null;
+
+            foreach ($reservations as $index => $reservation) {
+                $newRank = $index + 1;
+                $wasHighest = $reservation->is_highest;
+                $isNowHighest = ($newRank === 1);
+
+                // Store previous rank before updating
+                if ($reservation->rank_position !== $newRank) {
+                    $reservation->previous_rank = $reservation->rank_position;
+                }
+
+                // Update rank and highest flag
+                $reservation->rank_position = $newRank;
+                $reservation->is_highest = $isNowHighest;
+
+                // Update sub_status based on position
+                if ($isNowHighest) {
+                    $reservation->sub_status = self::SUB_STATUS_HIGHEST;
+
+                    // Mark the previous highest as superseded
+                    if ($previousHighest && $previousHighest->id !== $reservation->id) {
+                        $previousHighest->sub_status = self::SUB_STATUS_SUPERSEDED;
+                        $previousHighest->superseded_by_id = $reservation->id;
+                        $previousHighest->superseded_at = now();
+                        $previousHighest->save();
+                    }
+
+                    $previousHighest = $reservation;
+                } elseif ($reservation->sub_status === self::SUB_STATUS_HIGHEST) {
+                    // Was highest but no longer
+                    $reservation->sub_status = self::SUB_STATUS_SUPERSEDED;
+                }
+
+                $reservation->save();
+            }
+        });
+    }
+
+    /**
+     * Get rank change indicator
+     */
+    public function getRankChange(): string
+    {
+        if (!$this->previous_rank) {
+            return 'new';
+        }
+
+        if ($this->rank_position < $this->previous_rank) {
+            return 'up';
+        } elseif ($this->rank_position > $this->previous_rank) {
+            return 'down';
+        }
+
+        return 'same';
+    }
+
+    /**
+     * Get competitors (other reservations for same EGI)
+     */
+    public function getCompetitors(): Builder
+    {
+        return static::where('egi_id', $this->egi_id)
+            ->where('status', self::STATUS_ACTIVE)
+            ->where('is_current', true)
+            ->where('id', '!=', $this->id)
+            ->orderByDesc('amount_eur');
+    }
+
+    /**
+     * Check if user can supersede this reservation
+     */
+    public function canBeSupersededBy(float $newAmount): bool
+    {
+        // In pre-launch, any amount can be placed
+        // No minimum increment required
+        return true;
+    }
+
+    // ===== STATUS METHODS =====
+
+    /**
+     * Check if reservation is active
+     */
+    public function isActive(): bool
+    {
+        return $this->status === self::STATUS_ACTIVE && $this->is_current;
+    }
+
+    /**
+     * Check if reservation is the highest for its EGI
+     */
+    public function isHighest(): bool
+    {
+        return $this->is_highest && $this->isActive();
+    }
+
+    /**
+     * Check if reservation has been superseded
+     */
+    public function isSuperseded(): bool
+    {
+        return $this->sub_status === self::SUB_STATUS_SUPERSEDED ||
+               $this->superseded_by_id !== null;
+    }
+
+    /**
+     * Withdraw reservation
+     */
+    public function withdraw(): bool
+    {
+        $this->status = self::STATUS_WITHDRAWN;
+        $this->sub_status = self::SUB_STATUS_WITHDRAWN;
+        $this->is_current = false;
+        $this->is_highest = false;
+
+        $saved = $this->save();
+
+        if ($saved) {
+            // Recalculate rankings for remaining reservations
+            $this->updateEgiRankings();
+        }
+
+        return $saved;
+    }
+
+    // ===== DISPLAY METHODS =====
+
+    /**
+     * Get formatted amount in EUR
+     */
+    public function getFormattedAmountEur(): string
+    {
+        return '€' . number_format($this->amount_eur, 2);
+    }
+
+    /**
+     * Get formatted display amount
+     */
+    public function getFormattedDisplayAmount(): string
+    {
+        $symbol = $this->getCurrencySymbol($this->display_currency);
+        return $symbol . number_format($this->display_amount ?? $this->amount_eur, 2);
+    }
+
+    /**
+     * Get currency symbol
+     */
+    protected function getCurrencySymbol(string $currency): string
+    {
+        return match($currency) {
+            'EUR' => '€',
+            'USD' => '$',
+            'GBP' => '£',
+            default => $currency . ' '
+        };
+    }
+
+    /**
+     * Get status badge color
+     */
+    public function getStatusColor(): string
+    {
+        if ($this->isHighest()) {
+            return 'green';
+        }
+
+        if ($this->isSuperseded()) {
+            return 'yellow';
+        }
+
+        if ($this->status === self::STATUS_WITHDRAWN) {
+            return 'gray';
+        }
+
+        return 'blue';
+    }
+
+    /**
+     * Get status label
+     */
+    public function getStatusLabel(): string
+    {
+        if ($this->isHighest()) {
+            return 'Offerta più alta';
+        }
+
+        if ($this->isSuperseded()) {
+            return 'Superato';
+        }
+
+        if ($this->status === self::STATUS_WITHDRAWN) {
+            return 'Ritirato';
+        }
+
+        if ($this->rank_position) {
+            return 'Posizione #' . $this->rank_position;
+        }
+
+        return 'Attivo';
+    }
+
+    /**
+     * Get UI display data
+     */
+    public function getDisplayData(): array
+    {
+        return [
+            'id' => $this->id,
+            'egi_id' => $this->egi_id,
+            'egi_title' => $this->egi->title ?? 'EGI #' . $this->egi_id,
+            'amount_eur' => $this->amount_eur,
+            'formatted_amount' => $this->getFormattedAmountEur(),
+            'display_amount' => $this->getFormattedDisplayAmount(),
+            'rank' => $this->rank_position,
+            'rank_change' => $this->getRankChange(),
+            'is_highest' => $this->is_highest,
+            'status' => $this->status,
+            'sub_status' => $this->sub_status,
+            'status_color' => $this->getStatusColor(),
+            'status_label' => $this->getStatusLabel(),
+            'user_name' => $this->user?->name ?? 'Anonimo',
+            'created_at' => $this->created_at->format('d/m/Y H:i'),
+            'superseded_by' => $this->supersededBy?->user?->name,
+            'superseded_at' => $this->superseded_at?->format('d/m/Y H:i'),
+        ];
+    }
+
+    // ===== SCOPE METHODS =====
+
+    /**
+     * Active reservations
+     */
+    public function scopeActive(Builder $query): Builder
+    {
+        return $query->where('status', self::STATUS_ACTIVE)
+                     ->where('is_current', true);
+    }
+
+    /**
+     * Highest reservations only
+     */
+    public function scopeHighest(Builder $query): Builder
+    {
+        return $query->where('is_highest', true);
+    }
+
+    /**
+     * Reservations for a specific EGI
+     */
+    public function scopeForEgi(Builder $query, int $egiId): Builder
+    {
+        return $query->where('egi_id', $egiId);
+    }
+
+    /**
+     * Reservations for a specific user
+     */
+    public function scopeForUser(Builder $query, int $userId): Builder
+    {
+        return $query->where('user_id', $userId);
+    }
+
+    /**
+     * Ranked reservations (ordered by rank)
+     */
+    public function scopeRanked(Builder $query): Builder
+    {
+        return $query->whereNotNull('rank_position')
+                     ->orderBy('rank_position');
+    }
+
+    /**
+     * Reservations that need ranking update
+     */
+    public function scopeNeedsRanking(Builder $query): Builder
+    {
+        return $query->active()
+                     ->whereNull('rank_position');
+    }
+
+    // ===== FUTURE MINT METHODS (Pre-populated for launch) =====
+
+    /**
+     * Check if user is in mint window (future)
+     */
+    public function isInMintWindow(): bool
+    {
+        if (!$this->mint_window_starts_at || !$this->mint_window_ends_at) {
             return false;
         }
 
-        // Check if expiration date exists and is in the past
-        return $this->expires_at && $this->expires_at->isPast();
+        $now = now();
+        return $now->between($this->mint_window_starts_at, $this->mint_window_ends_at);
     }
 
     /**
-     * Check if this reservation is active.
-     *
-     * @return bool
+     * Get remaining mint time (future)
      */
-    public function isActive(): bool {
-        return $this->status === 'active' && !$this->isExpired() && $this->is_current;
-    }
-
-    /**
-     * Get the reservation priority value.
-     * Higher value means higher priority.
-     *
-     * @return int
-     */
-    public function getReservationPriority(): int {
-        $priority = 0;
-
-        // Type priority: Strong always has higher base priority than weak
-        $priority += ($this->type === 'strong') ? 1000 : 0;
-
-        // Amount priority: Higher offer gets higher priority (use FIAT amount)
-        $priority += (int)($this->offer_amount_fiat * 10);
-
-        // Time priority: Earlier reservations get slightly higher priority
-        $ageInDays = Carbon::now()->diffInDays($this->created_at);
-        $priority += min($ageInDays, 10); // Cap at 10 days to prevent very old reservations from having too high priority
-
-        return $priority;
-    }
-
-    /**
-     * Compare priority with another reservation.
-     *
-     * @param Reservation $otherReservation
-     * @return int Positive if this reservation has higher priority, negative if lower, 0 if equal
-     */
-    public function comparePriorityWith(Reservation $otherReservation): int {
-        return $this->getReservationPriority() - $otherReservation->getReservationPriority();
-    }
-
-    /**
-     * Check if this reservation has higher priority than another.
-     *
-     * @param Reservation $otherReservation
-     * @return bool
-     */
-    public function hasHigherPriorityThan(Reservation $otherReservation): bool {
-        return $this->comparePriorityWith($otherReservation) > 0;
-    }
-
-    /**
-     * Mark this reservation as superseded by another.
-     *
-     * @param Reservation $newReservation
-     * @return bool
-     */
-    public function markAsSuperseded(Reservation $newReservation): bool {
-        $this->is_current = false;
-        $this->superseded_by_id = $newReservation->id;
-
-        // Also mark the certificate as superseded if it exists
-        if ($this->certificate) {
-            $this->certificate->markAsSuperseded();
+    public function getMintTimeRemaining(): ?int
+    {
+        if (!$this->isInMintWindow()) {
+            return null;
         }
+
+        return $this->mint_window_ends_at->diffInMinutes(now());
+    }
+
+    /**
+     * Confirm mint intention (future)
+     */
+    public function confirmMint(): bool
+    {
+        if (!$this->isInMintWindow()) {
+            return false;
+        }
+
+        $this->mint_confirmed = true;
+        $this->mint_confirmed_at = now();
+        $this->sub_status = self::SUB_STATUS_CONFIRMED;
 
         return $this->save();
     }
 
+    // ===== NOTIFICATION METHODS =====
+
     /**
-     * Create a certificate for this reservation.
-     *
-     * @param array $additionalData Additional data for the certificate
-     * @return \App\Models\EgiReservationCertificate
+     * Record notification sent
      */
-    public function createCertificate(array $additionalData = []): EgiReservationCertificate {
-        // Create base certificate data
-        $certificateData = [
-            'reservation_id' => $this->id,
-            'egi_id' => $this->egi_id,
-            'user_id' => $this->user_id,
-            'wallet_address' => $this->user->wallet ?? $additionalData['wallet_address'] ?? '',
-            'reservation_type' => $this->type,
-            'offer_amount_fiat' => $this->offer_amount_fiat,
-            'fiat_currency' => $this->fiat_currency,
-            'offer_amount_algo' => $this->offer_amount_algo,
-            'exchange_rate' => $this->exchange_rate,
-            'is_current_highest' => $this->is_current,
+    public function recordNotification(string $type, array $data = []): void
+    {
+        $history = $this->notification_history ?? [];
+
+        $history[] = [
+            'type' => $type,
+            'sent_at' => now()->toIso8601String(),
+            'data' => $data,
         ];
 
-        // Merge with additional data
-        $certificateData = array_merge($certificateData, $additionalData);
+        $this->notification_history = $history;
+        $this->last_notification_at = now();
+        $this->save();
+    }
 
-        // Create and save the certificate
-        $certificate = new EgiReservationCertificate($certificateData);
-
-        // Generate signature hash
-        if (!isset($certificateData['signature_hash'])) {
-            $verificationData = $certificate->generateVerificationData();
-            $certificate->signature_hash = hash('sha256', $verificationData);
+    /**
+     * Check if notification needed
+     */
+    public function needsNotification(string $type): bool
+    {
+        if (!$this->last_notification_at) {
+            return true;
         }
 
-        $certificate->save();
+        // Check if specific notification type was already sent
+        $history = collect($this->notification_history ?? []);
+        $lastOfType = $history->where('type', $type)->last();
 
-        return $certificate;
+        if (!$lastOfType) {
+            return true;
+        }
+
+        // Don't send same notification within 24 hours
+        $lastSent = Carbon::parse($lastOfType['sent_at']);
+        return $lastSent->diffInHours(now()) > 24;
+    }
+
+    // ===== LEGACY COMPATIBILITY =====
+
+    /**
+     * Get offer amount (legacy compatibility)
+     */
+    public function getOfferAmountFiatAttribute(): float
+    {
+        return $this->display_amount ?? $this->amount_eur;
     }
 
     /**
-     * Scope query to only include active reservations.
-     *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @return \Illuminate\Database\Eloquent\Builder
+     * Get fiat currency (legacy compatibility)
      */
-    public function scopeActive($query) {
-        return $query->where('status', 'active')
-            ->where('is_current', true)
-            ->where(function ($query) {
-                $query->where('type', 'strong')
-                    ->orWhere(function ($query) {
-                        $query->where('type', 'weak')
-                            ->where(function ($query) {
-                                $query->whereNull('expires_at')
-                                    ->orWhere('expires_at', '>', Carbon::now());
-                            });
-                    });
-            });
-    }
-
-    /**
-     * Scope query to only include weak reservations.
-     *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeWeak($query) {
-        return $query->where('type', 'weak');
-    }
-
-    /**
-     * Scope query to only include strong reservations.
-     *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeStrong($query) {
-        return $query->where('type', 'strong');
-    }
-
-    /**
-     * Scope query to only include current reservations.
-     *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeCurrent($query) {
-        return $query->where('is_current', true);
+    public function getFiatCurrencyAttribute(): string
+    {
+        return $this->display_currency ?? 'EUR';
     }
 }

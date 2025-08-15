@@ -1832,6 +1832,72 @@ return [
             'msg_to' => 'toast'
         ],
 
+        'CERTIFICATE_GENERATION_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'semi-blocking', // impedisce l'emissione nel flusso corrente
+            'dev_message_key'  => 'error-manager::errors.dev.certificate_generation_failed',
+            'user_message_key' => 'error-manager::errors.user.certificate_generation_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'json',
+        ],
+
+        'CERTIFICATE_ANCHOR_FAILED' => [
+            'type' => 'warning',
+            'blocking' => 'not', // il certificato resta valido ma in stato "pending_anchor"
+            'dev_message_key'  => 'error-manager::errors.dev.certificate_anchor_failed',
+            'user_message_key' => 'error-manager::errors.user.certificate_anchor_failed',
+            'http_status_code' => 502, // failure provider/indexer esterno
+            'devTeam_email_need' => false,
+            'notify_slack' => true,
+            'msg_to' => 'json',
+        ],
+
+        'CERTIFICATE_PAYLOAD_VALIDATION_ERROR' => [
+            'type' => 'error',
+            'blocking' => 'semi-blocking',
+            'dev_message_key'  => 'error-manager::errors.dev.certificate_payload_validation_error',
+            'user_message_key' => 'error-manager::errors.user.certificate_payload_validation_error',
+            'http_status_code' => 422,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'json',
+        ],
+
+        'CERTIFICATE_VERIFICATION_TAMPERED' => [
+            'type' => 'error',
+            'blocking' => 'semi-blocking', // blocca download/verifica positiva
+            'dev_message_key'  => 'error-manager::errors.dev.certificate_verification_tampered',
+            'user_message_key' => 'error-manager::errors.user.certificate_verification_tampered',
+            'http_status_code' => 409, // integrità in conflitto
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'json',
+        ],
+
+        'CERTIFICATE_ANCHOR_TX_NOT_FOUND' => [
+            'type' => 'warning',
+            'blocking' => 'not',
+            'dev_message_key'  => 'error-manager::errors.dev.certificate_anchor_tx_not_found',
+            'user_message_key' => 'error-manager::errors.user.certificate_anchor_tx_not_found',
+            'http_status_code' => 404,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'json',
+        ],
+
+        'CERTIFICATE_REVOKE_FAILED' => [
+            'type' => 'error',
+            'blocking' => 'semi-blocking',
+            'dev_message_key'  => 'error-manager::errors.dev.certificate_revoke_failed',
+            'user_message_key' => 'error-manager::errors.user.certificate_revoke_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'json',
+        ],
+
         // ====================================================
         // Currency & Multi-Currency System Errors
         // ====================================================

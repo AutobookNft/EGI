@@ -13,6 +13,7 @@
 import { WalletStrategy } from '../strategies/wallet-strategy.js';
 import { InvitationStrategy } from '../strategies/invitation-strategy.js';
 import { GdprStrategy } from '../strategies/gdpr-strategy.js'; // <-- NUOVO IMPORT
+import { ReservationStrategy } from '../strategies/reservation-strategy.js'; // <-- NUOVO IMPORT
 
 export class PayloadHandlerFactory {
 
@@ -26,6 +27,8 @@ export class PayloadHandlerFactory {
             case 'gdpr': // <-- NUOVA VOCE
                 console.log(`🔍 Creazione strategia per payload: ${notificationInstance}`);
                 return new GdprStrategy(notificationInstance);
+            case 'reservation':
+                return new ReservationStrategy(notificationInstance);
             default:
                 // Restituiamo null invece di lanciare un errore per gestire con grazia tipi non ancora implementati.
                 console.warn(`Tipo di payload non gestito: ${payload}`);

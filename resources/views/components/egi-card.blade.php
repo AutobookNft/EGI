@@ -396,23 +396,23 @@ $isCreator = auth()->check() && auth()->id() === $creatorId;
 
             // Se c'è una prenotazione attiva, uso il suo prezzo e utente
             if ($highestPriorityReservation && $highestPriorityReservation->status === 'active') {
-                $displayPrice = $highestPriorityReservation->offer_amount_fiat ?? $egi->price;
-                $displayUser = $highestPriorityReservation->user;
-                
-                // 🎯 CURRENCY LOGIC: Usa valuta originale prenotazione per conversione automatica
-                $displayCurrency = $highestPriorityReservation->fiat_currency ?? 'USD';
+            $displayPrice = $highestPriorityReservation->offer_amount_fiat ?? $egi->price;
+            $displayUser = $highestPriorityReservation->user;
+
+            // 🎯 CURRENCY LOGIC: Usa valuta originale prenotazione per conversione automatica
+            $displayCurrency = $highestPriorityReservation->fiat_currency ?? 'USD';
             } else {
-                // Se NON c'è prenotazione, usa preferenza utente
-                $displayCurrency = 'EUR'; // Default fallback
-                if (App\Helpers\FegiAuth::check()) {
-                    $displayCurrency = App\Helpers\FegiAuth::user()->preferred_currency ?? 'EUR';
-                }
+            // Se NON c'è prenotazione, usa preferenza utente
+            $displayCurrency = 'EUR'; // Default fallback
+            if (App\Helpers\FegiAuth::check()) {
+            $displayCurrency = App\Helpers\FegiAuth::user()->preferred_currency ?? 'EUR';
+            }
             }
 
             // 🎯 TARGET CURRENCY: Valuta finale desiderata (quella del badge utente)
             $targetCurrency = 'EUR'; // Default fallback
             if (App\Helpers\FegiAuth::check()) {
-                $targetCurrency = App\Helpers\FegiAuth::user()->preferred_currency ?? 'EUR';
+            $targetCurrency = App\Helpers\FegiAuth::user()->preferred_currency ?? 'EUR';
             }
             @endphp
 
@@ -439,13 +439,9 @@ $isCreator = auth()->check() && auth()->id() === $creatorId;
                     </div>
                     <div class="text-right">
                         <span class="text-sm font-bold text-white">
-                            <x-currency-price 
-                                :price="$displayPrice" 
-                                :currency="$displayCurrency"
-                                :reservation="$highestPriorityReservation"
-                                :target-currency="$targetCurrency"
-                                size="small"
-                            />
+                            <x-currency-price :price="$displayPrice" :currency="$displayCurrency"
+                                :reservation="$highestPriorityReservation" :target-currency="$targetCurrency"
+                                size="small" />
                         </span>
                     </div>
                 </div>
