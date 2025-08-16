@@ -141,7 +141,7 @@ class ReservationService {
             }
 
             // Get exchange rate data
-            $fiatCurrency = $data['fiat_currency'] ?? 'USD';
+            $fiatCurrency = $data['fiat_currency'] ?? 'EUR';
             $rateData = $this->currencyService->getAlgoToFiatRate($fiatCurrency);
 
             if (!$rateData) {

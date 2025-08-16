@@ -81,7 +81,7 @@ class CollectionBadge extends Component {
      */
     public function shouldRender(): bool {
         $user = Auth::user();
-        
+
         // Non mostrare se l'utente non è autenticato o non ha il usertype corretto
         if (!$user || !in_array($user->usertype, ['creator', 'patron'])) {
             return false;

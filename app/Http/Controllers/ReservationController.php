@@ -122,7 +122,7 @@ class ReservationController extends Controller {
                 [
                     'egi_id' => $egiId,
                     'offer_amount_fiat' => $validated['offer_amount_fiat'],
-                    'fiat_currency' => $validated['fiat_currency'] ?? 'USD',
+                    'fiat_currency' => $validated['fiat_currency'] ?? 'EUR',
                     'contact_data' => $validated['contact_data'] ?? null
                 ],
                 $user,
