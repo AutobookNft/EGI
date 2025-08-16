@@ -51,6 +51,18 @@ class CollectionBadge extends Component
             $this->collectionName = null;
             $this->canEdit = false;
         }
+        
+        // DEBUG: Log dei valori per troubleshooting
+        \Log::info('CollectionBadge DEBUG', [
+            'size' => $this->size,
+            'showWhenEmpty' => $this->showWhenEmpty,
+            'position' => $this->position,
+            'collectionId' => $this->collectionId,
+            'collectionName' => $this->collectionName,
+            'canEdit' => $this->canEdit,
+            'uniqueId' => $this->uniqueId,
+            'user' => $user ? 'authenticated' : 'guest'
+        ]);
     }
 
     /**
@@ -66,6 +78,9 @@ class CollectionBadge extends Component
      */
     public function shouldRender(): bool
     {
+        // DEBUG: Forza sempre il rendering per test
+        return true;
+        
         // Mostra sempre se showWhenEmpty è true
         if ($this->showWhenEmpty) {
             return true;

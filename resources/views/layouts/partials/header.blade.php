@@ -172,7 +172,7 @@
                     {{-- NEW: Test Autonomous Collection Badge Component --}}
                     <x-collection-badge 
                         size="desktop" 
-                        :show-when-empty="false" 
+                        :show-when-empty="true" 
                         position="navbar" 
                     />
 
