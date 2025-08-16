@@ -65,6 +65,9 @@ export let mobileCollectionListErrorEl: HTMLDivElement | null = null;
 export let currentCollectionBadgeContainerEl: HTMLDivElement | null = null;
 export let currentCollectionBadgeLinkEl: HTMLAnchorElement | null = null;
 export let currentCollectionBadgeNameEl: HTMLSpanElement | null = null;
+export let currentCollectionBadgeContainerDesktopEl: HTMLDivElement | null = null;
+export let currentCollectionBadgeLinkDesktopEl: HTMLAnchorElement | null = null;
+export let currentCollectionBadgeNameDesktopEl: HTMLSpanElement | null = null;
 export let currentCollectionBadgeContainerMobileEl: HTMLDivElement | null = null;
 export let currentCollectionBadgeNameMobileEl: HTMLSpanElement | null = null;
 export let currentCollectionBadgeLinkMobileEl: HTMLAnchorElement | null = null;
@@ -135,6 +138,11 @@ export function initializeDOMReferences(): void {
     currentCollectionBadgeContainerEl = getEl<HTMLDivElement>('current-collection-badge-container');
     currentCollectionBadgeLinkEl = getEl<HTMLAnchorElement>('current-collection-badge-link');
     currentCollectionBadgeNameEl = getEl<HTMLSpanElement>('current-collection-badge-name');
+
+    // Desktop badge
+    currentCollectionBadgeContainerDesktopEl = getEl<HTMLDivElement>('current-collection-badge-container-desktop');
+    currentCollectionBadgeLinkDesktopEl = getEl<HTMLAnchorElement>('current-collection-badge-link-desktop');
+    currentCollectionBadgeNameDesktopEl = getEl<HTMLSpanElement>('current-collection-badge-name-desktop');
 
     // Mobile badge
     currentCollectionBadgeContainerMobileEl = getEl<HTMLDivElement>('current-collection-badge-container-mobile');

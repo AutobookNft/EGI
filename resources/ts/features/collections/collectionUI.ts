@@ -341,7 +341,8 @@ export async function initializeUserCollectionState(config: AppConfig, DOM: type
  * @param {typeof DOMElements} DOM Collezione dei riferimenti agli elementi DOM.
  */
 export function updateCurrentCollectionBadge(config: AppConfig, DOM: typeof DOMElements): void {
-    const { currentCollectionBadgeContainerEl, currentCollectionBadgeNameEl, currentCollectionBadgeLinkEl } = DOM;
+    const { currentCollectionBadgeContainerEl, currentCollectionBadgeNameEl, currentCollectionBadgeLinkEl, 
+            currentCollectionBadgeContainerDesktopEl, currentCollectionBadgeNameDesktopEl, currentCollectionBadgeLinkDesktopEl } = DOM;
     if (!currentCollectionBadgeContainerEl || !currentCollectionBadgeNameEl || !currentCollectionBadgeLinkEl) {
         // console.warn("Padmin CollectionUI: Current collection badge DOM elements not fully available for update.");
         return;
@@ -365,6 +366,23 @@ export function updateCurrentCollectionBadge(config: AppConfig, DOM: typeof DOME
         }
         currentCollectionBadgeContainerEl.classList.remove('hidden');
 
+        // Aggiorna anche il badge desktop se presente
+        if (currentCollectionBadgeContainerDesktopEl && currentCollectionBadgeNameDesktopEl && currentCollectionBadgeLinkDesktopEl) {
+            currentCollectionBadgeNameDesktopEl.textContent = name;
+            if (can_edit) {
+                currentCollectionBadgeLinkDesktopEl.href = editUrl;
+                currentCollectionBadgeLinkDesktopEl.title = appTranslate('editCurrentGalleryTitle', config.translations);
+                currentCollectionBadgeLinkDesktopEl.classList.remove('pointer-events-none', 'opacity-60', 'cursor-default');
+                currentCollectionBadgeLinkDesktopEl.classList.add('hover:border-sky-600', 'hover:bg-sky-800');
+            } else {
+                currentCollectionBadgeLinkDesktopEl.href = viewUrl;
+                currentCollectionBadgeLinkDesktopEl.title = appTranslate('viewCurrentGalleryTitle', config.translations);
+                currentCollectionBadgeLinkDesktopEl.classList.add('opacity-75');
+                currentCollectionBadgeLinkDesktopEl.classList.remove('pointer-events-none', 'cursor-default', 'hover:border-sky-600', 'hover:bg-sky-800');
+            }
+            currentCollectionBadgeContainerDesktopEl.classList.remove('hidden');
+        }
+
         // Aggiorna anche il badge mobile se presente
         if (DOM.currentCollectionBadgeContainerMobileEl && DOM.currentCollectionBadgeNameMobileEl && DOM.currentCollectionBadgeLinkMobileEl) {
             DOM.currentCollectionBadgeNameMobileEl.textContent = name;
@@ -379,6 +397,11 @@ export function updateCurrentCollectionBadge(config: AppConfig, DOM: typeof DOME
         }
     } else {
         currentCollectionBadgeContainerEl.classList.add('hidden');
+
+        // Nasconde anche il badge desktop se presente
+        if (DOM.currentCollectionBadgeContainerDesktopEl) {
+            DOM.currentCollectionBadgeContainerDesktopEl.classList.add('hidden');
+        }
 
         // Nasconde anche il badge mobile se presente
         if (DOM.currentCollectionBadgeContainerMobileEl) {
@@ -548,6 +571,14 @@ export function resetCollectionStateOnLogout(DOM: typeof DOMElements): void {
     }
     if (currentCollectionBadgeContainerEl) {
         currentCollectionBadgeContainerEl.classList.add('hidden');
+    }
+    // Reset anche del badge desktop
+    if (DOM.currentCollectionBadgeContainerDesktopEl) {
+        DOM.currentCollectionBadgeContainerDesktopEl.classList.add('hidden');
+    }
+    // Reset anche del badge mobile
+    if (DOM.currentCollectionBadgeContainerMobileEl) {
+        DOM.currentCollectionBadgeContainerMobileEl.classList.add('hidden');
     }
     // Assicura che il dropdown sia visivamente chiuso
     if (collectionListDropdownButtonEl && collectionListDropdownMenuEl && !collectionListDropdownMenuEl.classList.contains('hidden')) {
