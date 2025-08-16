@@ -22,55 +22,55 @@ Esempio uso:
 ])
 
 @php
-    // 🔧 VALIDATION: Assicuro che price sia sempre un numero valido
-    $safePrice = is_numeric($price) ? (float)$price : 0;
+// 🔧 VALIDATION: Assicuro che price sia sempre un numero valido
+$safePrice = is_numeric($price) ? (float)$price : 0;
 
-    // 🏷️ RESERVATION NOTE LOGIC: Nota di prenotazione originale (solo se diversa da EUR)
-    $shouldShowReservationNote = false;
-    $originalCurrency = '';
-    $originalPrice = 0;
-    $formattedOriginalPrice = '';
+// 🏷️ RESERVATION NOTE LOGIC: Nota di prenotazione originale (solo se diversa da EUR)
+$shouldShowReservationNote = false;
+$originalCurrency = '';
+$originalPrice = 0;
+$formattedOriginalPrice = '';
 
-    if ($reservation) {
-    $originalCurrency = $reservation->fiat_currency ?? 'EUR';
-    $originalPrice = $reservation->offer_amount_fiat ?? $safePrice;
+if ($reservation) {
+$originalCurrency = $reservation->fiat_currency ?? 'EUR';
+$originalPrice = $reservation->offer_amount_fiat ?? $safePrice;
 
-    // Mostra la nota solo se la prenotazione era in una valuta diversa da EUR
-    $shouldShowReservationNote = ($originalCurrency !== 'EUR');
+// Mostra la nota solo se la prenotazione era in una valuta diversa da EUR
+$shouldShowReservationNote = ($originalCurrency !== 'EUR');
 
-    if ($shouldShowReservationNote) {
-    // Formato il prezzo originale con il simbolo corretto
-    switch($originalCurrency) {
-    case 'USD':
-    $formattedOriginalPrice = '$' . number_format($originalPrice, 2);
-    break;
-    case 'GBP':
-    $formattedOriginalPrice = '£' . number_format($originalPrice, 2);
-    break;
-    default:
-    $formattedOriginalPrice = $originalCurrency . ' ' . number_format($originalPrice, 2);
-    break;
-    }
-    }
-    }
+if ($shouldShowReservationNote) {
+// Formato il prezzo originale con il simbolo corretto
+switch($originalCurrency) {
+case 'USD':
+$formattedOriginalPrice = '$' . number_format($originalPrice, 2);
+break;
+case 'GBP':
+$formattedOriginalPrice = '£' . number_format($originalPrice, 2);
+break;
+default:
+$formattedOriginalPrice = $originalCurrency . ' ' . number_format($originalPrice, 2);
+break;
+}
+}
+}
 
-    // 🎨 SIZE-BASED CLASSES: Classi CSS basate sulla dimensione
-    $sizeClasses = [
-    'small' => [
-    'container' => 'mt-1 px-2 py-1 text-xs',
-    'text' => 'text-xs font-normal'
-    ],
-    'normal' => [
-    'container' => 'mt-2 px-2 py-1 text-xs',
-    'text' => 'text-xs font-medium'
-    ],
-    'large' => [
-    'container' => 'mt-3 px-3 py-1.5 text-sm',
-    'text' => 'text-sm font-medium'
-    ]
-    ];
+// 🎨 SIZE-BASED CLASSES: Classi CSS basate sulla dimensione
+$sizeClasses = [
+'small' => [
+'container' => 'mt-1 px-2 py-1 text-xs',
+'text' => 'text-xs font-normal'
+],
+'normal' => [
+'container' => 'mt-2 px-2 py-1 text-xs',
+'text' => 'text-xs font-medium'
+],
+'large' => [
+'container' => 'mt-3 px-3 py-1.5 text-sm',
+'text' => 'text-sm font-medium'
+]
+];
 
-    $currentSize = $sizeClasses[$size] ?? $sizeClasses['normal'];
+$currentSize = $sizeClasses[$size] ?? $sizeClasses['normal'];
 @endphp
 
 <div class="currency-price-container">
@@ -96,18 +96,18 @@ Esempio uso:
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function() {
     // Funzione per aggiornare la conversione ALGO
     function updateAlgoConversion() {
         const algoElements = document.querySelectorAll('.algo-conversion-display');
-        
+
         // Prende il tasso dal badge nella navbar
         const rateElement = document.getElementById('currency-rate-value');
         if (!rateElement) return;
-        
+
         const eurToAlgoRate = parseFloat(rateElement.textContent);
         if (!eurToAlgoRate || eurToAlgoRate === 0) return;
-        
+
         algoElements.forEach(element => {
             const eurAmount = parseFloat(element.getAttribute('data-eur-amount'));
             if (eurAmount && eurToAlgoRate) {
@@ -117,15 +117,15 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-    
+
     function formatAlgoAmount(algoAmount) {
         // Sempre formato numerico intero, senza K
         return Math.round(algoAmount).toLocaleString();
     }
-    
+
     // Aggiorna immediatamente
     setTimeout(updateAlgoConversion, 1000);
-    
+
     // Aggiorna ogni volta che il tasso cambia
     setInterval(updateAlgoConversion, 5000);
 });
