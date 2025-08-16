@@ -159,6 +159,16 @@
                         </div>
                     </div>
 
+                    {{-- Collection Badge (Desktop) --}}
+                    <div id="current-collection-badge-container-desktop" class="items-center hidden ml-3 md:flex">
+                        <a href="#" id="current-collection-badge-link-desktop"
+                            class="flex items-center px-3 py-1.5 text-sm font-semibold transition border rounded-lg border-sky-700 bg-sky-900/60 text-sky-300 hover:border-sky-600 hover:bg-sky-800">
+                            <span class="mr-2 text-sm leading-none material-symbols-outlined"
+                                aria-hidden="true">folder_managed</span>
+                            <span id="current-collection-badge-name-desktop"></span>
+                        </a>
+                    </div>
+
                     {{-- Professional Currency Badge (Always Visible - Mobile First) --}}
 
                     @php
@@ -363,7 +373,7 @@
                     </div>
 
                     {{-- Collection Badge (spostato qui dalla prima riga) --}}
-                    <div id="current-collection-badge-container" class="items-center hidden ml-2">
+                    <div id="current-collection-badge-container" class="flex items-center ml-2">
                         <a href="#" id="current-collection-badge-link"
                             class="flex items-center px-2 py-1 text-xs font-semibold transition border rounded-full border-sky-700 bg-sky-900/60 text-sky-300 hover:border-sky-600 hover:bg-sky-800">
                             <span class="mr-1 text-xs leading-none material-symbols-outlined"
