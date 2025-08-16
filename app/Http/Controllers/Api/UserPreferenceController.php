@@ -277,4 +277,54 @@ class UserPreferenceController extends Controller {
             );
         }
     }
+
+    /**
+     * Get current collection information for authenticated user
+     *
+     * @return JsonResponse
+     */
+    public function getCurrentCollection(): JsonResponse 
+    {
+        try {
+            $user = Auth::user();
+            
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User not authenticated'
+                ], 401);
+            }
+
+            // Get current collection using the User model methods
+            $collectionName = $user->getCurrentCollectionName();
+            $egiCount = $user->getCurrentCollectionEgiCount();
+
+            $response = [
+                'success' => true,
+                'data' => [
+                    'collection_name' => $collectionName,
+                    'egi_count' => $egiCount,
+                    'has_collection' => !is_null($collectionName),
+                    'timestamp' => now()->toISOString()
+                ]
+            ];
+
+            $this->logger->info('Current collection data retrieved', [
+                'user_id' => $user->id,
+                'collection_name' => $collectionName,
+                'egi_count' => $egiCount
+            ]);
+
+            return response()->json($response);
+        } catch (\Exception $e) {
+            return $this->errorManager->handleError(
+                'USER_COLLECTION_FETCH_ERROR',
+                $e,
+                [
+                    'action' => 'get_current_collection',
+                    'user_id' => Auth::id()
+                ]
+            );
+        }
+    }
 }

@@ -341,8 +341,8 @@ export async function initializeUserCollectionState(config: AppConfig, DOM: type
  * @param {typeof DOMElements} DOM Collezione dei riferimenti agli elementi DOM.
  */
 export function updateCurrentCollectionBadge(config: AppConfig, DOM: typeof DOMElements): void {
-    const { currentCollectionBadgeContainerEl, currentCollectionBadgeNameEl, currentCollectionBadgeLinkEl, 
-            currentCollectionBadgeContainerDesktopEl, currentCollectionBadgeNameDesktopEl, currentCollectionBadgeLinkDesktopEl } = DOM;
+    const { currentCollectionBadgeContainerEl, currentCollectionBadgeNameEl, currentCollectionBadgeLinkEl,
+        currentCollectionBadgeContainerDesktopEl, currentCollectionBadgeNameDesktopEl, currentCollectionBadgeLinkDesktopEl } = DOM;
     if (!currentCollectionBadgeContainerEl || !currentCollectionBadgeNameEl || !currentCollectionBadgeLinkEl) {
         // console.warn("Padmin CollectionUI: Current collection badge DOM elements not fully available for update.");
         return;
@@ -562,7 +562,7 @@ export function resetCollectionStateOnLogout(DOM: typeof DOMElements): void {
         if (collectionListLoadingEl) {
             // Assicura che lo spinner sia il primo figlio e visibile per la prossima apertura
             if (!collectionListDropdownMenuEl.contains(collectionListLoadingEl)) {
-                 collectionListDropdownMenuEl.insertBefore(collectionListLoadingEl, collectionListDropdownMenuEl.firstChild);
+                collectionListDropdownMenuEl.insertBefore(collectionListLoadingEl, collectionListDropdownMenuEl.firstChild);
             }
             collectionListLoadingEl.classList.remove('hidden');
         }

@@ -13,8 +13,7 @@ use Illuminate\View\Component;
  * @date 2025-08-16
  * @author Fabio Cherici
  */
-class CurrencyBadge extends Component
-{
+class CurrencyBadge extends Component {
     public string $size;
     public string $position;
     public string $uniqueId;
@@ -40,16 +39,14 @@ class CurrencyBadge extends Component
     /**
      * Get the view / contents that represent the component.
      */
-    public function render()
-    {
+    public function render() {
         return view('components.currency-badge');
     }
 
     /**
      * Get responsive classes based on size
      */
-    public function getResponsiveClasses(): string
-    {
+    public function getResponsiveClasses(): string {
         return match ($this->size) {
             'mobile' => 'flex md:hidden items-center', // Solo mobile
             'desktop' => 'hidden md:flex items-center ml-3', // Solo desktop con margin
@@ -60,9 +57,8 @@ class CurrencyBadge extends Component
     /**
      * Get the CSS classes based on size
      */
-    public function getSizeClasses(): array
-    {
-        return match($this->size) {
+    public function getSizeClasses(): array {
+        return match ($this->size) {
             'small' => [
                 'container' => 'px-1.5 py-1',
                 'text' => 'text-xs',
@@ -97,9 +93,8 @@ class CurrencyBadge extends Component
     /**
      * Get position-specific CSS classes
      */
-    public function getPositionClasses(): string
-    {
-        return match($this->position) {
+    public function getPositionClasses(): string {
+        return match ($this->position) {
             'sidebar' => 'mb-2',
             'inline' => 'inline-flex',
             'footer' => 'mt-2',
@@ -110,16 +105,14 @@ class CurrencyBadge extends Component
     /**
      * Get the status dot ID for this instance
      */
-    public function getStatusDotId(): string
-    {
+    public function getStatusDotId(): string {
         return $this->uniqueId . '-status-dot';
     }
 
     /**
      * Get the rate value ID for this instance
      */
-    public function getRateValueId(): string
-    {
+    public function getRateValueId(): string {
         return $this->uniqueId . '-rate-value';
     }
 }
