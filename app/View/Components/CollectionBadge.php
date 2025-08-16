@@ -25,6 +25,7 @@ class CollectionBadge extends Component {
     public bool $canEdit;
     public string $uniqueId;
     public bool $shouldRender;
+    public string $responsiveClasses;
 
     /**
      * Create a new component instance.
@@ -40,6 +41,9 @@ class CollectionBadge extends Component {
 
         // Genera un ID univoco per questo badge
         $this->uniqueId = 'collection-badge-' . uniqid();
+
+        // Imposta le classi responsive
+        $this->responsiveClasses = $this->getResponsiveClasses();
 
         // Ottieni i dati della collection corrente
         $user = Auth::user();
@@ -103,11 +107,32 @@ class CollectionBadge extends Component {
                 'text' => 'text-base',
                 'icon' => 'text-base mr-2'
             ],
+            'mobile' => [
+                'container' => 'px-2 py-1',
+                'text' => 'text-xs',
+                'icon' => 'text-xs mr-1'
+            ],
+            'desktop' => [
+                'container' => 'px-3 py-1.5',
+                'text' => 'text-sm',
+                'icon' => 'text-sm mr-2'
+            ],
             default => [
                 'container' => 'px-3 py-1.5',
                 'text' => 'text-sm',
                 'icon' => 'text-sm mr-2'
             ]
+        };
+    }
+
+    /**
+     * Get responsive visibility classes based on size
+     */
+    public function getResponsiveClasses(): string {
+        return match ($this->size) {
+            'mobile' => 'flex md:hidden', // Solo mobile
+            'desktop' => 'hidden md:flex', // Solo desktop
+            default => 'flex' // Sempre visibile
         };
     }
 

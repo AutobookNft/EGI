@@ -4,12 +4,9 @@ Componente autonomo per il badge della collection con TypeScript integrato
 --}}
 
 <div id="{{ $uniqueId }}"
-    class="collection-badge-component items-center {{ $getPositionClasses() }} {{ $getSizeClasses()['container'] }}"
-    data-collection-id="{{ $collectionId }}" 
-    data-can-edit="{{ $canEdit ? 'true' : 'false' }}" 
-    data-size="{{ $size }}"
-    data-position="{{ $position }}"
-    data-egi-count="{{ $egiCount }}">
+    class="collection-badge-component items-center {{ $responsiveClasses }} {{ $getPositionClasses() }} {{ $getSizeClasses()['container'] }}"
+    data-collection-id="{{ $collectionId }}" data-can-edit="{{ $canEdit ? 'true' : 'false' }}" data-size="{{ $size }}"
+    data-position="{{ $position }}" data-egi-count="{{ $egiCount }}">
 
     <a href="{{ $getBadgeUrl() }}"
         class="collection-badge-link flex items-center transition border rounded-lg border-sky-700 bg-sky-900/60 text-sky-300 hover:border-sky-600 hover:bg-sky-800 {{ $getSizeClasses()['container'] }}"
@@ -20,12 +17,13 @@ Componente autonomo per il badge della collection con TypeScript integrato
 
         <span class="collection-badge-name {{ $getSizeClasses()['text'] }}">
             @if($collectionName)
-                {{ $collectionName }} 
-                <span class="collection-badge-count ml-1 px-1.5 py-0.5 text-xs bg-sky-700/60 text-sky-200 rounded-full border border-sky-600">
-                    {{ $egiCount }}
-                </span>
+            {{ $collectionName }}
+            <span
+                class="collection-badge-count ml-1 px-1.5 py-0.5 text-xs bg-sky-700/60 text-sky-200 rounded-full border border-sky-600">
+                {{ $egiCount }}
+            </span>
             @else
-                {{ __('collection.no_collection') }}
+            {{ __('collection.no_collection') }}
             @endif
         </span>
     </a>
