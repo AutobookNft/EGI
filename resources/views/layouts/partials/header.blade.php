@@ -169,6 +169,13 @@
                         </a>
                     </div>
 
+                    {{-- NEW: Test Autonomous Collection Badge Component --}}
+                    <x-collection-badge 
+                        size="desktop" 
+                        :show-when-empty="false" 
+                        position="navbar" 
+                    />
+
                     {{-- Professional Currency Badge (Always Visible - Mobile First) --}}
 
                     @php
