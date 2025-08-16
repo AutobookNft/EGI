@@ -10,20 +10,21 @@ use App\Helpers\FegiAuth;
  * 📜 Collection Badge Component
  * Componente autonomo per visualizzare il badge della collection corrente
  * con gestione completa TypeScript integrata.
- * 
+ *
  * @version 1.0.0
  * @date 2025-08-16
  * @author Fabio Cherici
  */
-class CollectionBadge extends Component
-{
+class CollectionBadge extends Component {
     public string $size;
     public bool $showWhenEmpty;
     public string $position;
     public ?int $collectionId;
     public ?string $collectionName;
+    public int $egiCount;
     public bool $canEdit;
     public string $uniqueId;
+    public bool $shouldRender;
 
     /**
      * Create a new component instance.
@@ -36,56 +37,53 @@ class CollectionBadge extends Component
         $this->size = $size;
         $this->showWhenEmpty = $showWhenEmpty;
         $this->position = $position;
-        
+
         // Genera un ID univoco per questo badge
         $this->uniqueId = 'collection-badge-' . uniqid();
-        
+
         // Ottieni i dati della collection corrente
         $user = Auth::user();
         if ($user) {
             $this->collectionId = $user->current_collection_id;
-            $this->collectionName = $user->current_collection_name;
-            $this->canEdit = $user->can_edit_current_collection ?? false;
+            $this->collectionName = $user->getCurrentCollectionName();
+            $this->egiCount = $user->getCurrentCollectionEgiCount();
+
+            // Verifica se l'utente può modificare la collection corrente
+            if ($this->collectionId && $user->currentCollection) {
+                $this->canEdit = $user->can('manage_collection', $user->currentCollection);
+            } else {
+                $this->canEdit = false;
+            }
         } else {
             $this->collectionId = null;
             $this->collectionName = null;
             $this->canEdit = false;
+            $this->egiCount = 0;
         }
-        
-        // DEBUG: Log dei valori per troubleshooting
-        \Log::info('CollectionBadge DEBUG', [
-            'size' => $this->size,
-            'showWhenEmpty' => $this->showWhenEmpty,
-            'position' => $this->position,
-            'collectionId' => $this->collectionId,
-            'collectionName' => $this->collectionName,
-            'canEdit' => $this->canEdit,
-            'uniqueId' => $this->uniqueId,
-            'user' => $user ? 'authenticated' : 'guest'
-        ]);
+
+        // Imposta shouldRender per il template
+        $this->shouldRender = $this->shouldRender();
     }
 
     /**
      * Get the view / contents that represent the component.
      */
-    public function render()
-    {
+    public function render() {
         return view('components.collection-badge');
     }
 
     /**
      * Determine if the component should be rendered.
      */
-    public function shouldRender(): bool
-    {
+    public function shouldRender(): bool {
         // DEBUG: Forza sempre il rendering per test
         return true;
-        
+
         // Mostra sempre se showWhenEmpty è true
         if ($this->showWhenEmpty) {
             return true;
         }
-        
+
         // Altrimenti mostra solo se c'è una collection
         return $this->collectionId && $this->collectionName;
     }
@@ -93,9 +91,8 @@ class CollectionBadge extends Component
     /**
      * Get the CSS classes based on size
      */
-    public function getSizeClasses(): array
-    {
-        return match($this->size) {
+    public function getSizeClasses(): array {
+        return match ($this->size) {
             'small' => [
                 'container' => 'px-2 py-1',
                 'text' => 'text-xs',
@@ -115,26 +112,35 @@ class CollectionBadge extends Component
     }
 
     /**
+     * Get position-specific CSS classes
+     */
+    public function getPositionClasses(): string {
+        return match ($this->position) {
+            'sidebar' => 'mb-2',
+            'inline' => 'inline-flex',
+            default => 'flex' // navbar
+        };
+    }
+
+    /**
      * Get the appropriate URL (edit or view)
      */
-    public function getBadgeUrl(): string
-    {
+    public function getBadgeUrl(): string {
         if (!$this->collectionId) {
             return '#';
         }
 
         if ($this->canEdit) {
-            return route('collections.edit', $this->collectionId);
+            return route('home.collections.edit', $this->collectionId);
         } else {
-            return route('collections.show', $this->collectionId);
+            return route('home.collections.show', $this->collectionId);
         }
     }
 
     /**
      * Get the title attribute
      */
-    public function getBadgeTitle(): string
-    {
+    public function getBadgeTitle(): string {
         if (!$this->collectionName) {
             return __('collection.no_current_collection');
         }

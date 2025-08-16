@@ -176,6 +176,34 @@ class User extends Authenticatable implements HasMedia {
     }
 
     /**
+     * Get the current collection name
+     *
+     * @return string|null
+     */
+    public function getCurrentCollectionName(): ?string {
+        if (!$this->current_collection_id) {
+            return null;
+        }
+
+        $collection = $this->currentCollection;
+        return $collection ? $collection->collection_name : null;
+    }
+
+    /**
+     * Get the current collection EGI count
+     *
+     * @return int
+     */
+    public function getCurrentCollectionEgiCount(): int {
+        if (!$this->current_collection_id) {
+            return 0;
+        }
+
+        $collection = $this->currentCollection;
+        return $collection ? $collection->egis()->count() : 0;
+    }
+
+    /**
      * Get the collections the user collaborates on.
      *
      * This relationship retrieves collections where the user is listed as a collaborator

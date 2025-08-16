@@ -1,32 +1,39 @@
-{{-- 
+{{--
 📜 Collection Badge Component Template
 Componente autonomo per il badge della collection con TypeScript integrato
 --}}
 
-@if($shouldRender())
-<div id="{{ $uniqueId }}" 
-     class="collection-badge-component items-center {{ $getPositionClasses() }} {{ $getSizeClasses()['container'] }}"
-     data-collection-id="{{ $collectionId }}"
-     data-can-edit="{{ $canEdit ? 'true' : 'false' }}"
-     data-size="{{ $size }}"
-     data-position="{{ $position }}">
-    
-    <a href="{{ $getBadgeUrl() }}" 
-       class="collection-badge-link flex items-center transition border rounded-lg border-sky-700 bg-sky-900/60 text-sky-300 hover:border-sky-600 hover:bg-sky-800 {{ $getSizeClasses()['container'] }}"
-       title="{{ $getBadgeTitle() }}">
-        
-        <span class="collection-badge-icon material-symbols-outlined {{ $getSizeClasses()['icon'] }}" 
-              aria-hidden="true">folder_managed</span>
-        
+<div id="{{ $uniqueId }}"
+    class="collection-badge-component items-center {{ $getPositionClasses() }} {{ $getSizeClasses()['container'] }}"
+    data-collection-id="{{ $collectionId }}" 
+    data-can-edit="{{ $canEdit ? 'true' : 'false' }}" 
+    data-size="{{ $size }}"
+    data-position="{{ $position }}"
+    data-egi-count="{{ $egiCount }}">
+
+    <a href="{{ $getBadgeUrl() }}"
+        class="collection-badge-link flex items-center transition border rounded-lg border-sky-700 bg-sky-900/60 text-sky-300 hover:border-sky-600 hover:bg-sky-800 {{ $getSizeClasses()['container'] }}"
+        title="{{ $getBadgeTitle() }}">
+
+        <span class="collection-badge-icon material-symbols-outlined {{ $getSizeClasses()['icon'] }}"
+            aria-hidden="true">folder_managed</span>
+
         <span class="collection-badge-name {{ $getSizeClasses()['text'] }}">
-            {{ $collectionName ?: __('collection.no_collection') }}
+            @if($collectionName)
+                {{ $collectionName }} 
+                <span class="collection-badge-count ml-1 px-1.5 py-0.5 text-xs bg-sky-700/60 text-sky-200 rounded-full border border-sky-600">
+                    {{ $egiCount }}
+                </span>
+            @else
+                {{ __('collection.no_collection') }}
+            @endif
         </span>
     </a>
 </div>
 
 {{-- TypeScript integrato per gestione autonoma --}}
 <script>
-(function() {
+    (function() {
     'use strict';
 
     /**
@@ -41,26 +48,27 @@ Componente autonomo per il badge della collection con TypeScript integrato
             this.canEdit = badgeElement.dataset.canEdit === 'true';
             this.size = badgeElement.dataset.size;
             this.position = badgeElement.dataset.position;
-            
+
             // Riferimenti agli elementi interni
             this.linkElement = badgeElement.querySelector('.collection-badge-link');
             this.nameElement = badgeElement.querySelector('.collection-badge-name');
+            this.countElement = badgeElement.querySelector('.collection-badge-count');
             this.iconElement = badgeElement.querySelector('.collection-badge-icon');
-            
+
             this.init();
         }
 
         init() {
             console.log(`🎯 Autonomous Collection Badge initialized: ${this.uniqueId}`);
-            
+
             // Ascolta eventi globali di cambio collection
             document.addEventListener('collection-changed', this.handleCollectionChange.bind(this));
             document.addEventListener('collection-updated', this.handleCollectionUpdate.bind(this));
             document.addEventListener('user-logout', this.handleUserLogout.bind(this));
-            
+
             // Auto-refresh dei dati dalla API se necessario
             this.startPeriodicUpdate();
-            
+
             // Gestione click con analytics
             this.linkElement?.addEventListener('click', this.handleClick.bind(this));
         }
@@ -69,46 +77,61 @@ Componente autonomo per il badge della collection con TypeScript integrato
          * Gestisce il cambio di collection
          */
         handleCollectionChange(event) {
-            const { id, name, can_edit } = event.detail;
-            this.updateBadge(id, name, can_edit);
+            const { id, name, can_edit, egi_count } = event.detail;
+            this.updateBadge(id, name, can_edit, egi_count);
         }
 
         /**
          * Gestisce l'aggiornamento della collection
          */
         handleCollectionUpdate(event) {
-            const { id, name, can_edit } = event.detail;
+            const { id, name, can_edit, egi_count } = event.detail;
             if (id == this.collectionId) {
-                this.updateBadge(id, name, can_edit);
+                this.updateBadge(id, name, can_edit, egi_count);
             }
         }
 
         /**
          * Aggiorna il badge con nuovi dati
          */
-        updateBadge(collectionId, collectionName, canEdit) {
+        updateBadge(collectionId, collectionName, canEdit, egiCount = 0) {
             this.collectionId = collectionId;
             this.canEdit = canEdit;
-            
-            if (this.nameElement) {
-                this.nameElement.textContent = collectionName || '{{ __("collection.no_collection") }}';
+
+            if (this.nameElement && collectionName) {
+                // Aggiorna il nome
+                const nameTextNode = this.nameElement.childNodes[0];
+                if (nameTextNode && nameTextNode.nodeType === Node.TEXT_NODE) {
+                    nameTextNode.textContent = collectionName + ' ';
+                } else {
+                    // Se non c'è un text node, ricostruisce il contenuto
+                    this.nameElement.innerHTML = collectionName + ' <span class="collection-badge-count ml-1 px-1.5 py-0.5 text-xs bg-sky-700/60 text-sky-200 rounded-full border border-sky-600">' + egiCount + '</span>';
+                }
+
+                // Aggiorna il contatore
+                const countElement = this.nameElement.querySelector('.collection-badge-count');
+                if (countElement) {
+                    countElement.textContent = egiCount;
+                }
+            } else if (this.nameElement) {
+                this.nameElement.textContent = '{{ __("collection.no_collection") }}';
             }
-            
+
             if (this.linkElement && collectionId) {
                 const baseUrl = canEdit ? '/collections/' + collectionId + '/edit' : '/collections/' + collectionId;
                 this.linkElement.href = baseUrl;
-                
+
                 const titleKey = canEdit ? '{{ __("collection.edit_collection", ["name" => "COLLECTION_NAME"]) }}' : '{{ __("collection.view_collection", ["name" => "COLLECTION_NAME"]) }}';
                 this.linkElement.title = titleKey.replace('COLLECTION_NAME', collectionName);
             }
-            
+
             // Aggiorna visibilità
             if (collectionId && collectionName) {
                 this.show();
             } else {
                 this.hide();
             }
-            
+
             // Animazione di aggiornamento
             this.animateUpdate();
         }
@@ -146,7 +169,7 @@ Componente autonomo per il badge della collection con TypeScript integrato
         handleClick(event) {
             // Analytics o tracking se necessario
             console.log(`🎯 Collection badge clicked: ${this.collectionId}, canEdit: ${this.canEdit}`);
-            
+
             // Dispatch evento personalizzato
             document.dispatchEvent(new CustomEvent('collection-badge-clicked', {
                 detail: {
@@ -170,7 +193,7 @@ Componente autonomo per il badge della collection con TypeScript integrato
                     if (response.ok) {
                         const data = await response.json();
                         if (data.collection) {
-                            this.updateBadge(data.collection.id, data.collection.name, data.collection.can_edit);
+                            this.updateBadge(data.collection.id, data.collection.name, data.collection.can_edit, data.collection.egi_count || 0);
                         }
                     }
                 } catch (error) {
@@ -183,7 +206,7 @@ Componente autonomo per il badge della collection con TypeScript integrato
          * Gestisce il logout
          */
         handleUserLogout() {
-            this.updateBadge(null, null, false);
+            this.updateBadge(null, null, false, 0);
         }
 
         /**
@@ -202,7 +225,7 @@ Componente autonomo per il badge della collection con TypeScript integrato
         if (badgeElement) {
             // Crea l'istanza del badge autonomo
             const autonomousBadge = new AutonomousCollectionBadge(badgeElement);
-            
+
             // Salva l'istanza per eventuali cleanup
             badgeElement._autonomousBadge = autonomousBadge;
         }
@@ -218,4 +241,3 @@ Componente autonomo per il badge della collection con TypeScript integrato
 
 })();
 </script>
-@endif
