@@ -30,8 +30,7 @@ use Illuminate\Http\RedirectResponse;
  * - Certificate generation
  * - Notification integration
  */
-class ReservationService
-{
+class ReservationService {
     /**
      * Service dependencies
      */
@@ -67,8 +66,7 @@ class ReservationService
      * @return Reservation|null
      * @throws \Exception If the reservation cannot be created
      */
-    public function createReservation(array $data, ?User $user = null, ?string $walletAddress = null): ?Reservation
-    {
+    public function createReservation(array $data, ?User $user = null, ?string $walletAddress = null): ?Reservation {
         // Start a transaction to ensure data consistency
         return DB::transaction(function () use ($data, $user, $walletAddress) {
             $egi = Egi::findOrFail($data['egi_id']);
@@ -124,17 +122,16 @@ class ReservationService
                         'previous_amount' => $previousReservation->offer_amount_fiat,
                         'new_amount' => $offerAmountFiat,
                         'message' => 'Il tuo rilancio deve essere superiore alla tua prenotazione precedente di €' .
-                                    number_format($previousReservation->offer_amount_fiat, 2) .
-                                    '. Hai inserito €' . number_format($offerAmountFiat, 2) . '.'
+                            number_format($previousReservation->offer_amount_fiat, 2) .
+                            '. Hai inserito €' . number_format($offerAmountFiat, 2) . '.'
                     ]);
                 }
 
-                // Deactivate previous reservations of the same user for this EGI
-                $this->deactivateUserPreviousReservations($user->id, $data['egi_id']);
+                // We'll handle superseding after creation to have the new reservation ID
             }
 
             // Determine reservation type
-            $reservationType = $user && !$user->is_weak_auth ? 'strong' : 'weak';
+            $reservationType = $user && !$user->is_weak_auth ? Reservation::TYPE_STRONG : Reservation::TYPE_WEAK;
 
             // Ensure we have either a user or a wallet address
             if (!$user && !$walletAddress) {
@@ -172,7 +169,7 @@ class ReservationService
                 'user_id' => $user?->id,
                 'egi_id' => $egi->id,
                 'type' => $reservationType,
-                'status' => 'active',
+                'status' => Reservation::STATUS_ACTIVE,
                 // New pre-launch fields
                 'amount_eur' => $amountEur,
                 'display_currency' => $fiatCurrency,
@@ -195,6 +192,11 @@ class ReservationService
             ]);
 
             $reservation->save();
+
+            // Now supersede user's previous reservations for this EGI
+            if ($user) {
+                $this->supersedeUserPreviousReservations($user->id, $data['egi_id'], $reservation->id);
+            }
 
             // Log financial operation for audit trail
             $this->logger->info('[FINANCIAL] Reservation created with currency conversion', [
@@ -292,8 +294,8 @@ class ReservationService
             if ($displayCurrency !== 'EUR') {
                 $rate = $this->currencyService->getExchangeRate($displayCurrency);
                 if ($rate) {
-                    $displayAmount = round($amountEur * $rate->rate, 2);
-                    $displayRate = $rate->rate;
+                    $displayAmount = round($amountEur * $rate['rate'], 2);
+                    $displayRate = $rate['rate'];
                 }
             }
 
@@ -360,7 +362,6 @@ class ReservationService
             ]);
 
             return $reservation;
-
         } catch (Exception $e) {
             $this->logger->error('[RESERVATION] Failed to create pre-launch reservation', [
                 'egi_id' => $egi->id,
@@ -419,8 +420,8 @@ class ReservationService
                     if ($displayCurrency !== 'EUR') {
                         $rate = $this->currencyService->getExchangeRate($displayCurrency);
                         if ($rate) {
-                            $reservation->display_amount = round($newAmountEur * $rate->rate, 2);
-                            $reservation->display_exchange_rate = $rate->rate;
+                            $reservation->display_amount = round($newAmountEur * $rate['rate'], 2);
+                            $reservation->display_exchange_rate = $rate['rate'];
                         }
                     } else {
                         $reservation->display_amount = $newAmountEur;
@@ -458,7 +459,6 @@ class ReservationService
             ]);
 
             return $reservation;
-
         } catch (Exception $e) {
             $this->logger->error('[RESERVATION] Failed to update reservation', [
                 'reservation_id' => $reservation->id,
@@ -479,8 +479,7 @@ class ReservationService
      * @param Egi $egi The EGI to check
      * @return bool Whether the EGI can be reserved
      */
-    public function canReserveEgi(Egi $egi): bool
-    {
+    public function canReserveEgi(Egi $egi): bool {
         // Check if EGI is published or if it's already minted
         return ($egi->is_published || $egi->status === 'published') && !$egi->mint;
     }
@@ -488,8 +487,7 @@ class ReservationService
     /**
      * Check if EGI is available (alias for new system)
      */
-    protected function isEgiAvailable(Egi $egi): bool
-    {
+    protected function isEgiAvailable(Egi $egi): bool {
         return $this->canReserveEgi($egi);
     }
 
@@ -499,8 +497,7 @@ class ReservationService
      * @param Reservation $newReservation The new reservation to process
      * @return void
      */
-    public function processReservationPriorities(Reservation $newReservation): void
-    {
+    public function processReservationPriorities(Reservation $newReservation): void {
         // Get all active reservations for the same EGI, excluding same user reservations
         $existingReservations = Reservation::where('egi_id', $newReservation->egi_id)
             ->where('id', '!=', $newReservation->id)
@@ -551,14 +548,13 @@ class ReservationService
      * @param Reservation $b Second reservation
      * @return bool Whether a has higher priority than b
      */
-    public function hasHigherPriority(Reservation $a, Reservation $b): bool
-    {
+    public function hasHigherPriority(Reservation $a, Reservation $b): bool {
         // Strong reservations always have priority over weak ones
-        if ($a->type === 'strong' && $b->type === 'weak') {
+        if ($a->type === Reservation::TYPE_STRONG && $b->type === Reservation::TYPE_WEAK) {
             return true;
         }
 
-        if ($a->type === 'weak' && $b->type === 'strong') {
+        if ($a->type === Reservation::TYPE_WEAK && $b->type === Reservation::TYPE_STRONG) {
             return false;
         }
 
@@ -581,8 +577,7 @@ class ReservationService
      * @param Egi $egi The EGI to check
      * @return Reservation|null The highest priority reservation or null if none
      */
-    public function getHighestPriorityReservation(Egi $egi): ?Reservation
-    {
+    public function getHighestPriorityReservation(Egi $egi): ?Reservation {
         // First look for strong reservations
         $strongReservation = $egi->reservations()
             ->where('type', 'strong')
@@ -610,8 +605,7 @@ class ReservationService
      * @param User $user The user
      * @return Collection Collection of active reservations
      */
-    public function getUserActiveReservations(User $user): Collection
-    {
+    public function getUserActiveReservations(User $user): Collection {
         return Reservation::where('user_id', $user->id)
             ->where('is_current', true)
             ->where('status', 'active')
@@ -622,8 +616,7 @@ class ReservationService
     /**
      * Get user's reservations (alias for new system)
      */
-    public function getUserReservations(int $userId): Collection
-    {
+    public function getUserReservations(int $userId): Collection {
         return Reservation::active()
             ->forUser($userId)
             ->with('egi')
@@ -637,8 +630,7 @@ class ReservationService
      * @param Egi $egi The EGI
      * @return Collection Collection of all reservations for the EGI
      */
-    public function getReservationHistory(Egi $egi): Collection
-    {
+    public function getReservationHistory(Egi $egi): Collection {
         return Reservation::where('egi_id', $egi->id)
             ->with(['user', 'certificate'])
             ->orderBy('created_at', 'desc')
@@ -651,8 +643,7 @@ class ReservationService
      * @param int $egiId
      * @return Collection
      */
-    public function getEgiRanking(int $egiId): Collection
-    {
+    public function getEgiRanking(int $egiId): Collection {
         return Reservation::active()
             ->forEgi($egiId)
             ->ranked()
@@ -669,8 +660,7 @@ class ReservationService
      * @param int $egiId
      * @return array
      */
-    public function getEgiStatistics(int $egiId): array
-    {
+    public function getEgiStatistics(int $egiId): array {
         $reservations = Reservation::active()->forEgi($egiId)->get();
 
         return [
@@ -688,10 +678,9 @@ class ReservationService
      * @param Reservation $reservation The reservation to cancel
      * @return bool Whether the cancellation was successful
      */
-    public function cancelReservation(Reservation $reservation): bool
-    {
+    public function cancelReservation(Reservation $reservation): bool {
         // Update the reservation status
-        $reservation->status = 'cancelled';
+        $reservation->status = Reservation::STATUS_CANCELLED;
         $reservation->is_current = false;
         $result = $reservation->save();
 
@@ -739,8 +728,7 @@ class ReservationService
      * @param string|null $reason
      * @return bool
      */
-    public function withdrawReservation(Reservation $reservation, ?string $reason = null): bool
-    {
+    public function withdrawReservation(Reservation $reservation, ?string $reason = null): bool {
         try {
             $this->logger->info('[RESERVATION] Withdrawing reservation', [
                 'reservation_id' => $reservation->id,
@@ -773,7 +761,6 @@ class ReservationService
             ]);
 
             return true;
-
         } catch (Exception $e) {
             $this->logger->error('[RESERVATION] Failed to withdraw reservation', [
                 'reservation_id' => $reservation->id,
@@ -796,8 +783,7 @@ class ReservationService
      * @param Egi $egi
      * @return bool
      */
-    public function canUserReserve(User $user, Egi $egi): bool
-    {
+    public function canUserReserve(User $user, Egi $egi): bool {
         // Creator cannot reserve their own EGI
         if ($egi->user_id === $user->id) {
             return false;
@@ -813,8 +799,7 @@ class ReservationService
      * @param int $egiId The EGI ID
      * @return void
      */
-    private function reprocessPrioritiesAfterCancellation(int $egiId): void
-    {
+    private function reprocessPrioritiesAfterCancellation(int $egiId): void {
         $activeReservations = Reservation::where('egi_id', $egiId)
             ->where('is_current', true)
             ->where('status', 'active')
@@ -848,8 +833,7 @@ class ReservationService
      * @param int $egiId
      * @return void
      */
-    private function deactivateUserPreviousReservations(int $userId, int $egiId): void
-    {
+    private function deactivateUserPreviousReservations(int $userId, int $egiId): void {
         $previousReservations = Reservation::where('user_id', $userId)
             ->where('egi_id', $egiId)
             ->where('is_current', true)
@@ -857,7 +841,8 @@ class ReservationService
 
         foreach ($previousReservations as $prevReservation) {
             $prevReservation->is_current = false;
-            $prevReservation->status = 'superseded';
+            $prevReservation->sub_status = Reservation::SUB_STATUS_SUPERSEDED;
+            $prevReservation->superseded_at = now();
             $prevReservation->save();
 
             // Update certificate if present
@@ -876,13 +861,50 @@ class ReservationService
     }
 
     /**
+     * Supersede user's previous reservations for an EGI with proper superseded_by_id
+     *
+     * @param int $userId
+     * @param int $egiId
+     * @param int $newReservationId
+     * @return void
+     */
+    private function supersedeUserPreviousReservations(int $userId, int $egiId, int $newReservationId): void {
+        $previousReservations = Reservation::where('user_id', $userId)
+            ->where('egi_id', $egiId)
+            ->where('is_current', true)
+            ->where('id', '!=', $newReservationId) // Exclude the new reservation
+            ->get();
+
+        foreach ($previousReservations as $prevReservation) {
+            $prevReservation->is_current = false;
+            $prevReservation->sub_status = Reservation::SUB_STATUS_SUPERSEDED;
+            $prevReservation->superseded_by_id = $newReservationId;
+            $prevReservation->superseded_at = now();
+            $prevReservation->save();
+
+            // Update certificate if present
+            if ($prevReservation->certificate) {
+                $prevReservation->certificate->is_current_highest = false;
+                $prevReservation->certificate->is_superseded = true;
+                $prevReservation->certificate->save();
+            }
+
+            $this->logger->info('[RESERVATION] Previous user reservation superseded', [
+                'superseded_reservation_id' => $prevReservation->id,
+                'superseded_by_id' => $newReservationId,
+                'user_id' => $userId,
+                'egi_id' => $egiId
+            ]);
+        }
+    }
+
+    /**
      * Update rankings for all reservations of an EGI (NEW)
      *
      * @param int $egiId
      * @return void
      */
-    protected function updateEgiRankings(int $egiId): void
-    {
+    protected function updateEgiRankings(int $egiId): void {
         // Get all active reservations for this EGI
         $reservations = Reservation::active()
             ->forEgi($egiId)
@@ -932,8 +954,7 @@ class ReservationService
      * @param Reservation $reservation
      * @return void
      */
-    protected function checkAndNotifyIfHighest(Reservation $reservation): void
-    {
+    protected function checkAndNotifyIfHighest(Reservation $reservation): void {
         if ($reservation->is_highest && $reservation->previous_rank !== 1) {
             $this->notificationService->sendNewHighest($reservation);
         }
@@ -945,8 +966,7 @@ class ReservationService
      * @param int $egiId
      * @return void
      */
-    protected function notifyRankingChangesAfterWithdrawal(int $egiId): void
-    {
+    protected function notifyRankingChangesAfterWithdrawal(int $egiId): void {
         $reservations = Reservation::active()
             ->forEgi($egiId)
             ->where('previous_rank', '>', 0)
@@ -969,16 +989,15 @@ class ReservationService
      * @param string $currency
      * @return float
      */
-    protected function convertToEur(float $amount, string $currency): float
-    {
+    protected function convertToEur(float $amount, string $currency): float {
         if ($currency === 'EUR') {
             return $amount;
         }
 
         $rate = $this->currencyService->getExchangeRate($currency);
         if ($rate) {
-            // Assuming rate is CURRENCY to EUR
-            return round($amount / $rate->rate, 2);
+            // Rate is an array: ['rate' => float, 'timestamp' => Carbon]
+            return round($amount / $rate['rate'], 2);
         }
 
         // Fallback to approximate rates if service unavailable
@@ -1014,8 +1033,7 @@ class ReservationService
      * @param float $amountEur The amount in EUR
      * @return Reservation The created/updated reservation
      */
-    public function createOrUpdatePreLaunchReservation(int $egiId, int $userId, float $amountEur): Reservation
-    {
+    public function createOrUpdatePreLaunchReservation(int $egiId, int $userId, float $amountEur): Reservation {
         $this->logger->info('[PRE_LAUNCH_RESERVATION] Creating/updating reservation', [
             'egi_id' => $egiId,
             'user_id' => $userId,
@@ -1059,7 +1077,6 @@ class ReservationService
                 if ($oldRank !== $reservation->rank_position) {
                     $this->handleRankChangeNotifications($reservation, $oldRank);
                 }
-
             } else {
                 // Create new reservation
                 $reservation = Reservation::create([
@@ -1106,17 +1123,33 @@ class ReservationService
      * @param int $egiId The EGI ID
      * @return void
      */
-    public function updatePreLaunchRankings(int $egiId): void
-    {
-        $reservations = Reservation::where('egi_id', $egiId)
+    public function updatePreLaunchRankings(int $egiId): void {
+        // FIXED: Proper Strong/Weak priority ranking
+        // Strong users ALWAYS rank before Weak users regardless of amount
+
+        // Get Strong reservations first (priority high)
+        $strongReservations = Reservation::where('egi_id', $egiId)
             ->where('status', 'active')
             ->where('is_current', true)
+            ->where('type', 'strong')
             ->orderBy('amount_eur', 'desc')
             ->orderBy('created_at', 'asc') // Tie-breaker
             ->get();
 
+        // Get Weak reservations second (priority low)
+        $weakReservations = Reservation::where('egi_id', $egiId)
+            ->where('status', 'active')
+            ->where('is_current', true)
+            ->where('type', 'weak')
+            ->orderBy('amount_eur', 'desc')
+            ->orderBy('created_at', 'asc') // Tie-breaker
+            ->get();
+
+        // Combine: Strong first, then Weak
+        $allReservations = $strongReservations->concat($weakReservations);
+
         $rank = 1;
-        foreach ($reservations as $reservation) {
+        foreach ($allReservations as $reservation) {
             $reservation->update([
                 'rank_position' => $rank,
                 'is_highest' => ($rank === 1)
@@ -1124,9 +1157,11 @@ class ReservationService
             $rank++;
         }
 
-        $this->logger->debug('[PRE_LAUNCH_RESERVATION] Rankings updated', [
+        $this->logger->debug('[PRE_LAUNCH_RESERVATION] Rankings updated with Strong/Weak priority', [
             'egi_id' => $egiId,
-            'total_reservations' => $reservations->count()
+            'total_reservations' => $allReservations->count(),
+            'strong_reservations' => $strongReservations->count(),
+            'weak_reservations' => $weakReservations->count()
         ]);
     }
 
@@ -1137,8 +1172,7 @@ class ReservationService
      * @param bool $activeOnly Whether to get only active reservations
      * @return Collection
      */
-    public function getEgiReservationsWithRanking(int $egiId, bool $activeOnly = true): Collection
-    {
+    public function getEgiReservationsWithRanking(int $egiId, bool $activeOnly = true): Collection {
         $query = Reservation::where('egi_id', $egiId)
             ->with(['user:id,name,email']);
 
@@ -1159,8 +1193,7 @@ class ReservationService
      * @param int $userId The user ID for authorization
      * @return bool Success status
      */
-    public function withdrawPreLaunchReservation(int $reservationId, int $userId): bool
-    {
+    public function withdrawPreLaunchReservation(int $reservationId, int $userId): bool {
         $this->logger->info('[PRE_LAUNCH_RESERVATION] Withdrawing reservation', [
             'reservation_id' => $reservationId,
             'user_id' => $userId
@@ -1232,8 +1265,7 @@ class ReservationService
      * @param int $egiId The EGI ID
      * @return array Statistics
      */
-    public function getEgiRankingStats(int $egiId): array
-    {
+    public function getEgiRankingStats(int $egiId): array {
         $reservations = $this->getEgiReservationsWithRanking($egiId, true);
 
         if ($reservations->isEmpty()) {
@@ -1264,8 +1296,7 @@ class ReservationService
      * @param int $userId The user ID
      * @return array Status and message
      */
-    public function canUserMakePreLaunchReservation(int $egiId, int $userId): array
-    {
+    public function canUserMakePreLaunchReservation(int $egiId, int $userId): array {
         $egi = Egi::find($egiId);
 
         if (!$egi) {
@@ -1318,8 +1349,7 @@ class ReservationService
      * @param int|null $oldRank
      * @return void
      */
-    private function handleRankChangeNotifications(Reservation $reservation, ?int $oldRank): void
-    {
+    private function handleRankChangeNotifications(Reservation $reservation, ?int $oldRank): void {
         $newRank = $reservation->rank_position;
 
         if ($oldRank === $newRank) {
@@ -1354,8 +1384,7 @@ class ReservationService
      * @param Reservation $newHighest
      * @return void
      */
-    private function notifyPreviousHighest(int $egiId, Reservation $newHighest): void
-    {
+    private function notifyPreviousHighest(int $egiId, Reservation $newHighest): void {
         $previousHighest = Reservation::where('egi_id', $egiId)
             ->where('id', '!=', $newHighest->id)
             ->where('rank_position', 2)
@@ -1367,7 +1396,7 @@ class ReservationService
         }
     }
 
-// ============================================================================
-// END OF EXTENSION METHODS
-// ============================================================================
+    // ============================================================================
+    // END OF EXTENSION METHODS
+    // ============================================================================
 }

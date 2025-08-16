@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Services\CurrencyService;
 use Ultra\ErrorManager\Interfaces\ErrorManagerInterface;;
+
 use Ultra\UltraLogManager\UltraLogManager;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -283,16 +284,23 @@ class UserPreferenceController extends Controller {
      *
      * @return JsonResponse
      */
-    public function getCurrentCollection(): JsonResponse 
-    {
+    public function getCurrentCollection(): JsonResponse {
         try {
             $user = Auth::user();
-            
+
             if (!$user) {
                 return response()->json([
                     'success' => false,
                     'message' => 'User not authenticated'
                 ], 401);
+            }
+
+            // Check if user has the correct usertype
+            if (!in_array($user->usertype, ['creator', 'patron'])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Access denied: Collection badge available only for creators and patrons'
+                ], 403);
             }
 
             // Get current collection using the User model methods
@@ -311,6 +319,7 @@ class UserPreferenceController extends Controller {
 
             $this->logger->info('Current collection data retrieved', [
                 'user_id' => $user->id,
+                'usertype' => $user->usertype,
                 'collection_name' => $collectionName,
                 'egi_count' => $egiCount
             ]);

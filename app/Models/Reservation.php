@@ -61,8 +61,7 @@ use Illuminate\Support\Facades\DB;
  * @property-read Reservation|null $supersededBy
  * @property-read Reservation[] $supersededReservations
  */
-class Reservation extends Model
-{
+class Reservation extends Model {
     use HasFactory;
 
     /**
@@ -193,8 +192,7 @@ class Reservation extends Model
     /**
      * Boot method to handle model events
      */
-    protected static function boot()
-    {
+    protected static function boot() {
         parent::boot();
 
         static::creating(function ($reservation) {
@@ -229,40 +227,35 @@ class Reservation extends Model
     /**
      * User who made the reservation
      */
-    public function user(): BelongsTo
-    {
+    public function user(): BelongsTo {
         return $this->belongsTo(User::class);
     }
 
     /**
      * EGI being reserved
      */
-    public function egi(): BelongsTo
-    {
+    public function egi(): BelongsTo {
         return $this->belongsTo(Egi::class);
     }
 
     /**
      * Reservation that superseded this one
      */
-    public function supersededBy(): BelongsTo
-    {
+    public function supersededBy(): BelongsTo {
         return $this->belongsTo(Reservation::class, 'superseded_by_id');
     }
 
     /**
      * Reservations superseded by this one
      */
-    public function supersededReservations(): HasMany
-    {
+    public function supersededReservations(): HasMany {
         return $this->hasMany(Reservation::class, 'superseded_by_id');
     }
 
     /**
      * Certificate (future implementation)
      */
-    public function certificate(): HasOne
-    {
+    public function certificate(): HasOne {
         return $this->hasOne(EgiReservationCertificate::class);
     }
 
@@ -271,8 +264,7 @@ class Reservation extends Model
     /**
      * Update rankings for all reservations of this EGI
      */
-    public function updateEgiRankings(): void
-    {
+    public function updateEgiRankings(): void {
         DB::transaction(function () {
             // Get all active reservations for this EGI ordered by amount
             $reservations = static::where('egi_id', $this->egi_id)
@@ -324,8 +316,7 @@ class Reservation extends Model
     /**
      * Get rank change indicator
      */
-    public function getRankChange(): string
-    {
+    public function getRankChange(): string {
         if (!$this->previous_rank) {
             return 'new';
         }
@@ -342,8 +333,7 @@ class Reservation extends Model
     /**
      * Get competitors (other reservations for same EGI)
      */
-    public function getCompetitors(): Builder
-    {
+    public function getCompetitors(): Builder {
         return static::where('egi_id', $this->egi_id)
             ->where('status', self::STATUS_ACTIVE)
             ->where('is_current', true)
@@ -354,8 +344,7 @@ class Reservation extends Model
     /**
      * Check if user can supersede this reservation
      */
-    public function canBeSupersededBy(float $newAmount): bool
-    {
+    public function canBeSupersededBy(float $newAmount): bool {
         // In pre-launch, any amount can be placed
         // No minimum increment required
         return true;
@@ -366,33 +355,29 @@ class Reservation extends Model
     /**
      * Check if reservation is active
      */
-    public function isActive(): bool
-    {
+    public function isActive(): bool {
         return $this->status === self::STATUS_ACTIVE && $this->is_current;
     }
 
     /**
      * Check if reservation is the highest for its EGI
      */
-    public function isHighest(): bool
-    {
+    public function isHighest(): bool {
         return $this->is_highest && $this->isActive();
     }
 
     /**
      * Check if reservation has been superseded
      */
-    public function isSuperseded(): bool
-    {
+    public function isSuperseded(): bool {
         return $this->sub_status === self::SUB_STATUS_SUPERSEDED ||
-               $this->superseded_by_id !== null;
+            $this->superseded_by_id !== null;
     }
 
     /**
      * Withdraw reservation
      */
-    public function withdraw(): bool
-    {
+    public function withdraw(): bool {
         $this->status = self::STATUS_WITHDRAWN;
         $this->sub_status = self::SUB_STATUS_WITHDRAWN;
         $this->is_current = false;
@@ -413,16 +398,14 @@ class Reservation extends Model
     /**
      * Get formatted amount in EUR
      */
-    public function getFormattedAmountEur(): string
-    {
+    public function getFormattedAmountEur(): string {
         return '€' . number_format($this->amount_eur, 2);
     }
 
     /**
      * Get formatted display amount
      */
-    public function getFormattedDisplayAmount(): string
-    {
+    public function getFormattedDisplayAmount(): string {
         $symbol = $this->getCurrencySymbol($this->display_currency);
         return $symbol . number_format($this->display_amount ?? $this->amount_eur, 2);
     }
@@ -430,9 +413,8 @@ class Reservation extends Model
     /**
      * Get currency symbol
      */
-    protected function getCurrencySymbol(string $currency): string
-    {
-        return match($currency) {
+    protected function getCurrencySymbol(string $currency): string {
+        return match ($currency) {
             'EUR' => '€',
             'USD' => '$',
             'GBP' => '£',
@@ -443,8 +425,7 @@ class Reservation extends Model
     /**
      * Get status badge color
      */
-    public function getStatusColor(): string
-    {
+    public function getStatusColor(): string {
         if ($this->isHighest()) {
             return 'green';
         }
@@ -463,8 +444,7 @@ class Reservation extends Model
     /**
      * Get status label
      */
-    public function getStatusLabel(): string
-    {
+    public function getStatusLabel(): string {
         if ($this->isHighest()) {
             return 'Offerta più alta';
         }
@@ -487,8 +467,7 @@ class Reservation extends Model
     /**
      * Get UI display data
      */
-    public function getDisplayData(): array
-    {
+    public function getDisplayData(): array {
         return [
             'id' => $this->id,
             'egi_id' => $this->egi_id,
@@ -515,52 +494,46 @@ class Reservation extends Model
     /**
      * Active reservations
      */
-    public function scopeActive(Builder $query): Builder
-    {
+    public function scopeActive(Builder $query): Builder {
         return $query->where('status', self::STATUS_ACTIVE)
-                     ->where('is_current', true);
+            ->where('is_current', true);
     }
 
     /**
      * Highest reservations only
      */
-    public function scopeHighest(Builder $query): Builder
-    {
+    public function scopeHighest(Builder $query): Builder {
         return $query->where('is_highest', true);
     }
 
     /**
      * Reservations for a specific EGI
      */
-    public function scopeForEgi(Builder $query, int $egiId): Builder
-    {
+    public function scopeForEgi(Builder $query, int $egiId): Builder {
         return $query->where('egi_id', $egiId);
     }
 
     /**
      * Reservations for a specific user
      */
-    public function scopeForUser(Builder $query, int $userId): Builder
-    {
+    public function scopeForUser(Builder $query, int $userId): Builder {
         return $query->where('user_id', $userId);
     }
 
     /**
      * Ranked reservations (ordered by rank)
      */
-    public function scopeRanked(Builder $query): Builder
-    {
+    public function scopeRanked(Builder $query): Builder {
         return $query->whereNotNull('rank_position')
-                     ->orderBy('rank_position');
+            ->orderBy('rank_position');
     }
 
     /**
      * Reservations that need ranking update
      */
-    public function scopeNeedsRanking(Builder $query): Builder
-    {
+    public function scopeNeedsRanking(Builder $query): Builder {
         return $query->active()
-                     ->whereNull('rank_position');
+            ->whereNull('rank_position');
     }
 
     // ===== FUTURE MINT METHODS (Pre-populated for launch) =====
@@ -568,8 +541,7 @@ class Reservation extends Model
     /**
      * Check if user is in mint window (future)
      */
-    public function isInMintWindow(): bool
-    {
+    public function isInMintWindow(): bool {
         if (!$this->mint_window_starts_at || !$this->mint_window_ends_at) {
             return false;
         }
@@ -581,8 +553,7 @@ class Reservation extends Model
     /**
      * Get remaining mint time (future)
      */
-    public function getMintTimeRemaining(): ?int
-    {
+    public function getMintTimeRemaining(): ?int {
         if (!$this->isInMintWindow()) {
             return null;
         }
@@ -593,8 +564,7 @@ class Reservation extends Model
     /**
      * Confirm mint intention (future)
      */
-    public function confirmMint(): bool
-    {
+    public function confirmMint(): bool {
         if (!$this->isInMintWindow()) {
             return false;
         }
@@ -611,8 +581,7 @@ class Reservation extends Model
     /**
      * Record notification sent
      */
-    public function recordNotification(string $type, array $data = []): void
-    {
+    public function recordNotification(string $type, array $data = []): void {
         $history = $this->notification_history ?? [];
 
         $history[] = [
@@ -629,8 +598,7 @@ class Reservation extends Model
     /**
      * Check if notification needed
      */
-    public function needsNotification(string $type): bool
-    {
+    public function needsNotification(string $type): bool {
         if (!$this->last_notification_at) {
             return true;
         }
@@ -653,16 +621,52 @@ class Reservation extends Model
     /**
      * Get offer amount (legacy compatibility)
      */
-    public function getOfferAmountFiatAttribute(): float
-    {
+    public function getOfferAmountFiatAttribute(): float {
         return $this->display_amount ?? $this->amount_eur;
     }
 
     /**
      * Get fiat currency (legacy compatibility)
      */
-    public function getFiatCurrencyAttribute(): string
-    {
+    public function getFiatCurrencyAttribute(): string {
         return $this->display_currency ?? 'EUR';
+    }
+
+    /**
+     * Create a certificate for this reservation
+     *
+     * @param array $additionalData
+     * @return EgiReservationCertificate
+     */
+    public function createCertificate(array $additionalData = []): EgiReservationCertificate {
+        return EgiReservationCertificate::create([
+            'reservation_id' => $this->id,
+            'egi_id' => $this->egi_id,
+            'user_id' => $this->user_id,
+            'wallet_address' => $this->wallet_address ?? ($this->user?->wallet ?? 'unknown'),
+            'reservation_type' => $this->type ?? 'strong',
+            'offer_amount_fiat' => $this->amount_eur,
+            'offer_amount_algo' => $this->offer_amount_algo ?? 0,
+            'certificate_uuid' => \Illuminate\Support\Str::uuid(),
+            'signature_hash' => hash('sha256', $this->id . $this->egi_id . $this->user_id . now()),
+            'is_superseded' => false,
+            'is_current_highest' => $this->is_highest ?? false,
+            ...$additionalData
+        ]);
+    }
+
+    /**
+     * Mark this reservation as superseded by another reservation
+     *
+     * @param Reservation $supersedingReservation
+     * @return bool
+     */
+    public function markAsSuperseded(Reservation $supersedingReservation): bool {
+        $this->is_current = false;
+        $this->sub_status = self::SUB_STATUS_SUPERSEDED;
+        $this->superseded_by_id = $supersedingReservation->id;
+        $this->superseded_at = now();
+
+        return $this->save();
     }
 }

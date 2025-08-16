@@ -47,7 +47,7 @@ class CollectionBadge extends Component {
 
         // Ottieni i dati della collection corrente
         $user = Auth::user();
-        if ($user) {
+        if ($user && in_array($user->usertype, ['creator', 'patron'])) {
             $this->collectionId = $user->current_collection_id;
             $this->collectionName = $user->getCurrentCollectionName();
             $this->egiCount = $user->getCurrentCollectionEgiCount();
@@ -80,10 +80,14 @@ class CollectionBadge extends Component {
      * Determine if the component should be rendered.
      */
     public function shouldRender(): bool {
-        // DEBUG: Forza sempre il rendering per test
-        return true;
+        $user = Auth::user();
+        
+        // Non mostrare se l'utente non è autenticato o non ha il usertype corretto
+        if (!$user || !in_array($user->usertype, ['creator', 'patron'])) {
+            return false;
+        }
 
-        // Mostra sempre se showWhenEmpty è true
+        // Mostra sempre se showWhenEmpty è true (per utenti creator/patron)
         if ($this->showWhenEmpty) {
             return true;
         }

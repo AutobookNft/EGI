@@ -430,10 +430,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
                 Route::get('/details', [NotificationReservationResponseController::class, 'getDetails']);
                 Route::get('/ranking', [NotificationReservationResponseController::class, 'getRanking']);
             });
-
         });
-
-
     });
 
 
@@ -842,7 +839,7 @@ Route::middleware(['web', 'auth'])->prefix('user/preferences')->name('web.user.p
         ->name('currency.get');
     Route::put('/currency', [App\Http\Controllers\Api\CurrencyController::class, 'updateUserPreference'])
         ->name('currency.update');
-    
+
     // Collection badge data for authenticated users
     Route::get('/current-collection', [App\Http\Controllers\Api\UserPreferenceController::class, 'getCurrentCollection'])
         ->name('current-collection.get');

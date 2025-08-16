@@ -169,4 +169,15 @@ class CurrencyService {
         $rateData = $this->getAlgoToFiatRate('EUR');
         return $rateData ? $rateData['rate'] : null;
     }
+
+    /**
+     * Get exchange rate for a specific currency
+     * (Method added for compatibility with ReservationService)
+     *
+     * @param string $currency
+     * @return array|null ['rate' => float, 'timestamp' => Carbon]
+     */
+    public function getExchangeRate(string $currency = 'EUR'): ?array {
+        return $this->getAlgoToFiatRate($currency);
+    }
 }

@@ -3,6 +3,7 @@
 Componente autonomo per il badge della collection con TypeScript integrato
 --}}
 
+@if($shouldRender)
 <div id="{{ $uniqueId }}"
     class="collection-badge-component items-center {{ $responsiveClasses }} {{ $getPositionClasses() }} {{ $getSizeClasses()['container'] }}"
     data-collection-id="{{ $collectionId }}" data-can-edit="{{ $canEdit ? 'true' : 'false' }}" data-size="{{ $size }}"
@@ -46,7 +47,7 @@ Componente autonomo per il badge della collection con TypeScript integrato
             this.canEdit = badgeElement.dataset.canEdit === 'true';
             this.size = badgeElement.dataset.size;
             this.position = badgeElement.dataset.position;
-            
+
             // Memorizza il conteggio EGI corrente per rilevare i cambiamenti
             this.egiCount = parseInt(badgeElement.dataset.egiCount) || 0;
 
@@ -112,7 +113,7 @@ Componente autonomo per il badge della collection con TypeScript integrato
                 egiCount,
                 previousCount: this.egiCount
             });
-            
+
             this.collectionId = collectionId;
             this.canEdit = canEdit;
             this.egiCount = egiCount; // Aggiorna il conteggio corrente
@@ -187,20 +188,20 @@ Componente autonomo per il badge della collection con TypeScript integrato
          */
         pulseAndShine() {
             console.log('✨ [CollectionBadge] Triggering pulse and shine animation');
-            
+
             if (!this.linkElement) return;
-            
+
             // Effetto pulso
             this.linkElement.style.transform = 'scale(1.05)';
             this.linkElement.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
-            
+
             // Effetto brillamento
             this.linkElement.style.boxShadow = '0 0 20px rgba(14, 165, 233, 0.6), 0 0 40px rgba(14, 165, 233, 0.3)';
             this.linkElement.style.borderColor = 'rgba(14, 165, 233, 0.8)';
-            
+
             // Ring effect
             this.linkElement.classList.add('ring-4', 'ring-sky-400', 'ring-opacity-75');
-            
+
             setTimeout(() => {
                 // Ripristina lo stato normale
                 this.linkElement.style.transform = 'scale(1)';
@@ -240,41 +241,41 @@ Componente autonomo per il badge della collection con TypeScript integrato
                         badgeId: this.uniqueId,
                         endpoint: '/user/preferences/current-collection'
                     });
-                    
+
                     const response = await fetch('/user/preferences/current-collection', {
                         headers: {
                             'Accept': 'application/json',
                             'X-Requested-With': 'XMLHttpRequest'
                         }
                     });
-                    
+
                     console.log('📡 [CollectionBadge] Response received:', {
                         status: response.status,
                         statusText: response.statusText,
                         ok: response.ok
                     });
-                    
+
                     if (response.ok) {
                         const data = await response.json();
                         console.log('📦 [CollectionBadge] Data received:', data);
-                        
+
                         if (data.success && data.data) {
                             const oldCount = this.egiCount;
                             const newCount = data.data.egi_count || 0;
-                            
+
                             console.log('🔢 [CollectionBadge] Count comparison:', {
                                 oldCount,
                                 newCount,
                                 changed: oldCount !== newCount
                             });
-                            
+
                             this.updateBadge(
                                 data.data.collection_id || null,
                                 data.data.collection_name || null,
                                 data.data.can_edit || false,
                                 newCount
                             );
-                            
+
                             // Se il conteggio è cambiato, attiva l'animazione
                             if (oldCount !== newCount) {
                                 this.pulseAndShine();
@@ -328,3 +329,4 @@ Componente autonomo per il badge della collection con TypeScript integrato
 
 })();
 </script>
+@endif
