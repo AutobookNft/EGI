@@ -129,35 +129,7 @@
                     @endif
 
                     {{-- EUR → ALGO Badge (Desktop) - Fixed Currency, Live Rate --}}
-                    <div class="items-center hidden ml-3 md:flex">
-                        <div
-                            class="inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-slate-800/90 to-slate-700/90 backdrop-blur-sm border border-slate-600/50 rounded-lg shadow-lg">
-                            {{-- Status Dot --}}
-                            <div class="relative mr-2">
-                                <span id="currency-status-dot"
-                                    class="w-1.5 h-1.5 bg-green-400 rounded-full block animate-pulse"></span>
-                                <span
-                                    class="absolute inset-0 w-1.5 h-1.5 bg-green-400 rounded-full animate-ping opacity-60"></span>
-                            </div>
-
-                            {{-- EUR → ALGO Display --}}
-                            <div class="flex items-center space-x-2">
-                                <span class="text-sm font-bold text-white">EUR</span>
-                                <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-                                </svg>
-                                <span class="text-sm font-bold text-emerald-400">ALGO</span>
-                            </div>
-
-                            {{-- Live Rate Display --}}
-                            <div class="flex items-center ml-3">
-                                <span id="currency-rate-value"
-                                    class="font-mono text-sm font-medium text-white">--</span>
-                            </div>
-                        </div>
-                    </div>
+                    <x-currency-badge size="desktop" position="header" />
 
                     {{-- Collection Badge (Desktop) --}}
                     {{-- <div id="current-collection-badge-container-desktop" class="items-center hidden ml-3 md:flex">
@@ -285,33 +257,7 @@
                     <div class="flex items-center gap-2 -mr-2 md:hidden">
 
                         {{-- EUR → ALGO Badge (Mobile) - Fixed Currency, Live Rate --}}
-                        <div class="flex items-center">
-                            <div
-                                class="inline-flex items-center px-1.5 py-1 bg-gradient-to-r from-slate-800/90 to-slate-700/90 backdrop-blur-sm border border-slate-600/50 rounded-md shadow-lg">
-                                {{-- Status Dot --}}
-                                <div class="relative mr-1">
-                                    <span id="currency-status-dot-mobile"
-                                        class="block w-1 h-1 bg-green-400 rounded-full animate-pulse"></span>
-                                </div>
-
-                                {{-- EUR → ALGO Display --}}
-                                <div class="flex items-center space-x-1">
-                                    <span class="text-xs font-bold text-white">EUR</span>
-                                    <svg class="w-2.5 h-2.5 text-slate-400" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-                                    </svg>
-                                    <span class="text-xs font-bold text-emerald-400">ALGO</span>
-                                </div>
-
-                                {{-- Live Rate Display --}}
-                                <div class="flex items-center ml-1">
-                                    <span id="currency-rate-value-mobile"
-                                        class="font-mono text-xs font-medium text-white">--</span>
-                                </div>
-                            </div>
-                        </div>
+                        <x-currency-badge size="mobile" position="header" />
 
                         {{-- Menu Mobile Button --}}
 
