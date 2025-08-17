@@ -24,8 +24,7 @@ use Illuminate\Support\Collection;
  * @date 2025-08-15
  * @purpose Handle all reservation notification flows with ranking system
  */
-class ReservationNotificationService
-{
+class ReservationNotificationService {
     /**
      * Constructor with dependency injection
      *
@@ -35,7 +34,8 @@ class ReservationNotificationService
     public function __construct(
         private UltraLogManager $logger,
         private ErrorManagerInterface $errorManager
-    ) {}
+    ) {
+    }
 
     /**
      * Send notification when user becomes the highest bidder
@@ -44,8 +44,7 @@ class ReservationNotificationService
      * @return void
      * @throws \Exception If notification fails
      */
-    public function sendNewHighest(Reservation $reservation): void
-    {
+    public function sendNewHighest(Reservation $reservation): void {
         // Log operation start
         $this->logger->info('[RESERVATION_NOTIFICATION] Starting sendNewHighest', [
             'reservation_id' => $reservation->id,
@@ -91,17 +90,14 @@ class ReservationNotificationService
                     'user_id' => $reservation->user_id
                 ]);
             });
-
         } catch (\Exception $e) {
             $this->errorManager->handle('RESERVATION_NOTIFICATION_SEND_ERROR', [
                 'operation' => 'sendNewHighest',
                 'reservation_id' => $reservation->id,
                 'user_id' => $reservation->user_id,
                 'error_message' => $e->getMessage(),
-                'context' => [
-                    'method' => __METHOD__,
-                    'line' => __LINE__
-                ]
+                'method' => __METHOD__,
+                'line' => __LINE__
             ], $e);
 
             throw $e;
@@ -116,8 +112,7 @@ class ReservationNotificationService
      * @return void
      * @throws \Exception If notification fails
      */
-    public function sendSuperseded(Reservation $supersededReservation, Reservation $newHighest): void
-    {
+    public function sendSuperseded(Reservation $supersededReservation, Reservation $newHighest): void {
         $this->logger->info('[RESERVATION_NOTIFICATION] Starting sendSuperseded', [
             'superseded_id' => $supersededReservation->id,
             'new_highest_id' => $newHighest->id,
@@ -161,7 +156,6 @@ class ReservationNotificationService
                     'user_id' => $supersededReservation->user_id
                 ]);
             });
-
         } catch (\Exception $e) {
             $this->errorManager->handle('RESERVATION_NOTIFICATION_SEND_ERROR', [
                 'operation' => 'sendSuperseded',
@@ -182,8 +176,7 @@ class ReservationNotificationService
      * @param int $threshold Minimum rank change to trigger notification (default: 3)
      * @return void
      */
-    public function sendRankChanged(Reservation $reservation, int $previousRank, int $threshold = 3): void
-    {
+    public function sendRankChanged(Reservation $reservation, int $previousRank, int $threshold = 3): void {
         // Calculate rank change
         $rankChange = abs($reservation->rank_position - $previousRank);
 
@@ -240,7 +233,6 @@ class ReservationNotificationService
                     'direction' => $improved ? 'improved' : 'worsened'
                 ]);
             });
-
         } catch (\Exception $e) {
             $this->errorManager->handle('RESERVATION_NOTIFICATION_SEND_ERROR', [
                 'operation' => 'sendRankChanged',
@@ -261,8 +253,7 @@ class ReservationNotificationService
      * @param Reservation $withdrawnReservation The reservation that was withdrawn
      * @return void
      */
-    public function sendCompetitorWithdrew(Collection $affectedReservations, Reservation $withdrawnReservation): void
-    {
+    public function sendCompetitorWithdrew(Collection $affectedReservations, Reservation $withdrawnReservation): void {
         $this->logger->info('[RESERVATION_NOTIFICATION] Starting sendCompetitorWithdrew', [
             'withdrawn_id' => $withdrawnReservation->id,
             'affected_count' => $affectedReservations->count(),
@@ -303,7 +294,6 @@ class ReservationNotificationService
                     'notifications_sent' => $affectedReservations->count()
                 ]);
             });
-
         } catch (\Exception $e) {
             $this->errorManager->handle('RESERVATION_NOTIFICATION_SEND_ERROR', [
                 'operation' => 'sendCompetitorWithdrew',
@@ -322,8 +312,7 @@ class ReservationNotificationService
      * @param int $egiId The EGI ID to process
      * @return void
      */
-    public function processBulkRankChanges(int $egiId): void
-    {
+    public function processBulkRankChanges(int $egiId): void {
         $this->logger->info('[RESERVATION_NOTIFICATION] Processing bulk rank changes', [
             'egi_id' => $egiId
         ]);
@@ -372,7 +361,6 @@ class ReservationNotificationService
                 'egi_id' => $egiId,
                 'reservations_processed' => $reservations->count()
             ]);
-
         } catch (\Exception $e) {
             $this->errorManager->handle('RESERVATION_NOTIFICATION_BULK_ERROR', [
                 'operation' => 'processBulkRankChanges',

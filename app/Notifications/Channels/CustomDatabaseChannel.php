@@ -71,11 +71,11 @@ class CustomDatabaseChannel
             'view'           => $data['view'],
             'notifiable_type'=> get_class($notifiable),
             'notifiable_id'  => $notifiable->getKey(),
-            'sender_id'      => $data['sender_id'] ?? null,
+            'sender_id'      => $data['sender_id'] ?? 1, // Default: sistema
             'model_type'     => $data['model_type'],
             'model_id'       => $data['model_id'],
             'data'           => $data['data'] ?? [],
-            'outcome'        => $data['outcome'] ?? null,
+            'outcome'        => $data['outcome'] ?? 'pending', // Default: pending
         ]);
 
         Log::channel('florenceegi')->info('Notifica creata', [

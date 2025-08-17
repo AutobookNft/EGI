@@ -102,7 +102,7 @@ return [
         'highest' => [
             'view' => 'notifications.reservations.highest',
             'render' => 'include',
-            'type' => 'informational',
+
         ],
         'superseded' => [
             'view' => 'notifications.reservations.superseded',
@@ -111,6 +111,11 @@ return [
         ],
         'rank-changed' => [
             'view' => 'notifications.reservations.rank-changed',
+            'render' => 'include',
+            'type' => 'informational',
+        ],
+        'rank-improved' => [
+            'view' => 'notifications.reservations.rank-improved',
             'render' => 'include',
             'type' => 'informational',
         ],

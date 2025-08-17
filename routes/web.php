@@ -393,45 +393,68 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
             });
         });
 
-        /*
-        |--------------------------------------------------------------------------
-        | Notifications Routes
-        |--------------------------------------------------------------------------
-        */
-        Route::prefix('notifications')->group(function () {
-            Route::get('{id}/details', [NotificationDetailsController::class, 'show'])
-                ->name('notifications.details');
-
-            Route::get('/request', [NotificationWalletResponseController::class, 'fetchHeadThumbnailList'])
-                ->name('head.thumbnails.list');
-
-            // Wallet notifications
-            Route::prefix('wallet')->group(function () {
-                Route::post('/response', [NotificationWalletResponseController::class, 'response'])
-                    ->name('notifications.wallets.response');
-
-                Route::post('/archive', [NotificationWalletResponseController::class, 'notificationArchive'])
-                    ->name('notifications.wallets.notificationArchive');
-            });
-
-            // Invitation notifications
-            Route::prefix('invitation')->group(function () {
-                Route::post('/response', [NotificationInvitationResponseController::class, 'response'])
-                    ->name('notifications.invitations.response');
-
-                Route::post('/archive', [NotificationInvitationResponseController::class, 'notificationArchive'])
-                    ->name('notifications.invitations.notificationArchive');
-            });
-
-            // Reservation notifications
-            Route::prefix('reservation')->group(function () {
-                Route::post('/response', [NotificationReservationResponseController::class, 'response']);
-                Route::post('/archive', [NotificationReservationResponseController::class, 'notificationArchive']);
-                Route::get('/details', [NotificationReservationResponseController::class, 'getDetails']);
-                Route::get('/ranking', [NotificationReservationResponseController::class, 'getRanking']);
-            });
-        });
     });
+
+/*
+|--------------------------------------------------------------------------
+| Notifications Routes
+|--------------------------------------------------------------------------
+*/
+Route::prefix('notifications')->group(function () {
+    Route::get('{id}/details', [NotificationDetailsController::class, 'show'])
+        ->name('notifications.details');
+        
+    // Add alias for notification badge component
+    Route::get('{id}', [NotificationDetailsController::class, 'show'])
+        ->name('notifications.show');
+        
+    // Add route for notifications index (all notifications page)
+    Route::get('/', function() {
+        return view('notifications.index');
+    })->name('notifications.index');
+    
+    // Add route to mark notification as read
+    Route::post('{id}/read', function($id) {
+        $user = App\Helpers\FegiAuth::user();
+        if ($user) {
+            $notification = $user->customNotifications()->find($id);
+            if ($notification) {
+                $notification->markAsRead();
+                return response()->json(['success' => true]);
+            }
+        }
+        return response()->json(['error' => 'Not found'], 404);
+    })->name('notifications.read');
+
+    Route::get('/request', [NotificationWalletResponseController::class, 'fetchHeadThumbnailList'])
+        ->name('head.thumbnails.list');
+
+    // Wallet notifications
+    Route::prefix('wallet')->group(function () {
+        Route::post('/response', [NotificationWalletResponseController::class, 'response'])
+            ->name('notifications.wallets.response');
+
+        Route::post('/archive', [NotificationWalletResponseController::class, 'notificationArchive'])
+            ->name('notifications.wallets.notificationArchive');
+    });
+
+    // Invitation notifications
+    Route::prefix('invitation')->group(function () {
+        Route::post('/response', [NotificationInvitationResponseController::class, 'response'])
+            ->name('notifications.invitations.response');
+
+        Route::post('/archive', [NotificationInvitationResponseController::class, 'notificationArchive'])
+            ->name('notifications.invitations.notificationArchive');
+    });
+
+    // Reservation notifications
+    Route::prefix('reservation')->group(function () {
+        Route::post('/response', [NotificationReservationResponseController::class, 'response']);
+        Route::post('/archive', [NotificationReservationResponseController::class, 'notificationArchive']);
+        Route::get('/details', [NotificationReservationResponseController::class, 'getDetails']);
+        Route::get('/ranking', [NotificationReservationResponseController::class, 'getRanking']);
+    });
+});
 
 
 // ===================================================================

@@ -1865,6 +1865,17 @@ return [
             'msg_to' => 'sweet-alert',
         ],
 
+        'RESERVATION_NOTIFICATION_BULK_ERROR' => [
+            'type' => 'error',
+            'blocking' => 'not',
+            'dev_message_key' => 'error-manager::errors.dev.reservation_notification_bulk_error',
+            'user_message_key' => 'error-manager::errors.user.reservation_notification_bulk_error',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
         'CERTIFICATE_GENERATION_FAILED' => [
             'type' => 'error',
             'blocking' => 'semi-blocking', // impedisce l'emissione nel flusso corrente

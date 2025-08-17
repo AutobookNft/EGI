@@ -30,6 +30,27 @@ return [
     'no_historical_notifications' => 'Nessuna notifica storica',
     'notification_list_error' => 'Errore durante il recupero delle notifiche',
 
+    // Badge Notifications
+    'badge' => [
+        'title' => 'Notifiche',
+        'aria_label' => 'Apri menu notifiche',
+        'view_all' => 'Visualizza tutte le notifiche',
+        'empty' => [
+            'title' => 'Nessuna notifica',
+            'message' => 'Non hai ancora ricevuto notifiche.',
+        ],
+    ],
+
+    'types' => [
+        'reservations' => 'Prenotazione',
+        'gdpr' => 'GDPR',
+        'collections' => 'Collezione',
+        'egis' => 'EGI',
+        'wallets' => 'Portafoglio',
+        'invitations' => 'Invito',
+        'general' => 'Generale',
+    ],
+
     'status' => [
         'read' => 'Letto',
         'pending_ack' => 'Da leggere',

@@ -5,6 +5,7 @@ namespace App\Notifications\Reservations;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 use App\Models\NotificationPayloadReservation;
+use App\Notifications\Channels\CustomDatabaseChannel;
 
 /**
  * Notification for when a competitor withdraws their reservation
@@ -15,8 +16,7 @@ use App\Models\NotificationPayloadReservation;
  * @date 2025-08-15
  * @purpose Notify user when a competitor withdraws and their rank improves
  */
-class CompetitorWithdrew extends Notification
-{
+class CompetitorWithdrew extends Notification {
     use Queueable;
 
     /**
@@ -31,8 +31,7 @@ class CompetitorWithdrew extends Notification
      *
      * @param NotificationPayloadReservation $payload
      */
-    public function __construct(NotificationPayloadReservation $payload)
-    {
+    public function __construct(NotificationPayloadReservation $payload) {
         $this->payload = $payload;
     }
 
@@ -42,33 +41,37 @@ class CompetitorWithdrew extends Notification
      * @param mixed $notifiable
      * @return array
      */
-    public function via($notifiable): array
-    {
-        return ['database'];
+    public function via($notifiable): array {
+        return [CustomDatabaseChannel::class];
     }
 
     /**
-     * Get the array representation of the notification.
+     * Get the data for the custom database channel.
      *
      * @param mixed $notifiable
      * @return array
      */
-    public function toArray($notifiable): array
-    {
+    public function toCustomDatabase($notifiable): array {
         return [
-            'type' => 'competitor_withdrew',
-            'payload_id' => $this->payload->id,
-            'payload_type' => NotificationPayloadReservation::class,
-            'reservation_id' => $this->payload->reservation_id,
-            'egi_id' => $this->payload->egi_id,
-            'previous_rank' => $this->payload->data['previous_rank'] ?? 0,
-            'new_rank' => $this->payload->data['new_rank'] ?? 0,
-            'withdrawn_amount' => $this->payload->data['withdrawn_amount'] ?? 0,
-            'withdrawn_user' => $this->payload->data['withdrawn_user'] ?? 'Un utente',
-            'egi_title' => $this->payload->data['egi_title'] ?? '',
-            'message' => $this->payload->getMessage(),
-            'icon' => 'ℹ️',
-            'color' => '#3B82F6'
+            'view' => 'reservations.competitor-withdrew',
+            'model_type' => NotificationPayloadReservation::class,
+            'model_id' => $this->payload->id,
+            'sender_id' => 1, // Sistema
+            'data' => [
+                'type' => 'competitor_withdrew',
+                'payload_id' => $this->payload->id,
+                'payload_type' => NotificationPayloadReservation::class,
+                'reservation_id' => $this->payload->reservation_id,
+                'egi_id' => $this->payload->egi_id,
+                'previous_rank' => $this->payload->data['previous_rank'] ?? 0,
+                'new_rank' => $this->payload->data['new_rank'] ?? 0,
+                'withdrawn_amount' => $this->payload->data['withdrawn_amount'] ?? 0,
+                'withdrawn_user' => $this->payload->data['withdrawn_user'] ?? 'Un utente',
+                'egi_title' => $this->payload->data['egi_title'] ?? '',
+                'message' => $this->payload->getMessage(),
+                'icon' => 'ℹ️',
+                'color' => '#3B82F6'
+            ]
         ];
     }
 }

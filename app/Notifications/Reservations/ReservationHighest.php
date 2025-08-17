@@ -5,6 +5,7 @@ namespace App\Notifications\Reservations;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 use App\Models\NotificationPayloadReservation;
+use App\Notifications\Channels\CustomDatabaseChannel;
 
 /**
  * Notification for when user becomes the highest bidder
@@ -15,8 +16,7 @@ use App\Models\NotificationPayloadReservation;
  * @date 2025-08-15
  * @purpose Notify user when their reservation becomes the highest
  */
-class ReservationHighest extends Notification
-{
+class ReservationHighest extends Notification {
     use Queueable;
 
     /**
@@ -31,8 +31,7 @@ class ReservationHighest extends Notification
      *
      * @param NotificationPayloadReservation $payload
      */
-    public function __construct(NotificationPayloadReservation $payload)
-    {
+    public function __construct(NotificationPayloadReservation $payload) {
         $this->payload = $payload;
     }
 
@@ -42,30 +41,34 @@ class ReservationHighest extends Notification
      * @param mixed $notifiable
      * @return array
      */
-    public function via($notifiable): array
-    {
-        return ['database'];
+    public function via($notifiable): array {
+        return [CustomDatabaseChannel::class];
     }
 
     /**
-     * Get the array representation of the notification.
+     * Get the data for the custom database channel.
      *
      * @param mixed $notifiable
      * @return array
      */
-    public function toArray($notifiable): array
-    {
+    public function toCustomDatabase($notifiable): array {
         return [
-            'type' => 'reservation_highest',
-            'payload_id' => $this->payload->id,
-            'payload_type' => NotificationPayloadReservation::class,
-            'reservation_id' => $this->payload->reservation_id,
-            'egi_id' => $this->payload->egi_id,
-            'amount_eur' => $this->payload->data['amount_eur'] ?? 0,
-            'egi_title' => $this->payload->data['egi_title'] ?? '',
-            'message' => $this->payload->getMessage(),
-            'icon' => '🏆',
-            'color' => '#10B981'
+            'view' => 'reservations.highest',
+            'model_type' => NotificationPayloadReservation::class,
+            'model_id' => $this->payload->id,
+            'sender_id' => 1, // Sistema
+            'data' => [
+                'type' => 'reservation_highest',
+                'payload_id' => $this->payload->id,
+                'payload_type' => NotificationPayloadReservation::class,
+                'reservation_id' => $this->payload->reservation_id,
+                'egi_id' => $this->payload->egi_id,
+                'amount_eur' => $this->payload->data['amount_eur'] ?? 0,
+                'egi_title' => $this->payload->data['egi_title'] ?? '',
+                'message' => $this->payload->getMessage(),
+                'icon' => '🏆',
+                'color' => '#10B981'
+            ]
         ];
     }
 }

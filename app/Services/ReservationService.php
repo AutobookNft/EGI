@@ -220,6 +220,9 @@ class ReservationService {
             // Update rankings for new pre-launch system
             $this->updateEgiRankings($egi->id);
 
+            // Refresh reservation to get updated ranking data
+            $reservation->refresh();
+
             // Generate a certificate for the reservation
             $certificateData = [
                 'wallet_address' => $walletAddress ?? $user->wallet ?? 'unknown'
@@ -233,7 +236,9 @@ class ReservationService {
                 'type' => $reservationType,
                 'amount_eur' => $amountEur,
                 'offer_amount_fiat' => $offerAmountFiat,
-                'fiat_currency' => $fiatCurrency
+                'fiat_currency' => $fiatCurrency,
+                'rank_position' => $reservation->rank_position,
+                'is_highest' => $reservation->is_highest
             ]);
 
             // Check if this reservation is now the highest and send notifications
@@ -349,6 +354,9 @@ class ReservationService {
                 // Update rankings for all reservations of this EGI
                 $this->updateEgiRankings($egi->id);
 
+                // Refresh reservation to get updated ranking data
+                $reservation->refresh();
+
                 // Check if this is now the highest offer
                 $this->checkAndNotifyIfHighest($reservation);
 
@@ -444,7 +452,8 @@ class ReservationService {
                 // Notify if position changed significantly
                 if ($oldRank && $reservation->rank_position) {
                     if ($reservation->rank_position < $oldRank) {
-                        $this->notificationService->sendRankImproved($reservation, $oldRank);
+                        // Position improved - use sendRankChanged with appropriate threshold
+                        $this->notificationService->sendRankChanged($reservation, $oldRank, 1); // Any improvement triggers notification for updates
                     }
                 }
 
@@ -509,6 +518,13 @@ class ReservationService {
         foreach ($existingReservations as $existingReservation) {
             // If new reservation has higher priority, mark existing as superseded
             if ($this->hasHigherPriority($newReservation, $existingReservation)) {
+                // Load relationships BEFORE marking as superseded
+                $existingReservation->load(['user', 'egi']);
+                $newReservation->load(['user', 'egi']);
+
+                // Send superseded notification BEFORE marking as superseded
+                $this->notificationService->sendSuperseded($existingReservation, $newReservation);
+
                 $existingReservation->markAsSuperseded($newReservation);
 
                 $this->logger->info('[RESERVATION] Reservation superseded', [
@@ -930,14 +946,14 @@ class ReservationService {
             if ($isHighest) {
                 $reservation->sub_status = Reservation::SUB_STATUS_HIGHEST;
 
-                // Handle supersession
-                if ($previousHighest && $previousHighest->id !== $reservation->id) {
+                // Handle supersession only if not already handled
+                if ($previousHighest && $previousHighest->id !== $reservation->id && $previousHighest->is_current) {
                     $previousHighest->sub_status = Reservation::SUB_STATUS_SUPERSEDED;
                     $previousHighest->superseded_by_id = $reservation->id;
                     $previousHighest->superseded_at = now();
                     $previousHighest->save();
 
-                    // Notify the superseded user
+                    // Notify the superseded user (only if still current to avoid duplicates)
                     $this->notificationService->sendSuperseded($previousHighest, $reservation);
                 }
             } elseif ($reservation->sub_status === Reservation::SUB_STATUS_HIGHEST) {
@@ -955,8 +971,25 @@ class ReservationService {
      * @return void
      */
     protected function checkAndNotifyIfHighest(Reservation $reservation): void {
-        if ($reservation->is_highest && $reservation->previous_rank !== 1) {
+        // For new reservations that became highest (previous_rank is null/0)
+        // OR for existing reservations that improved to highest (previous_rank !== 1)
+        if ($reservation->is_highest && ($reservation->previous_rank === null || $reservation->previous_rank === 0 || $reservation->previous_rank !== 1)) {
+            $this->logger->info('[RESERVATION_NOTIFICATION] Sending new highest notification', [
+                'reservation_id' => $reservation->id,
+                'user_id' => $reservation->user_id,
+                'previous_rank' => $reservation->previous_rank,
+                'current_rank' => $reservation->rank_position,
+                'is_highest' => $reservation->is_highest
+            ]);
+
             $this->notificationService->sendNewHighest($reservation);
+        } else {
+            $this->logger->debug('[RESERVATION_NOTIFICATION] Notification not sent - conditions not met', [
+                'reservation_id' => $reservation->id,
+                'is_highest' => $reservation->is_highest,
+                'previous_rank' => $reservation->previous_rank,
+                'current_rank' => $reservation->rank_position
+            ]);
         }
     }
 
@@ -974,10 +1007,11 @@ class ReservationService {
             ->get();
 
         foreach ($reservations as $reservation) {
-            $this->notificationService->sendRankImprovedAfterWithdrawal(
+            // Use sendRankChanged for withdrawal improvements
+            $this->notificationService->sendRankChanged(
                 $reservation,
                 $reservation->previous_rank,
-                $reservation->rank_position
+                1 // Any improvement after withdrawal triggers notification
             );
         }
     }

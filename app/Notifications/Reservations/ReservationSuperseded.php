@@ -5,6 +5,7 @@ namespace App\Notifications\Reservations;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 use App\Models\NotificationPayloadReservation;
+use App\Notifications\Channels\CustomDatabaseChannel;
 
 /**
  * Notification for when user's reservation is superseded
@@ -15,8 +16,7 @@ use App\Models\NotificationPayloadReservation;
  * @date 2025-08-15
  * @purpose Notify user when their reservation is no longer the highest
  */
-class ReservationSuperseded extends Notification
-{
+class ReservationSuperseded extends Notification {
     use Queueable;
 
     /**
@@ -31,8 +31,7 @@ class ReservationSuperseded extends Notification
      *
      * @param NotificationPayloadReservation $payload
      */
-    public function __construct(NotificationPayloadReservation $payload)
-    {
+    public function __construct(NotificationPayloadReservation $payload) {
         $this->payload = $payload;
     }
 
@@ -42,31 +41,35 @@ class ReservationSuperseded extends Notification
      * @param mixed $notifiable
      * @return array
      */
-    public function via($notifiable): array
-    {
-        return ['database'];
+    public function via($notifiable): array {
+        return [CustomDatabaseChannel::class];
     }
 
     /**
-     * Get the array representation of the notification.
+     * Get the data for the custom database channel.
      *
      * @param mixed $notifiable
      * @return array
      */
-    public function toArray($notifiable): array
-    {
+    public function toCustomDatabase($notifiable): array {
         return [
-            'type' => 'reservation_superseded',
-            'payload_id' => $this->payload->id,
-            'payload_type' => NotificationPayloadReservation::class,
-            'reservation_id' => $this->payload->reservation_id,
-            'egi_id' => $this->payload->egi_id,
-            'amount_eur' => $this->payload->data['amount_eur'] ?? 0,
-            'new_highest_amount' => $this->payload->data['new_highest_amount'] ?? 0,
-            'egi_title' => $this->payload->data['egi_title'] ?? '',
-            'message' => $this->payload->getMessage(),
-            'icon' => '⚠️',
-            'color' => '#F59E0B'
+            'view' => 'reservations.superseded',
+            'model_type' => NotificationPayloadReservation::class,
+            'model_id' => $this->payload->id,
+            'sender_id' => 1, // Sistema
+            'data' => [
+                'type' => 'reservation_superseded',
+                'payload_id' => $this->payload->id,
+                'payload_type' => NotificationPayloadReservation::class,
+                'reservation_id' => $this->payload->reservation_id,
+                'egi_id' => $this->payload->egi_id,
+                'amount_eur' => $this->payload->data['amount_eur'] ?? 0,
+                'new_highest_amount' => $this->payload->data['new_highest_amount'] ?? 0,
+                'egi_title' => $this->payload->data['egi_title'] ?? '',
+                'message' => $this->payload->getMessage(),
+                'icon' => '⚠️',
+                'color' => '#F59E0B'
+            ]
         ];
     }
 }

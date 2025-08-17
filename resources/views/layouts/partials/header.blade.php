@@ -128,6 +128,11 @@
                     </div>
                     @endif
 
+                    {{-- Notification Badge (Desktop) --}}
+                    @if(App\Helpers\FegiAuth::check())
+                    <x-notification-badge />
+                    @endif
+
                     {{-- EUR → ALGO Badge (Desktop) - Fixed Currency, Live Rate --}}
                     <x-currency-badge size="desktop" position="header" />
 
@@ -255,6 +260,11 @@
 
                     {{-- Menu Mobile Button --}}
                     <div class="flex items-center gap-2 -mr-2 md:hidden">
+
+                        {{-- Notification Badge (Mobile) --}}
+                        @if(App\Helpers\FegiAuth::check())
+                        <x-notification-badge />
+                        @endif
 
                         {{-- EUR → ALGO Badge (Mobile) - Fixed Currency, Live Rate --}}
                         <x-currency-badge size="mobile" position="header" />

@@ -71,7 +71,7 @@
 
     <!-- Pulsanti di azione -->
     <div class="flex space-x-3">
-        <a href="{{ route('egi.show', $notification->data['egi_id'] ?? '#') }}"
+        <a href="{{ route('egis.show', $notification->data['egi_id'] ?? '#') }}"
            class="flex items-center justify-center flex-1 px-4 py-2 font-medium text-yellow-600 transition-colors duration-200 bg-white rounded-lg hover:bg-yellow-50">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />

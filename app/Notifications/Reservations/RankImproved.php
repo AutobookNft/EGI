@@ -53,7 +53,7 @@ class RankImproved extends Notification
         return [
             'model_type' => get_class($this->notification),
             'model_id' => $this->notification->id,
-            'view' => 'notifications.reservations.rank-improved',
+            'view' => 'reservations.rank-improved',
             'sender_id' => 1, // System notification
             'data' => $this->notification->data,
             'outcome' => null, // This is informative only

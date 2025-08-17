@@ -31,8 +31,7 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
  * @property-read User $user
  * @property-read CustomDatabaseNotification|null $notification
  */
-class NotificationPayloadReservation extends Model
-{
+class NotificationPayloadReservation extends Model {
     /**
      * Table name
      */
@@ -84,40 +83,35 @@ class NotificationPayloadReservation extends Model
     /**
      * Get the associated reservation
      */
-    public function reservation(): BelongsTo
-    {
+    public function reservation(): BelongsTo {
         return $this->belongsTo(Reservation::class);
     }
 
     /**
      * Get the associated EGI
      */
-    public function egi(): BelongsTo
-    {
+    public function egi(): BelongsTo {
         return $this->belongsTo(Egi::class);
     }
 
     /**
      * Get the user who receives this notification
      */
-    public function user(): BelongsTo
-    {
+    public function user(): BelongsTo {
         return $this->belongsTo(User::class);
     }
 
     /**
      * Get the notification record (polymorphic)
      */
-    public function notification(): MorphOne
-    {
+    public function notification(): MorphOne {
         return $this->morphOne(CustomDatabaseNotification::class, 'model');
     }
 
     /**
      * Mark as read
      */
-    public function markAsRead(): bool
-    {
+    public function markAsRead(): bool {
         if ($this->read_at) {
             return true;
         }
@@ -129,24 +123,21 @@ class NotificationPayloadReservation extends Model
     /**
      * Check if read
      */
-    public function isRead(): bool
-    {
+    public function isRead(): bool {
         return $this->read_at !== null;
     }
 
     /**
      * Get the view name for rendering
      */
-    public function getView(): string
-    {
+    public function getView(): string {
         return 'reservations.' . str_replace('_', '-', $this->type);
     }
 
     /**
      * Get formatted message
      */
-    public function getFormattedMessage(): string
-    {
+    public function getFormattedMessage(): string {
         if ($this->message) {
             return $this->message;
         }
@@ -155,52 +146,77 @@ class NotificationPayloadReservation extends Model
     }
 
     /**
+     * Get message (alias for getFormattedMessage for compatibility)
+     */
+    public function getMessage(): string {
+        return $this->getFormattedMessage();
+    }
+
+    /**
      * Get default message based on type
      */
-    protected function getDefaultMessage(): string
-    {
+    protected function getDefaultMessage(): string {
         $egiTitle = $this->data['egi_title'] ?? 'EGI #' . $this->egi_id;
         $amount = $this->data['amount_eur'] ?? 0;
 
-        return match($this->type) {
+        return match ($this->type) {
             self::TYPE_RESERVATION_EXPIRED =>
-                "La tua prenotazione di €{$amount} per {$egiTitle} è scaduta.",
+            __('reservation.notifications.reservation_expired', [
+                'amount' => $amount,
+                'egi_title' => $egiTitle
+            ]),
 
             self::TYPE_SUPERSEDED =>
-                "La tua offerta per {$egiTitle} è stata superata. Nuova offerta più alta: €" .
-                ($this->data['new_highest_amount'] ?? $amount),
+            __('reservation.notifications.superseded', [
+                'egi_title' => $egiTitle,
+                'new_highest_amount' => $this->data['new_highest_amount'] ?? $amount
+            ]),
 
             self::TYPE_HIGHEST =>
-                "Congratulazioni! La tua offerta di €{$amount} per {$egiTitle} è ora la più alta!",
+            __('reservation.notifications.highest', [
+                'amount' => $amount,
+                'egi_title' => $egiTitle
+            ]),
 
             self::TYPE_RANK_CHANGED =>
-                "La tua posizione per {$egiTitle} è cambiata: sei ora in posizione #" .
-                ($this->data['new_rank'] ?? '?'),
+            __('reservation.notifications.rank_changed', [
+                'egi_title' => $egiTitle,
+                'new_rank' => $this->data['new_rank'] ?? '?'
+            ]),
 
             self::TYPE_COMPETITOR_WITHDREW =>
-                "Un concorrente si è ritirato. Sei salito in posizione #" .
-                ($this->data['new_rank'] ?? '?') . " per {$egiTitle}",
+            __('reservation.notifications.competitor_withdrew', [
+                'new_rank' => $this->data['new_rank'] ?? '?',
+                'egi_title' => $egiTitle
+            ]),
 
             self::TYPE_PRE_LAUNCH_REMINDER =>
-                "Il mint on-chain inizierà presto! Conferma la tua prenotazione per {$egiTitle}.",
+            __('reservation.notifications.pre_launch_reminder', [
+                'egi_title' => $egiTitle
+            ]),
 
             self::TYPE_MINT_WINDOW_OPEN =>
-                "È il tuo turno! Hai 48 ore per completare il mint di {$egiTitle}.",
+            __('reservation.notifications.mint_window_open', [
+                'egi_title' => $egiTitle
+            ]),
 
             self::TYPE_MINT_WINDOW_CLOSING =>
-                "Attenzione! Restano solo " . ($this->data['hours_remaining'] ?? 24) .
-                " ore per completare il mint di {$egiTitle}.",
+            __('reservation.notifications.mint_window_closing', [
+                'egi_title' => $egiTitle,
+                'hours_remaining' => $this->data['hours_remaining'] ?? 24
+            ]),
 
-            default => "Aggiornamento sulla tua prenotazione per {$egiTitle}"
+            default => __('reservation.notifications.default', [
+                'egi_title' => $egiTitle
+            ])
         };
     }
 
     /**
      * Get icon for notification type
      */
-    public function getIcon(): string
-    {
-        return match($this->type) {
+    public function getIcon(): string {
+        return match ($this->type) {
             self::TYPE_HIGHEST => 'trophy',
             self::TYPE_SUPERSEDED => 'trending-down',
             self::TYPE_RANK_CHANGED => 'activity',
@@ -216,9 +232,8 @@ class NotificationPayloadReservation extends Model
     /**
      * Get color for notification
      */
-    public function getColor(): string
-    {
-        return match($this->status) {
+    public function getColor(): string {
+        return match ($this->status) {
             self::STATUS_SUCCESS => 'green',
             self::STATUS_WARNING => 'yellow',
             self::STATUS_ERROR => 'red',
@@ -230,24 +245,21 @@ class NotificationPayloadReservation extends Model
     /**
      * Scope for unread notifications
      */
-    public function scopeUnread($query)
-    {
+    public function scopeUnread($query) {
         return $query->whereNull('read_at');
     }
 
     /**
      * Scope for user notifications
      */
-    public function scopeForUser($query, $userId)
-    {
+    public function scopeForUser($query, $userId) {
         return $query->where('user_id', $userId);
     }
 
     /**
      * Get data for notification service
      */
-    public function toNotificationArray(): array
-    {
+    public function toNotificationArray(): array {
         return [
             'id' => $this->id,
             'type' => $this->type,

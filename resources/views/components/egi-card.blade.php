@@ -481,9 +481,24 @@ $isCreator = auth()->check() && auth()->id() === $creatorId;
                         $activatorDisplay = formatActivatorDisplay($displayUser);
                         }
                         @endphp
-                        {{ __('egi.reservation.activator') }}: <span class="font-semibold">{{
-                            $activatorDisplay['name']
-                            }}</span>
+                        {{ __('egi.reservation.activator') }}:
+                        @if ($displayUser && isset($displayUser->usertype))
+                        @php
+                        $homeRoute = match($displayUser->usertype) {
+                        'collector' => route('collector.home', $displayUser->id),
+                        'commissioner' => route('collector.home', $displayUser->id),
+                        'patron' => route('collector.home', $displayUser->id),
+                        default => '#'
+                        };
+                        @endphp
+                        <a href="{{ $homeRoute }}"
+                            class="font-semibold transition-colors duration-200 hover:underline hover:text-blue-400"
+                            title="Visualizza profilo di {{ $activatorDisplay['name'] }}">
+                            {{ $activatorDisplay['name'] }}
+                        </a>
+                        @else
+                        <span class="font-semibold">{{ $activatorDisplay['name'] }}</span>
+                        @endif
                         @endif
                     </span>
                 </div>
