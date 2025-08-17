@@ -13,8 +13,7 @@ use Illuminate\Support\Facades\Log;
  * @date 2025-08-15
  * @purpose Notification when reservation rank improves
  */
-class RankImproved extends Notification
-{
+class RankImproved extends Notification {
     protected $notification;
 
     /**
@@ -22,8 +21,7 @@ class RankImproved extends Notification
      *
      * @param mixed $notification The NotificationPayloadReservation object
      */
-    public function __construct($notification)
-    {
+    public function __construct($notification) {
         $this->notification = $notification;
     }
 
@@ -33,8 +31,7 @@ class RankImproved extends Notification
      * @param mixed $notifiable
      * @return array
      */
-    public function via($notifiable)
-    {
+    public function via($notifiable) {
         return [CustomDatabaseChannel::class];
     }
 
@@ -44,8 +41,7 @@ class RankImproved extends Notification
      * @param mixed $notifiable
      * @return array
      */
-    public function toCustomDatabase($notifiable)
-    {
+    public function toCustomDatabase($notifiable) {
         Log::channel('florenceegi')->info('RankImproved:toCustomDatabase', [
             'notificationPayloadReservation' => $this->notification,
         ]);

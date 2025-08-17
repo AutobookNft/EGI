@@ -5,6 +5,7 @@ namespace App\View\Components;
 use Illuminate\View\Component;
 use Illuminate\Support\Facades\Auth;
 use App\Helpers\FegiAuth;
+use Ultra\ErrorManager\Interfaces\ErrorManagerInterface;
 
 /**
  * 📜 Collection Badge Component
@@ -45,27 +46,66 @@ class CollectionBadge extends Component {
         // Imposta le classi responsive
         $this->responsiveClasses = $this->getResponsiveClasses();
 
+        // Inizializza valori di default
+        $this->collectionId = null;
+        $this->collectionName = null;
+        $this->canEdit = false;
+        $this->egiCount = 0;
+
         // Ottieni i dati della collection corrente
         $user = Auth::user();
         if ($user && in_array($user->usertype, ['creator', 'patron'])) {
-            $this->collectionId = $user->current_collection_id;
-            $this->collectionName = $user->getCurrentCollectionName();
-            $this->egiCount = $user->getCurrentCollectionEgiCount();
+            try {
+                $this->collectionId = $user->current_collection_id;
 
-            // Verifica se l'utente può modificare la collection corrente
-            if ($this->collectionId && $user->currentCollection) {
-                $this->canEdit = $user->can('manage_collection', $user->currentCollection);
-            } else {
+                // Controlla se i metodi esistono prima di chiamarli
+                if (method_exists($user, 'getCurrentCollectionName')) {
+                    $this->collectionName = $user->getCurrentCollectionName();
+                } else {
+                    // Fallback: usa la relazione se esiste
+                    $this->collectionName = $user->currentCollection->name ?? null;
+                }
+
+                if (method_exists($user, 'getCurrentCollectionEgiCount')) {
+                    $this->egiCount = $user->getCurrentCollectionEgiCount();
+                } else {
+                    // Fallback: conta manualmente o imposta 0
+                    $this->egiCount = 0;
+                }
+
+                // Verifica se l'utente può modificare la collection corrente
+                if ($this->collectionId && isset($user->currentCollection)) {
+                    $this->canEdit = $user->can('manage_collection', $user->currentCollection);
+                } else {
+                    $this->canEdit = false;
+                }
+            } catch (\Exception $e) {
+                // Log dell'errore ma continua l'esecuzione usando UEM
+                try {
+                    $uem = app(ErrorManagerInterface::class);
+                    $uem->logError(
+                        'CollectionBadge component error',
+                        $e->getMessage(),
+                        [
+                            'user_id' => $user->id ?? null,
+                            'usertype' => $user->usertype ?? null,
+                            'current_collection_id' => $user->current_collection_id ?? null,
+                            'component' => 'CollectionBadge'
+                        ]
+                    );
+                } catch (\Exception $uemError) {
+                    // Fallback silenzioso se anche UEM fallisce
+                }
+
+                // Ripristina valori di default
+                $this->collectionId = null;
+                $this->collectionName = null;
                 $this->canEdit = false;
+                $this->egiCount = 0;
             }
-        } else {
-            $this->collectionId = null;
-            $this->collectionName = null;
-            $this->canEdit = false;
-            $this->egiCount = 0;
         }
 
-        // Imposta shouldRender per il template
+        // Imposta shouldRender per il template (sempre eseguito)
         $this->shouldRender = $this->shouldRender();
     }
 
@@ -73,6 +113,11 @@ class CollectionBadge extends Component {
      * Get the view / contents that represent the component.
      */
     public function render() {
+        // Se il componente non dovrebbe essere renderizzato, restituisci null
+        if (!$this->shouldRender) {
+            return null;
+        }
+
         return view('components.collection-badge');
     }
 

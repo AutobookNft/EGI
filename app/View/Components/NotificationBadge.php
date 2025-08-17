@@ -10,15 +10,14 @@ use Ultra\ErrorManager\Interfaces\ErrorManagerInterface;
 
 /**
  * NotificationBadge Component
- * 
+ *
  * @package App\View\Components
  * @author Padmin D. Curtis (AI Partner OS3.0) for Fabio Cherici
  * @version 1.0.0 (FlorenceEGI - Notification Badge)
  * @date 2025-08-17
  * @purpose Autonomous notification badge component with TypeScript selection
  */
-class NotificationBadge extends Component
-{
+class NotificationBadge extends Component {
     protected UltraLogManager $logger;
     protected ErrorManagerInterface $errorManager;
 
@@ -26,22 +25,20 @@ class NotificationBadge extends Component
     public int $unreadCount;
     public bool $hasNotifications;
 
-    public function __construct(UltraLogManager $logger, ErrorManagerInterface $errorManager)
-    {
+    public function __construct(UltraLogManager $logger, ErrorManagerInterface $errorManager) {
         $this->logger = $logger;
         $this->errorManager = $errorManager;
-        
+
         $this->loadNotifications();
     }
 
     /**
      * Load notifications for current user
      */
-    protected function loadNotifications(): void
-    {
+    protected function loadNotifications(): void {
         try {
             $user = FegiAuth::user();
-            
+
             if (!$user) {
                 $this->notifications = [];
                 $this->unreadCount = 0;
@@ -84,7 +81,6 @@ class NotificationBadge extends Component
                 'total_notifications' => count($this->notifications),
                 'unread_count' => $this->unreadCount
             ]);
-
         } catch (\Exception $e) {
             $this->logger->error('[NOTIFICATION_BADGE] Failed to load notifications', [
                 'user_id' => FegiAuth::id(),
@@ -100,12 +96,11 @@ class NotificationBadge extends Component
     /**
      * Get human-readable notification type
      */
-    protected function getNotificationType($notification): string
-    {
+    protected function getNotificationType($notification): string {
         // Try to extract from model_type first
         if ($notification->model_type) {
             $modelClass = class_basename($notification->model_type);
-            
+
             switch ($modelClass) {
                 case 'NotificationPayloadReservation':
                     return 'Prenotazione';
@@ -123,7 +118,7 @@ class NotificationBadge extends Component
         // Fallback to notification type
         if ($notification->type) {
             $typeClass = class_basename($notification->type);
-            
+
             if (str_contains($typeClass, 'Reservation')) {
                 return 'Prenotazione';
             } elseif (str_contains($typeClass, 'Gdpr')) {
@@ -141,12 +136,11 @@ class NotificationBadge extends Component
     /**
      * Get notification message text
      */
-    protected function getNotificationMessage($notification): string
-    {
+    protected function getNotificationMessage($notification): string {
         try {
             // Try to get message from data
             $data = is_string($notification->data) ? json_decode($notification->data, true) : $notification->data;
-            
+
             if (isset($data['message'])) {
                 return $data['message'];
             }
@@ -158,7 +152,7 @@ class NotificationBadge extends Component
 
             // Fallback based on type
             $type = $this->getNotificationType($notification);
-            
+
             switch ($type) {
                 case 'Prenotazione':
                     return 'Nuova attività sulla tua prenotazione';
@@ -171,7 +165,6 @@ class NotificationBadge extends Component
                 default:
                     return 'Hai una nuova notifica';
             }
-
         } catch (\Exception $e) {
             $this->logger->warning('[NOTIFICATION_BADGE] Failed to extract message', [
                 'notification_id' => $notification->id,
@@ -185,8 +178,7 @@ class NotificationBadge extends Component
     /**
      * Get the view / contents that represent the component.
      */
-    public function render()
-    {
+    public function render() {
         return view('components.notification-badge');
     }
 }

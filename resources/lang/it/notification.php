@@ -80,7 +80,7 @@ return [
         'disavow_button_label' => 'Non riconosco questa azione',
         'confirm_button_label' => 'Conferma questa azione',
         'confirm_action_prompt' => 'Sei sicuro di voler confermare questa azione?',
-        'unknown'=>[
+        'unknown' => [
             'content' => 'Hai ricevuto una notifica sconosciuta.',
             'title' => 'Notifica sconosciuta',
         ],

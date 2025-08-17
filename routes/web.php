@@ -392,7 +392,6 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
                     ->middleware('check.pending.wallet');
             });
         });
-
     });
 
 /*
@@ -403,18 +402,18 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
 Route::prefix('notifications')->group(function () {
     Route::get('{id}/details', [NotificationDetailsController::class, 'show'])
         ->name('notifications.details');
-        
+
     // Add alias for notification badge component
     Route::get('{id}', [NotificationDetailsController::class, 'show'])
         ->name('notifications.show');
-        
+
     // Add route for notifications index (all notifications page)
-    Route::get('/', function() {
+    Route::get('/', function () {
         return view('notifications.index');
     })->name('notifications.index');
-    
+
     // Add route to mark notification as read
-    Route::post('{id}/read', function($id) {
+    Route::post('{id}/read', function ($id) {
         $user = App\Helpers\FegiAuth::user();
         if ($user) {
             $notification = $user->customNotifications()->find($id);

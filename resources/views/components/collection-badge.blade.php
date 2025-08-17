@@ -3,7 +3,6 @@
 Componente autonomo per il badge della collection con TypeScript integrato
 --}}
 
-@if($shouldRender)
 <div id="{{ $uniqueId }}"
     class="collection-badge-component items-center {{ $responsiveClasses }} {{ $getPositionClasses() }} {{ $getSizeClasses()['container'] }}"
     data-collection-id="{{ $collectionId }}" data-can-edit="{{ $canEdit ? 'true' : 'false' }}" data-size="{{ $size }}"
@@ -329,4 +328,3 @@ Componente autonomo per il badge della collection con TypeScript integrato
 
 })();
 </script>
-@endif

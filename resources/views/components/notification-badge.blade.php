@@ -6,24 +6,26 @@
     {{-- Badge Button --}}
     <button
         class="relative p-2 text-gray-400 transition-colors duration-200 rounded-lg notification-badge-button hover:text-white hover:bg-gray-700/50 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-        aria-label="{{ __('notification.badge.aria_label') }}"
-        type="button"
-    >
+        aria-label="{{ __('notification.badge.aria_label') }}" type="button">
         {{-- Bell Icon --}}
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9">
+            </path>
         </svg>
 
         {{-- Unread Count Badge --}}
         @if($unreadCount > 0)
-        <span class="absolute flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full notification-unread-badge -top-1 -right-1">
+        <span
+            class="absolute flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full notification-unread-badge -top-1 -right-1">
             {{ $unreadCount > 99 ? '99+' : $unreadCount }}
         </span>
         @endif
     </button>
 
     {{-- Dropdown Panel --}}
-    <div class="absolute right-0 z-50 hidden mt-2 overflow-hidden bg-white border border-gray-200 rounded-lg shadow-xl notification-dropdown w-80">
+    <div
+        class="absolute right-0 z-50 hidden mt-2 overflow-hidden bg-white border border-gray-200 rounded-lg shadow-xl notification-dropdown w-80">
         {{-- Header --}}
         <div class="px-4 py-3 border-b border-gray-200 bg-gray-50">
             <div class="flex items-center justify-between">
@@ -39,80 +41,77 @@
         {{-- Notifications List --}}
         <div class="overflow-y-auto notification-list max-h-96">
             @if($hasNotifications)
-                @foreach($notifications as $index => $notification)
-                @php
-                    // Extract notification type from view field (e.g., "reservations.highest" -> "reservations")
-                    $viewParts = explode('.', $notification['view'] ?? '');
-                    $notificationType = $viewParts[0] ?? 'general';
-                    
-                    $typeLabel = $notificationType;
+            @foreach($notifications as $index => $notification)
+            @php
+            // Extract notification type from view field (e.g., "reservations.highest" -> "reservations")
+            $viewParts = explode('.', $notification['view'] ?? '');
+            $notificationType = $viewParts[0] ?? 'general';
 
-                    // Determine badge color based on type
-                    $badgeColors = [
-                        'reservations' => 'bg-green-100 text-green-800',
-                        'gdpr' => 'bg-blue-100 text-blue-800',
-                        'collections' => 'bg-purple-100 text-purple-800',
-                        'egis' => 'bg-yellow-100 text-yellow-800',
-                        'wallets' => 'bg-orange-100 text-orange-800',
-                        'invitations' => 'bg-pink-100 text-pink-800'
-                    ];
-                    $badgeColor = $badgeColors[$notificationType] ?? 'bg-gray-100 text-gray-800';
-                @endphp
+            $typeLabel = $notificationType;
 
-                <div
-                    class="px-4 py-3 transition-colors duration-150 border-b border-gray-100 cursor-pointer notification-item hover:bg-gray-50 last:border-b-0"
-                    data-notification-index="{{ $index }}"
-                    data-notification-id="{{ $notification['id'] }}"
-                    data-notification-url="{{ $notification['url'] }}"
-                    data-notification-type="{{ $notificationType }}"
-                    tabindex="0"
-                >
-                    <div class="flex items-start space-x-3">
-                        {{-- Type Badge --}}
-                        <div class="flex-shrink-0">
-                            <span class="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full {{ $badgeColor }}">
-                                {{ $typeLabel }}
-                            </span>
-                        </div>
+            // Determine badge color based on type
+            $badgeColors = [
+            'reservations' => 'bg-green-100 text-green-800',
+            'gdpr' => 'bg-blue-100 text-blue-800',
+            'collections' => 'bg-purple-100 text-purple-800',
+            'egis' => 'bg-yellow-100 text-yellow-800',
+            'wallets' => 'bg-orange-100 text-orange-800',
+            'invitations' => 'bg-pink-100 text-pink-800'
+            ];
+            $badgeColor = $badgeColors[$notificationType] ?? 'bg-gray-100 text-gray-800';
+            @endphp
 
-                        {{-- Content --}}
-                        <div class="flex-1 min-w-0">
-                            <p class="text-sm text-gray-900 line-clamp-2">
-                                {{ $notification['message'] }}
-                            </p>
-                            <p class="mt-1 text-xs text-gray-500">
-                                {{ $notification['created_at'] }}
-                            </p>
-                        </div>
-
-                        {{-- Read Status --}}
-                        @if(!$notification['is_read'])
-                        <div class="flex-shrink-0">
-                            <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
-                        </div>
-                        @endif
+            <div class="px-4 py-3 transition-colors duration-150 border-b border-gray-100 cursor-pointer notification-item hover:bg-gray-50 last:border-b-0"
+                data-notification-index="{{ $index }}" data-notification-id="{{ $notification['id'] }}"
+                data-notification-url="{{ $notification['url'] }}" data-notification-type="{{ $notificationType }}"
+                tabindex="0">
+                <div class="flex items-start space-x-3">
+                    {{-- Type Badge --}}
+                    <div class="flex-shrink-0">
+                        <span
+                            class="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full {{ $badgeColor }}">
+                            {{ $typeLabel }}
+                        </span>
                     </div>
-                </div>
-                @endforeach
 
-                {{-- View All Link --}}
-                <div class="px-4 py-3 border-t border-gray-200 bg-gray-50">
-                    <a
-                        href="{{ route('notifications.index') }}"
-                        class="block text-sm font-medium text-center text-indigo-600 transition-colors duration-150 notification-view-all hover:text-indigo-500"
-                    >
-                        {{ __('notification.badge.view_all') }}
-                    </a>
+                    {{-- Content --}}
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm text-gray-900 line-clamp-2">
+                            {{ $notification['message'] }}
+                        </p>
+                        <p class="mt-1 text-xs text-gray-500">
+                            {{ $notification['created_at'] }}
+                        </p>
+                    </div>
+
+                    {{-- Read Status --}}
+                    @if(!$notification['is_read'])
+                    <div class="flex-shrink-0">
+                        <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    </div>
+                    @endif
                 </div>
+            </div>
+            @endforeach
+
+            {{-- View All Link --}}
+            <div class="px-4 py-3 border-t border-gray-200 bg-gray-50">
+                <a href="{{ route('notifications.index') }}"
+                    class="block text-sm font-medium text-center text-indigo-600 transition-colors duration-150 notification-view-all hover:text-indigo-500">
+                    {{ __('notification.badge.view_all') }}
+                </a>
+            </div>
             @else
-                {{-- Empty State --}}
-                <div class="px-4 py-8 text-center">
-                    <svg class="w-12 h-12 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2M4 13h2m13-8v8a2 2 0 01-2 2H7a2 2 0 01-2-2V5a2 2 0 012-2h10a2 2 0 012 2z"></path>
-                    </svg>
-                    <h3 class="mt-2 text-sm font-medium text-gray-900">{{ __('notification.badge.empty.title') }}</h3>
-                    <p class="mt-1 text-sm text-gray-500">{{ __('notification.badge.empty.message') }}</p>
-                </div>
+            {{-- Empty State --}}
+            <div class="px-4 py-8 text-center">
+                <svg class="w-12 h-12 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2M4 13h2m13-8v8a2 2 0 01-2 2H7a2 2 0 01-2-2V5a2 2 0 012-2h10a2 2 0 012 2z">
+                    </path>
+                </svg>
+                <h3 class="mt-2 text-sm font-medium text-gray-900">{{ __('notification.badge.empty.title') }}</h3>
+                <p class="mt-1 text-sm text-gray-500">{{ __('notification.badge.empty.message') }}</p>
+            </div>
             @endif
         </div>
     </div>
@@ -120,7 +119,7 @@
 
 {{-- Pure JavaScript Implementation (TypeScript-style) --}}
 <script type="text/javascript">
-(function() {
+    (function() {
     'use strict';
 
     class NotificationBadge {
