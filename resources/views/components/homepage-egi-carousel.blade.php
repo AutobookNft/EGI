@@ -102,7 +102,7 @@ $activatorsCount = \DB::table('users')
                 </button>
 
             </div>
-            
+
             {{-- View Mode Toggle --}}
             <div class="flex justify-center">
                 <div class="flex gap-1 p-1 bg-gray-800 border border-gray-700 rounded-lg">
@@ -209,7 +209,14 @@ $activatorsCount = \DB::table('users')
                 <div class="grid grid-cols-1 gap-4 transition-all duration-300 mobile-content content-egi-list view-carousel"
                     data-content="egi-list" data-view="carousel">
                     @if($egis->count() > 0)
-                        <x-egi-card-carousel :egis="$egis" context="creator" :showPurchasePrice="false" :showOwnershipBadge="false" />
+                        {{-- Horizontal Carousel usando egi-card-list --}}
+                        <div class="flex pb-4 space-x-4 overflow-x-auto scrollbar-hide">
+                            @foreach($egis as $egi)
+                                <div class="flex-shrink-0" style="min-width: 320px;">
+                                    <x-egi-card-list :egi="$egi" context="creator" :showPurchasePrice="false" :showOwnershipBadge="false" />
+                                </div>
+                            @endforeach
+                        </div>
                     @else
                         <div class="py-8 text-center text-gray-400">
                             {{ __('egi.carousel.empty_state.no_egis') }}
@@ -222,7 +229,7 @@ $activatorsCount = \DB::table('users')
                     data-content="egi-card">
                     @if($egis->count() > 0)
                         {{-- Carousel Track per EGI Cards --}}
-                        <div class="flex space-x-4 overflow-x-auto pb-4 scrollbar-hide" id="egi-card-mobile-carousel">
+                        <div class="flex pb-4 space-x-4 overflow-x-auto scrollbar-hide" id="egi-card-mobile-carousel">
                             @foreach($egis as $egi)
                             <div class="flex-shrink-0" style="width: 280px;">
                                 <x-egi-card :egi="$egi" :showPurchasePrice="true" />
@@ -256,7 +263,14 @@ $activatorsCount = \DB::table('users')
                 <div class="hidden grid-cols-1 gap-4 transition-all duration-300 mobile-content content-creator view-carousel lg:hidden"
                     data-content="creator" data-view="carousel">
                     @if($creators->count() > 0)
-                        <x-creator-card-carousel :creators="$creators" context="default" :showBadge="true" />
+                        {{-- Horizontal Carousel usando creator-card-list --}}
+                        <div class="flex pb-4 space-x-4 overflow-x-auto scrollbar-hide">
+                            @foreach($creators as $creator)
+                                <div class="flex-shrink-0" style="min-width: 320px;">
+                                    <x-creator-card-list :creator="$creator" :context="'carousel'" :showBadge="true" />
+                                </div>
+                            @endforeach
+                        </div>
                     @else
                         <div class="py-8 text-center text-gray-400">
                             {{ __('egi.carousel.empty_state.no_creators') }}
@@ -300,7 +314,14 @@ $activatorsCount = \DB::table('users')
                 <div class="hidden grid-cols-1 gap-4 transition-all duration-300 mobile-content content-collector view-carousel lg:hidden"
                     data-content="collector" data-view="carousel">
                     @if($collectors->count() > 0)
-                        <x-collector-card-carousel :collectors="$collectors" context="default" :showBadge="true" />
+                        {{-- Horizontal Carousel usando collector-card-list --}}
+                        <div class="flex pb-4 space-x-4 overflow-x-auto scrollbar-hide">
+                            @foreach($collectors as $collector)
+                                <div class="flex-shrink-0" style="min-width: 320px;">
+                                    <x-collector-card-list :collector="$collector" :context="'default'" :showBadge="true" />
+                                </div>
+                            @endforeach
+                        </div>
                     @else
                         <div class="py-8 text-center text-gray-400">
                             {{ __('egi.carousel.empty_state.no_collectors') }}
@@ -441,7 +462,7 @@ $activatorsCount = \DB::table('users')
 
             // Update header text and route with smooth transition
             updateHeader(currentContentType);
-            
+
             // Show content with current view mode (or default for types without view modes)
             showContent(currentContentType, currentViewMode);
         });
