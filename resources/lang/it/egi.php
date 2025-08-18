@@ -280,9 +280,81 @@ return [
             'collectors' => 'Attivatori'
         ],
 
+        // Carousel sections
+        'sections' => [
+            'egis' => 'EGI in Evidenza',
+            'creators' => 'Artisti Emergenti',
+            'collections' => 'Collezioni Esclusive',
+            'collectors' => 'Top Collezionisti'
+        ],
+        'view_all' => 'Vedi Tutti',
+
         // Title and subtitle for multi-content carousel
         'title' => 'Scopri il Rinascimento',
         'subtitle' => 'Esplora opere, artisti, collezioni e collezionisti nell\'ecosistema FlorenceEGI',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | List View - Homepage List Mode
+    |--------------------------------------------------------------------------
+    */
+
+    'list' => [
+        'title' => 'Esplora per Categoria',
+        'subtitle' => 'Naviga tra le diverse categorie per trovare quello che cerchi',
+        
+        'content_types' => [
+            'egi_list' => 'Lista EGI',
+            'creators' => 'Lista Artisti',
+            'collections' => 'Lista Collezioni',
+            'collectors' => 'Lista Collezionisti'
+        ],
+
+        'headers' => [
+            'egi_list' => 'Opere EGI',
+            'creators' => 'Artisti',
+            'collections' => 'Collezioni',
+            'collectors' => 'Collezionisti'
+        ],
+
+        'empty_state' => [
+            'title' => 'Nessun Elemento Trovato',
+            'subtitle' => 'Prova a selezionare una categoria diversa',
+            'no_egis' => 'Nessuna opera EGI trovata.',
+            'no_creators' => 'Nessun artista trovato.',
+            'no_collections' => 'Nessuna collezione trovata.',
+            'no_collectors' => 'Nessun collezionista trovato.'
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Desktop Carousel - Desktop Only EGI Carousel
+    |--------------------------------------------------------------------------
+    */
+
+    'desktop_carousel' => [
+        'title' => 'Opere Digitali in Evidenza',
+        'subtitle' => 'Le migliori creazioni NFT della nostra community',
+        'navigation' => [
+            'previous' => 'Precedente',
+            'next' => 'Successivo',
+            'slide' => 'Vai alla diapositiva :number',
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Mobile Toggle - Mobile View Toggle
+    |--------------------------------------------------------------------------
+    */
+
+    'mobile_toggle' => [
+        'title' => 'Esplora FlorenceEGI',
+        'subtitle' => 'Scegli come vuoi navigare i contenuti',
+        'carousel_mode' => 'Vista Carousel',
+        'list_mode' => 'Vista Lista',
     ],
 
     /*

@@ -262,9 +262,81 @@ return [
             'no_collectors' => 'No collectors available at the moment.'
         ],
 
+        // Carousel sections
+        'sections' => [
+            'egis' => 'Featured EGIs',
+            'creators' => 'Emerging Artists',
+            'collections' => 'Exclusive Collections',
+            'collectors' => 'Top Collectors'
+        ],
+        'view_all' => 'View All',
+
         // Legacy (for backwards compatibility)
         'two_columns' => 'List View',
         'three_columns' => 'Card View'
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | List View - Homepage List Mode
+    |--------------------------------------------------------------------------
+    */
+
+    'list' => [
+        'title' => 'Browse by Category',
+        'subtitle' => 'Navigate through different categories to find what you\'re looking for',
+        
+        'content_types' => [
+            'egi_list' => 'EGI List',
+            'creators' => 'Artists List',
+            'collections' => 'Collections List',
+            'collectors' => 'Collectors List'
+        ],
+
+        'headers' => [
+            'egi_list' => 'EGI Artworks',
+            'creators' => 'Artists',
+            'collections' => 'Collections',
+            'collectors' => 'Collectors'
+        ],
+
+        'empty_state' => [
+            'title' => 'No Items Found',
+            'subtitle' => 'Try selecting a different category',
+            'no_egis' => 'No EGI artworks found.',
+            'no_creators' => 'No artists found.',
+            'no_collections' => 'No collections found.',
+            'no_collectors' => 'No collectors found.'
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Desktop Carousel - Desktop Only EGI Carousel
+    |--------------------------------------------------------------------------
+    */
+
+    'desktop_carousel' => [
+        'title' => 'Featured Digital Artworks',
+        'subtitle' => 'The best NFT creations from our community',
+        'navigation' => [
+            'previous' => 'Previous',
+            'next' => 'Next',
+            'slide' => 'Go to slide :number',
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Mobile Toggle - Mobile View Toggle
+    |--------------------------------------------------------------------------
+    */
+
+    'mobile_toggle' => [
+        'title' => 'Explore FlorenceEGI',
+        'subtitle' => 'Choose how you want to browse content',
+        'carousel_mode' => 'Carousel View',
+        'list_mode' => 'List View',
     ],
 
 ];
