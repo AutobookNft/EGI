@@ -20,7 +20,7 @@
     {{-- Desktop: EGI Cards Carousel - SOLO desktop --}}
     <x-slot name="belowHeroContent">
         <x-desktop-egi-carousel :egis="$featuredEgis" />
-        
+
         {{-- Creators carousel (era qui prima) --}}
         <div class="hidden lg:block">
             <x-creators-carousel :creators="$featuredCreators" title="{{ __('guest_home.featured_creators_title') }}"
