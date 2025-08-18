@@ -26,11 +26,11 @@ return [
     'like_button_title' => 'Aggiungi ai Preferiti',
     'share_button_title' => 'Condividi questo EGI',
     'current_price' => 'Prezzo Attuale',
-    'not_currently_listed' => 'Non Attualmente in Vendita',
+    'not_currently_listed' => 'Da Attivare',
     'contact_owner_availability' => 'Contatta il proprietario per disponibilità',
     'liked' => 'Piaciuto',
     'add_to_favorites' => 'Aggiungi ai Preferiti',
-    'reserve_this_piece' => 'Prenota Quest\'Opera',
+    'reserve_this_piece' => 'Attivalo',
 
     /*
     |--------------------------------------------------------------------------
@@ -98,9 +98,9 @@ return [
     'actions' => [
         'view' => 'Visualizza',
         'view_details' => 'Visualizza dettagli EGI',
-        'reserve' => 'Prenota',
+        'reserve' => 'Attivalo',
         'reserved' => 'Prenotato',
-        'outbid' => 'Rilancia',
+        'outbid' => 'Rilancia per attivare',
         'view_history' => 'Cronologia',
         'reserve_egi' => 'Prenota :title',
     ],
@@ -365,8 +365,8 @@ return [
     */
 
     'hero_coverflow' => [
-        'title' => 'Scopri le Opere in Evidenza',
-        'subtitle' => 'Vivi la nostra collezione di arte digitale più pregiata in un carousel immersivo 3D con i pezzi più preziosi e di tendenza su FlorenceEGI',
+        'title' => 'Attivare un EGI è lasciare il segno.',
+        'subtitle' => 'Il tuo nome rimane per sempre accanto a quello del Creator: senza di te l’opera non esisterebbe.',
         'carousel_mode' => 'Vista Carousel',
         'list_mode' => 'Vista Griglia',
         'carousel_label' => 'Carousel opere in evidenza',

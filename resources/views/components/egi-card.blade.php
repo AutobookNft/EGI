@@ -1,7 +1,6 @@
 {{-- resources/views/components/egi-card.blade.php --}}
 {{-- 📜 Oracode Blade Component: EGI Card --}}
-{{-- Displays a single EGI card, typically within a collection grid. --}}
-{{-- Expects an $egi object (App\Models\Egi) and optionally $collection (for creator comparison). --}}
+
 {{-- Uses Tailwind CSS for a modern, responsive design. --}}
 
 {{-- Props: Definisci l'oggetto egi come richiesto --}}
@@ -48,6 +47,11 @@ $showActivationBadge = !$hasActiveReservations;
 
 // 🔒 Creator check: Determina se l'utente corrente è il creatore dell'EGI
 $creatorId = $egi->user_id ?? $collection->creator_id ?? null;
+$isCreator = auth()->check() && auth()->id() === $creatorId;
+
+// 🔄 Controlla se c'è una prenotazione corrente per il pulsante Rilancia
+$hasCurrentReservation = $egi->reservations &&
+                        $egi->reservations->where('is_current', true)->first();
 $isCreator = auth()->check() && auth()->id() === $creatorId;
 @endphp
 
@@ -541,95 +545,23 @@ $isCreator = auth()->check() && auth()->id() === $creatorId;
         </div>
     </div>
 
-    {{-- 🎬 Footer Card con design migliorato --}}
-    <div class="px-4 py-3 border-t border-gray-700/50 bg-gray-900/80 backdrop-blur-sm">
-        <div class="flex min-h-[36px] items-center gap-2">
-            {{-- Link Visualizza Dettaglio con stile migliorato --}}
-            <a href="{{ route('egis.show', $egi->id) }}"
-                class="inline-flex items-center justify-center flex-shrink-0 px-3 py-2 text-xs font-semibold text-gray-300 transition-all duration-200 bg-gray-800 border border-gray-600 rounded-lg shadow-sm hover:border-gray-500 hover:bg-gray-700 hover:text-white hover:shadow-md"
-                aria-label="{{ __('egi.actions.view_details') }}">
-                <svg class="mr-1.5 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
-                    aria-hidden="true">
-                    <path d="M10 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" />
-                    <path fill-rule="evenodd"
-                        d="M.664 10.59a1.651 1.651 0 0 1 0-1.18C3.6 8.229 6.614 6.61 10 6.61s6.4 1.619 9.336 3.8a1.651 1.651 0 0 1 0 1.18C16.4 13.771 13.386 15.39 10 15.39s-6.4-1.619-9.336-3.8ZM14 10a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z"
-                        clip-rule="evenodd" />
-                </svg>
-                {{ __('egi.actions.view') }}
-            </a>
-
-            {{-- Spacer per spingere i bottoni a destra ma non fino al bordo --}}
-            <div class="flex-1"></div>
-
-            {{-- Container fisso per i bottoni di azione --}}
-            <div class="flex items-center gap-1">
-
-                {{-- Pulsante Riserva stilizzato (solo se non è nascosto) --}}
-                @if (!$hideReserveButton)
-                @php
-                // Determina se $collection è disponibile (potrebbe non essere passato in alcuni contesti)
-                $creatorId = isset($collection)
-                ? $collection->creator_id
-                : $egi->collection->creator_id ?? null;
-                // Usa solo il campo booleano is_published per determinare se l'EGI è pubblicato
-                $isPublished = (bool) $egi->is_published;
-                // Controlla se ha un prezzo (quindi è effettivamente in vendita)
-                $hasPrice =
-                ($egi->price && $egi->price > 0) || ($egi->floorDropPrice && $egi->floorDropPrice > 0);
-
-                // Il pulsante deve apparire SOLO se:
-                // 1. È pubblicato
-                // 2. Ha un prezzo (quindi è in vendita)
-                // 3. L'utente attuale NON è il creatore
-                // 4. Non è mintato
-                $canReserve = !$egi->mint && $isPublished && $hasPrice && !$isCreator;
-
-                // 🔥 CONTROLLA SE L'EGI È GIÀ PRENOTATO
-                $reservationService = app('App\Services\ReservationService');
-                $highestPriorityReservation = $reservationService->getHighestPriorityReservation($egi);
-                $isReserved = $highestPriorityReservation !== null;
-                @endphp
-                @if ($canReserve)
-                {{-- Pulsante Prenota con colore diverso se già prenotato --}}
-                <button
-                    class="reserve-button {{ $isReserved ? 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600' : 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600' }} inline-flex flex-shrink-0 items-center justify-center rounded-lg px-3 py-2 text-xs font-semibold text-white shadow-lg transition-all duration-200 hover:scale-105 hover:shadow-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600"
-                    data-egi-id="{{ $egi->id }}" data-has-reservations="{{ $isReserved ? 'true' : 'false' }}">
-                    @if ($isReserved)
-                    {{-- Icona per EGI già prenotato (warning/alert) --}}
-                    <svg class="mr-1.5 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                        fill="currentColor">
-                        <path fill-rule="evenodd"
-                            d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z"
-                            clip-rule="evenodd" />
-                    </svg>
-                    @else
-                    {{-- Icona per EGI non ancora prenotato (bookmark) --}}
-                    <svg class="mr-1.5 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                        fill="currentColor">
-                        <path fill-rule="evenodd"
-                            d="M4.25 2A1.75 1.75 0 0 0 2.5 3.75v14.5a.75.75 0 0 0 1.218.582l5.534-4.426a.75.75 0 0 1 .496 0l5.534 4.427A.75.75 0 0 0 17.5 18.25V3.75A1.75 1.75 0 0 0 15.75 2h-11.5Z"
-                            clip-rule="evenodd" />
-                    </svg>
-                    @endif
-                    <span class="button-text">{{ __('egi.actions.reserve') }}</span>
-                </button>
-
-                {{-- Se ci sono prenotazioni, aggiungi pulsante Cronologia con margine --}}
-                @if ($isReserved)
-                <button
-                    class="inline-flex items-center justify-center flex-shrink-0 px-2 py-2 ml-1 mr-2 text-xs font-semibold text-white transition-all duration-200 rounded-lg shadow-lg history-button bg-gradient-to-r from-amber-500 to-orange-500 hover:scale-105 hover:from-amber-600 hover:to-orange-600 hover:shadow-xl"
-                    data-egi-id="{{ $egi->id }}" title="Visualizza cronologia prenotazioni">
-                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd"
-                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.414-1.414L11 9.586V6z"
-                            clip-rule="evenodd" />
-                    </svg>
-                </button>
-                @endif
-                @endif
-            </div>
+    {{-- 🔥 Pulsante Prenota/Rilancia in fondo alla card (identico a egi-card-list) --}}
+    @if(!$isCreator && !$hideReserveButton)
+    <div class="mt-3">
+        <button type="button" class="reserve-button w-full flex items-center justify-center px-4 py-2 text-sm font-medium text-white
+                {{ $hasCurrentReservation ? 'bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700' : 'bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700' }}
+                rounded-t-none rounded-b-lg transition-all transform hover:scale-[1.01]" data-egi-id="{{ $egi->id }}">
+            @if($hasCurrentReservation)
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
+            {{ __('egi.actions.outbid') ?? 'Rilancia' }}
+            @else
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            {{ __('egi.actions.reserve') ?? 'Prenota' }}
             @endif
-        </div>
+        </button>
     </div>
-
-</article>
+    @endif</article>

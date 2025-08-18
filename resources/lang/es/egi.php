@@ -46,8 +46,8 @@ return [
     'actions' => [
         'view' => 'Ver',
         'view_details' => 'Ver detalles del EGI',
-        'reserve' => 'Reservar',
-        'outbid' => 'Pujar más',
+        'reserve' => 'Activarlo',
+        'outbid' => 'Pujar más para activar',
     ],
 
     'carousel' => [
@@ -58,6 +58,25 @@ return [
             'creators' => 'Artistas',
             'collections' => 'Colecciones',
             'collectors' => 'Activadores'
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Hero Coverflow - Sección Hero con Efecto Coverflow 3D
+    |--------------------------------------------------------------------------
+    */
+
+    'hero_coverflow' => [
+        'title' => 'Activar un EGI es dejar huella.',
+        'subtitle' => 'Tu nombre permanece para siempre junto al del Creator: sin ti, la obra no existiría.',
+        'carousel_mode' => 'Vista Carousel',
+        'list_mode' => 'Vista Cuadrícula',
+        'carousel_label' => 'Carrusel de obras destacadas',
+        'no_egis' => 'No hay obras destacadas disponibles en este momento.',
+        'navigation' => [
+            'previous' => 'Obra anterior',
+            'next' => 'Obra siguiente',
         ],
     ],
 

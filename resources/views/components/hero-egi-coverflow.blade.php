@@ -12,6 +12,13 @@
 'id' => 'hero-egi-coverflow'
 ])
 
+@php
+// Filter EGIs to show only those with hype = 1
+$hypedEgis = $egis->filter(function ($egi) {
+return $egi->hyper == 1;
+});
+@endphp
+
 <section id="{{ $id }}"
     class="relative min-h-[70vh] bg-gradient-to-br from-gray-900 via-gray-800 to-black overflow-hidden" data-coverflow>
     {{-- Background Pattern --}}
@@ -35,7 +42,7 @@
             </p>
 
             {{-- View Toggle - Desktop Only --}}
-            <div class="hidden md:inline-flex gap-1 p-1 mt-6 border border-gray-700 rounded-xl bg-gray-800/60">
+            <div class="hidden gap-1 p-1 mt-6 border border-gray-700 md:inline-flex rounded-xl bg-gray-800/60">
                 <button
                     class="px-4 py-2 text-sm font-medium rounded-lg transition-all data-[active=true]:bg-purple-600 data-[active=true]:text-white text-gray-300 hover:text-white"
                     data-action="set-view" data-view="carousel"
@@ -55,8 +62,8 @@
             <div class="flex gap-6 pb-8 pl-6 pr-6 overflow-x-auto snap-x snap-mandatory scroll-pl-6 will-change-transform"
                 data-track tabindex="0" aria-label="{{ __('egi.hero_coverflow.carousel_label') }}">
 
-                @if($egis->count() > 0)
-                @foreach($egis as $egi)
+                @if($hypedEgis->count() > 0)
+                @foreach($hypedEgis as $egi)
                 <div class="snap-center shrink-0 w-[85%] sm:w-[70%] md:w-[50%] lg:w-[40%] xl:w-[35%]
                                     transition-all duration-200 ease-out cursor-pointer" data-slide
                     data-url="{{ route('egis.show', $egi) }}">
@@ -76,7 +83,7 @@
             </div>
 
             {{-- Navigation Arrows - Desktop Only --}}
-            @if($egis->count() > 1)
+            @if($hypedEgis->count() > 1)
             <div
                 class="absolute inset-y-0 left-0 right-0 items-center justify-between hidden px-4 pointer-events-none md:flex">
                 <button
@@ -108,7 +115,7 @@
         {{-- List View (Fallback) --}}
         <div class="hidden px-4" data-list>
             <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                @foreach($egis as $egi)
+                @foreach($hypedEgis as $egi)
                 <x-egi-card-list :egi="$egi" :showPurchasePrice="true" />
                 @endforeach
             </div>

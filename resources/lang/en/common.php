@@ -6,7 +6,7 @@ return [
     'base_price' => 'Base Price',
     'activator' => 'Activator',
     'commissioner' => 'Commissioner',
-    'available' => 'Available',
+    'available' => 'To Activate',
     'collector' => 'Collector',
     'collection' => 'Collection',
     'creator' => 'Creator',

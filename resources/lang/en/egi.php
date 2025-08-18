@@ -26,11 +26,11 @@ return [
     'like_button_title' => 'Add to Favorites',
     'share_button_title' => 'Share this EGI',
     'current_price' => 'Current Price',
-    'not_currently_listed' => 'Not Currently Listed',
+    'not_currently_listed' => 'To Activate',
     'contact_owner_availability' => 'Contact owner for availability',
     'liked' => 'Liked',
     'add_to_favorites' => 'Add to Favorites',
-    'reserve_this_piece' => 'Reserve This Piece',
+    'reserve_this_piece' => 'Activate It',
 
     /*
     |--------------------------------------------------------------------------
@@ -76,8 +76,8 @@ return [
     'actions' => [
         'view' => 'View',
         'view_details' => 'View EGI details',
-        'reserve' => 'Reserve',
-        'outbid' => 'Outbid',
+        'reserve' => 'Activate It',
+        'outbid' => 'Bid Higher to Activate',
     ],
 
     // Original currency note
@@ -347,8 +347,8 @@ return [
     */
 
     'hero_coverflow' => [
-        'title' => 'Discover Featured Artworks',
-        'subtitle' => 'Experience our finest digital art collection in an immersive 3D carousel with the most valuable and trending pieces on FlorenceEGI',
+        'title' => 'Activating an EGI means leaving your mark.',
+        'subtitle' => 'Your name remains forever alongside the Creator\'s: without you, the artwork wouldn\'t exist.',
         'carousel_mode' => 'Carousel View',
         'list_mode' => 'Grid View',
         'carousel_label' => 'Featured artworks carousel',

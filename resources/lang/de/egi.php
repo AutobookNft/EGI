@@ -46,8 +46,8 @@ return [
     'actions' => [
         'view' => 'Anzeigen',
         'view_details' => 'EGI-Details anzeigen',
-        'reserve' => 'Reservieren',
-        'outbid' => 'Überbieten',
+        'reserve' => 'Aktivieren',
+        'outbid' => 'Höher bieten um zu aktivieren',
     ],
 
     'carousel' => [
@@ -58,6 +58,25 @@ return [
             'creators' => 'Künstler',
             'collections' => 'Sammlungen',
             'collectors' => 'Aktivatoren'
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Hero Coverflow - Hero-Bereich mit 3D-Coverflow-Effekt
+    |--------------------------------------------------------------------------
+    */
+
+    'hero_coverflow' => [
+        'title' => 'Ein EGI zu aktivieren bedeutet, Spuren zu hinterlassen.',
+        'subtitle' => 'Ihr Name bleibt für immer neben dem des Schöpfers: ohne Sie würde das Kunstwerk nicht existieren.',
+        'carousel_mode' => 'Karussell-Ansicht',
+        'list_mode' => 'Raster-Ansicht',
+        'carousel_label' => 'Karussell mit ausgewählten Kunstwerken',
+        'no_egis' => 'Momentan sind keine ausgewählten Kunstwerke verfügbar.',
+        'navigation' => [
+            'previous' => 'Vorheriges Kunstwerk',
+            'next' => 'Nächstes Kunstwerk',
         ],
     ],
 

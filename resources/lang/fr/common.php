@@ -6,7 +6,7 @@ return [
     'base_price' => 'Prix de Base',
     'activator' => 'Activateur',
     'commissioner' => 'Commissaire',
-    'available' => 'Disponible',
+    'available' => 'À Activer',
     'collector' => 'Collectionneur',
     'loading' => 'Chargement...',
     'error' => 'Erreur',
