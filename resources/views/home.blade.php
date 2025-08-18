@@ -7,7 +7,7 @@
 
     <x-slot name="heroFullWidth">
 
-        <x-hero-egi-coverflow :egis="$featuredEgis" id="mainHeroCoverflow" />
+        <x-hero-egi-coverflow :allEgis="$allEgis" id="mainHeroCoverflow" />
 
     </x-slot>
 

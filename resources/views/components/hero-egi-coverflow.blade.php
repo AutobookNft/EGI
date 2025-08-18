@@ -8,13 +8,13 @@
 --}}
 
 @props([
-'egis' => collect(),
+'allEgis' => collect(),
 'id' => 'hero-egi-coverflow'
 ])
 
 @php
-// Filter EGIs to show only those with hype = 1
-$hypedEgis = $egis->filter(function ($egi) {
+// Filter EGIs to show only those with hyper == 1
+$hypedEgis = $allEgis->filter(function ($egi) {
 return $egi->hyper == 1;
 });
 @endphp

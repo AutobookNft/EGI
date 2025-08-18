@@ -53,6 +53,9 @@ class HomeController extends Controller {
         $featuredCreators = $this->getFeaturedCreators(); // Nuovo: recupera i Creator
         $topCollectors = $this->collectorCarouselService->getTopCollectors(10); // Nuovo: top collectors
         $featuredEgis = $this->getFeaturedEgis(); // Nuovo: ultimi 20 EGI per carousel homepage
+        $allEgis = Egi::where('is_published', true)
+            ->with(['collection'])
+            ->get();
 
         // Dati impatto ambientale - valore hardcoded per MVP
         // TODO: In futuro, recuperare da database o API dedicata
@@ -67,6 +70,7 @@ class HomeController extends Controller {
             'featuredCreators' => $featuredCreators, // Nuovo: passa i Creator alla vista
             'topCollectors' => $topCollectors, // Nuovo: passa i Top Collectors alla vista
             'featuredEgis' => $featuredEgis, // Nuovo: ultimi 20 EGI per carousel homepage
+            'allEgis' => $allEgis, // Nuovo: tutti gli EGI pubblicati per il carousel
         ]);
     }
 
