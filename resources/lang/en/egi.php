@@ -270,6 +270,7 @@ return [
             'collectors' => 'Top Collectors'
         ],
         'view_all' => 'View All',
+        'items' => 'items',
 
         // Legacy (for backwards compatibility)
         'two_columns' => 'List View',

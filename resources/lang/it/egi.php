@@ -288,6 +288,7 @@ return [
             'collectors' => 'Top Collezionisti'
         ],
         'view_all' => 'Vedi Tutti',
+        'items' => 'elementi',
 
         // Title and subtitle for multi-content carousel
         'title' => 'Scopri il Rinascimento',

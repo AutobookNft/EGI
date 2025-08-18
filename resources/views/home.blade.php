@@ -11,9 +11,9 @@
 
     </x-slot>
 
-    {{-- EGI Carousel - Prima cosa visibile su mobile --}}
+    {{-- Mobile: Toggle between Carousel and List modes --}}
     <x-slot name="egiCarousel">
-        <x-homepage-egi-carousel :egis="$featuredEgis" :creators="$featuredCreators" :collections="$featuredCollections"
+        <x-mobile-homepage-toggle :egis="$featuredEgis" :creators="$featuredCreators" :collections="$featuredCollections"
             :collectors="$topCollectors" />
     </x-slot>
 

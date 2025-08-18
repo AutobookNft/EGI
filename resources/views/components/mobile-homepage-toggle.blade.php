@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', function() {
             btn.classList.add('text-gray-400');
         });
         
-        const activeBtn = document.querySelector(`[data-view="${viewMode}"]`);
+        const activeBtn = document.querySelector(`.mobile-view-toggle[data-view="${viewMode}"]`);
         if (activeBtn) {
             activeBtn.classList.add('active', 'bg-purple-600', 'text-white');
             activeBtn.classList.remove('text-gray-400');
@@ -107,7 +107,7 @@ document.addEventListener('DOMContentLoaded', function() {
             content.classList.add('hidden');
         });
 
-        const targetContent = document.querySelector(`[data-view="${viewMode}"]`);
+        const targetContent = document.querySelector(`.mobile-view-content[data-view="${viewMode}"]`);
         if (targetContent) {
             targetContent.classList.remove('hidden');
         }
