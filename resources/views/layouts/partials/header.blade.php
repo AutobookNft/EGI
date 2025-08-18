@@ -130,7 +130,9 @@
 
                     {{-- Notification Badge (Desktop) --}}
                     @if(App\Helpers\FegiAuth::check())
-                    <x-notification-badge />
+                    <div class="hidden md:block">
+                        <x-notification-badge />
+                    </div>
                     @endif
 
                     {{-- EUR → ALGO Badge (Desktop) - Fixed Currency, Live Rate --}}
