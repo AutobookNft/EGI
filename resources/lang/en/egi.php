@@ -286,7 +286,7 @@ return [
     'list' => [
         'title' => 'Browse by Category',
         'subtitle' => 'Navigate through different categories to find what you\'re looking for',
-        
+
         'content_types' => [
             'egi_list' => 'EGI List',
             'creators' => 'Artists List',
@@ -338,6 +338,25 @@ return [
         'subtitle' => 'Choose how you want to browse content',
         'carousel_mode' => 'Carousel View',
         'list_mode' => 'List View',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Hero Coverflow - Hero Section with 3D Coverflow Effect
+    |--------------------------------------------------------------------------
+    */
+
+    'hero_coverflow' => [
+        'title' => 'Discover Featured Artworks',
+        'subtitle' => 'Experience our finest digital art collection in an immersive 3D carousel with the most valuable and trending pieces on FlorenceEGI',
+        'carousel_mode' => 'Carousel View',
+        'list_mode' => 'Grid View',
+        'carousel_label' => 'Featured artworks carousel',
+        'no_egis' => 'No featured artworks available at the moment.',
+        'navigation' => [
+            'previous' => 'Previous artwork',
+            'next' => 'Next artwork',
+        ],
     ],
 
 ];

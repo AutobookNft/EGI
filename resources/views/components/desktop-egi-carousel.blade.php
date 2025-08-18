@@ -1,7 +1,7 @@
 {{-- resources/views/components/desktop-egi-carousel.blade.php --}}
 {{--
 * @package App\View\Components
-* @author AI Assistant for Fabio Cherici  
+* @author AI Assistant for Fabio Cherici
 * @version 1.0.0 (FlorenceEGI - Desktop EGI Carousel Only)
 * @date 2025-01-18
 * @purpose Desktop-only EGI carousel with navigation
@@ -14,7 +14,7 @@
 @if($egis->count() > 0)
 <section class="py-8 bg-gradient-to-br from-gray-900 via-gray-800 to-black hidden lg:block">
     <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
-        
+
         {{-- Header --}}
         <div class="mb-8 text-center">
             <h2 class="mb-3 text-2xl font-bold text-white md:text-3xl">
@@ -63,16 +63,17 @@
             @for($i = 0; $i < min(5, ceil($egis->count() / 4)); $i++)
                 <button
                     class="w-2 h-2 transition-colors duration-300 bg-gray-600 rounded-full hover:bg-purple-500 desktop-carousel-indicator"
-                    data-slide="{{ $i }}" aria-label="{{ __('egi.desktop_carousel.navigation.slide', ['number' => $i + 1]) }}">
+                    data-slide="{{ $i }}"
+                    aria-label="{{ __('egi.desktop_carousel.navigation.slide', ['number' => $i + 1]) }}">
                 </button>
-            @endfor
+                @endfor
         </div>
     </div>
 </section>
 
 {{-- Desktop Carousel JavaScript --}}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function() {
     const carousel = document.getElementById('desktop-egi-carousel-track');
     const prevBtn = document.getElementById('desktop-prev-btn');
     const nextBtn = document.getElementById('desktop-next-btn');
@@ -148,21 +149,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
 {{-- Custom Styles --}}
 <style>
-.scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-}
+    .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
 
-.scrollbar-hide::-webkit-scrollbar {
-    display: none;
-}
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+    }
 
-.desktop-carousel-indicator {
-    transition: all 0.3s ease;
-}
+    .desktop-carousel-indicator {
+        transition: all 0.3s ease;
+    }
 
-.desktop-carousel-indicator:hover {
-    transform: scale(1.2);
-}
+    .desktop-carousel-indicator:hover {
+        transform: scale(1.2);
+    }
 </style>
 @endif

@@ -61,16 +61,9 @@ $activatorsCount = \DB::table('users')
                             {{ $egisCount }}
                         </span>
                     </div>
-                    @if(Route::has('egi.index'))
-                    <a href="{{ route('egi.index') }}"
-                        class="text-sm text-purple-300 hover:text-purple-200 transition-colors">
+                    <a href="#" class="text-sm text-purple-300 hover:text-purple-200 transition-colors">
                         {{ __('egi.carousel.view_all') }} →
                     </a>
-                    @else
-                    <span class="text-sm text-gray-500">
-                        {{ $egisCount }} {{ __('egi.carousel.items') }}
-                    </span>
-                    @endif
                 </div>
 
                 <div class="flex pb-4 space-x-4 overflow-x-auto scrollbar-hide">

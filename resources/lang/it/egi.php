@@ -304,7 +304,7 @@ return [
     'list' => [
         'title' => 'Esplora per Categoria',
         'subtitle' => 'Naviga tra le diverse categorie per trovare quello che cerchi',
-        
+
         'content_types' => [
             'egi_list' => 'Lista EGI',
             'creators' => 'Lista Artisti',
@@ -356,6 +356,25 @@ return [
         'subtitle' => 'Scegli come vuoi navigare i contenuti',
         'carousel_mode' => 'Vista Carousel',
         'list_mode' => 'Vista Lista',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Hero Coverflow - Sezione Hero con Effetto Coverflow 3D
+    |--------------------------------------------------------------------------
+    */
+
+    'hero_coverflow' => [
+        'title' => 'Scopri le Opere in Evidenza',
+        'subtitle' => 'Vivi la nostra collezione di arte digitale più pregiata in un carousel immersivo 3D con i pezzi più preziosi e di tendenza su FlorenceEGI',
+        'carousel_mode' => 'Vista Carousel',
+        'list_mode' => 'Vista Griglia',
+        'carousel_label' => 'Carousel opere in evidenza',
+        'no_egis' => 'Nessuna opera in evidenza disponibile al momento.',
+        'navigation' => [
+            'previous' => 'Opera precedente',
+            'next' => 'Opera successiva',
+        ],
     ],
 
     /*

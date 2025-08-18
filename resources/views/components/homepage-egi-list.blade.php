@@ -94,18 +94,18 @@ $activatorsCount = \DB::table('users')
             @php
             // 🔗 Mapping route per ogni tipo di contenuto
             $routeMapping = [
-                'egi-list' => null,
-                'creator' => route('creator.index'),
-                'collection' => route('collections.index'),
-                'collector' => route('collector.index')
+            'egi-list' => null,
+            'creator' => route('creator.index'),
+            'collection' => route('collections.index'),
+            'collector' => route('collector.index')
             ];
 
             // 📊 Mapping contatori per ogni tipo
             $countMapping = [
-                'egi-list' => $egisCount,
-                'creator' => $creatorsCount,
-                'collection' => $collectionsCount,
-                'collector' => $activatorsCount
+            'egi-list' => $egisCount,
+            'creator' => $creatorsCount,
+            'collection' => $collectionsCount,
+            'collector' => $activatorsCount
             ];
             @endphp
 
@@ -127,66 +127,68 @@ $activatorsCount = \DB::table('users')
             {{-- EGI List --}}
             <div class="grid grid-cols-1 gap-4 list-content content-egi-list" data-content="egi-list">
                 @if($egis->count() > 0)
-                    <div class="space-y-3">
-                        @foreach($egis as $egi)
-                            <x-egi-card-list :egi="$egi" context="creator" :showPurchasePrice="false" :showOwnershipBadge="false" />
-                        @endforeach
-                    </div>
+                <div class="space-y-3">
+                    @foreach($egis as $egi)
+                    <x-egi-card-list :egi="$egi" context="creator" :showPurchasePrice="false"
+                        :showOwnershipBadge="false" />
+                    @endforeach
+                </div>
                 @else
-                    <div class="py-8 text-center text-gray-400">
-                        {{ __('egi.list.empty_state.no_egis') }}
-                    </div>
+                <div class="py-8 text-center text-gray-400">
+                    {{ __('egi.list.empty_state.no_egis') }}
+                </div>
                 @endif
             </div>
 
             {{-- Creator List --}}
             <div class="hidden grid-cols-1 gap-4 list-content content-creator" data-content="creator">
                 @if($creators->count() > 0)
-                    <div class="space-y-3">
-                        @foreach($creators as $creator)
-                            <x-creator-card-list :creator="$creator" :context="'list'" :showBadge="true" />
-                        @endforeach
-                    </div>
+                <div class="space-y-3">
+                    @foreach($creators as $creator)
+                    <x-creator-card-list :creator="$creator" :context="'list'" :showBadge="true" />
+                    @endforeach
+                </div>
                 @else
-                    <div class="py-8 text-center text-gray-400">
-                        {{ __('egi.list.empty_state.no_creators') }}
-                    </div>
+                <div class="py-8 text-center text-gray-400">
+                    {{ __('egi.list.empty_state.no_creators') }}
+                </div>
                 @endif
             </div>
 
             {{-- Collection List --}}
             <div class="hidden grid-cols-1 gap-4 list-content content-collection" data-content="collection">
                 @if($collections->count() > 0)
-                    <div class="space-y-3">
-                        @foreach($collections as $collection)
-                            <x-collection-card-list :collection="$collection" :context="'list'" :showBadge="true" />
-                        @endforeach
-                    </div>
+                <div class="space-y-3">
+                    @foreach($collections as $collection)
+                    <x-collection-card-list :collection="$collection" :context="'list'" :showBadge="true" />
+                    @endforeach
+                </div>
                 @else
-                    <div class="py-8 text-center text-gray-400">
-                        {{ __('egi.list.empty_state.no_collections') }}
-                    </div>
+                <div class="py-8 text-center text-gray-400">
+                    {{ __('egi.list.empty_state.no_collections') }}
+                </div>
                 @endif
             </div>
 
             {{-- Collector List --}}
             <div class="hidden grid-cols-1 gap-4 list-content content-collector" data-content="collector">
                 @if($collectors->count() > 0)
-                    <div class="space-y-3">
-                        @foreach($collectors as $collector)
-                            <x-collector-card-list :collector="$collector" :context="'list'" :showBadge="true" />
-                        @endforeach
-                    </div>
+                <div class="space-y-3">
+                    @foreach($collectors as $collector)
+                    <x-collector-card-list :collector="$collector" :context="'list'" :showBadge="true" />
+                    @endforeach
+                </div>
                 @else
-                    <div class="py-8 text-center text-gray-400">
-                        {{ __('egi.list.empty_state.no_collectors') }}
-                    </div>
+                <div class="py-8 text-center text-gray-400">
+                    {{ __('egi.list.empty_state.no_collectors') }}
+                </div>
                 @endif
             </div>
         </div>
 
         {{-- Empty State --}}
-        @if($egis->count() === 0 && $creators->count() === 0 && $collections->count() === 0 && $collectors->count() === 0)
+        @if($egis->count() === 0 && $creators->count() === 0 && $collections->count() === 0 && $collectors->count() ===
+        0)
         <div class="py-12 text-center">
             <div class="flex items-center justify-center w-16 h-16 mx-auto mb-6 bg-gray-700 rounded-full">
                 <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -205,7 +207,7 @@ $activatorsCount = \DB::table('users')
 
 {{-- List Content Switcher JavaScript --}}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function() {
     const contentTypeBtns = document.querySelectorAll('.content-type-btn');
     const listContents = document.querySelectorAll('.list-content');
     const contentHeader = document.getElementById('content-type-header');
@@ -322,20 +324,20 @@ function navigateToContent(element) {
 
 {{-- Custom Styles --}}
 <style>
-.content-type-btn.active {
-    background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
-}
+    .content-type-btn.active {
+        background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
+    }
 
-.content-type-btn {
-    min-width: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
+    .content-type-btn {
+        min-width: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
 
-.list-content {
-    max-height: 80vh;
-    overflow-y: auto;
-    scrollbar-width: thin;
-}
+    .list-content {
+        max-height: 80vh;
+        overflow-y: auto;
+        scrollbar-width: thin;
+    }
 </style>

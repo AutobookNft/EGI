@@ -7,18 +7,21 @@
 
     <x-slot name="heroFullWidth">
 
-        <x-collection-hero-banner :collections="$featuredCollections" id="mainHeroCarousel" />
+        <x-hero-egi-coverflow :egis="$featuredEgis" id="mainHeroCoverflow" />
 
     </x-slot>
 
     {{-- Mobile: Toggle between Carousel and List modes --}}
     <x-slot name="egiCarousel">
-        <x-mobile-homepage-toggle :egis="$featuredEgis" :creators="$featuredCreators" :collections="$featuredCollections"
-            :collectors="$topCollectors" />
+        <x-mobile-homepage-toggle :egis="$featuredEgis" :creators="$featuredCreators"
+            :collections="$featuredCollections" :collectors="$topCollectors" />
     </x-slot>
 
-    {{-- Contenuto SOTTO il testo hero: Collezioni in Evidenza NFT Style - NASCOSTO su mobile --}}
+    {{-- Desktop: EGI Cards Carousel - SOLO desktop --}}
     <x-slot name="belowHeroContent">
+        <x-desktop-egi-carousel :egis="$featuredEgis" />
+        
+        {{-- Creators carousel (era qui prima) --}}
         <div class="hidden lg:block">
             <x-creators-carousel :creators="$featuredCreators" title="{{ __('guest_home.featured_creators_title') }}"
                 bgClass="bg-gray-900" marginClass="mb-12" />
