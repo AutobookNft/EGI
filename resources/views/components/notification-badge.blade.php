@@ -25,7 +25,7 @@
 
     {{-- Dropdown Panel --}}
     <div
-        class="absolute right-0 z-50 hidden mt-2 overflow-hidden bg-white border border-gray-200 rounded-lg shadow-xl notification-dropdown w-80 
+        class="absolute right-0 z-50 hidden mt-2 overflow-hidden bg-white border border-gray-200 rounded-lg shadow-xl notification-dropdown w-80
                max-sm:fixed max-sm:left-1/2 max-sm:transform max-sm:-translate-x-1/2 max-sm:top-16 max-sm:w-80 max-sm:mx-4">
         {{-- Header --}}
         <div class="px-4 py-3 border-b border-gray-200 bg-gray-50">

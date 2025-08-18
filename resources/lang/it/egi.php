@@ -256,6 +256,16 @@ return [
             'collectors' => 'Top Collezionisti'
         ],
 
+        // View Mode Buttons
+        'view_modes' => [
+            'carousel' => 'Vista Carousel',
+            'list' => 'Vista Elenco'
+        ],
+
+        // Mode Labels
+        'carousel_mode' => 'Carousel',
+        'list_mode' => 'Elenco',
+
         // Content Labels
         'creators' => 'Artisti',
         'collections' => 'Collezioni',

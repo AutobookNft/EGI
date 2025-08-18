@@ -49,17 +49,19 @@ $activatorsCount = \DB::table('users')
         </div>
 
         {{-- Mobile Content Type Selector --}}
-        <div class="flex justify-center mb-6 lg:hidden">
-            <div class="flex flex-wrap gap-1 p-1 bg-gray-800 border border-gray-700 rounded-lg">
-                {{-- EGI List Button --}}
-                <button
-                    class="px-3 py-2 text-xs font-medium transition-all duration-200 rounded content-type-btn active"
-                    data-content="egi-list" aria-label="{{ __('egi.carousel.content_types.egi_list') }}">
-                    <svg class="inline w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M3 4h18v2H3V4zm0 7h18v2H3v-2zm0 7h18v2H3v-2z" />
-                    </svg>
-                    <span class="hidden sm:inline">EGI</span>
-                </button>
+        <div class="flex flex-col gap-4 mb-6 lg:hidden">
+            {{-- Content Type Selector --}}
+            <div class="flex justify-center">
+                <div class="flex flex-wrap gap-1 p-1 bg-gray-800 border border-gray-700 rounded-lg">
+                    {{-- EGI List Button --}}
+                    <button
+                        class="px-3 py-2 text-xs font-medium transition-all duration-200 rounded content-type-btn active"
+                        data-content="egi-list" aria-label="{{ __('egi.carousel.content_types.egi_list') }}">
+                        <svg class="inline w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M3 4h18v2H3V4zm0 7h18v2H3v-2zm0 7h18v2H3v-2z" />
+                        </svg>
+                        <span class="hidden sm:inline">EGI</span>
+                    </button>
 
                 {{-- EGI Card Button --}}
                 <button class="px-3 py-2 text-xs font-medium transition-all duration-200 rounded content-type-btn"
@@ -99,6 +101,31 @@ $activatorsCount = \DB::table('users')
                     <span class="hidden sm:inline">{{ __('egi.carousel.collections') }}</span>
                 </button>
 
+            </div>
+            
+            {{-- View Mode Toggle --}}
+            <div class="flex justify-center">
+                <div class="flex gap-1 p-1 bg-gray-800 border border-gray-700 rounded-lg">
+                    {{-- Carousel Mode Button (Default) --}}
+                    <button
+                        class="px-4 py-2 text-xs font-medium transition-all duration-200 rounded view-mode-btn active"
+                        data-view="carousel" aria-label="{{ __('egi.carousel.view_modes.carousel') }}">
+                        <svg class="inline w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                        </svg>
+                        🎠 {{ __('egi.carousel.carousel_mode') }}
+                    </button>
+
+                    {{-- List Mode Button --}}
+                    <button
+                        class="px-4 py-2 text-xs font-medium transition-all duration-200 rounded view-mode-btn"
+                        data-view="list" aria-label="{{ __('egi.carousel.view_modes.list') }}">
+                        <svg class="inline w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                        📋 {{ __('egi.carousel.list_mode') }}
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -161,9 +188,9 @@ $activatorsCount = \DB::table('users')
             {{-- Carousel Track --}}
             <div id="homepage-multi-carousel" class="overflow-hidden">
 
-                {{-- EGI List Cards (Default Active) --}}
-                <div class="grid grid-cols-1 gap-4 transition-all duration-300 mobile-content content-egi-list lg:hidden"
-                    data-content="egi-list">
+                {{-- EGI List Cards (List Mode) --}}
+                <div class="hidden grid-cols-1 gap-4 transition-all duration-300 mobile-content content-egi-list view-list"
+                    data-content="egi-list" data-view="list">
                     @if($egis->count() > 0)
                     <div class="space-y-3">
                         @foreach($egis as $egi)
@@ -178,15 +205,30 @@ $activatorsCount = \DB::table('users')
                     @endif
                 </div>
 
-                {{-- EGI Cards --}}
+                {{-- EGI Carousel (Carousel Mode - Default) --}}
+                <div class="grid grid-cols-1 gap-4 transition-all duration-300 mobile-content content-egi-list view-carousel"
+                    data-content="egi-list" data-view="carousel">
+                    @if($egis->count() > 0)
+                        <x-egi-card-carousel :egis="$egis" context="creator" :showPurchasePrice="false" :showOwnershipBadge="false" />
+                    @else
+                        <div class="py-8 text-center text-gray-400">
+                            {{ __('egi.carousel.empty_state.no_egis') }}
+                        </div>
+                    @endif
+                </div>
+
+                {{-- EGI Cards (Carousel Mode) --}}
                 <div class="hidden grid-cols-1 gap-4 transition-all duration-300 mobile-content content-egi-card lg:hidden"
                     data-content="egi-card">
                     @if($egis->count() > 0)
-                    @foreach($egis as $egi)
-                    <div class="mobile-item">
-                        <x-egi-card :egi="$egi" :showPurchasePrice="true" />
-                    </div>
-                    @endforeach
+                        {{-- Carousel Track per EGI Cards --}}
+                        <div class="flex space-x-4 overflow-x-auto pb-4 scrollbar-hide" id="egi-card-mobile-carousel">
+                            @foreach($egis as $egi)
+                            <div class="flex-shrink-0" style="width: 280px;">
+                                <x-egi-card :egi="$egi" :showPurchasePrice="true" />
+                            </div>
+                            @endforeach
+                        </div>
                     @else
                     <div class="py-8 text-center text-gray-400">
                         {{ __('egi.carousel.empty_state.no_egis') }}
@@ -194,9 +236,9 @@ $activatorsCount = \DB::table('users')
                     @endif
                 </div>
 
-                {{-- Creator List Cards --}}
-                <div class="hidden grid-cols-1 gap-4 transition-all duration-300 mobile-content content-creator lg:hidden"
-                    data-content="creator">
+                {{-- Creator List Cards (List Mode) --}}
+                <div class="hidden grid-cols-1 gap-4 transition-all duration-300 mobile-content content-creator view-list lg:hidden"
+                    data-content="creator" data-view="list">
                     @if($creators->count() > 0)
                     @foreach($creators as $creator)
                     <div class="mobile-item">
@@ -207,6 +249,18 @@ $activatorsCount = \DB::table('users')
                     <div class="py-8 text-center text-gray-400">
                         {{ __('egi.carousel.empty_state.no_creators') }}
                     </div>
+                    @endif
+                </div>
+
+                {{-- Creator Carousel (Carousel Mode) --}}
+                <div class="hidden grid-cols-1 gap-4 transition-all duration-300 mobile-content content-creator view-carousel lg:hidden"
+                    data-content="creator" data-view="carousel">
+                    @if($creators->count() > 0)
+                        <x-creator-card-carousel :creators="$creators" context="default" :showBadge="true" />
+                    @else
+                        <div class="py-8 text-center text-gray-400">
+                            {{ __('egi.carousel.empty_state.no_creators') }}
+                        </div>
                     @endif
                 </div>
 
@@ -226,9 +280,9 @@ $activatorsCount = \DB::table('users')
                     @endif
                 </div>
 
-                {{-- Collector List Cards --}}
-                <div class="hidden grid-cols-1 gap-4 transition-all duration-300 mobile-content content-collector lg:hidden"
-                    data-content="collector">
+                {{-- Collector List Cards (List Mode) --}}
+                <div class="hidden grid-cols-1 gap-4 transition-all duration-300 mobile-content content-collector view-list lg:hidden"
+                    data-content="collector" data-view="list">
                     @if($collectors->count() > 0)
                     @foreach($collectors as $collector)
                     <div class="mobile-item">
@@ -239,6 +293,18 @@ $activatorsCount = \DB::table('users')
                     <div class="py-8 text-center text-gray-400">
                         {{ __('egi.carousel.empty_state.no_collectors') }}
                     </div>
+                    @endif
+                </div>
+
+                {{-- Collector Carousel (Carousel Mode) --}}
+                <div class="hidden grid-cols-1 gap-4 transition-all duration-300 mobile-content content-collector view-carousel lg:hidden"
+                    data-content="collector" data-view="carousel">
+                    @if($collectors->count() > 0)
+                        <x-collector-card-carousel :collectors="$collectors" context="default" :showBadge="true" />
+                    @else
+                        <div class="py-8 text-center text-gray-400">
+                            {{ __('egi.carousel.empty_state.no_collectors') }}
+                        </div>
                     @endif
                 </div>
 
@@ -291,9 +357,14 @@ $activatorsCount = \DB::table('users')
     document.addEventListener('DOMContentLoaded', function() {
     // Mobile Content Type Switcher
     const contentTypeBtns = document.querySelectorAll('.content-type-btn');
+    const viewModeBtns = document.querySelectorAll('.view-mode-btn');
     const mobileContents = document.querySelectorAll('.mobile-content');
     const contentHeader = document.getElementById('content-type-header');
     const contentCount = document.getElementById('content-type-count');
+
+    // Current state
+    let currentContentType = 'egi-list';
+    let currentViewMode = 'carousel'; // Default to carousel
 
     // Header text mapping
     const headerTexts = {
@@ -322,9 +393,35 @@ $activatorsCount = \DB::table('users')
         'collector': {{ $activatorsCount }}
     };
 
+    // Helper function to show content based on type and view mode
+    function showContent(contentType, viewMode) {
+        // Hide all content containers
+        mobileContents.forEach(content => {
+            content.classList.add('hidden');
+            content.classList.remove('grid');
+        });
+
+        // For content types that have view modes (egi-list, creator, collector)
+        if (['egi-list', 'creator', 'collector'].includes(contentType)) {
+            const targetContent = document.querySelector(`.content-${contentType}.view-${viewMode}`);
+            if (targetContent) {
+                targetContent.classList.remove('hidden');
+                targetContent.classList.add('grid');
+            }
+        } else {
+            // For content types without view modes (egi-card, collection)
+            const targetContent = document.querySelector(`.content-${contentType}`);
+            if (targetContent) {
+                targetContent.classList.remove('hidden');
+                targetContent.classList.add('grid');
+            }
+        }
+    }
+
+    // Content Type Button Logic
     contentTypeBtns.forEach(btn => {
         btn.addEventListener('click', function() {
-            const contentType = this.dataset.content;
+            currentContentType = this.dataset.content;
 
             // Update active button
             contentTypeBtns.forEach(b => {
@@ -334,57 +431,95 @@ $activatorsCount = \DB::table('users')
             this.classList.add('active', 'bg-purple-600', 'text-white');
             this.classList.remove('text-gray-400');
 
+            // Show/hide view mode toggle based on content type
+            const viewModeContainer = document.querySelector('.view-mode-btn').parentElement.parentElement;
+            if (['egi-list', 'creator', 'collector'].includes(currentContentType)) {
+                viewModeContainer.style.display = 'flex';
+            } else {
+                viewModeContainer.style.display = 'none';
+            }
+
             // Update header text and route with smooth transition
-            if (contentHeader && contentCount) {
-                contentHeader.style.opacity = '0.5';
-                contentCount.style.opacity = '0.5';
-
-                setTimeout(() => {
-                    // Update header text
-                    contentHeader.textContent = headerTexts[contentType] || headerTexts['egi-list'];
-
-                    // Update count
-                    contentCount.textContent = countMapping[contentType] || 0;
-
-                    // Update route data attribute
-                    const route = routeMapping[contentType];
-                    contentHeader.setAttribute('data-route', route || '');
-
-                    // Update cursor style based on route availability
-                    if (route) {
-                        contentHeader.classList.add('cursor-pointer', 'hover:text-purple-300');
-                        contentHeader.classList.remove('cursor-default');
-                    } else {
-                        contentHeader.classList.add('cursor-default');
-                        contentHeader.classList.remove('cursor-pointer', 'hover:text-purple-300');
-                    }
-
-                    contentHeader.style.opacity = '1';
-                    contentCount.style.opacity = '1';
-                }, 150);
-            }
-
-            // Hide all content containers
-            mobileContents.forEach(content => {
-                content.classList.add('hidden');
-                content.classList.remove('grid');
-            });
-
-            // Show selected content container
-            const targetContent = document.querySelector(`.content-${contentType}`);
-            if (targetContent) {
-                targetContent.classList.remove('hidden');
-                targetContent.classList.add('grid');
-            }
+            updateHeader(currentContentType);
+            
+            // Show content with current view mode (or default for types without view modes)
+            showContent(currentContentType, currentViewMode);
         });
     });
 
-    // Initialize active button (EGI List by default)
-    const activeBtn = document.querySelector('.content-type-btn.active');
-    if (activeBtn) {
-        activeBtn.classList.add('bg-purple-600', 'text-white');
-        activeBtn.classList.remove('text-gray-400');
+    // View Mode Button Logic
+    viewModeBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            currentViewMode = this.dataset.view;
+
+            // Update active button
+            viewModeBtns.forEach(b => {
+                b.classList.remove('active', 'bg-purple-600', 'text-white');
+                b.classList.add('text-gray-400');
+            });
+            this.classList.add('active', 'bg-purple-600', 'text-white');
+            this.classList.remove('text-gray-400');
+
+            // Show content with current content type
+            showContent(currentContentType, currentViewMode);
+        });
+    });
+
+    // Update header function
+    function updateHeader(contentType) {
+        if (contentHeader && contentCount) {
+            contentHeader.style.opacity = '0.5';
+            contentCount.style.opacity = '0.5';
+
+            setTimeout(() => {
+                // Update header text
+                contentHeader.textContent = headerTexts[contentType] || headerTexts['egi-list'];
+
+                // Update count
+                contentCount.textContent = countMapping[contentType] || 0;
+
+                // Update route data attribute
+                const route = routeMapping[contentType];
+                contentHeader.setAttribute('data-route', route || '');
+
+                // Update cursor style based on route availability
+                if (route) {
+                    contentHeader.classList.add('cursor-pointer', 'hover:text-purple-300');
+                    contentHeader.classList.remove('cursor-default');
+                } else {
+                    contentHeader.classList.add('cursor-default');
+                    contentHeader.classList.remove('cursor-pointer', 'hover:text-purple-300');
+                }
+
+                contentHeader.style.opacity = '1';
+                contentCount.style.opacity = '1';
+            }, 150);
+        }
     }
+
+    // Initialize active buttons and default state
+    const activeContentBtn = document.querySelector('.content-type-btn.active');
+    if (activeContentBtn) {
+        activeContentBtn.classList.add('bg-purple-600', 'text-white');
+        activeContentBtn.classList.remove('text-gray-400');
+    }
+
+    const activeViewBtn = document.querySelector('.view-mode-btn.active');
+    if (activeViewBtn) {
+        activeViewBtn.classList.add('bg-purple-600', 'text-white');
+        activeViewBtn.classList.remove('text-gray-400');
+    }
+
+    // Show/hide view mode toggle based on initial content type
+    const viewModeContainer = document.querySelector('.view-mode-btn').parentElement.parentElement;
+    if (['egi-list', 'creator', 'collector'].includes(currentContentType)) {
+        viewModeContainer.style.display = 'flex';
+    } else {
+        viewModeContainer.style.display = 'none';
+    }
+
+    // Show initial content (EGI carousel by default)
+    showContent(currentContentType, currentViewMode);
 
     // Desktop Carousel Logic (unchanged, for EGI only)
     const carousel = document.getElementById('desktop-carousel-track');
@@ -490,11 +625,13 @@ function navigateToContent(element) {
         transform: scale(1.2);
     }
 
-    .content-type-btn.active {
+    .content-type-btn.active,
+    .view-mode-btn.active {
         background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
     }
 
-    .content-type-btn {
+    .content-type-btn,
+    .view-mode-btn {
         min-width: 60px;
         display: flex;
         align-items: center;

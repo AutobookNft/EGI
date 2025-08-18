@@ -221,6 +221,16 @@ return [
             'collectors' => 'Top Collectors'
         ],
 
+        // View Mode Buttons
+        'view_modes' => [
+            'carousel' => 'Carousel View',
+            'list' => 'List View'
+        ],
+
+        // Mode Labels
+        'carousel_mode' => 'Carousel',
+        'list_mode' => 'List',
+
         // Content Labels
         'creators' => 'Creators',
         'collections' => 'Collections',
