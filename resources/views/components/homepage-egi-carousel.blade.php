@@ -63,7 +63,7 @@ $activatorsCount = \DB::table('users')
                     </div>
                     @if(Route::has('egi.index'))
                     <a href="{{ route('egi.index') }}"
-                        class="text-sm text-purple-300 hover:text-purple-200 transition-colors">
+                        class="text-sm text-purple-300 transition-colors hover:text-purple-200">
                         {{ __('egi.carousel.view_all') }} →
                     </a>
                     @else
@@ -98,7 +98,7 @@ $activatorsCount = \DB::table('users')
                         </span>
                     </div>
                     <a href="{{ route('creator.index') }}"
-                        class="text-sm text-purple-300 hover:text-purple-200 transition-colors">
+                        class="text-sm text-purple-300 transition-colors hover:text-purple-200">
                         {{ __('egi.carousel.view_all') }} →
                     </a>
                 </div>
@@ -107,35 +107,6 @@ $activatorsCount = \DB::table('users')
                     @foreach($creators as $creator)
                     <div class="flex-shrink-0" style="min-width: 320px;">
                         <x-creator-card-list :creator="$creator" :context="'carousel'" :showBadge="true" />
-                    </div>
-                    @endforeach
-                </div>
-            </div>
-            @endif
-
-            {{-- Collection Carousel Section --}}
-            @if($collections->count() > 0)
-            <div class="carousel-section">
-                <div class="flex items-center justify-between mb-6">
-                    <div class="flex items-center gap-3">
-                        <h3 class="text-xl font-bold text-white">
-                            📚 {{ __('egi.carousel.sections.collections') }}
-                        </h3>
-                        <span
-                            class="inline-flex items-center px-2 py-1 text-sm font-medium text-purple-300 border rounded-full bg-purple-900/30 border-purple-500/20">
-                            {{ $collectionsCount }}
-                        </span>
-                    </div>
-                    <a href="{{ route('collections.index') }}"
-                        class="text-sm text-purple-300 hover:text-purple-200 transition-colors">
-                        {{ __('egi.carousel.view_all') }} →
-                    </a>
-                </div>
-
-                <div class="flex pb-4 space-x-4 overflow-x-auto scrollbar-hide">
-                    @foreach($collections as $collection)
-                    <div class="flex-shrink-0" style="min-width: 320px;">
-                        <x-collection-card-list :collection="$collection" :context="'carousel'" :showBadge="true" />
                     </div>
                     @endforeach
                 </div>
@@ -156,7 +127,7 @@ $activatorsCount = \DB::table('users')
                         </span>
                     </div>
                     <a href="{{ route('collector.index') }}"
-                        class="text-sm text-purple-300 hover:text-purple-200 transition-colors">
+                        class="text-sm text-purple-300 transition-colors hover:text-purple-200">
                         {{ __('egi.carousel.view_all') }} →
                     </a>
                 </div>
@@ -165,6 +136,35 @@ $activatorsCount = \DB::table('users')
                     @foreach($collectors as $collector)
                     <div class="flex-shrink-0" style="min-width: 320px;">
                         <x-collector-card-list :collector="$collector" :context="'carousel'" :showBadge="true" />
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+            @endif
+
+            {{-- Collection Carousel Section --}}
+            @if($collections->count() > 0)
+            <div class="carousel-section">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center gap-3">
+                        <h3 class="text-xl font-bold text-white">
+                            📚 {{ __('egi.carousel.sections.collections') }}
+                        </h3>
+                        <span
+                            class="inline-flex items-center px-2 py-1 text-sm font-medium text-purple-300 border rounded-full bg-purple-900/30 border-purple-500/20">
+                            {{ $collectionsCount }}
+                        </span>
+                    </div>
+                    <a href="{{ route('collections.index') }}"
+                        class="text-sm text-purple-300 transition-colors hover:text-purple-200">
+                        {{ __('egi.carousel.view_all') }} →
+                    </a>
+                </div>
+
+                <div class="flex pb-4 space-x-4 overflow-x-auto scrollbar-hide">
+                    @foreach($collections as $collection)
+                    <div class="flex-shrink-0" style="min-width: 320px;">
+                        <x-collection-card-list :collection="$collection" :context="'carousel'" :showBadge="true" />
                     </div>
                     @endforeach
                 </div>

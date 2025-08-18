@@ -51,7 +51,7 @@ $isCreator = auth()->check() && auth()->id() === $creatorId;
 
 // 🔄 Controlla se c'è una prenotazione corrente per il pulsante Rilancia
 $hasCurrentReservation = $egi->reservations &&
-                        $egi->reservations->where('is_current', true)->first();
+$egi->reservations->where('is_current', true)->first();
 $isCreator = auth()->check() && auth()->id() === $creatorId;
 @endphp
 
@@ -564,4 +564,5 @@ $isCreator = auth()->check() && auth()->id() === $creatorId;
             @endif
         </button>
     </div>
-    @endif</article>
+    @endif
+</article>
