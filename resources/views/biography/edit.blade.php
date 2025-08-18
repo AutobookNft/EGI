@@ -20,44 +20,44 @@
             <!-- Header -->
             <div class="mb-8">
                 @if ($isEdit)
-                    <h1 name="title" class="text-2xl font-bold text-gray-100">
-                        {{ __('biography.edit_page.edit_biography') }}</h1>
+                <h1 name="title" class="text-2xl font-bold text-gray-100">
+                    {{ __('biography.edit_page.edit_biography') }}</h1>
                 @else
-                    <h1 name="title" class="text-2xl font-bold text-gray-100">
-                        {{ __('biography.edit_page.create_new_biography') }}</h1>
+                <h1 name="title" class="text-2xl font-bold text-gray-100">
+                    {{ __('biography.edit_page.create_new_biography') }}</h1>
                 @endif
                 <p class="text-gray-300">{{ __('biography.edit_page.tell_story_description') }}</p>
             </div>
 
             <!-- Error Messages -->
             @if ($errors->any())
-                <div class="p-4 mb-6 border border-red-500 rounded-lg bg-red-900/50">
-                    <div class="flex items-center space-x-2">
-                        <svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                        <h3 class="font-medium text-red-300">{{ __('biography.edit_page.validation_errors') }}</h3>
-                    </div>
-                    <ul class="mt-2 space-y-1 text-sm text-red-200">
-                        @foreach ($errors->all() as $error)
-                            <li>• {{ $error }}</li>
-                        @endforeach
-                    </ul>
+            <div class="p-4 mb-6 border border-red-500 rounded-lg bg-red-900/50">
+                <div class="flex items-center space-x-2">
+                    <svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <h3 class="font-medium text-red-300">{{ __('biography.edit_page.validation_errors') }}</h3>
                 </div>
+                <ul class="mt-2 space-y-1 text-sm text-red-200">
+                    @foreach ($errors->all() as $error)
+                    <li>• {{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
             @endif
 
             <!-- Success Message -->
             @if (session()->has('success'))
-                <div class="p-4 mb-6 border border-green-500 rounded-lg bg-green-900/50">
-                    <div class="flex items-center space-x-2">
-                        <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
-                            </path>
-                        </svg>
-                        <span class="font-medium text-green-300">{{ session('success') }}</span>
-                    </div>
+            <div class="p-4 mb-6 border border-green-500 rounded-lg bg-green-900/50">
+                <div class="flex items-center space-x-2">
+                    <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
+                        </path>
+                    </svg>
+                    <span class="font-medium text-green-300">{{ session('success') }}</span>
                 </div>
+            </div>
             @endif
 
             <!-- Form -->
@@ -66,7 +66,7 @@
                 method="POST" enctype="multipart/form-data" id="biography-form">
                 @csrf
                 @if (isset($biography))
-                    @method('PUT')
+                @method('PUT')
                 @endif
 
                 <!-- Navigation Tabs -->
@@ -111,20 +111,19 @@
                 <div id="basic-tab" class="space-y-6">
                     <!-- Title -->
                     <div>
-                        <label for="title"
-                            class="block mb-2 text-sm font-medium text-gray-300">{{ __('biography.edit_page.title_required') }}</label>
-                        <input type="text" id="title" name="title"
-                            value="{{ old('title', $biography->title ?? '') }}"
+                        <label for="title" class="block mb-2 text-sm font-medium text-gray-300">{{
+                            __('biography.edit_page.title_required') }}</label>
+                        <input type="text" id="title" name="title" value="{{ old('title', $biography->title ?? '') }}"
                             class="w-full rounded-lg border border-gray-600 bg-gray-800 px-4 py-3 text-white placeholder-gray-400 transition-colors focus:border-[#D4A574] focus:ring-1 focus:ring-[#D4A574]"
                             placeholder="{{ __('biography.edit_page.title_placeholder') }}" required>
                         @error('title')
-                            <p class="mt-1 text-sm text-red-400">{{ $message }}</p>
+                        <p class="mt-1 text-sm text-red-400">{{ $message }}</p>
                         @enderror
                     </div>
                     <!-- Content -->
                     <div>
-                        <label for="content"
-                            class="block mb-2 text-sm font-medium text-gray-300">{{ __('biography.edit_page.content_required') }}</label>
+                        <label for="content" class="block mb-2 text-sm font-medium text-gray-300">{{
+                            __('biography.edit_page.content_required') }}</label>
                         <div class="trix-container">
                             <input id="content-trix" name="content" type="hidden"
                                 value="{{ old('content', $biography->content ?? '') }}">
@@ -133,30 +132,30 @@
                                 placeholder="{{ __('biography.edit_page.content_placeholder') }}"></trix-editor>
                         </div>
                         @error('content')
-                            <p class="mt-1 text-sm text-red-400">{{ $message }}</p>
+                        <p class="mt-1 text-sm text-red-400">{{ $message }}</p>
                         @enderror
                     </div>
                     <!-- Excerpt -->
                     <div>
-                        <label for="excerpt"
-                            class="block mb-2 text-sm font-medium text-gray-300">{{ __('biography.edit_page.excerpt') }}</label>
+                        <label for="excerpt" class="block mb-2 text-sm font-medium text-gray-300">{{
+                            __('biography.edit_page.excerpt') }}</label>
                         <textarea id="excerpt" name="excerpt" rows="3" maxlength="500"
                             class="w-full rounded-lg border border-gray-600 bg-gray-800 px-4 py-3 text-white placeholder-gray-400 transition-colors focus:border-[#D4A574] focus:ring-1 focus:ring-[#D4A574]"
                             placeholder="{{ __('biography.edit_page.excerpt_placeholder') }}">{{ old('excerpt', $biography->excerpt ?? '') }}</textarea>
                         <p class="mt-1 text-xs text-gray-400">{{ __('biography.edit_page.excerpt_help') }} (<span
                                 id="excerpt-count">{{ strlen(old('excerpt') ?? '') }}</span>/500)</p>
                         @error('excerpt')
-                            <p class="mt-1 text-sm text-red-400">{{ $message }}</p>
+                        <p class="mt-1 text-sm text-red-400">{{ $message }}</p>
                         @enderror
                     </div>
                     <!-- Bottone aggiungi capitolo - Mobile First -->
                     <div class="flex items-center justify-center md:justify-end mt-8">
-                        <button type="button" id="add-chapter-btn"
-                            class="w-full md:w-auto inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-[#D4A574] to-[#E6B885] 
-                                   px-6 py-4 md:py-3 font-semibold text-gray-900 shadow-lg transition-all duration-200 
+                        <button type="button" id="add-chapter-btn" class="w-full md:w-auto inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-[#D4A574] to-[#E6B885]
+                                   px-6 py-4 md:py-3 font-semibold text-gray-900 shadow-lg transition-all duration-200
                                    hover:from-[#E6B885] hover:to-[#D4A574] hover:scale-105 active:scale-95
                                    min-h-[44px] touch-manipulation">
-                            <svg class="w-5 h-5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 mr-2 flex-shrink-0" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M12 4v16m8-8H4"></path>
                             </svg>
@@ -166,56 +165,63 @@
 
                     <!-- Lista Capitoli Esistenti -->
                     @if (isset($chapters) && $chapters->count() > 0)
-                        <div id="biography-chapters-list" class="mt-10 space-y-6">
-                            @foreach ($chapters as $chapter)
-                                <div class="p-6 mb-6 shadow-lg rounded-xl bg-gray-800/60"
-                                    data-chapter-id="{{ $chapter->id }}">
-                                    <div class="flex items-center justify-between mb-2">
-                                        <h3 class="text-lg font-semibold text-white">{{ $chapter->title }}</h3>
-                                        <div class="flex space-x-2">
-                                            <button type="button"
-                                                class="edit-chapter-btn rounded bg-[#D4A574] px-2 py-1 font-semibold text-gray-900 hover:bg-[#E6B885]"
-                                                data-id="{{ $chapter->id }}">{{ __('biography.edit_page.edit_chapter') }}</button>
-                                            <button type="button"
-                                                class="px-2 py-1 text-white bg-red-700 rounded delete-chapter-btn hover:bg-red-600"
-                                                data-id="{{ $chapter->id }}">{{ __('biography.edit_page.delete_chapter') }}</button>
-                                        </div>
-                                    </div>
-                                    <div class="mb-2 text-sm text-gray-400">
-                                        {{ $chapter->date_from ? \Carbon\Carbon::parse($chapter->date_from)->format('d/m/Y') : '' }}
-                                        @if ($chapter->date_to)
-                                            → {{ \Carbon\Carbon::parse($chapter->date_to)->format('d/m/Y') }}
-                                        @endif
-                                    </div>
-                                    <div class="mb-2 prose text-white prose-invert max-w-none">{!! $chapter->content !!}
-                                    </div>
-                                    @if ($chapter->media && $chapter->media->count() > 0)
-                                        <div class="mb-2">
-                                            <div class="flex flex-wrap gap-2">
-                                                @foreach ($chapter->media as $media)
-                                                    <div class="relative overflow-hidden bg-gray-900 rounded group" style="width: 80px; height: 80px;">
-                                                        <img src="{{ $media['thumb_url'] ?? $media['url'] }}"
-                                                            class="object-cover w-full h-full" alt="media"
-                                                            title="{{ $media['file_name'] ?? 'Chapter media' }}">
-                                                        <div class="absolute top-1 right-1">
-                                                            <button class="p-1 text-white transition-opacity duration-200 bg-red-500 rounded-full shadow-lg opacity-0 btn-delete-chapter-image hover:bg-red-600 group-hover:opacity-100"
-                                                                    data-media-id="{{ $media['id'] }}"
-                                                                    data-chapter-id="{{ $chapter->id }}"
-                                                                    title="{{ __('biography.edit_page.delete_image_title') }}"
-                                                                    type="button">
-                                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                                                </svg>
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                @endforeach
-                                            </div>
-                                        </div>
-                                    @endif
+                    <div id="biography-chapters-list" class="mt-10 space-y-6">
+                        @foreach ($chapters as $chapter)
+                        <div class="p-6 mb-6 shadow-lg rounded-xl bg-gray-800/60" data-chapter-id="{{ $chapter->id }}">
+                            <div class="flex items-center justify-between mb-2">
+                                <h3 class="text-lg font-semibold text-white">{{ $chapter->title }}</h3>
+                                <div class="flex space-x-2">
+                                    <button type="button"
+                                        class="edit-chapter-btn rounded bg-[#D4A574] px-2 py-1 font-semibold text-gray-900 hover:bg-[#E6B885]"
+                                        data-id="{{ $chapter->id }}">{{ __('biography.edit_page.edit_chapter')
+                                        }}</button>
+                                    <button type="button"
+                                        class="px-2 py-1 text-white bg-red-700 rounded delete-chapter-btn hover:bg-red-600"
+                                        data-id="{{ $chapter->id }}">{{ __('biography.edit_page.delete_chapter')
+                                        }}</button>
                                 </div>
-                            @endforeach
+                            </div>
+                            <div class="mb-2 text-sm text-gray-400">
+                                {{ $chapter->date_from ? \Carbon\Carbon::parse($chapter->date_from)->format('d/m/Y') :
+                                '' }}
+                                @if ($chapter->date_to)
+                                → {{ \Carbon\Carbon::parse($chapter->date_to)->format('d/m/Y') }}
+                                @endif
+                            </div>
+                            <div class="mb-2 prose text-white prose-invert max-w-none">{!! $chapter->content !!}
+                            </div>
+                            @if ($chapter->media && $chapter->media->count() > 0)
+                            <div class="mb-2">
+                                <div class="flex flex-wrap gap-2">
+                                    @foreach ($chapter->media as $media)
+                                    <div class="relative overflow-hidden bg-gray-900 rounded group"
+                                        style="width: 80px; height: 80px;">
+                                        <img src="{{ $media['thumb_url'] ?? $media['url'] }}"
+                                            class="object-cover w-full h-full" alt="media"
+                                            title="{{ $media['file_name'] ?? 'Chapter media' }}">
+                                        <div class="absolute top-1 right-1">
+                                            <button
+                                                class="p-1 text-white transition-opacity duration-200 bg-red-500 rounded-full shadow-lg opacity-0 btn-delete-chapter-image hover:bg-red-600 group-hover:opacity-100"
+                                                data-media-id="{{ $media['id'] }}" data-chapter-id="{{ $chapter->id }}"
+                                                title="{{ __('biography.edit_page.delete_image_title') }}"
+                                                type="button">
+                                                <svg class="w-3 h-3" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                                                    </path>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                            @endif
                         </div>
+                        @endforeach
+                    </div>
                     @endif
                 </div>
                 <div id="media-tab" class="hidden space-y-6">
@@ -224,16 +230,16 @@
                         </h3>
                         <!-- Multiple Images Upload -->
                         <div>
-                            <label
-                                class="block mb-2 text-sm font-medium text-gray-300">{{ __('biography.edit_page.biography_images') }}</label>
+                            <label class="block mb-2 text-sm font-medium text-gray-300">{{
+                                __('biography.edit_page.biography_images') }}</label>
                             <input type="file" id="multiple-images-input" multiple accept="image/*"
                                 class="w-full rounded-lg border border-gray-600 bg-gray-800 px-4 py-3 text-white transition-colors file:mr-4 file:rounded-lg file:border-0 file:bg-[#D4A574] file:px-4 file:py-2 file:text-sm file:font-medium file:text-gray-900 hover:file:bg-[#E6B885]">
                             <p class="text-xs text-gray-400">{{ __('biography.edit_page.upload_images_help') }}</p>
                             <div id="upload-loading"
                                 class="mt-2 hidden items-center space-x-2 rounded-lg bg-[#D4A574]/10 p-3 text-[#D4A574]">
                                 <div class="h-4 w-4 animate-spin rounded-full border-b-2 border-[#D4A574]"></div>
-                                <span
-                                    class="text-sm font-medium">{{ __('biography.edit_page.uploading_images') }}</span>
+                                <span class="text-sm font-medium">{{ __('biography.edit_page.uploading_images')
+                                    }}</span>
                             </div>
                             <div id="upload-error" class="hidden mt-1 text-sm text-red-400"></div>
                             <div id="upload-success" class="hidden mt-1 text-sm text-green-400"></div>
@@ -255,16 +261,16 @@
                         <div class="space-y-4">
                             <div class="flex items-center justify-between">
                                 <div class="flex-1">
-                                    <label
-                                        class="text-sm font-medium text-gray-300">{{ __('biography.edit_page.biography_public') }}</label>
+                                    <label class="text-sm font-medium text-gray-300">{{
+                                        __('biography.edit_page.biography_public') }}</label>
                                     <p class="text-xs text-gray-400">
                                         {{ __('biography.edit_page.biography_public_help') }}</p>
                                 </div>
                                 <label class="relative inline-flex items-center cursor-pointer">
                                     <input type="hidden" name="is_public" value="0">
                                     <input type="checkbox" name="is_public" id="is_public" value="1"
-                                        class="sr-only peer"
-                                        {{ old('is_public', $biography->is_public ?? false) ? 'checked' : '' }}>
+                                        class="sr-only peer" {{ old('is_public', $biography->is_public ?? false) ?
+                                    'checked' : '' }}>
                                     <div
                                         class="peer h-6 w-11 rounded-full bg-gray-600 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-[#D4A574] peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#D4A574]/20">
                                     </div>
@@ -292,7 +298,8 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M5 13l4 4L19 7"></path>
                             </svg>
-                            {{ isset($biography) ? __('biography.edit_page.update_biography') : __('biography.edit_page.create_biography') }}
+                            {{ isset($biography) ? __('biography.edit_page.update_biography') :
+                            __('biography.edit_page.create_biography') }}
                         </button>
                     </div>
                 </div>
@@ -303,21 +310,23 @@
     <!-- Modale CRUD Capitolo - Mobile First Design -->
     <div id="chapter-modal" class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-sm">
         <!-- Mobile: Full screen, Desktop: Centered modal -->
-        <div class="absolute inset-0 md:relative md:inset-auto md:top-1/2 md:left-1/2 md:transform md:-translate-x-1/2 md:-translate-y-1/2 
-                    bg-gray-900 md:shadow-2xl md:rounded-xl md:max-w-4xl md:max-h-[90vh] 
+        <div class="absolute inset-0 md:relative md:inset-auto md:top-1/2 md:left-1/2 md:transform md:-translate-x-1/2 md:-translate-y-1/2
+                    bg-gray-900 md:shadow-2xl md:rounded-xl md:max-w-4xl md:max-h-[90vh]
                     flex flex-col overflow-hidden">
-            
+
             <!-- Header Mobile/Desktop -->
-            <div class="flex items-center justify-between p-4 border-b border-gray-700 bg-gray-800 md:bg-transparent md:border-0 md:p-6">
+            <div
+                class="flex items-center justify-between p-4 border-b border-gray-700 bg-gray-800 md:bg-transparent md:border-0 md:p-6">
                 <h2 id="chapter-modal-title" class="text-lg md:text-xl font-bold text-white">Aggiungi Capitolo</h2>
                 <button id="close-chapter-modal"
                     class="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors md:p-1">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                        </path>
                     </svg>
                 </button>
             </div>
-            
+
             <!-- Content scrollable area -->
             <div class="flex-1 overflow-y-auto">
                 <div id="chapter-modal-content" class="p-4 md:p-6">
@@ -329,216 +338,222 @@
 </x-app-layout>
 
 @push('styles')
-    <link rel="stylesheet" type="text/css" href="https://unpkg.com/trix@2/dist/trix.css">
-    <style>
-        .tab-button {
-            @apply border-b-2 border-transparent px-1 py-3 text-sm font-medium text-gray-400 transition-colors hover:text-white;
-        }
+<link rel="stylesheet" type="text/css" href="https://unpkg.com/trix@2/dist/trix.css">
+<style>
+    .tab-button {
+        @apply border-b-2 border-transparent px-1 py-3 text-sm font-medium text-gray-400 transition-colors hover: text-white;
+    }
 
-        .tab-button.active {
-            @apply border-[#D4A574] text-[#D4A574];
-        }
+    .tab-button.active {
+        @apply border-[#D4A574] text-[#D4A574];
+    }
 
-        .trix-editor-biography {
-            @apply rounded-lg border border-gray-600 bg-gray-800 text-white;
-        }
+    .trix-editor-biography {
+        @apply rounded-lg border border-gray-600 bg-gray-800 text-white;
+    }
 
-        .trix-editor-biography:focus {
-            @apply border-[#D4A574] ring-1 ring-[#D4A574];
-        }
+    .trix-editor-biography:focus {
+        @apply border-[#D4A574] ring-1 ring-[#D4A574];
+    }
 
-        /* Trix Toolbar Styling per migliore visibilità */
-        trix-toolbar {
-            background-color: #374151 !important;
-            /* Gray-700 più chiaro */
-            border-bottom: 1px solid #4B5563 !important;
-            /* Gray-600 */
-            border-radius: 0.5rem 0.5rem 0 0 !important;
-            /* Rounded top */
-        }
+    /* Trix Toolbar Styling per migliore visibilità */
+    trix-toolbar {
+        background-color: #374151 !important;
+        /* Gray-700 più chiaro */
+        border-bottom: 1px solid #4B5563 !important;
+        /* Gray-600 */
+        border-radius: 0.5rem 0.5rem 0 0 !important;
+        /* Rounded top */
+    }
 
-        /* Bottoni della toolbar */
-        trix-toolbar .trix-button {
-            background-color: transparent !important;
-            border: 1px solid transparent !important;
-            color: #D1D5DB !important;
-            /* Gray-300 */
-            border-radius: 0.375rem !important;
-            margin: 0.125rem !important;
-            padding: 0.375rem 0.5rem !important;
-            transition: all 0.2s ease !important;
-        }
+    /* Bottoni della toolbar */
+    trix-toolbar .trix-button {
+        background-color: transparent !important;
+        border: 1px solid transparent !important;
+        color: #D1D5DB !important;
+        /* Gray-300 */
+        border-radius: 0.375rem !important;
+        margin: 0.125rem !important;
+        padding: 0.375rem 0.5rem !important;
+        transition: all 0.2s ease !important;
+    }
 
-        /* Bottoni hover */
-        trix-toolbar .trix-button:hover {
-            background-color: #4B5563 !important;
-            /* Gray-600 */
-            color: #F9FAFB !important;
-            /* Gray-50 */
-            border-color: #6B7280 !important;
-            /* Gray-500 */
-        }
+    /* Bottoni hover */
+    trix-toolbar .trix-button:hover {
+        background-color: #4B5563 !important;
+        /* Gray-600 */
+        color: #F9FAFB !important;
+        /* Gray-50 */
+        border-color: #6B7280 !important;
+        /* Gray-500 */
+    }
 
-        /* Bottoni attivi/premuti */
-        trix-toolbar .trix-button.trix-active {
-            background-color: #D4A574 !important;
-            /* Brand color */
-            color: #1F2937 !important;
-            /* Gray-800 dark text */
-            border-color: #E6B885 !important;
-        }
+    /* Bottoni attivi/premuti */
+    trix-toolbar .trix-button.trix-active {
+        background-color: #D4A574 !important;
+        /* Brand color */
+        color: #1F2937 !important;
+        /* Gray-800 dark text */
+        border-color: #E6B885 !important;
+    }
 
-        /* Separatori tra gruppi di bottoni */
-        trix-toolbar .trix-button-group {
-            border-right: 1px solid #4B5563 !important;
-            padding-right: 0.5rem !important;
-            margin-right: 0.5rem !important;
-        }
+    /* Separatori tra gruppi di bottoni */
+    trix-toolbar .trix-button-group {
+        border-right: 1px solid #4B5563 !important;
+        padding-right: 0.5rem !important;
+        margin-right: 0.5rem !important;
+    }
 
-        trix-toolbar .trix-button-group:last-child {
-            border-right: none !important;
-        }
+    trix-toolbar .trix-button-group:last-child {
+        border-right: none !important;
+    }
 
-        /* Dialog per link, etc */
-        trix-toolbar .trix-dialog {
-            background-color: #1F2937 !important;
-            /* Gray-800 */
-            border: 1px solid #4B5563 !important;
-            border-radius: 0.5rem !important;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3) !important;
-        }
+    /* Dialog per link, etc */
+    trix-toolbar .trix-dialog {
+        background-color: #1F2937 !important;
+        /* Gray-800 */
+        border: 1px solid #4B5563 !important;
+        border-radius: 0.5rem !important;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3) !important;
+    }
 
-        trix-toolbar .trix-dialog .trix-input {
-            background-color: #374151 !important;
-            /* Gray-700 */
-            border: 1px solid #4B5563 !important;
-            color: #F9FAFB !important;
-            border-radius: 0.375rem !important;
-            padding: 0.5rem !important;
-        }
+    trix-toolbar .trix-dialog .trix-input {
+        background-color: #374151 !important;
+        /* Gray-700 */
+        border: 1px solid #4B5563 !important;
+        color: #F9FAFB !important;
+        border-radius: 0.375rem !important;
+        padding: 0.5rem !important;
+    }
 
-        trix-toolbar .trix-dialog .trix-input:focus {
-            border-color: #D4A574 !important;
-            box-shadow: 0 0 0 1px #D4A574 !important;
-        }
+    trix-toolbar .trix-dialog .trix-input:focus {
+        border-color: #D4A574 !important;
+        box-shadow: 0 0 0 1px #D4A574 !important;
+    }
 
-        /* Bottoni del dialog */
-        trix-toolbar .trix-dialog .trix-button {
-            background-color: #4B5563 !important;
-            color: #F9FAFB !important;
-            border: 1px solid #6B7280 !important;
-        }
+    /* Bottoni del dialog */
+    trix-toolbar .trix-dialog .trix-button {
+        background-color: #4B5563 !important;
+        color: #F9FAFB !important;
+        border: 1px solid #6B7280 !important;
+    }
 
-        trix-toolbar .trix-dialog .trix-button:hover {
-            background-color: #D4A574 !important;
-            color: #1F2937 !important;
-        }
+    trix-toolbar .trix-dialog .trix-button:hover {
+        background-color: #D4A574 !important;
+        color: #1F2937 !important;
+    }
 
-        /* Stili specifici per i bottoni di eliminazione immagini */
-        .btn-delete-image {
-            pointer-events: auto !important;
-            cursor: pointer !important;
-            z-index: 10 !important;
-        }
+    /* Stili specifici per i bottoni di eliminazione immagini */
+    .btn-delete-image {
+        pointer-events: auto !important;
+        cursor: pointer !important;
+        z-index: 10 !important;
+    }
 
-        .btn-delete-image:hover {
-            cursor: pointer !important;
-            transform: scale(1.1) !important;
-        }
+    .btn-delete-image:hover {
+        cursor: pointer !important;
+        transform: scale(1.1) !important;
+    }
 
-        /* Stili per i bottoni di eliminazione delle immagini dei capitoli */
-        .btn-delete-chapter-image {
-            pointer-events: auto !important;
-            cursor: pointer !important;
-            z-index: 10 !important;
-        }
+    /* Stili per i bottoni di eliminazione delle immagini dei capitoli */
+    .btn-delete-chapter-image {
+        pointer-events: auto !important;
+        cursor: pointer !important;
+        z-index: 10 !important;
+    }
 
-        .btn-delete-chapter-image:hover {
-            cursor: pointer !important;
-            transform: scale(1.1) !important;
-        }
+    .btn-delete-chapter-image:hover {
+        cursor: pointer !important;
+        transform: scale(1.1) !important;
+    }
 
-        /* Assicura che l'overlay non blocchi i click */
-        .group:hover .btn-delete-image,
-        .group:hover .btn-delete-chapter-image {
-            pointer-events: auto !important;
-        }
+    /* Assicura che l'overlay non blocchi i click */
+    .group:hover .btn-delete-image,
+    .group:hover .btn-delete-chapter-image {
+        pointer-events: auto !important;
+    }
 
-        /* === MOBILE FIRST MODAL STYLES === */
-        /* Mobile: Modale a schermo intero con scroll sicuro */
+    /* === MOBILE FIRST MODAL STYLES === */
+    /* Mobile: Modale a schermo intero con scroll sicuro */
+    #chapter-modal {
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Mobile: Prevent body scroll quando modale è aperta */
+    body.modal-open {
+        overflow: hidden;
+        position: fixed;
+        width: 100%;
+        height: 100%;
+    }
+
+    /* Mobile: Assicura che la modale sia completamente visibile */
+    @media (max-width: 768px) {
+        #chapter-modal>div {
+            min-height: 100vh;
+            min-height: 100dvh;
+            /* Dynamic viewport height per mobile */
+        }
+    }
+
+    /* Desktop: Comportamento normale modale centrata */
+    @media (min-width: 769px) {
         #chapter-modal {
-            -webkit-overflow-scrolling: touch;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+    }
+
+    /* Trix Editor specifico per modale capitoli */
+    .trix-editor-biography {
+        background-color: #1F2937 !important;
+        /* Gray-800 */
+        border: 1px solid #4B5563 !important;
+        /* Gray-600 */
+        color: #F9FAFB !important;
+        /* Gray-50 */
+        border-radius: 0.5rem !important;
+        padding: 1rem !important;
+    }
+
+    .trix-editor-biography:focus {
+        border-color: #D4A574 !important;
+        box-shadow: 0 0 0 1px #D4A574 !important;
+        outline: none !important;
+    }
+
+    /* Mobile: Aggiusta dimensioni touch target */
+    @media (max-width: 768px) {
+
+        #chapter-modal input,
+        #chapter-modal button,
+        #chapter-modal .trix-editor-biography {
+            min-height: 44px;
+            /* iOS recommended touch target */
         }
 
-        /* Mobile: Prevent body scroll quando modale è aperta */
-        body.modal-open {
-            overflow: hidden;
-            position: fixed;
-            width: 100%;
-            height: 100%;
+        #chapter-modal input[type="file"] {
+            padding: 12px;
         }
 
-        /* Mobile: Assicura che la modale sia completamente visibile */
-        @media (max-width: 768px) {
-            #chapter-modal > div {
-                min-height: 100vh;
-                min-height: 100dvh; /* Dynamic viewport height per mobile */
-            }
+        /* Aggiusta toolbar Trix per mobile */
+        .trix-editor-biography trix-toolbar {
+            flex-wrap: wrap !important;
         }
 
-        /* Desktop: Comportamento normale modale centrata */
-        @media (min-width: 769px) {
-            #chapter-modal {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                padding: 1rem;
-            }
+        .trix-editor-biography trix-toolbar .trix-button-group {
+            margin-bottom: 0.25rem !important;
         }
-
-        /* Trix Editor specifico per modale capitoli */
-        .trix-editor-biography {
-            background-color: #1F2937 !important; /* Gray-800 */
-            border: 1px solid #4B5563 !important; /* Gray-600 */
-            color: #F9FAFB !important; /* Gray-50 */
-            border-radius: 0.5rem !important;
-            padding: 1rem !important;
-        }
-
-        .trix-editor-biography:focus {
-            border-color: #D4A574 !important;
-            box-shadow: 0 0 0 1px #D4A574 !important;
-            outline: none !important;
-        }
-
-        /* Mobile: Aggiusta dimensioni touch target */
-        @media (max-width: 768px) {
-            #chapter-modal input,
-            #chapter-modal button,
-            #chapter-modal .trix-editor-biography {
-                min-height: 44px; /* iOS recommended touch target */
-            }
-
-            #chapter-modal input[type="file"] {
-                padding: 12px;
-            }
-
-            /* Aggiusta toolbar Trix per mobile */
-            .trix-editor-biography trix-toolbar {
-                flex-wrap: wrap !important;
-            }
-
-            .trix-editor-biography trix-toolbar .trix-button-group {
-                margin-bottom: 0.25rem !important;
-            }
-        }
-    </style>
+    }
+</style>
 @endpush
 
 
 
 @push('scripts')
-    <script type="text/javascript" src="https://unpkg.com/trix@2/dist/trix.umd.min.js"></script>
+<script type="text/javascript" src="https://unpkg.com/trix@2/dist/trix.umd.min.js"></script>
 
-    @vite('resources/js/biography-edit.js')
+@vite('resources/js/biography-edit.js')
 @endpush

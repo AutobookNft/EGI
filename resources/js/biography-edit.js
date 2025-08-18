@@ -101,9 +101,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (firstInput) firstInput.focus();
             }, 100);
         });
-        
+
         closeChapterModalBtn.addEventListener('click', closeChapterModal);
-        
+
         // Close on backdrop click (but not on content click)
         chapterModal.addEventListener('click', function (e) {
             if (e.target === chapterModal) closeChapterModal();
@@ -122,7 +122,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Mobile: Restore body scroll
         document.body.classList.remove('modal-open');
         chapterModalContent.innerHTML = '';
-        
+
         // Reset focus to add button for accessibility
         const addBtn = document.getElementById('add-chapter-btn');
         if (addBtn) addBtn.focus();
@@ -141,9 +141,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 <!-- Titolo -->
                 <div>
                     <label class="block text-sm font-medium text-gray-300 mb-2">Titolo *</label>
-                    <input type="text" name="title" required 
-                           class="w-full rounded-lg border border-gray-600 bg-gray-800 px-4 py-3 text-white 
-                                  focus:border-[#D4A574] focus:ring-1 focus:ring-[#D4A574] transition-colors" 
+                    <input type="text" name="title" required
+                           class="w-full rounded-lg border border-gray-600 bg-gray-800 px-4 py-3 text-white
+                                  focus:border-[#D4A574] focus:ring-1 focus:ring-[#D4A574] transition-colors"
                            value="${chapter ? chapter.title : ''}"
                            placeholder="Inserisci il titolo del capitolo">
                 </div>
@@ -152,16 +152,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">Dal</label>
-                        <input type="date" name="date_from" 
-                               class="w-full rounded-lg border border-gray-600 bg-gray-800 px-4 py-3 text-white 
-                                      focus:border-[#D4A574] focus:ring-1 focus:ring-[#D4A574] transition-colors" 
+                        <input type="date" name="date_from"
+                               class="w-full rounded-lg border border-gray-600 bg-gray-800 px-4 py-3 text-white
+                                      focus:border-[#D4A574] focus:ring-1 focus:ring-[#D4A574] transition-colors"
                                value="${chapter && chapter.date_from ? chapter.date_from : ''}">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">Al</label>
-                        <input type="date" name="date_to" 
-                               class="w-full rounded-lg border border-gray-600 bg-gray-800 px-4 py-3 text-white 
-                                      focus:border-[#D4A574] focus:ring-1 focus:ring-[#D4A574] transition-colors" 
+                        <input type="date" name="date_to"
+                               class="w-full rounded-lg border border-gray-600 bg-gray-800 px-4 py-3 text-white
+                                      focus:border-[#D4A574] focus:ring-1 focus:ring-[#D4A574] transition-colors"
                                value="${chapter && chapter.date_to ? chapter.date_to : ''}">
                     </div>
                 </div>
@@ -170,7 +170,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div>
                     <label class="block text-sm font-medium text-gray-300 mb-2">Contenuto *</label>
                     <input id="chapter-content-trix" type="hidden" name="content" value="${chapter ? (chapter.content || '') : ''}">
-                    <trix-editor input="chapter-content-trix" 
+                    <trix-editor input="chapter-content-trix"
                                 class="trix-editor-biography min-h-[200px] md:min-h-[300px] rounded-lg border border-gray-600 bg-gray-800"></trix-editor>
                 </div>
 
@@ -178,9 +178,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div>
                     <label class="block text-sm font-medium text-gray-300 mb-2">Immagini</label>
                     <div class="border-2 border-dashed border-gray-600 rounded-lg p-4 hover:border-[#D4A574] transition-colors">
-                        <input type="file" id="chapter-media-input" name="images[]" multiple accept="image/*" 
-                               class="block w-full text-sm text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-lg 
-                                      file:border-0 file:text-sm file:font-medium file:bg-[#D4A574] file:text-gray-900 
+                        <input type="file" id="chapter-media-input" name="images[]" multiple accept="image/*"
+                               class="block w-full text-sm text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-lg
+                                      file:border-0 file:text-sm file:font-medium file:bg-[#D4A574] file:text-gray-900
                                       hover:file:bg-[#E6B885] file:cursor-pointer cursor-pointer">
                         <p class="mt-2 text-xs text-gray-400">PNG, JPG, GIF fino a 10MB. Seleziona più file contemporaneamente.</p>
                     </div>
@@ -190,25 +190,25 @@ document.addEventListener('DOMContentLoaded', function() {
                 <!-- Action Buttons - Mobile Stack, Desktop Row -->
                 <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pt-6 border-t border-gray-700">
                     <!-- Delete button (if editing) -->
-                    <button type="button" id="delete-chapter-btn" 
-                            class="order-last md:order-first px-4 py-2 rounded-lg bg-red-600 text-white font-medium 
+                    <button type="button" id="delete-chapter-btn"
+                            class="order-last md:order-first px-4 py-2 rounded-lg bg-red-600 text-white font-medium
                                    hover:bg-red-700 transition-colors ${chapter ? '' : 'hidden'}">
                         <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                         </svg>
                         Elimina
                     </button>
-                    
+
                     <!-- Cancel and Save buttons -->
                     <div class="flex gap-3">
-                        <button type="button" id="cancel-chapter-btn" 
-                                class="flex-1 md:flex-none px-6 py-3 rounded-lg bg-gray-700 text-white font-medium 
+                        <button type="button" id="cancel-chapter-btn"
+                                class="flex-1 md:flex-none px-6 py-3 rounded-lg bg-gray-700 text-white font-medium
                                        hover:bg-gray-600 transition-colors">
                             Annulla
                         </button>
-                        <button type="submit" 
-                                class="flex-1 md:flex-none px-6 py-3 rounded-lg bg-gradient-to-r from-[#D4A574] to-[#E6B885] 
-                                       text-gray-900 font-semibold hover:from-[#E6B885] hover:to-[#D4A574] 
+                        <button type="submit"
+                                class="flex-1 md:flex-none px-6 py-3 rounded-lg bg-gradient-to-r from-[#D4A574] to-[#E6B885]
+                                       text-gray-900 font-semibold hover:from-[#E6B885] hover:to-[#D4A574]
                                        transition-all duration-200 shadow-lg">
                             <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
