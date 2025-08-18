@@ -69,9 +69,9 @@
                 @endif
             </div>
 
-            {{-- Navigation Arrows --}}
+            {{-- Navigation Arrows - Desktop Only --}}
             @if($egis->count() > 1)
-            <div class="pointer-events-none absolute inset-y-0 left-0 right-0 flex justify-between items-center px-4">
+            <div class="hidden md:flex pointer-events-none absolute inset-y-0 left-0 right-0 justify-between items-center px-4">
                 <button class="pointer-events-auto rounded-full p-3 bg-gray-900/80 backdrop-blur border border-gray-700 text-white hover:bg-gray-800 hover:border-purple-500 transition-all transform hover:scale-110" 
                         data-arrow="-1" aria-label="{{ __('egi.hero_coverflow.navigation.previous') }}">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -192,9 +192,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
         updateCoverflowEffect();
 
-        // Center on click for non-centered slides
+        // Center on click for non-centered slides (but not for interactive elements)
         slides.forEach(slide => {
             slide.addEventListener('click', (e) => {
+                // Check if click target is a button, link, or other interactive element
+                const isInteractiveElement = e.target.closest('button, a, input, select, textarea, [role="button"], [tabindex]');
+                
+                if (isInteractiveElement) {
+                    // Allow the interactive element to handle the click
+                    return;
+                }
+                
                 const trackRect = track.getBoundingClientRect();
                 const slideRect = slide.getBoundingClientRect();
                 const slideCenter = slideRect.left + slideRect.width / 2;
@@ -205,6 +213,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     e.preventDefault();
                     const scrollAmount = slideCenter - trackCenter;
                     track.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+                } else {
+                    // If centered and not clicking on interactive element, navigate to EGI detail
+                    const url = slide.dataset.url;
+                    if (url) {
+                        window.location.href = url;
+                    }
                 }
             });
         });
