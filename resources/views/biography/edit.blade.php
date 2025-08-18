@@ -149,15 +149,18 @@
                             <p class="mt-1 text-sm text-red-400">{{ $message }}</p>
                         @enderror
                     </div>
-                    <!-- Bottone aggiungi capitolo -->
-                    <div class="flex items-center justify-end mt-8">
+                    <!-- Bottone aggiungi capitolo - Mobile First -->
+                    <div class="flex items-center justify-center md:justify-end mt-8">
                         <button type="button" id="add-chapter-btn"
-                            class="inline-flex items-center rounded-lg bg-gradient-to-r from-[#D4A574] to-[#E6B885] px-6 py-3 font-semibold text-gray-900 shadow-lg transition-all duration-200 hover:from-[#E6B885] hover:to-[#D4A574]">
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            class="w-full md:w-auto inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-[#D4A574] to-[#E6B885] 
+                                   px-6 py-4 md:py-3 font-semibold text-gray-900 shadow-lg transition-all duration-200 
+                                   hover:from-[#E6B885] hover:to-[#D4A574] hover:scale-105 active:scale-95
+                                   min-h-[44px] touch-manipulation">
+                            <svg class="w-5 h-5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M12 4v16m8-8H4"></path>
                             </svg>
-                            {{ __('biography.edit_page.add_chapter') }}
+                            <span class="text-sm md:text-base">{{ __('biography.edit_page.add_chapter') }}</span>
                         </button>
                     </div>
 
@@ -297,13 +300,29 @@
         </div>
     </div>
 
-    <!-- Modale CRUD Capitolo (markup base, da popolare via JS) -->
-    <div id="chapter-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden ml-80 bg-black/60">
-        <div class="relative w-full max-w-2xl p-8 bg-gray-900 shadow-2xl rounded-xl">
-            <button id="close-chapter-modal"
-                class="absolute text-2xl text-gray-400 right-4 top-4 hover:text-white">&times;</button>
-            <div id="chapter-modal-content">
-                <!-- Il form CRUD capitolo verrà iniettato qui via JS -->
+    <!-- Modale CRUD Capitolo - Mobile First Design -->
+    <div id="chapter-modal" class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-sm">
+        <!-- Mobile: Full screen, Desktop: Centered modal -->
+        <div class="absolute inset-0 md:relative md:inset-auto md:top-1/2 md:left-1/2 md:transform md:-translate-x-1/2 md:-translate-y-1/2 
+                    bg-gray-900 md:shadow-2xl md:rounded-xl md:max-w-4xl md:max-h-[90vh] 
+                    flex flex-col overflow-hidden">
+            
+            <!-- Header Mobile/Desktop -->
+            <div class="flex items-center justify-between p-4 border-b border-gray-700 bg-gray-800 md:bg-transparent md:border-0 md:p-6">
+                <h2 id="chapter-modal-title" class="text-lg md:text-xl font-bold text-white">Aggiungi Capitolo</h2>
+                <button id="close-chapter-modal"
+                    class="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors md:p-1">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- Content scrollable area -->
+            <div class="flex-1 overflow-y-auto">
+                <div id="chapter-modal-content" class="p-4 md:p-6">
+                    <!-- Il form CRUD capitolo verrà iniettato qui via JS -->
+                </div>
             </div>
         </div>
     </div>
@@ -443,6 +462,75 @@
         .group:hover .btn-delete-image,
         .group:hover .btn-delete-chapter-image {
             pointer-events: auto !important;
+        }
+
+        /* === MOBILE FIRST MODAL STYLES === */
+        /* Mobile: Modale a schermo intero con scroll sicuro */
+        #chapter-modal {
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Mobile: Prevent body scroll quando modale è aperta */
+        body.modal-open {
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Mobile: Assicura che la modale sia completamente visibile */
+        @media (max-width: 768px) {
+            #chapter-modal > div {
+                min-height: 100vh;
+                min-height: 100dvh; /* Dynamic viewport height per mobile */
+            }
+        }
+
+        /* Desktop: Comportamento normale modale centrata */
+        @media (min-width: 769px) {
+            #chapter-modal {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 1rem;
+            }
+        }
+
+        /* Trix Editor specifico per modale capitoli */
+        .trix-editor-biography {
+            background-color: #1F2937 !important; /* Gray-800 */
+            border: 1px solid #4B5563 !important; /* Gray-600 */
+            color: #F9FAFB !important; /* Gray-50 */
+            border-radius: 0.5rem !important;
+            padding: 1rem !important;
+        }
+
+        .trix-editor-biography:focus {
+            border-color: #D4A574 !important;
+            box-shadow: 0 0 0 1px #D4A574 !important;
+            outline: none !important;
+        }
+
+        /* Mobile: Aggiusta dimensioni touch target */
+        @media (max-width: 768px) {
+            #chapter-modal input,
+            #chapter-modal button,
+            #chapter-modal .trix-editor-biography {
+                min-height: 44px; /* iOS recommended touch target */
+            }
+
+            #chapter-modal input[type="file"] {
+                padding: 12px;
+            }
+
+            /* Aggiusta toolbar Trix per mobile */
+            .trix-editor-biography trix-toolbar {
+                flex-wrap: wrap !important;
+            }
+
+            .trix-editor-biography trix-toolbar .trix-button-group {
+                margin-bottom: 0.25rem !important;
+            }
         }
     </style>
 @endpush
