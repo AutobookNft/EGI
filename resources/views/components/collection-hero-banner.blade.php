@@ -33,8 +33,8 @@ return [
 <div class="relative w-full overflow-hidden hero-banner-container"
     style="height: 60vh; min-height: 450px; max-height: 700px;" id="heroBannerContainer_{{ $instanceId }}">
 
-    {{-- ... (div hero-banner-background come prima) ... --}}
-    <div class="absolute inset-0 transition-opacity duration-700 ease-in-out bg-center bg-cover hero-banner-background"
+    {{-- Desktop: Banner con background-image --}}
+    <div class="absolute inset-0 hidden transition-opacity duration-700 ease-in-out bg-center bg-cover hero-banner-background md:block"
         id="heroBannerBackground_{{ $instanceId }}"
         style="background-image: url('{{ $hasCollections && $firstCollection && $firstCollection->image_banner ? asset($firstCollection->image_banner) : asset("
         images/default/random_background/$logo") }}')">
@@ -42,10 +42,37 @@ return [
         <div class="absolute inset-0 opacity-75 bg-gradient-to-r from-black/50 via-transparent to-transparent"></div>
     </div>
 
+    {{-- Mobile: Carousel con immagini scrollabili --}}
+    <div class="absolute inset-0 md:hidden" id="mobileImageCarousel_{{ $instanceId }}">
+        <div class="flex w-full h-full overflow-x-auto snap-x snap-mandatory scrollbar-hide"
+            id="mobileCarouselTrack_{{ $instanceId }}">
+            @if($hasCollections)
+            @foreach($collections as $index => $collection)
+            <div class="relative flex-shrink-0 w-full h-full snap-start">
+                <img src="{{ $collection->image_banner ? asset($collection->image_banner) : asset("images/default/random_background/$logo") }}"
+                    alt="{{ $collection->collection_name ?? '' }}"
+                    class="object-cover w-full h-full">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10"></div>
+                <div class="absolute inset-0 opacity-75 bg-gradient-to-r from-black/50 via-transparent to-transparent">
+                </div>
+            </div>
+            @endforeach
+            @else
+            <div class="relative flex-shrink-0 w-full h-full snap-start">
+                <img src="{{ asset(" images/default/random_background/$logo") }}" alt="Default background"
+                    class="object-cover w-full h-full">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10"></div>
+                <div class="absolute inset-0 opacity-75 bg-gradient-to-r from-black/50 via-transparent to-transparent">
+                </div>\
+            </div>
+            @endif
+        </div>
+    </div>
+
     {{-- CTA Ambientale - CENTRATA COMPLETAMENTE --}}
     <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
         <p
-            class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-green-300 font-bold max-w-4xl leading-tight text-center px-8">
+            class="max-w-4xl px-8 text-2xl font-bold leading-tight text-center text-green-300 sm:text-3xl md:text-4xl lg:text-5xl">
             {{ __('guest_home.hero_banner_cta') }}
         </p>
     </div>
@@ -84,7 +111,7 @@ return [
             Su md+, md:self-start lo allinea all'inizio del contenitore flex laterale (a destra).
             Aggiunto md:mt-0 per resettare il margine su schermi più grandi se il titolo è corto.
             --}}
-            <div class="hidden md:flex items-center p-2 mt-4 space-x-2 rounded-full md:mt-0 md:self-start bg-black/30 backdrop-blur-sm"
+            <div class="items-center hidden p-2 mt-4 space-x-2 rounded-full md:flex md:mt-0 md:self-start bg-black/30 backdrop-blur-sm"
                 id="slideIndicators_{{ $instanceId }}">
                 @foreach($collections as $index => $collection)
                 <button data-index="{{ $index }}"
@@ -122,12 +149,6 @@ return [
             <div class="order-2 md:order-1"></div> {{-- Placeholder per mantenere layout --}}
             @endif
 
-            <!-- Pulsante Reserve -->
-            {{-- @include('partials.collection-hero-banner-reserve-button', [
-            'instanceId' => $instanceId,
-            'hasCollections' => $hasCollections,
-            'firstCollection' => $firstCollection
-            ]) --}}
 
         </div>
     </div>
@@ -140,75 +161,66 @@ return [
     // console.log('HERO BANNER SCRIPT BLOCK PARSED - Instance ID: {{ $instanceId }}');
 
     document.addEventListener('DOMContentLoaded', function() {
-        // Log per indicare che DOMContentLoaded si è attivato per questo script
-        // console.log('HERO BANNER DOMCONTENTLOADED FIRED - Instance ID: {{ $instanceId }}');
-
         const componentId = "{{ $instanceId }}";
-        // console.log('Component Initializing with JS componentId:', componentId);
-
         const heroBannerContainer = document.getElementById('heroBannerContainer_' + componentId);
 
         if (!heroBannerContainer) {
             console.error('CRITICAL: Hero Banner Container (heroBannerContainer_' + componentId + ') not found.');
             return;
         }
-        // console.log('Hero Banner Container FOUND:', heroBannerContainer);
 
         const collectionsData = @json($jsCollectionsData);
 
-        if (!collectionsData || !Array.isArray(collectionsData)) { // Controllo più robusto
+        if (!collectionsData || !Array.isArray(collectionsData)) {
             console.warn('Collections data is not a valid array or is missing for component ID:', componentId);
-            // Nascondi controlli se non ci sono dati validi
-            const elToHideOnError = ['prevSlide_', 'nextSlide_', 'slideIndicators_'];
-            elToHideOnError.forEach(prefix => {
-                const el = document.getElementById(prefix + componentId);
-                if (el) el.style.display = 'none';
-            });
-            // Potresti anche voler aggiornare il banner a uno stato di "nessuna collezione"
-             const bannerBgErr = document.getElementById('heroBannerBackground_' + componentId);
-             const subTextErr = document.getElementById('collectionSubText_' + componentId);
-             const reserveBtnErr = document.getElementById('reserveButton_' + componentId);
-             if(bannerBgErr) bannerBgErr.style.backgroundImage = `url('{{ asset('images/default/banner_placeholder.jpg') }}')`;
-             if(subTextErr) subTextErr.textContent = '{{ __('guest_home.no_collections_available') }}';
-             if(reserveBtnErr) reserveBtnErr.disabled = true;
             return;
         }
-        // console.log('Collections Data Loaded:', collectionsData.length, collectionsData);
 
-        let currentIndex = 0;
-        let autoScrollInterval;
-        const autoplayInterval = {{ $autoplayInterval }}; // Preso dalle props
-        const totalCollections = collectionsData.length;
-        // console.log('Total Collections:', totalCollections);
-
-        const bannerBackground = document.getElementById('heroBannerBackground_' + componentId);
+        // Elementi del DOM
+        const bannerBackground = document.getElementById('heroBannerBackground_' + componentId); // Desktop only
+        const mobileCarouselTrack = document.getElementById('mobileCarouselTrack_' + componentId); // Mobile only
         const collectionSubTextElement = document.getElementById('collectionSubText_' + componentId);
         const reserveButton = document.getElementById('reserveButton_' + componentId);
-        const slideIndicatorsContainer = document.getElementById('slideIndicators_' + componentId);
-        const slideIndicators = slideIndicatorsContainer ? slideIndicatorsContainer.querySelectorAll('.slide-indicator') : [];
         const prevButton = document.getElementById('prevSlide_' + componentId);
         const nextButton = document.getElementById('nextSlide_' + componentId);
+        const slideIndicatorsContainer = document.querySelector('#heroBannerContainer_' + componentId + ' .slide-indicators');
+        const slideIndicators = slideIndicatorsContainer ? slideIndicatorsContainer.querySelectorAll('[data-index]') : [];
 
-        // === INIZIO DEFINIZIONE FUNZIONI HELPER ===
+        const totalCollections = collectionsData.length;
+        const autoplayInterval = {{ $autoplayInterval }};
+        let currentIndex = 0;
+        let autoScrollInterval = null;
+        let isMobile = window.innerWidth < 768; // md breakpoint
+
+        // Funzione per rilevare se siamo su mobile
+        function checkIfMobile() {
+            isMobile = window.innerWidth < 768;
+        }
+
+        // Update in base a desktop/mobile
         function updateBannerContent() {
-            // console.log('updateBannerContent called. Current index:', currentIndex);
-            if (!collectionsData[currentIndex]) {
-                console.warn('updateBannerContent: No data for current index', currentIndex);
-                if(bannerBackground) bannerBackground.style.backgroundImage = `url('{{ asset('images/default/banner_placeholder.jpg') }}')`;
-                if(collectionSubTextElement) collectionSubTextElement.textContent = '{{ __('guest_home.no_collections_available') }}';
-                if(reserveButton) reserveButton.disabled = true;
-                return;
-            }
-            const currentCollection = collectionsData[currentIndex];
+            if (totalCollections === 0) return;
 
-            if (bannerBackground) {
-                bannerBackground.style.opacity = '0.7'; // Inizia transizione
+            const currentCollection = collectionsData[currentIndex];
+            if (!currentCollection) return;
+
+            if (isMobile && mobileCarouselTrack) {
+                // Mobile: scroll nativo
+                const slideWidth = mobileCarouselTrack.offsetWidth;
+                mobileCarouselTrack.scrollTo({
+                    left: currentIndex * slideWidth,
+                    behavior: 'smooth'
+                });
+            } else if (!isMobile && bannerBackground) {
+                // Desktop: background image transition
+                bannerBackground.style.opacity = '0.3';
                 setTimeout(() => {
                     bannerBackground.style.backgroundImage = `url('${currentCollection.banner}')`;
-                    bannerBackground.style.opacity = '1'; // Fine transizione
-                }, 350); // Metà della durata css transition-opacity (che è 700ms)
+                    bannerBackground.style.opacity = '1';
+                }, 350);
             }
 
+            // Aggiorna contenuto testuale
             if (collectionSubTextElement) {
                 collectionSubTextElement.textContent = `${currentCollection.name} {{ __('guest_home.by') }} ${currentCollection.creator}`;
             }
@@ -219,6 +231,7 @@ return [
                 reserveButton.disabled = false;
             }
 
+            // Aggiorna indicatori
             if (slideIndicators && slideIndicators.length > 0) {
                 slideIndicators.forEach((indicator, index) => {
                     indicator.classList.toggle('bg-white', index === currentIndex);
@@ -230,7 +243,6 @@ return [
         }
 
         function goToSlide(index) {
-            // console.log('goToSlide called with index:', index);
             if (isNaN(index) || index < 0 || index >= totalCollections) {
                 console.warn('goToSlide: Invalid index received:', index);
                 return;
@@ -241,7 +253,6 @@ return [
         }
 
         function cycleSlide(direction) {
-            // console.log('cycleSlide called with direction:', direction);
             if (totalCollections <= 1) return;
             let newIndex = currentIndex + direction;
             if (newIndex < 0) newIndex = totalCollections - 1;
@@ -250,7 +261,6 @@ return [
         }
 
         function startAutoScroll() {
-            // console.log('startAutoScroll called. Autoplay interval:', autoplayInterval);
             clearInterval(autoScrollInterval);
             if (totalCollections > 1 && autoplayInterval > 0) {
                 autoScrollInterval = setInterval(() => cycleSlide(1), autoplayInterval);
@@ -258,32 +268,28 @@ return [
         }
 
         function resetAutoScroll() {
-            // console.log('resetAutoScroll called');
             clearInterval(autoScrollInterval);
             startAutoScroll();
         }
-        // === FINE DEFINIZIONE FUNZIONI HELPER ===
 
-        // Aggancio event listener
+        // Event listeners per i bottoni
         if (prevButton && nextButton && totalCollections > 1) {
-            // console.log('Attaching listeners to Prev/Next buttons.');
-            prevButton.addEventListener('click', () => { /* console.log('Prev button clicked'); */ cycleSlide(-1); });
-            nextButton.addEventListener('click', () => { /* console.log('Next button clicked'); */ cycleSlide(1); });
+            prevButton.addEventListener('click', () => cycleSlide(-1));
+            nextButton.addEventListener('click', () => cycleSlide(1));
         } else {
-            if (totalCollections <= 1) { // Nascondi se non servono
+            if (totalCollections <= 1) {
                 if(prevButton) prevButton.style.display = 'none';
                 if(nextButton) nextButton.style.display = 'none';
                 if(slideIndicatorsContainer) slideIndicatorsContainer.style.display = 'none';
             }
         }
 
+        // Event listeners per gli indicatori
         if (slideIndicators.length > 0 && totalCollections > 1) {
-            // console.log('Attaching listeners to Slide Indicators.');
             slideIndicators.forEach((indicator) => {
                 indicator.addEventListener('click', () => {
                     const indexVal = indicator.dataset.index;
                     const parsedIndex = parseInt(indexVal);
-                    // console.log('Indicator clicked. Data-index:', indexVal, 'Parsed index:', parsedIndex);
                     goToSlide(parsedIndex);
                 });
             });
@@ -291,25 +297,72 @@ return [
              if(slideIndicatorsContainer) slideIndicatorsContainer.style.display = 'none';
         }
 
+        // Gestione del mobile swipe su scroll nativo
+        if (isMobile && mobileCarouselTrack && totalCollections > 1) {
+            let isScrolling = false;
+
+            mobileCarouselTrack.addEventListener('scroll', () => {
+                if (isScrolling) return;
+                isScrolling = true;
+
+                requestAnimationFrame(() => {
+                    const slideWidth = mobileCarouselTrack.offsetWidth;
+                    const scrollLeft = mobileCarouselTrack.scrollLeft;
+                    const newIndex = Math.round(scrollLeft / slideWidth);
+
+                    if (newIndex !== currentIndex && newIndex >= 0 && newIndex < totalCollections) {
+                        currentIndex = newIndex;
+                        // Aggiorna solo il testo e gli indicatori, non lo scroll (già fatto dall'utente)
+                        const currentCollection = collectionsData[currentIndex];
+                        if (collectionSubTextElement && currentCollection) {
+                            collectionSubTextElement.textContent = `${currentCollection.name} {{ __('guest_home.by') }} ${currentCollection.creator}`;
+                        }
+                        if (reserveButton && currentCollection) {
+                            reserveButton.dataset.egiId = currentCollection.id;
+                            reserveButton.dataset.collectionName = currentCollection.name;
+                        }
+                        // Aggiorna indicatori
+                        if (slideIndicators && slideIndicators.length > 0) {
+                            slideIndicators.forEach((indicator, index) => {
+                                indicator.classList.toggle('bg-white', index === currentIndex);
+                                indicator.classList.toggle('scale-125', index === currentIndex);
+                                indicator.classList.toggle('bg-white/50', index !== currentIndex);
+                                indicator.classList.toggle('hover:bg-white/75', index !== currentIndex);
+                            });
+                        }
+                        resetAutoScroll();
+                    }
+                    isScrolling = false;
+                });
+            });
+        }
+
+        // Gestione resize per rilevare cambio desktop/mobile
+        window.addEventListener('resize', () => {
+            checkIfMobile();
+            updateBannerContent();
+        });
+
+        // Gestione keyboard e mouse events (solo se non mobile o per contenuto generale)
         if (totalCollections > 1 && heroBannerContainer) {
             heroBannerContainer.addEventListener('keydown', (e) => {
                 if (e.key === 'ArrowLeft') cycleSlide(-1);
                 else if (e.key === 'ArrowRight') cycleSlide(1);
             });
-            heroBannerContainer.addEventListener('mouseenter', () => { /* console.log('Mouse entered, clearing interval'); */ clearInterval(autoScrollInterval); });
-            heroBannerContainer.addEventListener('mouseleave', () => { /* console.log('Mouse left, restarting autoscroll'); */ startAutoScroll(); });
+            heroBannerContainer.addEventListener('mouseenter', () => {
+                clearInterval(autoScrollInterval);
+            });
+            heroBannerContainer.addEventListener('mouseleave', () => {
+                startAutoScroll();
+            });
         }
 
-        // Chiamata iniziale e autoscroll
-        if (collectionsData.length > 0) { // Modificato da totalCollections a collectionsData.length per coerenza
-            // console.log('Initial call to updateBannerContent for index:', currentIndex);
+        // Inizializzazione
+        if (collectionsData.length > 0) {
             updateBannerContent();
             if (totalCollections > 1) {
                 startAutoScroll();
             }
-        } else {
-            // Questo blocco è ridondante se il controllo all'inizio dello script nasconde già tutto
-            // console.warn("No collections to display, banner content not updated (final check).");
         }
     });
 </script>

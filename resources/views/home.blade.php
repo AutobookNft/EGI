@@ -7,7 +7,7 @@
 
     <x-slot name="heroFullWidth">
 
-        <x-hero-egi-coverflow :allEgis="$allEgis" id="mainHeroCoverflow" />
+        <x-collection-hero-banner :collections="$featuredCollections" id="mainHeroCarousel" />
 
     </x-slot>
 
