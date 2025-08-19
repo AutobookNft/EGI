@@ -36,7 +36,7 @@ $activatorsCount = \DB::table('users')
         {{-- Header Section --}}
         <div class="mb-8 text-center">
             <h2 class="mb-3 text-2xl font-bold text-white md:text-3xl">
-                ⚡ <span class="text-transparent bg-gradient-to-r from-purple-400 to-blue-500 bg-clip-text">
+                💎 <span class="text-transparent bg-gradient-to-r from-purple-400 to-blue-500 bg-clip-text">
                     {{ __('egi.carousel.title') }}
                 </span>
             </h2>
