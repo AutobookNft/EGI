@@ -330,11 +330,11 @@ if [ $TAGGED_COMMITS -gt 0 ]; then
     fi
     
     # Suggerimento sul focus
-    if [ $MAX_TAG_TYPE == "FEAT (funzionalità)" ]; then
+    if [[ "$MAX_TAG_TYPE" == "FEAT (funzionalità)" ]]; then
         echo "🚀 Focus su sviluppo: ottimo per crescita del progetto!"
-    elif [ $MAX_TAG_TYPE == "FIX (correzioni)" ]; then
+    elif [[ "$MAX_TAG_TYPE" == "FIX (correzioni)" ]]; then
         echo "🔧 Focus su stabilità: buono per consolidamento"
-    elif [ $MAX_TAG_TYPE == "REFACTOR (ristrutturazione)" ]; then
+    elif [[ "$MAX_TAG_TYPE" == "REFACTOR (ristrutturazione)" ]]; then
         echo "♻️  Focus su qualità: eccellente per manutenibilità"
     fi
 fi
