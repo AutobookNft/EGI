@@ -7,7 +7,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="user-authenticated" content="{{ auth()->check() ? 'true' : 'false' }}">
     <meta name="user-preferred-currency"
-        content="{{ auth()->check() ? (auth()->user()->preferred_currency ?? 'USD') : 'USD' }}">>
+        content="{{ auth()->check() ? (auth()->user()->preferred_currency ?? 'USD') : 'USD' }}">
 
     {{--
     @oracode-dimension technical
@@ -103,7 +103,7 @@ Using proper HTML5 landmarks for accessibility (Pillar #4 - Interpretable by Ass
 --}}
 {{-- MODIFICHE AL BODY: font-body per Source Sans Pro, text-base-content e bg-base-100 dal tema DaisyUI --}}
 
-<body class="bg-base-100 font-body text-base-content antialiased" itemscope itemtype="https://schema.org/WebPage">
+<body class="antialiased bg-base-100 font-body text-base-content" itemscope itemtype="https://schema.org/WebPage">
     {{-- Skip to main content for accessibility (WCAG 2.1) --}}
     <a href="#main-content"
         class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-content">
@@ -119,10 +119,10 @@ Using proper HTML5 landmarks for accessibility (Pillar #4 - Interpretable by Ass
         <input id="main-drawer" type="checkbox" class="drawer-toggle" aria-label="Toggle navigation menu">
 
         {{-- Main Content Area --}}
-        <div class="drawer-content flex min-h-screen flex-col">
+        <div class="flex flex-col min-h-screen drawer-content">
             {{-- Navigation Header --}}
             {{-- MODIFICA: Aggiunto stile base per header, i componenti Livewire interni dovranno adattarsi --}}
-            <header role="banner" aria-label="Main navigation" class="border-b border-base-300 bg-base-200 shadow-sm">
+            <header role="banner" aria-label="Main navigation" class="border-b shadow-sm border-base-300 bg-base-200">
                 <livewire:navigation-menu />
             </header>
 
@@ -130,8 +130,8 @@ Using proper HTML5 landmarks for accessibility (Pillar #4 - Interpretable by Ass
             @if (isset($header))
             {{-- MODIFICA: Stile base per la sezione header, il contenuto $header userà font-display e colori chiari
             --}}
-            <section class="bg-base-200 shadow" role="complementary" aria-label="Page header">
-                <div class="mx-auto max-w-7xl px-4 py-6 text-base-content sm:px-6 lg:px-8"> {{-- Usare text-base-content
+            <section class="shadow bg-base-200" role="complementary" aria-label="Page header">
+                <div class="px-4 py-6 mx-auto max-w-7xl text-base-content sm:px-6 lg:px-8"> {{-- Usare text-base-content
                     per coerenza --}}
                     {{ $header }}
                 </div>
@@ -171,9 +171,9 @@ Using proper HTML5 landmarks for accessibility (Pillar #4 - Interpretable by Ass
     </div>
 
     {{-- Footer --}}
-    <footer class="gdpr-header mt-auto border-t border-gray-200/50" role="contentinfo">
-        <div class="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-            <div class="gdpr-subtitle flex items-center justify-between text-sm">
+    <footer class="mt-auto border-t gdpr-header border-gray-200/50" role="contentinfo">
+        <div class="px-4 py-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between text-sm gdpr-subtitle">
                 <p>&copy; {{ date('Y') }} {{ config('app.name') }}. {{ __('profile.all_rights_reserved') }}</p>
                 <div class="flex space-x-4">
                     <a href="{{ route('gdpr.privacy-policy') }}" class="gdpr-link">{{ __('profile.privacy_policy')

@@ -108,9 +108,13 @@
                     </div>
 
                     {{-- Natan Assistant - Posizionato vicino al logo --}}
+                    @if($user)
                     <div class="hidden ml-6 md:block">
-                        <x-natan-assistant :suffix="'-desktop'" />
+                        <img src="{{ $user->profile_photo_url }}" alt="User Avatar" class="w-8 h-8 rounded-full">
+                        {{--
+                        <x-natan-assistant :suffix="'-desktop'" /> --}}
                     </div>
+                    @endif
 
                     <button type="button" id="open-butler-assistant"
                         class="{{ $navLinkClasses }} items-center gap-1 hidden ml-6 md:flex"
@@ -284,9 +288,14 @@
                         @endguest
 
                         {{-- Natan Assistant Mobile --}}
+                        @if($user)
                         <div class="block md:hidden">
-                            <x-natan-assistant :suffix="'-mobile'" />
+                            {{-- Mostra l'immagine dell'utente solo se loggato --}}
+                            <img src="{{ $user->profile_photo_url }}" alt="User Avatar" class="w-8 h-8 rounded-full">
+                            {{--
+                            <x-natan-assistant :suffix="'-mobile'" /> --}}
                         </div>
+                        @endif
 
                         {{-- Butler Assistant Menu su mobile non lo mostro --}}
                         {{-- <button type="button" id="open-butler-assistant"
