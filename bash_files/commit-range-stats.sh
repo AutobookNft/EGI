@@ -84,10 +84,10 @@ echo "------------------------"
 while [[ "$current_date" != $(date -d "$END_DATE + 1 day" +%Y-%m-%d) ]]; do
     # Calcola i commit per il giorno corrente
     commits_count=$(git log --oneline --since="$current_date 00:00:00" --until="$current_date 23:59:59" | wc -l)
-    
+
     # Nome del giorno
     day_name=$(date -d "$current_date" +"%A")
-    
+
     # Emoji basata sul numero di commit
     if [ $commits_count -eq 0 ]; then
         emoji="😴"
@@ -100,31 +100,31 @@ while [[ "$current_date" != $(date -d "$END_DATE + 1 day" +%Y-%m-%d) ]]; do
     else
         emoji="⚡"
     fi
-    
+
     # Mostra il risultato
     printf "%s %s (%s): %2d commit\n" "$emoji" "$current_date" "$day_name" "$commits_count"
-    
+
     # Aggiorna statistiche
     TOTAL_COMMITS=$((TOTAL_COMMITS + commits_count))
     TOTAL_DAYS=$((TOTAL_DAYS + 1))
-    
+
     if [ $commits_count -gt 0 ]; then
         PRODUCTIVE_DAYS=$((PRODUCTIVE_DAYS + 1))
     fi
-    
+
     if [ $commits_count -gt $MAX_COMMITS ]; then
         MAX_COMMITS=$commits_count
         MAX_DATE=$current_date
     fi
-    
+
     if [ $commits_count -lt $MIN_COMMITS ] && [ $commits_count -gt 0 ]; then
         MIN_COMMITS=$commits_count
         MIN_DATE=$current_date
     fi
-    
+
     # Memorizza per grafico
     daily_stats+=("$current_date:$commits_count")
-    
+
     # Prossimo giorno
     current_date=$(date -d "$current_date + 1 day" +%Y-%m-%d)
 done
@@ -184,17 +184,17 @@ if [ $TAGGED_COMMITS -gt 0 ]; then
     if [ $OTHER_COUNT -gt 0 ]; then
         echo "❓ Commit senza TAG: $OTHER_COUNT"
     fi
-    
+
     # Percentuali
     if [ $TOTAL_COMMITS -gt 0 ]; then
         TAG_PERCENTAGE=$(echo "scale=1; $TAGGED_COMMITS * 100 / $TOTAL_COMMITS" | bc -l 2>/dev/null || echo "0")
         echo "📈 Copertura TAG: $TAG_PERCENTAGE%"
     fi
-    
+
     # Tipo più comune
     MAX_TAG_COUNT=0
     MAX_TAG_TYPE=""
-    
+
     if [ $FEAT_COUNT -gt $MAX_TAG_COUNT ]; then
         MAX_TAG_COUNT=$FEAT_COUNT
         MAX_TAG_TYPE="FEAT (funzionalità)"
@@ -219,7 +219,7 @@ if [ $TAGGED_COMMITS -gt 0 ]; then
         MAX_TAG_COUNT=$CHORE_COUNT
         MAX_TAG_TYPE="CHORE (manutenzione)"
     fi
-    
+
     if [ $MAX_TAG_COUNT -gt 0 ]; then
         echo "🏆 Tipo più frequente: $MAX_TAG_TYPE ($MAX_TAG_COUNT commit)"
     fi
@@ -269,7 +269,7 @@ fi
 for stat in "${daily_stats[@]}"; do
     date_part=$(echo "$stat" | cut -d: -f1)
     count_part=$(echo "$stat" | cut -d: -f2)
-    
+
     # Calcola lunghezza barra (max 20 caratteri)
     if [ $count_part -gt 0 ] && [ $max_for_graph -gt 0 ]; then
         bar_length=$(echo "scale=0; $count_part * 20 / $max_for_graph" | bc -l 2>/dev/null || echo "1")
@@ -279,13 +279,13 @@ for stat in "${daily_stats[@]}"; do
     else
         bar_length=0
     fi
-    
+
     # Crea barra
     bar=""
     for ((i=1; i<=bar_length; i++)); do
         bar+="█"
     done
-    
+
     printf "%s │%s %d\n" "$date_part" "$bar" "$count_part"
 done
 
@@ -309,26 +309,26 @@ if [ $TAGGED_COMMITS -gt 0 ]; then
     echo ""
     echo "🏷️  Suggerimenti sui TAG:"
     echo "------------------------"
-    
+
     if [ $TAG_PERCENTAGE != "N/A" ] && [ $(echo "$TAG_PERCENTAGE < 80" | bc -l 2>/dev/null || echo "1") -eq 1 ]; then
         echo "📝 Considera di aggiungere TAG ai commit esistenti per migliore tracciabilità"
     fi
-    
+
     # Suggerimenti sul bilanciamento
     if [ $FIX_COUNT -gt $((FEAT_COUNT * 2)) ]; then
         echo "🔧 Molte correzioni: considera più testing preventivo"
     elif [ $FEAT_COUNT -gt $((FIX_COUNT * 3)) ] && [ $TEST_COUNT -eq 0 ]; then
         echo "🧪 Molte funzionalità: aggiungi più test per stabilità"
     fi
-    
+
     if [ $DOC_COUNT -eq 0 ] && [ $FEAT_COUNT -gt 3 ]; then
         echo "📚 Aggiungi documentazione per le nuove funzionalità"
     fi
-    
+
     if [ $REFACTOR_COUNT -eq 0 ] && [ $TOTAL_COMMITS -gt 10 ]; then
         echo "♻️  Considera periodici refactoring per mantenere il codice pulito"
     fi
-    
+
     # Suggerimento sul focus
     if [[ "$MAX_TAG_TYPE" == "FEAT (funzionalità)" ]]; then
         echo "🚀 Focus su sviluppo: ottimo per crescita del progetto!"
