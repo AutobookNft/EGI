@@ -31,8 +31,7 @@ return [
 }
 @endphp
 
-
-<div class="relative w-full overflow-hidden hero-banner-container" style="height: 30vh; max-height: 700px;"
+<div class="relative w-full overflow-hidden hero-banner-container" style="height: 35vh; max-height: 700px;"
     id="heroBannerContainer_{{ $instanceId }}">
 
     {{-- Desktop: Banner con background-image --}}
@@ -124,9 +123,51 @@ return [
             @endif
         </div>
 
-        {{-- Riga Inferiore: Navigazione, Pulsante Reserve --}}
-        {{-- Le classi qui dovrebbero già centrare bene su mobile: flex-col items-center --}}
-        <div class="flex flex-col items-center w-full gap-4 sm:gap-6 md:flex-row md:items-end md:justify-between">
+        {{-- Riga Inferiore: Statistiche stile OpenSea centrate --}}
+        <div class="flex flex-col items-center justify-center w-full gap-4 sm:gap-6">
+            {{-- Statistiche OpenSea SOVRAPPOSTE nel banner - 4 NOSTRE STATISTICHE --}}
+            @if($hasCollections && $firstCollection)
+            <div class="p-4 bg-black border rounded-lg backdrop-blur-sm border-white/10 opacity-70">
+                <div class="flex divide-x divide-white/20">
+                    <div class="pr-6">
+                        <div class="text-xs font-medium tracking-wider text-gray-300 uppercase">EGIS</div>
+                        <div class="text-xs text-white">{{ $firstCollection->EGI_number ??
+                            $firstCollection->egis_count ?? 0 }}</div>
+                    </div>
+                    <div class="px-6">
+                        <div class="text-xs font-medium tracking-wider text-gray-300 uppercase">LIKES</div>
+                        <div class="text-xs text-white">{{ $firstCollection->likes_count ?? 0 }}</div>
+                    </div>
+                    <div class="px-6">
+                        <div class="text-xs font-medium tracking-wider text-gray-300 uppercase">RESERVED</div>
+                        <div class="text-xs text-white">{{ $firstCollection->reservations_count ?? 0 }}</div>
+                    </div>
+                    <div class="pl-6">
+                        <div class="text-xs font-medium tracking-wider text-gray-300 uppercase">VOLUME</div>
+                        @php
+                        // Calcola il totale delle prenotazioni attive per questa collezione
+                        $totalReservationsValue = $firstCollection->egis()
+                        ->whereHas('reservations', function($query) {
+                        $query->where('is_current', true)->where('status', 'active');
+                        })
+                        ->with(['reservations' => function($query) {
+                        $query->where('is_current', true)->where('status', 'active');
+                        }])
+                        ->get()
+                        ->sum(function($egi) {
+                        return $egi->reservations->sum('offer_amount_fiat');
+                        });
+                        @endphp
+                        @if($totalReservationsValue > 0)
+                        <div class="text-sm text-white">{{ number_format($totalReservationsValue, 2) }} EUR
+                        </div>
+                        @else
+                        <div class="text-sm text-white">0.00 EUR</div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+            @endif
             <!-- Pulsanti di navigazione (prev/next) - COMMENTATI -->
             {{-- @if($collections->count() > 1)
             <div class="flex order-2 space-x-3 pointer-events-auto md:order-1">

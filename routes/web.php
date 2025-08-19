@@ -156,6 +156,10 @@ Route::get('/archetypes/collector', function () {
 |--------------------------------------------------------------------------
 */
 Route::prefix('info')->name('info.')->group(function () {
+    Route::get('/florence-egi', function () {
+        return view('info.under-construction', ['title' => 'Che cos\'è FlorenceEGI?', 'subtitle' => 'Scopri la piattaforma che unisce arte, sostenibilità e innovazione']);
+    })->name('florence-egi');
+
     Route::get('/egi', function () {
         return view('info.under-construction', ['title' => 'Cosa sono gli EGI?', 'subtitle' => 'Scopri come funzionano gli Environmental Generative Items']);
     })->name('egi');
@@ -167,9 +171,27 @@ Route::prefix('info')->name('info.')->group(function () {
     Route::get('/impatto', function () {
         return view('info.under-construction', ['title' => 'Che Impatto hanno gli EGI?', 'subtitle' => 'Scopri l\'impatto ambientale e sociale degli Environmental Generative Items']);
     })->name('impatto');
+
+    Route::get('/creator', function () {
+        return view('info.under-construction', ['title' => 'Chi sono i Creator?', 'subtitle' => 'Scopri il ruolo dei creatori di contenuti nell\'ecosistema FlorenceEGI']);
+    })->name('creator');
+
+    Route::get('/attivatori', function () {
+        return view('info.under-construction', ['title' => 'Chi sono gli Attivatori?', 'subtitle' => 'Scopri il ruolo degli attivatori e come contribuiscono alla piattaforma']);
+    })->name('attivatori');
+
+    Route::get('/mecenati', function () {
+        return view('info.under-construction', ['title' => 'Chi sono i Mecenati?', 'subtitle' => 'Scopri il ruolo dei mecenati e il loro supporto all\'arte sostenibile']);
+    })->name('mecenati');
+
+    Route::get('/aziende', function () {
+        return view('info.under-construction', ['title' => 'Le Aziende Partner', 'subtitle' => 'Scopri come le aziende partecipano all\'ecosistema sostenibile']);
+    })->name('aziende');
+
+    Route::get('/trader-pro', function () {
+        return view('info.under-construction', ['title' => 'Trader Professionali', 'subtitle' => 'Scopri gli strumenti avanzati per il trading di EGI']);
+    })->name('trader-pro');
 });
-
-
 /*
 |--------------------------------------------------------------------------
 | Collector Routes - Public Profiles & Portfolios

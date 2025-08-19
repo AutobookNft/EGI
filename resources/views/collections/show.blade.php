@@ -80,6 +80,61 @@
 
     {{-- 🎨 HERO BANNER POTENZIATO --}}
     <section class="relative overflow-hidden">
+        {{-- Statistiche sopra banner - Layout OpenSea --}}
+        <div class="bg-gray-900">
+            <div class="container px-4 py-4 mx-auto sm:px-6 lg:px-8">
+                <div class="grid grid-cols-3 gap-6 lg:grid-cols-5">
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-emerald-400">{{ $collection->EGI_number ??
+                            $collection->egis_count ?? 0 }}</div>
+                        <div class="text-sm text-gray-400">{{ __('collection.show.egis') }}</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-pink-400">{{ $collection->likes_count ?? 0 }}</div>
+                        <div class="text-sm text-gray-400">{{ __('collection.show.likes') }}</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-blue-400">{{ $collection->reservations_count ?? 0 }}</div>
+                        <div class="text-sm text-gray-400">{{ __('collection.show.reserved') }}</div>
+                    </div>
+                    <div class="text-center">
+                        @php
+                        // Calcola il totale delle prenotazioni attive
+                        $totalReservationsValue = $collection->egis()
+                        ->whereHas('reservations', function($query) {
+                        $query->where('is_current', true)->where('status', 'active');
+                        })
+                        ->with(['reservations' => function($query) {
+                        $query->where('is_current', true)->where('status', 'active');
+                        }])
+                        ->get()
+                        ->sum(function($egi) {
+                        return $egi->reservations->max('offer_amount_fiat') ?? 0;
+                        });
+                        @endphp
+                        @if($totalReservationsValue > 0)
+                        <div class="text-2xl font-bold text-yellow-400">{{ number_format($totalReservationsValue, 0) }}
+                            €</div>
+                        <div class="text-sm text-gray-400">{{ __('collection.show.total_volume') }}</div>
+                        @else
+                        <div class="text-2xl font-bold text-purple-400">{{ __('collection.show.free_mint') }}</div>
+                        <div class="text-sm text-gray-400">{{ __('collection.show.mint_label') }}</div>
+                        @endif
+                    </div>
+                    <div class="hidden text-center lg:block">
+                        @if($collection->floor_price && $collection->floor_price > 0)
+                        <div class="text-2xl font-bold text-orange-400">{{ number_format($collection->floor_price, 2) }}
+                            €</div>
+                        <div class="text-sm text-gray-400">{{ __('collection.show.algo_floor') }}</div>
+                        @else
+                        <div class="text-2xl font-bold text-gray-400">--</div>
+                        <div class="text-sm text-gray-400">{{ __('collection.show.algo_floor') }}</div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
+
         {{-- Background con Parallax Effect --}}
         <div class="absolute inset-0 z-0 parallax-banner">
             @if($collection->image_banner)
