@@ -229,8 +229,6 @@ return [
     */
 
     'carousel' => [
-        'title' => 'Opere in Evidenza',
-        'subtitle' => 'Scopri le ultime creazioni digitali dei nostri artisti',
         'two_columns' => 'Vista Lista',
         'three_columns' => 'Vista Card',
         'navigation' => [
@@ -291,8 +289,8 @@ return [
         'items' => 'elementi',
 
         // Title and subtitle for multi-content carousel
-        'title' => 'Scopri il Rinascimento',
-        'subtitle' => 'Esplora opere, artisti, collezioni e collezionisti nell\'ecosistema FlorenceEGI',
+        'title' => 'Attiva un EGI!',
+        'subtitle' => 'Attivare un opera significa unirsi ad essa ed essere riconosciuti per sempre come parte della sua storia.',
     ],
 
     /*

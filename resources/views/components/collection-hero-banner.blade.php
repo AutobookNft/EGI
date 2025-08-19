@@ -96,12 +96,12 @@ return [
     </div>
 
     {{-- CTA Ambientale - CENTRATA COMPLETAMENTE --}}
-    <div class="absolute inset-0 z-[70] flex items-center justify-center pointer-events-none">
+    {{-- <div class="absolute inset-0 z-[70] flex items-center justify-center pointer-events-none">
         <p
             class="max-w-2xl px-8 text-lg font-bold leading-tight text-center text-green-300 pointer-events-none sm:text-xl md:text-4xl lg:text-5xl">
             {{ __('guest_home.hero_banner_cta') }}
         </p>
-    </div>
+    </div> --}}
 
     <!-- Contenuto Hero -->
     <div
