@@ -21,11 +21,39 @@ if ($hasCollections) {
 $jsCollectionsData = $collections->map(function($c) use($logo) {
 $creatorName = $c->creator ? $c->creator->name : null;
 $bannerPath = $c->image_banner;
+
+// Calcola le statistiche per ogni collezione DINAMICAMENTE
+$egisCount = $c->egis()->count();
+$likesCount = $c->likes()->count();
+$reservationsCount = $c->egis()
+->whereHas('reservations', function($query) {
+$query->where('is_current', true)->where('status', 'active');
+})
+->count();
+
+$totalReservationsValue = $c->egis()
+->whereHas('reservations', function($query) {
+$query->where('is_current', true)->where('status', 'active');
+})
+->with(['reservations' => function($query) {
+$query->where('is_current', true)->where('status', 'active');
+}])
+->get()
+->sum(function($egi) {
+return $egi->reservations->sum('offer_amount_fiat');
+});
+
 return [
 'id' => $c->id,
 'name' => $c->collection_name ?? '',
 'creator' => $creatorName ?: __('guest_home.unknown_artist'),
 'banner' => $bannerPath ? asset($bannerPath) : asset("images/default/random_background/$logo"),
+'stats' => [
+'egis' => $egisCount,
+'likes' => $likesCount,
+'reserved' => $reservationsCount,
+'volume' => $totalReservationsValue
+]
 ];
 })->values()->all();
 }
@@ -131,21 +159,25 @@ return [
                 <div class="flex divide-x divide-white/20">
                     <div class="pr-6">
                         <div class="text-xs font-medium tracking-wider text-gray-300 uppercase">EGIS</div>
-                        <div class="text-xs text-white">{{ $firstCollection->EGI_number ??
-                            $firstCollection->egis_count ?? 0 }}</div>
+                        <div class="text-white" style="font-size: 8px;" id="statEgis_{{ $instanceId }}">{{
+                            $firstCollection->egis()->count() }}</div>
                     </div>
                     <div class="px-6">
                         <div class="text-xs font-medium tracking-wider text-gray-300 uppercase">LIKES</div>
-                        <div class="text-xs text-white">{{ $firstCollection->likes_count ?? 0 }}</div>
+                        <div class="text-white" style="font-size: 8px;" id="statLikes_{{ $instanceId }}">{{
+                            $firstCollection->likes()->count() }}</div>
                     </div>
                     <div class="px-6">
                         <div class="text-xs font-medium tracking-wider text-gray-300 uppercase">RESERVED</div>
-                        <div class="text-xs text-white">{{ $firstCollection->reservations_count ?? 0 }}</div>
+                        <div class="text-white" style="font-size: 8px;" id="statReserved_{{ $instanceId }}">{{
+                            $firstCollection->egis()->whereHas('reservations', function($query) {
+                            $query->where('is_current', true)->where('status', 'active');
+                            })->count() }}</div>
                     </div>
                     <div class="pl-6">
                         <div class="text-xs font-medium tracking-wider text-gray-300 uppercase">VOLUME</div>
                         @php
-                        // Calcola il totale delle prenotazioni attive per questa collezione
+
                         $totalReservationsValue = $firstCollection->egis()
                         ->whereHas('reservations', function($query) {
                         $query->where('is_current', true)->where('status', 'active');
@@ -159,10 +191,10 @@ return [
                         });
                         @endphp
                         @if($totalReservationsValue > 0)
-                        <div class="text-sm text-white">{{ number_format($totalReservationsValue, 2) }} EUR
-                        </div>
+                        <div class="text-white" style="font-size: 8px;" id="statVolume_{{ $instanceId }}">€ {{
+                            number_format($totalReservationsValue, 2) }}</div>
                         @else
-                        <div class="text-sm text-white">0.00 EUR</div>
+                        <div class="text-white" style="font-size: 8px;" id="statVolume_{{ $instanceId }}">€ 0.00</div>
                         @endif
                     </div>
                 </div>
@@ -266,6 +298,24 @@ return [
                 collectionSubTextElement.textContent = `${currentCollection.name} {{ __('guest_home.by') }} ${currentCollection.creator}`;
             }
 
+            // Aggiorna statistiche dinamicamente
+            const statEgis = document.getElementById('statEgis_' + componentId);
+            const statLikes = document.getElementById('statLikes_' + componentId);
+            const statReserved = document.getElementById('statReserved_' + componentId);
+            const statVolume = document.getElementById('statVolume_' + componentId);
+
+            if (currentCollection.stats) {
+                if (statEgis) statEgis.textContent = currentCollection.stats.egis || 0;
+                if (statLikes) statLikes.textContent = currentCollection.stats.likes || 0;
+                if (statReserved) statReserved.textContent = currentCollection.stats.reserved || 0;
+                if (statVolume) {
+                    const volume = currentCollection.stats.volume || 0;
+                    statVolume.textContent = volume > 0 ?
+                        '€ ' + new Intl.NumberFormat('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(volume) :
+                        '€ 0.00';
+                }
+            }
+
             if (reserveButton) {
                 reserveButton.dataset.egiId = currentCollection.id;
                 reserveButton.dataset.collectionName = currentCollection.name;
@@ -358,6 +408,25 @@ return [
                         if (collectionSubTextElement && currentCollection) {
                             collectionSubTextElement.textContent = `${currentCollection.name} {{ __('guest_home.by') }} ${currentCollection.creator}`;
                         }
+
+                        // Aggiorna statistiche anche per lo swipe manuale
+                        const statEgis = document.getElementById('statEgis_' + componentId);
+                        const statLikes = document.getElementById('statLikes_' + componentId);
+                        const statReserved = document.getElementById('statReserved_' + componentId);
+                        const statVolume = document.getElementById('statVolume_' + componentId);
+
+                        if (currentCollection.stats) {
+                            if (statEgis) statEgis.textContent = currentCollection.stats.egis || 0;
+                            if (statLikes) statLikes.textContent = currentCollection.stats.likes || 0;
+                            if (statReserved) statReserved.textContent = currentCollection.stats.reserved || 0;
+                            if (statVolume) {
+                                const volume = currentCollection.stats.volume || 0;
+                                statVolume.textContent = volume > 0 ?
+                                    '€ ' + new Intl.NumberFormat('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(volume) :
+                                    '€ 0.00';
+                            }
+                        }
+
                         if (reserveButton && currentCollection) {
                             reserveButton.dataset.egiId = currentCollection.id;
                             reserveButton.dataset.collectionName = currentCollection.name;
