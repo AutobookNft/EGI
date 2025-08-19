@@ -69,15 +69,15 @@ return [
     </div>
 
     {{-- CTA Ambientale - CENTRATA COMPLETAMENTE --}}
-    <div class="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
+    <div class="absolute inset-0 z-[70] flex items-center justify-center pointer-events-none">
         <p
-            class="max-w-4xl px-8 text-2xl font-bold leading-tight text-center text-green-300 sm:text-3xl md:text-4xl lg:text-5xl">
+            class="max-w-4xl px-8 text-2xl font-bold leading-tight text-center text-green-300 sm:text-3xl md:text-4xl lg:text-5xl pointer-events-none">
             {{ __('guest_home.hero_banner_cta') }}
         </p>
     </div>
 
     <!-- Contenuto Hero -->
-    <div class="absolute inset-0 z-20 flex flex-col justify-between p-4 text-white sm:p-6 md:p-8 lg:p-10 md:z-auto">
+    <div class="absolute inset-0 z-[70] flex flex-col justify-between p-4 text-white sm:p-6 md:p-8 lg:p-10 md:z-auto pointer-events-none md:pointer-events-auto">
         {{-- z-20 su mobile, z-auto su desktop padding mobile p-4 sm:p-6 --}}
         {{-- Riga Superiore: Titolo, Creator, Indicatori --}}
         <div
