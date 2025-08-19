@@ -36,21 +36,20 @@ return [
     {{-- Desktop: Banner con background-image --}}
     <div class="absolute inset-0 hidden transition-opacity duration-700 ease-in-out bg-center bg-cover hero-banner-background md:block"
         id="heroBannerBackground_{{ $instanceId }}"
-        style="background-image: url('{{ $hasCollections && $firstCollection && $firstCollection->image_banner ? asset($firstCollection->image_banner) : asset("
-        images/default/random_background/$logo") }}')">
+        style="background-image: url('{{ $hasCollections && $firstCollection && $firstCollection->image_banner ? asset($firstCollection->image_banner) :
+        asset("images/default/random_background/$logo") }}')">
         <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10"></div>
         <div class="absolute inset-0 opacity-75 bg-gradient-to-r from-black/50 via-transparent to-transparent"></div>
     </div>
 
     {{-- Mobile: Carousel con immagini scrollabili --}}
-    <div class="absolute inset-0 md:hidden" id="mobileImageCarousel_{{ $instanceId }}">
+    <div class="absolute inset-0 z-[60] md:hidden" id="mobileImageCarousel_{{ $instanceId }}">
         <div class="flex w-full h-full overflow-x-auto snap-x snap-mandatory scrollbar-hide"
             id="mobileCarouselTrack_{{ $instanceId }}">
             @if($hasCollections)
             @foreach($collections as $index => $collection)
             <div class="relative flex-shrink-0 w-full h-full snap-start">
-                <img src="{{ $collection->image_banner ? asset($collection->image_banner) : asset("images/default/random_background/$logo") }}"
-                    alt="{{ $collection->collection_name ?? '' }}"
+                <img src="{{ $collection->image_banner ? asset($collection->image_banner) : asset("images/default/random_background/$logo") }}" alt="{{ $collection->collection_name ?? '' }}"
                     class="object-cover w-full h-full">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10"></div>
                 <div class="absolute inset-0 opacity-75 bg-gradient-to-r from-black/50 via-transparent to-transparent">
@@ -70,7 +69,7 @@ return [
     </div>
 
     {{-- CTA Ambientale - CENTRATA COMPLETAMENTE --}}
-    <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+    <div class="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
         <p
             class="max-w-4xl px-8 text-2xl font-bold leading-tight text-center text-green-300 sm:text-3xl md:text-4xl lg:text-5xl">
             {{ __('guest_home.hero_banner_cta') }}
@@ -78,8 +77,8 @@ return [
     </div>
 
     <!-- Contenuto Hero -->
-    <div class="absolute inset-0 flex flex-col justify-between p-4 text-white sm:p-6 md:p-8 lg:p-10"> {{-- Ridotto
-        padding mobile p-4 sm:p-6 --}}
+    <div class="absolute inset-0 z-20 flex flex-col justify-between p-4 text-white sm:p-6 md:p-8 lg:p-10 md:z-auto">
+        {{-- z-20 su mobile, z-auto su desktop padding mobile p-4 sm:p-6 --}}
         {{-- Riga Superiore: Titolo, Creator, Indicatori --}}
         <div
             class="flex flex-col items-center w-full gap-4 text-center md:text-left md:flex-row md:items-start md:justify-between">
@@ -89,7 +88,7 @@ return [
             --}}
 
             <!-- Titolo e creator info -->
-            <div class="max-w-xl"> {{-- max-w-xl è già restrittivo, va bene per il centro --}}
+            <div class="max-w-xl pointer-events-none md:pointer-events-auto"> {{-- Trasparente ai touch su mobile --}}
                 <h1 class="text-2xl font-bold sm:text-3xl md:text-4xl lg:text-5xl font-display"
                     id="collectionName_{{ $instanceId }}"> {{-- Ridotta dimensione font base mobile --}}
                     {{ __('guest_home.hero_banner_title') }}
@@ -111,12 +110,12 @@ return [
             Su md+, md:self-start lo allinea all'inizio del contenitore flex laterale (a destra).
             Aggiunto md:mt-0 per resettare il margine su schermi più grandi se il titolo è corto.
             --}}
-            <div class="items-center hidden p-2 mt-4 space-x-2 rounded-full md:flex md:mt-0 md:self-start bg-black/30 backdrop-blur-sm"
+            <div class="items-center hidden p-2 mt-4 space-x-2 rounded-full pointer-events-auto md:flex md:mt-0 md:self-start bg-black/30 backdrop-blur-sm"
                 id="slideIndicators_{{ $instanceId }}">
                 @foreach($collections as $index => $collection)
                 <button data-index="{{ $index }}"
                     aria-label="{{ __('guest_home.go_to_slide', ['index' => $index + 1]) }}"
-                    class="slide-indicator w-2.5 h-2.5 rounded-full transition-all duration-300 {{ $index === 0 ? 'bg-white scale-125' : 'bg-white/50 hover:bg-white/75' }}">
+                    class="slide-indicator w-2.5 h-2.5 rounded-full transition-all duration-300 {{ $index === 0 ? 'bg-white scale-125' : 'bg-white/50 hover:bg-white/75' }} pointer-events-auto">
                 </button>
                 @endforeach
             </div>
@@ -128,17 +127,17 @@ return [
         <div class="flex flex-col items-center w-full gap-4 sm:gap-6 md:flex-row md:items-end md:justify-between">
             <!-- Pulsanti di navigazione (prev/next) -->
             @if($collections->count() > 1)
-            <div class="flex order-2 space-x-3 md:order-1">
+            <div class="flex order-2 space-x-3 pointer-events-auto md:order-1">
                 {{-- ... (codice bottoni prev/next come prima) ... --}}
                 <button id="prevSlide_{{ $instanceId }}" aria-label="{{ __('guest_home.previous_slide') }}"
-                    class="p-2 text-white transition-colors duration-300 rounded-full sm:p-3 bg-black/40 hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/50">
+                    class="p-2 text-white transition-colors duration-300 rounded-full pointer-events-auto sm:p-3 bg-black/40 hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/50">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 sm:w-6 sm:h-6" fill="none"
                         viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
                     </svg>
                 </button>
                 <button id="nextSlide_{{ $instanceId }}" aria-label="{{ __('guest_home.next_slide') }}"
-                    class="p-2 text-white transition-colors duration-300 rounded-full sm:p-3 bg-black/40 hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/50">
+                    class="p-2 text-white transition-colors duration-300 rounded-full pointer-events-auto sm:p-3 bg-black/40 hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/50">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 sm:w-6 sm:h-6" fill="none"
                         viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
