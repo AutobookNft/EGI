@@ -150,6 +150,25 @@ Route::get('/archetypes/collector', function () {
     return view('archetypes.collector');
 })->name('archetypes.collector');
 
+/*
+|--------------------------------------------------------------------------
+| Platform Info Routes - EGI, Attivare, Impatto
+|--------------------------------------------------------------------------
+*/
+Route::prefix('info')->name('info.')->group(function () {
+    Route::get('/egi', function () {
+        return view('info.under-construction', ['title' => 'Cosa sono gli EGI?', 'subtitle' => 'Scopri come funzionano gli Environmental Generative Items']);
+    })->name('egi');
+
+    Route::get('/attivare', function () {
+        return view('info.under-construction', ['title' => 'Come Attivare un EGI?', 'subtitle' => 'Guida step-by-step per attivare il tuo Environmental Generative Item']);
+    })->name('attivare');
+
+    Route::get('/impatto', function () {
+        return view('info.under-construction', ['title' => 'Che Impatto hanno gli EGI?', 'subtitle' => 'Scopri l\'impatto ambientale e sociale degli Environmental Generative Items']);
+    })->name('impatto');
+});
+
 
 /*
 |--------------------------------------------------------------------------

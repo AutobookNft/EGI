@@ -6,6 +6,13 @@
 
 {{-- @include('layouts.guest_script') --}}
 
+<!-- Platform Info Buttons (sopra hero) -->
+@isset($platformInfoButtons)
+<div class="relative z-20 w-full">
+    {{ $platformInfoButtons }}
+</div>
+@endisset
+
 <!-- Hero Section -->
 @unless (isset($noHero) && $noHero)
 <section id="hero-section" class="relative flex min-h-[100vh] flex-col items-center overflow-hidden"

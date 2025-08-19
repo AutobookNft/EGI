@@ -5,6 +5,10 @@
 
 <x-guest-layout :title="__('guest_home.page_title')" :metaDescription="__('guest_home.meta_description')">
 
+    <x-slot name="platformInfoButtons">
+        <x-platform-info-buttons />
+    </x-slot>
+
     <x-slot name="heroFullWidth">
 
         <x-collection-hero-banner :collections="$featuredCollections" id="mainHeroCarousel" />
