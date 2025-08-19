@@ -7,6 +7,8 @@
 @php
 $instanceId = $attributes->get('id', $componentElementId ?: 'chb_'.uniqid());
 $logo = "15.jpg";
+$defaultBannerUrl = asset("images/default/random_background/$logo");
+
 if (is_array($collections)) {
 $collections = collect($collections);
 }
@@ -30,14 +32,13 @@ return [
 @endphp
 
 
-<div class="relative w-full overflow-hidden hero-banner-container"
-    style="height: 60vh; min-height: 450px; max-height: 700px;" id="heroBannerContainer_{{ $instanceId }}">
+<div class="relative w-full overflow-hidden hero-banner-container" style="height: 30vh; max-height: 700px;"
+    id="heroBannerContainer_{{ $instanceId }}">
 
     {{-- Desktop: Banner con background-image --}}
     <div class="absolute inset-0 hidden transition-opacity duration-700 ease-in-out bg-center bg-cover hero-banner-background md:block"
         id="heroBannerBackground_{{ $instanceId }}"
-        style="background-image: url('{{ $hasCollections && $firstCollection && $firstCollection->image_banner ? asset($firstCollection->image_banner) :
-        asset("images/default/random_background/$logo") }}')">
+        style="background-image: url('{{ $hasCollections && $firstCollection && $firstCollection->image_banner ? asset($firstCollection->image_banner) : $defaultBannerUrl }}')">
         <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10"></div>
         <div class="absolute inset-0 opacity-75 bg-gradient-to-r from-black/50 via-transparent to-transparent"></div>
     </div>
@@ -49,8 +50,8 @@ return [
             @if($hasCollections)
             @foreach($collections as $index => $collection)
             <div class="relative flex-shrink-0 w-full h-full snap-start">
-                <img src="{{ $collection->image_banner ? asset($collection->image_banner) : asset("images/default/random_background/$logo") }}" alt="{{ $collection->collection_name ?? '' }}"
-                    class="object-cover w-full h-full">
+                <img src="{{ $collection->image_banner ? asset($collection->image_banner) : $defaultBannerUrl }}"
+                    alt="{{ $collection->collection_name ?? '' }}" class="object-cover w-full h-full">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10"></div>
                 <div class="absolute inset-0 opacity-75 bg-gradient-to-r from-black/50 via-transparent to-transparent">
                 </div>
@@ -58,8 +59,7 @@ return [
             @endforeach
             @else
             <div class="relative flex-shrink-0 w-full h-full snap-start">
-                <img src="{{ asset(" images/default/random_background/$logo") }}" alt="Default background"
-                    class="object-cover w-full h-full">
+                <img src="{{ $defaultBannerUrl }}" alt="Default background" class="object-cover w-full h-full">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10"></div>
                 <div class="absolute inset-0 opacity-75 bg-gradient-to-r from-black/50 via-transparent to-transparent">
                 </div>\
@@ -71,13 +71,14 @@ return [
     {{-- CTA Ambientale - CENTRATA COMPLETAMENTE --}}
     <div class="absolute inset-0 z-[70] flex items-center justify-center pointer-events-none">
         <p
-            class="max-w-4xl px-8 text-2xl font-bold leading-tight text-center text-green-300 sm:text-3xl md:text-4xl lg:text-5xl pointer-events-none">
+            class="max-w-2xl px-8 text-lg font-bold leading-tight text-center text-green-300 pointer-events-none sm:text-xl md:text-4xl lg:text-5xl">
             {{ __('guest_home.hero_banner_cta') }}
         </p>
     </div>
 
     <!-- Contenuto Hero -->
-    <div class="absolute inset-0 z-[70] flex flex-col justify-between p-4 text-white sm:p-6 md:p-8 lg:p-10 md:z-auto pointer-events-none md:pointer-events-auto">
+    <div
+        class="absolute inset-0 z-[70] flex flex-col justify-between p-4 text-white sm:p-6 md:p-8 lg:p-10 md:z-auto pointer-events-none md:pointer-events-auto">
         {{-- z-20 su mobile, z-auto su desktop padding mobile p-4 sm:p-6 --}}
         {{-- Riga Superiore: Titolo, Creator, Indicatori --}}
         <div
@@ -89,11 +90,12 @@ return [
 
             <!-- Titolo e creator info -->
             <div class="max-w-xl pointer-events-none md:pointer-events-auto"> {{-- Trasparente ai touch su mobile --}}
-                <h1 class="text-2xl font-bold sm:text-3xl md:text-4xl lg:text-5xl font-display"
-                    id="collectionName_{{ $instanceId }}"> {{-- Ridotta dimensione font base mobile --}}
+                <h1 class="text-sm font-bold sm:text-3xl md:text-4xl lg:text-5xl font-display"
+                    id="collectionName_{{ $instanceId }}"> {{-- Ridotta molto dimensione font mobile per banner 30vh
+                    --}}
                     {{ __('guest_home.hero_banner_title') }}
                 </h1>
-                <p class="mt-2 text-base opacity-90 sm:text-lg md:text-xl font-body"
+                <p class="mt-1 text-xs opacity-90 sm:text-lg md:text-xl font-body"
                     id="collectionSubText_{{ $instanceId }}"> {{-- Ridotta dimensione font base mobile --}}
                     @if($hasCollections && $firstCollection)
                     {{ $firstCollection->collection_name }} {{ __('guest_home.by') }} {{
@@ -125,10 +127,9 @@ return [
         {{-- Riga Inferiore: Navigazione, Pulsante Reserve --}}
         {{-- Le classi qui dovrebbero già centrare bene su mobile: flex-col items-center --}}
         <div class="flex flex-col items-center w-full gap-4 sm:gap-6 md:flex-row md:items-end md:justify-between">
-            <!-- Pulsanti di navigazione (prev/next) -->
-            @if($collections->count() > 1)
+            <!-- Pulsanti di navigazione (prev/next) - COMMENTATI -->
+            {{-- @if($collections->count() > 1)
             <div class="flex order-2 space-x-3 pointer-events-auto md:order-1">
-                {{-- ... (codice bottoni prev/next come prima) ... --}}
                 <button id="prevSlide_{{ $instanceId }}" aria-label="{{ __('guest_home.previous_slide') }}"
                     class="p-2 text-white transition-colors duration-300 rounded-full pointer-events-auto sm:p-3 bg-black/40 hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/50">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 sm:w-6 sm:h-6" fill="none"
@@ -145,8 +146,8 @@ return [
                 </button>
             </div>
             @else
-            <div class="order-2 md:order-1"></div> {{-- Placeholder per mantenere layout --}}
-            @endif
+            <div class="order-2 md:order-1"></div>
+            @endif --}}
 
 
         </div>
