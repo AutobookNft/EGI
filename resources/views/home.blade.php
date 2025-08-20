@@ -5,6 +5,12 @@
 
 <x-guest-layout :title="__('guest_home.page_title')" :metaDescription="__('guest_home.meta_description')">
 
+    <x-slot name="platformStats">
+        <div class="flex justify-center py-6 bg-gray-900/50 backdrop-blur-sm">
+            <x-payment-distribution-stats />
+        </div>
+    </x-slot>
+
     <x-slot name="platformInfoButtons">
         <x-platform-info-buttons />
     </x-slot>

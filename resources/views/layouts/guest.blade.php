@@ -6,6 +6,13 @@
 
 {{-- @include('layouts.guest_script') --}}
 
+<!-- Platform Statistics (sopra platform info buttons) -->
+@isset($platformStats)
+<div class="relative z-20 w-full">
+    {{ $platformStats }}
+</div>
+@endisset
+
 <!-- Platform Info Buttons (sopra hero) -->
 @isset($platformInfoButtons)
 <div class="relative z-20 w-full">
