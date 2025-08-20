@@ -246,4 +246,240 @@ class PaymentDistribution extends Model {
     public function getStatusDisplayAttribute(): string {
         return $this->distribution_status->getDisplayName();
     }
+
+    // ================================
+    // 📊 STATISTICS METHODS
+    // ================================
+
+    /**
+     * Get total number of distributions created
+     * @return int
+     */
+    public static function getTotalDistributionsCount(): int
+    {
+        return static::count();
+    }
+
+    /**
+     * Get total amount distributed in EUR
+     * @return float
+     */
+    public static function getTotalAmountDistributed(): float
+    {
+        return static::sum('amount_eur') ?? 0.0;
+    }
+
+    /**
+     * Get average distribution amount
+     * @return float
+     */
+    public static function getAverageDistributionAmount(): float
+    {
+        return static::avg('amount_eur') ?? 0.0;
+    }
+
+    /**
+     * Get distributions grouped by period (day/week/month)
+     * @param string $period ('day', 'week', 'month')
+     * @param int $limit Number of periods to return
+     * @return array
+     */
+    public static function getDistributionsByPeriod(string $period = 'day', int $limit = 30): array
+    {
+        $dateFormat = match($period) {
+            'day' => '%Y-%m-%d',
+            'week' => '%Y-%u',
+            'month' => '%Y-%m',
+            default => '%Y-%m-%d'
+        };
+
+        return static::selectRaw("
+                DATE_FORMAT(created_at, '{$dateFormat}') as period,
+                COUNT(*) as count,
+                SUM(amount_eur) as total_amount,
+                AVG(amount_eur) as avg_amount
+            ")
+            ->groupByRaw("DATE_FORMAT(created_at, '{$dateFormat}')")
+            ->orderByRaw("DATE_FORMAT(created_at, '{$dateFormat}') DESC")
+            ->limit($limit)
+            ->get()
+            ->toArray();
+    }
+
+    /**
+     * Get distributions totals grouped by user type
+     * @return array
+     */
+    public static function getTotalByUserType(): array
+    {
+        return static::selectRaw('
+                user_type,
+                COUNT(*) as count,
+                SUM(amount_eur) as total_amount,
+                AVG(amount_eur) as avg_amount,
+                AVG(percentage) as avg_percentage,
+                MIN(percentage) as min_percentage,
+                MAX(percentage) as max_percentage
+            ')
+            ->groupBy('user_type')
+            ->orderBy('total_amount', 'DESC')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'user_type' => $item->user_type->value, // Convert enum to string
+                    'count' => $item->count,
+                    'total_amount' => round($item->total_amount, 2),
+                    'avg_amount' => round($item->avg_amount, 2),
+                    'avg_percentage' => round($item->avg_percentage, 2),
+                    'min_percentage' => round($item->min_percentage, 2),
+                    'max_percentage' => round($item->max_percentage, 2),
+                ];
+            })
+            ->toArray();
+    }
+
+    /**
+     * Get top users that generate most distributions for EPP type
+     * @param int $limit
+     * @return array
+     */
+    public static function getTopUsersForEPP(int $limit = 10): array
+    {
+        return static::join('reservations', 'payment_distributions.reservation_id', '=', 'reservations.id')
+            ->join('users', 'reservations.user_id', '=', 'users.id')
+            ->where('payment_distributions.user_type', UserTypeEnum::EPP)
+            ->selectRaw('
+                users.id as user_id,
+                users.name as user_name,
+                users.email as user_email,
+                COUNT(payment_distributions.id) as distributions_count,
+                SUM(payment_distributions.amount_eur) as total_epp_amount,
+                AVG(payment_distributions.amount_eur) as avg_epp_amount,
+                AVG(payment_distributions.percentage) as avg_epp_percentage
+            ')
+            ->groupBy('users.id', 'users.name', 'users.email')
+            ->orderBy('total_epp_amount', 'DESC')
+            ->limit($limit)
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'user_id' => $item->user_id,
+                    'user_name' => $item->user_name,
+                    'user_email' => $item->user_email,
+                    'distributions_count' => $item->distributions_count,
+                    'total_epp_amount' => round($item->total_epp_amount, 2),
+                    'avg_epp_amount' => round($item->avg_epp_amount, 2),
+                    'avg_epp_percentage' => round($item->avg_epp_percentage, 2),
+                ];
+            })
+            ->toArray();
+    }
+
+    /**
+     * Get total amount distributed per collection
+     * @param int $limit
+     * @return array
+     */
+    public static function getTotalByCollection(int $limit = 20): array
+    {
+        return static::join('reservations', 'payment_distributions.reservation_id', '=', 'reservations.id')
+            ->join('egis', 'reservations.egi_id', '=', 'egis.id')
+            ->join('collections', 'egis.collection_id', '=', 'collections.id')
+            ->selectRaw('
+                collections.id as collection_id,
+                collections.collection_name as collection_name,
+                COUNT(DISTINCT payment_distributions.reservation_id) as reservations_count,
+                COUNT(payment_distributions.id) as distributions_count,
+                SUM(payment_distributions.amount_eur) as total_distributed,
+                AVG(payment_distributions.amount_eur) as avg_distribution,
+                SUM(CASE WHEN payment_distributions.user_type = "creator" THEN payment_distributions.amount_eur ELSE 0 END) as total_to_creators,
+                SUM(CASE WHEN payment_distributions.user_type = "epp" THEN payment_distributions.amount_eur ELSE 0 END) as total_to_epp,
+                SUM(CASE WHEN payment_distributions.user_type = "collector" THEN payment_distributions.amount_eur ELSE 0 END) as total_to_collectors
+            ')
+            ->groupBy('collections.id', 'collections.collection_name')
+            ->orderBy('total_distributed', 'DESC')
+            ->limit($limit)
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'collection_id' => $item->collection_id,
+                    'collection_name' => $item->collection_name,
+                    'reservations_count' => $item->reservations_count,
+                    'distributions_count' => $item->distributions_count,
+                    'total_distributed' => round($item->total_distributed, 2),
+                    'avg_distribution' => round($item->avg_distribution, 2),
+                    'total_to_creators' => round($item->total_to_creators, 2),
+                    'total_to_epp' => round($item->total_to_epp, 2),
+                    'total_to_collectors' => round($item->total_to_collectors, 2),
+                ];
+            })
+            ->toArray();
+    }
+
+    /**
+     * Get most profitable collections
+     * @param int $limit
+     * @return array
+     */
+    public static function getMostProfitableCollections(int $limit = 10): array
+    {
+        return static::getTotalByCollection($limit);
+    }
+
+    /**
+     * Get ROI per collection (simplified calculation)
+     * @param int $limit
+     * @return array
+     */
+    public static function getCollectionROI(int $limit = 10): array
+    {
+        return static::join('reservations', 'payment_distributions.reservation_id', '=', 'reservations.id')
+            ->join('egis', 'reservations.egi_id', '=', 'egis.id')
+            ->join('collections', 'egis.collection_id', '=', 'collections.id')
+            ->selectRaw('
+                collections.id as collection_id,
+                collections.collection_name as collection_name,
+                collections.floor_price as floor_price,
+                COUNT(DISTINCT payment_distributions.reservation_id) as reservations_count,
+                SUM(payment_distributions.amount_eur) as total_distributed,
+                SUM(reservations.amount_eur) as total_reservations_value,
+                (SUM(payment_distributions.amount_eur) / NULLIF(collections.floor_price, 0)) * 100 as roi_percentage
+            ')
+            ->groupBy('collections.id', 'collections.collection_name', 'collections.floor_price')
+            ->having('collections.floor_price', '>', 0)
+            ->orderBy('roi_percentage', 'DESC')
+            ->limit($limit)
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'collection_id' => $item->collection_id,
+                    'collection_name' => $item->collection_name,
+                    'floor_price' => round($item->floor_price, 2),
+                    'reservations_count' => $item->reservations_count,
+                    'total_distributed' => round($item->total_distributed, 2),
+                    'total_reservations_value' => round($item->total_reservations_value, 2),
+                    'roi_percentage' => round($item->roi_percentage, 2),
+                ];
+            })
+            ->toArray();
+    }
+
+    /**
+     * Get comprehensive statistics dashboard
+     * @return array
+     */
+    public static function getDashboardStats(): array
+    {
+        return [
+            'overview' => [
+                'total_distributions' => static::getTotalDistributionsCount(),
+                'total_amount_distributed' => static::getTotalAmountDistributed(),
+                'average_distribution' => static::getAverageDistributionAmount(),
+            ],
+            'by_user_type' => static::getTotalByUserType(),
+            'recent_activity' => static::getDistributionsByPeriod('day', 7),
+            'top_collections' => static::getMostProfitableCollections(5),
+            'top_epp_generators' => static::getTopUsersForEPP(5),
+        ];
+    }
 }

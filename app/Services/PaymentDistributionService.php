@@ -24,8 +24,7 @@ use Illuminate\Support\Facades\Auth;
  * @version 1.0.0
  * @date 2025-08-20
  */
-class PaymentDistributionService
-{
+class PaymentDistributionService {
     protected UltraLogManager $logger;
     protected ErrorManagerInterface $errorManager;
 
@@ -50,8 +49,7 @@ class PaymentDistributionService
      * @param Reservation $reservation
      * @return array
      */
-    public function createDistributionsForReservation(Reservation $reservation): array
-    {
+    public function createDistributionsForReservation(Reservation $reservation): array {
         try {
             // Start database transaction
             return DB::transaction(function () use ($reservation) {
@@ -118,8 +116,7 @@ class PaymentDistributionService
      * @param Reservation $reservation
      * @throws \Exception
      */
-    private function validateReservationForDistribution(Reservation $reservation): void
-    {
+    private function validateReservationForDistribution(Reservation $reservation): void {
         // Check if reservation is active (current system only uses 'active' status)
         if ($reservation->status !== 'active') {
             $this->errorManager->handle('RESERVATION_NOT_ACTIVE', [
@@ -163,15 +160,14 @@ class PaymentDistributionService
         }
     }
 
-        /**
+    /**
      * Get collection wallets with validation
      *
      * @param \App\Models\Collection $collection
      * @return \Illuminate\Database\Eloquent\Collection<Wallet>
      * @throws \Exception
      */
-    private function getCollectionWallets(\App\Models\Collection $collection)
-    {
+    private function getCollectionWallets(\App\Models\Collection $collection) {
         $wallets = $collection->wallets()->with('user')->get();
 
         if ($wallets->isEmpty()) {
@@ -206,8 +202,7 @@ class PaymentDistributionService
      * @param \Illuminate\Database\Eloquent\Collection<Wallet> $wallets
      * @return array
      */
-    private function calculateDistributions(Reservation $reservation, $wallets): array
-    {
+    private function calculateDistributions(Reservation $reservation, $wallets): array {
         $distributions = [];
         $totalAmount = $reservation->amount_eur;
         $exchangeRate = $reservation->payment_exchange_rate ?? 1.0;
@@ -251,8 +246,7 @@ class PaymentDistributionService
      * @param Wallet $wallet
      * @return UserTypeEnum
      */
-    private function determineUserType(Wallet $wallet): UserTypeEnum
-    {
+    private function determineUserType(Wallet $wallet): UserTypeEnum {
         // Priority 1: Platform role mapping
         if ($wallet->platform_role === 'EPP') {
             return UserTypeEnum::EPP;
@@ -289,10 +283,9 @@ class PaymentDistributionService
      * @param Wallet $wallet
      * @return bool
      */
-    private function isEppWallet(Wallet $wallet): bool
-    {
+    private function isEppWallet(Wallet $wallet): bool {
         return $wallet->platform_role === 'EPP' ||
-               ($wallet->user && $wallet->user->usertype === 'epp');
+            ($wallet->user && $wallet->user->usertype === 'epp');
     }
 
     /**
@@ -301,8 +294,7 @@ class PaymentDistributionService
      * @param array $distributions
      * @return \Illuminate\Database\Eloquent\Collection<PaymentDistribution>
      */
-    private function createDistributionRecords(array $distributions)
-    {
+    private function createDistributionRecords(array $distributions) {
         $createdDistributions = collect();
 
         foreach ($distributions as $distributionData) {
@@ -319,8 +311,7 @@ class PaymentDistributionService
      * @param Reservation $reservation
      * @param \Illuminate\Database\Eloquent\Collection<PaymentDistribution> $distributions
      */
-    private function logUserActivities(Reservation $reservation, $distributions): void
-    {
+    private function logUserActivities(Reservation $reservation, $distributions): void {
         foreach ($distributions as $distribution) {
             try {
                 UserActivity::create([
@@ -349,7 +340,6 @@ class PaymentDistributionService
                     'user_agent' => request()->userAgent() ?? 'System/PaymentDistributionService',
                     'expires_at' => now()->addYears(7), // GDPR retention for financial records
                 ]);
-
             } catch (\Exception $e) {
                 // Log error but don't fail the whole process - use UEM with non-blocking error
                 $this->errorManager->handle('USER_ACTIVITY_LOGGING_FAILED', [
@@ -372,8 +362,7 @@ class PaymentDistributionService
      * @param string|null $endDate
      * @return array
      */
-    public function getDistributionStats(\App\Models\Collection $collection, ?string $startDate = null, ?string $endDate = null): array
-    {
+    public function getDistributionStats(\App\Models\Collection $collection, ?string $startDate = null, ?string $endDate = null): array {
         $query = PaymentDistribution::where('collection_id', $collection->id)
             ->whereHas('reservation', function ($q) {
                 $q->where('rank', 1); // Only count #1 highest reservations for stats
@@ -418,8 +407,7 @@ class PaymentDistributionService
      * @param string|null $endDate
      * @return array
      */
-    public function getAllDistributionTracking(\App\Models\Collection $collection, ?string $startDate = null, ?string $endDate = null): array
-    {
+    public function getAllDistributionTracking(\App\Models\Collection $collection, ?string $startDate = null, ?string $endDate = null): array {
         $query = PaymentDistribution::where('collection_id', $collection->id);
 
         if ($startDate) {
