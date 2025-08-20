@@ -88,7 +88,11 @@ class InvitationService {
 
                 // Gestione notifica
                 $handler = NotificationHandlerFactory::getHandler(NotificationHandlerType::INVITATION);
-                $handler->handle($user, $notification);
+                $result = $handler->handle('send_invitation', $invitation, ['user' => $user, 'notification_data' => $notification]);
+
+                if (!$result['success']) {
+                    throw new Exception($result['message']);
+                }
 
                 return $invitation;
             } catch (Exception $e) {

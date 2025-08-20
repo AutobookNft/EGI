@@ -92,6 +92,16 @@ class NotificationPayloadInvitation extends Model implements NotifiablePayload
     }
 
     /**
+     * Ottiene lo status dell'invito.
+     *
+     * @return string
+     */
+    public function getStatus(): string
+    {
+        return $this->status;
+    }
+
+    /**
      * Metodo per gestire l'update
      */
     public function handlePending()
