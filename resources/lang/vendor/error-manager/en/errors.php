@@ -287,6 +287,17 @@ return [
         'currency_conversion_validation_error' => 'Currency conversion validation failed. Parameters: :params. Errors: :errors.',
         'user_preference_fetch_error' => 'Unable to fetch preferences for user_id :user_id. Error: :error.',
         'currency_preference_validation_error' => 'Currency preference validation failed for :currency. Error: :validation_error.',
+
+        // Payment Distribution Service Error Messages
+        'payment_distribution_error' => 'Payment distribution failed for reservation :reservation_id. Error: :error.',
+        'reservation_not_completed' => 'Reservation :reservation_id is not completed and cannot have distributions created.',
+        'payment_not_executed' => 'Reservation :reservation_id has no payment execution timestamp.',
+        'invalid_amount' => 'Reservation :reservation_id has invalid amount_eur.',
+        'collection_not_found' => 'Reservation :reservation_id has no associated collection.',
+        'distributions_already_exist' => 'Distributions already exist for reservation :reservation_id.',
+        'no_wallets_found' => 'No wallets found for collection :collection_id.',
+        'invalid_mint_percentages' => 'Collection :collection_id wallet percentages don\'t sum to 100% (current: :current_percentage%).',
+        'user_activity_logging_failed' => 'Failed to log user activity for user :user_id, distribution :distribution_id. Error: :error.',
     ],
     'user' => [
         // == Existing Entries ==
@@ -515,6 +526,17 @@ return [
         'currency_conversion_validation_error' => 'The data entered for conversion is not valid. Please check and try again.',
         'user_preference_fetch_error' => 'Unable to load your preferences. Please try again or contact support.',
         'currency_preference_validation_error' => 'The selected currency is not valid. Please choose a currency from the available list.',
+
+        // Payment Distribution Service Error Messages - User-Friendly
+        'payment_distribution_error' => 'Unable to process payment distribution. Our technical team has been notified. Please try again later.',
+        'reservation_not_completed' => 'This reservation is not completed yet. Payment distributions will be processed automatically once the reservation is finalized.',
+        'payment_not_executed' => 'Payment for this reservation has not been processed yet. Please contact support if you believe this is an error.',
+        'invalid_amount' => 'There is an issue with the payment amount. Please contact support for assistance.',
+        'collection_not_found' => 'Unable to find the associated collection. Please contact support for assistance.',
+        'distributions_already_exist' => 'Payment distributions have already been processed for this reservation.',
+        'no_wallets_found' => 'No payment wallets are configured for this collection. Please contact the collection owner.',
+        'invalid_mint_percentages' => 'The collection wallet configuration is incorrect. Please contact the collection owner to fix the percentage settings.',
+        'user_activity_logging_failed' => 'Unable to record activity log. This does not affect your transaction.',
     ],
 
     // Generic message (used by UserInterfaceHandler if no specific message found)

@@ -276,6 +276,17 @@ return [
         'biography_chapter_index_failed' => 'Errore nel recupero dei capitoli biografia. Verifica la query di ordinamento e i filtri di pubblicazione. Context: biography_id, user_id, order_by.',
         'biography_chapter_show_failed' => 'Errore nel caricamento dettagli capitolo biografia. Possibili cause: relazione mancante, eager loading fallito, o corruzione dati capitolo. Context: biography_id, chapter_id, user_id.',
 
+        // Payment Distribution Service Error Messages - Developer Messages
+        'payment_distribution_error' => 'Distribuzione pagamento fallita per prenotazione :reservation_id. Errore: :error.',
+        'reservation_not_completed' => 'La prenotazione :reservation_id non è completata e non può avere distribuzioni create.',
+        'payment_not_executed' => 'La prenotazione :reservation_id non ha timestamp di esecuzione pagamento.',
+        'invalid_amount' => 'La prenotazione :reservation_id ha amount_eur non valido.',
+        'collection_not_found' => 'La prenotazione :reservation_id non ha collezione associata.',
+        'distributions_already_exist' => 'Distribuzioni già esistenti per prenotazione :reservation_id.',
+        'no_wallets_found' => 'Nessun wallet trovato per collezione :collection_id.',
+        'invalid_mint_percentages' => 'Le percentuali dei wallet della collezione :collection_id non sommano al 100% (attuale: :current_percentage%).',
+        'user_activity_logging_failed' => 'Errore nel logging attività utente per user :user_id, distribuzione :distribution_id. Errore: :error.',
+
     ],
     'user' => [
         // == Existing Entries ==
@@ -508,6 +519,17 @@ return [
         'currency_conversion_validation_error' => 'I dati inseriti per la conversione non sono validi. Controlla e riprova.',
         'user_preference_fetch_error' => 'Non è stato possibile caricare le tue preferenze. Riprova o contatta l\'assistenza.',
         'currency_preference_validation_error' => 'La valuta selezionata non è valida. Scegli una valuta dall\'elenco disponibile.',
+
+        // Payment Distribution Service Error Messages - User-Friendly (Italian)
+        'payment_distribution_error' => 'Impossibile elaborare la distribuzione del pagamento. Il nostro team tecnico è stato avvisato. Riprova più tardi.',
+        'reservation_not_completed' => 'Questa prenotazione non è ancora completata. Le distribuzioni di pagamento verranno elaborate automaticamente una volta finalizzata la prenotazione.',
+        'payment_not_executed' => 'Il pagamento per questa prenotazione non è ancora stato elaborato. Contatta l\'assistenza se ritieni sia un errore.',
+        'invalid_amount' => 'C\'è un problema con l\'importo del pagamento. Contatta l\'assistenza per ricevere aiuto.',
+        'collection_not_found' => 'Impossibile trovare la collezione associata. Contatta l\'assistenza per ricevere aiuto.',
+        'distributions_already_exist' => 'Le distribuzioni di pagamento sono già state elaborate per questa prenotazione.',
+        'no_wallets_found' => 'Nessun wallet di pagamento è configurato per questa collezione. Contatta il proprietario della collezione.',
+        'invalid_mint_percentages' => 'La configurazione dei wallet della collezione non è corretta. Contatta il proprietario della collezione per correggere le impostazioni delle percentuali.',
+        'user_activity_logging_failed' => 'Impossibile registrare il log delle attività. Questo non influisce sulla tua transazione.',
     ],
 
     // Generic message (used by UserInterfaceHandler if no specific message found)

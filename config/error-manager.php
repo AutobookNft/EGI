@@ -3354,5 +3354,105 @@ return [
             'msg_to' => 'json',
         ],
 
+        // Payment Distribution Service Error Codes
+        'PAYMENT_DISTRIBUTION_ERROR' => [
+            'type' => 'error',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.payment_distribution_error',
+            'user_message_key' => 'error-manager::errors.user.payment_distribution_error',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'json',
+        ],
+
+        'RESERVATION_NOT_COMPLETED' => [
+            'type' => 'warning',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.reservation_not_completed',
+            'user_message_key' => 'error-manager::errors.user.reservation_not_completed',
+            'http_status_code' => 400,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'json',
+        ],
+
+        'PAYMENT_NOT_EXECUTED' => [
+            'type' => 'warning',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.payment_not_executed',
+            'user_message_key' => 'error-manager::errors.user.payment_not_executed',
+            'http_status_code' => 400,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'json',
+        ],
+
+        'INVALID_AMOUNT' => [
+            'type' => 'error',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.invalid_amount',
+            'user_message_key' => 'error-manager::errors.user.invalid_amount',
+            'http_status_code' => 400,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'json',
+        ],
+
+        'COLLECTION_NOT_FOUND' => [
+            'type' => 'error',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.collection_not_found',
+            'user_message_key' => 'error-manager::errors.user.collection_not_found',
+            'http_status_code' => 404,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'json',
+        ],
+
+        'DISTRIBUTIONS_ALREADY_EXIST' => [
+            'type' => 'warning',
+            'blocking' => 'not',
+            'dev_message_key' => 'error-manager::errors.dev.distributions_already_exist',
+            'user_message_key' => 'error-manager::errors.user.distributions_already_exist',
+            'http_status_code' => 409,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'json',
+        ],
+
+        'NO_WALLETS_FOUND' => [
+            'type' => 'error',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.no_wallets_found',
+            'user_message_key' => 'error-manager::errors.user.no_wallets_found',
+            'http_status_code' => 404,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'json',
+        ],
+
+        'INVALID_MINT_PERCENTAGES' => [
+            'type' => 'error',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.invalid_mint_percentages',
+            'user_message_key' => 'error-manager::errors.user.invalid_mint_percentages',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'json',
+        ],
+
+        'USER_ACTIVITY_LOGGING_FAILED' => [
+            'type' => 'warning',
+            'blocking' => 'not',
+            'dev_message_key' => 'error-manager::errors.dev.user_activity_logging_failed',
+            'user_message_key' => 'error-manager::errors.user.user_activity_logging_failed',
+            'http_status_code' => 200,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'none',
+        ],
+
     ]
 ];
