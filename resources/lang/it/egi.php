@@ -28,6 +28,8 @@ return [
     'current_price' => 'Prezzo Attuale',
     'not_currently_listed' => 'Da Attivare',
     'contact_owner_availability' => 'Contatta il proprietario per disponibilità',
+    'not_for_sale' => 'Non in vendita',
+    'not_for_sale_description' => 'Questo EGI non è attualmente disponibile per l\'acquisto',
     'liked' => 'Piaciuto',
     'add_to_favorites' => 'Aggiungi ai Preferiti',
     'reserve_this_piece' => 'Attivalo',

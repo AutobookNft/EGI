@@ -28,6 +28,8 @@ return [
     'current_price' => 'Current Price',
     'not_currently_listed' => 'To Activate',
     'contact_owner_availability' => 'Contact owner for availability',
+    'not_for_sale' => 'Not for sale',
+    'not_for_sale_description' => 'This EGI is not currently available for purchase',
     'liked' => 'Liked',
     'add_to_favorites' => 'Add to Favorites',
     'reserve_this_piece' => 'Activate It',

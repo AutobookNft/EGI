@@ -354,8 +354,7 @@
                                             <input type="hidden" name="is_published" value="0">
                                             <input type="checkbox" id="is_published" name="is_published" value="1" {{
                                                 old('is_published', $egi->is_published) ? 'checked' : '' }}
-                                            class="w-4 h-4 rounded text-emerald-600 bg-black/30 border-emerald-700/50
-                                            focus:ring-emerald-500 focus:ring-2">
+                                            class="w-4 h-4 rounded text-emerald-600 bg-black/30 border-emerald-700/50 focus:ring-emerald-500 focus:ring-2">
                                             <span class="ml-3 text-sm font-medium text-emerald-300">
                                                 {{ __('egi.crud.is_published') }}
                                             </span>
@@ -561,9 +560,14 @@
                                 </div>
                                 @else
                                 <div class="mb-6 text-center">
+                                    @if($egi->price && $egi->price > 0)
                                     <p class="text-lg font-semibold text-gray-300">{{ __('egi.not_currently_listed') }}
                                     </p>
                                     <p class="mt-1 text-sm text-gray-500">{{ __('egi.contact_owner_availability') }}</p>
+                                    @else
+                                    <p class="text-lg font-semibold text-gray-300">{{ __('egi.not_for_sale') }}</p>
+                                    <p class="mt-1 text-sm text-gray-500">{{ __('egi.not_for_sale_description') }}</p>
+                                    @endif
                                 </div>
                                 @endif
 
@@ -589,7 +593,7 @@
                                     @endif
 
                                     {{-- Reserve Button --}}
-                                    @if($canBeReserved)
+                                    @if($canBeReserved && $egi->price && $egi->price > 0)
                                     <button
                                         class="inline-flex items-center justify-center w-full px-6 py-4 font-medium text-white transition-all duration-200 border rounded-lg bg-gradient-to-r from-emerald-600/80 to-teal-600/80 hover:from-emerald-600 hover:to-teal-600 backdrop-blur-sm border-emerald-500/30 hover:border-emerald-400/50 reserve-button"
                                         data-egi-id="{{ $egi->id }}">
@@ -601,6 +605,16 @@
                                         </svg>
                                         {{ __('egi.reserve_this_piece') }}
                                     </button>
+                                    @else
+                                    {{-- Non in vendita - Messaggio informativo --}}
+                                    {{-- <div
+                                        class="inline-flex items-center justify-center w-full px-6 py-4 font-medium text-gray-500 transition-all duration-200 bg-gray-100 border border-gray-300 rounded-lg">
+                                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                        {{ __('egi.not_for_sale') }}
+                                    </div> --}}
                                     @endif
                                 </div>
                             </div>
