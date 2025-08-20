@@ -30,4 +30,20 @@ return [
     // GDPR
     'gdpr_check' => 'Controllo Conformità GDPR',
     'gdpr_coming_soon' => 'Gli alert sulla privacy arriveranno nella prossima fase MVP',
+
+    // Payment Distribution Statistics
+    'volume' => 'VOLUME',
+    'epp' => 'EPP',
+    'collections' => 'COLLEZIONI',
+    'sell_collections' => 'COLLEZIONI IN VENDITA',
+    'egis' => 'EGIS',
+    'sell_egis' => 'EGIS IN VENDITA',
+
+    // Statistics descriptions (for tooltips/help)
+    'volume_description' => 'Importo totale distribuito',
+    'epp_description' => 'Totale distribuito agli EPP',
+    'collections_description' => 'Numero totale di collezioni',
+    'sell_collections_description' => 'Collezioni con distribuzioni attive',
+    'egis_description' => 'Numero totale di EGI',
+    'sell_egis_description' => 'EGI con prenotazioni attive',
 ];

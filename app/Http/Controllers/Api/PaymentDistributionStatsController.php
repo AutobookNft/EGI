@@ -8,18 +8,16 @@ use App\Models\Egi;
 use App\Models\Collection;
 use Illuminate\Http\Request;
 
-class PaymentDistributionStatsController extends Controller
-{
+class PaymentDistributionStatsController extends Controller {
     /**
      * Ottieni le statistiche globali di Payment Distribution
      * Utilizzato per aggiornare dinamicamente le statistiche sulla homepage
      */
-    public function getGlobalStats(Request $request)
-    {
+    public function getGlobalStats(Request $request) {
         try {
             // Calcola le statistiche usando i metodi del modello PaymentDistribution
             $totalEgis = Egi::count();
-            $sellEgis = Egi::whereHas('reservations', function($query) {
+            $sellEgis = Egi::whereHas('reservations', function ($query) {
                 $query->where('is_current', true)->where('status', 'active');
             })->count();
 
@@ -57,7 +55,6 @@ class PaymentDistributionStatsController extends Controller
                     'sell_egis' => number_format($sellEgis)
                 ]
             ]);
-
         } catch (\Exception $e) {
             \Log::error('Errore nel recupero delle statistiche globali di PaymentDistribution', [
                 'error' => $e->getMessage(),
@@ -74,11 +71,10 @@ class PaymentDistributionStatsController extends Controller
     /**
      * Ottieni le statistiche per una collezione specifica
      */
-    public function getCollectionStats(Request $request, $collectionId)
-    {
+    public function getCollectionStats(Request $request, $collectionId) {
         try {
             $distributionStats = PaymentDistribution::getDashboardStatsByCollection($collectionId);
-            
+
             if (!$distributionStats) {
                 return response()->json([
                     'success' => false,
@@ -90,7 +86,6 @@ class PaymentDistributionStatsController extends Controller
                 'success' => true,
                 'data' => $distributionStats
             ]);
-
         } catch (\Exception $e) {
             \Log::error('Errore nel recupero delle statistiche della collezione', [
                 'collection_id' => $collectionId,

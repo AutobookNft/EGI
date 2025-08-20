@@ -50,7 +50,7 @@ $instanceId = uniqid();
     <div class="flex divide-x divide-white/20">
         {{-- VOLUME - Totale valore prenotazioni per questa collezione --}}
         <div class="pr-6">
-            <div class="text-xs font-medium tracking-wider text-gray-300 uppercase">VOLUME</div>
+            <div class="text-xs font-medium tracking-wider text-gray-300 uppercase">{{ __('statistics.volume') }}</div>
             <div class="font-bold text-white" style="font-size: 14px; color: #ffffff;"
                 id="statVolume_{{ $instanceId }}">
                 @if($totalVolume > 0)
@@ -63,7 +63,7 @@ $instanceId = uniqid();
 
         {{-- EPP - Distribuzioni EPP per questa collezione - VERDE --}}
         <div class="px-6">
-            <div class="text-xs font-medium tracking-wider text-gray-300 uppercase">EPP</div>
+            <div class="text-xs font-medium tracking-wider text-gray-300 uppercase">{{ __('statistics.epp') }}</div>
             <div class="font-bold text-green-400" style="font-size: 14px; color: #4ade80;"
                 id="statEpp_{{ $instanceId }}">
                 @if($eppTotal > 0)
@@ -76,7 +76,7 @@ $instanceId = uniqid();
 
         {{-- EGIS - Numero EGI in questa collezione --}}
         <div class="px-6">
-            <div class="text-xs font-medium tracking-wider text-gray-300 uppercase">EGIS</div>
+            <div class="text-xs font-medium tracking-wider text-gray-300 uppercase">{{ __('statistics.egis') }}</div>
             <div class="font-bold text-white" style="font-size: 14px; color: #ffffff;"
                 id="statTotalEgis_{{ $instanceId }}">
                 {{ number_format($totalEgis) }}
@@ -85,7 +85,8 @@ $instanceId = uniqid();
 
         {{-- SELL EGIS - EGI con prenotazioni attive in questa collezione --}}
         <div class="pl-6">
-            <div class="text-xs font-medium tracking-wider text-gray-300 uppercase">SELL EGIS</div>
+            <div class="text-xs font-medium tracking-wider text-gray-300 uppercase">{{ __('statistics.sell_egis') }}
+            </div>
             <div class="font-bold text-white" style="font-size: 14px; color: #ffffff;"
                 id="statSellEgis_{{ $instanceId }}">
                 {{ number_format($sellEgis) }}

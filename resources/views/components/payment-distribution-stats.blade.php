@@ -30,12 +30,14 @@ $instanceId = uniqid();
 @endphp
 
 {{-- Statistiche Payment Distribution GLOBALI --}}
-<div class="flex flex-col items-center justify-center w-full gap-4 sm:gap-6" id="globalStatsContainer_{{ $instanceId }}">
+<div class="flex flex-col items-center justify-center w-full gap-4 sm:gap-6"
+    id="globalStatsContainer_{{ $instanceId }}">
     <div class="p-4 border rounded-lg backdrop-blur-sm border-white/10" style="background-color: rgba(0, 0, 0, 0.5);">
         <div class="flex divide-x divide-white/20">
             {{-- VOLUME - Totale importo distribuito (€) --}}
             <div class="pr-6">
-                <div class="text-xs font-medium tracking-wider text-gray-300 uppercase">VOLUME</div>
+                <div class="text-xs font-medium tracking-wider text-gray-300 uppercase">{{ __('statistics.volume') }}
+                </div>
                 <div class="text-white" style="font-size: 12px; color: #ffffff; font-weight: 700;"
                     id="statVolume_{{ $instanceId }}">
                     @if($totalVolume > 0)
@@ -48,7 +50,7 @@ $instanceId = uniqid();
 
             {{-- EPP - Totale distribuito agli EPP (€) --}}
             <div class="px-6">
-                <div class="text-xs font-medium tracking-wider text-gray-300 uppercase">EPP</div>
+                <div class="text-xs font-medium tracking-wider text-gray-300 uppercase">{{ __('statistics.epp') }}</div>
                 <div class="text-green-400" style="font-size: 12px; color: #4ade80; font-weight: 700;"
                     id="statEpp_{{ $instanceId }}">
                     @if($eppTotal > 0)
@@ -61,7 +63,8 @@ $instanceId = uniqid();
 
             {{-- COLLECTIONS - Numero totale delle collections (come EGIS) --}}
             <div class="px-6">
-                <div class="text-xs font-medium tracking-wider text-gray-300 uppercase">COLLECTIONS</div>
+                <div class="text-xs font-medium tracking-wider text-gray-300 uppercase">{{ __('statistics.collections')
+                    }}</div>
                 <div class="text-white" style="font-size: 12px; color: #ffffff; font-weight: 700;"
                     id="statCollections_{{ $instanceId }}">
                     {{ number_format($totalCollections) }}
@@ -70,7 +73,8 @@ $instanceId = uniqid();
 
             {{-- SELL COLLECTIONS - Collections con distribuzioni attive --}}
             <div class="px-6">
-                <div class="text-xs font-medium tracking-wider text-gray-300 uppercase">SELL COLLECTIONS</div>
+                <div class="text-xs font-medium tracking-wider text-gray-300 uppercase">{{
+                    __('statistics.sell_collections') }}</div>
                 <div class="text-white" style="font-size: 12px; color: #ffffff; font-weight: 700;"
                     id="statSellCollections_{{ $instanceId }}">
                     {{ number_format($sellCollections) }}
@@ -79,7 +83,8 @@ $instanceId = uniqid();
 
             {{-- EGIS - Numero totale degli EGI presenti --}}
             <div class="px-6">
-                <div class="text-xs font-medium tracking-wider text-gray-300 uppercase">EGIS</div>
+                <div class="text-xs font-medium tracking-wider text-gray-300 uppercase">{{ __('statistics.egis') }}
+                </div>
                 <div class="text-white" style="font-size: 12px; color: #ffffff; font-weight: 700;"
                     id="statTotalEgis_{{ $instanceId }}">
                     {{ number_format($totalEgis) }}
@@ -88,7 +93,8 @@ $instanceId = uniqid();
 
             {{-- SELL_EGIS - Numero totale degli EGI che hanno in corso una prenotazione valida --}}
             <div class="pl-6">
-                <div class="text-xs font-medium tracking-wider text-gray-300 uppercase">SELL EGIS</div>
+                <div class="text-xs font-medium tracking-wider text-gray-300 uppercase">{{ __('statistics.sell_egis') }}
+                </div>
                 <div class="text-white" style="font-size: 12px; color: #ffffff; font-weight: 700;"
                     id="statSellEgis_{{ $instanceId }}">
                     {{ number_format($sellEgis) }}
@@ -100,12 +106,12 @@ $instanceId = uniqid();
 
 {{-- JavaScript per aggiornamento automatico delle statistiche globali --}}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function() {
     const instanceId = "{{ $instanceId }}";
     const globalStatsContainer = document.getElementById('globalStatsContainer_' + instanceId);
-    
+
     if (!globalStatsContainer) return;
-    
+
     // Aggiorna le statistiche globali
     function updateGlobalStats() {
         console.log('Aggiornamento statistiche globali desktop...'); // Debug
@@ -121,7 +127,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     const sellCollectionsElement = document.getElementById('statSellCollections_' + instanceId);
                     const totalEgisElement = document.getElementById('statTotalEgis_' + instanceId);
                     const sellEgisElement = document.getElementById('statSellEgis_' + instanceId);
-                    
+
                     // Funzione per aggiungere effetto brillamento
                     function addShineEffect(element, newValue) {
                         if (element && element.textContent !== newValue) {
@@ -130,7 +136,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             element.style.transition = 'all 0.3s ease';
                             element.style.transform = 'scale(1.05)';
                             element.style.textShadow = '0 0 10px rgba(255, 255, 255, 0.8)';
-                            
+
                             setTimeout(() => {
                                 element.style.transform = 'scale(1)';
                                 element.style.textShadow = 'none';
@@ -139,7 +145,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             element.textContent = newValue;
                         }
                     }
-                    
+
                     addShineEffect(volumeElement, data.formatted.volume);
                     addShineEffect(eppElement, data.formatted.epp);
                     addShineEffect(collectionsElement, data.formatted.collections);
@@ -152,13 +158,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error('Errore nel recupero delle statistiche globali:', error);
             });
     }
-    
+
     // Prima chiamata immediata per testare
     setTimeout(updateGlobalStats, 1000);
-    
+
     // Aggiorna ogni 5 secondi (temporaneo per test, poi ripristinare a 30000)
     const updateInterval = setInterval(updateGlobalStats, 5000);
-    
+
     // Cleanup quando l'elemento viene rimosso dal DOM
     const observer = new MutationObserver(function(mutations) {
         mutations.forEach(function(mutation) {
@@ -170,7 +176,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     });
-    
+
     observer.observe(document.body, { childList: true, subtree: true });
 });
 </script>

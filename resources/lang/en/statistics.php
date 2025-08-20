@@ -30,4 +30,20 @@ return [
     // GDPR
     'gdpr_check' => 'GDPR Compliance Check',
     'gdpr_coming_soon' => 'Privacy compliance alerts coming in the next MVP phase',
+
+    // Payment Distribution Statistics
+    'volume' => 'VOLUME',
+    'epp' => 'EPP',
+    'collections' => 'COLLECTIONS',
+    'sell_collections' => 'SELL COLLECTIONS',
+    'egis' => 'EGIS',
+    'sell_egis' => 'SELL EGIS',
+
+    // Statistics descriptions (for tooltips/help)
+    'volume_description' => 'Total amount distributed',
+    'epp_description' => 'Total distributed to EPPs',
+    'collections_description' => 'Total number of collections',
+    'sell_collections_description' => 'Collections with active distributions',
+    'egis_description' => 'Total number of EGIs',
+    'sell_egis_description' => 'EGIs with active reservations',
 ];
