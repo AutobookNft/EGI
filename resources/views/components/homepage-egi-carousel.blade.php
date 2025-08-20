@@ -73,9 +73,9 @@ $activatorsCount = \DB::table('users')
                     @endif
                 </div>
 
-                <div class="flex pb-4 space-x-4 overflow-x-auto scrollbar-hide">
+                <div class="flex items-stretch pb-4 space-x-4 overflow-x-auto scrollbar-hide">
                     @foreach($egis as $egi)
-                    <div class="flex-shrink-0" style="min-width: 320px;">
+                    <div class="flex-shrink-0 egi-carousel-card" style="min-width: 320px;">
                         <x-egi-card-list :egi="$egi" context="creator" :showPurchasePrice="false"
                             :showOwnershipBadge="false" />
                     </div>
@@ -209,5 +209,33 @@ $activatorsCount = \DB::table('users')
 
     .carousel-section:hover {
         transform: translateY(-2px);
+    }
+
+    /* Stabilizza le card EGI nel carousel */
+    .egi-carousel-card {
+        transform: translateZ(0);
+        /* Force hardware acceleration */
+        will-change: auto;
+        /* Optimize for changes */
+    }
+
+    /* Neutralizza animazioni HYPER nel carousel */
+    .egi-carousel-card .egi-sparkles {
+        display: none !important;
+        /* Nasconde sparkles che causano instabilità */
+    }
+
+    .egi-carousel-card .egi-hyper-badge-small {
+        animation: none !important;
+        /* Disabilita animazione pulsante */
+        transform: none !important;
+        /* Rimuove trasformazioni */
+    }
+
+    /* Stabilizza elementi absolute nel carousel */
+    .egi-carousel-card article {
+        position: relative !important;
+        contain: layout style paint;
+        /* CSS containment per performance */
     }
 </style>
