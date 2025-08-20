@@ -234,6 +234,31 @@ class ReservationFormModal {
         // Update ALGO equivalent when offer amount changes
         this.offerInput?.addEventListener('input', () => this.updateAlgoEquivalent());
 
+        // Validate numeric input for offer amount
+        this.offerInput?.addEventListener('input', (e: Event) => {
+            const target = e.target as HTMLInputElement;
+            let value = target.value;
+            
+            // Remove any non-numeric characters except decimal point
+            value = value.replace(/[^0-9.]/g, '');
+            
+            // Ensure only one decimal point
+            const parts = value.split('.');
+            if (parts.length > 2) {
+                value = parts[0] + '.' + parts.slice(1).join('');
+            }
+            
+            // Limit to 2 decimal places
+            if (parts[1] && parts[1].length > 2) {
+                value = parts[0] + '.' + parts[1].substring(0, 2);
+            }
+            
+            // Update the input value if it changed
+            if (target.value !== value) {
+                target.value = value;
+            }
+        });
+
         // Form submission
         this.form?.addEventListener('submit', (e: Event) => this.handleSubmit(e));
     }
@@ -483,6 +508,9 @@ class ReservationFormModal {
 
             // Handle response
             if (response.success) {
+                // Update EGI display with new reservation data
+                this.updateEgiDisplay(response);
+
                 // Close modal
                 this.close();
 
@@ -582,6 +610,68 @@ class ReservationFormModal {
     }
 
     /**
+     * Update EGI display after successful reservation
+     *
+     * @private
+     * @param response The reservation response
+     */
+    private updateEgiDisplay(response: ReservationResponse): void {
+        try {
+            // Find the EGI card in the DOM using the EGI ID
+            const egiCard = document.querySelector(`[data-egi-id="${this.egiId}"]`);
+            if (!egiCard) {
+                console.log('EGI card not found for ID:', this.egiId);
+                return;
+            }
+
+            // Update the price display if available in response
+            if (response.reservation && response.reservation.offer_amount_fiat) {
+                const priceElements = egiCard.querySelectorAll('.egi-price, [data-price]');
+                priceElements.forEach((element) => {
+                    if (element instanceof HTMLElement) {
+                        element.textContent = `€${parseFloat(response.reservation!.offer_amount_fiat.toString()).toFixed(2)}`;
+                    }
+                });
+            }
+
+            // Update the activation status/button
+            const activateButton = egiCard.querySelector('.egi-activate-btn, [data-action="activate"], button[onclick*="showReservationModal"]');
+            if (activateButton instanceof HTMLElement) {
+                // Change button text to indicate user is now the activator
+                activateButton.textContent = 'Hai Attivato';
+                activateButton.classList.add('bg-green-600', 'text-white');
+                activateButton.classList.remove('bg-amber-500', 'hover:bg-amber-600');
+                
+                // Disable the button temporarily
+                if (activateButton instanceof HTMLButtonElement) {
+                    activateButton.disabled = true;
+                }
+            }
+
+            // Add a visual indicator that the reservation was successful
+            const statusIndicator = egiCard.querySelector('.status-indicator');
+            if (statusIndicator instanceof HTMLElement) {
+                statusIndicator.textContent = 'Attivato da Te';
+                statusIndicator.classList.add('text-green-600', 'font-semibold');
+            } else {
+                // Create a new status indicator if one doesn't exist
+                const newIndicator = document.createElement('div');
+                newIndicator.className = 'status-indicator text-green-600 font-semibold text-sm mt-2';
+                newIndicator.textContent = 'Attivato da Te';
+                
+                const cardBody = egiCard.querySelector('.card-body, .p-4');
+                if (cardBody) {
+                    cardBody.appendChild(newIndicator);
+                }
+            }
+
+            console.log('Successfully updated EGI display for ID:', this.egiId);
+        } catch (error) {
+            console.error('Error updating EGI display:', error);
+        }
+    }
+
+    /**
      * Generate the HTML for the reservation modal
      *
      * @private
@@ -614,7 +704,7 @@ class ReservationFormModal {
 
 
         return `
-        <div id="reservation-modal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black bg-opacity-75 hidden" role="dialog" aria-modal="true" aria-hidden="true" tabindex="-1" aria-labelledby="reservation-modal-title">
+        <div id="reservation-modal" class="fixed inset-0 z-[100] flex items-center justify-center backdrop-blur-sm bg-black/60 bg-opacity-60 hidden" role="dialog" aria-modal="true" aria-hidden="true" tabindex="-1" aria-labelledby="reservation-modal-title">
             <div class="relative bg-gradient-to-b from-white to-amber-50 rounded-xl shadow-2xl max-w-2xl w-11/12 md:w-3/4 lg:w-2/5 max-h-[90vh] overflow-y-auto border border-amber-200" role="document" style="border-image: linear-gradient(45deg, #D4A574, #2D5016) 1;">
                 <button id="close-reservation-modal" class="absolute w-8 h-8 flex items-center justify-center text-2xl leading-none text-amber-700 top-4 right-4 hover:text-amber-900 hover:bg-amber-100 rounded-full transition-all duration-200" aria-label="${appTranslate('reservation.form.close_button')}">&times;</button>
 
@@ -652,10 +742,10 @@ class ReservationFormModal {
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <span class="text-amber-600 font-medium text-lg">€</span>
                                 </div>
-                                <input type="number" name="offer_amount_fiat" id="offer_amount_fiat"
-                                       class="block w-full pl-8 pr-12 py-3 text-lg border-2 border-amber-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white placeholder-gray-400 transition-all duration-200"
+                                <input type="text" name="offer_amount_fiat" id="offer_amount_fiat"
+                                       class="block w-full pl-12 pr-12 py-3 text-lg border-2 border-amber-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white placeholder-gray-400 transition-all duration-200"
                                        placeholder="${appTranslate('reservation.form.offer_amount_placeholder')}"
-                                       step="0.01" min="1" required>
+                                       pattern="[0-9]+(\.[0-9]{1,2})?" inputmode="decimal" required>
                                 <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                                     <span class="text-amber-600 text-sm font-medium">EUR</span>
                                 </div>
