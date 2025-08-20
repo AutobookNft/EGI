@@ -230,6 +230,11 @@ $activatorsCount = \DB::table('users')
         /* Disabilita animazione pulsante */
         transform: none !important;
         /* Rimuove trasformazioni */
+        position: absolute !important;
+        top: 8px !important;
+        right: 8px !important;
+        z-index: 10 !important;
+        /* Posiziona il badge dentro la card con padding */
     }
 
     /* Stabilizza elementi absolute nel carousel */
