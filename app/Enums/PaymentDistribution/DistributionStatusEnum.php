@@ -13,8 +13,7 @@ namespace App\Enums\PaymentDistribution;
  * @version 1.0.0
  * @date 2025-08-20
  */
-enum DistributionStatusEnum: string
-{
+enum DistributionStatusEnum: string {
     case PENDING = 'pending';
     case PROCESSED = 'processed';
     case CONFIRMED = 'confirmed';
@@ -24,8 +23,7 @@ enum DistributionStatusEnum: string
      * Get the display name for the status
      * @return string
      */
-    public function getDisplayName(): string
-    {
+    public function getDisplayName(): string {
         return match ($this) {
             self::PENDING => __('payment_distribution.status.pending'),
             self::PROCESSED => __('payment_distribution.status.processed'),
@@ -38,8 +36,7 @@ enum DistributionStatusEnum: string
      * Get the description for the status
      * @return string
      */
-    public function getDescription(): string
-    {
+    public function getDescription(): string {
         return match ($this) {
             self::PENDING => __('payment_distribution.status_desc.pending'),
             self::PROCESSED => __('payment_distribution.status_desc.processed'),
@@ -52,8 +49,7 @@ enum DistributionStatusEnum: string
      * Get the color class for UI display
      * @return string
      */
-    public function getColorClass(): string
-    {
+    public function getColorClass(): string {
         return match ($this) {
             self::PENDING => 'text-yellow-600 bg-yellow-100',
             self::PROCESSED => 'text-blue-600 bg-blue-100',
@@ -66,8 +62,7 @@ enum DistributionStatusEnum: string
      * Get all statuses as array for selects
      * @return array<string, string>
      */
-    public static function getOptions(): array
-    {
+    public static function getOptions(): array {
         $options = [];
         foreach (self::cases() as $case) {
             $options[$case->value] = $case->getDisplayName();
@@ -79,8 +74,7 @@ enum DistributionStatusEnum: string
      * Get statuses that indicate success
      * @return array<DistributionStatusEnum>
      */
-    public static function getSuccessStatuses(): array
-    {
+    public static function getSuccessStatuses(): array {
         return [self::PROCESSED, self::CONFIRMED];
     }
 
@@ -88,8 +82,7 @@ enum DistributionStatusEnum: string
      * Check if this status indicates success
      * @return bool
      */
-    public function isSuccess(): bool
-    {
+    public function isSuccess(): bool {
         return in_array($this, self::getSuccessStatuses());
     }
 
@@ -97,8 +90,7 @@ enum DistributionStatusEnum: string
      * Get statuses that indicate pending/in-progress
      * @return array<DistributionStatusEnum>
      */
-    public static function getPendingStatuses(): array
-    {
+    public static function getPendingStatuses(): array {
         return [self::PENDING];
     }
 
@@ -106,8 +98,7 @@ enum DistributionStatusEnum: string
      * Check if this status indicates pending
      * @return bool
      */
-    public function isPending(): bool
-    {
+    public function isPending(): bool {
         return $this === self::PENDING;
     }
 
@@ -115,8 +106,7 @@ enum DistributionStatusEnum: string
      * Get statuses that indicate failure
      * @return array<DistributionStatusEnum>
      */
-    public static function getFailureStatuses(): array
-    {
+    public static function getFailureStatuses(): array {
         return [self::FAILED];
     }
 
@@ -124,8 +114,7 @@ enum DistributionStatusEnum: string
      * Check if this status indicates failure
      * @return bool
      */
-    public function isFailure(): bool
-    {
+    public function isFailure(): bool {
         return $this === self::FAILED;
     }
 
@@ -133,8 +122,7 @@ enum DistributionStatusEnum: string
      * Check if this status is final (no further processing)
      * @return bool
      */
-    public function isFinal(): bool
-    {
+    public function isFinal(): bool {
         return in_array($this, [self::CONFIRMED, self::FAILED]);
     }
 }

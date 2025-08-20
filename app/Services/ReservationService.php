@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Services\CurrencyService;
 use App\Services\CertificateGeneratorService;
 use App\Services\Notifications\ReservationNotificationService;
+use App\Services\PaymentDistributionService;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
@@ -39,6 +40,7 @@ class ReservationService {
     protected CurrencyService $currencyService;
     protected ReservationNotificationService $notificationService;
     protected ErrorManagerInterface $errorManager;
+    protected PaymentDistributionService $paymentDistributionService;
 
     /**
      * Constructor with dependency injection
@@ -48,13 +50,15 @@ class ReservationService {
         CertificateGeneratorService $certificateGenerator,
         CurrencyService $currencyService,
         ReservationNotificationService $notificationService,
-        ErrorManagerInterface $errorManager
+        ErrorManagerInterface $errorManager,
+        PaymentDistributionService $paymentDistributionService
     ) {
         $this->logger = $logger;
         $this->certificateGenerator = $certificateGenerator;
         $this->currencyService = $currencyService;
         $this->notificationService = $notificationService;
         $this->errorManager = $errorManager;
+        $this->paymentDistributionService = $paymentDistributionService;
     }
 
     /**
@@ -1145,6 +1149,34 @@ class ReservationService {
                 'rank_position' => $reservation->rank_position,
                 'is_highest' => $reservation->is_highest
             ]);
+
+            // 🎯 FASE 3: CREATE PAYMENT DISTRIBUTIONS for every reservation
+            try {
+                $distributions = $this->paymentDistributionService->createDistributionsForReservation($reservation);
+
+                $this->logger->info('[PAYMENT_DISTRIBUTIONS] Created distributions for reservation', [
+                    'reservation_id' => $reservation->id,
+                    'distributions_count' => count($distributions),
+                    'total_amount' => array_sum(array_column($distributions, 'amount_eur')),
+                    'is_highest_rank' => $reservation->rank_position === 1
+                ]);
+            } catch (\Exception $e) {
+                // Log error but don't fail the reservation process
+                $this->logger->error('[PAYMENT_DISTRIBUTIONS] Failed to create distributions', [
+                    'reservation_id' => $reservation->id,
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]);
+
+                // Using ErrorManager to handle non-blocking error
+                $this->errorManager->handle('PAYMENT_DISTRIBUTION_ERROR', [
+                    'reservation_id' => $reservation->id,
+                    'operation' => 'createOrUpdatePreLaunchReservation',
+                    'error' => $e->getMessage(),
+                    'user_id' => $userId,
+                    'timestamp' => now()->toIso8601String()
+                ], $e);
+            }
 
             return $reservation;
         });

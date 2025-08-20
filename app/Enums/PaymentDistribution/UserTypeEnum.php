@@ -13,8 +13,7 @@ namespace App\Enums\PaymentDistribution;
  * @version 1.0.0
  * @date 2025-08-20
  */
-enum UserTypeEnum: string
-{
+enum UserTypeEnum: string {
     case WEAK = 'weak';
     case CREATOR = 'creator';
     case COLLECTOR = 'collector';
@@ -23,13 +22,13 @@ enum UserTypeEnum: string
     case EPP = 'epp';
     case TRADER_PRO = 'trader-pro';
     case VIP = 'vip';
+    case NATAN = 'natan';
 
     /**
      * Get the display name for the user type
      * @return string
      */
-    public function getDisplayName(): string
-    {
+    public function getDisplayName(): string {
         return match ($this) {
             self::WEAK => __('payment_distribution.user_types.weak'),
             self::CREATOR => __('payment_distribution.user_types.creator'),
@@ -39,6 +38,7 @@ enum UserTypeEnum: string
             self::EPP => __('payment_distribution.user_types.epp'),
             self::TRADER_PRO => __('payment_distribution.user_types.trader_pro'),
             self::VIP => __('payment_distribution.user_types.vip'),
+            self::NATAN => __('payment_distribution.user_types.natan'),
         };
     }
 
@@ -46,8 +46,7 @@ enum UserTypeEnum: string
      * Get the description for the user type
      * @return string
      */
-    public function getDescription(): string
-    {
+    public function getDescription(): string {
         return match ($this) {
             self::WEAK => __('payment_distribution.user_types_desc.weak'),
             self::CREATOR => __('payment_distribution.user_types_desc.creator'),
@@ -57,6 +56,7 @@ enum UserTypeEnum: string
             self::EPP => __('payment_distribution.user_types_desc.epp'),
             self::TRADER_PRO => __('payment_distribution.user_types_desc.trader_pro'),
             self::VIP => __('payment_distribution.user_types_desc.vip'),
+            self::NATAN => __('payment_distribution.user_types_desc.natan'),
         };
     }
 
@@ -64,8 +64,7 @@ enum UserTypeEnum: string
      * Get all user types as array for selects
      * @return array<string, string>
      */
-    public static function getOptions(): array
-    {
+    public static function getOptions(): array {
         $options = [];
         foreach (self::cases() as $case) {
             $options[$case->value] = $case->getDisplayName();
@@ -77,8 +76,7 @@ enum UserTypeEnum: string
      * Get user types that are EPP-related
      * @return array<UserTypeEnum>
      */
-    public static function getEppTypes(): array
-    {
+    public static function getEppTypes(): array {
         return [self::EPP];
     }
 
@@ -86,8 +84,7 @@ enum UserTypeEnum: string
      * Check if this user type is EPP-related
      * @return bool
      */
-    public function isEpp(): bool
-    {
+    public function isEpp(): bool {
         return $this === self::EPP;
     }
 
@@ -95,8 +92,7 @@ enum UserTypeEnum: string
      * Get user types that are business-oriented
      * @return array<UserTypeEnum>
      */
-    public static function getBusinessTypes(): array
-    {
+    public static function getBusinessTypes(): array {
         return [self::COMPANY, self::TRADER_PRO];
     }
 
@@ -104,8 +100,7 @@ enum UserTypeEnum: string
      * Check if this user type is business-oriented
      * @return bool
      */
-    public function isBusiness(): bool
-    {
+    public function isBusiness(): bool {
         return in_array($this, self::getBusinessTypes());
     }
 
@@ -113,8 +108,7 @@ enum UserTypeEnum: string
      * Get user types that are individual users
      * @return array<UserTypeEnum>
      */
-    public static function getIndividualTypes(): array
-    {
+    public static function getIndividualTypes(): array {
         return [self::WEAK, self::CREATOR, self::COLLECTOR, self::COMMISSIONER, self::VIP];
     }
 
@@ -122,8 +116,7 @@ enum UserTypeEnum: string
      * Check if this user type is an individual user
      * @return bool
      */
-    public function isIndividual(): bool
-    {
+    public function isIndividual(): bool {
         return in_array($this, self::getIndividualTypes());
     }
 }

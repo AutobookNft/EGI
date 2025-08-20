@@ -34,9 +34,14 @@ use Illuminate\Database\Eloquent\Builder;
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
  */
-class PaymentDistribution extends Model
-{
+class PaymentDistribution extends Model {
     use HasFactory;
+
+    /**
+     * The table associated with the model
+     * @var string
+     */
+    protected $table = 'payment_distributions';
 
     /**
      * The attributes that are mass assignable
@@ -77,8 +82,7 @@ class PaymentDistribution extends Model
      * Get the reservation that owns this distribution
      * @return BelongsTo
      */
-    public function reservation(): BelongsTo
-    {
+    public function reservation(): BelongsTo {
         return $this->belongsTo(Reservation::class);
     }
 
@@ -86,8 +90,7 @@ class PaymentDistribution extends Model
      * Get the collection that owns this distribution
      * @return BelongsTo
      */
-    public function collection(): BelongsTo
-    {
+    public function collection(): BelongsTo {
         return $this->belongsTo(Collection::class);
     }
 
@@ -95,8 +98,7 @@ class PaymentDistribution extends Model
      * Get the user that receives this distribution
      * @return BelongsTo
      */
-    public function user(): BelongsTo
-    {
+    public function user(): BelongsTo {
         return $this->belongsTo(User::class);
     }
 
@@ -108,8 +110,7 @@ class PaymentDistribution extends Model
      * @param UserTypeEnum $userType
      * @return Builder
      */
-    public function scopeByUserType(Builder $query, UserTypeEnum $userType): Builder
-    {
+    public function scopeByUserType(Builder $query, UserTypeEnum $userType): Builder {
         return $query->where('user_type', $userType);
     }
 
@@ -119,8 +120,7 @@ class PaymentDistribution extends Model
      * @param int $collectionId
      * @return Builder
      */
-    public function scopeByCollection(Builder $query, int $collectionId): Builder
-    {
+    public function scopeByCollection(Builder $query, int $collectionId): Builder {
         return $query->where('collection_id', $collectionId);
     }
 
@@ -129,8 +129,7 @@ class PaymentDistribution extends Model
      * @param Builder $query
      * @return Builder
      */
-    public function scopeIsEPP(Builder $query): Builder
-    {
+    public function scopeIsEPP(Builder $query): Builder {
         return $query->where('is_epp', true);
     }
 
@@ -139,8 +138,7 @@ class PaymentDistribution extends Model
      * @param Builder $query
      * @return Builder
      */
-    public function scopeNotEPP(Builder $query): Builder
-    {
+    public function scopeNotEPP(Builder $query): Builder {
         return $query->where('is_epp', false);
     }
 
@@ -150,8 +148,7 @@ class PaymentDistribution extends Model
      * @param DistributionStatusEnum $status
      * @return Builder
      */
-    public function scopeByStatus(Builder $query, DistributionStatusEnum $status): Builder
-    {
+    public function scopeByStatus(Builder $query, DistributionStatusEnum $status): Builder {
         return $query->where('distribution_status', $status);
     }
 
@@ -162,8 +159,7 @@ class PaymentDistribution extends Model
      * @param string $endDate
      * @return Builder
      */
-    public function scopeByDateRange(Builder $query, string $startDate, string $endDate): Builder
-    {
+    public function scopeByDateRange(Builder $query, string $startDate, string $endDate): Builder {
         return $query->whereBetween('created_at', [$startDate, $endDate]);
     }
 
@@ -174,8 +170,7 @@ class PaymentDistribution extends Model
      * @param int $reservationId
      * @return float
      */
-    public static function getTotalForReservation(int $reservationId): float
-    {
+    public static function getTotalForReservation(int $reservationId): float {
         return static::where('reservation_id', $reservationId)->sum('amount_eur');
     }
 
@@ -184,8 +179,7 @@ class PaymentDistribution extends Model
      * @param int $reservationId
      * @return float
      */
-    public static function getPercentageTotalForReservation(int $reservationId): float
-    {
+    public static function getPercentageTotalForReservation(int $reservationId): float {
         return static::where('reservation_id', $reservationId)->sum('percentage');
     }
 
@@ -194,8 +188,7 @@ class PaymentDistribution extends Model
      * @param int $collectionId
      * @return float
      */
-    public static function getEppImpactForCollection(int $collectionId): float
-    {
+    public static function getEppImpactForCollection(int $collectionId): float {
         return static::where('collection_id', $collectionId)
             ->where('is_epp', true)
             ->sum('amount_eur');
@@ -206,8 +199,7 @@ class PaymentDistribution extends Model
      * @param UserTypeEnum $userType
      * @return float
      */
-    public static function getUserTypeEarnings(UserTypeEnum $userType): float
-    {
+    public static function getUserTypeEarnings(UserTypeEnum $userType): float {
         return static::where('user_type', $userType)->sum('amount_eur');
     }
 
@@ -216,8 +208,7 @@ class PaymentDistribution extends Model
      * @param int $reservationId
      * @return bool
      */
-    public static function validatePercentagesForReservation(int $reservationId): bool
-    {
+    public static function validatePercentagesForReservation(int $reservationId): bool {
         $total = static::getPercentageTotalForReservation($reservationId);
         return abs($total - 100.00) < 0.01; // Allow for floating point precision
     }
@@ -228,8 +219,7 @@ class PaymentDistribution extends Model
      * Get formatted amount in EUR
      * @return string
      */
-    public function getFormattedAmountAttribute(): string
-    {
+    public function getFormattedAmountAttribute(): string {
         return '€ ' . number_format($this->amount_eur, 2);
     }
 
@@ -237,8 +227,7 @@ class PaymentDistribution extends Model
      * Get formatted percentage
      * @return string
      */
-    public function getFormattedPercentageAttribute(): string
-    {
+    public function getFormattedPercentageAttribute(): string {
         return number_format($this->percentage, 2) . '%';
     }
 
@@ -246,8 +235,7 @@ class PaymentDistribution extends Model
      * Get user type display name
      * @return string
      */
-    public function getUserTypeDisplayAttribute(): string
-    {
+    public function getUserTypeDisplayAttribute(): string {
         return $this->user_type->getDisplayName();
     }
 
@@ -255,8 +243,7 @@ class PaymentDistribution extends Model
      * Get status display name
      * @return string
      */
-    public function getStatusDisplayAttribute(): string
-    {
+    public function getStatusDisplayAttribute(): string {
         return $this->distribution_status->getDisplayName();
     }
 }

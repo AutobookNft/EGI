@@ -58,8 +58,8 @@ class PaymentDistributionService
                 $this->validateReservationForDistribution($reservation);
 
                 // Get collection and validate wallets
-                $collection = $reservation->collection;
-                
+                $collection = $reservation->egi->collection;
+
                 // Log operation start
                 if ($this->logger) {
                     $this->logger->info('[Payment Distribution] Starting distribution creation', [
@@ -74,23 +74,25 @@ class PaymentDistributionService
                 // Get all wallets for the collection
                 $wallets = $this->getCollectionWallets($collection);
 
-                // Create distributions for each wallet
-                $distributions = [];
-                foreach ($wallets as $wallet) {
-                    $distribution = $this->createDistribution($reservation, $wallet);
-                    $distributions[] = $distribution;
-                }
+                // Calculate distributions for all wallets
+                $distributionsData = $this->calculateDistributions($reservation, $wallets);
+
+                // Create distribution records in database
+                $distributions = $this->createDistributionRecords($distributionsData);
+
+                // Log GDPR-compliant user activities
+                $this->logUserActivities($reservation, $distributions);
 
                 // Log completion
                 if ($this->logger) {
                     $this->logger->info('[Payment Distribution] Distribution creation completed', [
                         'reservation_id' => $reservation->id,
-                        'total_distributions' => count($distributions),
-                        'total_amount' => array_sum(array_column($distributions, 'amount_eur'))
+                        'total_distributions' => $distributions->count(),
+                        'total_amount' => $distributions->sum('amount_eur')
                     ]);
                 }
 
-                return $distributions;
+                return $distributions->toArray();
             });
         } catch (\Exception $e) {
             // Handle error with UEM
@@ -103,7 +105,7 @@ class PaymentDistributionService
                 'timestamp' => now()->toIso8601String(),
                 'error' => $e->getMessage()
             ], $e);
-            
+
             throw $e;
         }
     }
@@ -111,7 +113,7 @@ class PaymentDistributionService
     /**
      * Validate that reservation is eligible for distribution
      * Note: All reservations are treated as virtual payments, only 'highest' rank counts for stats
-     * 
+     *
      * @param Reservation $reservation
      * @throws \Exception
      */
@@ -162,7 +164,7 @@ class PaymentDistributionService
 
         /**
      * Get collection wallets with validation
-     * 
+     *
      * @param \App\Models\Collection $collection
      * @return \Illuminate\Database\Eloquent\Collection<Wallet>
      * @throws \Exception
@@ -181,8 +183,8 @@ class PaymentDistributionService
         }
 
         // Validate total mint percentages sum to 100%
-        $totalMintPercentage = $wallets->sum('mint_percentage');
-        if ($totalMintPercentage !== 100) {
+        $totalMintPercentage = $wallets->sum('royalty_mint');
+        if ($totalMintPercentage != 100) {
             $this->errorManager->handle('INVALID_MINT_PERCENTAGES', [
                 'collection_id' => $collection->id,
                 'current_percentage' => $totalMintPercentage,
@@ -198,7 +200,7 @@ class PaymentDistributionService
 
     /**
      * Calculate distributions based on wallet percentages
-     * 
+     *
      * @param Reservation $reservation
      * @param \Illuminate\Database\Eloquent\Collection<Wallet> $wallets
      * @return array
@@ -244,7 +246,7 @@ class PaymentDistributionService
 
     /**
      * Determine user type from wallet and user data
-     * 
+     *
      * @param Wallet $wallet
      * @return UserTypeEnum
      */
@@ -262,7 +264,7 @@ class PaymentDistributionService
         // Priority 2: User type from user model
         if ($wallet->user && $wallet->user->usertype) {
             $usertype = $wallet->user->usertype;
-            
+
             return match ($usertype) {
                 'weak' => UserTypeEnum::WEAK,
                 'creator' => UserTypeEnum::CREATOR,
@@ -282,19 +284,19 @@ class PaymentDistributionService
 
     /**
      * Check if wallet is EPP-related
-     * 
+     *
      * @param Wallet $wallet
      * @return bool
      */
     private function isEppWallet(Wallet $wallet): bool
     {
-        return $wallet->platform_role === 'EPP' || 
+        return $wallet->platform_role === 'EPP' ||
                ($wallet->user && $wallet->user->usertype === 'epp');
     }
 
     /**
      * Create distribution records in database
-     * 
+     *
      * @param array $distributions
      * @return \Illuminate\Database\Eloquent\Collection<PaymentDistribution>
      */
@@ -312,7 +314,7 @@ class PaymentDistributionService
 
     /**
      * Log GDPR-compliant user activities for each distribution
-     * 
+     *
      * @param Reservation $reservation
      * @param \Illuminate\Database\Eloquent\Collection<PaymentDistribution> $distributions
      */
@@ -363,7 +365,7 @@ class PaymentDistributionService
     /**
      * Get distribution statistics for analytics
      * Note: Only 'highest' rank reservations count for real statistics
-     * 
+     *
      * @param \App\Models\Collection $collection
      * @param string|null $startDate
      * @param string|null $endDate
@@ -409,7 +411,7 @@ class PaymentDistributionService
     /**
      * Get ALL distribution tracking (including non-highest ranks)
      * Use this for complete audit trail, not for statistics
-     * 
+     *
      * @param \App\Models\Collection $collection
      * @param string|null $startDate
      * @param string|null $endDate
