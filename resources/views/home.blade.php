@@ -5,14 +5,22 @@
 
 <x-guest-layout :title="__('guest_home.page_title')" :metaDescription="__('guest_home.meta_description')">
 
-    <x-slot name="platformStats">
-        <div class="flex justify-center py-6 bg-gray-900/50 backdrop-blur-sm">
-            <x-payment-distribution-stats />
-        </div>
-    </x-slot>
-
     <x-slot name="platformInfoButtons">
         <x-platform-info-buttons />
+    </x-slot>
+
+    <x-slot name="platformStats">
+        <div class="flex justify-center py-2 bg-gray-900/50 backdrop-blur-sm">
+            {{-- Desktop: Componente statistiche completo --}}
+            <div class="hidden sm:block">
+                <x-payment-distribution-stats />
+            </div>
+
+            {{-- Mobile: Componente statistiche carousel --}}
+            <div class="block w-full px-4 sm:hidden">
+                <x-payment-distribution-stats-mobile />
+            </div>
+        </div>
     </x-slot>
 
     <x-slot name="heroFullWidth">

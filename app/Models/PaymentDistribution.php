@@ -255,8 +255,7 @@ class PaymentDistribution extends Model {
      * Get total number of distributions created
      * @return int
      */
-    public static function getTotalDistributionsCount(): int
-    {
+    public static function getTotalDistributionsCount(): int {
         return static::count();
     }
 
@@ -264,8 +263,7 @@ class PaymentDistribution extends Model {
      * Get total amount distributed in EUR
      * @return float
      */
-    public static function getTotalAmountDistributed(): float
-    {
+    public static function getTotalAmountDistributed(): float {
         return static::sum('amount_eur') ?? 0.0;
     }
 
@@ -273,8 +271,7 @@ class PaymentDistribution extends Model {
      * Get average distribution amount
      * @return float
      */
-    public static function getAverageDistributionAmount(): float
-    {
+    public static function getAverageDistributionAmount(): float {
         return static::avg('amount_eur') ?? 0.0;
     }
 
@@ -284,9 +281,8 @@ class PaymentDistribution extends Model {
      * @param int $limit Number of periods to return
      * @return array
      */
-    public static function getDistributionsByPeriod(string $period = 'day', int $limit = 30): array
-    {
-        $dateFormat = match($period) {
+    public static function getDistributionsByPeriod(string $period = 'day', int $limit = 30): array {
+        $dateFormat = match ($period) {
             'day' => '%Y-%m-%d',
             'week' => '%Y-%u',
             'month' => '%Y-%m',
@@ -310,8 +306,7 @@ class PaymentDistribution extends Model {
      * Get distributions totals grouped by user type
      * @return array
      */
-    public static function getTotalByUserType(): array
-    {
+    public static function getTotalByUserType(): array {
         return static::selectRaw('
                 user_type,
                 COUNT(*) as count,
@@ -343,8 +338,7 @@ class PaymentDistribution extends Model {
      * @param int $limit
      * @return array
      */
-    public static function getTopUsersForEPP(int $limit = 10): array
-    {
+    public static function getTopUsersForEPP(int $limit = 10): array {
         return static::join('reservations', 'payment_distributions.reservation_id', '=', 'reservations.id')
             ->join('users', 'reservations.user_id', '=', 'users.id')
             ->where('payment_distributions.user_type', UserTypeEnum::EPP)
@@ -380,8 +374,7 @@ class PaymentDistribution extends Model {
      * @param int $limit
      * @return array
      */
-    public static function getTotalByCollection(int $limit = 20): array
-    {
+    public static function getTotalByCollection(int $limit = 20): array {
         return static::join('reservations', 'payment_distributions.reservation_id', '=', 'reservations.id')
             ->join('egis', 'reservations.egi_id', '=', 'egis.id')
             ->join('collections', 'egis.collection_id', '=', 'collections.id')
@@ -421,8 +414,7 @@ class PaymentDistribution extends Model {
      * @param int $limit
      * @return array
      */
-    public static function getMostProfitableCollections(int $limit = 10): array
-    {
+    public static function getMostProfitableCollections(int $limit = 10): array {
         return static::getTotalByCollection($limit);
     }
 
@@ -431,8 +423,7 @@ class PaymentDistribution extends Model {
      * @param int $limit
      * @return array
      */
-    public static function getCollectionROI(int $limit = 10): array
-    {
+    public static function getCollectionROI(int $limit = 10): array {
         return static::join('reservations', 'payment_distributions.reservation_id', '=', 'reservations.id')
             ->join('egis', 'reservations.egi_id', '=', 'egis.id')
             ->join('collections', 'egis.collection_id', '=', 'collections.id')
@@ -468,8 +459,7 @@ class PaymentDistribution extends Model {
      * Get comprehensive statistics dashboard
      * @return array
      */
-    public static function getDashboardStats(): array
-    {
+    public static function getDashboardStats(): array {
         return [
             'overview' => [
                 'total_distributions' => static::getTotalDistributionsCount(),
