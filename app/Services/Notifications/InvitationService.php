@@ -19,6 +19,8 @@ use App\Models\NotificationPayloadWallet;
 use App\Models\User;
 use App\Services\Notifications\InvitationNotificationHandler;
 use App\Services\Notifications\NotificationHandlerFactory;
+use Ultra\UltraLogManager\UltraLogManager;
+use Ultra\ErrorManager\Interfaces\ErrorManagerInterface;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -28,25 +30,71 @@ use Illuminate\Support\Facades\Log;
  * Class InvitationService
  * @package App\Services
  */
-
 class InvitationService {
+
+    private ?UltraLogManager $logger;
+    private ?ErrorManagerInterface $errorManager;
+
+    public function __construct(
+        ?UltraLogManager $logger = null,
+        ?ErrorManagerInterface $errorManager = null
+    ) {
+        $this->logger = $logger ?? app(UltraLogManager::class);
+        $this->errorManager = $errorManager ?? app(ErrorManagerInterface::class);
+    }
+
     public function createInvitation(Collection $collection, string $email, string $role): NotificationPayloadInvitation {
-        return DB::transaction(function () use ($collection, $email, $role) {
+        $startTime = microtime(true);
+        $operationId = uniqid('inv_create_', true);
 
+        // ULM: Log inizio operazione
+        if ($this->logger) {
+            $this->logger->info('[INVITATION] Starting invitation creation', [
+                'operation_id' => $operationId,
+                'collection_id' => $collection->id,
+                'collection_name' => $collection->collection_name,
+                'proposer_id' => Auth::id(),
+                'target_email' => $email,
+                'target_role' => $role,
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent()
+            ]);
+        }
+
+        return DB::transaction(function () use ($collection, $email, $role, $startTime, $operationId) {
             try {
-
-                Log::channel('florenceegi')->info('InvitationService:creazione invito', [
-                    'collection' => $collection,
-                    'email' => $email,
-                    'role' => $role
-                ]);
+                // ULM: Log step - ricerca utente destinatario
+                if ($this->logger) {
+                    $this->logger->debug('[INVITATION] Looking up target user', [
+                        'operation_id' => $operationId,
+                        'target_email' => $email
+                    ]);
+                }
 
                 // User destinatario della risposta, si verifica se esiste
                 $user = User::where('email', '=', $email)->first();
 
-                Log::channel('florenceegi')->info('InvitationService:utente destinatario', [
-                    'user' => $user
-                ]);
+                if (!$user) {
+                    // UEM: Gestione errore utente non trovato (non bloccante)
+                    $this->errorManager->handle('INVITATION_USER_NOT_FOUND', [
+                        'operation_id' => $operationId,
+                        'collection_id' => $collection->id,
+                        'proposer_id' => Auth::id(),
+                        'target_email' => $email,
+                        'ip_address' => request()->ip()
+                    ]);
+
+                    throw new Exception("User with email {$email} not found");
+                }
+
+                // ULM: Log utente trovato
+                if ($this->logger) {
+                    $this->logger->info('[INVITATION] Target user found', [
+                        'operation_id' => $operationId,
+                        'target_user_id' => $user->id,
+                        'target_user_name' => $user->name
+                    ]);
+                }
 
                 // Status dell'invito
                 $status = NotificationStatus::PENDING->value;
@@ -60,17 +108,22 @@ class InvitationService {
                     status: $status
                 );
 
-                Log::channel('florenceegi')->info(
-                    'createInvitation: dati di payload',
-                    [
-                        'invitation' => $invitationData
-                    ]
-                );
+                // ULM: Log creazione payload
+                if ($this->logger) {
+                    $this->logger->debug('[INVITATION] Creating invitation payload', [
+                        'operation_id' => $operationId,
+                        'invitation_data' => $invitationData->toPayloadInArray()
+                    ]);
+                }
 
                 /**
-                 * @var array $NotificationPayloadInvitation
+                 * @var NotificationPayloadInvitation $invitation
                  */
                 $invitation = NotificationPayloadInvitation::create($invitationData->toPayloadInArray());
+
+                if (!$invitation) {
+                    throw new Exception('Failed to create invitation payload in database');
+                }
 
                 $notification = new NotificationData(
                     model_type: get_class($invitation),
@@ -86,6 +139,15 @@ class InvitationService {
                     status: NotificationStatus::PENDING->value
                 );
 
+                // ULM: Log invio notifica
+                if ($this->logger) {
+                    $this->logger->info('[INVITATION] Sending notification', [
+                        'operation_id' => $operationId,
+                        'invitation_id' => $invitation->id,
+                        'target_user_id' => $user->id
+                    ]);
+                }
+
                 // Gestione notifica
                 $handler = NotificationHandlerFactory::getHandler(NotificationHandlerType::INVITATION);
                 $result = $handler->handle('send_invitation', $invitation, ['user' => $user, 'notification_data' => $notification]);
@@ -94,12 +156,41 @@ class InvitationService {
                     throw new Exception($result['message']);
                 }
 
+                // ULM: Log successo completo
+                $executionTime = microtime(true) - $startTime;
+                if ($this->logger) {
+                    $this->logger->info('[INVITATION] Invitation created successfully', [
+                        'operation_id' => $operationId,
+                        'invitation_id' => $invitation->id,
+                        'collection_id' => $collection->id,
+                        'target_user_id' => $user->id,
+                        'execution_time_ms' => round($executionTime * 1000, 2),
+                        'status' => 'success'
+                    ]);
+                }
+
                 return $invitation;
             } catch (Exception $e) {
-                Log::channel('florenceegi')->error('Errore creazione invito', [
-                    'error' => $e->getMessage(),
-                    'data' => $notification ?? null
-                ]);
+                // UEM: Gestione errore completa con contesto dettagliato
+                $executionTime = microtime(true) - $startTime;
+
+                $this->errorManager->handle('INVITATION_CREATION_ERROR', [
+                    'operation_id' => $operationId,
+                    'collection_id' => $collection->id,
+                    'collection_name' => $collection->collection_name,
+                    'proposer_id' => Auth::id(),
+                    'proposer_name' => Auth::user()->name ?? 'unknown',
+                    'target_email' => $email,
+                    'target_role' => $role,
+                    'ip_address' => request()->ip(),
+                    'user_agent' => request()->userAgent(),
+                    'execution_time_ms' => round($executionTime * 1000, 2),
+                    'error_message' => $e->getMessage(),
+                    'error_code' => $e->getCode(),
+                    'timestamp' => now()->toIso8601String()
+                ], $e);
+
+                // Re-throw per mantenere il comportamento esistente
                 throw $e;
             }
         });

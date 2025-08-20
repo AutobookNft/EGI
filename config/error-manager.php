@@ -3454,5 +3454,30 @@ return [
             'msg_to' => 'none',
         ],
 
+        // ====================================================
+        // INVITATION SYSTEM
+        // ====================================================
+        'INVITATION_CREATION_ERROR' => [
+            'type' => 'error',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.invitation_creation_error',
+            'user_message_key' => 'error-manager::errors.user.invitation_creation_error',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'INVITATION_USER_NOT_FOUND' => [
+            'type' => 'warning',
+            'blocking' => 'not',
+            'dev_message_key' => 'error-manager::errors.dev.invitation_user_not_found',
+            'user_message_key' => 'error-manager::errors.user.invitation_user_not_found',
+            'http_status_code' => 404,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'sweet-alert',
+        ],
+
     ]
 ];

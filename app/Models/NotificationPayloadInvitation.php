@@ -12,8 +12,7 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Facades\Log;
 
-class NotificationPayloadInvitation extends Model implements NotifiablePayload
-{
+class NotificationPayloadInvitation extends Model implements NotifiablePayload {
     use HasFactory;
 
     /**
@@ -42,26 +41,22 @@ class NotificationPayloadInvitation extends Model implements NotifiablePayload
     //     'status' => InvitationStatus::class
     // ];
 
-    public function getNotificationData(): array
-    {
+    public function getNotificationData(): array {
         return [
             'message' => __('Sei stato invitato a partecipare ad una collezione.'),
             'collection_name' => $this->collection->name,
         ];
     }
 
-    public function getRecipient(): User
-    {
+    public function getRecipient(): User {
         return User::where('email', $this->email)->firstOrFail();
     }
 
-    public function getModelType(): string
-    {
+    public function getModelType(): string {
         return static::class;
     }
 
-    public function getModelId(): int
-    {
+    public function getModelId(): int {
         return $this->id;
     }
 
@@ -70,24 +65,20 @@ class NotificationPayloadInvitation extends Model implements NotifiablePayload
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function collection()
-    {
+    public function collection() {
         return $this->belongsTo(Collection::class);
     }
 
     // Helper per determinare lo stato in base all'enum normalizzato
-    public function isPending(): bool
-    {
+    public function isPending(): bool {
         return $this->status === NotificationStatus::PENDING;
     }
 
-    public function isAccepted(): bool
-    {
+    public function isAccepted(): bool {
         return $this->status === NotificationStatus::ACCEPTED;
     }
 
-    public function isRejected(): bool
-    {
+    public function isRejected(): bool {
         return $this->status === NotificationStatus::REJECTED;
     }
 
@@ -96,16 +87,14 @@ class NotificationPayloadInvitation extends Model implements NotifiablePayload
      *
      * @return string
      */
-    public function getStatus(): string
-    {
+    public function getStatus(): string {
         return $this->status;
     }
 
     /**
      * Metodo per gestire l'update
      */
-    public function handlePending()
-    {
+    public function handlePending() {
         // Logica specifica per l'update
         $this->update(['status' => $this->isPending]);
     }
@@ -113,8 +102,7 @@ class NotificationPayloadInvitation extends Model implements NotifiablePayload
     /**
      * Metodo per gestire l'approvazione
      */
-    public function handleApproval()
-    {
+    public function handleApproval() {
         // Logica specifica per l'approvazione
         $this->update(['status' => NotificationStatus::ACCEPTED]);
     }
@@ -122,8 +110,7 @@ class NotificationPayloadInvitation extends Model implements NotifiablePayload
     /**
      * Metodo per gestire il rifiuto
      */
-    public function handleRejection()
-    {
+    public function handleRejection() {
         // Logica specifica per il rifiuto
         $this->update(['status' =>  NotificationStatus::REJECTED]);
     }
@@ -132,8 +119,7 @@ class NotificationPayloadInvitation extends Model implements NotifiablePayload
      * Summary of proposer
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function proposer()
-    {
+    public function proposer() {
         return $this->belongsTo(User::class, 'proposer_id');
     }
 
@@ -141,13 +127,11 @@ class NotificationPayloadInvitation extends Model implements NotifiablePayload
      * Summary of receiver
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function receiver()
-    {
+    public function receiver() {
         return $this->belongsTo(User::class, 'receiver_id');
     }
 
-    public function notifications(): MorphMany
-    {
+    public function notifications(): MorphMany {
         return $this->morphMany(CustomDatabaseNotification::class, 'model');
     }
 }

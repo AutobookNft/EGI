@@ -36,16 +36,15 @@ use function Laravel\Prompts\progress;
 /**
  * Service per la gestione delle operazioni sui wallet
  */
-class RequestWalletService
-{
+class RequestWalletService {
     public function __construct(
         private readonly NotificationHandlerFactory $notificationFactory,
-    ) {}
+    ) {
+    }
 
     // App/Services/Notifications/WalletService.php
 
-    public function createWalletRequest(WalletCreateRequest $request): JsonResponse
-    {
+    public function createWalletRequest(WalletCreateRequest $request): JsonResponse {
         try {
             DB::transaction(function () use ($request) {
 
@@ -76,20 +75,17 @@ class RequestWalletService
                 );
 
                 $this->requestNotification($walletPayload, $request);
-
             });
             return response()->json([
                 'success' => true,
                 'message' => __('collection.wallet.wallet_creation_request_success')
             ]);
-
         } catch (WalletException $e) {
             Log::channel('florenceegi')->error('Violazione della soglia minima durante creazione wallet:', [
                 'error' => $e->getMessage(),
 
             ]);
             throw $e;
-
         } catch (Exception $e) {
             Log::channel('florenceegi')->error('Error creating wallet request:', [
                 'message' => $e->getMessage(),
@@ -97,7 +93,6 @@ class RequestWalletService
                 'request' => $request,
             ]);
             throw $e;
-
         } catch (\Throwable $e) {
             Log::channel('florenceegi')->error('Error creating wallet request caught in Throwable:', [
                 'error' => $e->getMessage(),
@@ -112,8 +107,7 @@ class RequestWalletService
     /**
      * Gestisce l'accettazione di un wallet
      */
-    public function updateWalletRequest(WalletUpdateRequest $request): void
-    {
+    public function updateWalletRequest(WalletUpdateRequest $request): void {
 
         Log::channel('florenceegi')->info('WalletService:Accepting wallet', [
             'request' => $request,
@@ -154,13 +148,12 @@ class RequestWalletService
 
                 // Validare le quote richieste
                 $this->validateAndAdjustCreatorQuotaOnUpdate(
-                    WalletQuotaValidation::fromPayload($walletPayload), $existingWallet
+                    WalletQuotaValidation::fromPayload($walletPayload),
+                    $existingWallet
                 );
 
                 $this->requestUpdateNotification($walletPayload, $request);
-
             });
-
         } catch (Exception $e) {
             Log::channel('florenceegi')->error('Errore durante l\'accettazione del wallet:', [
                 'message' => $e->getMessage(),
@@ -171,8 +164,7 @@ class RequestWalletService
         }
     }
 
-    public function donationWalletRequest(WalletDonationRequest $request): JsonResponse
-    {
+    public function donationWalletRequest(WalletDonationRequest $request): JsonResponse {
         try {
             return DB::transaction(function () use ($request) {
 
@@ -185,7 +177,7 @@ class RequestWalletService
 
                 // Recupero i wallet
                 $eppWallet = Wallet::where('collection_id', $request->collection_id)
-                ->where('user_id', $epp_id)->first();
+                    ->where('user_id', $epp_id)->first();
 
                 // Recupero il wallet del creator, prelevo il wallet dalla tabella users
                 $userLogged = User::findOrFail(Auth::id());
@@ -245,14 +237,12 @@ class RequestWalletService
                     'message' => __('collection.wallet.wallet_donation_success'),
                 ]);
             });
-
         } catch (Exception $e) {
             Log::channel('florenceegi')->error('Errore nella donazione:', [
                 'message' => $e->getMessage(),
                 // 'request' => $request->all(),
             ]);
             return response()->json(['success' => false, 'message' => 'Errore imprevisto'], 500);
-
         } catch (Throwable $e) {
             Log::channel('florenceegi')->error('Errore critico nella donazione:', [
                 'error' => $e->getMessage(),
@@ -269,8 +259,7 @@ class RequestWalletService
      *
      * @throws Exception Se il wallet non esiste o non ci sono quote sufficienti
      */
-    private function validateAndAdjustCreatorQuota(WalletQuotaValidation $validation):void
-    {
+    private function validateAndAdjustCreatorQuota(WalletQuotaValidation $validation): void {
         Log::channel('florenceegi')->info('Validazione quote wallet', [
             'validation' => $validation,
         ]);
@@ -312,8 +301,7 @@ class RequestWalletService
         Log::channel('florenceegi')->info('Quota sufficiente per creazione wallet.');
     }
 
-    private function validateAndAdjustCreatorQuotaOnUpdate(WalletQuotaValidation $validation, Wallet $existingWallet): void
-    {
+    private function validateAndAdjustCreatorQuotaOnUpdate(WalletQuotaValidation $validation, Wallet $existingWallet): void {
         Log::channel('florenceegi')->info('Validazione modifica quote wallet', [
             'validation' => $validation,
             'existing_wallet' => $existingWallet,
@@ -351,11 +339,11 @@ class RequestWalletService
         if (
             ($additionalMintRequired > 0 &&
                 ($creatorWallet->royalty_mint < $additionalMintRequired ||
-                ($creatorWallet->royalty_mint - $additionalMintRequired) < $thresholdMint))
+                    ($creatorWallet->royalty_mint - $additionalMintRequired) < $thresholdMint))
             ||
             ($additionalRebindRequired > 0 &&
                 ($creatorWallet->royalty_rebind < $additionalRebindRequired ||
-                ($creatorWallet->royalty_rebind - $additionalRebindRequired) < $thresholdRebind))
+                    ($creatorWallet->royalty_rebind - $additionalRebindRequired) < $thresholdRebind))
         ) {
             $walletError = WalletError::quotaInsufficient(
                 available: min($creatorWallet->royalty_mint, $creatorWallet->royalty_rebind),
@@ -370,7 +358,7 @@ class RequestWalletService
         Log::channel('florenceegi')->info('Quota sufficiente per aggiornamento wallet.');
     }
 
-    private function requestNotification(NotificationPayloadWallet $walletPayload, $request): void{
+    private function requestNotification(NotificationPayloadWallet $walletPayload, $request): void {
 
         Log::channel('florenceegi')->info('Wallet request notification', [
             'walletPayload->status,' => $walletPayload->status,
@@ -382,12 +370,12 @@ class RequestWalletService
         $notificationData = new NotificationData(
             model_type: $walletPayload::class,
             model_id: $walletPayload->id,
-            view: 'wallets.'.$walletPayload->status,
+            view: 'wallets.' . $walletPayload->status,
             sender_id: Auth::id(),
             prev_id: null,
             message: $walletPayload->message,
             reason: null,
-            sender_name: Auth::user()->name.' '.Auth::user()->last_name,
+            sender_name: Auth::user()->name . ' ' . Auth::user()->last_name,
             sender_email: Auth::user()->email,
             collection_name: $walletPayload->collection->collection_name,
             status: $walletPayload->status,
@@ -411,17 +399,23 @@ class RequestWalletService
 
         // Inviare la notifica usando il factory pattern esistente
         $handler = $this->notificationFactory->getHandler(NotificationHandlerType::WALLET);
-        $handler->handle($recipient, $notificationData);
+        $result = $handler->handle('send_wallet_creation', $walletPayload, [
+            'user' => $recipient,
+            'notification_data' => $notificationData
+        ]);
+
+        if (!$result['success']) {
+            throw new Exception($result['message']);
+        }
 
         Log::channel('florenceegi')->info('Wallet request created successfully', [
             'wallet_payload_id' => $walletPayload->id,
             'receiver_id' => $recipient->id,
             'sender_id' => Auth::id(),
         ]);
-
     }
 
-    private function requestUpdateNotification(NotificationPayloadWallet $walletPayload, $request): void{
+    private function requestUpdateNotification(NotificationPayloadWallet $walletPayload, $request): void {
 
         Log::channel('florenceegi')->info('Wallet request notification', [
             'walletPayload->status,' => $walletPayload->status,
@@ -433,12 +427,12 @@ class RequestWalletService
         $notificationData = new WalletNotificationUpdateData(
             model_type: $walletPayload::class,
             model_id: $walletPayload->id,
-            view: 'wallets.'.$walletPayload->status,
+            view: 'wallets.' . $walletPayload->status,
             sender_id: Auth::id(),
             prev_id: null,
             message: $walletPayload->message,
             reason: null,
-            sender_name: Auth::user()->name.' '.Auth::user()->last_name,
+            sender_name: Auth::user()->name . ' ' . Auth::user()->last_name,
             sender_email: Auth::user()->email,
             collection_name: $walletPayload->collection->collection_name,
             status: $walletPayload->status,
@@ -464,17 +458,23 @@ class RequestWalletService
 
         // Inviare la notifica usando il factory pattern esistente
         $handler = $this->notificationFactory->getHandler(NotificationHandlerType::WALLET);
-        $handler->handle($recipient, $notificationData);
+        $result = $handler->handle('send_wallet_update', $walletPayload, [
+            'user' => $recipient,
+            'notification_data' => $notificationData
+        ]);
+
+        if (!$result['success']) {
+            throw new Exception($result['message']);
+        }
 
         Log::channel('florenceegi')->info('Wallet request created successfully', [
             'wallet_payload_id' => $walletPayload->id,
             'receiver_id' => $recipient->id,
             'sender_id' => Auth::id(),
         ]);
-
     }
 
-    private function acceptNotification($walletPayload, $request){
+    private function acceptNotification($walletPayload, $request) {
 
         $notification = CustomDatabaseNotification::findOrFail($request->notification_id);
 
@@ -482,12 +482,12 @@ class RequestWalletService
         $notificationData = new NotificationData(
             model_type: $walletPayload::class,
             model_id: $walletPayload->id,
-            view: 'wallets.'.NotificationStatus::ACCEPTED->value,
+            view: 'wallets.' . NotificationStatus::ACCEPTED->value,
             prev_id: $notification->id,
             sender_id: Auth::id(),
             message: __('collection.wallet.wallet_change_accepted'),
             reason: null,
-            sender_name: Auth::user()->name.' '.Auth::user()->last_name,
+            sender_name: Auth::user()->name . ' ' . Auth::user()->last_name,
             sender_email: Auth::user()->email,  // Email di chi sta inviando la notifica
             collection_name: $walletPayload->collection->collection_name,
             status: NotificationStatus::ACCEPTED->value
@@ -503,14 +503,20 @@ class RequestWalletService
         }
 
         $handler = $this->notificationFactory->getHandler(NotificationHandlerType::WALLET);
-        $handler->handle($recipient, $notificationData);
+        $result = $handler->handle('accept_wallet', $walletPayload, [
+            'user' => $recipient,
+            'notification_data' => $notificationData
+        ]);
+
+        if (!$result['success']) {
+            throw new Exception($result['message']);
+        }
     }
 
     /**
      * Ottiene lo stato di una notifica
      */
-    public function getNotificationStatus(CustomDatabaseNotification $notification): string
-    {
+    public function getNotificationStatus(CustomDatabaseNotification $notification): string {
         return match ($notification->outcome) {
             'pending_create', 'pending_update', 'pending' => 'pending',
             'Accepted' => 'accepted',
@@ -522,8 +528,7 @@ class RequestWalletService
     /**
      * Ottiene la classe CSS per uno stato di notifica
      */
-    public function getNotificationStatusClass(string $status): string
-    {
+    public function getNotificationStatusClass(string $status): string {
         return match ($status) {
             'pending' => 'text-yellow-500',
             'Accepted' => 'text-green-500',

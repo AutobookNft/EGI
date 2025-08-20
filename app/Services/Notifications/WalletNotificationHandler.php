@@ -19,6 +19,7 @@ use App\Notifications\Wallets\{
     WalletExpiration,
 };
 use Exception;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\{
     Log,
     Notification,
@@ -32,53 +33,88 @@ use Illuminate\Support\Facades\{
  *
  * @package App\Services\Notifications
  */
-class WalletNotificationHandler implements NotificationHandlerInterface
-{
+class WalletNotificationHandler implements NotificationHandlerInterface {
     /**
-     * Gestisce l'invio di una notifica wallet all'utente specificato.
+     * Gestisce l'azione di notifica secondo l'interfaccia standard.
      *
-     * @param User                      $message_to   Destinatario della notifica
-     * @param NotificationDataInterface $notification Dati della notifica
+     * @param string $action L'azione da eseguire
+     * @param Model $payload Il payload della notifica
+     * @param array $data Dati aggiuntivi
+     * @return array Risposta con stato di successo e messaggio
      *
      * @throws Exception Se lo stato della notifica non è valido o se si verifica un errore nell'invio
      */
-    public function handle(User $message_to, NotificationDataInterface $notification): void
-    {
+    public function handle(string $action, Model $payload, array $data = []): array {
         try {
-            $action = NotificationStatus::fromDatabase($notification->getStatus());
+            // Estrae l'utente destinatario dai dati
+            $message_to = $data['user'] ?? null;
+            if (!$message_to instanceof User) {
+                throw new Exception('User destinatario richiesto nei dati');
+            }
+
+            // Estrae i dati di notifica se presenti, altrimenti usa il payload
+            $notificationData = $data['notification_data'] ?? $payload;
+
+            $status = NotificationStatus::fromDatabase($payload->status);
 
             Log::channel('florenceegi')->info('Invio notifica wallet', [
-                'action' => $action->value,
+                'action' => $action,
+                'status' => $status->value,
                 'user_id' => $message_to->id,
-                'notification_type' => $notification::class
+                'payload_type' => get_class($payload)
             ]);
 
-            $this->sendNotification($message_to, $notification, $action);
+            $this->sendNotification($message_to, $notificationData, $status);
 
+            return [
+                'success' => true,
+                'message' => 'Notifica wallet inviata con successo'
+            ];
         } catch (Exception $e) {
             Log::channel('florenceegi')->error('Errore invio notifica wallet', [
+                'action' => $action,
                 'message' => $e->getMessage(),
-                'user_id' => $message_to->id,
-                'notification_data' => $notification
+                'user_id' => $message_to->id ?? 'unknown',
+                'payload_data' => $payload
             ]);
-            throw $e;
+
+            return [
+                'success' => false,
+                'message' => 'Errore invio notifica: ' . $e->getMessage()
+            ];
         }
+    }
+
+    /**
+     * Ottiene le azioni supportate da questo handler.
+     *
+     * @return array Lista delle azioni supportate
+     */
+    public function getSupportedActions(): array {
+        return [
+            'send_wallet_creation',
+            'send_wallet_update',
+            'accept_wallet',
+            'reject_wallet',
+            'expire_wallet'
+        ];
     }
 
     /**
      * Invia la notifica appropriata in base allo stato.
      *
-     * @param User               $message_to   Destinatario della notifica
-     * @param NotificationStatus $action       Stato/azione della notifica
+     * @param User $message_to Destinatario della notifica
+     * @param mixed $notificationData Payload della notifica (Model o DTO)
+     * @param NotificationStatus $action Stato/azione della notifica
      *
      * @throws Exception Se lo stato della notifica non è valido
      */
     private function sendNotification(
         User $message_to,
-        NotificationDataInterface $notification,
+        $notificationData,
         NotificationStatus $action
     ): void {
-        $notificationClass = match($action) {
+        $notificationClass = match ($action) {
             NotificationStatus::PENDING_CREATE => WalletCreation::class,
             NotificationStatus::PENDING_UPDATE => WalletUpdate::class,
             NotificationStatus::ACCEPTED => WalletAccepted::class,
@@ -87,6 +123,6 @@ class WalletNotificationHandler implements NotificationHandlerInterface
             default => throw new Exception("Stato notifica non valido: {$action->value}")
         };
 
-        Notification::send($message_to, new $notificationClass($notification));
+        Notification::send($message_to, new $notificationClass($notificationData));
     }
 }
