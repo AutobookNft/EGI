@@ -83,45 +83,47 @@ $isCreator = auth()->check() && auth()->id() === $creatorId;
     @endif
     {{-- 🖼️ Sezione Immagine --}}
     <figure class="relative aspect-[4/5] w-full overflow-hidden bg-black">
-        @php
-        // 🛠️ Costruzione Path Immagine Relativo (Oracode: Esplicitamente Intenzionale)
-        // Ricostruisce il path RELATIVO a storage/app/public/ come definito dalla logica di upload.
-        $imageRelativePath =
-        $egi->collection_id && $egi->user_id && $egi->key_file && $egi->extension
-        ? sprintf(
-        'users_files/collections_%d/creator_%d/%d.%s',
-        $egi->collection_id,
-        $egi->user_id,
-        $egi->key_file,
-        $egi->extension,
-        )
-        : null;
+        <a href="{{ route('egis.show', $egi->id) }}" class="block w-full h-full">
+            @php
+            // 🛠️ Costruzione Path Immagine Relativo (Oracode: Esplicitamente Intenzionale)
+            // Ricostruisce il path RELATIVO a storage/app/public/ come definito dalla logica di upload.
+            $imageRelativePath =
+            $egi->collection_id && $egi->user_id && $egi->key_file && $egi->extension
+            ? sprintf(
+            'users_files/collections_%d/creator_%d/%d.%s',
+            $egi->collection_id,
+            $egi->user_id,
+            $egi->key_file,
+            $egi->extension,
+            )
+            : null;
 
-        // 🔗 Generazione URL Pubblico usando asset() (Oracode: Pragmatico)
-        // Usa l'helper asset() che correttamente include la porta se necessario
-        // e presuppone che il link simbolico 'public/storage' esista e punti a 'storage/app/public'.
-        $imageUrl = $imageRelativePath ? asset('storage/' . $imageRelativePath) : null;
-        @endphp
+            // 🔗 Generazione URL Pubblico usando asset() (Oracode: Pragmatico)
+            // Usa l'helper asset() che correttamente include la porta se necessario
+            // e presuppone che il link simbolico 'public/storage' esista e punti a 'storage/app/public'.
+            $imageUrl = $imageRelativePath ? asset('storage/' . $imageRelativePath) : null;
+            @endphp
 
-        {{-- 🎯 Immagine Principale o Placeholder --}}
-        @if ($imageUrl)
-        <img src="{{ $imageUrl }}" {{-- Usa l'URL generato con asset() --}} alt="{{ $egi->title ?? 'EGI Image' }}"
-            class="object-contain object-center w-full h-full transition-transform duration-300 ease-in-out bg-gray-800 group-hover:scale-105"
-            loading="lazy" />
-        @else
-        {{-- Placeholder --}}
-        <div class="flex items-center justify-center w-full h-full bg-gradient-to-br from-gray-800 to-gray-900">
-            <svg class="w-16 h-16 text-gray-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-        </div>
-        @endif
+            {{-- 🎯 Immagine Principale o Placeholder --}}
+            @if ($imageUrl)
+            <img src="{{ $imageUrl }}" {{-- Usa l'URL generato con asset() --}} alt="{{ $egi->title ?? 'EGI Image' }}"
+                class="object-contain object-center w-full h-full transition-transform duration-300 ease-in-out bg-gray-800 group-hover:scale-105"
+                loading="lazy" />
+            @else
+            {{-- Placeholder --}}
+            <div class="flex items-center justify-center w-full h-full bg-gradient-to-br from-gray-800 to-gray-900">
+                <svg class="w-16 h-16 text-gray-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                    stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+            </div>
+            @endif
 
-        {{-- Overlay leggero su hover --}}
-        <div class="absolute inset-0 transition-opacity duration-300 opacity-0 bg-black/40 group-hover:opacity-100">
-        </div>
+            {{-- Overlay leggero su hover --}}
+            <div class="absolute inset-0 transition-opacity duration-300 opacity-0 bg-black/40 group-hover:opacity-100">
+            </div>
+        </a>
 
         {{-- Logo piattaforma posizionato fuori dal badge --}}
         <img src="{{ asset('images/logo/logo_1.webp') }}" alt=""
@@ -566,7 +568,7 @@ $isCreator = auth()->check() && auth()->id() === $creatorId;
         </button>
         @else
         <div
-            class="w-full flex items-center justify-center px-4 py-2 text-sm font-medium text-gray-500 bg-gray-100 rounded-t-none rounded-b-lg">
+            class="flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-gray-500 bg-gray-100 rounded-t-none rounded-b-lg">
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L5.636 5.636" />

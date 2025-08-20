@@ -97,15 +97,15 @@
 
                             {{-- Floating Title Card - Elegantly Positioned --}}
                             <div class="absolute bottom-3 left-3 right-3 lg:bottom-6 lg:left-6 lg:right-6">
-                                <div
-                                    class="p-3 border rounded-lg shadow-2xl lg:p-4 bg-black/10 border-white/5">
+                                <div class="p-3 border rounded-lg shadow-2xl lg:p-4 bg-black/10 border-white/5">
                                     <div class="flex items-start justify-between">
                                         <div class="flex-1">
                                             <h1
                                                 class="mb-1 text-lg font-bold tracking-tight text-white lg:text-2xl xl:text-3xl drop-shadow-2xl">
                                                 {{
                                                 $egi->title }}</h1>
-                                            <div class="flex items-center space-x-2 text-xs text-gray-100 lg:text-sm drop-shadow-lg">
+                                            <div
+                                                class="flex items-center space-x-2 text-xs text-gray-100 lg:text-sm drop-shadow-lg">
                                                 <a href="{{ route('home.collections.show', $collection->id) }}"
                                                     class="font-medium transition-colors duration-200 hover:text-white">
                                                     {{ $collection->collection_name }}
@@ -356,7 +356,8 @@
                                             <input type="hidden" name="is_published" value="0">
                                             <input type="checkbox" id="is_published" name="is_published" value="1" {{
                                                 old('is_published', $egi->is_published) ? 'checked' : '' }}
-                                            class="w-4 h-4 rounded text-emerald-600 bg-black/30 border-emerald-700/50 focus:ring-emerald-500 focus:ring-2">
+                                            class="w-4 h-4 rounded text-emerald-600 bg-black/30 border-emerald-700/50
+                                            focus:ring-emerald-500 focus:ring-2">
                                             <span class="ml-3 text-sm font-medium text-emerald-300">
                                                 {{ __('egi.crud.is_published') }}
                                             </span>
@@ -680,7 +681,7 @@
                             </div>
 
                             {{-- Reservation History --}}
-                            @if($egi->reservationCertificates)
+                            @if($egi->reservationCertificates && $egi->price && $egi->price > 0)
                             <div class="space-y-4">
                                 <h3 class="text-lg font-semibold text-white">{{ __('egi.provenance') }}</h3>
                                 <x-egi-reservation-history :egi="$egi" :certificates="$egi->reservationCertificates" />

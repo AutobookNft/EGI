@@ -239,6 +239,146 @@ class ReservationFormModal {
     }
 
     /**
+     * Load and display EGI information in the modal
+     *
+     * @private
+     */
+    private async loadEgiInfo(): Promise<void> {
+        const infoSection = document.getElementById('egi-info-section');
+        if (!infoSection) return;
+
+        try {
+            // Fetch EGI modal information from our new endpoint
+            // Use the route from config with proper parameter replacement
+            let url;
+            try {
+                const config = getAppConfig();
+                if (config.routes?.api?.egiModalInfo) {
+                    url = config.routes.api.egiModalInfo.replace(':egiId', this.egiId.toString());
+                } else {
+                    throw new Error('Route not found in config');
+                }
+            } catch (e) {
+                // Fallback to hardcoded URL if route helper fails
+                url = `/api/egis/${this.egiId}/modal-info`;
+            }
+            console.log('Loading EGI info from URL:', url);
+
+            const response = await fetch(url, {
+                headers: {
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': getCsrfTokenTS()
+                }
+            });
+
+            console.log('Response status:', response.status);
+
+            if (!response.ok) {
+                console.error('Response not OK:', response.status, response.statusText);
+                throw new Error('HTTP error: ' + response.status);
+            }
+
+            const result = await response.json();
+            console.log('API result:', result);
+
+            if (result && result.success && result.data) {
+                const data = result.data;
+                let egiInfoHTML = '';
+
+                // Mostra il titolo dell'EGI se disponibile
+                if (data.title) {
+                    egiInfoHTML += `
+                        <div class="mb-3">
+                            <h3 class="text-lg font-semibold text-gray-800">${data.title}</h3>
+                        </div>
+                    `;
+                }
+
+                // Mostra il prezzo corrente
+                if (data.has_reservations && data.current_price) {
+                    egiInfoHTML += `
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-sm font-medium text-green-700">Offerta Attuale più Alta:</span>
+                            <span class="text-lg font-bold text-green-800">€${parseFloat(data.current_price).toFixed(2)}</span>
+                        </div>
+                    `;
+                } else if (data.base_price) {
+                    egiInfoHTML += `
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-sm font-medium text-amber-700">Prezzo Base:</span>
+                            <span class="text-lg font-bold text-amber-800">€${parseFloat(data.base_price).toFixed(2)}</span>
+                        </div>
+                    `;
+                }
+
+                // Mostra informazioni sull'attivatore se esiste
+                if (data.activator) {
+                    egiInfoHTML += `
+                        <div class="border-t border-green-200 pt-3">
+                            <span class="text-sm font-medium text-green-700">Attuale Attivatore:</span>
+                            <div class="flex items-center gap-2 mt-1">
+                    `;
+
+                    if (data.activator.type === 'commissioner') {
+                        // Mostra nome e avatar per commissioner
+                        egiInfoHTML += `
+                            ${data.activator.avatar ?
+                                `<img src="${data.activator.avatar}" alt="Avatar" class="w-6 h-6 rounded-full">` :
+                                `<div class="w-6 h-6 bg-amber-500 rounded-full flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+                                    </svg>
+                                </div>`
+                            }
+                            <span class="text-sm text-green-800 font-medium">${data.activator.name}</span>
+                        `;
+                    } else {
+                        // Mostra solo icona e wallet per utenti anonimi
+                        egiInfoHTML += `
+                            <div class="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                                <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="text-sm text-green-800">Attivatore</span>
+                                <span class="text-xs text-green-600 font-mono">${data.activator.wallet_address}</span>
+                            </div>
+                        `;
+                    }
+
+                    egiInfoHTML += `
+                            </div>
+                        </div>
+                    `;
+                }
+
+                infoSection.innerHTML = egiInfoHTML;
+            } else {
+                // Errore nel caricamento
+                infoSection.innerHTML = `
+                    <div class="text-center text-amber-600">
+                        <svg class="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.081 15.5c-.77.833.192 2.5 1.732 2.5z"/>
+                        </svg>
+                        <p class="text-sm">Impossibile caricare le informazioni dell'EGI</p>
+                    </div>
+                `;
+            }
+        } catch (error) {
+            console.error('Error loading EGI info:', error);
+            infoSection.innerHTML = `
+                <div class="text-center text-red-600">
+                    <svg class="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <p class="text-sm">Errore nel caricamento delle informazioni</p>
+                </div>
+            `;
+        }
+    }
+
+    /**
      * Open the reservation modal
      *
      * @returns {void}
@@ -257,6 +397,9 @@ class ReservationFormModal {
 
         // Prevent background scrolling
         document.body.style.overflow = 'hidden';
+
+        // Load EGI information
+        this.loadEgiInfo();
     }
 
     /**
@@ -459,7 +602,7 @@ class ReservationFormModal {
                     text: appTranslate('reservation.auth_required'),
                     confirmButtonText: appTranslate('wallet_connect_button'),
                     confirmButtonColor: '#3085d6'
-                }).then((result) => {
+                }).then((result: any) => {
                     if (result.isConfirmed) {
                         // Trigger apertura modale wallet
                         document.dispatchEvent(new CustomEvent('open-wallet-modal'));
@@ -472,83 +615,81 @@ class ReservationFormModal {
 
         return `
         <div id="reservation-modal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black bg-opacity-75 hidden" role="dialog" aria-modal="true" aria-hidden="true" tabindex="-1" aria-labelledby="reservation-modal-title">
-            <div class="relative bg-white rounded-lg shadow-xl max-w-2xl w-11/12 md:w-3/4 lg:w-2/5 max-h-[90vh] overflow-y-auto p-6 md:p-8" role="document">
-                <button id="close-reservation-modal" class="absolute text-3xl leading-none text-gray-400 top-4 right-4 hover:text-gray-600" aria-label="${appTranslate('reservation.form.close_button')}">&times;</button>
+            <div class="relative bg-gradient-to-b from-white to-amber-50 rounded-xl shadow-2xl max-w-2xl w-11/12 md:w-3/4 lg:w-2/5 max-h-[90vh] overflow-y-auto border border-amber-200" role="document" style="border-image: linear-gradient(45deg, #D4A574, #2D5016) 1;">
+                <button id="close-reservation-modal" class="absolute w-8 h-8 flex items-center justify-center text-2xl leading-none text-amber-700 top-4 right-4 hover:text-amber-900 hover:bg-amber-100 rounded-full transition-all duration-200" aria-label="${appTranslate('reservation.form.close_button')}">&times;</button>
 
-                <h2 id="reservation-modal-title" class="text-2xl font-bold text-gray-900 mb-6">${appTranslate('reservation.form.title')}</h2>
-
-                <form id="reservation-form" method="POST" action="${route('egis.reserve', { id: egiId })}" class="space-y-6">
-                    <input type="hidden" name="_token" value="${getCsrfTokenTS()}">
-
-                    <div>
-                        <label for="offer_amount_fiat" class="block text-sm font-medium text-gray-700">
-                            ${appTranslate('reservation.form.offer_amount_label')}
-                        </label>
-                        <div class="mt-1 relative rounded-md shadow-sm">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <span class="text-gray-500 sm:text-sm">€</span>
-                            </div>
-                            <input type="number" name="offer_amount_fiat" id="offer_amount_fiat"
-                                   class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md"
-                                   placeholder="${appTranslate('reservation.form.offer_amount_placeholder')}"
-                                   step="0.01" min="1" required>
+                <!-- Header con stile rinascimentale -->
+                <div class="bg-gradient-to-r from-amber-600 to-amber-700 text-white p-6 rounded-t-xl">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
+                            </svg>
                         </div>
-                        <p class="mt-1 text-sm text-gray-500" id="algo-equivalent-text">
-                            ${appTranslate('reservation.form.algo_equivalent', { amount: '0.00' })}
-                        </p>
+                        <h2 id="reservation-modal-title" class="text-xl font-bold">${appTranslate('reservation.form.title')}</h2>
+                    </div>
+                </div>
+
+                <!-- Contenuto principale con padding elegante -->
+                <div class="p-6 md:p-8">
+                    <!-- Sezione informazioni EGI -->
+                    <div id="egi-info-section" class="mb-6 p-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg">
+                        <div class="animate-pulse">
+                            <div class="h-4 bg-green-200 rounded w-3/4 mb-2"></div>
+                            <div class="h-3 bg-green-100 rounded w-1/2"></div>
+                        </div>
                     </div>
 
-                    <div class="flex items-start">
-                        <div class="flex items-center h-5">
-                            <input id="terms_accepted" name="terms_accepted" type="checkbox" required
-                                   class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded">
-                        </div>
-                        <div class="ml-3 text-sm">
-                            <label for="terms_accepted" class="font-medium text-gray-700">
-                                ${appTranslate('reservation.form.terms_accepted')}
+                                    <!-- Form di prenotazione -->
+                    <form id="reservation-form" method="POST" action="#" class="space-y-6">
+                        <input type="hidden" name="_token" value="${getCsrfTokenTS()}">
+
+                        <div>
+                            <label for="offer_amount_fiat" class="block text-sm font-medium text-gray-800 mb-2">
+                                <span class="text-amber-700 font-semibold">${appTranslate('reservation.form.offer_amount_label')}</span>
                             </label>
+                            <div class="relative rounded-md shadow-sm">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <span class="text-amber-600 font-medium text-lg">€</span>
+                                </div>
+                                <input type="number" name="offer_amount_fiat" id="offer_amount_fiat"
+                                       class="block w-full pl-8 pr-12 py-3 text-lg border-2 border-amber-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white placeholder-gray-400 transition-all duration-200"
+                                       placeholder="${appTranslate('reservation.form.offer_amount_placeholder')}"
+                                       step="0.01" min="1" required>
+                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                    <span class="text-amber-600 text-sm font-medium">EUR</span>
+                                </div>
+                            </div>
+                            <p class="mt-2 text-sm text-green-700 font-medium" id="algo-equivalent-text">
+                                ${appTranslate('reservation.form.algo_equivalent', { amount: '0.00' })}
+                            </p>
                         </div>
-                    </div>
 
-                    <div class="border-t border-gray-200 pt-4">
-                        <h4 class="text-sm font-medium text-gray-500 mb-2">${appTranslate('reservation.form.contact_info')}</h4>
-                        <div class="space-y-4">
-                            <div>
-                                <label for="contact_data[name]" class="block text-sm font-medium text-gray-700">
-                                    ${appTranslate('Name')}
-                                </label>
-                                <input type="text" name="contact_data[name]" id="contact_data[name]"
-                                       class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                        <div class="flex items-start p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                            <div class="flex items-center h-5">
+                                <input id="terms_accepted" name="terms_accepted" type="checkbox" required
+                                       class="focus:ring-amber-500 h-4 w-4 text-amber-600 border-amber-300 rounded">
                             </div>
-
-                            <div>
-                                <label for="contact_data[email]" class="block text-sm font-medium text-gray-700">
-                                    ${appTranslate('Email')}
+                            <div class="ml-3 text-sm">
+                                <label for="terms_accepted" class="font-medium text-gray-800">
+                                    ${appTranslate('reservation.form.terms_accepted')}
                                 </label>
-                                <input type="email" name="contact_data[email]" id="contact_data[email]"
-                                       class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
-                            </div>
-
-                            <div>
-                                <label for="contact_data[message]" class="block text-sm font-medium text-gray-700">
-                                    ${appTranslate('Message')}
-                                </label>
-                                <textarea name="contact_data[message]" id="contact_data[message]" rows="3"
-                                          class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"></textarea>
                             </div>
                         </div>
-                    </div>
 
-                    <div>
-                        <button type="submit"
-                                class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                            ${appTranslate('reservation.form.submit_button')}
-                        </button>
-                    </div>
-                </form>
+                        <div class="pt-4">
+                            <button type="submit"
+                                    class="w-full inline-flex justify-center items-center px-6 py-3 border border-transparent rounded-lg shadow-lg text-lg font-semibold text-white bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 transition-all duration-200 transform hover:scale-105">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                ${appTranslate('reservation.form.submit_button')}
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
-        </div>
-        `;
+        </div>`;
     }
 }
 
@@ -579,7 +720,14 @@ export async function reserveEgi(egiId: number, data: ReservationFormData): Prom
     try {
         const config = getAppConfig();
 
-        const reserveUrl = route(`api/egis/${egiId}/reserve`, { id: egiId });
+        // Use the API route for reservations with safety check
+        let reserveUrl;
+        if (config.routes?.api?.egisReserve) {
+            reserveUrl = config.routes.api.egisReserve.replace(':egiId', egiId.toString());
+        } else {
+            // Fallback to hardcoded URL
+            reserveUrl = `/api/egis/${egiId}/reserve`;
+        }
 
         const response = await fetch(reserveUrl, {
             method: 'POST',
@@ -592,11 +740,11 @@ export async function reserveEgi(egiId: number, data: ReservationFormData): Prom
         });
 
         if (!response.ok && !response.headers.get('content-type')?.includes('application/json')) {
-            throw new Error(`HTTP error: ${response.status} ${response.statusText}`);
+            throw new Error('HTTP error: ' + response.status + ' ' + response.statusText);
         }
 
         return await response.json();
-    } catch (error) {
+    } catch (error: any) {
         console.error('Reservation API error:', error);
         return {
             success: false,
@@ -617,7 +765,6 @@ export async function getEgiReservationStatus(egiId: number): Promise<Reservatio
 
     try {
         // Use UEM.safeFetch if available, otherwise use regular fetch
-        // const statusUrl = route(`api/egis/${egiId}/reservation-status`);
         const statusUrl = route('api.egis.reservation-status', { egi: egiId })
 
         console.log('getEgiReservationStatus: route:', statusUrl)
@@ -630,7 +777,7 @@ export async function getEgiReservationStatus(egiId: number): Promise<Reservatio
             });
 
             if (!response.ok) {
-                throw new Error(`HTTP error: ${response.status} ${response.statusText}`);
+                throw new Error('HTTP error: ' + response.status + ' ' + response.statusText);
             }
 
             return await response.json();
@@ -642,12 +789,12 @@ export async function getEgiReservationStatus(egiId: number): Promise<Reservatio
             });
 
             if (!response.ok) {
-                throw new Error(`HTTP error: ${response.status} ${response.statusText}`);
+                throw new Error('HTTP error: ' + response.status + ' ' + response.statusText);
             }
 
             return await response.json();
         }
-    } catch (error) {
+    } catch (error: any) {
         console.error('Reservation status API error:', error);
 
         return {
@@ -675,7 +822,7 @@ export async function getAlgoExchangeRate(): Promise<number | null> {
             });
 
             if (!response.ok) {
-                throw new Error(`HTTP error: ${response.status} ${response.statusText}`);
+                throw new Error("HTTP error: " + response.status + " " + response.statusText);
             }
 
             const data = await response.json() as AlgoExchangeRateResponse;
@@ -690,7 +837,7 @@ export async function getAlgoExchangeRate(): Promise<number | null> {
             });
 
             if (!response.ok) {
-                throw new Error(`HTTP error: ${response.status} ${response.statusText}`);
+                throw new Error("HTTP error: " + response.status + " " + response.statusText);
             }
 
             const data = await response.json() as AlgoExchangeRateResponse;
@@ -724,7 +871,7 @@ export async function cancelReservation(reservationId: number): Promise<{ succes
         });
 
         if (!response.ok && !response.headers.get('content-type')?.includes('application/json')) {
-            throw new Error(`HTTP error: ${response.status} ${response.statusText}`);
+            throw new Error("HTTP error: " + response.status + " " + response.statusText);
         }
 
         return await response.json();
@@ -768,7 +915,7 @@ export async function createPreLaunchReservation(
         });
 
         if (!response.ok && !response.headers.get('content-type')?.includes('application/json')) {
-            throw new Error(`HTTP error: ${response.status} ${response.statusText}`);
+            throw new Error("HTTP error: " + response.status + " " + response.statusText);
         }
 
         const data = await response.json();
@@ -781,7 +928,12 @@ export async function createPreLaunchReservation(
         return data;
     } catch (error) {
         console.error('Pre-launch reservation error:', error);
-        throw error;
+        // Ensure we always throw a proper Error object
+        if (error instanceof Error) {
+            throw error;
+        } else {
+            throw new Error(typeof error === 'string' ? error : 'An unknown error occurred during reservation');
+        }
     }
 }
 
@@ -793,7 +945,7 @@ export async function createPreLaunchReservation(
  */
 export async function getPreLaunchRankings(egiId: number): Promise<RankingsResponse> {
     try {
-        const response = await fetch(`/api/reservations/pre-launch/rankings/${egiId}`, {
+        const response = await fetch(`/ api / reservations / pre - launch / rankings / ${egiId} `, {
             method: 'GET',
             headers: {
                 'Accept': 'application/json'
@@ -801,7 +953,7 @@ export async function getPreLaunchRankings(egiId: number): Promise<RankingsRespo
         });
 
         if (!response.ok) {
-            throw new Error(`HTTP error: ${response.status} ${response.statusText}`);
+            throw new Error("HTTP error: " + response.status + " " + response.statusText);
         }
 
         return await response.json();
@@ -822,9 +974,9 @@ export async function getPreLaunchRankings(egiId: number): Promise<RankingsRespo
  */
 export async function withdrawPreLaunchReservation(
     reservationId: number
-): Promise<{success: boolean, message: string}> {
+): Promise<{ success: boolean, message: string }> {
     try {
-        const response = await fetch(`/api/reservations/pre-launch/${reservationId}/withdraw`, {
+        const response = await fetch(`/ api / reservations / pre - launch / ${reservationId}/withdraw`, {
             method: 'DELETE',
             headers: {
                 'Accept': 'application/json',
@@ -833,7 +985,7 @@ export async function withdrawPreLaunchReservation(
         });
 
         if (!response.ok && !response.headers.get('content-type')?.includes('application/json')) {
-            throw new Error(`HTTP error: ${response.status} ${response.statusText}`);
+            throw new Error("HTTP error: " + response.status + " " + response.statusText);
         }
 
         return await response.json();

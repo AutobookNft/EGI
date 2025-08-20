@@ -780,8 +780,7 @@ class ReservationController extends Controller {
      * @param Request $request
      * @return JsonResponse
      */
-    public function createPreLaunchReservation(Request $request): JsonResponse
-    {
+    public function createPreLaunchReservation(Request $request): JsonResponse {
         $this->logger->info('[PRE_LAUNCH_RESERVATION] Create/update request', [
             'user_id' => FegiAuth::id(),
             'ip' => $request->ip()
@@ -844,7 +843,6 @@ class ReservationController extends Controller {
                     'updated_at' => $reservation->updated_at->toIso8601String()
                 ]
             ]);
-
         } catch (\Exception $e) {
             return $this->errorManager->handle(
                 'PRE_LAUNCH_RESERVATION_CREATE_ERROR',
@@ -866,8 +864,7 @@ class ReservationController extends Controller {
      * @param int $egiId
      * @return JsonResponse
      */
-    public function getPreLaunchRankings(Request $request, int $egiId): JsonResponse
-    {
+    public function getPreLaunchRankings(Request $request, int $egiId): JsonResponse {
         $this->logger->info('[PRE_LAUNCH_RESERVATION] Rankings requested', [
             'egi_id' => $egiId,
             'user_id' => FegiAuth::id()
@@ -909,7 +906,6 @@ class ReservationController extends Controller {
                     'stats' => $stats
                 ]
             ]);
-
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return response()->json([
                 'success' => false,
@@ -934,8 +930,7 @@ class ReservationController extends Controller {
      * @param int $reservationId
      * @return JsonResponse
      */
-    public function withdrawPreLaunchReservation(Request $request, int $reservationId): JsonResponse
-    {
+    public function withdrawPreLaunchReservation(Request $request, int $reservationId): JsonResponse {
         $this->logger->info('[PRE_LAUNCH_RESERVATION] Withdraw request', [
             'reservation_id' => $reservationId,
             'user_id' => FegiAuth::id()
@@ -971,7 +966,6 @@ class ReservationController extends Controller {
                 'success' => false,
                 'message' => 'Failed to withdraw reservation'
             ], 500);
-
         } catch (\Exception $e) {
             return $this->errorManager->handle(
                 'PRE_LAUNCH_WITHDRAW_ERROR',
@@ -991,8 +985,7 @@ class ReservationController extends Controller {
      * @param Request $request
      * @return JsonResponse
      */
-    public function getUserPreLaunchReservations(Request $request): JsonResponse
-    {
+    public function getUserPreLaunchReservations(Request $request): JsonResponse {
         $user = FegiAuth::user();
         if (!$user) {
             return response()->json([
@@ -1033,7 +1026,6 @@ class ReservationController extends Controller {
                     'reservations' => $formattedReservations
                 ]
             ]);
-
         } catch (\Exception $e) {
             return $this->errorManager->handle(
                 'USER_PRE_LAUNCH_RESERVATIONS_ERROR',
@@ -1053,8 +1045,7 @@ class ReservationController extends Controller {
      * @param int $egiId
      * @return JsonResponse
      */
-    public function checkPreLaunchReservationEligibility(Request $request, int $egiId): JsonResponse
-    {
+    public function checkPreLaunchReservationEligibility(Request $request, int $egiId): JsonResponse {
         $user = FegiAuth::user();
         if (!$user) {
             return response()->json([
@@ -1073,7 +1064,6 @@ class ReservationController extends Controller {
                 'success' => true,
                 'data' => $result
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -1083,7 +1073,104 @@ class ReservationController extends Controller {
         }
     }
 
-// ============================================================================
-// END OF EXTENSION METHODS
-// ============================================================================
+    /**
+     * Get detailed EGI information for reservation modal
+     *
+     * @param Request $request
+     * @param int $egiId
+     * @return JsonResponse
+     */
+    public function getEgiModalInfo(Request $request, int $egiId): JsonResponse {
+        $this->logger->info('[EGI_MODAL_INFO] Request received', [
+            'egi_id' => $egiId,
+            'user_id' => FegiAuth::id(),
+            'ip' => $request->ip()
+        ]);
+
+        try {
+            // Find the EGI
+            $egi = Egi::with(['collection', 'reservations' => function ($query) {
+                $query->where('is_current', true)
+                    ->where('status', 'active')
+                    ->with('user');
+            }])->find($egiId);
+
+            if (!$egi) {
+                $this->logger->warning('[EGI_MODAL_INFO] EGI not found', ['egi_id' => $egiId]);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'EGI not found'
+                ], 404);
+            }            // Get reservation information
+            $reservationService = app('App\Services\ReservationService');
+            $highestPriorityReservation = $reservationService->getHighestPriorityReservation($egi);
+
+            $response = [
+                'success' => true,
+                'data' => [
+                    'egi_id' => $egiId,
+                    'title' => $egi->title,
+                    'base_price' => $egi->price,
+                    'current_price' => $egi->price,
+                    'has_reservations' => false,
+                    'activator' => null
+                ]
+            ];
+
+            // Se c'è una prenotazione attiva
+            if ($highestPriorityReservation && $highestPriorityReservation->status === 'active') {
+                $activator = $highestPriorityReservation->user;
+                $isCommissioner = false;
+                $activatorInfo = null;
+
+                if ($activator) {
+                    // Determina se è un commissioner
+                    $isCommissioner = $activator->hasRole('commissioner') ||
+                        $activator->can('display_public_name_on_egi');
+
+                    if ($isCommissioner) {
+                        // Mostra informazioni complete
+                        $activatorInfo = [
+                            'type' => 'commissioner',
+                            'name' => ($activator->first_name && $activator->last_name)
+                                ? $activator->first_name . ' ' . $activator->last_name
+                                : $activator->name,
+                            'avatar' => $activator->profile_photo_url,
+                            'id' => $activator->id
+                        ];
+                    } else {
+                        // Mostra solo icona e wallet
+                        $activatorInfo = [
+                            'type' => 'anonymous',
+                            'wallet_address' => $activator->wallet ?? 'N/A',
+                            'id' => $activator->id
+                        ];
+                    }
+                }
+
+                $response['data']['current_price'] = $highestPriorityReservation->offer_amount_fiat;
+                $response['data']['has_reservations'] = true;
+                $response['data']['activator'] = $activatorInfo;
+                $response['data']['reservation_type'] = $highestPriorityReservation->type;
+            }
+
+            return response()->json($response);
+        } catch (\Exception $e) {
+            $this->logger->error('Error getting EGI modal info', [
+                'egi_id' => $egiId,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error retrieving EGI information',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    // ============================================================================
+    // END OF EXTENSION METHODS
+    // ============================================================================
 }

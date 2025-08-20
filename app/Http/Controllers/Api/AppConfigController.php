@@ -265,6 +265,7 @@ class AppConfigController extends Controller {
                 // Route di prenotazione e certificati (aggiornate in base alle definizioni reali)
                 'egiReservationStatus' => route('api.egis.reservation-status', ['egiId' => ':egiId']),
                 'egisReserve' => route('api.egis.reserve', ['egiId' => ':egiId']),
+                'egiModalInfo' => route('api.egis.modal-info', ['egiId' => ':egiId']),
                 'reservationsCancel' => route('api.reservations.cancel', ['id' => ':id']),
                 'myReservations' => route('api.my-reservations'),
 

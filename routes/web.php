@@ -695,8 +695,10 @@ Route::prefix('api')->name('api.')->group(function () {
         ->name('reservations.history');
 
     // Route API per status prenotazioni (existing)
-    Route::get('/api/egis/{egiId}/reservation-status', [ReservationController::class, 'getReservationStatus']);
-    Route::get('/api/reservations/egi/{egiId}/history', [ReservationController::class, 'getReservationHistory']);
+    Route::get('/egis/{egiId}/reservation-status-old', [ReservationController::class, 'getReservationStatus']);
+    Route::get('/reservations/egi/{egiId}/history-old', [ReservationController::class, 'getReservationHistory']);
+    Route::get('/egis/{egiId}/modal-info', [ReservationController::class, 'getEgiModalInfo'])
+        ->name('egis.modal-info');
 
     // Route API per statistiche Payment Distribution
     Route::get('/stats/global', [App\Http\Controllers\Api\PaymentDistributionStatsController::class, 'getGlobalStats']);
