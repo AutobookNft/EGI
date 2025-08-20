@@ -42,7 +42,8 @@ class PaymentDistributionService
         $this->logger = $logger;
         $this->errorManager = $errorManager;
     }
-        /**
+
+    /**
      * Create distributions for a reservation (treating reservations as virtual payments)
      * GDPR Compliance: All activities logged with user_activities for audit trail
      *

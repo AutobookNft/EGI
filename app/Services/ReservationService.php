@@ -248,6 +248,25 @@ class ReservationService {
             // Check if this reservation is now the highest and send notifications
             $this->checkAndNotifyIfHighest($reservation);
 
+            // 🎯 PAYMENT DISTRIBUTIONS: Create distributions for this reservation
+            try {
+                $distributions = $this->paymentDistributionService->createDistributionsForReservation($reservation);
+
+                $this->logger->info('[PAYMENT_DISTRIBUTIONS] Created distributions for reservation (createReservation)', [
+                    'reservation_id' => $reservation->id,
+                    'distributions_count' => count($distributions),
+                    'total_amount' => array_sum(array_column($distributions, 'amount_eur')),
+                    'method' => 'createReservation'
+                ]);
+            } catch (\Exception $e) {
+                // Log error but don't fail the reservation process
+                $this->logger->error('[PAYMENT_DISTRIBUTIONS] Failed to create distributions (createReservation)', [
+                    'reservation_id' => $reservation->id,
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]);
+            }
+
             return $reservation;
         });
     }
