@@ -548,6 +548,7 @@ $isCreator = auth()->check() && auth()->id() === $creatorId;
     {{-- 🔥 Pulsante Prenota/Rilancia in fondo alla card (identico a egi-card-list) --}}
     @if(!$isCreator && !$hideReserveButton)
     <div class="mt-3">
+        @if($egi->price && $egi->price > 0)
         <button type="button" class="reserve-button w-full flex items-center justify-center px-4 py-2 text-sm font-medium text-white
                 {{ $hasCurrentReservation ? 'bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700' : 'bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700' }}
                 rounded-t-none rounded-b-lg transition-all transform hover:scale-[1.01]" data-egi-id="{{ $egi->id }}">
@@ -563,6 +564,16 @@ $isCreator = auth()->check() && auth()->id() === $creatorId;
             {{ __('egi.actions.reserve') ?? 'Prenota' }}
             @endif
         </button>
+        @else
+        <div
+            class="w-full flex items-center justify-center px-4 py-2 text-sm font-medium text-gray-500 bg-gray-100 rounded-t-none rounded-b-lg">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L5.636 5.636" />
+            </svg>
+            {{ __('egi.status.not_for_sale') ?? 'Non in vendita' }}
+        </div>
+        @endif
     </div>
     @endif
 </article>
