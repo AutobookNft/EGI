@@ -290,7 +290,7 @@ return [
 
         // Payment Distribution Service Error Messages
         'payment_distribution_error' => 'Payment distribution failed for reservation :reservation_id. Error: :error.',
-        'reservation_not_completed' => 'Reservation :reservation_id is not completed and cannot have distributions created.',
+        'reservation_not_active' => 'Reservation :reservation_id is not active and cannot have distributions created.',
         'payment_not_executed' => 'Reservation :reservation_id has no payment execution timestamp.',
         'invalid_amount' => 'Reservation :reservation_id has invalid amount_eur.',
         'collection_not_found' => 'Reservation :reservation_id has no associated collection.',
@@ -529,7 +529,7 @@ return [
 
         // Payment Distribution Service Error Messages - User-Friendly
         'payment_distribution_error' => 'Unable to process payment distribution. Our technical team has been notified. Please try again later.',
-        'reservation_not_completed' => 'This reservation is not completed yet. Payment distributions will be processed automatically once the reservation is finalized.',
+        'reservation_not_active' => 'This reservation is not active yet. Payment distributions will be processed automatically once the reservation becomes active.',
         'payment_not_executed' => 'Payment for this reservation has not been processed yet. Please contact support if you believe this is an error.',
         'invalid_amount' => 'There is an issue with the payment amount. Please contact support for assistance.',
         'collection_not_found' => 'Unable to find the associated collection. Please contact support for assistance.',

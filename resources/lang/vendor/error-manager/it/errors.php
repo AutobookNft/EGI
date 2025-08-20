@@ -278,7 +278,7 @@ return [
 
         // Payment Distribution Service Error Messages - Developer Messages
         'payment_distribution_error' => 'Distribuzione pagamento fallita per prenotazione :reservation_id. Errore: :error.',
-        'reservation_not_completed' => 'La prenotazione :reservation_id non è completata e non può avere distribuzioni create.',
+        'reservation_not_active' => 'La prenotazione :reservation_id non è attiva e non può avere distribuzioni create.',
         'payment_not_executed' => 'La prenotazione :reservation_id non ha timestamp di esecuzione pagamento.',
         'invalid_amount' => 'La prenotazione :reservation_id ha amount_eur non valido.',
         'collection_not_found' => 'La prenotazione :reservation_id non ha collezione associata.',
@@ -522,7 +522,7 @@ return [
 
         // Payment Distribution Service Error Messages - User-Friendly (Italian)
         'payment_distribution_error' => 'Impossibile elaborare la distribuzione del pagamento. Il nostro team tecnico è stato avvisato. Riprova più tardi.',
-        'reservation_not_completed' => 'Questa prenotazione non è ancora completata. Le distribuzioni di pagamento verranno elaborate automaticamente una volta finalizzata la prenotazione.',
+        'reservation_not_active' => 'Questa prenotazione non è ancora attiva. Le distribuzioni di pagamento verranno elaborate automaticamente una volta che la prenotazione diventa attiva.',
         'payment_not_executed' => 'Il pagamento per questa prenotazione non è ancora stato elaborato. Contatta l\'assistenza se ritieni sia un errore.',
         'invalid_amount' => 'C\'è un problema con l\'importo del pagamento. Contatta l\'assistenza per ricevere aiuto.',
         'collection_not_found' => 'Impossibile trovare la collezione associata. Contatta l\'assistenza per ricevere aiuto.',

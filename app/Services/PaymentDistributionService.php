@@ -43,7 +43,7 @@ class PaymentDistributionService
         $this->errorManager = $errorManager;
     }
         /**
-     * Create distributions for a completed reservation
+     * Create distributions for a reservation (treating reservations as virtual payments)
      * GDPR Compliance: All activities logged with user_activities for audit trail
      *
      * @param Reservation $reservation
@@ -110,29 +110,22 @@ class PaymentDistributionService
 
     /**
      * Validate that reservation is eligible for distribution
+     * Note: All reservations are treated as virtual payments, only 'highest' rank counts for stats
      * 
      * @param Reservation $reservation
      * @throws \Exception
      */
     private function validateReservationForDistribution(Reservation $reservation): void
     {
-        if ($reservation->status !== 'completed') {
-            $this->errorManager->handle('RESERVATION_NOT_COMPLETED', [
+        // Check if reservation is active (current system only uses 'active' status)
+        if ($reservation->status !== 'active') {
+            $this->errorManager->handle('RESERVATION_NOT_ACTIVE', [
                 'reservation_id' => $reservation->id,
                 'current_status' => $reservation->status,
                 'user_id' => auth()->id(),
                 'timestamp' => now()->toIso8601String()
             ]);
-            throw new \Exception("Reservation {$reservation->id} is not completed");
-        }
-
-        if (!$reservation->payment_executed_at) {
-            $this->errorManager->handle('PAYMENT_NOT_EXECUTED', [
-                'reservation_id' => $reservation->id,
-                'user_id' => auth()->id(),
-                'timestamp' => now()->toIso8601String()
-            ]);
-            throw new \Exception("Reservation {$reservation->id} has no payment execution timestamp");
+            throw new \Exception("Reservation {$reservation->id} is not active");
         }
 
         if (!$reservation->amount_eur || $reservation->amount_eur <= 0) {
@@ -239,6 +232,9 @@ class PaymentDistributionService
                     'platform_role' => $wallet->platform_role,
                     'calculation_timestamp' => now()->toISOString(),
                     'reservation_type' => $reservation->type,
+                    'reservation_rank' => $reservation->rank,
+                    'is_highest_rank' => $reservation->rank === 1,
+                    'counts_for_stats' => $reservation->rank === 1, // Solo rank #1 conta per statistiche
                 ]
             ];
         }
@@ -366,6 +362,7 @@ class PaymentDistributionService
 
     /**
      * Get distribution statistics for analytics
+     * Note: Only 'highest' rank reservations count for real statistics
      * 
      * @param \App\Models\Collection $collection
      * @param string|null $startDate
@@ -374,7 +371,10 @@ class PaymentDistributionService
      */
     public function getDistributionStats(\App\Models\Collection $collection, ?string $startDate = null, ?string $endDate = null): array
     {
-        $query = PaymentDistribution::where('collection_id', $collection->id);
+        $query = PaymentDistribution::where('collection_id', $collection->id)
+            ->whereHas('reservation', function ($q) {
+                $q->where('rank', 1); // Only count #1 highest reservations for stats
+            });
 
         if ($startDate) {
             $query->where('created_at', '>=', $startDate);
@@ -398,6 +398,43 @@ class PaymentDistributionService
                 ];
             }),
             'by_status' => $distributions->groupBy('distribution_status')->map(function ($group) {
+                return [
+                    'count' => $group->count(),
+                    'amount_eur' => $group->sum('amount_eur'),
+                ];
+            }),
+        ];
+    }
+
+    /**
+     * Get ALL distribution tracking (including non-highest ranks)
+     * Use this for complete audit trail, not for statistics
+     * 
+     * @param \App\Models\Collection $collection
+     * @param string|null $startDate
+     * @param string|null $endDate
+     * @return array
+     */
+    public function getAllDistributionTracking(\App\Models\Collection $collection, ?string $startDate = null, ?string $endDate = null): array
+    {
+        $query = PaymentDistribution::where('collection_id', $collection->id);
+
+        if ($startDate) {
+            $query->where('created_at', '>=', $startDate);
+        }
+
+        if ($endDate) {
+            $query->where('created_at', '<=', $endDate);
+        }
+
+        $distributions = $query->with(['user', 'reservation'])->get();
+
+        return [
+            'total_tracking_entries' => $distributions->count(),
+            'highest_rank_count' => $distributions->whereHas('reservation', fn($q) => $q->where('rank', 1))->count(),
+            'other_ranks_count' => $distributions->whereHas('reservation', fn($q) => $q->where('rank', '>', 1))->count(),
+            'total_virtual_amount' => $distributions->sum('amount_eur'),
+            'by_rank' => $distributions->groupBy('reservation.rank')->map(function ($group) {
                 return [
                     'count' => $group->count(),
                     'amount_eur' => $group->sum('amount_eur'),

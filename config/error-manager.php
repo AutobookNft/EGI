@@ -3366,11 +3366,11 @@ return [
             'msg_to' => 'json',
         ],
 
-        'RESERVATION_NOT_COMPLETED' => [
+        'RESERVATION_NOT_ACTIVE' => [
             'type' => 'warning',
             'blocking' => 'semi-blocking',
-            'dev_message_key' => 'error-manager::errors.dev.reservation_not_completed',
-            'user_message_key' => 'error-manager::errors.user.reservation_not_completed',
+            'dev_message_key' => 'error-manager::errors.dev.reservation_not_active',
+            'user_message_key' => 'error-manager::errors.user.reservation_not_active',
             'http_status_code' => 400,
             'devTeam_email_need' => false,
             'notify_slack' => false,
