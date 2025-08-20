@@ -585,6 +585,14 @@ class User extends Authenticatable implements HasMedia {
     }
 
     /**
+     * Payment distributions received by this user
+     * @return HasMany
+     */
+    public function paymentDistributions(): HasMany {
+        return $this->hasMany(PaymentDistribution::class);
+    }
+
+    /**
      * Get security events related to this user.
      *
      * @return HasMany

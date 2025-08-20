@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -157,6 +158,14 @@ class Collection extends Model {
             'id',            // Local key on this table (collections)
             'id'             // Local key on the intermediate table (egis)
         );
+    }
+
+    /**
+     * Payment distributions for this collection
+     * @return HasMany
+     */
+    public function paymentDistributions(): HasMany {
+        return $this->hasMany(PaymentDistribution::class);
     }
 
     /**

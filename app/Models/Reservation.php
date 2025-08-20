@@ -259,6 +259,14 @@ class Reservation extends Model {
         return $this->hasOne(EgiReservationCertificate::class);
     }
 
+    /**
+     * Payment distributions for this reservation
+     * @return HasMany
+     */
+    public function paymentDistributions(): HasMany {
+        return $this->hasMany(PaymentDistribution::class);
+    }
+
     // ===== RANKING METHODS =====
 
     /**
