@@ -65,7 +65,7 @@ $stats = [
 @endphp
 
 {{-- Statistiche Payment Distribution MOBILE - Formato Carousel --}}
-<div class="w-full">
+<div class="w-full" id="mobileStatsContainer_{{ $instanceId }}">
     {{-- Contenitore per il carousel fluido --}}
     <div class="relative overflow-hidden">
         <div id="mobile-stats-carousel-{{ $instanceId }}"
@@ -147,8 +147,9 @@ $stats = [
 
 {{-- JavaScript per animazione fluida --}}
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-    const carousel = document.getElementById('mobile-stats-carousel-{{ $instanceId }}');
+document.addEventListener('DOMContentLoaded', function() {
+    const instanceId = "{{ $instanceId }}";
+    const carousel = document.getElementById('mobile-stats-carousel-' + instanceId);
     const totalPanels = {{ count($stats) }};
     let currentIndex = 0;
     let isPaused = false;
@@ -220,5 +221,99 @@ $stats = [
     // Avvia l'animazione
     startAnimation();
     // updateIndicators(); // Commentato perché indicatori nascosti
+    
+    // ===== AGGIORNAMENTO AUTOMATICO STATISTICHE GLOBALI MOBILE =====
+    const mobileStatsContainer = document.getElementById('mobileStatsContainer_' + instanceId);
+    
+    if (!mobileStatsContainer) {
+        console.error('mobileStatsContainer non trovato per instanceId:', instanceId);
+        return;
+    }
+    
+    // Aggiorna le statistiche globali mobile
+    function updateMobileGlobalStats() {
+        console.log('Aggiornamento statistiche globali mobile...'); // Debug
+        fetch('/api/stats/global')
+            .then(response => response.json())
+            .then(data => {
+                console.log('Dati ricevuti mobile:', data); // Debug
+                if (data.success && data.formatted) {
+                    // Aggiorna i valori con i dati formattati e aggiungi effetto brillamento
+                    const volumeElement = document.getElementById('statVolume_' + instanceId);
+                    const eppElement = document.getElementById('statEpp_' + instanceId);
+                    const collectionsElement = document.getElementById('statCollections_' + instanceId);
+                    const sellCollectionsElement = document.getElementById('statSellCollections_' + instanceId);
+                    const totalEgisElement = document.getElementById('statTotalEgis_' + instanceId);
+                    const sellEgisElement = document.getElementById('statSellEgis_' + instanceId);
+                    
+                    // Funzione per aggiungere effetto brillamento mobile
+                    function addMobileShineEffect(element, newValue) {
+                        if (element && element.textContent !== newValue) {
+                            console.log('Aggiornamento valore mobile:', element.id, 'da', element.textContent, 'a', newValue); // Debug
+                            element.textContent = newValue;
+                            element.style.transition = 'all 0.3s ease';
+                            element.style.transform = 'scale(1.05)';
+                            element.style.textShadow = '0 0 8px rgba(255, 255, 255, 0.9)';
+                            
+                            setTimeout(() => {
+                                element.style.transform = 'scale(1)';
+                                element.style.textShadow = 'none';
+                            }, 300);
+                        } else if (element) {
+                            element.textContent = newValue;
+                        }
+                    }
+                    
+                    // Funzione per aggiornare tutti gli elementi con lo stesso testo (originali + duplicati)
+                    function updateAllInstances(label, newValue) {
+                        // Trova tutti gli elementi che contengono questo label nel carousel
+                        const carouselElement = document.getElementById('mobile-stats-carousel-' + instanceId);
+                        if (carouselElement) {
+                            const allLabels = carouselElement.querySelectorAll('.text-gray-300');
+                            allLabels.forEach(labelElement => {
+                                if (labelElement.textContent.trim() === label) {
+                                    // Trova l'elemento valore corrispondente (il fratello successivo)
+                                    const valueElement = labelElement.parentElement.querySelector('.text-sm.font-semibold');
+                                    if (valueElement) {
+                                        addMobileShineEffect(valueElement, newValue);
+                                    }
+                                }
+                            });
+                        }
+                    }
+                    
+                    // Aggiorna tutte le istanze (originali + duplicate)
+                    updateAllInstances('VOLUME', data.formatted.volume);
+                    updateAllInstances('EPP', data.formatted.epp);
+                    updateAllInstances('COLLECTIONS', data.formatted.collections);
+                    updateAllInstances('SELL COLLECTIONS', data.formatted.sell_collections);
+                    updateAllInstances('EGIS', data.formatted.total_egis);
+                    updateAllInstances('SELL EGIS', data.formatted.sell_egis);
+                }
+            })
+            .catch(error => {
+                console.error('Errore nel recupero delle statistiche globali mobile:', error);
+            });
+    }
+    
+    // Prima chiamata immediata per testare
+    setTimeout(updateMobileGlobalStats, 1000);
+    
+    // Aggiorna ogni 5 secondi (temporaneo per test, poi ripristinare a 30000)
+    const mobileUpdateInterval = setInterval(updateMobileGlobalStats, 5000);
+    
+    // Cleanup quando l'elemento viene rimosso dal DOM
+    const mobileObserver = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            mutation.removedNodes.forEach(function(node) {
+                if (node === mobileStatsContainer || (node.contains && node.contains(mobileStatsContainer))) {
+                    clearInterval(mobileUpdateInterval);
+                    mobileObserver.disconnect();
+                }
+            });
+        });
+    });
+    
+    mobileObserver.observe(document.body, { childList: true, subtree: true });
 });
 </script>

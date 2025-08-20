@@ -30,7 +30,7 @@ $instanceId = uniqid();
 @endphp
 
 {{-- Statistiche Payment Distribution GLOBALI --}}
-<div class="flex flex-col items-center justify-center w-full gap-4 sm:gap-6">
+<div class="flex flex-col items-center justify-center w-full gap-4 sm:gap-6" id="globalStatsContainer_{{ $instanceId }}">
     <div class="p-4 border rounded-lg backdrop-blur-sm border-white/10" style="background-color: rgba(0, 0, 0, 0.5);">
         <div class="flex divide-x divide-white/20">
             {{-- VOLUME - Totale importo distribuito (€) --}}
@@ -97,3 +97,80 @@ $instanceId = uniqid();
         </div>
     </div>
 </div>
+
+{{-- JavaScript per aggiornamento automatico delle statistiche globali --}}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const instanceId = "{{ $instanceId }}";
+    const globalStatsContainer = document.getElementById('globalStatsContainer_' + instanceId);
+    
+    if (!globalStatsContainer) return;
+    
+    // Aggiorna le statistiche globali
+    function updateGlobalStats() {
+        console.log('Aggiornamento statistiche globali desktop...'); // Debug
+        fetch('/api/stats/global')
+            .then(response => response.json())
+            .then(data => {
+                console.log('Dati ricevuti:', data); // Debug
+                if (data.success && data.formatted) {
+                    // Aggiorna i valori con i dati formattati e aggiungi effetto brillamento
+                    const volumeElement = document.getElementById('statVolume_' + instanceId);
+                    const eppElement = document.getElementById('statEpp_' + instanceId);
+                    const collectionsElement = document.getElementById('statCollections_' + instanceId);
+                    const sellCollectionsElement = document.getElementById('statSellCollections_' + instanceId);
+                    const totalEgisElement = document.getElementById('statTotalEgis_' + instanceId);
+                    const sellEgisElement = document.getElementById('statSellEgis_' + instanceId);
+                    
+                    // Funzione per aggiungere effetto brillamento
+                    function addShineEffect(element, newValue) {
+                        if (element && element.textContent !== newValue) {
+                            console.log('Aggiornamento valore:', element.id, 'da', element.textContent, 'a', newValue); // Debug
+                            element.textContent = newValue;
+                            element.style.transition = 'all 0.3s ease';
+                            element.style.transform = 'scale(1.05)';
+                            element.style.textShadow = '0 0 10px rgba(255, 255, 255, 0.8)';
+                            
+                            setTimeout(() => {
+                                element.style.transform = 'scale(1)';
+                                element.style.textShadow = 'none';
+                            }, 300);
+                        } else if (element) {
+                            element.textContent = newValue;
+                        }
+                    }
+                    
+                    addShineEffect(volumeElement, data.formatted.volume);
+                    addShineEffect(eppElement, data.formatted.epp);
+                    addShineEffect(collectionsElement, data.formatted.collections);
+                    addShineEffect(sellCollectionsElement, data.formatted.sell_collections);
+                    addShineEffect(totalEgisElement, data.formatted.total_egis);
+                    addShineEffect(sellEgisElement, data.formatted.sell_egis);
+                }
+            })
+            .catch(error => {
+                console.error('Errore nel recupero delle statistiche globali:', error);
+            });
+    }
+    
+    // Prima chiamata immediata per testare
+    setTimeout(updateGlobalStats, 1000);
+    
+    // Aggiorna ogni 5 secondi (temporaneo per test, poi ripristinare a 30000)
+    const updateInterval = setInterval(updateGlobalStats, 5000);
+    
+    // Cleanup quando l'elemento viene rimosso dal DOM
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            mutation.removedNodes.forEach(function(node) {
+                if (node === globalStatsContainer || (node.contains && node.contains(globalStatsContainer))) {
+                    clearInterval(updateInterval);
+                    observer.disconnect();
+                }
+            });
+        });
+    });
+    
+    observer.observe(document.body, { childList: true, subtree: true });
+});
+</script>

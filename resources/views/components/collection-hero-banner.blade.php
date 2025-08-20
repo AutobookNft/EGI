@@ -22,26 +22,29 @@ $jsCollectionsData = $collections->map(function($c) use($logo) {
 $creatorName = $c->creator ? $c->creator->name : null;
 $bannerPath = $c->image_banner;
 
-// Calcola le statistiche per ogni collezione DINAMICAMENTE
+// Calcola le statistiche per ogni collezione per l'aggiornamento dinamico
 $egisCount = $c->egis()->count();
-$likesCount = $c->likes()->count();
-$reservationsCount = $c->egis()
+
+$sellEgisCount = $c->egis()
 ->whereHas('reservations', function($query) {
 $query->where('is_current', true)->where('status', 'active');
 })
 ->count();
 
-$totalReservationsValue = $c->egis()
-->whereHas('reservations', function($query) {
-$query->where('is_current', true)->where('status', 'active');
-})
-->with(['reservations' => function($query) {
-$query->where('is_current', true)->where('status', 'active');
-}])
-->get()
-->sum(function($egi) {
-return $egi->reservations->sum('offer_amount_fiat');
-});
+// VOLUME - Solo distribuzioni di prenotazioni con sub_status = 'highest'
+$totalVolume = \App\Models\PaymentDistribution::join('reservations', 'payment_distributions.reservation_id', '=',
+'reservations.id')
+->where('payment_distributions.collection_id', $c->id)
+->where('reservations.sub_status', 'highest')
+->sum('payment_distributions.amount_eur');
+
+// EPP per questa collezione specifica - Solo prenotazioni con sub_status = 'highest'
+$eppTotal = \App\Models\PaymentDistribution::join('reservations', 'payment_distributions.reservation_id', '=',
+'reservations.id')
+->where('payment_distributions.collection_id', $c->id)
+->where('reservations.sub_status', 'highest')
+->where('payment_distributions.user_type', 'epp')
+->sum('payment_distributions.amount_eur');
 
 return [
 'id' => $c->id,
@@ -50,9 +53,9 @@ return [
 'banner' => $bannerPath ? asset($bannerPath) : asset("images/default/random_background/$logo"),
 'stats' => [
 'egis' => $egisCount,
-'likes' => $likesCount,
-'reserved' => $reservationsCount,
-'volume' => $totalReservationsValue
+'sell_egis' => $sellEgisCount,
+'volume' => $totalVolume,
+'epp' => $eppTotal
 ]
 ];
 })->values()->all();
@@ -153,53 +156,13 @@ return [
 
         {{-- Riga Inferiore: Statistiche stile OpenSea centrate --}}
         <div class="flex flex-col items-center justify-center w-full gap-4 sm:gap-6">
-            {{-- Statistiche OpenSea SOVRAPPOSTE nel banner - 4 NOSTRE STATISTICHE --}}
+            {{-- Statistiche Hero Banner per la collezione corrente --}}
             @if($hasCollections && $firstCollection)
-            <div class="p-4 bg-black border rounded-lg backdrop-blur-sm border-white/10 opacity-70">
-                <div class="flex divide-x divide-white/20">
-                    <div class="pr-6">
-                        <div class="text-xs font-medium tracking-wider text-gray-300 uppercase">EGIS</div>
-                        <div class="text-white" style="font-size: 8px;" id="statEgis_{{ $instanceId }}">{{
-                            $firstCollection->egis()->count() }}</div>
-                    </div>
-                    <div class="px-6">
-                        <div class="text-xs font-medium tracking-wider text-gray-300 uppercase">LIKES</div>
-                        <div class="text-white" style="font-size: 8px;" id="statLikes_{{ $instanceId }}">{{
-                            $firstCollection->likes()->count() }}</div>
-                    </div>
-                    <div class="px-6">
-                        <div class="text-xs font-medium tracking-wider text-gray-300 uppercase">RESERVED</div>
-                        <div class="text-white" style="font-size: 8px;" id="statReserved_{{ $instanceId }}">{{
-                            $firstCollection->egis()->whereHas('reservations', function($query) {
-                            $query->where('is_current', true)->where('status', 'active');
-                            })->count() }}</div>
-                    </div>
-                    <div class="pl-6">
-                        <div class="text-xs font-medium tracking-wider text-gray-300 uppercase">VOLUME</div>
-                        @php
-
-                        $totalReservationsValue = $firstCollection->egis()
-                        ->whereHas('reservations', function($query) {
-                        $query->where('is_current', true)->where('status', 'active');
-                        })
-                        ->with(['reservations' => function($query) {
-                        $query->where('is_current', true)->where('status', 'active');
-                        }])
-                        ->get()
-                        ->sum(function($egi) {
-                        return $egi->reservations->sum('offer_amount_fiat');
-                        });
-                        @endphp
-                        @if($totalReservationsValue > 0)
-                        <div class="text-white" style="font-size: 8px;" id="statVolume_{{ $instanceId }}">€ {{
-                            number_format($totalReservationsValue, 2) }}</div>
-                        @else
-                        <div class="text-white" style="font-size: 8px;" id="statVolume_{{ $instanceId }}">€ 0.00</div>
-                        @endif
-                    </div>
-                </div>
-            </div>
+            <x-hero-banner-stats :collection="$firstCollection" />
+            @else
+            <x-hero-banner-stats />
             @endif
+
             <!-- Pulsanti di navigazione (prev/next) - COMMENTATI -->
             {{-- @if($collections->count() > 1)
             <div class="flex order-2 space-x-3 pointer-events-auto md:order-1">
@@ -298,21 +261,37 @@ return [
                 collectionSubTextElement.textContent = `${currentCollection.name} {{ __('guest_home.by') }} ${currentCollection.creator}`;
             }
 
-            // Aggiorna statistiche dinamicamente
-            const statEgis = document.getElementById('statEgis_' + componentId);
-            const statLikes = document.getElementById('statLikes_' + componentId);
-            const statReserved = document.getElementById('statReserved_' + componentId);
-            const statVolume = document.getElementById('statVolume_' + componentId);
-
+            // Aggiorna statistiche per la collezione corrente
             if (currentCollection.stats) {
-                if (statEgis) statEgis.textContent = currentCollection.stats.egis || 0;
-                if (statLikes) statLikes.textContent = currentCollection.stats.likes || 0;
-                if (statReserved) statReserved.textContent = currentCollection.stats.reserved || 0;
-                if (statVolume) {
-                    const volume = currentCollection.stats.volume || 0;
-                    statVolume.textContent = volume > 0 ?
-                        '€ ' + new Intl.NumberFormat('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(volume) :
-                        '€ 0.00';
+                // Cerca il container delle statistiche (ID dinamico dal componente)
+                const statsContainer = document.querySelector('[id^="heroBannerStatsContainer_"]');
+                if (statsContainer) {
+                    const volumeElement = statsContainer.querySelector('[id^="statVolume_"]');
+                    const eppElement = statsContainer.querySelector('[id^="statEpp_"]');
+                    const egisElement = statsContainer.querySelector('[id^="statTotalEgis_"]');
+                    const sellEgisElement = statsContainer.querySelector('[id^="statSellEgis_"]');
+
+                    if (volumeElement) {
+                        const volume = currentCollection.stats.volume || 0;
+                        volumeElement.textContent = volume > 0 ?
+                            '€' + new Intl.NumberFormat('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(volume) :
+                            '€0.00';
+                    }
+
+                    if (eppElement) {
+                        const epp = currentCollection.stats.epp || 0;
+                        eppElement.textContent = epp > 0 ?
+                            '€' + new Intl.NumberFormat('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(epp) :
+                            '€0.00';
+                    }
+
+                    if (egisElement) {
+                        egisElement.textContent = new Intl.NumberFormat('it-IT').format(currentCollection.stats.egis || 0);
+                    }
+
+                    if (sellEgisElement) {
+                        sellEgisElement.textContent = new Intl.NumberFormat('it-IT').format(currentCollection.stats.sell_egis || 0);
+                    }
                 }
             }
 
@@ -409,21 +388,36 @@ return [
                             collectionSubTextElement.textContent = `${currentCollection.name} {{ __('guest_home.by') }} ${currentCollection.creator}`;
                         }
 
-                        // Aggiorna statistiche anche per lo swipe manuale
-                        const statEgis = document.getElementById('statEgis_' + componentId);
-                        const statLikes = document.getElementById('statLikes_' + componentId);
-                        const statReserved = document.getElementById('statReserved_' + componentId);
-                        const statVolume = document.getElementById('statVolume_' + componentId);
-
+                        // Le statistiche cambiano per ogni collezione
                         if (currentCollection.stats) {
-                            if (statEgis) statEgis.textContent = currentCollection.stats.egis || 0;
-                            if (statLikes) statLikes.textContent = currentCollection.stats.likes || 0;
-                            if (statReserved) statReserved.textContent = currentCollection.stats.reserved || 0;
-                            if (statVolume) {
-                                const volume = currentCollection.stats.volume || 0;
-                                statVolume.textContent = volume > 0 ?
-                                    '€ ' + new Intl.NumberFormat('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(volume) :
-                                    '€ 0.00';
+                            const statsContainer = document.querySelector('[id^="heroBannerStatsContainer_"]');
+                            if (statsContainer) {
+                                const volumeElement = statsContainer.querySelector('[id^="statVolume_"]');
+                                const eppElement = statsContainer.querySelector('[id^="statEpp_"]');
+                                const egisElement = statsContainer.querySelector('[id^="statTotalEgis_"]');
+                                const sellEgisElement = statsContainer.querySelector('[id^="statSellEgis_"]');
+
+                                if (volumeElement) {
+                                    const volume = currentCollection.stats.volume || 0;
+                                    volumeElement.textContent = volume > 0 ?
+                                        '€' + new Intl.NumberFormat('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(volume) :
+                                        '€0.00';
+                                }
+
+                                if (eppElement) {
+                                    const epp = currentCollection.stats.epp || 0;
+                                    eppElement.textContent = epp > 0 ?
+                                        '€' + new Intl.NumberFormat('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(epp) :
+                                        '€0.00';
+                                }
+
+                                if (egisElement) {
+                                    egisElement.textContent = new Intl.NumberFormat('it-IT').format(currentCollection.stats.egis || 0);
+                                }
+
+                                if (sellEgisElement) {
+                                    sellEgisElement.textContent = new Intl.NumberFormat('it-IT').format(currentCollection.stats.sell_egis || 0);
+                                }
                             }
                         }
 

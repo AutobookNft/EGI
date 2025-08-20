@@ -260,11 +260,13 @@ class PaymentDistribution extends Model {
     }
 
     /**
-     * Get total amount distributed in EUR
+     * Get total amount distributed in EUR - Only from highest sub_status reservations
      * @return float
      */
     public static function getTotalAmountDistributed(): float {
-        return static::sum('amount_eur') ?? 0.0;
+        return static::join('reservations', 'payment_distributions.reservation_id', '=', 'reservations.id')
+            ->where('reservations.sub_status', 'highest')
+            ->sum('payment_distributions.amount_eur') ?? 0.0;
     }
 
     /**
@@ -303,20 +305,22 @@ class PaymentDistribution extends Model {
     }
 
     /**
-     * Get distributions totals grouped by user type
+     * Get distributions totals grouped by user type - Only from highest sub_status reservations
      * @return array
      */
     public static function getTotalByUserType(): array {
-        return static::selectRaw('
-                user_type,
+        return static::join('reservations', 'payment_distributions.reservation_id', '=', 'reservations.id')
+            ->where('reservations.sub_status', 'highest')
+            ->selectRaw('
+                payment_distributions.user_type,
                 COUNT(*) as count,
-                SUM(amount_eur) as total_amount,
-                AVG(amount_eur) as avg_amount,
-                AVG(percentage) as avg_percentage,
-                MIN(percentage) as min_percentage,
-                MAX(percentage) as max_percentage
+                SUM(payment_distributions.amount_eur) as total_amount,
+                AVG(payment_distributions.amount_eur) as avg_amount,
+                AVG(payment_distributions.percentage) as avg_percentage,
+                MIN(payment_distributions.percentage) as min_percentage,
+                MAX(payment_distributions.percentage) as max_percentage
             ')
-            ->groupBy('user_type')
+            ->groupBy('payment_distributions.user_type')
             ->orderBy('total_amount', 'DESC')
             ->get()
             ->map(function ($item) {

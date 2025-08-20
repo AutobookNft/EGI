@@ -697,6 +697,11 @@ Route::prefix('api')->name('api.')->group(function () {
     // Route API per status prenotazioni (existing)
     Route::get('/api/egis/{egiId}/reservation-status', [ReservationController::class, 'getReservationStatus']);
     Route::get('/api/reservations/egi/{egiId}/history', [ReservationController::class, 'getReservationHistory']);
+    
+    // Route API per statistiche Payment Distribution
+    Route::get('/stats/global', [App\Http\Controllers\Api\PaymentDistributionStatsController::class, 'getGlobalStats']);
+    Route::get('/stats/collection/{collectionId}', [App\Http\Controllers\Api\PaymentDistributionStatsController::class, 'getCollectionStats']);
+    
     // Like/Unlike routes
     Route::post('/collections/{collectionId}/toggle-like', [LikeController::class, 'toggleCollectionLike'])
         ->name('toggle.collection.like');
