@@ -76,6 +76,7 @@ return [
 
     // Prenotazioni
     'reservation' => [
+        'count' => 'Prenotazioni',
         'highest_bidder' => 'Miglior Offerente',
         'by' => 'da',
         'highest_bid' => 'Offerta Più Alta',
@@ -391,6 +392,10 @@ return [
         'close_modal' => 'Chiudi finestra di conferma',
         'required_field' => 'Campo obbligatorio',
         'optional_field' => 'Campo opzionale',
+    ],
+
+    'collection' => [
+        'part_of' => 'Parte di',
     ],
 
 ];
