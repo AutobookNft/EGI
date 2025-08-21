@@ -56,19 +56,19 @@ Componente autonomo per il badge della collection con TypeScript integrato
             this.countElement = badgeElement.querySelector('.collection-badge-count');
             this.iconElement = badgeElement.querySelector('.collection-badge-icon');
 
-            console.log('🔧 [CollectionBadge] Constructor completed:', {
-                uniqueId: this.uniqueId,
-                collectionId: this.collectionId,
-                currentEgiCount: this.egiCount,
-                size: this.size,
-                position: this.position
-            });
+            // console.log('🔧 [CollectionBadge] Constructor completed:', {
+            //     uniqueId: this.uniqueId,
+            //     collectionId: this.collectionId,
+            //     currentEgiCount: this.egiCount,
+            //     size: this.size,
+            //     position: this.position
+            // });
 
             this.init();
         }
 
         init() {
-            console.log(`🎯 [CollectionBadge] Autonomous Collection Badge initialized: ${this.uniqueId}`);
+            // console.log(`🎯 [CollectionBadge] Autonomous Collection Badge initialized: ${this.uniqueId}`);
 
             // Ascolta eventi globali di cambio collection
             document.addEventListener('collection-changed', this.handleCollectionChange.bind(this));
@@ -76,7 +76,7 @@ Componente autonomo per il badge della collection con TypeScript integrato
             document.addEventListener('user-logout', this.handleUserLogout.bind(this));
 
             // Auto-refresh dei dati dalla API se necessario
-            console.log(`⏰ [CollectionBadge] Starting periodic updates every 5 seconds for badge: ${this.uniqueId}`);
+            // console.log(`⏰ [CollectionBadge] Starting periodic updates every 5 seconds for badge: ${this.uniqueId}`);
             this.startPeriodicUpdate();
 
             // Gestione click con analytics
@@ -105,13 +105,13 @@ Componente autonomo per il badge della collection con TypeScript integrato
          * Aggiorna il badge con nuovi dati
          */
         updateBadge(collectionId, collectionName, canEdit, egiCount = 0) {
-            console.log('🔄 [CollectionBadge] updateBadge called:', {
-                collectionId,
-                collectionName,
-                canEdit,
-                egiCount,
-                previousCount: this.egiCount
-            });
+            // console.log('🔄 [CollectionBadge] updateBadge called:', {
+            //     collectionId,
+            //     collectionName,
+            //     canEdit,
+            //     egiCount,
+            //     previousCount: this.egiCount
+            // });
 
             this.collectionId = collectionId;
             this.canEdit = canEdit;
@@ -186,7 +186,7 @@ Componente autonomo per il badge della collection con TypeScript integrato
          * Animazione pulso e brillamento quando il conteggio cambia
          */
         pulseAndShine() {
-            console.log('✨ [CollectionBadge] Triggering pulse and shine animation');
+            // console.log('✨ [CollectionBadge] Triggering pulse and shine animation');
 
             if (!this.linkElement) return;
 
@@ -236,10 +236,10 @@ Componente autonomo per il badge della collection con TypeScript integrato
             // Aggiorna ogni 5 secondi per sincronizzare rapidamente con eventuali cambi di conteggio EGI
             setInterval(async () => {
                 try {
-                    console.log('🔄 [CollectionBadge] Fetching collection data...', {
-                        badgeId: this.uniqueId,
-                        endpoint: '/user/preferences/current-collection'
-                    });
+                    // console.log('🔄 [CollectionBadge] Fetching collection data...', {
+                    //     badgeId: this.uniqueId,
+                    //     endpoint: '/user/preferences/current-collection'
+                    // });
 
                     const response = await fetch('/user/preferences/current-collection', {
                         headers: {
@@ -248,25 +248,25 @@ Componente autonomo per il badge della collection con TypeScript integrato
                         }
                     });
 
-                    console.log('📡 [CollectionBadge] Response received:', {
-                        status: response.status,
-                        statusText: response.statusText,
-                        ok: response.ok
-                    });
+                    // console.log('📡 [CollectionBadge] Response received:', {
+                    //     status: response.status,
+                    //     statusText: response.statusText,
+                    //     ok: response.ok
+                    // });
 
                     if (response.ok) {
                         const data = await response.json();
-                        console.log('📦 [CollectionBadge] Data received:', data);
+                        // console.log('📦 [CollectionBadge] Data received:', data);
 
                         if (data.success && data.data) {
                             const oldCount = this.egiCount;
                             const newCount = data.data.egi_count || 0;
 
-                            console.log('🔢 [CollectionBadge] Count comparison:', {
-                                oldCount,
-                                newCount,
-                                changed: oldCount !== newCount
-                            });
+                            // console.log('🔢 [CollectionBadge] Count comparison:', {
+                            //     oldCount,
+                            //     newCount,
+                            //     changed: oldCount !== newCount
+                            // });
 
                             this.updateBadge(
                                 data.data.collection_id || null,

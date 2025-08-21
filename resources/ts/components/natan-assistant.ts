@@ -57,17 +57,17 @@ export class NatanAssistant {
     private dismissTimeout: number | null = null;
 
     constructor() {
-        console.log('🎩 [NATAN BUTLER] Constructor called - versione 3.0.0');
+        //// console.log('🎩 [NATAN BUTLER] Constructor called - versione 3.0.0');
         this.debug('NatanAssistant Butler constructor called');
 
         // hasGreeted serve solo per tracking, NON blocca la visualizzazione
         this.hasGreeted = localStorage.getItem('natan_has_greeted') === 'true';
 
-        console.log('🎩 [NATAN BUTLER] State check:', {
-            hasGreeted: this.hasGreeted,
-            willShowModal: !this.hasGreeted, // SOLO hasGreeted blocca la visualizzazione
-            localStorage_greeted: localStorage.getItem('natan_has_greeted')
-        });
+        //// console.log('🎩 [NATAN BUTLER] State check:', {
+        //     hasGreeted: this.hasGreeted,
+        //     willShowModal: !this.hasGreeted, // SOLO hasGreeted blocca la visualizzazione
+        //     localStorage_greeted: localStorage.getItem('natan_has_greeted')
+        // });
 
         // Ottieni riferimenti DOM principali - cerca prima i nuovi ID con suffisso, poi fallback ai vecchi
         this.toggleButton = document.getElementById('natan-assistant-toggle-desktop') ||
@@ -78,24 +78,24 @@ export class NatanAssistant {
                           document.getElementById('natan-assistant-menu-mobile') ||
                           document.getElementById('natan-assistant-menu'); // fallback per compatibilità
 
-        console.log('🎯 [INIT] Elements search results:', {
-            desktopToggle: !!document.getElementById('natan-assistant-toggle-desktop'),
-            mobileToggle: !!document.getElementById('natan-assistant-toggle-mobile'),
-            oldToggle: !!document.getElementById('natan-assistant-toggle'),
-            desktopMenu: !!document.getElementById('natan-assistant-menu-desktop'),
-            mobileMenu: !!document.getElementById('natan-assistant-menu-mobile'),
-            oldMenu: !!document.getElementById('natan-assistant-menu'),
-            finalToggle: !!this.toggleButton,
-            finalMenu: !!this.menuElement,
-            toggleButtonId: this.toggleButton?.id,
-            menuElementId: this.menuElement?.id,
-            screenWidth: window.innerWidth
-        });
+        //// console.log('🎯 [INIT] Elements search results:', {
+        //     desktopToggle: !!document.getElementById('natan-assistant-toggle-desktop'),
+        //     mobileToggle: !!document.getElementById('natan-assistant-toggle-mobile'),
+        //     oldToggle: !!document.getElementById('natan-assistant-toggle'),
+        //     desktopMenu: !!document.getElementById('natan-assistant-menu-desktop'),
+        //     mobileMenu: !!document.getElementById('natan-assistant-menu-mobile'),
+        //     oldMenu: !!document.getElementById('natan-assistant-menu'),
+        //     finalToggle: !!this.toggleButton,
+        //     finalMenu: !!this.menuElement,
+        //     toggleButtonId: this.toggleButton?.id,
+        //     menuElementId: this.menuElement?.id,
+        //     screenWidth: window.innerWidth
+        // });
 
-        console.log('🎩 [NATAN BUTLER] DOM elements:', {
-            toggleButton: !!this.toggleButton,
-            menuElement: !!this.menuElement
-        });
+        //// console.log('🎩 [NATAN BUTLER] DOM elements:', {
+        //     toggleButton: !!this.toggleButton,
+        //     menuElement: !!this.menuElement
+        // });
 
         if (!this.toggleButton || !this.menuElement) {
             this.debug('ERROR: Critical DOM elements not found', {
@@ -116,7 +116,7 @@ export class NatanAssistant {
             this.createButlerModal();
         }
 
-        console.log('🎩 [NATAN BUTLER] All systems initialized!');
+        //// console.log('🎩 [NATAN BUTLER] All systems initialized!');
 
         // Protezione aggiuntiva per eventi esterni
         document.addEventListener('click', (e) => {
@@ -156,20 +156,20 @@ export class NatanAssistant {
                 this.checkUserHistory();
 
                 // Mostra il maggiordomo di benvenuto (sempre, tranne se dismesso)
-                console.log('🎩 [NATAN BUTLER] Checking conditions for auto-show:', {
-                    hasGreeted: this.hasGreeted,
-                    shouldShow: !this.hasGreeted // Solo il hasGreeted blocca la visualizzazione
-                });
+                //// console.log('🎩 [NATAN BUTLER] Checking conditions for auto-show:', {
+                //     hasGreeted: this.hasGreeted,
+                //     shouldShow: !this.hasGreeted // Solo il hasGreeted blocca la visualizzazione
+                // });
 
                 if (!this.hasGreeted) {
-                    console.log('🎩 [NATAN BUTLER] ✅ Conditions met - Will show butler welcome in 2 seconds');
+                    //// console.log('🎩 [NATAN BUTLER] ✅ Conditions met - Will show butler welcome in 2 seconds');
                     setTimeout(() => {
-                        console.log('🎩 [NATAN BUTLER] 🚀 Executing auto-show now!');
+                        //console.log('🎩 [NATAN BUTLER] 🚀 Executing auto-show now!');
                         this.showButlerWelcome();
                     }, 2000);
                 } else {
-                    console.log('🎩 [NATAN BUTLER] ❌ Conditions NOT met for auto-show');
-                    console.log('🎩 [NATAN BUTLER] - Reason: Butler was dismissed permanently');
+                    //// console.log('🎩 [NATAN BUTLER] ❌ Conditions NOT met for auto-show');
+                    //// console.log('🎩 [NATAN BUTLER] - Reason: Butler was dismissed permanently');
                 }
             }, 1000);
         });
@@ -179,7 +179,7 @@ export class NatanAssistant {
             document.addEventListener('DOMContentLoaded', () => {
                 setTimeout(() => {
                     if (!this.hasGreeted) {
-                        console.log('🎩 [NATAN BUTLER] DOMContentLoaded - Showing butler');
+                        //// console.log('🎩 [NATAN BUTLER] DOMContentLoaded - Showing butler');
                         this.showButlerWelcome();
                     }
                 }, 1000);
@@ -187,7 +187,7 @@ export class NatanAssistant {
         } else if (!this.hasGreeted) {
             // Documento già carico, mostra subito se non dismesso
             setTimeout(() => {
-                console.log('🎩 [NATAN BUTLER] Document already loaded - Showing butler');
+                //// console.log('🎩 [NATAN BUTLER] Document already loaded - Showing butler');
                 this.showButlerWelcome();
             }, 2000);
         }
@@ -234,7 +234,7 @@ export class NatanAssistant {
      */
     private debug(...args: any[]): void {
         if (this.debugMode) {
-            console.log('[🎩 NatanButler]', ...args);
+            //console.log('[🎩 NatanButler]', ...args);
         }
     }
 
@@ -303,7 +303,7 @@ export class NatanAssistant {
         allButtons.forEach(button => {
             if (!button) return;
 
-            console.log('🎯 [SETUP] Adding listener to additional button:', button.id);
+            //console.log('🎯 [SETUP] Adding listener to additional button:', button.id);
 
             button.addEventListener('click', (e: Event) => {
                 const mouseEvent = e as MouseEvent;
@@ -317,16 +317,16 @@ export class NatanAssistant {
                 }
 
                 const targetMenu = document.getElementById(targetMenuId);
-                console.log('🎯 [CLICK] Additional button clicked:', button.id, 'Target menu:', targetMenuId, 'Found:', !!targetMenu);
+                //console.log('🎯 [CLICK] Additional button clicked:', button.id, 'Target menu:', targetMenuId, 'Found:', !!targetMenu);
 
                 if (!targetMenu) {
-                    console.log('🎯 [CLICK] Target menu not found for button:', button.id);
+                    //console.log('🎯 [CLICK] Target menu not found for button:', button.id);
                     return;
                 }
 
                 // Previeni doppi click
                 if (this.isProcessingToggle) {
-                    console.log('🎯 [CLICK] Ignoring click - already processing toggle');
+                    //console.log('🎯 [CLICK] Ignoring click - already processing toggle');
                     mouseEvent.stopImmediatePropagation();
                     mouseEvent.stopPropagation();
                     mouseEvent.preventDefault();
@@ -391,7 +391,7 @@ export class NatanAssistant {
             return;
         }
 
-        console.log('🎯 [TOGGLE] Using menu:', menuToUse.id, 'Screen width:', window.innerWidth);
+        //console.log('🎯 [TOGGLE] Using menu:', menuToUse.id, 'Screen width:', window.innerWidth);
 
         try {
             // Assicurati che non siamo in uno stato incoerente prima di procedere
@@ -1481,13 +1481,13 @@ export class NatanAssistant {
      * @brand-compliant Usa Oro Fiorentino #D4A574, Verde Rinascita #2D5016, Blu Algoritmo #1B365D
      */
     private createButlerModal(): void {
-        console.log('🎩 [NATAN BUTLER] createButlerModal called');
+        //console.log('🎩 [NATAN BUTLER] createButlerModal called');
         this.debug('Creating butler modal with accordion categories');
 
         // Rimuovi eventuali modal esistenti
         const existingModal = document.getElementById('natan-butler-modal');
         if (existingModal) {
-            console.log('🎩 [NATAN BUTLER] Removing existing modal');
+            //console.log('🎩 [NATAN BUTLER] Removing existing modal');
             existingModal.remove();
         }
 
@@ -1651,7 +1651,7 @@ export class NatanAssistant {
         `;
 
         document.body.appendChild(this.butlerModal);
-        console.log('🎩 [NATAN BUTLER] Modal appended to body');
+        //console.log('🎩 [NATAN BUTLER] Modal appended to body');
 
         // Aggiungi event listeners
         this.setupButlerEventListeners();
@@ -1682,7 +1682,7 @@ export class NatanAssistant {
             }
         }, 0);
 
-        console.log('🎩 [NATAN BUTLER] Butler modal created with accordion');
+        //console.log('🎩 [NATAN BUTLER] Butler modal created with accordion');
         this.debug('Butler modal created with accordion categories');
     }
 
@@ -1933,11 +1933,11 @@ export class NatanAssistant {
         localStorage.setItem('natan_assistant_opened', 'true');
 
         // Log dell'azione per analytics
-        console.log('🎩 [NATAN BUTLER] Sub-option action executed:', {
-            category: parentCategory.key,
-            action: actionKey,
-            timestamp: new Date().toISOString()
-        });
+        //console.log('🎩 [NATAN BUTLER] Sub-option action executed:', {
+        //     category: parentCategory.key,
+        //     action: actionKey,
+        //     timestamp: new Date().toISOString()
+        // });
 
         // Esegui l'azione dopo un breve delay per permettere l'animazione di chiusura
         setTimeout(() => {
@@ -1966,9 +1966,9 @@ export class NatanAssistant {
      * Mostra il modal di benvenuto del maggiordomo
      */
     private showButlerWelcome(): void {
-        console.log('🎩 [NATAN BUTLER] showButlerWelcome called');
-        console.log('🎩 [NATAN BUTLER] butlerModal exists:', !!this.butlerModal);
-        console.log('🎩 [NATAN BUTLER] isButlerDismissed:', this.hasGreeted);
+        //console.log('🎩 [NATAN BUTLER] showButlerWelcome called');
+        //console.log('🎩 [NATAN BUTLER] butlerModal exists:', !!this.butlerModal);
+        //console.log('🎩 [NATAN BUTLER] isButlerDismissed:', this.hasGreeted);
 
         if (!this.butlerModal || this.hasGreeted) {
             this.debug('Butler modal not available or dismissed');
@@ -1976,7 +1976,7 @@ export class NatanAssistant {
         }
 
         this.debug('Showing butler welcome modal');
-        console.log('🎩 [NATAN BUTLER] About to show modal');
+        //console.log('🎩 [NATAN BUTLER] About to show modal');
 
         // FORZA BRUTALMENTE la visualizzazione del modal
         this.butlerModal.className = 'natan-butler-modal-visible';
@@ -2000,31 +2000,31 @@ export class NatanAssistant {
             pointer-events: auto !important;
         `;
 
-        console.log('🎩 [NATAN BUTLER] Modal should now be visible');
-        console.log('🎩 [NATAN BUTLER] Modal classes:', this.butlerModal.className);
-        console.log('🎩 [NATAN BUTLER] Modal display:', this.butlerModal.style.display);
+        //console.log('🎩 [NATAN BUTLER] Modal should now be visible');
+        //console.log('🎩 [NATAN BUTLER] Modal classes:', this.butlerModal.className);
+        //console.log('🎩 [NATAN BUTLER] Modal display:', this.butlerModal.style.display);
 
         // DEBUG AGGRESSIVO: Verifica che il modal sia effettivamente visibile
         setTimeout(() => {
             const modalElement = document.getElementById('natan-butler-modal');
             if (modalElement) {
                 const computedStyle = window.getComputedStyle(modalElement);
-                console.log('🎩 [NATAN BUTLER] DEBUG Computed styles:');
-                console.log('- display:', computedStyle.display);
-                console.log('- visibility:', computedStyle.visibility);
-                console.log('- opacity:', computedStyle.opacity);
-                console.log('- z-index:', computedStyle.zIndex);
-                console.log('- position:', computedStyle.position);
-                console.log('- width:', computedStyle.width);
-                console.log('- height:', computedStyle.height);
-                console.log('🎩 [NATAN BUTLER] Modal rect:', modalElement.getBoundingClientRect());
+                //console.log('🎩 [NATAN BUTLER] DEBUG Computed styles:');
+                //console.log('- display:', computedStyle.display);
+                //console.log('- visibility:', computedStyle.visibility);
+                //console.log('- opacity:', computedStyle.opacity);
+                //console.log('- z-index:', computedStyle.zIndex);
+                //console.log('- position:', computedStyle.position);
+                //console.log('- width:', computedStyle.width);
+                //console.log('- height:', computedStyle.height);
+                //console.log('🎩 [NATAN BUTLER] Modal rect:', modalElement.getBoundingClientRect());
             }
         }, 100);
 
         // Anima l'entrata
         const container = this.butlerModal.querySelector('.natan-butler-container');
         if (container) {
-            console.log('🎩 [NATAN BUTLER] Container found, animating');
+            //console.log('🎩 [NATAN BUTLER] Container found, animating');
             (container as HTMLElement).style.transform = 'scale(0.9)';
             (container as HTMLElement).style.opacity = '0';
 
@@ -2032,10 +2032,10 @@ export class NatanAssistant {
                 (container as HTMLElement).style.transition = 'all 0.3s ease-out';
                 (container as HTMLElement).style.transform = 'scale(1)';
                 (container as HTMLElement).style.opacity = '1';
-                console.log('🎩 [NATAN BUTLER] Animation applied');
+                //console.log('🎩 [NATAN BUTLER] Animation applied');
             }, 50);
         } else {
-            console.log('🎩 [NATAN BUTLER] ERROR: Container not found!');
+            //console.log('🎩 [NATAN BUTLER] ERROR: Container not found!');
         }
 
         // Anima il testo di benvenuto
@@ -2052,7 +2052,7 @@ export class NatanAssistant {
 
         // Auto-nascondi dopo 60 secondi se non interagisce (aumentato da 30s)
         this.dismissTimeout = window.setTimeout(() => {
-            console.log('🎩 [NATAN BUTLER] Auto-dismissing modal after 60 seconds');
+            //console.log('🎩 [NATAN BUTLER] Auto-dismissing modal after 60 seconds');
             this.hideButlerModal();
         }, 60000);
     }
@@ -2063,7 +2063,7 @@ export class NatanAssistant {
     private hideButlerModal(): void {
         if (!this.butlerModal) return;
 
-        console.log('🎩 [NATAN BUTLER] Hiding butler modal');
+        //console.log('🎩 [NATAN BUTLER] Hiding butler modal');
         this.debug('Hiding butler modal');
 
         // Cancella timeout di auto-dismiss
@@ -2092,7 +2092,7 @@ export class NatanAssistant {
                 // Aggiungi anche la classe hidden per sicurezza
                 this.butlerModal.classList.add('hidden');
 
-                console.log('🎩 [NATAN BUTLER] Modal completely hidden');
+                //console.log('🎩 [NATAN BUTLER] Modal completely hidden');
                 this.debug('Butler modal completely hidden and page interaction restored');
             }
         }, 200);
@@ -2114,7 +2114,7 @@ export class NatanAssistant {
      * Gestisce le azioni del maggiordomo
      */
     private handleButlerAction(action: string): void {
-        console.log('🎩 [NATAN BUTLER] Butler action selected:', action);
+        //console.log('🎩 [NATAN BUTLER] Butler action selected:', action);
         this.debug('Butler action selected:', action);
 
         // Nascondi il modal
@@ -2123,13 +2123,13 @@ export class NatanAssistant {
         // Esegui l'azione appropriata
         switch (action) {
             case 'explore':
-                console.log('🎩 [NATAN BUTLER] Navigating to collections page');
+                //console.log('🎩 [NATAN BUTLER] Navigating to collections page');
                 // Naviga alla pagina delle collezioni
                 window.location.href = '/home/collections';
                 break;
 
             case 'learn':
-                console.log('🎩 [NATAN BUTLER] Showing impact information');
+                //console.log('🎩 [NATAN BUTLER] Showing impact information');
                 // Scrolla alla sezione impatto o stats
                 const impactSection = document.querySelector('.nft-stats-section');
                 if (impactSection) {
@@ -2139,18 +2139,18 @@ export class NatanAssistant {
                     }, 1000);
                 } else {
                     // Se non c'è la sezione, naviga a una pagina informativa
-                    console.log('🎩 [NATAN BUTLER] Impact section not found, could navigate to info page');
+                    //console.log('🎩 [NATAN BUTLER] Impact section not found, could navigate to info page');
                 }
                 break;
 
             case 'start':
-                console.log('🎩 [NATAN BUTLER] Highlighting registration options');
+                //console.log('🎩 [NATAN BUTLER] Highlighting registration options');
                 // Spotlight sui pulsanti di registrazione
                 this.spotlight('#register-link-desktop, #register-link-mobile', 4000);
                 break;
 
             case 'business':
-                console.log('🎩 [NATAN BUTLER] Showing business opportunities');
+                //console.log('🎩 [NATAN BUTLER] Showing business opportunities');
                 // Scrolla alla sezione creator
                 const creatorSection = document.querySelector('section[aria-labelledby="creator-cta-heading"]');
                 if (creatorSection) {
@@ -2160,12 +2160,12 @@ export class NatanAssistant {
                     }, 1000);
                 } else {
                     // Se non c'è la sezione, potremmo navigare a una pagina dedicata
-                    console.log('🎩 [NATAN BUTLER] Creator section not found, could navigate to business page');
+                    //console.log('🎩 [NATAN BUTLER] Creator section not found, could navigate to business page');
                 }
                 break;
 
             default:
-                console.log('🎩 [NATAN BUTLER] Unknown action:', action);
+                //console.log('🎩 [NATAN BUTLER] Unknown action:', action);
         }
 
         // Segna che l'utente ha interagito con il maggiordomo
@@ -2185,7 +2185,7 @@ export class NatanAssistant {
      * Reset completo del maggiordomo (utile per testing)
      */
     public async resetButler(): Promise<void> {
-        console.log('🎩 [NATAN BUTLER] Resetting butler state');
+        //console.log('🎩 [NATAN BUTLER] Resetting butler state');
         this.debug('Resetting butler state');
 
         localStorage.removeItem('natan_has_greeted');
@@ -2193,7 +2193,7 @@ export class NatanAssistant {
 
         this.hasGreeted = false;
 
-        console.log('🎩 [NATAN BUTLER] Butler state reset. Reload page to see modal automatically.');
+        //console.log('🎩 [NATAN BUTLER] Butler state reset. Reload page to see modal automatically.');
 
         // Rimostra il maggiordomo dopo 2 secondi
         setTimeout(async () => {
@@ -2206,12 +2206,12 @@ export class NatanAssistant {
      * Funzione combinata per test completo e debug
      */
     public testButler(): void {
-        console.log('🎩 [NATAN BUTLER] === COMPLETE BUTLER TEST ===');
-        console.log('Current state:', {
-            hasGreeted: this.hasGreeted,
-            butlerModal: !!this.butlerModal,
-            localStorage_greeted: localStorage.getItem('natan_has_greeted')
-        });
+        //console.log('🎩 [NATAN BUTLER] === COMPLETE BUTLER TEST ===');
+        //console.log('Current state:', {
+        //     hasGreeted: this.hasGreeted,
+        //     butlerModal: !!this.butlerModal,
+        //     localStorage_greeted: localStorage.getItem('natan_has_greeted')
+        // });
 
         // Reset stato e forza visualizzazione
         this.resetButler();
@@ -2221,7 +2221,7 @@ export class NatanAssistant {
      * Mostra il maggiordomo anche se già salutato (per test)
      */
     public async showButlerManually(): Promise<void> {
-        console.log('🎩 [NATAN BUTLER] showButlerManually called');
+        //console.log('🎩 [NATAN BUTLER] showButlerManually called');
         this.debug('Showing butler manually');
 
         // Se il modal non esiste, crealo
@@ -2239,7 +2239,7 @@ export class NatanAssistant {
      * Forza la creazione e visualizzazione immediata del modal (SUPER DEBUG)
      */
     public async forceShowModal(): Promise<void> {
-        console.log('🎩 [NATAN BUTLER] FORCE SHOW MODAL - Creating modal from scratch');
+        //console.log('🎩 [NATAN BUTLER] FORCE SHOW MODAL - Creating modal from scratch');
 
         // Rimuovi qualsiasi modal esistente
         const existing = document.getElementById('natan-butler-modal');
@@ -2258,24 +2258,24 @@ export class NatanAssistant {
 
 // Funzione per generare dinamicamente i bottoni delle opzioni nella modale
 function renderAssistantOptions() {
-    console.log('🎯 [RENDER OPTIONS] renderAssistantOptions called - Screen width:', window.innerWidth);
+    //console.log('🎯 [RENDER OPTIONS] renderAssistantOptions called - Screen width:', window.innerWidth);
 
     // Cerca entrambi i menu (desktop e mobile)
     const desktopMenu = document.getElementById('natan-assistant-menu-desktop');
     const mobileMenu = document.getElementById('natan-assistant-menu-mobile');
     const oldMenu = document.getElementById('natan-assistant-menu'); // fallback
 
-    console.log('🎯 [RENDER OPTIONS] Menu search results:', {
-        desktopMenu: !!desktopMenu,
-        mobileMenu: !!mobileMenu,
-        oldMenu: !!oldMenu,
-        screenWidth: window.innerWidth
-    });
+    //console.log('🎯 [RENDER OPTIONS] Menu search results:', {
+    //     desktopMenu: !!desktopMenu,
+    //     mobileMenu: !!mobileMenu,
+    //     oldMenu: !!oldMenu,
+    //     screenWidth: window.innerWidth
+    // });
 
     const allMenus = [desktopMenu, mobileMenu, oldMenu].filter(menu => menu !== null);
 
     if (allMenus.length === 0) {
-        console.log('🎯 [RENDER OPTIONS] No menu elements found');
+        //console.log('🎯 [RENDER OPTIONS] No menu elements found');
         return;
     }
 
@@ -2285,7 +2285,7 @@ function renderAssistantOptions() {
     let config;
     try {
         config = getAppConfig();
-        console.log('🎯 [RENDER OPTIONS] Config loaded successfully');
+        //console.log('🎯 [RENDER OPTIONS] Config loaded successfully');
     } catch (error) {
         console.warn('🎯 [RENDER OPTIONS] App config not loaded yet, cannot render assistant options', error);
         return;
@@ -2323,7 +2323,7 @@ function renderAssistantOptions() {
         console.log(`🎯 [RENDER OPTIONS] Completed ${menuType} menu - total buttons:`, menu.children.length);
     });
 
-    console.log('🎯 [RENDER OPTIONS] All menus processed successfully');
+    //console.log('🎯 [RENDER OPTIONS] All menus processed successfully');
 }
 
 // Chiamata al render dopo il caricamento della pagina

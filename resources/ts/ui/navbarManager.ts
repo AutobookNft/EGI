@@ -28,10 +28,9 @@ import { UEM_Client_TS_Placeholder as UEM } from '../services/uemClientService';
  * @param {typeof DOMElements} DOM Collezione dei riferimenti agli elementi DOM.
  */
 export function updateNavbarUI(config: AppConfig, DOM: typeof DOMElements, uem: typeof UEM): void {
-    console.log('--- DEBUG NAVBAR_MANAGER: Funzione updateNavbarUI chiamata. Ispeziono il parametro uem ricevuto:', uem); // <-- AGGIUNGI QUESTO
-
-    console.log('🔄 updateNavbarUI called with auth status:', getAuthStatus(config));
-    console.log('🔄 config.isAuthenticatedByBackend:', config.isAuthenticated);
+    // console.log('--- DEBUG NAVBAR_MANAGER: Funzione updateNavbarUI chiamata. Ispeziono il parametro uem ricevuto:', uem); // <-- AGGIUNGI QUESTO
+    // console.log('🔄 updateNavbarUI called with auth status:', getAuthStatus(config));
+    // console.log('🔄 config.isAuthenticatedByBackend:', config.isAuthenticated);
 
 
     const authStatus = getAuthStatus(config);
@@ -141,7 +140,7 @@ export function updateNavbarUI(config: AppConfig, DOM: typeof DOMElements, uem: 
     } else {
         console.warn("Padmin NavbarManager: Core DOM elements for Collection List/Generic Links not all found. UI may be inconsistent.");
     }
-        console.log(`Padmin NavbarManager: UI Updated. Auth Status: ${authStatus}`);
+        // console.log(`Padmin NavbarManager: UI Updated. Auth Status: ${authStatus}`);
 
     initButlerMenuButton();
 }

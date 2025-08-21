@@ -19,7 +19,7 @@ export default class Notification {
         this.options = options || { apiBaseUrl: '/notifications' };
         this.handlersCache = new Map();
         this.processingNotifications = {};
-        console.log(`🔍 Inizializzazione unica Notification: options ${JSON.stringify(this.options)}`);
+        // // console.log(`🔍 Inizializzazione unica Notification: options ${JSON.stringify(this.options)}`);
         this.initialize();
         notificationInstance = this;
         return this;
@@ -43,7 +43,7 @@ export default class Notification {
             if (typeof handler.initialize === 'function') {
                 try {
                     await handler.initialize();
-                    console.log(`Handler per ${payload} inizializzato`);
+                    // console.log(`Handler per ${payload} inizializzato`);
                 } catch (error) {
                     console.error(`Errore inizializzazione handler per ${payload}:`, error);
                     return null;
@@ -52,7 +52,7 @@ export default class Notification {
 
             // ✅ CACHA SEMPRE, ANCHE SENZA initialize()
             this.handlersCache.set(payload, handler);
-            console.log(`Handler per ${payload} cachato`);
+            // // console.log(`Handler per ${payload} cachato`);
         }
 
         return this.handlersCache.get(payload);
@@ -67,7 +67,7 @@ export default class Notification {
             const timestamp = performance.now(); // Microsecondi per maggiore precisione
             const clickId = clickCounter++; // Incrementa il contatore prima di usarlo
 
-            console.log(`🔔 Evento click all'inizio di bindEvents catturato alle ${new Date().toISOString()}, ID: ${clickCounter++}, target: ${e.target.tagName}.${e.target.className}, timestamp: ${timestamp.toFixed(3)}ms`);
+            // // console.log(`🔔 Evento click all'inizio di bindEvents catturato alle ${new Date().toISOString()}, ID: ${clickCounter++}, target: ${e.target.tagName}.${e.target.className}, timestamp: ${timestamp.toFixed(3)}ms`);
 
             const btn = e.target.closest('.response-btn, .archive-btn, .reject-btn, .invitation-response-btn, .invitation-reject-btn, .invitation-archive-btn');
             if (btn) {
@@ -104,7 +104,7 @@ export default class Notification {
                 }
                 this.processingNotifications[notificationId] = true;
 
-                console.log(`🔘 Pulsante trovato: ${btn.dataset.action} per notifica ${notificationId}, click ID: ${clickId}`);
+                // console.log(`🔘 Pulsante trovato: ${btn.dataset.action} per notifica ${notificationId}, click ID: ${clickId}`);
 
                 try {
                     await this.handleActionClick(btn);
@@ -143,7 +143,7 @@ export default class Notification {
                     return; // Ignora se ci sono duplicati
                 }
 
-                console.log(`🔍 Thumbnail trovata: notifica ${notificationId}, click ID: ${clickId}`);
+                // console.log(`🔍 Thumbnail trovata: notifica ${notificationId}, click ID: ${clickId}`);
                 try {
                     await this.handleThumbnailClick(thumbnail);
                 } catch (error) {
@@ -151,7 +151,7 @@ export default class Notification {
                 }
             }
 
-            console.log(`🔔 Evento alla fine di bindEventscatturato alle ${new Date().toISOString()}, ID: ${clickCounter++}, target: ${e.target.tagName}.${e.target.className}, timestamp: ${timestamp.toFixed(3)}ms`);
+            // console.log(`🔔 Evento alla fine di bindEventscatturato alle ${new Date().toISOString()}, ID: ${clickCounter++}, target: ${e.target.tagName}.${e.target.className}, timestamp: ${timestamp.toFixed(3)}ms`);
         });
     }
 
@@ -179,7 +179,7 @@ export default class Notification {
             return;
         }
 
-        console.log(`🔘 Inizio azione ${action} per notifica ${notificationId} con payload ${payload}`);
+        // console.log(`🔘 Inizio azione ${action} per notifica ${notificationId} con payload ${payload}`);
 
         const actionRequest = new NotificationActionRequest({
             action: action,
@@ -261,7 +261,7 @@ export default class Notification {
             }
 
             if (typeof isPendingStatus === 'function' && isPendingStatus(thumbnail.dataset.status) && diffHours >= (expirationHours - 5)) {
-                console.log(`🟡 La notifica ${thumbnail.dataset.notificationId} è quasi scaduta!`);
+                // console.log(`🟡 La notifica ${thumbnail.dataset.notificationId} è quasi scaduta!`);
                 const remainingHours = Math.ceil(expirationHours - diffHours);
                 setTimeout(() => {
                     if (warningTooltip) {
@@ -299,7 +299,7 @@ export default class Notification {
             }, 10);
 
             // Delay aumentato a 4000ms per maggiore stabilità, con verifica DOM
-            console.log(`🔄 Inizio verifica DOM e reload per notifica ${notificationId} dopo 4000ms`);
+            // console.log(`🔄 Inizio verifica DOM e reload per notifica ${notificationId} dopo 4000ms`);
             setTimeout(() => {
                 const duplicateBtns = document.querySelectorAll(`.invitation-response-btn[data-notification-id="${notificationId}"]`).length > 1;
                 if (duplicateBtns) {
@@ -307,7 +307,7 @@ export default class Notification {
                     return;
                 }
                 this.reloadNotificationList();
-                console.log(`🔄 Reload completato per notifica ${notificationId}`);
+                // console.log(`🔄 Reload completato per notifica ${notificationId}`);
             }, 4000);
         } else {
             console.error('Container dettagli non trovato');
@@ -337,7 +337,7 @@ export default class Notification {
                 this.bindEvents(); // Ri-lega eventi a pulsanti e thumbnail
                 this.highlightAllNotifications(); // Ricolora le thumbnail
                 const thumbnailCount = document.querySelectorAll('.notification-thumbnail').length;
-                console.log(`🔄 Ricaricamento completato, thumbnail rilegate: ${thumbnailCount}`);
+                // console.log(`🔄 Ricaricamento completato, thumbnail rilegate: ${thumbnailCount}`);
             } else {
                 console.error('Container notifiche non trovato');
             }

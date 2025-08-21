@@ -272,6 +272,7 @@ class AppConfigController extends Controller {
                 // Route per like/unlike
                 'toggleCollectionLike' => route('api.toggle.collection.like', ['collectionId' => ':collection->id']),
                 'toggleEgiLike' => route('api.toggle.egi.like', ['egi' => ':egi']),
+                'currencyAlgoExchangeRate' => route('api.currency.algo-exchange-rate'),
 
                 // Aggiungi qui altre route API future
             ],

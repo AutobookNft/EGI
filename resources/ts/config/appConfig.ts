@@ -156,7 +156,7 @@ async function loadAppConfigFromAPI(): Promise<AppConfig> {
     const config = fullResponse.AppConfig as AppConfig;
     // -------------------------
 
-    console.log('Padmin Config: Application configuration loaded and extracted successfully.');
+    //console.log('Padmin Config: Application configuration loaded and extracted successfully.');
     return config; // Ora restituiamo l'oggetto con la forma corretta
 }
 
@@ -202,7 +202,7 @@ export function getAppConfig(): AppConfig {
     if (!loadedConfig) {
         throw new Error('App configuration not initialized. Call initializeAppConfig() first.');
     }
-    // console.log('Padmin Config: translations called with key:', 'getAppConfig');
+    //// console.log('Padmin Config: translations called with key:', 'getAppConfig');
     return loadedConfig;
 }
 
@@ -276,7 +276,7 @@ export function appTranslate(
             }
         }
 
-        // console.log('Padmin Config: translations called with key:', translatedString);
+        //// console.log('Padmin Config: translations called with key:', translatedString);
 
         return translatedString;
     } catch (error) {
@@ -310,6 +310,7 @@ export function route(
             'api.my-reservations': 'myReservations',
             'api.toggle.collection.like': 'toggleCollectionLike',
             'api.toggle.egi.like': 'toggleEgiLike',
+            'api.currency.algo-exchange-rate': 'currencyAlgoExchangeRate',
 
             // Aggiungi altre mappature qui secondo necessità
         };
@@ -448,7 +449,7 @@ function loadAndParseAppConfig(): AppConfig {
             parsedConfig.routes.api.baseUrl = parsedConfig.routes.baseUrl;
             console.warn("Padmin Config: `routes.api.baseUrl` not found in #app-config, defaulting to main `routes.baseUrl` for API calls. Adjust if API has a different base.");
         }
-        console.log("Padmin Config: Application configuration parsed successfully from #app-config.");
+        //console.log("Padmin Config: Application configuration parsed successfully from #app-config.");
         return parsedConfig;
     } catch (e: any) {
         const parseErrorMessage = 'FATAL: Failed to parse application configuration JSON from #app-config. Invalid JSON structure or content.';

@@ -114,11 +114,11 @@ $instanceId = uniqid();
 
     // Aggiorna le statistiche globali
     function updateGlobalStats() {
-        console.log('Aggiornamento statistiche globali desktop...'); // Debug
+        // console.log('Aggiornamento statistiche globali desktop...'); // Debug
         fetch('/api/stats/global')
             .then(response => response.json())
             .then(data => {
-                console.log('Dati ricevuti:', data); // Debug
+                // console.log('Dati ricevuti:', data); // Debug
                 if (data.success && data.formatted) {
                     // Aggiorna i valori con i dati formattati e aggiungi effetto brillamento
                     const volumeElement = document.getElementById('statVolume_' + instanceId);
@@ -131,7 +131,7 @@ $instanceId = uniqid();
                     // Funzione per aggiungere effetto brillamento
                     function addShineEffect(element, newValue) {
                         if (element && element.textContent !== newValue) {
-                            console.log('Aggiornamento valore:', element.id, 'da', element.textContent, 'a', newValue); // Debug
+                            // console.log('Aggiornamento valore:', element.id, 'da', element.textContent, 'a', newValue); // Debug
                             element.textContent = newValue;
                             element.style.transition = 'all 0.3s ease';
                             element.style.transform = 'scale(1.05)';

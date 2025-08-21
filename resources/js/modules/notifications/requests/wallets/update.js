@@ -55,7 +55,7 @@ export class RequestUpdateNotificationWallet {
             });
 
             if (result.isConfirmed) {
-                console.log("✅ Dati ricevuti da Swal:", result.value);
+                // console.log("✅ Dati ricevuti da Swal:", result.value);
                 await this.handleUpdateWallet(result.value);
             }
         } catch (error) {

@@ -182,12 +182,12 @@ export function confirmDOMReferencesLoaded(): void {
         // Aggiungi altri se necessario
     ];
     // console.log('Padmin D. Curtis: Confirming critical DOM references post-initialization...');
-    console.log('🔍 [DEBUG] Checking logout form:', logoutFormEl); // Temporaneo debug
+    // console.log('🔍 [DEBUG] Checking logout form:', logoutFormEl); // Temporaneo debug
     criticalElements.forEach(item => {
         if (!item.element || (item.element instanceof NodeList && item.element.length === 0)) {
             console.warn(`DOMElementReferences Check: Critical element "${item.name}" NOT FOUND or empty.`);
         } else if (item.name === 'logoutFormEl') {
-            console.log(`✅ [DEBUG] ${item.name} found:`, item.element);
+            // console.log(`✅ [DEBUG] ${item.name} found:`, item.element);
         }
     });
 }

@@ -46,7 +46,7 @@ Route::prefix('currency')->name('api.currency.')->group(function () {
 
     // Legacy route per retrocompatibilità
     Route::get('/algo-exchange-rate', [App\Http\Controllers\Api\CurrencyController::class, 'getAlgoExchangeRate'])
-        ->name('legacy.algo-rate');
+        ->name('algo-exchange-rate');
 });
 
 // === PROTECTED Legacy Currency Route (for authenticated users) ===

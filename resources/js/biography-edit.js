@@ -1,10 +1,10 @@
-console.log('🚀 Biography Edit JS caricato');
+//console.log('🚀 Biography Edit JS caricato');
 
 document.addEventListener('DOMContentLoaded', function() {
     // DEBUG: log bottoni tab trovati
     const tabButtons = document.querySelectorAll('.tab-button');
-    console.log('DEBUG: trovati', tabButtons.length, 'tab-button');
-    tabButtons.forEach((btn, i) => console.log('DEBUG: tab', i, btn.dataset.tab));
+    //console.log('DEBUG: trovati', tabButtons.length, 'tab-button');
+    //tabButtons.forEach((btn, i) => console.log('DEBUG: tab', i, btn.dataset.tab));
 
     const tabIds = ['basic-tab', 'media-tab', 'settings-tab'];
     const tabContents = tabIds.map(id => document.getElementById(id));
@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (trixEditor && hiddenInput) {
                 // USA innerHTML per mantenere la formattazione HTML
                 hiddenInput.value = trixEditor.innerHTML;
-                console.log('📝 Contenuto HTML sincronizzato:', trixEditor.innerHTML);
+                //console.log('📝 Contenuto HTML sincronizzato:', trixEditor.innerHTML);
             }
         });
     }
@@ -43,18 +43,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Event delegation per i bottoni di eliminazione immagini
     document.addEventListener('click', function(e) {
-        console.log('🖱️ Click rilevato su:', e.target);
-        console.log('🏷️ Classi target:', e.target.classList?.toString());
+        //console.log('🖱️ Click rilevato su:', e.target);
+        //console.log('🏷️ Classi target:', e.target.classList?.toString());
 
         // Controlla se è un bottone di eliminazione immagine biografia
         const deleteButton = e.target.closest('.btn-delete-image');
         if (deleteButton) {
-            console.log('✅ Bottone eliminazione immagine biografia cliccato!');
+            //console.log('✅ Bottone eliminazione immagine biografia cliccato!');
             const mediaId = deleteButton.getAttribute('data-media-id');
-            console.log('🆔 Media ID:', mediaId);
+            //console.log('🆔 Media ID:', mediaId);
 
             if (mediaId) {
-                console.log('🚀 Chiamando window.removeImage...');
+                //console.log('🚀 Chiamando window.removeImage...');
                 window.removeImage(mediaId);
             } else {
                 console.error('❌ Media ID non trovato!');
@@ -65,13 +65,13 @@ document.addEventListener('DOMContentLoaded', function() {
         // Controlla se è un bottone di eliminazione immagine capitolo
         const deleteChapterImageButton = e.target.closest('.btn-delete-chapter-image');
         if (deleteChapterImageButton) {
-            console.log('✅ Bottone eliminazione immagine capitolo cliccato!');
+            //console.log('✅ Bottone eliminazione immagine capitolo cliccato!');
             const mediaId = deleteChapterImageButton.getAttribute('data-media-id');
             const chapterId = deleteChapterImageButton.getAttribute('data-chapter-id');
-            console.log('🆔 Media ID:', mediaId, 'Chapter ID:', chapterId);
+            //console.log('🆔 Media ID:', mediaId, 'Chapter ID:', chapterId);
 
             if (mediaId && chapterId) {
-                console.log('🚀 Chiamando window.removeChapterImage...');
+                //console.log('🚀 Chiamando window.removeChapterImage...');
                 window.removeChapterImage(chapterId, mediaId);
             } else {
                 console.error('❌ Media ID o Chapter ID non trovato!');
@@ -79,7 +79,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        console.log('ℹ️ Click non su bottoni eliminazione');
+        //console.log('ℹ️ Click non su bottoni eliminazione');
     });    // Inizializza contatore caratteri
     initializeCharacterCounter();
 
@@ -283,9 +283,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 date_to
             });
 
-            console.log('Content being sent:', content);
-            console.log('Content length:', content.length);
-            console.log('Has HTML tags:', /<[^>]*>/g.test(content));
+            //console.log('Content being sent:', content);
+            //console.log('Content length:', content.length);
+            //console.log('Has HTML tags:', /<[^>]*>/g.test(content));
 
             const response = await fetch(url, {
                 method,
@@ -300,14 +300,14 @@ document.addEventListener('DOMContentLoaded', function() {
             const result = await response.json();
             if (!result.success) throw new Error(result.message || 'Errore salvataggio capitolo');
 
-            console.log('✅ Capitolo salvato:', result.data);
+            //console.log('✅ Capitolo salvato:', result.data);
 
             if (isEdit) updateChapterInList(result.data); else appendChapterToList(result.data);
 
             // Upload media se selezionati
             const mediaInput = document.getElementById('chapter-media-input');
             if (mediaInput && mediaInput.files.length > 0) {
-                console.log('📁 File selezionati per upload:', mediaInput.files.length);
+                //console.log('📁 File selezionati per upload:', mediaInput.files.length);
                 if (result.data && result.data.id) {
                     // CHIUDI LA MODALE PRIMA dell'upload per vedere l'animazione
                     closeChapterModal();
@@ -341,7 +341,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // === Funzione upload immagini capitolo ===
     async function uploadChapterImages(chapterId, files) {
-        console.log(`🚀 Inizio upload sequenziale per ${files.length} file...`);
+        //console.log(`🚀 Inizio upload sequenziale per ${files.length} file...`);
 
         // Mostra indicatore di elaborazione
         showProcessingIndicator(chapterId, `Caricamento di ${files.length} immagini...`);
@@ -352,7 +352,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
-            console.log(`📤 Caricando file ${i+1}/${files.length}: ${file.name}`);
+            //console.log(`📤 Caricando file ${i+1}/${files.length}: ${file.name}`);
 
             // Aggiorna indicatore per file specifico
             showProcessingIndicator(chapterId, `Caricamento ${i+1}/${files.length}: ${file.name}`);
@@ -378,7 +378,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     throw new Error(result.message || `Errore durante l'upload di ${file.name}`);
                 }
 
-                console.log(`✅ ${file.name} caricato con successo.`);
+                //console.log(`✅ ${file.name} caricato con successo.`);
                 finalGallery.push(...result.gallery);
                 successCount++;
 
@@ -388,11 +388,11 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
 
-        console.log('✅ Upload sequenziale completato.', { successCount, errorCount });
+        //console.log('✅ Upload sequenziale completato.', { successCount, errorCount });
 
         // Aggiorna automaticamente il capitolo nella lista se ci sono stati upload riusciti
         if (successCount > 0) {
-            console.log('🔄 Aggiornamento automatico del capitolo...');
+            //console.log('🔄 Aggiornamento automatico del capitolo...');
             showProcessingIndicator(chapterId, `✨ Elaborazione di ${successCount} nuove immagini...`);
             await updateChapterWithPolling(chapterId, successCount);
         } else {
@@ -405,20 +405,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // === Funzione per aggiornare il capitolo con polling ===
     async function updateChapterWithPolling(chapterId, expectedNewImages = 1, maxAttempts = 10, delay = 2000) {
-        console.log(`🔄 Iniziando polling per capitolo ${chapterId}, aspettando ${expectedNewImages} nuove immagini...`);
+        //console.log(`🔄 Iniziando polling per capitolo ${chapterId}, aspettando ${expectedNewImages} nuove immagini...`);
 
         // Ottieni lo stato attuale prima del polling
         const initialChapter = await fetchChapter(chapterId);
         const initialMediaCount = initialChapter?.media ? initialChapter.media.length : 0;
         const targetMediaCount = initialMediaCount; // In realtà dovremmo conoscere il numero precedente + le nuove
 
-        console.log(`📊 Stato iniziale: ${initialMediaCount} immagini`);
+        //console.log(`📊 Stato iniziale: ${initialMediaCount} immagini`);
 
         let attempts = 0;
 
         while (attempts < maxAttempts) {
             attempts++;
-            console.log(`🔍 Tentativo ${attempts}/${maxAttempts} - Verificando elaborazione nuove immagini...`);
+            //console.log(`🔍 Tentativo ${attempts}/${maxAttempts} - Verificando elaborazione nuove immagini...`);
 
             // Aggiorna indicatore con tentativo corrente
             showProcessingIndicator(chapterId, `🔍 Verifica elaborazione nuove immagini... (${attempts}/${maxAttempts})`);
@@ -433,7 +433,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
 
                 const currentMediaCount = updatedChapter.media ? updatedChapter.media.length : 0;
-                console.log(`📊 Media count attuale: ${currentMediaCount}`);
+                //console.log(`📊 Media count attuale: ${currentMediaCount}`);
 
                 // Controlla se ci sono media e se hanno tutti le thumbnail processate
                 if (currentMediaCount > 0) {
@@ -442,19 +442,19 @@ document.addEventListener('DOMContentLoaded', function() {
                     const allRecentProcessed = recentMedia.every(media => {
                         const hasThumb = media.thumb_url || media.url;
                         const isProcessed = media.thumb_url !== null;
-                        console.log(`🖼️ Media ${media.id}: hasThumb=${!!hasThumb}, isProcessed=${isProcessed}`);
+                        //console.log(`🖼️ Media ${media.id}: hasThumb=${!!hasThumb}, isProcessed=${isProcessed}`);
                         return hasThumb;
                     });
 
                     if (allRecentProcessed) {
-                        console.log('✅ Tutte le nuove immagini sono state elaborate!');
+                        //console.log('✅ Tutte le nuove immagini sono state elaborate!');
                         hideProcessingIndicator(chapterId);
 
                         // REFRESH COMPLETO per assicurarsi che tutte le immagini siano visibili
                         showSuccess(`✅ ${expectedNewImages} nuove immagini elaborate! Ricaricamento pagina...`);
 
                         setTimeout(() => {
-                            console.log('🔄 Ricaricamento pagina per mostrare le nuove immagini elaborate...');
+                            //console.log('🔄 Ricaricamento pagina per mostrare le nuove immagini elaborate...');
                             window.location.reload();
                         }, 1000);
 
@@ -467,7 +467,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // Attesa prima del prossimo tentativo
                 if (attempts < maxAttempts) {
-                    console.log(`⏳ Attesa di ${delay}ms prima del prossimo controllo...`);
+                    //console.log(`⏳ Attesa di ${delay}ms prima del prossimo controllo...`);
                     await new Promise(resolve => setTimeout(resolve, delay));
                 }
 
@@ -480,7 +480,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Anche se il polling fallisce, facciamo un refresh per vedere eventuali immagini caricate
                     showSuccess('⚠️ Elaborazione completata. Ricaricamento pagina...');
                     setTimeout(() => {
-                        console.log('🔄 Ricaricamento pagina dopo timeout polling...');
+                        //console.log('🔄 Ricaricamento pagina dopo timeout polling...');
                         window.location.reload();
                     }, 1500);
 
@@ -496,7 +496,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Refresh anche quando raggiungiamo il massimo dei tentativi
             showSuccess('⚠️ Elaborazione completata. Ricaricamento pagina...');
             setTimeout(() => {
-                console.log('🔄 Ricaricamento pagina dopo massimo tentativi...');
+                //console.log('🔄 Ricaricamento pagina dopo massimo tentativi...');
                 window.location.reload();
             }, 1500);
         }
@@ -615,7 +615,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function initializeTabs() {
-    console.log('🔧 Configurando tabs...');
+    //console.log('🔧 Configurando tabs...');
 
     const tabButtons = document.querySelectorAll('.tab-button');
     const tabContents = [
@@ -648,7 +648,7 @@ function initializeTabs() {
 }
 
 function initializeTrixEditor() {
-    console.log('🔧 Configurando Trix Editor...');
+    //console.log('🔧 Configurando Trix Editor...');
 
     const editor = document.querySelector('trix-editor[input="content-trix"]');
     if (!editor) {
@@ -667,7 +667,7 @@ function initializeTrixEditor() {
     // Sync continuo per mantenere HTML - CAMBIATO
     editor.addEventListener('trix-change', function(e) {
         const content = e.target.innerHTML; // ← HTML formattato
-        console.log('📝 Contenuto editor aggiornato, con HTML:', /<[^>]*>/g.test(content));
+        //console.log('📝 Contenuto editor aggiornato, con HTML:', /<[^>]*>/g.test(content));
 
         // Aggiorna il hidden input con HTML
         if (hiddenInput) {
@@ -675,11 +675,11 @@ function initializeTrixEditor() {
         }
     });
 
-    console.log('✅ Editor Trix configurato con sync HTML');
+    //console.log('✅ Editor Trix configurato con sync HTML');
 }
 
 function initializeCharacterCounter() {
-    console.log('🔧 Configurando contatore caratteri...');
+    //console.log('🔧 Configurando contatore caratteri...');
 
     const excerptTextarea = document.getElementById('excerpt');
     const excerptCount = document.getElementById('excerpt-count');
@@ -700,7 +700,7 @@ function initializeCharacterCounter() {
 }
 
 function initializeMediaUpload() {
-    console.log('📁 Configurando upload media...');
+    //console.log('📁 Configurando upload media...');
 
     const fileInput = document.getElementById('multiple-images-input');
     const uploadLoading = document.getElementById('upload-loading');
@@ -716,11 +716,11 @@ function initializeMediaUpload() {
     fileInput.addEventListener('change', async function(e) {
         const files = Array.from(e.target.files);
         if (files.length === 0) {
-            console.log('ℹ️ Nessun file selezionato');
+            //console.log('ℹ️ Nessun file selezionato');
             return;
         }
 
-        console.log('📂 File selezionati:', files.length);
+        //console.log('📂 File selezionati:', files.length);
 
         // Mostra loading
         showLoading();
@@ -732,11 +732,11 @@ function initializeMediaUpload() {
 
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
-            console.log(`📤 Caricando file ${i+1}/${files.length}: ${file.name}`);
+            //console.log(`📤 Caricando file ${i+1}/${files.length}: ${file.name}`);
 
             try {
                 const result = await uploadFile(file);
-                console.log(`✅ File ${file.name} caricato con successo`);
+                //console.log(`✅ File ${file.name} caricato con successo`);
 
                 // Aggiungi immagine alla gallery
                 addImageToGallery(result.media);
@@ -763,14 +763,14 @@ function initializeMediaUpload() {
         e.target.value = '';
     });
 
-    console.log('✅ Upload media configurato');
+    //console.log('✅ Upload media configurato');
 }
 
 function initializeExistingImages() {
-    console.log('🖼️ Inizializzando immagini esistenti...');
+    //console.log('🖼️ Inizializzando immagini esistenti...');
 
     if (window.existingImages && window.existingImages.length > 0) {
-        console.log('📁 Immagini esistenti trovate:', window.existingImages.length);
+        //console.log('📁 Immagini esistenti trovate:', window.existingImages.length);
 
         window.existingImages.forEach(image => {
             addImageToGallery({
@@ -780,12 +780,12 @@ function initializeExistingImages() {
             });
         });
     } else {
-        console.log('📁 Nessuna immagine esistente');
+        //console.log('📁 Nessuna immagine esistente');
     }
 }
 
 async function uploadFile(file) {
-    console.log('📤 Inizio upload:', file.name);
+    //console.log('📤 Inizio upload:', file.name);
 
     // Validazione
     if (!file.type.startsWith('image/')) {
@@ -801,9 +801,9 @@ async function uploadFile(file) {
     formData.append('file', file);
     formData.append('collection', 'main_gallery');
 
-    console.log('📂 FormData preparata per l\'upload:', file.name);
+    //console.log('📂 FormData preparata per l\'upload:', file.name);
     // controlliamo se l'ID della biografia è disponibile
-    console.log('🔍 ID biografia:', window.biographyId || 'non disponibile');
+    //console.log('🔍 ID biografia:', window.biographyId || 'non disponibile');
 
     // Aggiungi l'ID della biografia se disponibile
     if (window.biographyId) {
@@ -842,7 +842,7 @@ async function uploadFile(file) {
 }
 
 function addImageToGallery(media) {
-    console.log('🖼️ Aggiungendo immagine alla gallery:', media.file_name);
+    //console.log('🖼️ Aggiungendo immagine alla gallery:', media.file_name);
 
     const imagesGrid = document.getElementById('images-grid');
     if (!imagesGrid) {
@@ -874,7 +874,7 @@ function addImageToGallery(media) {
 
 // Rende la funzione accessibile globalmente
 window.removeImage = async function(mediaId) {
-    console.log('🗑️ Rimozione immagine:', mediaId);
+    //console.log('🗑️ Rimozione immagine:', mediaId);
 
     if (!confirm('Sei sicuro di voler rimuovere questa immagine?')) {
         return;
@@ -922,7 +922,7 @@ window.removeImage = async function(mediaId) {
 
 // Rende la funzione accessibile globalmente per le immagini dei capitoli
 window.removeChapterImage = async function(chapterId, mediaId) {
-    console.log('🗑️ Rimozione immagine capitolo:', { chapterId, mediaId });
+    //console.log('🗑️ Rimozione immagine capitolo:', { chapterId, mediaId });
 
     if (!confirm('Sei sicuro di voler rimuovere questa immagine dal capitolo?')) {
         return;
@@ -1094,20 +1094,20 @@ function hideProcessingIndicator(chapterId) {
     }
 }
 
-console.log('🎯 Biography Edit JS inizializzato completamente');
+//console.log('🎯 Biography Edit JS inizializzato completamente');
 
 // Test debug - verifica che le funzioni siano disponibili
-console.log('🔧 TEST: window.removeImage definita?', typeof window.removeImage);
-console.log('🔧 TEST: window.removeChapterImage definita?', typeof window.removeChapterImage);
+//console.log('🔧 TEST: window.removeImage definita?', typeof window.removeImage);
+//console.log('🔧 TEST: window.removeChapterImage definita?', typeof window.removeChapterImage);
 
 if (typeof window.removeImage === 'function') {
-    console.log('✅ window.removeImage è disponibile globalmente');
+    //console.log('✅ window.removeImage è disponibile globalmente');
 } else {
     console.error('❌ window.removeImage NON è disponibile globalmente');
 }
 
 if (typeof window.removeChapterImage === 'function') {
-    console.log('✅ window.removeChapterImage è disponibile globalmente');
+    //console.log('✅ window.removeChapterImage è disponibile globalmente');
 } else {
     console.error('❌ window.removeChapterImage NON è disponibile globalmente');
 }

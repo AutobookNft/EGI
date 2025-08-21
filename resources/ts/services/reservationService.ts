@@ -11,6 +11,9 @@
  * @author Padmin D. Curtis (for Fabio Cherici)
  */
 
+// ✅ IMPORT del PortfolioManager per triggering updates
+// import { getPortfolioManager } from '../features/portfolio/portfolioManager'; // RIMOSSO - non serve più!
+
 /**
  * PRE-LAUNCH RESERVATION FUNCTIONS
  *
@@ -238,21 +241,21 @@ class ReservationFormModal {
         this.offerInput?.addEventListener('input', (e: Event) => {
             const target = e.target as HTMLInputElement;
             let value = target.value;
-            
+
             // Remove any non-numeric characters except decimal point
             value = value.replace(/[^0-9.]/g, '');
-            
+
             // Ensure only one decimal point
             const parts = value.split('.');
             if (parts.length > 2) {
                 value = parts[0] + '.' + parts.slice(1).join('');
             }
-            
+
             // Limit to 2 decimal places
             if (parts[1] && parts[1].length > 2) {
                 value = parts[0] + '.' + parts[1].substring(0, 2);
             }
-            
+
             // Update the input value if it changed
             if (target.value !== value) {
                 target.value = value;
@@ -416,6 +419,7 @@ class ReservationFormModal {
 
         // Show modal
         this.modal.classList.remove('hidden');
+        this.modal.classList.add('flex', 'items-center', 'justify-center');
 
         // Set focus on the offer input
         this.offerInput?.focus();
@@ -437,6 +441,7 @@ class ReservationFormModal {
 
         // Hide modal
         this.modal.classList.add('hidden');
+        this.modal.classList.remove('flex', 'items-center', 'justify-center');
 
         // Restore focus to the element that was focused before the modal opened
         if (this.lastFocusedElement) {
@@ -508,13 +513,13 @@ class ReservationFormModal {
 
             // Handle response
             if (response.success) {
-                // Update EGI display with new reservation data
-                this.updateEgiDisplay(response);
-
                 // Close modal
                 this.close();
 
                 // Show success message
+                // 🎯 AGGIORNA LA CARD IMMEDIATAMENTE PRIMA DI SWEETALERT!
+                this.updateEgiDisplay(response);
+
                 if (window.Swal) {
                     window.Swal.fire({
                         icon: 'success',
@@ -524,11 +529,16 @@ class ReservationFormModal {
                         showCancelButton: true,
                         cancelButtonText: appTranslate('reservation.close')
                     }).then((result: { isConfirmed: boolean }) => {
+                        // Card già aggiornata sopra!
+
                         if (result.isConfirmed && response.certificate) {
                             window.location.href = response.certificate.url;
                         }
                     });
                 } else {
+                    // Update EGI display immediately if no SweetAlert
+                    // this.updateEgiDisplay(response); // Già chiamata sopra!
+
                     alert(response.message);
                     if (response.certificate) {
                         window.location.href = response.certificate.url;
@@ -611,63 +621,210 @@ class ReservationFormModal {
 
     /**
      * Update EGI display after successful reservation
+     * 🎯 SEMPLIFICATO: Usa il sistema di aggiornamento automatico esistente!
      *
      * @private
      * @param response The reservation response
      */
     private updateEgiDisplay(response: ReservationResponse): void {
         try {
-            // Find the EGI card in the DOM using the EGI ID
-            const egiCard = document.querySelector(`[data-egi-id="${this.egiId}"]`);
-            if (!egiCard) {
-                console.log('EGI card not found for ID:', this.egiId);
+            console.log('🎯 AGGIORNAMENTO DIRETTO CARD!');
+            console.log('🔍 Cercando EGI ID:', this.egiId);
+
+            // 🎯 TROVA TUTTI GLI ELEMENTI CON LO STESSO EGI ID!
+            const allEgiElements = document.querySelectorAll(`[data-egi-id="${this.egiId}"]`);
+
+            if (allEgiElements.length === 0) {
+                console.error('❌ NESSUN ELEMENTO TROVATO per ID:', this.egiId);
+
+                // DEBUG: mostra tutti gli elementi disponibili
+                const allCards = document.querySelectorAll('.egi-card, .egi-card-list, [data-egi-id], [data-id]');
+                console.log('🔍 Tutti gli elementi trovati:', Array.from(allCards).map(card => ({
+                    tagName: card.tagName,
+                    className: card.className,
+                    dataEgiId: card.getAttribute('data-egi-id'),
+                    dataId: card.getAttribute('data-id')
+                })));
                 return;
             }
 
-            // Update the price display if available in response
-            if (response.reservation && response.reservation.offer_amount_fiat) {
-                const priceElements = egiCard.querySelectorAll('.egi-price, [data-price]');
-                priceElements.forEach((element) => {
-                    if (element instanceof HTMLElement) {
-                        element.textContent = `€${parseFloat(response.reservation!.offer_amount_fiat.toString()).toFixed(2)}`;
+            console.log(`✅ Trovati ${allEgiElements.length} elementi con EGI ID ${this.egiId}:`);
+            Array.from(allEgiElements).forEach((element, index) => {
+                console.log(`  [${index}] ${element.tagName}.${element.className}`);
+            });
+
+            // 🎯 AGGIORNA TUTTI GLI ELEMENTI CON LO STESSO EGI ID
+            Array.from(allEgiElements).forEach((egiCard, cardIndex) => {
+                console.log(`\n🔄 Aggiornando elemento ${cardIndex}: ${egiCard.tagName}.${egiCard.className}`); console.log('✅ Card trovata!', egiCard);
+                console.log('🔍 Struttura HTML della card:', egiCard.outerHTML.substring(0, 300) + '...');
+
+                // Aggiorna prezzo - VERSIONE MASSIVA
+                if (response.reservation?.offer_amount_fiat) {
+                    const newPrice = parseFloat(response.reservation.offer_amount_fiat.toString()).toFixed(2);
+                    console.log(`💰 Nuovo prezzo da applicare: €${newPrice}`);
+
+                    const allElements = egiCard.querySelectorAll('*');
+                    console.log(`🔍 Elementi nella card: ${allElements.length}`);
+
+                    let priceFound = false;
+
+                    // 🎯 PROVA TUTTI I POSSIBILI PATTERN DI PREZZO
+                    const pricePatterns = [
+                        /€\s*[\d,.]+(,\d{2})?/g,
+                        /€\s*[\d,.]+/g,
+                        /€[\d,.]+/g,
+                        /\d+[.,]\d{2}\s*€/g,
+                        /\d+[.,]\d+\s*€/g,
+                        /\d+\s*€/g
+                    ];
+
+                    Array.from(allElements).forEach((el, index) => {
+                        if (el instanceof HTMLElement && el.textContent?.includes('€')) {
+                            const oldText = el.textContent;
+                            console.log(`💰 Elemento ${index} con €: "${oldText}"`);
+
+                            // Prova tutti i pattern
+                            let newText = oldText;
+                            let updated = false;
+
+                            for (const pattern of pricePatterns) {
+                                const testText = oldText.replace(pattern, `€${newPrice}`);
+                                if (testText !== oldText) {
+                                    newText = testText;
+                                    updated = true;
+                                    console.log(`💰 PATTERN MATCH: ${pattern} → "${oldText}" → "${newText}"`);
+                                    break;
+                                }
+                            }
+
+                            if (updated) {
+                                el.textContent = newText;
+                                console.log(`💰 AGGIORNATO elemento ${index}: "${oldText}" → "${newText}"`);
+                                priceFound = true;
+
+                                // 🔥 FORZA ANCHE IL REFRESH VISIVO
+                                el.style.backgroundColor = '#fef3c7';
+                                el.style.fontWeight = 'bold';
+                                el.style.color = '#d97706';
+                                setTimeout(() => {
+                                    el.style.backgroundColor = '';
+                                    el.style.fontWeight = '';
+                                    el.style.color = '';
+                                }, 2000);
+                            }
+                        }
+                    });
+
+                    // 🎯 SE NON TROVA, PROVA SELETTORI SPECIFICI
+                    if (!priceFound) {
+                        console.log('⚠️ NESSUN ELEMENTO CON € AGGIORNATO! Proviamo selettori specifici...');
+
+                        const specificSelectors = [
+                            '.price',
+                            '.amount',
+                            '.egi-price',
+                            '[class*="price"]',
+                            '[class*="amount"]',
+                            '.text-lg',
+                            '.font-bold',
+                            'span',
+                            'div'
+                        ];
+
+                        for (const selector of specificSelectors) {
+                            const elements = egiCard.querySelectorAll(selector);
+                            console.log(`🔍 Selettore "${selector}": ${elements.length} elementi`);
+
+                            Array.from(elements).forEach((el, idx) => {
+                                if (el instanceof HTMLElement && el.textContent?.includes('€')) {
+                                    console.log(`🎯 Trovato elemento con € in "${selector}[${idx}]": "${el.textContent}"`);
+                                    const oldText = el.textContent;
+                                    const newText = oldText.replace(/€\s*[\d,.]+/g, `€${newPrice}`);
+                                    if (newText !== oldText) {
+                                        el.textContent = newText;
+                                        el.style.backgroundColor = '#dcfce7';
+                                        el.style.fontWeight = 'bold';
+                                        console.log(`✅ AGGIORNATO con selettore specifico: "${oldText}" → "${newText}"`);
+                                        priceFound = true;
+                                    }
+                                }
+                            });
+
+                            if (priceFound) break;
+                        }
                     }
-                });
-            }
 
-            // Update the activation status/button
-            const activateButton = egiCard.querySelector('.egi-activate-btn, [data-action="activate"], button[onclick*="showReservationModal"]');
-            if (activateButton instanceof HTMLElement) {
-                // Change button text to indicate user is now the activator
-                activateButton.textContent = 'Hai Attivato';
-                activateButton.classList.add('bg-green-600', 'text-white');
-                activateButton.classList.remove('bg-amber-500', 'hover:bg-amber-600');
-                
-                // Disable the button temporarily
-                if (activateButton instanceof HTMLButtonElement) {
-                    activateButton.disabled = true;
+                    if (!priceFound) {
+                        console.log('❌ FALLIMENTO TOTALE! Tutti i testi nella card:');
+                        Array.from(allElements).forEach((el, idx) => {
+                            if (el instanceof HTMLElement && el.textContent?.trim()) {
+                                console.log(`[${idx}] ${el.tagName}: "${el.textContent.trim()}"`);
+                            }
+                        });
+                    }
                 }
-            }
 
-            // Add a visual indicator that the reservation was successful
-            const statusIndicator = egiCard.querySelector('.status-indicator');
-            if (statusIndicator instanceof HTMLElement) {
-                statusIndicator.textContent = 'Attivato da Te';
-                statusIndicator.classList.add('text-green-600', 'font-semibold');
-            } else {
-                // Create a new status indicator if one doesn't exist
-                const newIndicator = document.createElement('div');
-                newIndicator.className = 'status-indicator text-green-600 font-semibold text-sm mt-2';
-                newIndicator.textContent = 'Attivato da Te';
-                
-                const cardBody = egiCard.querySelector('.card-body, .p-4');
-                if (cardBody) {
-                    cardBody.appendChild(newIndicator);
+                // Aggiungi badge (rimuovi quello precedente se esiste)
+                const existingBadge = egiCard.querySelector('.egi-update-badge');
+                if (existingBadge) {
+                    existingBadge.remove();
+                    console.log('🗑️ Badge precedente rimosso');
                 }
-            }
 
-            console.log('Successfully updated EGI display for ID:', this.egiId);
+                const badge = document.createElement('div');
+                badge.className = 'egi-update-badge';
+                badge.textContent = '✅ ATTIVATO';
+                badge.style.cssText = 'position: absolute; top: 8px; right: 8px; background: #10b981; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; z-index: 1000;';
+
+                if (egiCard instanceof HTMLElement) {
+                    egiCard.style.position = 'relative';
+                    egiCard.appendChild(badge);
+                    egiCard.style.border = '2px solid #10b981';
+                    egiCard.style.boxShadow = '0 0 10px rgba(16, 185, 129, 0.5)';
+                    console.log('✅ Badge aggiunto e stile applicato');
+                }
+
+                console.log('🎉 CARD AGGIORNATA!');            // ✅ USA LA FUNZIONE DI REFRESH AUTOMATICO ESISTENTE
+                // Simile a quella in collection-badge.blade.php che aggiorna ogni 5 secondi
+                setTimeout(() => {
+                    console.log('� Triggering automatic refresh of EGI data...');
+
+                    // ✅ USA GLI EVENTI CHE IL COLLECTION-BADGE GIÀ ASCOLTA!
+                    // 1. collection-changed event
+                    const collectionChangedEvent = new CustomEvent('collection-changed', {
+                        detail: {
+                            egiId: this.egiId,
+                            reason: 'reservation-completed'
+                        }
+                    });
+                    document.dispatchEvent(collectionChangedEvent);
+
+                    // 2. collection-updated event
+                    const collectionUpdatedEvent = new CustomEvent('collection-updated', {
+                        detail: {
+                            egiId: this.egiId,
+                            reason: 'reservation-completed'
+                        }
+                    });
+                    document.dispatchEvent(collectionUpdatedEvent);
+
+                    // Forza anche il refresh della pagina se necessario per aggiornare le cifre
+                    if (typeof window !== 'undefined' && window.location) {
+                        console.log('� Scheduling page data refresh...');
+                        setTimeout(() => {
+                            // NO RELOAD! Questa è una SPA, non PHP anni 90!
+                        }, 2000); // Aspetta 2 secondi prima del refresh
+                    }
+
+                }, 1000); // Aspetta 1 secondo per permettere al server di processare
+
+                console.log('✅ Eventi ESISTENTI lanciati! Il collection-badge dovrebbe reagire');
+
+                // 🎯 Eventi già lanciati sopra per aggiornare il sistema
+                console.log('✅ Aggiornamento completato via eventi DOM');
+            }); // CHIUDI IL FOREACH
         } catch (error) {
-            console.error('Error updating EGI display:', error);
+            console.error('❌ Errore nell\'aggiornamento EGI:', error);
         }
     }
 
@@ -704,7 +861,7 @@ class ReservationFormModal {
 
 
         return `
-        <div id="reservation-modal" class="fixed inset-0 z-[100] flex items-center justify-center backdrop-blur-sm bg-black/60 bg-opacity-60 hidden" role="dialog" aria-modal="true" aria-hidden="true" tabindex="-1" aria-labelledby="reservation-modal-title">
+        <div id="reservation-modal" class="fixed inset-0 z-[100] backdrop-blur-sm bg-black/60 bg-opacity-60 hidden" role="dialog" aria-modal="true" aria-hidden="true" tabindex="-1" aria-labelledby="reservation-modal-title">
             <div class="relative bg-gradient-to-b from-white to-amber-50 rounded-xl shadow-2xl max-w-2xl w-11/12 md:w-3/4 lg:w-2/5 max-h-[90vh] overflow-y-auto border border-amber-200" role="document" style="border-image: linear-gradient(45deg, #D4A574, #2D5016) 1;">
                 <button id="close-reservation-modal" class="absolute w-8 h-8 flex items-center justify-center text-2xl leading-none text-amber-700 top-4 right-4 hover:text-amber-900 hover:bg-amber-100 rounded-full transition-all duration-200" aria-label="${appTranslate('reservation.form.close_button')}">&times;</button>
 

@@ -16,7 +16,8 @@
                     </div>
                     <input type="text" name="offer_amount_fiat" id="offer_amount_fiat"
                         class="block w-full pr-12 border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 pl-12 sm:text-sm"
-                        placeholder="{{ __('reservation.form.offer_amount_placeholder') }}" pattern="[0-9]+(\.[0-9]{1,2})?" inputmode="decimal" required
+                        placeholder="{{ __('reservation.form.offer_amount_placeholder') }}"
+                        pattern="[0-9]+(\.[0-9]{1,2})?" inputmode="decimal" required
                         value="{{ old('offer_amount_fiat', '') }}">
                 </div>
                 <p class="mt-1 text-sm text-gray-500" id="algo-equivalent-text">

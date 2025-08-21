@@ -1,7 +1,7 @@
-console.log('🚀 Biography Create JS caricato');
+//console.log('🚀 Biography Create JS caricato');
 
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🔥 DOM pronto - inizializzo form biografia');
+    //console.log('🔥 DOM pronto - inizializzo form biografia');
 
     // Inizializza tabs
     initializeTabs();
@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function initializeTabs() {
-    console.log('🔧 Configurando tabs...');
+    //console.log('🔧 Configurando tabs...');
 
     const tabButtons = document.querySelectorAll('.tab-button');
     const tabContents = document.querySelectorAll('.tab-content');
@@ -38,13 +38,13 @@ function initializeTabs() {
             // Aggiungi active al content corrispondente
             document.getElementById(targetTab + '-tab').classList.add('active');
 
-            console.log('📋 Tab cambiato:', targetTab);
+            //console.log('📋 Tab cambiato:', targetTab);
         });
     });
 }
 
 function initializeTrixEditor() {
-    console.log('🔧 Configurando Trix Editor...');
+    //console.log('🔧 Configurando Trix Editor...');
 
     const editor = document.querySelector('trix-editor[input="content-trix"]');
     if (!editor) {
@@ -54,7 +54,7 @@ function initializeTrixEditor() {
 
     editor.addEventListener('trix-change', function(e) {
         const content = e.target.editor.getDocument().toString();
-        console.log('📝 Contenuto editor aggiornato, lunghezza:', content.length);
+        //console.log('📝 Contenuto editor aggiornato, lunghezza:', content.length);
 
         // Aggiorna il hidden input
         const hiddenInput = document.getElementById('content-trix');
@@ -63,11 +63,11 @@ function initializeTrixEditor() {
         }
     });
 
-    console.log('✅ Editor Trix configurato');
+    //console.log('✅ Editor Trix configurato');
 }
 
 function initializeCharacterCounter() {
-    console.log('🔧 Configurando contatore caratteri...');
+    //console.log('🔧 Configurando contatore caratteri...');
 
     const excerptTextarea = document.getElementById('excerpt');
     const excerptCount = document.getElementById('excerpt-count');
@@ -88,7 +88,7 @@ function initializeCharacterCounter() {
 }
 
 function initializeMediaUpload() {
-    console.log('📁 Configurando upload media...');
+    //console.log('📁 Configurando upload media...');
 
     const fileInput = document.getElementById('multiple-images-input');
     const uploadLoading = document.getElementById('upload-loading');
@@ -104,11 +104,11 @@ function initializeMediaUpload() {
     fileInput.addEventListener('change', async function(e) {
         const files = Array.from(e.target.files);
         if (files.length === 0) {
-            console.log('ℹ️ Nessun file selezionato');
+            //console.log('ℹ️ Nessun file selezionato');
             return;
         }
 
-        console.log('📂 File selezionati:', files.length);
+        //console.log('📂 File selezionati:', files.length);
 
         // Mostra loading
         showLoading();
@@ -120,11 +120,11 @@ function initializeMediaUpload() {
 
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
-            console.log(`📤 Caricando file ${i+1}/${files.length}: ${file.name}`);
+            //console.log(`📤 Caricando file ${i+1}/${files.length}: ${file.name}`);
 
             try {
                 const result = await uploadFile(file);
-                console.log(`✅ File ${file.name} caricato con successo`);
+                //console.log(`✅ File ${file.name} caricato con successo`);
 
                 // Aggiungi immagine alla gallery
                 addImageToGallery(result.media);
@@ -151,11 +151,11 @@ function initializeMediaUpload() {
         e.target.value = '';
     });
 
-    console.log('✅ Upload media configurato');
+    //console.log('✅ Upload media configurato');
 }
 
 async function uploadFile(file) {
-    console.log('📤 Inizio upload:', file.name);
+    //console.log('📤 Inizio upload:', file.name);
 
     // Validazione
     if (!file.type.startsWith('image/')) {
@@ -202,7 +202,7 @@ async function uploadFile(file) {
 }
 
 function addImageToGallery(media) {
-    console.log('🖼️ Aggiungendo immagine alla gallery:', media.file_name);
+    //console.log('🖼️ Aggiungendo immagine alla gallery:', media.file_name);
 
     const imagesGrid = document.getElementById('images-grid');
     if (!imagesGrid) {
@@ -234,7 +234,7 @@ function addImageToGallery(media) {
 }
 
 async function removeImage(mediaId) {
-    console.log('🗑️ Rimozione immagine:', mediaId);
+    //console.log('🗑️ Rimozione immagine:', mediaId);
 
     if (!confirm('Sei sicuro di voler rimuovere questa immagine?')) {
         return;
@@ -323,4 +323,4 @@ function hideSuccess() {
     }
 }
 
-console.log('🎯 Biography Create JS inizializzato completamente');
+//console.log('🎯 Biography Create JS inizializzato completamente');

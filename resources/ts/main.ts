@@ -7,7 +7,7 @@
  * @author Padmin D. Curtis (AI Partner OS2.0-Compliant) for Fabio Cheri                // DISABILITATO: Sistema di prenotazioni gestito dal server
         // if (reservationFeature && typeof reservationFeature.initialize === 'function') {
         //     await reservationFeature.initialize();
-        //     console.log('Padmin Main: reservationFeature initialized successfully');
+        // //     console.log('Padmin Main: reservationFeature initialized successfully');
         // } else {
         //     console.warn('Padmin Main: reservationFeature or its initialize method not found.');
         // }🎯 Purpose: Single point orchestrated initialization respecting dependency order
@@ -97,10 +97,10 @@ function safeAddEventListener(
 ): boolean {
     if (element && typeof element.addEventListener === 'function') {
         element.addEventListener(event, handler);
-        console.log(`✅ Event listener added: ${description || 'unknown'}`);
+        // // console.log(`✅ Event listener added: ${description || 'unknown'}`);
         return true;
     } else {
-        console.log(`⚠️ Element not found, skipping listener: ${description || 'unknown'}`);
+        // // console.log(`⚠️ Element not found, skipping listener: ${description || 'unknown'}`);
         return false;
     }
 }
@@ -123,7 +123,7 @@ async function waitForGlobalDependencies(): Promise<void> {
                 typeof window.Swal !== 'undefined' &&
                 typeof window.jQuery !== 'undefined'
             ) {
-                console.log('Padmin Main: Global dependencies confirmed available.');
+                // console.log('Padmin Main: Global dependencies confirmed available.');
                 resolve();
             } else if (attempts >= maxAttempts) {
                 const missing = [
@@ -156,7 +156,7 @@ async function initializeTranslationsOrchestrated(): Promise<void> {
         window.getTranslation = getTranslation;
         window.ensureTranslationsLoaded = ensureTranslationsLoaded;
 
-        console.log('Padmin Main: Translations system initialized successfully.');
+        // console.log('Padmin Main: Translations system initialized successfully.');
     } catch (error) {
         console.error('Padmin Main: Critical error in translations initialization:', error);
         throw new Error(`Translations initialization failed: ${error instanceof Error ? error.message : String(error)}`);
@@ -172,7 +172,7 @@ async function initializeUEMOrchestrated(): Promise<void> {
     try {
         if (UEM && typeof UEM.initialize === 'function') {
             await UEM.initialize();
-            console.log('Padmin Main: UEM Client Service initialized successfully.');
+            // console.log('Padmin Main: UEM Client Service initialized successfully.');
         } else {
             throw new Error('UEM service or initialize method not available');
         }
@@ -190,36 +190,36 @@ async function initializeUEMOrchestrated(): Promise<void> {
  */
 async function initializeCurrencySystemOrchestrated(): Promise<void> {
     try {
-        console.log('Padmin Main: Initializing Multi-Currency System (Enterprise Financial)...');
+        // console.log('Padmin Main: Initializing Multi-Currency System (Enterprise Financial)...');
 
         // Initialize currency display manager
         await currencyDisplayManager.initialize();
-        console.log('Padmin Main: Currency display manager initialized successfully.');
+        // console.log('Padmin Main: Currency display manager initialized successfully.');
 
         // Initialize currency selector for badge
         const currencyBadge = document.getElementById('currency-badge-desktop');
         if (currencyBadge) {
             const currencySelector = new CurrencySelectorComponent();
             await currencySelector.initialize();
-            console.log('Padmin Main: Currency selector component initialized successfully.');
+            // console.log('Padmin Main: Currency selector component initialized successfully.');
         } else {
-            console.log('Padmin Main: No currency badge found, skipping selector initialization.');
+            // console.log('Padmin Main: No currency badge found, skipping selector initialization.');
         }
 
         // Initialize FAST currency display component with proper async handling
         const currencyDisplay = new CurrencyDisplayComponent();
         await currencyDisplay.initialize();
-        console.log('Padmin Main: FAST Currency display component initialized successfully.');
+        // console.log('Padmin Main: FAST Currency display component initialized successfully.');
 
         // Test currency service connectivity
         const testRate = await currencyService.getExchangeRate('USD');
         if (testRate) {
-            console.log('Padmin Main: Currency service connectivity test successful', { rate: testRate.rate });
+            // console.log('Padmin Main: Currency service connectivity test successful', { rate: testRate.rate });
         } else {
             console.warn('Padmin Main: Currency service connectivity test failed, but system will continue with fallbacks.');
         }
 
-        console.log('Padmin Main: Multi-Currency System initialization complete.');
+        // console.log('Padmin Main: Multi-Currency System initialization complete.');
 
     } catch (error) {
         console.error('Padmin Main: Multi-Currency System initialization error:', error);
@@ -233,7 +233,7 @@ async function initializeCurrencySystemOrchestrated(): Promise<void> {
         }
 
         // Don't throw - let app continue without currency features
-        console.log('Padmin Main: Continuing without multi-currency features due to initialization error.');
+        // console.log('Padmin Main: Continuing without multi-currency features due to initialization error.');
     }
 }
 
@@ -250,7 +250,7 @@ async function initializeEnumsOrchestrated(): Promise<void> {
         window.getEnum = getEnum;
         window.isPendingStatus = isPendingStatus;
 
-        console.log('Padmin Main: Enums system initialized successfully.');
+        // console.log('Padmin Main: Enums system initialized successfully.');
     } catch (error) {
         console.error('Padmin Main: Critical error in enums initialization:', error);
         throw new Error(`Enums initialization failed: ${error instanceof Error ? error.message : String(error)}`);
@@ -267,34 +267,34 @@ async function initializeWalletModulesOrchestrated(): Promise<void> {
         // RequestCreateNotificationWallet
         if (!walletCreateInstance) {
             walletCreateInstance = new RequestCreateNotificationWallet({ apiBaseUrl: '/notifications' });
-            console.log('Padmin Main: RequestCreateNotificationWallet initialized.');
+            // console.log('Padmin Main: RequestCreateNotificationWallet initialized.');
         }
 
         // RequestUpdateNotificationWallet
         if (!walletUpdateInstance) {
             walletUpdateInstance = new RequestUpdateNotificationWallet({ apiBaseUrl: '/notifications' });
-            console.log('Padmin Main: RequestUpdateNotificationWallet initialized.');
+            // console.log('Padmin Main: RequestUpdateNotificationWallet initialized.');
         }
 
         // RequestWalletDonation
         if (!walletDonationInstance) {
             walletDonationInstance = new RequestWalletDonation({ apiBaseUrl: '/notifications' });
-            console.log('Padmin Main: RequestWalletDonation initialized.');
+            // console.log('Padmin Main: RequestWalletDonation initialized.');
         }
 
         // DeleteProposalInvitation
         if (!deleteProposalInvitationInstance) {
             deleteProposalInvitationInstance = new DeleteProposalInvitation({ apiBaseUrl: '/notifications' });
-            console.log('Padmin Main: DeleteProposalInvitation initialized.');
+            // console.log('Padmin Main: DeleteProposalInvitation initialized.');
         }
 
         // DeleteProposalWallet
         if (!deleteProposalWalletInstance) {
             deleteProposalWalletInstance = new DeleteProposalWallet({ apiBaseUrl: '/notifications' });
-            console.log('Padmin Main: DeleteProposalWallet initialized.');
+            // console.log('Padmin Main: DeleteProposalWallet initialized.');
         }
 
-        console.log('Padmin Main: All wallet modules initialized successfully.');
+        // console.log('Padmin Main: All wallet modules initialized successfully.');
     } catch (error) {
         console.error('Padmin Main: Error in wallet modules initialization:', error);
         UEM.handleClientError('CLIENT_INIT_FAIL_WALLET_MODULES', {
@@ -314,9 +314,9 @@ function initializeThreeAnimationIndependent(): void {
         // Controlla se ci sono elementi necessari per l'animazione sulla pagina
         if (document.getElementById('dynamic-3d-container') && document.getElementById('webgl-canvas')) {
             initThreeAnimation();
-            console.log('Padmin Main: Three.js animation initialized independently.');
+            // console.log('Padmin Main: Three.js animation initialized independently.');
         } else {
-            console.log('Padmin Main: Three.js animation elements not found - skipping initialization.');
+            // console.log('Padmin Main: Three.js animation elements not found - skipping initialization.');
         }
     } catch (error) {
         console.error('Padmin Main: Error in Three.js animation initialization:', error);
@@ -346,11 +346,11 @@ async function initializeFEGISystemOrchestrated(): Promise<void> {
 
         // 3. Carica configurazione dal server
         mainAppConfig = await initializeAppConfig();
-        console.log(`${appTranslate('padminGreeting', mainAppConfig?.translations || { padminGreeting: 'Padmin' })} FEGI Configuration loaded successfully.`);
+        // // console.log(`${appTranslate('padminGreeting', mainAppConfig?.translations || { padminGreeting: 'Padmin' })} FEGI Configuration loaded successfully.`);
 
         // 4. Conferma riferimenti DOM
         DOMElements.confirmDOMReferencesLoaded();
-        console.log('Padmin Main: DOM references confirmation check complete.');
+        // console.log('Padmin Main: DOM references confirmation check complete.');
 
         // 5. Inizializza UploadModalManager (dopo conferma DOM)
         if (DOMElements.uploadModalEl && DOMElements.uploadModalCloseButtonEl && DOMElements.uploadModalContentEl) {
@@ -360,7 +360,7 @@ async function initializeFEGISystemOrchestrated(): Promise<void> {
                 modalContent: DOMElements.uploadModalContentEl
             };
             mainUploadModalManager = new UploadModalManager(uploadModalDOMElements, mainAppConfig.csrf_token);
-            console.log('Padmin Main: UploadModalManager initialized.');
+            // console.log('Padmin Main: UploadModalManager initialized.');
         } else {
             const missingElements = [
                 !DOMElements.uploadModalEl ? '#upload-modal' : null,
@@ -376,19 +376,19 @@ async function initializeFEGISystemOrchestrated(): Promise<void> {
 
         // 7. Aggiorna UI navbar
         updateNavbarUI(mainAppConfig, DOMElements, UEM);
-        console.log('Padmin Main: Initial navbar UI update performed.');
+        // console.log('Padmin Main: Initial navbar UI update performed.');
 
         // 8. Inizializza il sistema di like
         if (likeUIManager && typeof likeUIManager.initialize === 'function') {
             likeUIManager.initialize(mainAppConfig);
-            console.log('Padmin Main: Like system initialized.');
+            // console.log('Padmin Main: Like system initialized.');
         } else {
             console.warn('Padmin Main: likeUIManager or its initialize method not found.');
         }
 
         // 9. Inizializza il sistema di prenotazione
         if (reservationFeature && typeof reservationFeature.initialize === 'function') {
-            console.log('Padmin Main: Reservation feature initialized.');
+            // console.log('Padmin Main: Reservation feature initialized.');
         } else {
             console.warn('Padmin Main: reservationFeature or its initialize method not found.');
         }
@@ -396,7 +396,7 @@ async function initializeFEGISystemOrchestrated(): Promise<void> {
         // 10. Inizializza i bottoni di prenotazione
         if (reservationButtons && typeof reservationButtons.initialize === 'function') {
             await reservationButtons.initialize();
-            console.log('Padmin Main: Reservation buttons initialized.');
+            // console.log('Padmin Main: Reservation buttons initialized.');
         } else {
             console.warn('Padmin Main: reservationButtons or its initialize method not found.');
         }
@@ -405,7 +405,7 @@ async function initializeFEGISystemOrchestrated(): Promise<void> {
         try {
             const portfolioManager = initPortfolioManager();
             (window as any).portfolioManager = portfolioManager;
-            console.log('Padmin Main: Portfolio manager initialized successfully.');
+            // console.log('Padmin Main: Portfolio manager initialized successfully.');
         } catch (error) {
             console.warn('Padmin Main: Portfolio manager initialization failed:', error);
         }
@@ -417,22 +417,22 @@ async function initializeFEGISystemOrchestrated(): Promise<void> {
                 (window as any).natan = natanAssistant;
                 (window as any).natanAssistant = natanAssistant;
                 (window as any).testButlerModal = () => {
-                    console.log('🎩 TEST: Forcing butler modal display from global function');
+                    // console.log('🎩 TEST: Forcing butler modal display from global function');
                     natanAssistant.forceShowModal();
                 };
                 (window as any).testButler = () => {
-                    console.log('🎩 TEST: Complete butler test with state reset');
+                    // console.log('🎩 TEST: Complete butler test with state reset');
                     natanAssistant.testButler();
                 };
                 (window as any).resetButler = () => {
-                    console.log('🎩 TEST: Resetting butler state');
+                    // console.log('🎩 TEST: Resetting butler state');
                     natanAssistant.resetButler();
                 };
-                console.log('Padmin Main: Natan Assistant initialized.');
-                console.log('🎩 Available test functions:');
-                console.log('- window.testButlerModal() - Force show modal');
-                console.log('- window.testButler() - Complete test with reset');
-                console.log('- window.resetButler() - Reset state only');
+                // console.log('Padmin Main: Natan Assistant initialized.');
+                // console.log('🎩 Available test functions:');
+                // console.log('- window.testButlerModal() - Force show modal');
+                // console.log('- window.testButler() - Complete test with reset');
+                // console.log('- window.resetButler() - Reset state only');
             } else {
                 console.warn('Padmin Main: NatanAssistant is not a constructor or function.');
             }
@@ -444,7 +444,7 @@ async function initializeFEGISystemOrchestrated(): Promise<void> {
         // 12. Setup FEGI-specific custom event listeners
         setupFegiCustomEvents();
 
-        console.log('Padmin Main: FEGI System initialized successfully.');
+        // console.log('Padmin Main: FEGI System initialized successfully.');
 
     } catch (error) {
         console.error('Padmin Main: Critical error in FEGI system initialization:', error);
@@ -460,39 +460,39 @@ async function initializeFEGISystemOrchestrated(): Promise<void> {
  */
 async function initializeApplicationOrchestrated(): Promise<void> {
     try {
-        console.log('Padmin Main: Starting orchestrated initialization sequence...');
+        // console.log('Padmin Main: Starting orchestrated initialization sequence...');
 
         // FASE 0: Aspetta dipendenze globali (da app.js)
-        console.log('Padmin Main: Phase 0 - Waiting for global dependencies...');
+        // console.log('Padmin Main: Phase 0 - Waiting for global dependencies...');
         await waitForGlobalDependencies();
 
         // FASE 1: Traduzioni (primo requisito)
-        console.log('Padmin Main: Phase 1 - Initializing translations...');
+        // console.log('Padmin Main: Phase 1 - Initializing translations...');
         await initializeTranslationsOrchestrated();
 
         // FASE 2: UEM (secondo requisito)
-        console.log('Padmin Main: Phase 2 - Initializing UEM...');
+        // console.log('Padmin Main: Phase 2 - Initializing UEM...');
         await initializeUEMOrchestrated();
 
         // FASE 3: Enum (terzo requisito)
-        console.log('Padmin Main: Phase 3 - Initializing enums...');
+        // console.log('Padmin Main: Phase 3 - Initializing enums...');
         await initializeEnumsOrchestrated();
 
         // FASE 4: Moduli Wallet (quarto requisito)
-        console.log('Padmin Main: Phase 4 - Initializing wallet modules...');
+        // console.log('Padmin Main: Phase 4 - Initializing wallet modules...');
         await initializeWalletModulesOrchestrated();
 
         // FASE 5: Ultra Upload Manager (preparazione, NON inizializzazione completa)
-        console.log('Padmin Main: Phase 5 - Preparing Ultra Upload Manager...');
+        // console.log('Padmin Main: Phase 5 - Preparing Ultra Upload Manager...');
         // NON chiamiamo initializeUltraUploadManager() qui - troppo presto!
-        console.log('Padmin Main: Ultra Upload Manager preparation complete (deferred initialization).');
+        // console.log('Padmin Main: Ultra Upload Manager preparation complete (deferred initialization).');
 
         // FASE 6: Sistema Multi-Valuta (Enterprise Financial System)
-        console.log('Padmin Main: Phase 6 - Initializing Multi-Currency System...');
+        // console.log('Padmin Main: Phase 6 - Initializing Multi-Currency System...');
         await initializeCurrencySystemOrchestrated();
 
         // FASE 7: Sistema FEGI (include UploadModalManager + Ultra Upload Manager on-demand)
-        console.log('Padmin Main: Phase 7 - Initializing FEGI system...');
+        // console.log('Padmin Main: Phase 7 - Initializing FEGI system...');
         await initializeFEGISystemOrchestrated();
 
         // FASE INDIPENDENTE: Animazione Three.js (se necessaria)
@@ -514,7 +514,7 @@ async function initializeApplicationOrchestrated(): Promise<void> {
             });
         });
 
-        console.log('Padmin Main: 🚀 ORCHESTRATED INITIALIZATION SEQUENCE COMPLETE - FlorenceEGI Ready! 🚀');
+        // console.log('Padmin Main: 🚀 ORCHESTRATED INITIALIZATION SEQUENCE COMPLETE - FlorenceEGI Ready! 🚀');
 
     } catch (error) {
         console.error('Padmin Main: 💥 CRITICAL ORCHESTRATED INITIALIZATION ERROR:', error);
@@ -570,7 +570,7 @@ async function initializeApplicationOrchestrated(): Promise<void> {
  * 🛡️ Security: Safe binding per elementi che possono non esistere per mancanza permessi
  */
 function setupEventListeners(): void {
-    console.log('Padmin Main: Attempting to setup FEGI event listeners with safe binding...');
+    // console.log('Padmin Main: Attempting to setup FEGI event listeners with safe binding...');
 
     // --- MODALE CONNESSIONE FEGI WALLET (sempre presenti) ---
     safeAddEventListener(
@@ -763,13 +763,13 @@ function setupEventListeners(): void {
         DOMElements.mobileMenuButtonEl,
         'click',
         () => {
-            console.log('Padmin Main: Mobile menu button clicked.');
+            // console.log('Padmin Main: Mobile menu button clicked.');
             toggleMobileMenu(DOMElements, mainAppConfig);
         },
         'Mobile Menu Button'
     );
 
-    console.log('Padmin Main: FEGI Event listeners setup with safe binding complete.');
+    // console.log('Padmin Main: FEGI Event listeners setup with safe binding complete.');
 }
 
 /**
@@ -784,7 +784,7 @@ function setupFegiCustomEvents(): void {
         const { type } = customEvent.detail;
         if (mainUploadModalManager && type) {
             mainUploadModalManager.openModal(type);
-            console.log(`Padmin Main: Upload modal opened via custom event for type: ${type}`);
+            // // console.log(`Padmin Main: Upload modal opened via custom event for type: ${type}`);
         }
     });
 
@@ -795,15 +795,15 @@ function setupFegiCustomEvents(): void {
         if (reservationFeature && typeof reservationFeature.updateReservationButtonStates === 'function') {
             reservationFeature.updateReservationButtonStates();
         }
-        console.log('Padmin Main: UI updated after FEGI connection');
+        // console.log('Padmin Main: UI updated after FEGI connection');
 
         // Opzionalmente usa i dati dell'evento
         if (customEvent.detail?.walletAddress) {
-            console.log(`Padmin Main: Connected wallet: ${customEvent.detail.walletAddress}`);
+            // // console.log(`Padmin Main: Connected wallet: ${customEvent.detail.walletAddress}`);
         }
     });
 
-    console.log('Padmin Main: FEGI custom events setup complete.');
+    // console.log('Padmin Main: FEGI custom events setup complete.');
 }
 
 // --- 🚀 PUNTO DI INGRESSO ORCHESTRATO DELL'APPLICAZIONE ---
