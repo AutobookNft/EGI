@@ -229,7 +229,7 @@ $showBadge = $showBadge ?? $showOwnershipBadge;
             // 🎯 Sistema Commissioner: Formattiamo le informazioni dell'attivatore
             $activatorDisplay = formatActivatorDisplay($currentReservation->user);
             @endphp
-            <div class="flex items-center gap-2 mb-1 text-sm">
+            <div class="flex items-center gap-2 mb-1 text-sm" data-activation-status>
                 @if ($activatorDisplay && $activatorDisplay['is_commissioner'])
                 {{-- 👤 Commissioner: Mostra avatar personalizzato --}}
                 @if ($activatorDisplay['avatar'])
@@ -247,7 +247,7 @@ $showBadge = $showBadge ?? $showOwnershipBadge;
                 <span class="font-medium text-green-300" data-activator-name>
                     {{ $activatorDisplay['name'] }}
                 </span>
-                <span class="text-xs text-gray-400">({{ __('common.activator') }})</span>
+                <span class="text-xs text-gray-400">({{ __('egi.reservation.activator') }})</span>
                 @else
                 {{-- 💰 Regular Collector: Icona generica + wallet abbreviato --}}
                 <div class="flex items-center justify-center w-4 h-4 bg-gray-600 rounded-full">
@@ -261,17 +261,17 @@ $showBadge = $showBadge ?? $showOwnershipBadge;
                     Str::limit($currentReservation->user->wallet_address, 12, '...') :
                     $currentReservation->user->first_name . ' ' . $currentReservation->user->last_name) }}
                 </span>
-                <span class="text-xs text-gray-400">({{ __('common.activator') }})</span>
+                <span class="text-xs text-gray-400">({{ __('egi.reservation.activator') }})</span>
                 @endif
             </div>
             @elseif ($context === 'creator')
-            <div class="flex items-center gap-2 mb-1 text-sm" data-activation-status>
+            <div class="flex items-center gap-2 mb-1 text-sm" data-activation-status="available">
                 <svg class="w-4 h-4 text-green-400" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd"
                         d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
                         clip-rule="evenodd" />
                 </svg>
-                <span class="text-sm font-medium text-green-300">{{ __('common.available') }}</span>
+                <span class="text-sm font-medium text-green-300">{{ __('egi.not_currently_listed') }}</span>
             </div>
             @endif
             @endif

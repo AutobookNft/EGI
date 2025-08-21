@@ -294,12 +294,13 @@ class ReservationController extends Controller {
                 'success' => true,
                 'message' => __('reservation.success'),
                 'data' => [
-                    'user'=>[
+                    'user' => [
                         'id' => $user->id,
                         'name' => $user->name ?? null,
                         'last_name' => $user->last_name ?? null,
                         'wallet_address' => $sessionWallet,
-                        'avatar' => $user->profile_photo_url ? $user->profile_photo_url  : null
+                        'avatar' => $user->profile_photo_url ? $user->profile_photo_url  : null,
+                        'is_commissioner' => $user->hasRole('commissioner') || $user->can('display_public_name_on_egi')
                     ],
                     'reservation' => [
                         'id' => $reservation->id,

@@ -397,7 +397,7 @@ $isCreator = auth()->check() && auth()->id() === $creatorId;
                     </div>
                     <div class="flex-1 min-w-0">
                         <span class="text-xs font-medium text-gray-300">{{ __('egi.collection.part_of') }}</span>
-                        <span class="ml-1 text-xs font-semibold text-white truncate">{{ $egiCollection->name }}</span>
+                        <span class="ml-1 text-xs font-semibold text-white truncate">{{ $egiCollection->collection_name }}</span>
                     </div>
                 </div>
             @endif
@@ -413,7 +413,7 @@ $isCreator = auth()->check() && auth()->id() === $creatorId;
                     </div>
                     <div class="flex-1 min-w-0">
                         <span class="text-xs font-medium text-gray-300">
-                            {{ $egi->reservations->count() }} {{ __('egi.reservations.count') }}
+                            {{ $egi->reservations->count() }} {{ __('egi.reservation.count') }}
                         </span>
                     </div>
                 </div>

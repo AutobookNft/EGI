@@ -52,14 +52,17 @@ export interface ReservationResponse {
             last_name?: string;
             wallet_address?: string;
             avatar?: string;
+            is_commissioner?: boolean;
         };
         reservation?: {
             id: number;
             type: 'strong' | 'weak';
             offer_amount_fiat: number;
             offer_amount_algo: number;
+            amount_eur?: number;
             status: string;
             is_current: boolean;
+            fegi_code?: string;
         };
     };
     reservation?: {
@@ -67,14 +70,17 @@ export interface ReservationResponse {
         type: 'strong' | 'weak';
         offer_amount_fiat: number;
         offer_amount_algo: number;
+        amount_eur?: number;
         status: string;
         is_current: boolean;
+        fegi_code?: string;
         user?: {
             id: number;
             name?: string;
             last_name?: string;
             wallet_address?: string;
             avatar?: string;
+            is_commissioner?: boolean;
         };
     };
     certificate?: {
@@ -808,130 +814,94 @@ class ReservationFormModal {
                         }
                     });
                 } else {
-                    // 🆕 CERCA E SOSTITUISCE LA SEZIONE "DA ATTIVARE"
-                    console.log('👤 RICERCA SEZIONE DA ATTIVARE per sostituirla...');
+                    // 🆕 PER EGI-CARD: AGGIUNGI SOTTOSEZIONE ATTIVATORE DENTRO IL BOX PREZZO
+                    console.log('👤 RICERCA SEZIONE PREZZO per aggiungere sottosezione attivatore...');
 
-                    // Cerca la sezione "Da Attivare" da sostituire
-                    const activationStatusDiv = egiCard.querySelector('[data-activation-status]');
+                    // 👤 Determina se è un commissioner e avatar - DEVONO ESSERE QUI!
+                    const isCommissioner = userDetails?.is_commissioner || false;
+                    const avatarUrl = userDetails?.avatar || null;
 
-                    if (activationStatusDiv) {
-                        console.log('✅ TROVATA SEZIONE DA ATTIVARE - SOSTITUISCO COMPLETAMENTE!');
+                    console.log('🔍 DEBUG AVATAR (egi-card):', {
+                        isCommissioner,
+                        avatarUrl,
+                        userDetails: userDetails
+                    });
 
-                        // 🎯 CREA HTML DINAMICO INTELLIGENTE - evita duplicazione
-                        let activatorHtml;
-                        if (isGenericName) {
-                            // Se è un nome generico, mostra solo "Attivatore"
-                            activatorHtml = `
-                                <img src="https://via.placeholder.com/16x16/6b7280/ffffff?text=A" alt="Attivatore" class="object-cover w-4 h-4 border rounded-full shadow-sm border-green-400/30">
-                                <span class="font-medium text-green-300" data-activator-name>Attivatore</span>
-                            `;
+                    // Cerca il div del prezzo (quello con border-green-500/30 e bg-gradient-to-r)
+                    const priceSection = egiCard.querySelector('.border-green-500\\/30');
+
+                    if (priceSection) {
+                        console.log('✅ TROVATA SEZIONE PREZZO - AGGIUNGO SOTTOSEZIONE ATTIVATORE!');
+
+                        // Controlla se esiste già una sottosezione attivatore
+                        const existingActivatorSection = priceSection.querySelector('[data-activator-section]');
+
+                        if (existingActivatorSection) {
+                            // Aggiorna la sezione esistente
+                            console.log('🔄 Aggiornando sezione attivatore esistente...');
+
+                            const activatorNameSpan = existingActivatorSection.querySelector('[data-activator-name]');
+                            const activatorAvatar = existingActivatorSection.querySelector('.activator-avatar');
+
+                            if (activatorNameSpan) {
+                                activatorNameSpan.textContent = userName;
+                            }
+
+                            if (activatorAvatar && avatarUrl) {
+                                activatorAvatar.outerHTML = `<img src="${avatarUrl}" alt="${userName}" class="object-cover w-4 h-4 border rounded-full border-white/20 activator-avatar">`;
+                            }
+
                         } else {
-                            // Se abbiamo un nome specifico, mostra "Nome (Attivatore)" con avatar
-                            const avatarUrl = userDetails?.avatar || `https://via.placeholder.com/16x16/6b7280/ffffff?text=${userName.charAt(0)}`;
-                            activatorHtml = `
-                                <img src="${avatarUrl}" alt="${userName}" class="object-cover w-4 h-4 border rounded-full shadow-sm border-green-400/30">
-                                <span class="font-medium text-green-300" data-activator-name>${userName}</span>
-                                <span class="text-xs text-gray-400">(Attivatore)</span>
-                            `;
-                        }
+                            // Crea nuova sottosezione attivatore
+                            console.log('🆕 Creando nuova sottosezione attivatore...');
 
-                        // Sostituisci completamente il contenuto del div
-                        activationStatusDiv.innerHTML = activatorHtml;
+                            const activatorSubsection = document.createElement('div');
+                            activatorSubsection.className = 'flex items-center gap-2 pt-2 border-t border-green-500/20';
+                            activatorSubsection.setAttribute('data-activator-section', 'true');
 
-                        // Evidenziazione visiva della sezione sostituita
-                        const newActivatorElement = activationStatusDiv.querySelector('[data-activator-name]') as HTMLElement;
-                        if (newActivatorElement) {
-                            newActivatorElement.style.backgroundColor = '#dcfce7';
-                            newActivatorElement.style.fontWeight = 'bold';
-                            newActivatorElement.style.border = '1px solid #16a34a';
-
-                            setTimeout(() => {
-                                newActivatorElement.style.backgroundColor = '';
-                                newActivatorElement.style.fontWeight = '';
-                                newActivatorElement.style.border = '';
-                            }, 3000);
-                        }
-
-                        activatorUpdated = true;
-                        console.log('✅ SEZIONE "DA ATTIVARE" SOSTITUITA CON ATTIVATORE!');
-                    } else {
-                        console.log('❌ Non riesco a trovare la sezione [data-activation-status] da sostituire');
-
-                        // 🔄 FALLBACK: Crea dopo la sezione prezzo se non trova [data-activation-status]
-                        const priceSection = egiCard.querySelector('.currency-display, [data-price-display]')?.closest('div');
-
-                        if (priceSection) {
-                            console.log('🔄 FALLBACK: Creo sezione attivatore dopo il prezzo');
-
-                            // Crea la sezione attivatore
-                            const activatorSection = document.createElement('div');
-                            activatorSection.className = 'flex items-center gap-2 mt-2 mb-1 text-sm';
-
-                            // 🎯 CREA HTML DINAMICO INTELLIGENTE - evita duplicazione
-                            let activatorHtml;
-                            if (isGenericName) {
-                                // Se è un nome generico, mostra solo "Attivatore"
-                                activatorHtml = `
-                                    <img src="https://via.placeholder.com/16x16/6b7280/ffffff?text=A" alt="Attivatore" class="object-cover w-4 h-4 border rounded-full shadow-sm border-green-400/30">
-                                    <span class="font-medium text-green-300" data-activator-name>Attivatore</span>
+                            // Avatar con logica corretta
+                            let avatarElement = '';
+                            if (avatarUrl) {
+                                avatarElement = `<img src="${avatarUrl}" alt="${userName}" class="object-cover w-4 h-4 border rounded-full border-white/20 activator-avatar">`;
+                            } else if (isCommissioner) {
+                                avatarElement = `
+                                    <div class="flex items-center justify-center flex-shrink-0 w-4 h-4 bg-green-600 rounded-full activator-avatar">
+                                        <svg class="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
                                 `;
                             } else {
-                                // Se abbiamo un nome specifico, mostra "Nome (Attivatore)" con avatar
-                                const avatarUrl = userDetails?.avatar || `https://via.placeholder.com/16x16/6b7280/ffffff?text=${userName.charAt(0)}`;
-                                activatorHtml = `
-                                    <img src="${avatarUrl}" alt="${userName}" class="object-cover w-4 h-4 border rounded-full shadow-sm border-green-400/30">
-                                    <span class="font-medium text-green-300" data-activator-name>${userName}</span>
-                                    <span class="text-xs text-gray-400">(Attivatore)</span>
+                                avatarElement = `
+                                    <div class="flex items-center justify-center flex-shrink-0 w-4 h-4 bg-green-600 rounded-full activator-avatar">
+                                        <svg class="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
                                 `;
                             }
 
-                            activatorSection.innerHTML = activatorHtml;
+                            activatorSubsection.innerHTML = `
+                                ${avatarElement}
+                                <span class="text-xs text-green-200 truncate">
+                                    Attivatore: <span class="font-semibold" data-activator-name>${userName}</span>
+                                </span>
+                            `;
 
-                            // Inserisci dopo la sezione prezzo
-                            priceSection.parentNode?.insertBefore(activatorSection, priceSection.nextSibling);
-
-                            // Evidenziazione visiva della nuova sezione
-                            const newActivatorElement = activatorSection.querySelector('[data-activator-name]') as HTMLElement;
-                            if (newActivatorElement) {
-                                newActivatorElement.style.backgroundColor = '#dcfce7';
-                                newActivatorElement.style.fontWeight = 'bold';
-                                newActivatorElement.style.border = '1px solid #16a34a';
-
-                                setTimeout(() => {
-                                    newActivatorElement.style.backgroundColor = '';
-                                    newActivatorElement.style.fontWeight = '';
-                                    newActivatorElement.style.border = '';
-                                }, 3000);
-                            }
-
-                            activatorUpdated = true;
-                            console.log('✅ SEZIONE ATTIVATORE CREATA DINAMICAMENTE COME FALLBACK!');
-                        } else {
-                            console.log('❌ Non riesco a trovare nemmeno la sezione prezzo per il fallback');
+                            // Aggiungi la sottosezione alla fine del box prezzo
+                            priceSection.appendChild(activatorSubsection);
                         }
+
+                        console.log('✅ SOTTOSEZIONE ATTIVATORE AGGIUNTA/AGGIORNATA NEL BOX PREZZO!');
+                        activatorUpdated = true;
+
+                    } else {
+                        console.log('❌ Non riesco a trovare la sezione prezzo (.border-green-500\\/30)');
                     }
                 }
 
                 if (!activatorUpdated) {
                     console.log('👤 NESSUN ELEMENTO [data-activator-name] TROVATO - probabilmente non ci sono attivatori nella card!');
-                }                // Aggiungi badge (rimuovi quello precedente se esiste)
-                const existingBadge = egiCard.querySelector('.egi-update-badge');
-                if (existingBadge) {
-                    existingBadge.remove();
-                    console.log('🗑️ Badge precedente rimosso');
-                }
-
-                const badge = document.createElement('div');
-                badge.className = 'egi-update-badge';
-                badge.textContent = '✅ ATTIVATO';
-                badge.style.cssText = 'position: absolute; top: 8px; right: 8px; background: #10b981; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; z-index: 1000;';
-
-                if (egiCard instanceof HTMLElement) {
-                    egiCard.style.position = 'relative';
-                    egiCard.appendChild(badge);
-                    egiCard.style.border = '2px solid #10b981';
-                    egiCard.style.boxShadow = '0 0 10px rgba(16, 185, 129, 0.5)';
-                    console.log('✅ Badge aggiunto e stile applicato');
                 }
 
                 console.log('🎉 CARD AGGIORNATA!');            // ✅ USA LA FUNZIONE DI REFRESH AUTOMATICO ESISTENTE
