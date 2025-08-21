@@ -244,7 +244,7 @@ $showBadge = $showBadge ?? $showOwnershipBadge;
                     </svg>
                 </div>
                 @endif
-                <span class="font-medium text-green-300">
+                <span class="font-medium text-green-300" data-activator-name>
                     {{ $activatorDisplay['name'] }}
                 </span>
                 <span class="text-xs text-gray-400">({{ __('common.activator') }})</span>
@@ -256,7 +256,7 @@ $showBadge = $showBadge ?? $showOwnershipBadge;
                             clip-rule="evenodd" />
                     </svg>
                 </div>
-                <span class="font-medium text-green-300">
+                <span class="font-medium text-green-300" data-activator-name>
                     {{ $activatorDisplay ? $activatorDisplay['name'] : ($currentReservation->user->wallet_address ?
                     Str::limit($currentReservation->user->wallet_address, 12, '...') :
                     $currentReservation->user->first_name . ' ' . $currentReservation->user->last_name) }}

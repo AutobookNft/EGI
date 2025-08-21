@@ -74,7 +74,7 @@ $currentSize = $sizeClasses[$size] ?? $sizeClasses['normal'];
 @endphp
 
 <div class="currency-price-container">
-    <span {{ $attributes->merge(['class' => "currency-display {$class}"]) }}>
+    <span {{ $attributes->merge(['class' => "currency-display {$class}"]) }} data-price-display>
         {{-- Sempre EUR - Sistema semplificato --}}
         €{{ number_format($safePrice, 2) }}
     </span>

@@ -53,6 +53,12 @@ export interface ReservationResponse {
             offer_amount_algo: number;
             status: string;
             is_current: boolean;
+            user?: {
+                id: number;
+                first_name?: string;
+                last_name?: string;
+                wallet_address?: string;
+            };
         };
     };
     reservation?: {
@@ -62,6 +68,12 @@ export interface ReservationResponse {
         offer_amount_algo: number;
         status: string;
         is_current: boolean;
+        user?: {
+            id: number;
+            first_name?: string;
+            last_name?: string;
+            wallet_address?: string;
+        };
     };
     certificate?: {
         uuid: string;
@@ -673,73 +685,52 @@ class ReservationFormModal {
                 console.log(`\n🔄 Aggiornando elemento ${cardIndex}: ${egiCard.tagName}.${egiCard.className}`); console.log('✅ Card trovata!', egiCard);
                 console.log('🔍 Struttura HTML della card:', egiCard.outerHTML.substring(0, 300) + '...');
 
-                // 💰 AGGIORNA PREZZO - VERSIONE MIGLIORATA
+                // 💰 AGGIORNA PREZZO - USA DATA-PRICE-DISPLAY SPECIFICO
                 if (response.data?.reservation?.offer_amount_fiat) {
                     const newPrice = parseFloat(response.data.reservation.offer_amount_fiat.toString()).toFixed(2);
                     console.log(`💰 Nuovo prezzo da applicare: €${newPrice}`);
 
-                    const allElements = egiCard.querySelectorAll('*');
-                    console.log(`🔍 Elementi nella card: ${allElements.length}`);
+                    // 🎯 USA IL SELETTORE DATA-PRICE-DISPLAY SPECIFICO
+                    const priceElements = egiCard.querySelectorAll('[data-price-display]');
+                    console.log(`� Trovati ${priceElements.length} elementi con data-price-display`);
 
-                    let priceFound = false;
+                    let priceUpdated = false;
+                    Array.from(priceElements).forEach((el, idx) => {
+                        if (el instanceof HTMLElement) {
+                            const oldText = el.textContent?.trim() || '';
+                            console.log(`💰 AGGIORNAMENTO PREZZO [${idx}]: "${oldText}" → "€${newPrice}"`);
 
-                    // 🎯 PATTERN REGEX MIGLIORATI E PIÙ FLESSIBILI
-                    const pricePatterns = [
-                        // Pattern base
-                        /€\s*[\d,.]+(,\d{2})?/gi,
-                        /€\s*[\d,.]+/gi,
-                        /€[\d,.]+/gi,
-                        // Pattern con euro dopo
-                        /\d+[.,]\d{2}\s*€/gi,
-                        /\d+[.,]\d+\s*€/gi,
-                        /\d+\s*€/gi,
-                        // Pattern con virgole come separatori migliaia
-                        /€\s*\d{1,3}(,\d{3})*(\.\d{2})?/gi,
-                        // Pattern con punti come separatori migliaia
-                        /€\s*\d{1,3}(\.\d{3})*(,\d{2})?/gi,
-                        // Pattern più aggressivi
-                        /€\s*[\d]+[.,]?[\d]*/gi,
-                        /[\d]+[.,]?[\d]*\s*€/gi
-                    ];
+                            el.textContent = `€${newPrice}`;
+                            priceUpdated = true;
 
-                    Array.from(allElements).forEach((el, index) => {
-                        if (el instanceof HTMLElement && el.textContent?.includes('€')) {
-                            const oldText = el.textContent.trim();
-                            console.log(`💰 Elemento ${index} con €: "${oldText}"`);
+                            // Evidenziazione visiva
+                            el.style.backgroundColor = '#fef3c7';
+                            el.style.fontWeight = 'bold';
+                            el.style.color = '#d97706';
+                            setTimeout(() => {
+                                el.style.backgroundColor = '';
+                                el.style.fontWeight = '';
+                                el.style.color = '';
+                            }, 2000);
 
-                            // Prova tutti i pattern
-                            let newText = oldText;
-                            let updated = false;
+                            console.log(`✅ PREZZO AGGIORNATO: "${oldText}" → "${el.textContent}"`);
+                        }
+                    });
 
-                            for (const pattern of pricePatterns) {
-                                // Testa il pattern
-                                if (pattern.test(oldText)) {
-                                    // Reset del regex per riutilizzo
-                                    pattern.lastIndex = 0;
-                                    const testText = oldText.replace(pattern, `€${newPrice}`);
-                                    if (testText !== oldText) {
-                                        newText = testText;
-                                        updated = true;
-                                        console.log(`💰 PATTERN MATCH: ${pattern} → "${oldText}" → "${newText}"`);
-                                        break;
-                                    }
-                                }
-                                // Reset pattern per il prossimo test
-                                pattern.lastIndex = 0;
-                            }
+                    if (!priceUpdated) {
+                        console.log('❌ NESSUN ELEMENTO [data-price-display] TROVATO!');
+                        // Fallback con metodo precedente se il data-attribute non è ancora renderizzato
+                        const fallbackElements = egiCard.querySelectorAll('.currency-display');
+                        console.log(`🔄 Fallback: trovati ${fallbackElements.length} elementi .currency-display`);
 
-                            // 🔥 SE I PATTERN NON FUNZIONANO, SOSTITUISCI TUTTO IL CONTENUTO SE È SOLO UN PREZZO
-                            if (!updated && /^€?\s*[\d,.]+(,\d{2})?\s*€?$/.test(oldText.trim())) {
-                                console.log(`💰 SOSTITUZIONE TOTALE: "${oldText}" → "€${newPrice}"`);
+                        Array.from(fallbackElements).forEach((el, idx) => {
+                            if (el instanceof HTMLElement && el.textContent?.includes('€')) {
+                                const oldText = el.textContent.trim();
+                                console.log(`💰 FALLBACK [${idx}]: "${oldText}" → "€${newPrice}"`);
                                 el.textContent = `€${newPrice}`;
-                                updated = true;
-                            }
+                                priceUpdated = true;
 
-                            if (updated) {
-                                console.log(`💰 AGGIORNATO elemento ${index}: "${oldText}" → "${el.textContent}"`);
-                                priceFound = true;
-
-                                // 🔥 FORZA ANCHE IL REFRESH VISIVO
+                                // Evidenziazione visiva
                                 el.style.backgroundColor = '#fef3c7';
                                 el.style.fontWeight = 'bold';
                                 el.style.color = '#d97706';
@@ -749,101 +740,100 @@ class ReservationFormModal {
                                     el.style.color = '';
                                 }, 2000);
                             }
+                        });
+                    }
+                }
+
+                // 👤 AGGIORNA ATTIVATORE - USA DATA-ACTIVATOR-NAME SPECIFICO
+                console.log('👤 Aggiornamento informazioni attivatore...');
+                const activatorElements = egiCard.querySelectorAll('[data-activator-name]');
+                console.log(`� Trovati ${activatorElements.length} elementi con data-activator-name`);
+
+                let activatorUpdated = false;
+
+                // 📋 PRENDI I DATI DELL'UTENTE DALLA RESPONSE
+                const userDetails = response.data?.reservation?.user || response.reservation?.user;
+                const userName = userDetails?.first_name && userDetails?.last_name
+                    ? `${userDetails.first_name} ${userDetails.last_name}`
+                    : userDetails?.wallet_address
+                        ? userDetails.wallet_address.substring(0, 12) + '...'
+                        : 'Attivatore';
+
+                console.log('👤 Dati utente dalla response:', userDetails);
+                console.log('👤 Nome attivatore calcolato:', userName);
+
+                if (activatorElements.length > 0) {
+                    // ✅ Aggiorna elementi esistenti
+                    Array.from(activatorElements).forEach((el, idx) => {
+                        if (el instanceof HTMLElement) {
+                            const oldText = el.textContent?.trim() || '';
+                            console.log(`👤 AGGIORNAMENTO ATTIVATORE [${idx}]: "${oldText}" → "${userName}"`);
+
+                            el.textContent = userName;
+                            activatorUpdated = true;
+
+                            // Evidenziazione visiva
+                            el.style.backgroundColor = '#dcfce7';
+                            el.style.fontWeight = 'bold';
+                            el.style.border = '1px solid #16a34a';
+
+                            setTimeout(() => {
+                                el.style.backgroundColor = '';
+                                el.style.fontWeight = '';
+                                el.style.border = '';
+                            }, 3000);
+
+                            console.log(`✅ ATTIVATORE AGGIORNATO: "${oldText}" → "${el.textContent}"`);
                         }
                     });
+                } else {
+                    // 🆕 CREA DINAMICAMENTE LA SEZIONE ATTIVATORE SE NON ESISTE
+                    console.log('👤 CREAZIONE DINAMICA SEZIONE ATTIVATORE...');
 
-                    // 🎯 SE NON TROVA, PROVA SELETTORI SPECIFICI
-                    if (!priceFound) {
-                        console.log('⚠️ NESSUN ELEMENTO CON € AGGIORNATO! Proviamo selettori specifici...');
+                    // Cerca dove inserire la sezione attivatore (dopo le informazioni di prezzo)
+                    const priceSection = egiCard.querySelector('.currency-display, [data-price-display]')?.closest('div');
 
-                        const specificSelectors = [
-                            '.price',
-                            '.amount',
-                            '.egi-price',
-                            '[class*="price"]',
-                            '[class*="amount"]',
-                            '.text-lg',
-                            '.font-bold',
-                            'span',
-                            'div'
-                        ];
+                    if (priceSection) {
+                        // Crea la sezione attivatore
+                        const activatorSection = document.createElement('div');
+                        activatorSection.className = 'flex items-center gap-2 mt-2 mb-1 text-sm';
+                        activatorSection.innerHTML = `
+                            <div class="flex items-center justify-center w-4 h-4 bg-gray-600 rounded-full">
+                                <svg class="w-2 h-2 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                            <span class="font-medium text-green-300" data-activator-name>${userName}</span>
+                            <span class="text-xs text-gray-400">(Attivatore)</span>
+                        `;
 
-                        for (const selector of specificSelectors) {
-                            const elements = egiCard.querySelectorAll(selector);
-                            console.log(`🔍 Selettore "${selector}": ${elements.length} elementi`);
+                        // Inserisci dopo la sezione prezzo
+                        priceSection.parentNode?.insertBefore(activatorSection, priceSection.nextSibling);
 
-                            Array.from(elements).forEach((el, idx) => {
-                                if (el instanceof HTMLElement && el.textContent?.includes('€')) {
-                                    console.log(`🎯 Trovato elemento con € in "${selector}[${idx}]": "${el.textContent}"`);
-                                    const oldText = el.textContent;
-                                    const newText = oldText.replace(/€\s*[\d,.]+/g, `€${newPrice}`);
-                                    if (newText !== oldText) {
-                                        el.textContent = newText;
-                                        el.style.backgroundColor = '#dcfce7';
-                                        el.style.fontWeight = 'bold';
-                                        console.log(`✅ AGGIORNATO con selettore specifico: "${oldText}" → "${newText}"`);
-                                        priceFound = true;
-                                    }
-                                }
-                            });
+                        // Evidenziazione visiva della nuova sezione
+                        const newActivatorElement = activatorSection.querySelector('[data-activator-name]') as HTMLElement;
+                        if (newActivatorElement) {
+                            newActivatorElement.style.backgroundColor = '#dcfce7';
+                            newActivatorElement.style.fontWeight = 'bold';
+                            newActivatorElement.style.border = '1px solid #16a34a';
 
-                            if (priceFound) break;
+                            setTimeout(() => {
+                                newActivatorElement.style.backgroundColor = '';
+                                newActivatorElement.style.fontWeight = '';
+                                newActivatorElement.style.border = '';
+                            }, 3000);
                         }
-                    }
 
-                    if (!priceFound) {
-                        console.log('❌ FALLIMENTO TOTALE! Tutti i testi nella card:');
-                        Array.from(allElements).forEach((el, idx) => {
-                            if (el instanceof HTMLElement && el.textContent?.trim()) {
-                                console.log(`[${idx}] ${el.tagName}: "${el.textContent.trim()}"`);
-                            }
-                        });
+                        activatorUpdated = true;
+                        console.log('✅ SEZIONE ATTIVATORE CREATA DINAMICAMENTE!');
+                    } else {
+                        console.log('❌ Non riesco a trovare la sezione prezzo per inserire l\'attivatore');
                     }
                 }
 
-                // 👤 AGGIORNA INFORMAZIONI UTENTE/ATTIVATORE
-                console.log('👤 Cercando elementi utente da aggiornare...');
-                const userSelectors = [
-                    '.activator-name',
-                    '.user-name',
-                    '.current-user',
-                    '.attivatore',
-                    '[class*="activator"]',
-                    '[class*="user"]',
-                    '[class*="attivatore"]'
-                ];
-
-                let userUpdated = false;
-                for (const selector of userSelectors) {
-                    const userElements = egiCard.querySelectorAll(selector);
-                    if (userElements.length > 0) {
-                        console.log(`👤 Trovati ${userElements.length} elementi con selettore: ${selector}`);
-                        Array.from(userElements).forEach((el, idx) => {
-                            if (el instanceof HTMLElement && el.textContent?.trim()) {
-                                console.log(`👤 Aggiornamento elemento utente [${idx}]: "${el.textContent.trim()}"`);
-
-                                // Aggiungi indicazione di aggiornamento
-                                el.style.backgroundColor = '#dcfce7';
-                                el.style.fontWeight = 'bold';
-                                el.style.border = '1px solid #16a34a';
-
-                                setTimeout(() => {
-                                    el.style.backgroundColor = '';
-                                    el.style.fontWeight = '';
-                                    el.style.border = '';
-                                }, 3000);
-
-                                userUpdated = true;
-                            }
-                        });
-                    }
-                }
-
-                if (!userUpdated) {
-                    console.log('👤 Nessun elemento utente trovato per l\'aggiornamento');
-                }
-
-                // Aggiungi badge (rimuovi quello precedente se esiste)
+                if (!activatorUpdated) {
+                    console.log('👤 NESSUN ELEMENTO [data-activator-name] TROVATO - probabilmente non ci sono attivatori nella card!');
+                }                // Aggiungi badge (rimuovi quello precedente se esiste)
                 const existingBadge = egiCard.querySelector('.egi-update-badge');
                 if (existingBadge) {
                     existingBadge.remove();

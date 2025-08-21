@@ -499,11 +499,11 @@ $isCreator = auth()->check() && auth()->id() === $creatorId;
                         @endphp
                         <a href="{{ $homeRoute }}"
                             class="font-semibold transition-colors duration-200 hover:underline hover:text-blue-400"
-                            title="Visualizza profilo di {{ $activatorDisplay['name'] }}">
+                            title="Visualizza profilo di {{ $activatorDisplay['name'] }}" data-activator-name>
                             {{ $activatorDisplay['name'] }}
                         </a>
                         @else
-                        <span class="font-semibold">{{ $activatorDisplay['name'] }}</span>
+                        <span class="font-semibold" data-activator-name>{{ $activatorDisplay['name'] }}</span>
                         @endif
                         @endif
                     </span>
