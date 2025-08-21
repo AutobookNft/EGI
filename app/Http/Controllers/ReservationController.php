@@ -226,7 +226,7 @@ class ReservationController extends Controller {
                 'offer_amount_fiat' => 'required|numeric|min:1',
                 'terms_accepted' => 'required|accepted',
                 'contact_data' => 'nullable|array',
-                'wallet_address' => 'nullable|string|size:58'
+                'wallet' => 'nullable|string|size:58'
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return $this->errorManager->handle(
@@ -264,7 +264,7 @@ class ReservationController extends Controller {
             // Resolve authentication - dedicated try/catch for auth validation
             $user = FegiAuth::user();
             $sessionWallet = Session::get('connected_wallet');
-            $walletAddress = $validated['wallet_address'] ?? $sessionWallet;
+            $walletAddress = $user['wallet'] ?? $sessionWallet;
 
             if (!$user && !$walletAddress) {
                 throw new \Exception('Unauthorized access: no user or wallet authentication found');
@@ -294,6 +294,13 @@ class ReservationController extends Controller {
                 'success' => true,
                 'message' => __('reservation.success'),
                 'data' => [
+                    'user'=>[
+                        'id' => $user->id,
+                        'name' => $user->name ?? null,
+                        'last_name' => $user->last_name ?? null,
+                        'wallet_address' => $sessionWallet,
+                        'avatar' => $user->profile_photo_url ? $user->profile_photo_url  : null
+                    ],
                     'reservation' => [
                         'id' => $reservation->id,
                         'type' => $reservation->type,
