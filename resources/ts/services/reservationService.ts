@@ -45,6 +45,16 @@ export interface ReservationFormData {
 export interface ReservationResponse {
     success: boolean;
     message: string;
+    data?: {
+        reservation?: {
+            id: number;
+            type: 'strong' | 'weak';
+            offer_amount_fiat: number;
+            offer_amount_algo: number;
+            status: string;
+            is_current: boolean;
+        };
+    };
     reservation?: {
         id: number;
         type: 'strong' | 'weak';
@@ -631,6 +641,11 @@ class ReservationFormModal {
             console.log('🎯 AGGIORNAMENTO DIRETTO CARD!');
             console.log('🔍 Cercando EGI ID:', this.egiId);
 
+            // 🔍 DEBUG: STAMPA TUTTA LA RESPONSE
+            console.log('📋 RESPONSE COMPLETA:', JSON.stringify(response, null, 2));
+            console.log('📋 response.reservation:', response.reservation);
+            console.log('📋 response.reservation?.offer_amount_fiat:', response.reservation?.offer_amount_fiat);
+
             // 🎯 TROVA TUTTI GLI ELEMENTI CON LO STESSO EGI ID!
             const allEgiElements = document.querySelectorAll(`[data-egi-id="${this.egiId}"]`);
 
@@ -658,9 +673,9 @@ class ReservationFormModal {
                 console.log(`\n🔄 Aggiornando elemento ${cardIndex}: ${egiCard.tagName}.${egiCard.className}`); console.log('✅ Card trovata!', egiCard);
                 console.log('🔍 Struttura HTML della card:', egiCard.outerHTML.substring(0, 300) + '...');
 
-                // Aggiorna prezzo - VERSIONE MASSIVA
-                if (response.reservation?.offer_amount_fiat) {
-                    const newPrice = parseFloat(response.reservation.offer_amount_fiat.toString()).toFixed(2);
+                // 💰 AGGIORNA PREZZO - VERSIONE MIGLIORATA
+                if (response.data?.reservation?.offer_amount_fiat) {
+                    const newPrice = parseFloat(response.data.reservation.offer_amount_fiat.toString()).toFixed(2);
                     console.log(`💰 Nuovo prezzo da applicare: €${newPrice}`);
 
                     const allElements = egiCard.querySelectorAll('*');
@@ -668,19 +683,28 @@ class ReservationFormModal {
 
                     let priceFound = false;
 
-                    // 🎯 PROVA TUTTI I POSSIBILI PATTERN DI PREZZO
+                    // 🎯 PATTERN REGEX MIGLIORATI E PIÙ FLESSIBILI
                     const pricePatterns = [
-                        /€\s*[\d,.]+(,\d{2})?/g,
-                        /€\s*[\d,.]+/g,
-                        /€[\d,.]+/g,
-                        /\d+[.,]\d{2}\s*€/g,
-                        /\d+[.,]\d+\s*€/g,
-                        /\d+\s*€/g
+                        // Pattern base
+                        /€\s*[\d,.]+(,\d{2})?/gi,
+                        /€\s*[\d,.]+/gi,
+                        /€[\d,.]+/gi,
+                        // Pattern con euro dopo
+                        /\d+[.,]\d{2}\s*€/gi,
+                        /\d+[.,]\d+\s*€/gi,
+                        /\d+\s*€/gi,
+                        // Pattern con virgole come separatori migliaia
+                        /€\s*\d{1,3}(,\d{3})*(\.\d{2})?/gi,
+                        // Pattern con punti come separatori migliaia
+                        /€\s*\d{1,3}(\.\d{3})*(,\d{2})?/gi,
+                        // Pattern più aggressivi
+                        /€\s*[\d]+[.,]?[\d]*/gi,
+                        /[\d]+[.,]?[\d]*\s*€/gi
                     ];
 
                     Array.from(allElements).forEach((el, index) => {
                         if (el instanceof HTMLElement && el.textContent?.includes('€')) {
-                            const oldText = el.textContent;
+                            const oldText = el.textContent.trim();
                             console.log(`💰 Elemento ${index} con €: "${oldText}"`);
 
                             // Prova tutti i pattern
@@ -688,18 +712,31 @@ class ReservationFormModal {
                             let updated = false;
 
                             for (const pattern of pricePatterns) {
-                                const testText = oldText.replace(pattern, `€${newPrice}`);
-                                if (testText !== oldText) {
-                                    newText = testText;
-                                    updated = true;
-                                    console.log(`💰 PATTERN MATCH: ${pattern} → "${oldText}" → "${newText}"`);
-                                    break;
+                                // Testa il pattern
+                                if (pattern.test(oldText)) {
+                                    // Reset del regex per riutilizzo
+                                    pattern.lastIndex = 0;
+                                    const testText = oldText.replace(pattern, `€${newPrice}`);
+                                    if (testText !== oldText) {
+                                        newText = testText;
+                                        updated = true;
+                                        console.log(`💰 PATTERN MATCH: ${pattern} → "${oldText}" → "${newText}"`);
+                                        break;
+                                    }
                                 }
+                                // Reset pattern per il prossimo test
+                                pattern.lastIndex = 0;
+                            }
+
+                            // 🔥 SE I PATTERN NON FUNZIONANO, SOSTITUISCI TUTTO IL CONTENUTO SE È SOLO UN PREZZO
+                            if (!updated && /^€?\s*[\d,.]+(,\d{2})?\s*€?$/.test(oldText.trim())) {
+                                console.log(`💰 SOSTITUZIONE TOTALE: "${oldText}" → "€${newPrice}"`);
+                                el.textContent = `€${newPrice}`;
+                                updated = true;
                             }
 
                             if (updated) {
-                                el.textContent = newText;
-                                console.log(`💰 AGGIORNATO elemento ${index}: "${oldText}" → "${newText}"`);
+                                console.log(`💰 AGGIORNATO elemento ${index}: "${oldText}" → "${el.textContent}"`);
                                 priceFound = true;
 
                                 // 🔥 FORZA ANCHE IL REFRESH VISIVO
@@ -762,6 +799,48 @@ class ReservationFormModal {
                             }
                         });
                     }
+                }
+
+                // 👤 AGGIORNA INFORMAZIONI UTENTE/ATTIVATORE
+                console.log('👤 Cercando elementi utente da aggiornare...');
+                const userSelectors = [
+                    '.activator-name',
+                    '.user-name',
+                    '.current-user',
+                    '.attivatore',
+                    '[class*="activator"]',
+                    '[class*="user"]',
+                    '[class*="attivatore"]'
+                ];
+
+                let userUpdated = false;
+                for (const selector of userSelectors) {
+                    const userElements = egiCard.querySelectorAll(selector);
+                    if (userElements.length > 0) {
+                        console.log(`👤 Trovati ${userElements.length} elementi con selettore: ${selector}`);
+                        Array.from(userElements).forEach((el, idx) => {
+                            if (el instanceof HTMLElement && el.textContent?.trim()) {
+                                console.log(`👤 Aggiornamento elemento utente [${idx}]: "${el.textContent.trim()}"`);
+
+                                // Aggiungi indicazione di aggiornamento
+                                el.style.backgroundColor = '#dcfce7';
+                                el.style.fontWeight = 'bold';
+                                el.style.border = '1px solid #16a34a';
+
+                                setTimeout(() => {
+                                    el.style.backgroundColor = '';
+                                    el.style.fontWeight = '';
+                                    el.style.border = '';
+                                }, 3000);
+
+                                userUpdated = true;
+                            }
+                        });
+                    }
+                }
+
+                if (!userUpdated) {
+                    console.log('👤 Nessun elemento utente trovato per l\'aggiornamento');
                 }
 
                 // Aggiungi badge (rimuovi quello precedente se esiste)
