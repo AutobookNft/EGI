@@ -29,160 +29,16 @@ import { UEM_Client_TS_Placeholder as UEM } from './uemClientService';
 import { getAppConfig, route, appTranslate, ServerErrorResponse } from '../config/appConfig';
 import { getCsrfTokenTS } from '../utils/csrf';
 import { getAuthStatus } from '../features/auth/authService';
-
-// --- TYPES ---
-export interface ReservationFormData {
-    offer_amount_fiat: number;
-    terms_accepted: boolean;
-    contact_data?: {
-        name?: string;
-        email?: string;
-        message?: string;
-    };
-    wallet_address?: string;
-}
-
-export interface ReservationResponse {
-    success: boolean;
-    message: string;
-    data?: {
-        user?: {
-            id: number;
-            name?: string;
-            last_name?: string;
-            wallet_address?: string;
-            avatar?: string;
-            is_commissioner?: boolean;
-        };
-        reservation?: {
-            id: number;
-            type: 'strong' | 'weak';
-            offer_amount_fiat: number;
-            offer_amount_algo: number;
-            amount_eur?: number;
-            status: string;
-            is_current: boolean;
-            fegi_code?: string;
-        };
-    };
-    reservation?: {
-        id: number;
-        type: 'strong' | 'weak';
-        offer_amount_fiat: number;
-        offer_amount_algo: number;
-        amount_eur?: number;
-        status: string;
-        is_current: boolean;
-        fegi_code?: string;
-        user?: {
-            id: number;
-            name?: string;
-            last_name?: string;
-            wallet_address?: string;
-            avatar?: string;
-            is_commissioner?: boolean;
-        };
-    };
-    certificate?: {
-        uuid: string;
-        url: string;
-        verification_url: string;
-        pdf_url: string;
-    };
-    error_code?: string;
-}
-
-export interface ReservationStatusResponse {
-    success: boolean;
-    data?: {
-        egi_id: number;
-        is_reserved: boolean;
-        total_reservations: number;
-        user_has_reservation: boolean;
-        highest_priority_reservation?: {
-            type: 'strong' | 'weak';
-            offer_amount_fiat: number;
-            belongs_to_current_user: boolean;
-        };
-        user_reservation?: {
-            id: number;
-            type: 'strong' | 'weak';
-            offer_amount_fiat: number;
-            offer_amount_algo: number;
-            is_highest_priority: boolean;
-            created_at: string;
-            certificate?: {
-                uuid: string;
-                url: string;
-            };
-        };
-    };
-    message?: string;
-    error_code?: string;
-}
-
-export interface AlgoExchangeRateResponse {
-    success: boolean;
-    message?: string;
-    data?: {
-        fiat_currency: string;
-        rate_to_algo: number;
-        timestamp: string;
-        is_cached: boolean;
-    };
-    rate?: number; // Backward compatibility
-    updated_at?: string; // Backward compatibility
-}
-
-export interface PreLaunchReservationData {
-    egi_id: number;
-    amount_eur: number;
-}
-
-export interface PreLaunchReservationResponse {
-    success: boolean;
-    message: string;
-    data?: {
-        reservation_id: number;
-        egi_id: number;
-        amount_eur: number;
-        rank_position: number;
-        is_highest: boolean;
-        created_at: string;
-        updated_at: string;
-    };
-}
-
-export interface RankingEntry {
-    rank_position: number;
-    amount_eur: number;
-    is_highest: boolean;
-    is_mine: boolean;
-    user?: {
-        name: string;
-    };
-    created_at: string;
-}
-
-export interface RankingsResponse {
-    success: boolean;
-    data?: {
-        egi_id: number;
-        egi_title: string;
-        total_reservations: number;
-        rankings: RankingEntry[];
-        stats: {
-            total_reservations: number;
-            highest_amount: number;
-            lowest_amount: number;
-            average_amount: number;
-            median_amount: number;
-        };
-    };
-}
+import { getAlgoExchangeRate, getCachedAlgoRate, setCachedAlgoRate } from './reservation/ExchangeRateService';
+import type {
+    ReservationFormData,
+    ReservationResponse,
+    ReservationStatusResponse,
+    PreLaunchReservationResponse,
+    RankingsResponse
+} from '../types/reservationTypes';
 
 // --- STATE ---
-let currentAlgoRate: number | null = null;
 let reservationModalInstance: ReservationFormModal | null = null;
 
 /**
@@ -613,7 +469,10 @@ class ReservationFormModal {
      * @private
      */
     private updateAlgoEquivalent(): void {
-        if (!this.offerInput || !this.algoEquivalentText || !currentAlgoRate) return;
+        if (!this.offerInput || !this.algoEquivalentText) return;
+
+        const currentAlgoRate = getCachedAlgoRate();
+        if (!currentAlgoRate) return;
 
         const eurAmount = parseFloat(this.offerInput.value) || 0;
         const algoAmount = (eurAmount / currentAlgoRate).toFixed(8);
@@ -629,7 +488,8 @@ class ReservationFormModal {
     private async updateAlgoRate(): Promise<void> {
         try {
             // Use the exchange rate if already fetched
-            if (currentAlgoRate !== null) {
+            const cachedRate = getCachedAlgoRate();
+            if (cachedRate !== null) {
                 this.updateAlgoEquivalent();
                 return;
             }
@@ -637,14 +497,14 @@ class ReservationFormModal {
             // Otherwise fetch the current rate
             const rate = await getAlgoExchangeRate();
             if (rate !== null) {
-                currentAlgoRate = rate;
+                setCachedAlgoRate(rate);
                 this.updateAlgoEquivalent();
             }
         } catch (error) {
             console.error('Failed to fetch ALGO exchange rate:', error);
 
             // Use fallback rate
-            currentAlgoRate = 0.2; // 1 EUR = 5 ALGO (fallback)
+            setCachedAlgoRate(0.2); // 1 EUR = 5 ALGO (fallback)
             this.updateAlgoEquivalent();
         }
     }
@@ -1180,52 +1040,6 @@ export async function getEgiReservationStatus(egiId: number): Promise<Reservatio
             message: (error instanceof Error) ? error.message : 'An unknown error occurred',
             error_code: 'RESERVATION_STATUS_API_ERROR'
         };
-    }
-}
-
-/**
- * Get the current ALGO/EUR exchange rate
- *
- * @returns {Promise<number|null>} The exchange rate or null if unavailable
- */
-export async function getAlgoExchangeRate(): Promise<number | null> {
-    try {
-        const rateUrl = route('api/currency/algo-exchange-rate', {});
-
-        if (UEM && typeof UEM.safeFetch === 'function') {
-            const response = await UEM.safeFetch(rateUrl, {
-                headers: {
-                    'Accept': 'application/json'
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error("HTTP error: " + response.status + " " + response.statusText);
-            }
-
-            const data = await response.json() as AlgoExchangeRateResponse;
-            // Handle new API format with data.rate_to_algo or legacy format with rate
-            const rate = data.data?.rate_to_algo || data.rate;
-            return data.success && rate ? rate : null;
-        } else {
-            const response = await fetch(rateUrl, {
-                headers: {
-                    'Accept': 'application/json'
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error("HTTP error: " + response.status + " " + response.statusText);
-            }
-
-            const data = await response.json() as AlgoExchangeRateResponse;
-            // Handle new API format with data.rate_to_algo or legacy format with rate
-            const rate = data.data?.rate_to_algo || data.rate;
-            return data.success && rate ? rate : null;
-        }
-    } catch (error) {
-        console.error('ALGO exchange rate API error:', error);
-        return null;
     }
 }
 
