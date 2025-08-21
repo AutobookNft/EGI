@@ -693,6 +693,17 @@ class ReservationFormModal {
                 console.log(`\n🔄 Aggiornando elemento ${cardIndex}: ${egiCard.tagName}.${egiCard.className}`); console.log('✅ Card trovata!', egiCard);
                 console.log('🔍 Struttura HTML della card:', egiCard.outerHTML.substring(0, 300) + '...');
 
+                // 🎯 GESTIONE SPECIFICA PER EGI-CARD-LIST
+                const isEgiCardList = egiCard.classList.contains('egi-card-list') ||
+                    egiCard.querySelector('.egi-card-list') ||
+                    egiCard.closest('.egi-card-list');
+
+                if (isEgiCardList) {
+                    console.log('🎯 RILEVATO EGI-CARD-LIST - Gestione sostituzione sezione Da Attivare');
+                    handleEgiCardListUpdate(egiCard, response);
+                    return; // Skip normal processing per egi-card-list
+                }
+
                 // 💰 AGGIORNA PREZZO - USA DATA-PRICE-DISPLAY SPECIFICO
                 if (response.data?.reservation?.offer_amount_fiat) {
                     const newPrice = parseFloat(response.data.reservation.offer_amount_fiat.toString()).toFixed(2);
@@ -1409,6 +1420,123 @@ function showPreLaunchSuccessModal(data: any): void {
     `;
 
     document.body.insertAdjacentHTML('beforeend', modalHtml);
+}
+
+/**
+ * Handle update for egi-card-list component
+ * Sostituisce la sezione "Da Attivare" con avatar+attivatore
+ */
+function handleEgiCardListUpdate(egiCard: Element, response: ReservationResponse): void {
+    console.log('🎯 INIZIO GESTIONE EGI-CARD-LIST UPDATE');
+
+    // 💰 Aggiorna il prezzo prima
+    if (response.data?.reservation?.offer_amount_fiat) {
+        const newPrice = parseFloat(response.data.reservation.offer_amount_fiat.toString()).toFixed(2);
+        console.log(`💰 Aggiornamento prezzo per egi-card-list: €${newPrice}`);
+
+        const priceElements = egiCard.querySelectorAll('[data-price-display]');
+        Array.from(priceElements).forEach((el) => {
+            if (el instanceof HTMLElement) {
+                const oldText = el.textContent?.trim() || '';
+                console.log(`💰 PREZZO [egi-card-list]: "${oldText}" → "€${newPrice}"`);
+                el.textContent = `€${newPrice}`;
+
+                // Evidenziazione visiva
+                el.style.backgroundColor = '#fef3c7';
+                el.style.fontWeight = 'bold';
+                el.style.color = '#d97706';
+                setTimeout(() => {
+                    el.style.backgroundColor = '';
+                    el.style.fontWeight = '';
+                    el.style.color = '';
+                }, 2000);
+            }
+        });
+    }
+
+    // 👤 Gestisce la sostituzione della sezione "Da Attivare" con avatar+attivatore
+    const availableSection = egiCard.querySelector('[data-activation-status="available"]');
+
+    if (availableSection) {
+        console.log('✅ TROVATA SEZIONE DA ATTIVARE - Sostituisco con avatar+attivatore');
+
+        // 📋 PRENDI I DATI DELL'UTENTE DALLA RESPONSE
+        const userDetails = response.data?.user;
+        console.log('👤 User details per egi-card-list:', userDetails);
+
+        // 🎯 CALCOLA IL NOME DELL'ATTIVATORE
+        let userName = 'Utente'; // Fallback generico
+        if (userDetails?.name) {
+            userName = `${userDetails.name}`;
+        } else if (userDetails?.wallet_address) {
+            userName = userDetails.wallet_address.substring(0, 12) + '...';
+        } else {
+            // 🔄 Fallback: prova a prendere l'utente autenticato attuale
+            const currentUser = (window as any).user || (window as any).Laravel?.user;
+            if (currentUser?.name && currentUser?.last_name) {
+                userName = `${currentUser.name} ${currentUser.last_name}`;
+            }
+        }
+
+        // 👤 Avatar e status commissioner
+        const isCommissioner = userDetails?.is_commissioner || false;
+        const avatarUrl = userDetails?.avatar || null;
+
+        console.log('🔍 DEBUG AVATAR (egi-card-list):', {
+            isCommissioner,
+            avatarUrl,
+            userName
+        });
+
+        // Crea la nuova sezione con avatar+attivatore
+        const newActivatorSection = document.createElement('div');
+        newActivatorSection.className = 'flex items-center gap-2 mb-1 text-sm';
+        newActivatorSection.setAttribute('data-activation-status', 'activated');
+
+        // Avatar con logica corretta
+        let avatarElement = '';
+        if (avatarUrl) {
+            avatarElement = `<img src="${avatarUrl}" alt="${userName}" class="object-cover w-4 h-4 border rounded-full shadow-sm border-green-400/30">`;
+        } else if (isCommissioner) {
+            avatarElement = `
+                <div class="flex items-center justify-center w-4 h-4 bg-green-500 rounded-full shadow-sm">
+                    <svg class="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+            `;
+        } else {
+            avatarElement = `
+                <div class="flex items-center justify-center w-4 h-4 bg-gray-600 rounded-full">
+                    <svg class="w-2 h-2 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+            `;
+        }
+
+        newActivatorSection.innerHTML = `
+            ${avatarElement}
+            <span class="font-medium text-green-300" data-activator-name>${userName}</span>
+            <span class="text-xs text-gray-400">(Attivatore)</span>
+        `;
+
+        // Sostituisci la sezione "Da Attivare" con quella dell'attivatore
+        availableSection.parentNode?.replaceChild(newActivatorSection, availableSection);
+
+        console.log('✅ SEZIONE "DA ATTIVARE" SOSTITUITA CON AVATAR+ATTIVATORE');
+
+        // Evidenziazione visiva temporanea
+        newActivatorSection.style.backgroundColor = '#dcfce7';
+        newActivatorSection.style.border = '1px solid #16a34a';
+        setTimeout(() => {
+            newActivatorSection.style.backgroundColor = '';
+            newActivatorSection.style.border = '';
+        }, 3000);
+
+    } else {
+        console.log('❌ Non trovata sezione [data-activation-status="available"] in egi-card-list');
+    }
 }
 
 // Export the main service functions and types
