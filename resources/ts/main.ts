@@ -42,6 +42,7 @@ import reservationFeature from './features/reservations/reservationFeature';
 import reservationButtons from './features/reservations/reservationButtons';
 import { initPortfolioManager } from './features/portfolio/portfolioManager'; // 🚀 NEW
 import { NatanAssistant } from './components/natan-assistant';
+import { mountAllCurrentPrices } from './current-price'; // 🔴 Real-time price updates
 
 // --- 💰 IMPORTAZIONI SISTEMA MULTI-VALUTA (Enterprise Financial System) ---
 import { currencyService } from './services/currencyService';
@@ -485,6 +486,10 @@ async function initializeApplicationOrchestrated(): Promise<void> {
         // FASE 6: Sistema Multi-Valuta (Enterprise Financial System)
         // console.log('Padmin Main: Phase 6 - Initializing Multi-Currency System...');
         await initializeCurrencySystemOrchestrated();
+
+        // FASE 6.1: Real-time Price Updates
+        // console.log('Padmin Main: Phase 6.1 - Initializing real-time price updates...');
+        mountAllCurrentPrices();
 
         // FASE 7: Sistema FEGI (include UploadModalManager + Ultra Upload Manager on-demand)
         // console.log('Padmin Main: Phase 7 - Initializing FEGI system...');
