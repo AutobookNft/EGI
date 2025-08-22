@@ -530,8 +530,18 @@ export class ReservationFormModal {
             });
 
             // 🎯 AGGIORNA TUTTI GLI ELEMENTI CON LO STESSO EGI ID
-            Array.from(allEgiElements).forEach((egiCard, cardIndex) => {
-                console.log(`\n🔄 Aggiornando elemento ${cardIndex}: ${egiCard.tagName}.${egiCard.className}`); console.log('✅ Card trovata!', egiCard);
+            Array.from(allEgiElements).forEach((element, cardIndex) => {
+                console.log(`\n🔄 Aggiornando elemento ${cardIndex}: ${element.tagName}.${element.className}`);
+                
+                // 🎯 SKIP i bottoni - processiamo solo le card vere
+                if (element.tagName === 'BUTTON') {
+                    console.log('⏭️ SKIP: È un bottone, non una card');
+                    return;
+                }
+                
+                // 🎯 Ora element è sicuramente una card (ARTICLE)
+                const egiCard = element;
+                console.log('✅ Card trovata!', egiCard);
                 console.log('🔍 Struttura HTML della card:', egiCard.outerHTML.substring(0, 300) + '...');
 
                 // 🎯 GESTIONE SPECIFICA PER EGI-CARD-LIST
@@ -760,14 +770,14 @@ export class ReservationFormModal {
                 // 🎯 AGGIORNA BOTTONE DA "ATTIVALO" A "RILANCIA"
                 console.log('🔄 Aggiornamento bottone prenotazione...');
                 const reserveButton = egiCard.querySelector('.reserve-button');
-                
+
                 if (reserveButton) {
                     console.log('✅ Trovato bottone prenotazione, aggiornamento in corso...');
-                    
+
                     // Ottieni il testo attuale del bottone (senza l'icona)
                     const currentHtml = reserveButton.innerHTML;
                     console.log(`🔄 HTML bottone attuale:`, currentHtml);
-                    
+
                     // Aggiorna l'HTML del bottone completamente per "Rilancia"
                     reserveButton.innerHTML = `
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -775,16 +785,16 @@ export class ReservationFormModal {
                         </svg>
                         Rilancia
                     `;
-                    
+
                     // Cambia le classi CSS per il colore (da purple a amber/orange)
                     reserveButton.className = reserveButton.className
                         .replace(/bg-gradient-to-r from-purple-500 to-purple-600/, 'bg-gradient-to-r from-amber-500 to-orange-600')
                         .replace(/hover:from-purple-600 hover:to-purple-700/, 'hover:from-amber-600 hover:to-orange-700');
-                    
+
                     console.log('✅ BOTTONE AGGIORNATO: "Prenota" → "Rilancia" con colore amber/orange');
                 } else {
                     console.log('❌ Bottone prenotazione non trovato');
-                    
+
                     // 🔍 DEBUG MIGLIORATO: Mostra tutti i bottoni nella card
                     const allButtons = egiCard.querySelectorAll('button');
                     console.log(`🔍 Trovati ${allButtons.length} bottoni nella card:`);
@@ -794,18 +804,18 @@ export class ReservationFormModal {
                         console.log(`  [${index}] data-egi-id: "${btn.getAttribute('data-egi-id')}"`);
                         console.log(`  [${index}] Ha classe .reserve-button: ${btn.classList.contains('reserve-button')}`);
                     });
-                    
+
                     // 🎯 PROVA A TROVARE IL BOTTONE CON METODI ALTERNATIVI
-                    const buttonByText = Array.from(allButtons).find(btn => 
-                        btn.textContent?.includes('Prenota') || 
+                    const buttonByText = Array.from(allButtons).find(btn =>
+                        btn.textContent?.includes('Prenota') ||
                         btn.textContent?.includes('Reserve') ||
                         btn.innerHTML.includes('Prenota')
                     );
-                    
+
                     if (buttonByText) {
                         console.log('🎯 TROVATO bottone tramite testo "Prenota"!');
                         console.log('🔄 Aggiornamento tramite fallback...');
-                        
+
                         // Aggiorna questo bottone
                         buttonByText.innerHTML = `
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -813,38 +823,38 @@ export class ReservationFormModal {
                             </svg>
                             Rilancia
                         `;
-                        
+
                         // Cambia le classi CSS per il colore
                         buttonByText.className = buttonByText.className
                             .replace(/bg-gradient-to-r from-purple-500 to-purple-600/, 'bg-gradient-to-r from-amber-500 to-orange-600')
                             .replace(/hover:from-purple-600 hover:to-purple-700/, 'hover:from-amber-600 hover:to-orange-700');
-                        
+
                         console.log('✅ BOTTONE AGGIORNATO tramite fallback!');
                     } else {
                         console.log('❌ Nessun bottone trovato anche con fallback');
                     }
                 }
-                
+
                 // 🎯 AGGIUNGI SEZIONE CONTEGGIO PRENOTAZIONI
                 console.log('📊 Aggiunta sezione conteggio prenotazioni...');
-                
+
                 // Trova dove inserire la sezione (dopo le info del creator e collection)
-                const collectionInfo = egiCard.querySelector('[data-collection-info]') || 
-                                     egiCard.querySelector('.flex.items-center.gap-2:has(.text-purple-500)') ||
-                                     egiCard.querySelector('.flex.items-center.gap-2:has(svg):has(.text-purple-300)');
-                
+                const collectionInfo = egiCard.querySelector('[data-collection-info]') ||
+                    egiCard.querySelector('.flex.items-center.gap-2:has(.text-purple-500)') ||
+                    egiCard.querySelector('.flex.items-center.gap-2:has(svg):has(.text-purple-300)');
+
                 // Se non trova la collection info, cerca dopo le info del creator
-                const insertAfter = collectionInfo || 
-                                  egiCard.querySelector('[data-creator-info]') ||
-                                  egiCard.querySelector('.flex.items-center.gap-2:has(.text-blue-500)');
-                
+                const insertAfter = collectionInfo ||
+                    egiCard.querySelector('[data-creator-info]') ||
+                    egiCard.querySelector('.flex.items-center.gap-2:has(.text-blue-500)');
+
                 if (insertAfter && !egiCard.querySelector('[data-reservation-count]')) {
                     console.log('✅ Trovato punto di inserimento, aggiungendo sezione prenotazioni...');
-                    
+
                     const reservationSection = document.createElement('div');
                     reservationSection.className = 'flex items-center gap-2 p-2 mb-2 border rounded-lg border-gray-700/50 bg-gray-800/50';
                     reservationSection.setAttribute('data-reservation-count', 'true');
-                    
+
                     reservationSection.innerHTML = `
                         <div class="flex items-center justify-center flex-shrink-0 w-5 h-5 rounded-full bg-gradient-to-r from-green-500 to-emerald-500">
                             <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -858,10 +868,10 @@ export class ReservationFormModal {
                             </span>
                         </div>
                     `;
-                    
+
                     // Inserisci dopo l'elemento trovato
                     insertAfter.parentNode?.insertBefore(reservationSection, insertAfter.nextSibling);
-                    
+
                     // Evidenziazione visiva per la nuova sezione
                     reservationSection.style.backgroundColor = '#dcfce7';
                     reservationSection.style.borderColor = '#16a34a';
@@ -869,17 +879,17 @@ export class ReservationFormModal {
                         reservationSection.style.backgroundColor = '';
                         reservationSection.style.borderColor = '';
                     }, 3000);
-                    
+
                     console.log('✅ SEZIONE PRENOTAZIONI AGGIUNTA!');
                 } else if (egiCard.querySelector('[data-reservation-count]')) {
                     console.log('📊 Sezione prenotazioni già presente, aggiornamento conteggio...');
-                    
+
                     const existingSection = egiCard.querySelector('[data-reservation-count] .text-gray-300');
                     if (existingSection && existingSection instanceof HTMLElement) {
                         const currentCount = existingSection.textContent?.match(/(\d+)/)?.[1] || '0';
                         const newCount = parseInt(currentCount) + 1;
                         existingSection.textContent = `${newCount} ${newCount === 1 ? 'Prenotazione' : 'Prenotazioni'}`;
-                        
+
                         // Evidenziazione visiva
                         existingSection.style.backgroundColor = '#dcfce7';
                         existingSection.style.fontWeight = 'bold';
@@ -887,7 +897,7 @@ export class ReservationFormModal {
                             existingSection.style.backgroundColor = '';
                             existingSection.style.fontWeight = '';
                         }, 2000);
-                        
+
                         console.log(`✅ CONTEGGIO PRENOTAZIONI AGGIORNATO: ${currentCount} → ${newCount}`);
                     }
                 } else {
@@ -895,7 +905,7 @@ export class ReservationFormModal {
                 }
 
                 console.log('🎉 CARD AGGIORNATA COMPLETAMENTE!');
-                
+
                 // ✅ USA LA FUNZIONE DI REFRESH AUTOMATICO ESISTENTE
                 // Simile a quella in collection-badge.blade.php che aggiorna ogni 5 secondi
                 setTimeout(() => {

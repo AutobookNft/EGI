@@ -341,5 +341,33 @@ export class ReservationModalUI {
         } else {
             console.log('❌ Non trovata sezione [data-activation-status="available"] in egi-card-list');
         }
+
+        // 🎯 AGGIORNA ANCHE IL BOTTONE NELL'EGI-CARD-LIST
+        console.log('🔄 Aggiornamento bottone in egi-card-list...');
+        const reserveButton = egiCard.querySelector('.reserve-button');
+        
+        if (reserveButton) {
+            console.log('✅ Trovato bottone in egi-card-list, aggiornamento...');
+            
+            // Aggiorna HTML con icona "Rilancia"
+            reserveButton.innerHTML = `
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+                Rilancia
+            `;
+            
+            // Aggiorna le classi CSS per il colore amber/orange
+            const currentClassName = reserveButton.className;
+            const newClassName = currentClassName
+                .replace(/bg-gradient-to-r from-purple-500 to-purple-600/, 'bg-gradient-to-r from-amber-500 to-orange-600')
+                .replace(/hover:from-purple-600 hover:to-purple-700/, 'hover:from-amber-600 hover:to-orange-700');
+            
+            reserveButton.className = newClassName;
+            
+            console.log('✅ BOTTONE EGI-CARD-LIST AGGIORNATO: "Prenota" → "Rilancia"');
+        } else {
+            console.log('❌ Bottone non trovato in egi-card-list');
+        }
     }
 }
