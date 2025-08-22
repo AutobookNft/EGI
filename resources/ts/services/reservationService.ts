@@ -959,41 +959,8 @@ export function initReservationModal(egiId: number): ReservationFormModal {
  * @returns {Promise<ReservationResponse>} The reservation response
  */
 export async function reserveEgi(egiId: number, data: ReservationFormData): Promise<ReservationResponse> {
-    try {
-        const config = getAppConfig();
-
-        // Use the API route for reservations with safety check
-        let reserveUrl;
-        if (config.routes?.api?.egisReserve) {
-            reserveUrl = config.routes.api.egisReserve.replace(':egiId', egiId.toString());
-        } else {
-            // Fallback to hardcoded URL
-            reserveUrl = `/api/egis/${egiId}/reserve`;
-        }
-
-        const response = await fetch(reserveUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'X-CSRF-TOKEN': getCsrfTokenTS()
-            },
-            body: JSON.stringify(data)
-        });
-
-        if (!response.ok && !response.headers.get('content-type')?.includes('application/json')) {
-            throw new Error('HTTP error: ' + response.status + ' ' + response.statusText);
-        }
-
-        return await response.json();
-    } catch (error: any) {
-        console.error('Reservation API error:', error);
-        return {
-            success: false,
-            message: (error instanceof Error) ? error.message : 'An unknown error occurred',
-            error_code: 'RESERVATION_API_ERROR'
-        };
-    }
+    const apiClient = new ReservationApiClient();
+    return await apiClient.createReservation(egiId, data);
 }
 
 /**

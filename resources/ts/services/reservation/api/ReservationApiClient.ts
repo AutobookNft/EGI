@@ -27,11 +27,47 @@ import { getCsrfTokenTS } from '../../../utils/csrf';
 export class ReservationApiClient {
 
     /**
-     * Create a new reservation
+     * Create a new reservation (reserve EGI)
+     * @param {number} egiId The ID of the EGI to reserve
+     * @param {ReservationFormData} data The reservation form data
+     * @returns {Promise<ReservationResponse>} The reservation response
      */
-    async createReservation(data: ReservationFormData): Promise<ReservationResponse | ServerErrorResponse> {
-        // TODO: Move implementation from original file
-        throw new Error('Implementation needed');
+    async createReservation(egiId: number, data: ReservationFormData): Promise<ReservationResponse> {
+        try {
+            const config = getAppConfig();
+
+            // Use the API route for reservations with safety check
+            let reserveUrl;
+            if (config.routes?.api?.egisReserve) {
+                reserveUrl = config.routes.api.egisReserve.replace(':egiId', egiId.toString());
+            } else {
+                // Fallback to hardcoded URL
+                reserveUrl = `/api/egis/${egiId}/reserve`;
+            }
+
+            const response = await fetch(reserveUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': getCsrfTokenTS()
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (!response.ok && !response.headers.get('content-type')?.includes('application/json')) {
+                throw new Error('HTTP error: ' + response.status + ' ' + response.statusText);
+            }
+
+            return await response.json();
+        } catch (error: any) {
+            console.error('Reservation API error:', error);
+            return {
+                success: false,
+                message: (error instanceof Error) ? error.message : 'An unknown error occurred',
+                error_code: 'RESERVATION_API_ERROR'
+            };
+        }
     }
 
     /**
