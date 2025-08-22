@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\PriceUpdated;
 use App\Helpers\FegiAuth;
 use App\Models\Egi;
 use App\Models\Reservation;
@@ -138,6 +139,14 @@ class ReservationController extends Controller {
                 'offer_amount_fiat' => $reservation->offer_amount_fiat,
                 'fiat_currency' => $reservation->fiat_currency
             ]);
+
+            // 🔴 Emit real-time price update event
+            PriceUpdated::dispatch(
+                $egiId,
+                number_format((float)$reservation->offer_amount_fiat, 2),
+                $reservation->fiat_currency ?? 'EUR',
+                now()->toISOString()
+            );
 
             return redirect()->route('egi-certificates.show', $reservation->certificate->certificate_uuid)
                 ->with('success', __('reservation.success'));
@@ -289,6 +298,14 @@ class ReservationController extends Controller {
                 'certificate_uuid' => $reservation->certificate?->certificate_uuid,
                 'offer_amount_fiat' => $reservation->offer_amount_fiat
             ]);
+
+            // 🔴 Emit real-time price update event
+            PriceUpdated::dispatch(
+                $egiId,
+                number_format((float)$reservation->offer_amount_fiat, 2),
+                $reservation->fiat_currency ?? 'EUR',
+                now()->toISOString()
+            );
 
             return response()->json([
                 'success' => true,
@@ -835,6 +852,14 @@ class ReservationController extends Controller {
                 'rank_position' => $reservation->rank_position,
                 'is_highest' => $reservation->is_highest
             ]);
+
+            // 🔴 Emit real-time price update event for pre-launch reservation
+            PriceUpdated::dispatch(
+                $reservation->egi_id,
+                number_format((float)$reservation->amount_eur, 2),
+                'EUR',
+                now()->toISOString()
+            );
 
             return response()->json([
                 'success' => true,
