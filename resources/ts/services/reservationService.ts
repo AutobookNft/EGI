@@ -30,6 +30,7 @@ import { getAppConfig, route, appTranslate, ServerErrorResponse } from '../confi
 import { getCsrfTokenTS } from '../utils/csrf';
 import { getAuthStatus } from '../features/auth/authService';
 import { getAlgoExchangeRate, getCachedAlgoRate, setCachedAlgoRate } from './reservation/ExchangeRateService';
+import { ReservationApiClient } from './reservation/api/ReservationApiClient';
 import type {
     ReservationFormData,
     ReservationResponse,
@@ -37,6 +38,9 @@ import type {
     PreLaunchReservationResponse,
     RankingsResponse
 } from '../types/reservationTypes';
+
+// 🎯 SOLID Architecture Instances - gradual migration
+const reservationApiClient = new ReservationApiClient();
 
 // --- STATE ---
 let reservationModalInstance: ReservationFormModal | null = null;
@@ -1050,31 +1054,7 @@ export async function getEgiReservationStatus(egiId: number): Promise<Reservatio
  * @returns {Promise<{success: boolean, message: string}>} The cancellation response
  */
 export async function cancelReservation(reservationId: number): Promise<{ success: boolean, message: string }> {
-    try {
-        const cancelUrl = route('api.reservations.cancel', { id: reservationId });
-
-        const response = await fetch(cancelUrl, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'X-CSRF-TOKEN': getCsrfTokenTS()
-            }
-        });
-
-        if (!response.ok && !response.headers.get('content-type')?.includes('application/json')) {
-            throw new Error("HTTP error: " + response.status + " " + response.statusText);
-        }
-
-        return await response.json();
-    } catch (error) {
-        console.error('Reservation cancellation API error:', error);
-
-        return {
-            success: false,
-            message: (error instanceof Error) ? error.message : 'An unknown error occurred'
-        };
-    }
+    return reservationApiClient.cancelReservation(reservationId);
 }
 
 // ============================================================================
