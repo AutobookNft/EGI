@@ -9,7 +9,7 @@
 
 // All'inizio di ReservationFormModal.ts
 import { UEM_Client_TS_Placeholder as UEM } from '../../uemClientService';
-import { getAppConfig, route, appTranslate, ServerErrorResponse } from '../../../config/appConfig';
+import { getAppConfig, appTranslate } from '../../../config/appConfig';
 import { getCsrfTokenTS } from '../../../utils/csrf';
 import { getAuthStatus } from '../../../features/auth/authService';
 import { getAlgoExchangeRate, getCachedAlgoRate, setCachedAlgoRate } from '../ExchangeRateService';
@@ -17,7 +17,6 @@ import { ReservationModalUI } from '../ui/ReservationModalUI';
 import type {
     ReservationFormData,
     ReservationResponse,
-    ReservationStatusResponse
 } from '../../../types/reservationTypes';
 
 // Per usare la funzione reserveEgi
@@ -758,10 +757,110 @@ export class ReservationFormModal {
                     console.log('👤 NESSUN ELEMENTO [data-activator-name] TROVATO - probabilmente non ci sono attivatori nella card!');
                 }
 
-                console.log('🎉 CARD AGGIORNATA!');            // ✅ USA LA FUNZIONE DI REFRESH AUTOMATICO ESISTENTE
+                // 🎯 AGGIORNA BOTTONE DA "ATTIVALO" A "RILANCIA"
+                console.log('🔄 Aggiornamento bottone prenotazione...');
+                const reserveButton = egiCard.querySelector('.reserve-button');
+                
+                if (reserveButton) {
+                    console.log('✅ Trovato bottone prenotazione, aggiornamento in corso...');
+                    
+                    // Ottieni il testo attuale del bottone (senza l'icona)
+                    const currentHtml = reserveButton.innerHTML;
+                    console.log(`🔄 HTML bottone attuale:`, currentHtml);
+                    
+                    // Aggiorna l'HTML del bottone completamente per "Rilancia"
+                    reserveButton.innerHTML = `
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                        Rilancia
+                    `;
+                    
+                    // Cambia le classi CSS per il colore (da purple a amber/orange)
+                    reserveButton.className = reserveButton.className
+                        .replace(/bg-gradient-to-r from-purple-500 to-purple-600/, 'bg-gradient-to-r from-amber-500 to-orange-600')
+                        .replace(/hover:from-purple-600 hover:to-purple-700/, 'hover:from-amber-600 hover:to-orange-700');
+                    
+                    console.log('✅ BOTTONE AGGIORNATO: "Prenota" → "Rilancia" con colore amber/orange');
+                } else {
+                    console.log('❌ Bottone prenotazione non trovato');
+                }
+                
+                // 🎯 AGGIUNGI SEZIONE CONTEGGIO PRENOTAZIONI
+                console.log('📊 Aggiunta sezione conteggio prenotazioni...');
+                
+                // Trova dove inserire la sezione (dopo le info del creator e collection)
+                const collectionInfo = egiCard.querySelector('[data-collection-info]') || 
+                                     egiCard.querySelector('.flex.items-center.gap-2:has(.text-purple-500)') ||
+                                     egiCard.querySelector('.flex.items-center.gap-2:has(svg):has(.text-purple-300)');
+                
+                // Se non trova la collection info, cerca dopo le info del creator
+                const insertAfter = collectionInfo || 
+                                  egiCard.querySelector('[data-creator-info]') ||
+                                  egiCard.querySelector('.flex.items-center.gap-2:has(.text-blue-500)');
+                
+                if (insertAfter && !egiCard.querySelector('[data-reservation-count]')) {
+                    console.log('✅ Trovato punto di inserimento, aggiungendo sezione prenotazioni...');
+                    
+                    const reservationSection = document.createElement('div');
+                    reservationSection.className = 'flex items-center gap-2 p-2 mb-2 border rounded-lg border-gray-700/50 bg-gray-800/50';
+                    reservationSection.setAttribute('data-reservation-count', 'true');
+                    
+                    reservationSection.innerHTML = `
+                        <div class="flex items-center justify-center flex-shrink-0 w-5 h-5 rounded-full bg-gradient-to-r from-green-500 to-emerald-500">
+                            <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
+                                <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 1 1 0 000 2H6a2 2 0 00-2 2v6a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-1a1 1 0 100-2 2 2 0 012 2v8a2 2 0 01-2 2H6a2 2 0 01-2-2V5z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <span class="text-xs font-medium text-gray-300">
+                                1 Prenotazione
+                            </span>
+                        </div>
+                    `;
+                    
+                    // Inserisci dopo l'elemento trovato
+                    insertAfter.parentNode?.insertBefore(reservationSection, insertAfter.nextSibling);
+                    
+                    // Evidenziazione visiva per la nuova sezione
+                    reservationSection.style.backgroundColor = '#dcfce7';
+                    reservationSection.style.borderColor = '#16a34a';
+                    setTimeout(() => {
+                        reservationSection.style.backgroundColor = '';
+                        reservationSection.style.borderColor = '';
+                    }, 3000);
+                    
+                    console.log('✅ SEZIONE PRENOTAZIONI AGGIUNTA!');
+                } else if (egiCard.querySelector('[data-reservation-count]')) {
+                    console.log('📊 Sezione prenotazioni già presente, aggiornamento conteggio...');
+                    
+                    const existingSection = egiCard.querySelector('[data-reservation-count] .text-gray-300');
+                    if (existingSection && existingSection instanceof HTMLElement) {
+                        const currentCount = existingSection.textContent?.match(/(\d+)/)?.[1] || '0';
+                        const newCount = parseInt(currentCount) + 1;
+                        existingSection.textContent = `${newCount} ${newCount === 1 ? 'Prenotazione' : 'Prenotazioni'}`;
+                        
+                        // Evidenziazione visiva
+                        existingSection.style.backgroundColor = '#dcfce7';
+                        existingSection.style.fontWeight = 'bold';
+                        setTimeout(() => {
+                            existingSection.style.backgroundColor = '';
+                            existingSection.style.fontWeight = '';
+                        }, 2000);
+                        
+                        console.log(`✅ CONTEGGIO PRENOTAZIONI AGGIORNATO: ${currentCount} → ${newCount}`);
+                    }
+                } else {
+                    console.log('❌ Non riesco a trovare dove inserire la sezione prenotazioni');
+                }
+
+                console.log('🎉 CARD AGGIORNATA COMPLETAMENTE!');
+                
+                // ✅ USA LA FUNZIONE DI REFRESH AUTOMATICO ESISTENTE
                 // Simile a quella in collection-badge.blade.php che aggiorna ogni 5 secondi
                 setTimeout(() => {
-                    console.log('� Triggering automatic refresh of EGI data...');
+                    console.log('🔄 Triggering automatic refresh of EGI data...');
 
                     // ✅ USA GLI EVENTI CHE IL COLLECTION-BADGE GIÀ ASCOLTA!
                     // 1. collection-changed event
@@ -784,7 +883,7 @@ export class ReservationFormModal {
 
                     // Forza anche il refresh della pagina se necessario per aggiornare le cifre
                     if (typeof window !== 'undefined' && window.location) {
-                        console.log('� Scheduling page data refresh...');
+                        console.log('🔄 Scheduling page data refresh...');
                         setTimeout(() => {
                             // NO RELOAD! Questa è una SPA, non PHP anni 90!
                         }, 2000); // Aspetta 2 secondi prima del refresh

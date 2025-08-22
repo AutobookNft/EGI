@@ -25,11 +25,7 @@
  * @author Fabio Cherici
  * @refactored 2025-01-20 - SOLID Architecture Implementation
  */
-
-import { UEM_Client_TS_Placeholder as UEM } from './uemClientService';
-import { getAppConfig, route, appTranslate, ServerErrorResponse } from '../config/appConfig';
-import { getCsrfTokenTS } from '../utils/csrf';
-import { getAuthStatus } from '../features/auth/authService';
+import { ServerErrorResponse } from '../config/appConfig';
 import { getAlgoExchangeRate, getCachedAlgoRate, setCachedAlgoRate } from './reservation/ExchangeRateService';
 import { ReservationApiClient } from './reservation/api/ReservationApiClient';
 import { ReservationModalUI } from './reservation/ui/ReservationModalUI';

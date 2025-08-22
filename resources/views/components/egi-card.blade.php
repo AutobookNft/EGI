@@ -374,7 +374,7 @@ $isCreator = auth()->check() && auth()->id() === $creatorId;
 
             {{-- 🎨 CREATOR INFO - SEMPRE VISIBILE --}}
             @if ($egiCreator)
-                <div class="flex items-center gap-2 p-2 mb-2 border rounded-lg border-gray-700/50 bg-gray-800/50">
+                <div class="flex items-center gap-2 p-2 mb-2 border rounded-lg border-gray-700/50 bg-gray-800/50" data-creator-info>
                     <div class="flex items-center justify-center flex-shrink-0 w-5 h-5 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500">
                         <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
@@ -389,7 +389,7 @@ $isCreator = auth()->check() && auth()->id() === $creatorId;
 
             {{-- 📦 COLLECTION INFO --}}
             @if ($egiCollection)
-                <div class="flex items-center gap-2 p-2 mb-2 border rounded-lg border-gray-700/50 bg-gray-800/50">
+                <div class="flex items-center gap-2 p-2 mb-2 border rounded-lg border-gray-700/50 bg-gray-800/50" data-collection-info>
                     <div class="flex items-center justify-center flex-shrink-0 w-5 h-5 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500">
                         <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" />
@@ -404,7 +404,7 @@ $isCreator = auth()->check() && auth()->id() === $creatorId;
 
             {{-- 📊 RESERVATION COUNT --}}
             @if ($egi->reservations && $egi->reservations->count() > 0)
-                <div class="flex items-center gap-2 p-2 mb-2 border rounded-lg border-gray-700/50 bg-gray-800/50">
+                <div class="flex items-center gap-2 p-2 mb-2 border rounded-lg border-gray-700/50 bg-gray-800/50" data-reservation-count>
                     <div class="flex items-center justify-center flex-shrink-0 w-5 h-5 rounded-full bg-gradient-to-r from-green-500 to-emerald-500">
                         <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
@@ -454,7 +454,7 @@ $isCreator = auth()->check() && auth()->id() === $creatorId;
                             </span>
                         </div>
                         <div class="text-right">
-                            <span class="text-sm font-bold text-white">
+                            <span class="text-sm font-bold text-white" data-price-display>
                                 <x-currency-price :price="$displayPrice" size="small" />
                             </span>
                         </div>
@@ -490,10 +490,10 @@ $isCreator = auth()->check() && auth()->id() === $creatorId;
                             <span class="text-xs {{ $isWeakReservation ? 'text-amber-200' : 'text-green-200' }} truncate">
                                 @if ($isWeakReservation)
                                     {{ __('egi.reservation.weak_bidder') }}:
-                                    <span class="font-semibold">{{ $highestReservation->fegi_code ?? 'FG#******' }}</span>
+                                    <span class="font-semibold" data-activator-name>{{ $highestReservation->fegi_code ?? 'FG#******' }}</span>
                                 @else
                                     {{ __('egi.reservation.activator') }}:
-                                    <span class="font-semibold">{{ $activatorDisplay['name'] }}</span>
+                                    <span class="font-semibold" data-activator-name>{{ $activatorDisplay['name'] }}</span>
                                 @endif
                             </span>
                         </div>
@@ -517,7 +517,7 @@ $isCreator = auth()->check() && auth()->id() === $creatorId;
     </div>
 
     {{-- 🔥 Reserve/Outbid Button - MANTIENE LA CLASSE reserve-button PER TYPESCRIPT --}}
-    @if(!$isCreator && !$hideReserveButton && $egi->price && $egi->price > 0)
+    {{-- @if(!$isCreator && !$hideReserveButton && $egi->price && $egi->price > 0)
         <div class="mt-3">
             <button type="button"
                     class="reserve-button w-full flex items-center justify-center px-4 py-2 text-sm font-medium text-white
@@ -544,5 +544,35 @@ $isCreator = auth()->check() && auth()->id() === $creatorId;
             </svg>
             {{ __('egi.status.not_for_sale') }}
         </div>
+    @endif --}}
+     @if(!$isCreator)
+    <div class="mt-3">
+        @if($egi->price && $egi->price > 0)
+        <button type="button" class="reserve-button w-full flex items-center justify-center px-4 py-2 text-sm font-medium text-white
+                {{ $hasCurrentReservation ? 'bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700' : 'bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700' }}
+                rounded-t-none rounded-b-lg transition-all transform hover:scale-[1.01]" data-egi-id="{{ $egi->id }}">
+            @if($hasCurrentReservation)
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
+            {{ __('egi.actions.outbid') ?? 'Rilancia' }}
+            @else
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            {{ __('egi.actions.reserve') ?? 'Prenota' }}
+            @endif
+        </button>
+        @else
+        <div
+            class="flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-gray-500 bg-gray-100 rounded-t-none rounded-b-lg">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L5.636 5.636" />
+            </svg>
+            {{ __('egi.status.not_for_sale') ?? 'Non in vendita' }}
+        </div>
+        @endif
+    </div>
     @endif
 </article>

@@ -526,6 +526,10 @@ Route::get('/biographies/{biography:slug}', [BiographyWebController::class, 'sho
 |
 */
 
+// Fuori da auth per compatibilità legacy (da rimuovere in futuro)
+Route::post('/user/preferred-currency', [App\Http\Controllers\Api\UserPreferenceController::class, 'updatePreferredCurrency'])
+        ->name('user.currency.update.legacy');
+
 Route::middleware(['auth'])->group(function () {
     /*
     |--------------------------------------------------------------------------
@@ -542,10 +546,7 @@ Route::middleware(['auth'])->group(function () {
         ->name('user.currency.get');
     Route::put('/user/preferences/currency', [App\Http\Controllers\Api\CurrencyController::class, 'updateUserPreference'])
         ->name('user.currency.update');
-
-    // Legacy compatibility
-    Route::post('/user/preferred-currency', [App\Http\Controllers\Api\UserPreferenceController::class, 'updatePreferredCurrency'])
-        ->name('user.currency.update.legacy');
+   
 
     // Biography management (user's own biographies)
     Route::get('/biography/manage', [App\Http\Controllers\Web\BiographyController::class, 'manage'])
