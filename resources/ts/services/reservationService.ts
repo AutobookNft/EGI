@@ -1076,26 +1076,7 @@ export async function createPreLaunchReservation(
  * @returns {Promise<RankingsResponse>} The rankings response
  */
 export async function getPreLaunchRankings(egiId: number): Promise<RankingsResponse> {
-    try {
-        const response = await fetch(`/ api / reservations / pre - launch / rankings / ${egiId} `, {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json'
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error("HTTP error: " + response.status + " " + response.statusText);
-        }
-
-        return await response.json();
-    } catch (error) {
-        console.error('Error fetching rankings:', error);
-        return {
-            success: false,
-            data: undefined
-        };
-    }
+    return reservationApiClient.getPreLaunchRankings(egiId);
 }
 
 /**
