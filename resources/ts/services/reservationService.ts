@@ -1080,7 +1080,7 @@ export async function getPreLaunchRankings(egiId: number): Promise<RankingsRespo
 }
 
 /**
- * Withdraw a pre-launch reservation
+ * Withdraw a pre-launch reservation - Delegates to ReservationApiClient
  *
  * @param {number} reservationId The reservation ID
  * @returns {Promise<{success: boolean, message: string}>} The withdrawal response
@@ -1088,27 +1088,8 @@ export async function getPreLaunchRankings(egiId: number): Promise<RankingsRespo
 export async function withdrawPreLaunchReservation(
     reservationId: number
 ): Promise<{ success: boolean, message: string }> {
-    try {
-        const response = await fetch(`/ api / reservations / pre - launch / ${reservationId}/withdraw`, {
-            method: 'DELETE',
-            headers: {
-                'Accept': 'application/json',
-                'X-CSRF-TOKEN': getCsrfTokenTS()
-            }
-        });
-
-        if (!response.ok && !response.headers.get('content-type')?.includes('application/json')) {
-            throw new Error("HTTP error: " + response.status + " " + response.statusText);
-        }
-
-        return await response.json();
-    } catch (error) {
-        console.error('Withdrawal error:', error);
-        return {
-            success: false,
-            message: 'Failed to withdraw reservation'
-        };
-    }
+    const apiClient = new ReservationApiClient();
+    return await apiClient.withdrawPreLaunchReservation(reservationId);
 }
 
 /**

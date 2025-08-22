@@ -17,7 +17,7 @@ import {
     PreLaunchReservationData,
     PreLaunchReservationResponse,
     RankingsResponse
-} from '../types';
+} from '../../../types/reservationTypes';
 import { getAppConfig, route, ServerErrorResponse } from '../../../config/appConfig';
 import { getCsrfTokenTS } from '../../../utils/csrf';
 
@@ -155,10 +155,31 @@ export class ReservationApiClient {
 
     /**
      * Withdraw pre-launch reservation
+     * @param {number} reservationId The reservation ID
+     * @returns {Promise<{success: boolean, message: string}>} The withdrawal response
      */
     async withdrawPreLaunchReservation(reservationId: number): Promise<{ success: boolean; message: string }> {
-        // TODO: Move implementation from original file
-        throw new Error('Implementation needed');
+        try {
+            const response = await fetch(`/api/reservations/pre-launch/${reservationId}/withdraw`, {
+                method: 'DELETE',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': getCsrfTokenTS()
+                }
+            });
+
+            if (!response.ok && !response.headers.get('content-type')?.includes('application/json')) {
+                throw new Error("HTTP error: " + response.status + " " + response.statusText);
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Withdrawal error:', error);
+            return {
+                success: false,
+                message: 'Failed to withdraw reservation'
+            };
+        }
     }
 
     /**
