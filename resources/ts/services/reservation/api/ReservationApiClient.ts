@@ -9,9 +9,9 @@
  * @author GitHub Copilot for Fabio Cherici
  */
 
-import { 
-    ReservationFormData, 
-    ReservationResponse, 
+import {
+    ReservationFormData,
+    ReservationResponse,
     ReservationStatusResponse,
     AlgoExchangeRateResponse,
     PreLaunchReservationData,
@@ -25,7 +25,7 @@ import { getCsrfTokenTS } from '../../../utils/csrf';
  * Base API client for reservation operations
  */
 export class ReservationApiClient {
-    
+
     /**
      * Create a new reservation
      */
@@ -38,8 +38,46 @@ export class ReservationApiClient {
      * Get reservation status for an EGI
      */
     async getReservationStatus(egiId: number): Promise<ReservationStatusResponse | ServerErrorResponse> {
-        // TODO: Move implementation from original file
-        throw new Error('Implementation needed');
+        try {
+            // Use UEM.safeFetch if available, otherwise use regular fetch
+            const statusUrl = route('api.egis.reservation-status', { egi: egiId });
+
+            console.log('getEgiReservationStatus: route:', statusUrl);
+
+            if ((window as any).UEM && typeof (window as any).UEM.safeFetch === 'function') {
+                const response = await (window as any).UEM.safeFetch(statusUrl, {
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('HTTP error: ' + response.status + ' ' + response.statusText);
+                }
+
+                return await response.json();
+            } else {
+                const response = await fetch(statusUrl, {
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('HTTP error: ' + response.status + ' ' + response.statusText);
+                }
+
+                return await response.json();
+            }
+        } catch (error: any) {
+            console.error('Reservation status API error:', error);
+
+            return {
+                success: false,
+                message: (error instanceof Error) ? error.message : 'An unknown error occurred',
+                error_code: 'RESERVATION_STATUS_API_ERROR'
+            };
+        }
     }
 
     /**

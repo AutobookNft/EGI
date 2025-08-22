@@ -1004,47 +1004,7 @@ export async function reserveEgi(egiId: number, data: ReservationFormData): Prom
  * @return {Promise<ServerErrorResponse>} The reservation status response
  */
 export async function getEgiReservationStatus(egiId: number): Promise<ReservationStatusResponse | ServerErrorResponse> {
-
-    try {
-        // Use UEM.safeFetch if available, otherwise use regular fetch
-        const statusUrl = route('api.egis.reservation-status', { egi: egiId })
-
-        console.log('getEgiReservationStatus: route:', statusUrl)
-
-        if (UEM && typeof UEM.safeFetch === 'function') {
-            const response = await UEM.safeFetch(statusUrl, {
-                headers: {
-                    'Accept': 'application/json'
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error('HTTP error: ' + response.status + ' ' + response.statusText);
-            }
-
-            return await response.json();
-        } else {
-            const response = await fetch(statusUrl, {
-                headers: {
-                    'Accept': 'application/json'
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error('HTTP error: ' + response.status + ' ' + response.statusText);
-            }
-
-            return await response.json();
-        }
-    } catch (error: any) {
-        console.error('Reservation status API error:', error);
-
-        return {
-            success: false,
-            message: (error instanceof Error) ? error.message : 'An unknown error occurred',
-            error_code: 'RESERVATION_STATUS_API_ERROR'
-        };
-    }
+    return reservationApiClient.getReservationStatus(egiId);
 }
 
 /**
