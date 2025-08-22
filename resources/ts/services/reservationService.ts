@@ -938,12 +938,19 @@ class ReservationFormModal {
 }
 
 /**
- * Initialize the reservation modal for a specific EGI
+ * Initialize the reservation modal for a specific EGI - Delegates to modal factory
  *
  * @param {number} egiId The ID of the EGI to reserve
  * @returns {ReservationFormModal} The reservation modal instance
  */
 export function initReservationModal(egiId: number): ReservationFormModal {
+    return getOrCreateReservationModal(egiId);
+}
+
+/**
+ * Factory function for reservation modal singleton
+ */
+function getOrCreateReservationModal(egiId: number): ReservationFormModal {
     // Create a new instance or return the existing one if for the same EGI
     if (reservationModalInstance && reservationModalInstance['egiId'] === egiId) {
         return reservationModalInstance;
