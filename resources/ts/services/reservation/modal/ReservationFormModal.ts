@@ -784,6 +784,45 @@ export class ReservationFormModal {
                     console.log('✅ BOTTONE AGGIORNATO: "Prenota" → "Rilancia" con colore amber/orange');
                 } else {
                     console.log('❌ Bottone prenotazione non trovato');
+                    
+                    // 🔍 DEBUG MIGLIORATO: Mostra tutti i bottoni nella card
+                    const allButtons = egiCard.querySelectorAll('button');
+                    console.log(`🔍 Trovati ${allButtons.length} bottoni nella card:`);
+                    allButtons.forEach((btn, index) => {
+                        console.log(`  [${index}] Classe: "${btn.className}"`);
+                        console.log(`  [${index}] HTML: "${btn.innerHTML.substring(0, 80)}..."`);
+                        console.log(`  [${index}] data-egi-id: "${btn.getAttribute('data-egi-id')}"`);
+                        console.log(`  [${index}] Ha classe .reserve-button: ${btn.classList.contains('reserve-button')}`);
+                    });
+                    
+                    // 🎯 PROVA A TROVARE IL BOTTONE CON METODI ALTERNATIVI
+                    const buttonByText = Array.from(allButtons).find(btn => 
+                        btn.textContent?.includes('Prenota') || 
+                        btn.textContent?.includes('Reserve') ||
+                        btn.innerHTML.includes('Prenota')
+                    );
+                    
+                    if (buttonByText) {
+                        console.log('🎯 TROVATO bottone tramite testo "Prenota"!');
+                        console.log('🔄 Aggiornamento tramite fallback...');
+                        
+                        // Aggiorna questo bottone
+                        buttonByText.innerHTML = `
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                            </svg>
+                            Rilancia
+                        `;
+                        
+                        // Cambia le classi CSS per il colore
+                        buttonByText.className = buttonByText.className
+                            .replace(/bg-gradient-to-r from-purple-500 to-purple-600/, 'bg-gradient-to-r from-amber-500 to-orange-600')
+                            .replace(/hover:from-purple-600 hover:to-purple-700/, 'hover:from-amber-600 hover:to-orange-700');
+                        
+                        console.log('✅ BOTTONE AGGIORNATO tramite fallback!');
+                    } else {
+                        console.log('❌ Nessun bottone trovato anche con fallback');
+                    }
                 }
                 
                 // 🎯 AGGIUNGI SEZIONE CONTEGGIO PRENOTAZIONI
