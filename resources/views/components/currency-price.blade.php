@@ -15,6 +15,7 @@ Esempio uso:
 
 @props([
 'price',
+'egi' => null,
 'class' => '',
 'showAlgoConversion' => false,
 'reservation' => null,
@@ -73,10 +74,10 @@ $sizeClasses = [
 $currentSize = $sizeClasses[$size] ?? $sizeClasses['normal'];
 @endphp
 
-<div class="currency-price-container">
+<div class="currency-price-container{{ $egi ? ' current-price' : '' }}"{{ $egi ? ' data-egi-id=' . $egi->id : '' }}>
     <span {{ $attributes->merge(['class' => "currency-display {$class}"]) }} data-price-display>
         {{-- Sempre EUR - Sistema semplificato --}}
-        €{{ number_format($safePrice, 2) }}
+        €<span class="amount">{{ number_format($safePrice, 2) }}</span><span class="currency" style="display: none;">EUR</span>
     </span>
 
     {{-- 🪙 ALGO CONVERSION: Sempre visibile --}}
