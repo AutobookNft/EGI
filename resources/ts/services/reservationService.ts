@@ -15,14 +15,15 @@
 // import { getPortfolioManager } from '../features/portfolio/portfolioManager'; // RIMOSSO - non serve più!
 
 /**
- * PRE-LAUNCH RESERVATION FUNCTIONS
- *
- * ADD these functions to your existing reservationService.ts file
- * Place them BEFORE the final export default statement
- *
- * @author Padmin D. Curtis (AI Partner OS3.0) for Fabio Cherici
- * @date 2025-08-15
- * @version 1.0.0 (FlorenceEGI - Pre-Launch Addon)
+ * RESERVATION SERVICE - SOLID Architecture Implementation
+ * 
+ * This service has been refactored following SOLID principles with:
+ * - ReservationApiClient: API communication layer (SRP)
+ * - ReservationModalUI: UI component management (SRP)
+ * - Factory patterns for singleton management
+ * 
+ * @author Fabio Cherici
+ * @refactored 2025-01-20 - SOLID Architecture Implementation
  */
 
 import { UEM_Client_TS_Placeholder as UEM } from './uemClientService';
@@ -991,10 +992,6 @@ export async function getEgiReservationStatus(egiId: number): Promise<Reservatio
 export async function cancelReservation(reservationId: number): Promise<{ success: boolean, message: string }> {
     return reservationApiClient.cancelReservation(reservationId);
 }
-
-// ============================================================================
-// ADD THESE FUNCTIONS BEFORE THE export default STATEMENT
-// ============================================================================
 
 /**
  * Create or update a pre-launch reservation
