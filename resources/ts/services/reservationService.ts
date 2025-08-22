@@ -968,8 +968,7 @@ function getOrCreateReservationModal(egiId: number): ReservationFormModal {
  * @returns {Promise<ReservationResponse>} The reservation response
  */
 export async function reserveEgi(egiId: number, data: ReservationFormData): Promise<ReservationResponse> {
-    const apiClient = new ReservationApiClient();
-    return await apiClient.createReservation(egiId, data);
+    return reservationApiClient.createReservation(egiId, data);
 }
 
 /**
@@ -1008,8 +1007,7 @@ export async function createPreLaunchReservation(
     egiId: number,
     amountEur: number
 ): Promise<PreLaunchReservationResponse> {
-    const apiClient = new ReservationApiClient();
-    const data = await apiClient.createPreLaunchReservation(egiId, amountEur);
+    const data = await reservationApiClient.createPreLaunchReservation(egiId, amountEur);
 
     // Handle success with UI feedback
     if (data.success && data.data) {
@@ -1041,8 +1039,7 @@ export async function getPreLaunchRankings(egiId: number): Promise<RankingsRespo
 export async function withdrawPreLaunchReservation(
     reservationId: number
 ): Promise<{ success: boolean, message: string }> {
-    const apiClient = new ReservationApiClient();
-    return await apiClient.withdrawPreLaunchReservation(reservationId);
+    return reservationApiClient.withdrawPreLaunchReservation(reservationId);
 }
 
 // Export the main service functions and types
