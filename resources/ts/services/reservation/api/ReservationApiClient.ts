@@ -121,10 +121,42 @@ export class ReservationApiClient {
 
     /**
      * Create pre-launch reservation
+     * @param {number} egiId The EGI ID
+     * @param {number} amountEur The amount in EUR
+     * @returns {Promise<PreLaunchReservationResponse>} The reservation response
      */
-    async createPreLaunchReservation(data: PreLaunchReservationData): Promise<PreLaunchReservationResponse | ServerErrorResponse> {
-        // TODO: Move implementation from original file
-        throw new Error('Implementation needed');
+    async createPreLaunchReservation(
+        egiId: number,
+        amountEur: number
+    ): Promise<PreLaunchReservationResponse> {
+        try {
+            const response = await fetch('/api/reservations/pre-launch/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': getCsrfTokenTS()
+                },
+                body: JSON.stringify({
+                    egi_id: egiId,
+                    amount_eur: amountEur
+                })
+            });
+
+            if (!response.ok && !response.headers.get('content-type')?.includes('application/json')) {
+                throw new Error("HTTP error: " + response.status + " " + response.statusText);
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Pre-launch reservation error:', error);
+            // Ensure we always throw a proper Error object
+            if (error instanceof Error) {
+                throw error;
+            } else {
+                throw new Error(typeof error === 'string' ? error : 'An unknown error occurred during reservation');
+            }
+        }
     }
 
     /**

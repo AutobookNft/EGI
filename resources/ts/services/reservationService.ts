@@ -1032,41 +1032,15 @@ export async function createPreLaunchReservation(
     egiId: number,
     amountEur: number
 ): Promise<PreLaunchReservationResponse> {
-    try {
-        const response = await fetch('/api/reservations/pre-launch/create', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'X-CSRF-TOKEN': getCsrfTokenTS()
-            },
-            body: JSON.stringify({
-                egi_id: egiId,
-                amount_eur: amountEur
-            })
-        });
+    const apiClient = new ReservationApiClient();
+    const data = await apiClient.createPreLaunchReservation(egiId, amountEur);
 
-        if (!response.ok && !response.headers.get('content-type')?.includes('application/json')) {
-            throw new Error("HTTP error: " + response.status + " " + response.statusText);
-        }
-
-        const data = await response.json();
-
-        // Handle success with UI feedback
-        if (data.success && data.data) {
-            showPreLaunchSuccessModal(data.data);
-        }
-
-        return data;
-    } catch (error) {
-        console.error('Pre-launch reservation error:', error);
-        // Ensure we always throw a proper Error object
-        if (error instanceof Error) {
-            throw error;
-        } else {
-            throw new Error(typeof error === 'string' ? error : 'An unknown error occurred during reservation');
-        }
+    // Handle success with UI feedback
+    if (data.success && data.data) {
+        showPreLaunchSuccessModal(data.data);
     }
+
+    return data;
 }
 
 /**
