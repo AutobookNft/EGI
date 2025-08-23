@@ -461,7 +461,7 @@
             // Update every 30 seconds
             this.updateInterval = setInterval(() => {
                 this.fetchAndUpdateRate();
-            }, 5000);
+            }, 60000);
         }
 
         async fetchAndUpdateRate() {
