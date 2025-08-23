@@ -33,7 +33,7 @@
     <x-slot name="egiCarousel">
         <x-mobile-homepage-toggle :egis="$featuredEgis" :creators="$featuredCreators"
             :collections="$featuredCollections" :collectors="$topCollectors" />
-            
+    </x-slot>        
 
     {{-- Desktop: EGI Cards Carousel - SOLO desktop --}}
     <x-slot name="belowHeroContent">

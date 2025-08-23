@@ -26,7 +26,7 @@ $instanceId = uniqid();
 <div class="w-full" id="carousel_{{ $instanceId }}">
     {{-- Header semplice --}}
     <div class="flex items-center justify-between mb-4">
-        <h3 class="text-lg font-semibold text-white">Trending collections</h3>
+        <h3 class="text-lg font-semibold text-white">{{ __('statistics.top_collections') }}</h3>
         <div class="flex space-x-2">
             <button id="prevBtn_{{ $instanceId }}" class="p-1.5 text-gray-400 hover:text-white transition-colors">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -44,7 +44,7 @@ $instanceId = uniqid();
     {{-- Container del carousel con overflow nascosto --}}
     <div class="overflow-hidden">
         <div id="carouselContainer_{{ $instanceId }}" 
-             class="flex transition-transform duration-300 ease-in-out space-x-3">
+             class="flex space-x-3 transition-transform duration-300 ease-in-out">
             @if(count($collectionsWithImages) > 0)
                 @foreach($collectionsWithImages as $item)
                     <div class="flex-shrink-0 w-64">
@@ -55,8 +55,8 @@ $instanceId = uniqid();
                     </div>
                 @endforeach
             @else
-                <div class="w-full text-center py-8 text-gray-400">
-                    <p>No collections available</p>
+                <div class="w-full py-8 text-center text-gray-400">
+                    <p>{{ __('statistics.no_collections_data') }}</p>
                 </div>
             @endif
         </div>

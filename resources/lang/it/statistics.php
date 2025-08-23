@@ -49,6 +49,7 @@ return [
 
     // Carousel Collections
     'top_collections' => 'Top Collezioni',
+    'all_collections' => 'Tutte le Collezioni',
     'no_collections_data' => 'Nessuna collezione disponibile',
     'collections_coming_soon' => 'Le collezioni saranno visualizzate qui quando disponibili',
     'reservations' => 'Prenotazioni',

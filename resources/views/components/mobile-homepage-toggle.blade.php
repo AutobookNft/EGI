@@ -35,6 +35,5 @@
     <div id="mobile-content-container">
         {{-- <x-homepage-egi-carousel :egis="$egis" :creators="$creators" :collections="$collections":collectors="$collectors" /> --}}
         <x-collection-list :collections="$collections" />
-    </x-slot>
     </div>
 </div>

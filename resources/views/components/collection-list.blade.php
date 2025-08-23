@@ -30,18 +30,18 @@ $instanceId = uniqid();
 @endphp
 
 {{-- Collection List Container --}}
-<div class="w-full" id="collectionList_{{ $instanceId }}">
+<div class="w-full mt-4 mb-4" id="collectionList_{{ $instanceId }}">
     {{-- Header --}}
-    <div class="flex items-center justify-between mb-6">
-        <h3 class="text-lg font-semibold text-white">All Collections</h3>
-        <div class="text-sm text-gray-400">
-            {{ count($allCollections) }} collections
+    <div class="flex items-center justify-between mb-6 ml-2">
+        <h3 class="text-lg font-semibold text-white">{{ __('statistics.all_collections') }}</h3>
+        <div class="mr-2 text-sm text-gray-400">
+            {{ count($allCollections) }} {{ strtolower(__('statistics.collections')) }}
         </div>
     </div>
 
     {{-- Lista delle Collection con scroll --}}
     @if(count($allCollections) > 0)
-        <div class="max-h-96 overflow-y-auto space-y-1 pr-2">
+        <div class="pr-2 space-y-1 overflow-y-auto max-h-96">
             @foreach($allCollections as $item)
                 <x-coll-card-list-small 
                     :collection="$item['collection']"
@@ -50,12 +50,12 @@ $instanceId = uniqid();
             @endforeach
         </div>
     @else
-        <div class="text-center py-12 text-gray-400">
+        <div class="py-12 text-center text-gray-400">
             <svg class="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
             </svg>
-            <p class="text-lg">No collections available</p>
-            <p class="text-sm">Collections will appear here when available</p>
+            <p class="text-lg">{{ __('statistics.no_collections_data') }}</p>
+            <p class="text-sm">{{ __('statistics.collections_coming_soon') }}</p>
         </div>
     @endif
 </div>
