@@ -310,7 +310,7 @@ $showBadge = $showBadge ?? $showOwnershipBadge;
                     </svg>
                     <div class="flex items-center gap-1">
                         <span class="font-bold {{ $isHyper ? 'text-yellow-300' : 'text-orange-300' }}">
-                            <x-currency-price :price="$displayPriceEur" />
+                            <x-currency-price :price="$displayPriceEur" :egi="$egi" />
                         </span>
                         {{-- EUR-only system: il componente currency-price gestisce automaticamente le note --}}
 
@@ -327,7 +327,7 @@ $showBadge = $showBadge ?? $showOwnershipBadge;
             <div class="flex items-center gap-2 mt-1 text-sm">
                 <span class="text-gray-400">{{ __('collector.portfolio.purchased_for') }}</span>
                 <span class="font-bold {{ $isHyper ? 'text-yellow-400' : 'text-green-400' }}">
-                    <x-currency-price :price="$egi->pivot->offer_amount_fiat" />
+                    <x-currency-price :price="$egi->pivot->offer_amount_fiat" :egi="$egi" />
                 </span>
             </div>
             @elseif ($context === 'patron' && isset($egi->support_amount))

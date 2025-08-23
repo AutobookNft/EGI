@@ -455,7 +455,7 @@ $isCreator = auth()->check() && auth()->id() === $creatorId;
                         </div>
                         <div class="text-right">
                             <span class="text-sm font-bold text-white" data-price-display>
-                                <x-currency-price :price="$displayPrice" size="small" />
+                                <x-currency-price :price="$displayPrice" :egi="$egi" size="small" />
                             </span>
                         </div>
                     </div>

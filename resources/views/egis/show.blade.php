@@ -410,6 +410,7 @@
                                         <div class="font-medium text-white">
                                             @if($displayPrice)
                                             <x-currency-price :price="$displayPrice"
+                                                :egi="$egi"
                                                 :reservation="$highestPriorityReservation" />
                                             @else
                                             {{ __('egi.crud.price_not_set') }}
@@ -499,6 +500,7 @@
                                     <p class="mb-2 text-sm text-gray-400">{{ $priceLabel }}</p>
                                     <div class="flex items-baseline justify-center">
                                         <x-currency-price :price="$displayPrice"
+                                            :egi="$egi"
                                             :reservation="$highestPriorityReservation"
                                             class="text-4xl font-bold text-white" :show-algo-conversion="true" />
                                         <span class="ml-2 text-lg font-medium text-gray-400">EUR</span>
