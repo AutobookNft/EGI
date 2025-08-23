@@ -75,11 +75,12 @@ return [
 
     {{-- Mobile: Carousel con immagini scrollabili --}}
     <div class="absolute inset-0 z-[60] md:hidden" id="mobileImageCarousel_{{ $instanceId }}">
-        <div class="flex w-full h-full overflow-x-auto snap-x snap-mandatory scrollbar-hide"
-            id="mobileCarouselTrack_{{ $instanceId }}">
+        <div class="flex w-full h-full overflow-x-auto snap-x snap-mandatory scrollbar-hide scroll-smooth"
+            id="mobileCarouselTrack_{{ $instanceId }}"
+            style="scroll-snap-type: x mandatory; scroll-behavior: smooth;">
             @if($hasCollections)
             @foreach($collections as $index => $collection)
-            <div class="relative flex-shrink-0 w-full h-full snap-start">
+            <div class="relative flex-shrink-0 w-full h-full snap-start" style="scroll-snap-align: start;">
                 <img src="{{ $collection->image_banner ? asset($collection->image_banner) : $defaultBannerUrl }}"
                     alt="{{ $collection->collection_name ?? '' }}" class="object-cover w-full h-full">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10"></div>
@@ -88,7 +89,7 @@ return [
             </div>
             @endforeach
             @else
-            <div class="relative flex-shrink-0 w-full h-full snap-start">
+            <div class="relative flex-shrink-0 w-full h-full snap-start" style="scroll-snap-align: start;">
                 <img src="{{ $defaultBannerUrl }}" alt="Default background" class="object-cover w-full h-full">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10"></div>
                 <div class="absolute inset-0 opacity-75 bg-gradient-to-r from-black/50 via-transparent to-transparent">
@@ -301,14 +302,14 @@ return [
         }
 
         // Update in base a desktop/mobile
-        function updateBannerContent() {
+        function updateBannerContent(skipScroll = false) {
             if (totalCollections === 0) return;
 
             const currentCollection = collectionsData[currentIndex];
             if (!currentCollection) return;
 
-            if (isMobile && mobileCarouselTrack) {
-                // Mobile: scroll nativo
+            if (isMobile && mobileCarouselTrack && !skipScroll) {
+                // Mobile: scroll nativo - solo se non stiamo già gestendo uno scroll
                 const slideWidth = mobileCarouselTrack.offsetWidth;
                 mobileCarouselTrack.scrollTo({
                     left: currentIndex * slideWidth,
@@ -455,24 +456,37 @@ return [
         // Gestione del mobile swipe su scroll nativo
         if (isMobile && mobileCarouselTrack && totalCollections > 1) {
             let isScrolling = false;
+            let scrollTimeout = null;
 
             mobileCarouselTrack.addEventListener('scroll', () => {
                 if (isScrolling) return;
-                isScrolling = true;
+                
+                // Pausa l'auto-scroll durante la navigazione manuale
+                clearInterval(autoScrollInterval);
+                
+                // Debounce dello scroll per evitare troppi trigger
+                clearTimeout(scrollTimeout);
+                scrollTimeout = setTimeout(() => {
+                    isScrolling = true;
 
-                requestAnimationFrame(() => {
-                    const slideWidth = mobileCarouselTrack.offsetWidth;
-                    const scrollLeft = mobileCarouselTrack.scrollLeft;
-                    const newIndex = Math.round(scrollLeft / slideWidth);
+                    requestAnimationFrame(() => {
+                        const slideWidth = mobileCarouselTrack.offsetWidth;
+                        const scrollLeft = mobileCarouselTrack.scrollLeft;
+                        const newIndex = Math.round(scrollLeft / slideWidth);
 
-                    if (newIndex !== currentIndex && newIndex >= 0 && newIndex < totalCollections) {
-                        currentIndex = newIndex;
-                        // Usa updateBannerContent per aggiornare tutto in modo consistente
-                        updateBannerContent(currentIndex, false);
-                        resetAutoScroll();
-                    }
-                    isScrolling = false;
-                });
+                        if (newIndex !== currentIndex && newIndex >= 0 && newIndex < totalCollections) {
+                            currentIndex = newIndex;
+                            // Usa updateBannerContent con skipScroll=true per evitare loop
+                            updateBannerContent(true);
+                        }
+                        
+                        isScrolling = false;
+                        // Riavvia l'auto-scroll dopo 3 secondi di inattività
+                        setTimeout(() => {
+                            if (totalCollections > 1) startAutoScroll();
+                        }, 3000);
+                    });
+                }, 100); // Debounce di 100ms
             });
         }
 
@@ -480,7 +494,7 @@ return [
         window.addEventListener('resize', () => {
             checkIfMobile();
             // Forza un aggiornamento delle statistiche quando cambia il breakpoint
-            updateBannerContent(currentIndex, false);
+            updateBannerContent(false);
         });
 
         // Gestione keyboard e mouse events (solo se non mobile o per contenuto generale)
