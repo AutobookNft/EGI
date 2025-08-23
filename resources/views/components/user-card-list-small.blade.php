@@ -14,8 +14,8 @@ $avgAmount = $stats['avg_amount'] ?? 0;
 $imageUrl = null;
 if ($user && $user->avatar_url) {
     $imageUrl = $user->avatar_url;
-} elseif ($user && $user->profile_photo_path) {
-    $imageUrl = $user->profile_photo_path;
+} elseif ($user && $user->profile_photo_url) {
+    $imageUrl = $user->profile_photo_url;
 }
 
 // Se non ha immagine, usa le iniziali
@@ -35,7 +35,7 @@ $typeConfig = match($userType) {
         'route' => 'creator.home'
     ],
     'collector' => [
-        'badge_color' => 'bg-blue-500', 
+        'badge_color' => 'bg-blue-500',
         'badge_icon' => 'shopping_bag',
         'earnings_label' => __('statistics.collector_earnings'),
         'count_label' => __('statistics.collector_count_label'),
@@ -51,7 +51,7 @@ $typeConfig = match($userType) {
     default => [
         'badge_color' => 'bg-gray-500',
         'badge_icon' => 'person',
-        'earnings_label' => 'USER', 
+        'earnings_label' => 'USER',
         'route' => 'creator.home'
     ]
 };
@@ -68,7 +68,7 @@ $profileUrl = $user ? route($typeConfig['route'], ['id' => $user->id]) : '#';
             {{-- Parte sinistra: immagine + nome --}}
             <div class="flex items-center space-x-3">
                 {{-- Immagine User PICCOLA E TONDA (come OpenSea) --}}
-                <div class="flex-shrink-0 w-10 h-10 overflow-hidden rounded-full bg-gray-700">
+                <div class="flex-shrink-0 w-10 h-10 overflow-hidden bg-gray-700 rounded-full">
                     @if($imageUrl)
                         <img src="{{ $imageUrl }}" alt="{{ $user->name ?? $user->first_name . ' ' . $user->last_name }}" class="object-cover w-full h-full">
                     @else
@@ -77,7 +77,7 @@ $profileUrl = $user ? route($typeConfig['route'], ['id' => $user->id]) : '#';
                         </div>
                     @endif
                 </div>
-                
+
                 {{-- Nome User e Badge --}}
                 <div class="flex items-center">
                     <h3 class="mr-2 text-sm font-medium text-white">
@@ -92,7 +92,7 @@ $profileUrl = $user ? route($typeConfig['route'], ['id' => $user->id]) : '#';
                     </div>
                 </div>
             </div>
-            
+
             {{-- Parte destra: earnings e conteggio distribuzioni --}}
             <div class="text-right">
                 <div class="text-lg font-bold text-white">€{{ number_format($totalEarnings, 2) }} <span class="text-sm text-gray-400">{{ $typeConfig['earnings_label'] }}</span></div>
