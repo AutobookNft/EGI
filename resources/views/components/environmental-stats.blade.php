@@ -1,4 +1,4 @@
-@props(['format' => 'full', 'textColor' => 'cyan'])
+@props(['format' => 'full', 'textColor' => 'cyan', 'mobileAbbreviated' => true])
 
 @php
     // Determina le classi di stile in base al formato
@@ -27,30 +27,51 @@
 
     // Determina la formattazione del numero in base al formato
     $decimals = $format === 'footer' ? 0 : 2;
+
+    // Helper per formattazione responsive
+    $getFormattedValue = function($value, $useAbbr = null) use ($decimals, $mobileAbbreviated) {
+        $useAbbreviation = $useAbbr ?? $mobileAbbreviated;
+        return $useAbbreviation ? formatNumberAbbreviated($value, 1) : number_format($value, $decimals, ',', '.');
+    };
 @endphp
 
 @if ($format === 'full')
     <div class="{{ $containerClasses }}">
         <div class="h-1.5 w-1.5 rounded-full bg-blue-400 animate-pulse"></div>
         <span class="{{ $valueClasses }}">
-            <span class="tabular-nums" id="impact-realtime-counter">{{ $formattedTotal($decimals) }}</span> kg di plastica recuperati dagli oceani
+            {{-- Desktop: formato standard, Mobile: formato abbreviato --}}
+            <span class="hidden md:inline tabular-nums" id="impact-realtime-counter">{{ $formattedTotal($decimals) }}</span>
+            <span class="md:hidden tabular-nums" id="impact-realtime-counter-mobile">{{ $getFormattedValue($totalPlasticRecovered) }}</span>
+            kg di plastica recuperati dagli oceani
         </span>
     </div>
 @elseif ($format === 'compact')
     <div class="{{ $containerClasses }}">
         <div class="w-1 h-1 bg-blue-400 rounded-full animate-pulse"></div>
-        <span class="{{ $valueClasses }}">{{ $formattedTotal($decimals) }} kg</span> di plastica recuperati
+        <span class="{{ $valueClasses }}">
+            <span class="hidden md:inline">{{ $formattedTotal($decimals) }}</span>
+            <span class="md:hidden">{{ $getFormattedValue($totalPlasticRecovered) }}</span>
+            kg
+        </span> di plastica recuperati
     </div>
 @elseif ($format === 'footer')
     <span class="{{ $containerClasses }}">
         {{ __('guest_layout.total_plastic_recovered') }}:
-        <strong class="{{ $valueClasses }}">{{ $formattedTotal($decimals) }} Kg</strong>
+        <strong class="{{ $valueClasses }}">
+            <span class="hidden md:inline">{{ $formattedTotal($decimals) }}</span>
+            <span class="md:hidden">{{ $getFormattedValue($totalPlasticRecovered) }}</span>
+            Kg
+        </strong>
     </span>
 @elseif ($format === 'card-stats')
     <div class="{{ $containerClasses }} {{ $borderClass }}">
         <div class="flex flex-col items-end">
             <span class="text-white/60 text-[11px]">Total Impact</span>
-            <span class="{{ $valueClasses }}">{{ $formattedTotal($decimals) }} Kg</span>
+            <span class="{{ $valueClasses }}">
+                <span class="hidden md:inline">{{ $formattedTotal($decimals) }}</span>
+                <span class="md:hidden">{{ $getFormattedValue($totalPlasticRecovered) }}</span>
+                Kg
+            </span>
         </div>
         <div class="flex flex-col items-end">
             <span class="text-white/60 text-[11px]">Active Projects</span>
@@ -76,7 +97,10 @@
     <div class="{{ $containerClasses }}">
         <div class="h-1.5 w-1.5 rounded-full bg-green-400 animate-pulse"></div>
         <span class="{{ $valueClasses }}">
-            <span class="font-bold tabular-nums">{{ $formattedEquilibrium($decimals) }}</span> € di Equilibrium generato
+            <span class="font-bold tabular-nums">
+                <span class="hidden md:inline">{{ $formattedEquilibrium($decimals) }}</span>
+                <span class="md:hidden">{{ formatPriceAbbreviated($equilibrium, 1) }}</span>
+            </span> di Equilibrium generato
         </span>
     </div>
 @elseif ($format === 'reservations')

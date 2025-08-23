@@ -19,7 +19,6 @@ Esempio uso:
 <x-currency-price :price="$egi->price" class="text-2xl font-bold" :show-algo-conversion="true" />
 <x-currency-price :price="$egi->price" :mobile-abbreviated="false" /> {{-- Disabilita abbreviazione mobile --}}
 
-
 @props([
 'price',
 'egi' => null,

@@ -30,37 +30,37 @@ $instanceId = uniqid();
 
 // Array delle statistiche per il carousel
 $stats = [
-[
-'label' => __('statistics.volume'),
-'value' => $totalVolume > 0 ? '€' . number_format($totalVolume, 2) : '€0.00',
-'id' => 'statVolume_' . $instanceId
-],
-[
-'label' => __('statistics.epp'),
-'value' => $eppTotal > 0 ? '€' . number_format($eppTotal, 2) : '€0.00',
-'id' => 'statEpp_' . $instanceId,
-'color' => '#4ade80' // Verde environment
-],
-[
-'label' => __('statistics.collections'),
-'value' => number_format($totalCollections),
-'id' => 'statCollections_' . $instanceId
-],
-[
-'label' => __('statistics.sell_collections'),
-'value' => number_format($sellCollections),
-'id' => 'statSellCollections_' . $instanceId
-],
-[
-'label' => __('statistics.egis'),
-'value' => number_format($totalEgis),
-'id' => 'statTotalEgis_' . $instanceId
-],
-[
-'label' => __('statistics.sell_egis'),
-'value' => number_format($sellEgis),
-'id' => 'statSellEgis_' . $instanceId
-]
+    [
+        'label' => __('statistics.volume'),
+        'value' => $totalVolume > 0 ? formatPriceAbbreviated($totalVolume, 1) : '€0',
+        'id' => 'statVolume_' . $instanceId
+    ],
+    [
+        'label' => __('statistics.epp'),
+        'value' => $eppTotal > 0 ? formatPriceAbbreviated($eppTotal, 1) : '€0',
+        'id' => 'statEpp_' . $instanceId,
+        'color' => '#4ade80' // Verde environment
+    ],
+    [
+        'label' => __('statistics.collections'),
+        'value' => formatNumberAbbreviated($totalCollections, 0),
+        'id' => 'statCollections_' . $instanceId
+    ],
+    [
+        'label' => __('statistics.sell_collections'),
+        'value' => formatNumberAbbreviated($sellCollections, 0),
+        'id' => 'statSellCollections_' . $instanceId
+    ],
+    [
+        'label' => __('statistics.egis'),
+        'value' => formatNumberAbbreviated($totalEgis, 0),
+        'id' => 'statTotalEgis_' . $instanceId
+    ],
+    [
+        'label' => __('statistics.sell_egis'),
+        'value' => formatNumberAbbreviated($sellEgis, 0),
+        'id' => 'statSellEgis_' . $instanceId
+    ]
 ];
 @endphp
 

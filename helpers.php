@@ -286,3 +286,96 @@ if (!function_exists('getEgiActivationStatus')) {
         return '€ ' . number_format((float) $price, 2, ',', '.');
     }
 }
+
+if (!function_exists('formatNumberAbbreviated')) {
+    /**
+     * Formatta un numero con notazione abbreviata per risparmiare spazio nei layout mobile
+     *
+     * @param int|float|string|null $number Numero da formattare
+     * @param int $decimals Numero di decimali da mostrare (default: 1)
+     * @param bool $showZeroDecimals Se mostrare .0 per numeri interi (default: false)
+     * @return string Numero formattato con notazione abbreviata (es: 1.2K, 15.5M)
+     *
+     * Esempi:
+     * - 999 → "999"
+     * - 1234 → "1.2K"
+     * - 12345 → "12.3K"
+     * - 123456 → "123K"
+     * - 1234567 → "1.2M"
+     * - 1000000000 → "1B"
+     */
+    function formatNumberAbbreviated($number, int $decimals = 1, bool $showZeroDecimals = false): string {
+        // Gestisci casi null o vuoti
+        if ($number === null || $number === '') {
+            return '0';
+        }
+
+        // Converti a numero
+        $num = (float) $number;
+
+        // Gestisci numeri negativi
+        $isNegative = $num < 0;
+        $num = abs($num);
+
+        // Definisci le soglie e suffissi
+        $suffixes = [
+            1000000000000 => 'T', // Trilioni
+            1000000000 => 'B',    // Miliardi
+            1000000 => 'M',       // Milioni
+            1000 => 'K'           // Migliaia
+        ];
+
+        $formatted = '';
+
+        // Cerca la soglia appropriata
+        foreach ($suffixes as $threshold => $suffix) {
+            if ($num >= $threshold) {
+                $value = $num / $threshold;
+
+                // Se il valore è >= 100, non mostrare decimali per leggibilità
+                if ($value >= 100) {
+                    $formatted = number_format($value, 0, ',', '') . $suffix;
+                }
+                // Se il valore è un numero intero e non vogliamo mostrare .0
+                elseif (!$showZeroDecimals && $value == floor($value)) {
+                    $formatted = number_format($value, 0, ',', '') . $suffix;
+                } else {
+                    $formatted = number_format($value, $decimals, ',', '') . $suffix;
+                }
+                break;
+            }
+        }
+
+        // Se non ha raggiunto nessuna soglia, mostra il numero intero
+        if (empty($formatted)) {
+            $formatted = number_format($num, 0, ',', '.');
+        }
+
+        // Aggiungi il segno negativo se necessario
+        return $isNegative ? '-' . $formatted : $formatted;
+    }
+}
+
+if (!function_exists('formatPriceAbbreviated')) {
+    /**
+     * Formatta un prezzo in euro con notazione abbreviata per layout mobile
+     *
+     * @param int|float|string|null $price Prezzo da formattare
+     * @param int $decimals Numero di decimali da mostrare (default: 1)
+     * @param bool $showZeroDecimals Se mostrare .0 per numeri interi (default: false)
+     * @return string Prezzo formattato con simbolo euro e notazione abbreviata
+     *
+     * Esempi:
+     * - 999 → "€ 999"
+     * - 1234 → "€ 1.2K"
+     * - 1234567 → "€ 1.2M"
+     */
+    function formatPriceAbbreviated($price, int $decimals = 1, bool $showZeroDecimals = false): string {
+        if ($price === null || $price === '') {
+            return '€ 0';
+        }
+
+        $formattedNumber = formatNumberAbbreviated($price, $decimals, $showZeroDecimals);
+        return '€ ' . $formattedNumber;
+    }
+}

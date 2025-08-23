@@ -27,7 +27,7 @@ if ($collection->image_card) {
             {{-- Parte sinistra: immagine + nome --}}
             <div class="flex items-center space-x-3">
                 {{-- Immagine Collection PICCOLA E TONDA (come OpenSea) --}}
-                
+
                     <div class="flex-shrink-0 w-10 h-10 overflow-hidden bg-gray-700 rounded-full">
                         @if($imageUrl)
                             <img src="{{ $imageUrl }}" alt="{{ $collection->collection_name }}" class="object-cover w-full h-full">
@@ -37,7 +37,7 @@ if ($collection->image_card) {
                             </div>
                         @endif
                     </div>
-                
+
                 {{-- Nome Collection e Badge --}}
                 <div class="flex items-center">
                     <h3 class="mr-2 text-sm font-medium text-white">{{ $collection->collection_name }}</h3>
@@ -48,12 +48,20 @@ if ($collection->image_card) {
                     </div>
                 </div>
             </div>
-            
+
             {{-- Parte destra: volume e EPP volume --}}
             <div class="text-right">
-                <div class="text-lg font-bold text-white">{{ number_format($totalDistributed, 2) }} <span class="text-sm text-gray-400">VOLUME</span></div>
+                <div class="text-lg font-bold text-white">
+                    {{-- Desktop: formato standard, Mobile: formato abbreviato --}}
+                    <span class="hidden md:inline">{{ number_format($totalDistributed, 2) }}</span>
+                    <span class="md:hidden">{{ formatNumberAbbreviated($totalDistributed, 1) }}</span>
+                    <span class="text-sm text-gray-400">VOLUME</span>
+                </div>
                 <div class="text-sm font-medium text-green-400">
-                    €{{ number_format($totalToEpp, 2) }} EPP
+                    {{-- Desktop: formato standard, Mobile: formato abbreviato --}}
+                    <span class="hidden md:inline">€{{ number_format($totalToEpp, 2) }}</span>
+                    <span class="md:hidden">{{ formatPriceAbbreviated($totalToEpp, 1) }}</span>
+                    EPP
                 </div>
             </div>
         </div>

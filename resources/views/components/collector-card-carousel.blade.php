@@ -177,7 +177,11 @@ $logo = config('app.logo');
                 {{-- Total Spent --}}
                 @if($totalSpent > 0)
                 <div class="bg-emerald-900/30 border border-emerald-500/20 rounded-lg p-2 text-center">
-                    <div class="text-sm font-bold text-emerald-300">€{{ number_format($totalSpent, 0, ',', '.') }}</div>
+                    <div class="text-sm font-bold text-emerald-300">
+                        {{-- Desktop: formato standard, Mobile: formato abbreviato --}}
+                        <span class="hidden md:inline">€{{ number_format($totalSpent, 0, ',', '.') }}</span>
+                        <span class="md:hidden">{{ formatPriceAbbreviated($totalSpent, 0) }}</span>
+                    </div>
                     <div class="text-xs text-emerald-400">{{ __('collector.total_invested') }}</div>
                 </div>
                 @endif

@@ -93,7 +93,9 @@ $stats = $collector->getCollectorStats();
             <div class="flex flex-col text-right">
                 <span class="text-xs tracking-wide text-gray-400 uppercase">SPENT</span>
                 <span class="text-sm font-semibold text-white">
-                    €{{ number_format($stats['total_spent'] ?? ($collector->total_spent ?? 0), 0) }}
+                    {{-- Desktop: formato standard, Mobile: formato abbreviato --}}
+                    <span class="hidden md:inline">€{{ number_format($stats['total_spent'] ?? ($collector->total_spent ?? 0), 0) }}</span>
+                    <span class="md:hidden">{{ formatPriceAbbreviated($stats['total_spent'] ?? ($collector->total_spent ?? 0), 0) }}</span>
                 </span>
             </div>
         </div>

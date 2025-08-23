@@ -273,14 +273,33 @@ class EnvironmentalStats extends Component {
     }
 
     /**
-     * Formatta il numero con separatori localizzati
+     * Formatta il numero con separatori localizzati e notazione abbreviata per mobile
      *
      * @param float $value Il valore da formattare
      * @param int $decimals Numero di decimali da mostrare
+     * @param bool $useAbbreviation Se utilizzare notazione abbreviata (K, M, B)
      * @return string
      */
-    public function formatNumber(float $value, int $decimals = 2): string {
+    public function formatNumber(float $value, int $decimals = 2, bool $useAbbreviation = false): string {
+        if ($useAbbreviation) {
+            return formatNumberAbbreviated($value, $decimals);
+        }
         return number_format($value, $decimals, ',', '.');
+    }
+
+    /**
+     * Formatta un valore monetario con notazione abbreviata per mobile
+     *
+     * @param float $value Il valore da formattare
+     * @param int $decimals Numero di decimali da mostrare
+     * @param bool $useAbbreviation Se utilizzare notazione abbreviata (K, M, B)
+     * @return string
+     */
+    public function formatCurrency(float $value, int $decimals = 1, bool $useAbbreviation = true): string {
+        if ($useAbbreviation) {
+            return formatPriceAbbreviated($value, $decimals);
+        }
+        return '€ ' . number_format($value, 2, ',', '.');
     }
 
     /**

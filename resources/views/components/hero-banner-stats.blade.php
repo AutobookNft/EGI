@@ -54,7 +54,9 @@ $instanceId = uniqid();
             <div class="font-bold text-white" style="font-size: 14px; color: #ffffff;"
                 id="statVolume_{{ $instanceId }}">
                 @if($totalVolume > 0)
-                €{{ number_format($totalVolume, 2) }}
+                {{-- Responsive formatting: desktop standard, mobile abbreviated --}}
+                <span class="hidden md:inline">€{{ number_format($totalVolume, 2) }}</span>
+                <span class="md:hidden">{{ formatPriceAbbreviated($totalVolume) }}</span>
                 @else
                 €0.00
                 @endif
@@ -67,7 +69,9 @@ $instanceId = uniqid();
             <div class="font-bold text-green-400" style="font-size: 14px; color: #4ade80;"
                 id="statEpp_{{ $instanceId }}">
                 @if($eppTotal > 0)
-                €{{ number_format($eppTotal, 2) }}
+                {{-- Responsive formatting: desktop standard, mobile abbreviated --}}
+                <span class="hidden md:inline">€{{ number_format($eppTotal, 2) }}</span>
+                <span class="md:hidden">{{ formatPriceAbbreviated($eppTotal) }}</span>
                 @else
                 €0.00
                 @endif
@@ -79,7 +83,9 @@ $instanceId = uniqid();
             <div class="text-xs font-medium tracking-wider text-gray-300 uppercase">{{ __('statistics.egis') }}</div>
             <div class="font-bold text-white" style="font-size: 14px; color: #ffffff;"
                 id="statTotalEgis_{{ $instanceId }}">
-                {{ number_format($totalEgis) }}
+                {{-- Responsive formatting: desktop standard, mobile abbreviated for large numbers --}}
+                <span class="hidden md:inline">{{ number_format($totalEgis) }}</span>
+                <span class="md:hidden">{{ $totalEgis >= 1000 ? formatNumberAbbreviated($totalEgis) : number_format($totalEgis) }}</span>
             </div>
         </div>
 
@@ -89,7 +95,9 @@ $instanceId = uniqid();
             </div>
             <div class="font-bold text-white" style="font-size: 14px; color: #ffffff;"
                 id="statSellEgis_{{ $instanceId }}">
-                {{ number_format($sellEgis) }}
+                {{-- Responsive formatting: desktop standard, mobile abbreviated for large numbers --}}
+                <span class="hidden md:inline">{{ number_format($sellEgis) }}</span>
+                <span class="md:hidden">{{ $sellEgis >= 1000 ? formatNumberAbbreviated($sellEgis) : number_format($sellEgis) }}</span>
             </div>
         </div>
     </div>

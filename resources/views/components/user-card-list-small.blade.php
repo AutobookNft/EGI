@@ -102,7 +102,12 @@ $profileUrl = $user ? route($typeConfig['route'], ['id' => $user->id]) : '#';
 
             {{-- Parte destra: earnings e conteggio distribuzioni --}}
             <div class="text-right">
-                <div class="text-lg font-bold text-white">€{{ number_format($totalEarnings, 2) }} <span class="text-sm text-gray-400">{{ $typeConfig['earnings_label'] }}</span></div>
+                <div class="text-lg font-bold text-white">
+                    {{-- Desktop: formato standard, Mobile: formato abbreviato --}}
+                    <span class="hidden md:inline">€{{ number_format($totalEarnings, 2) }}</span>
+                    <span class="md:hidden">{{ formatPriceAbbreviated($totalEarnings, 1) }}</span>
+                    <span class="text-sm text-gray-400">{{ $typeConfig['earnings_label'] }}</span>
+                </div>
                 <div class="text-sm font-medium text-green-400">
                     {{ $distributionsCount }} {{ $typeConfig['count_label'] }}
                 </div>

@@ -157,14 +157,20 @@ $isHyper = $egi->hyper ?? false;
             <!-- Price -->
             @if($activationStatus['highest_bid'])
             <span class="text-xs text-gray-500 line-through">
-                {{ formatPrice($egi->price) }}
+                {{-- Desktop: formato standard, Mobile: formato abbreviato --}}
+                <span class="hidden md:inline">{{ formatPrice($egi->price) }}</span>
+                <span class="md:hidden">{{ formatPriceAbbreviated($egi->price) }}</span>
             </span>
             <span class="text-lg font-bold {{ $isHyper ? 'text-yellow-400' : 'text-orange-400' }}">
-                {{ formatPrice($activationStatus['highest_bid']) }}
+                {{-- Desktop: formato standard, Mobile: formato abbreviato --}}
+                <span class="hidden md:inline">{{ formatPrice($activationStatus['highest_bid']) }}</span>
+                <span class="md:hidden">{{ formatPriceAbbreviated($activationStatus['highest_bid']) }}</span>
             </span>
             @elseif($egi->price)
             <span class="text-lg font-bold {{ $isHyper ? 'text-yellow-400' : 'text-orange-400' }}">
-                {{ formatPrice($egi->price) }}
+                {{-- Desktop: formato standard, Mobile: formato abbreviato --}}
+                <span class="hidden md:inline">{{ formatPrice($egi->price) }}</span>
+                <span class="md:hidden">{{ formatPriceAbbreviated($egi->price) }}</span>
             </span>
             @endif
 
