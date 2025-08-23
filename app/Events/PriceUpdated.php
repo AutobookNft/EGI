@@ -15,14 +15,16 @@ class PriceUpdated implements ShouldBroadcastNow {
     public string $amount;
     public string $currency;
     public string $updatedAt;
+    public ?array $structureChanges;
 
     public bool $afterCommit = true;
 
-    public function __construct(int $egiId, string $amount, string $currency, string $updatedAt) {
-        $this->egiId     = $egiId;
-        $this->amount    = $amount;
-        $this->currency  = $currency;
-        $this->updatedAt = $updatedAt;
+    public function __construct(int $egiId, string $amount, string $currency, string $updatedAt, ?array $structureChanges = null) {
+        $this->egiId           = $egiId;
+        $this->amount          = $amount;
+        $this->currency        = $currency;
+        $this->updatedAt       = $updatedAt;
+        $this->structureChanges = $structureChanges;
     }
 
     public function broadcastOn(): Channel {
@@ -34,11 +36,18 @@ class PriceUpdated implements ShouldBroadcastNow {
     }
 
     public function broadcastWith(): array {
-        return [
+        $payload = [
             'id'         => $this->egiId,
             'amount'     => $this->amount,
             'currency'   => $this->currency,
             'updated_at' => $this->updatedAt,
         ];
+
+        // Aggiungi dati strutturali se forniti
+        if ($this->structureChanges) {
+            $payload['structure_changes'] = $this->structureChanges;
+        }
+
+        return $payload;
     }
 }

@@ -39,6 +39,47 @@ class ReservationController extends Controller {
     }
 
     /**
+     * Prepare structure changes data for real-time broadcasting
+     * 
+     * @param \App\Models\Reservation $reservation
+     * @param \App\Models\Egi $egi
+     * @return array
+     */
+    private function prepareStructureChanges($reservation, $egi): array {
+        // Get total reservation count for this EGI
+        $reservationCount = $egi->reservations()->count();
+        $isFirstReservation = $reservationCount === 1;
+
+        // Get user details from reservation
+        $user = $reservation->user;
+        $activatorData = [];
+
+        if ($user) {
+            $activatorData = [
+                'name' => $user->name ?? ($user->wallet_address ? substr($user->wallet_address, 0, 12) . '...' : 'Utente'),
+                'avatar' => $user->profile_photo_url ?? null,
+                'is_commissioner' => (bool)($user->is_commissioner ?? false),
+                'wallet_address' => $user->wallet_address ?? null
+            ];
+        } else {
+            // Fallback for anonymous reservations
+            $activatorData = [
+                'name' => 'Utente',
+                'avatar' => null,
+                'is_commissioner' => false,
+                'wallet_address' => null
+            ];
+        }
+
+        return [
+            'is_first_reservation' => $isFirstReservation,
+            'reservation_count' => $reservationCount,
+            'activator' => $activatorData,
+            'button_state' => $isFirstReservation ? 'rilancia' : 'rilancia', // Sempre rilancia dopo prima prenotazione
+        ];
+    }
+
+    /**
      * Handle web-based reservation requests
      *
      * @param Request $request
@@ -140,12 +181,14 @@ class ReservationController extends Controller {
                 'fiat_currency' => $reservation->fiat_currency
             ]);
 
-            // 🔴 Emit real-time price update event
+            // 🔴 Emit real-time price update event with structure changes
+            $structureChanges = $this->prepareStructureChanges($reservation, $egi);
             PriceUpdated::dispatch(
                 $egiId,
                 number_format((float)$reservation->offer_amount_fiat, 2),
                 $reservation->fiat_currency ?? 'EUR',
-                now()->toISOString()
+                now()->toISOString(),
+                $structureChanges
             );
 
             return redirect()->route('egi-certificates.show', $reservation->certificate->certificate_uuid)
@@ -299,12 +342,14 @@ class ReservationController extends Controller {
                 'offer_amount_fiat' => $reservation->offer_amount_fiat
             ]);
 
-            // 🔴 Emit real-time price update event
+            // 🔴 Emit real-time price update event with structure changes
+            $structureChanges = $this->prepareStructureChanges($reservation, $egi);
             PriceUpdated::dispatch(
                 $egiId,
                 number_format((float)$reservation->offer_amount_fiat, 2),
                 $reservation->fiat_currency ?? 'EUR',
-                now()->toISOString()
+                now()->toISOString(),
+                $structureChanges
             );
 
             return response()->json([
@@ -854,12 +899,17 @@ class ReservationController extends Controller {
             ]);
 
             // 🔴 Emit real-time price update event for pre-launch reservation
-            PriceUpdated::dispatch(
-                $reservation->egi_id,
-                number_format((float)$reservation->amount_eur, 2),
-                'EUR',
-                now()->toISOString()
-            );
+            $egi = Egi::find($reservation->egi_id);
+            if ($egi) {
+                $structureChanges = $this->prepareStructureChanges($reservation, $egi);
+                PriceUpdated::dispatch(
+                    $reservation->egi_id,
+                    number_format((float)$reservation->amount_eur, 2),
+                    'EUR',
+                    now()->toISOString(),
+                    $structureChanges
+                );
+            }
 
             return response()->json([
                 'success' => true,
