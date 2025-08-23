@@ -467,58 +467,8 @@ return [
 
                     if (newIndex !== currentIndex && newIndex >= 0 && newIndex < totalCollections) {
                         currentIndex = newIndex;
-                        // Aggiorna solo il testo e gli indicatori, non lo scroll (già fatto dall'utente)
-                        const currentCollection = collectionsData[currentIndex];
-                        if (collectionSubTextElement && currentCollection) {
-                            collectionSubTextElement.textContent = `${currentCollection.name} {{ __('guest_home.by') }} ${currentCollection.creator}`;
-                        }
-
-                        // Le statistiche cambiano per ogni collezione
-                        if (currentCollection.stats) {
-                            const statsContainer = document.querySelector('[id^="heroBannerStatsContainer_"]');
-                            if (statsContainer) {
-                                const volumeElement = statsContainer.querySelector('[id^="statVolume_"]');
-                                const eppElement = statsContainer.querySelector('[id^="statEpp_"]');
-                                const egisElement = statsContainer.querySelector('[id^="statTotalEgis_"]');
-                                const sellEgisElement = statsContainer.querySelector('[id^="statSellEgis_"]');
-
-                                if (volumeElement) {
-                                    const volume = currentCollection.stats.volume || 0;
-                                    // Use abbreviated formatting for mobile
-                                    volumeElement.textContent = formatPriceAbbreviated(volume, 1);
-                                }
-
-                                if (eppElement) {
-                                    const epp = currentCollection.stats.epp || 0;
-                                    // Use abbreviated formatting for mobile
-                                    eppElement.textContent = formatPriceAbbreviated(epp, 1);
-                                }
-
-                                if (egisElement) {
-                                    // Use abbreviated format for mobile
-                                    egisElement.textContent = formatNumberAbbreviated(currentCollection.stats.egis || 0, 0);
-                                }
-
-                                if (sellEgisElement) {
-                                    // Use abbreviated format for mobile
-                                    sellEgisElement.textContent = formatNumberAbbreviated(currentCollection.stats.sell_egis || 0, 0);
-                                }
-                            }
-                        }
-
-                        if (reserveButton && currentCollection) {
-                            reserveButton.dataset.egiId = currentCollection.id;
-                            reserveButton.dataset.collectionName = currentCollection.name;
-                        }
-                        // Aggiorna indicatori
-                        if (slideIndicators && slideIndicators.length > 0) {
-                            slideIndicators.forEach((indicator, index) => {
-                                indicator.classList.toggle('bg-white', index === currentIndex);
-                                indicator.classList.toggle('scale-125', index === currentIndex);
-                                indicator.classList.toggle('bg-white/50', index !== currentIndex);
-                                indicator.classList.toggle('hover:bg-white/75', index !== currentIndex);
-                            });
-                        }
+                        // Usa updateBannerContent per aggiornare tutto in modo consistente
+                        updateBannerContent(currentIndex, false);
                         resetAutoScroll();
                     }
                     isScrolling = false;
@@ -530,55 +480,7 @@ return [
         window.addEventListener('resize', () => {
             checkIfMobile();
             // Forza un aggiornamento delle statistiche quando cambia il breakpoint
-            if (collectionsData[currentIndex] && collectionsData[currentIndex].stats) {
-                const currentCollection = collectionsData[currentIndex];
-                const statsContainer = document.querySelector('[id^="heroBannerStatsContainer_"]');
-                if (statsContainer) {
-                    const volumeElement = statsContainer.querySelector('[id^="statVolume_"]');
-                    const eppElement = statsContainer.querySelector('[id^="statEpp_"]');
-                    const egisElement = statsContainer.querySelector('[id^="statTotalEgis_"]');
-                    const sellEgisElement = statsContainer.querySelector('[id^="statSellEgis_"]');
-
-                    if (volumeElement) {
-                        const volume = currentCollection.stats.volume || 0;
-                        if (isMobileDevice()) {
-                            volumeElement.textContent = formatPriceAbbreviated(volume, 1);
-                        } else {
-                            volumeElement.textContent = volume > 0 ?
-                                '€' + new Intl.NumberFormat('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(volume) :
-                                '€0.00';
-                        }
-                    }
-
-                    if (eppElement) {
-                        const epp = currentCollection.stats.epp || 0;
-                        if (isMobileDevice()) {
-                            eppElement.textContent = formatPriceAbbreviated(epp, 1);
-                        } else {
-                            eppElement.textContent = epp > 0 ?
-                                '€' + new Intl.NumberFormat('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(epp) :
-                                '€0.00';
-                        }
-                    }
-
-                    if (egisElement) {
-                        if (isMobileDevice()) {
-                            egisElement.textContent = formatNumberAbbreviated(currentCollection.stats.egis || 0, 0);
-                        } else {
-                            egisElement.textContent = new Intl.NumberFormat('it-IT').format(currentCollection.stats.egis || 0);
-                        }
-                    }
-
-                    if (sellEgisElement) {
-                        if (isMobileDevice()) {
-                            sellEgisElement.textContent = formatNumberAbbreviated(currentCollection.stats.sell_egis || 0, 0);
-                        } else {
-                            sellEgisElement.textContent = new Intl.NumberFormat('it-IT').format(currentCollection.stats.sell_egis || 0);
-                        }
-                    }
-                }
-            }
-            updateBannerContent();
+            updateBannerContent(currentIndex, false);
         });
 
         // Gestione keyboard e mouse events (solo se non mobile o per contenuto generale)
