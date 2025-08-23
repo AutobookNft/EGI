@@ -29,12 +29,12 @@ class StatsUpdated implements ShouldBroadcastNow {
         $channels = [
             new Channel("global.stats") // Sempre broadcast globale
         ];
-        
+
         // Se è per una collection specifica, aggiungi anche il canale collection
         if ($this->collectionId) {
             $channels[] = new Channel("collection.{$this->collectionId}.stats");
         }
-        
+
         return $channels;
     }
 

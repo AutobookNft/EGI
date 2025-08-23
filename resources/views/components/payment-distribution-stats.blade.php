@@ -172,24 +172,9 @@ $instanceId = uniqid();
             });
     }
 
-    // Prima chiamata immediata per testare
-    setTimeout(updateGlobalStats, 1000);
-
-    // Aggiorna ogni 5 secondi (temporaneo per test, poi ripristinare a 30000)
-    const updateInterval = setInterval(updateGlobalStats, 5000);
-
-    // Cleanup quando l'elemento viene rimosso dal DOM
-    const observer = new MutationObserver(function(mutations) {
-        mutations.forEach(function(mutation) {
-            mutation.removedNodes.forEach(function(node) {
-                if (node === globalStatsContainer || (node.contains && node.contains(globalStatsContainer))) {
-                    clearInterval(updateInterval);
-                    observer.disconnect();
-                }
-            });
-        });
-    });
-
-    observer.observe(document.body, { childList: true, subtree: true });
+    // ℹ️ Le statistiche si aggiornano automaticamente tramite WebSocket (stats-realtime.ts)
+    // Rimosso polling per evitare conflitti con sistema real-time
+    console.log('✅ Global Stats Container ready for real-time updates:', instanceId);
 });
+</script>
 </script>

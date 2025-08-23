@@ -133,7 +133,7 @@ class ReservationController extends Controller {
 
             // SELL EGIS - EGI con prenotazioni attive in questa collezione
             $sellEgis = $collection->egis()
-                ->whereHas('reservations', function($query) {
+                ->whereHas('reservations', function ($query) {
                     $query->where('is_current', true)->where('status', 'active');
                 })->count();
 
@@ -142,7 +142,7 @@ class ReservationController extends Controller {
                 'volume' => $totalVolume,
                 'epp' => $eppTotal,
                 'collections' => 1, // Siamo su una collection specifica
-                'sell_collections' => $collection->egis()->whereHas('reservations', function($query) {
+                'sell_collections' => $collection->egis()->whereHas('reservations', function ($query) {
                     $query->where('is_current', true)->where('status', 'active');
                 })->exists() ? 1 : 0,
                 'total_egis' => $totalEgis,

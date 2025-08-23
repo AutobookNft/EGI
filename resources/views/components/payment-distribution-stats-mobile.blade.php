@@ -65,7 +65,7 @@ $stats = [
 @endphp
 
 {{-- Statistiche Payment Distribution MOBILE - Formato Carousel --}}
-<div class="w-full">
+<div class="w-full" data-stats-context="global">
     {{-- Contenitore per il carousel fluido --}}
     <div class="relative overflow-hidden">
         <div id="mobile-stats-carousel-{{ $instanceId }}"
@@ -221,43 +221,9 @@ $stats = [
     startAnimation();
     // updateIndicators(); // Commentato perché indicatori nascosti
 
-    // ===== SISTEMA AUTO-REFRESH STATISTICHE =====
-    function updateStats() {
-        fetch('/api/stats/global')
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    const stats = data.data;
-
-                    // Aggiorna i valori con animazione
-                    updateStatValue('statVolume_{{ $instanceId }}', `€${stats.volume.toLocaleString('it-IT', {minimumFractionDigits: 2})}`);
-                    updateStatValue('statEpp_{{ $instanceId }}', `€${stats.epp.toLocaleString('it-IT', {minimumFractionDigits: 2})}`);
-                    updateStatValue('statCollections_{{ $instanceId }}', stats.collections.toLocaleString());
-                    updateStatValue('statSellCollections_{{ $instanceId }}', stats.sell_collections.toLocaleString());
-                    updateStatValue('statTotalEgis_{{ $instanceId }}', stats.total_egis.toLocaleString());
-                    updateStatValue('statSellEgis_{{ $instanceId }}', stats.sell_egis.toLocaleString());
-                }
-            })
-            .catch(error => console.error('Errore nel caricamento delle statistiche:', error));
-    }
-
-    function updateStatValue(elementId, newValue) {
-        const element = document.getElementById(elementId);
-        if (element && element.textContent !== newValue) {
-            element.style.transform = 'scale(1.1)';
-            element.style.transition = 'transform 0.3s ease';
-
-            setTimeout(() => {
-                element.textContent = newValue;
-                element.style.transform = 'scale(1)';
-            }, 150);
-        }
-    }
-
-    // Aggiorna le statistiche ogni 30 secondi
-    setInterval(updateStats, 30000);
-
-    // Prima chiamata dopo 2 secondi
-    setTimeout(updateStats, 2000);
+    // ℹ️ Le statistiche si aggiornano automaticamente tramite WebSocket (stats-realtime.ts)
+    // Rimosso polling per evitare conflitti con sistema real-time
+    console.log('✅ Mobile Stats Carousel ready for real-time updates:', '{{ $instanceId }}');
 });
+</script>
 </script>

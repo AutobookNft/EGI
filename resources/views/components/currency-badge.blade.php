@@ -79,12 +79,14 @@ Componente autonomo per il badge EUR → ALGO con TypeScript integrato
         }
 
         /**
-         * Avvia l'aggiornamento automatico
+         * Avvia l'aggiornamento automatico - DISABILITATO per evitare conflitti con WebSocket
          */
         startAutoUpdate() {
-            this.updateInterval = setInterval(() => {
-                this.fetchAndUpdateRate();
-            }, 30000); // 30 secondi
+            // ℹ️ Auto-update disabilitato - usa WebSocket real-time per aggiornamenti currency
+            console.log('✅ Currency Badge ready - auto-update via WebSocket');
+            // this.updateInterval = setInterval(() => {
+            //     this.fetchAndUpdateRate();
+            // }, 30000); // 30 secondi
         }
 
         /**

@@ -28,6 +28,8 @@ interface StatsUpdateMessage {
     };
     updated_at: string;
     trigger?: string;
+    collection_id?: number; // ID della collection (null = globali)
+    context?: string; // 'global' | 'collection'
 }
 
 /**
@@ -48,6 +50,12 @@ export function initializeStatsRealTime(): void {
 
     globalStatsChannel.listen('.stats.updated', (message: StatsUpdateMessage) => {
         console.log('📊 GLOBAL STATS UPDATE RECEIVED!', message);
+
+        // FILTRO: Aggiorna solo se il messaggio è effettivamente per il contesto globale
+        if (message.collection_id) {
+            console.log('🚫 Ignoring collection-specific update on global channel');
+            return;
+        }
 
         // Aggiorna solo i componenti che sono nel contesto globale
         updateStatsForContext(message.stats, 'global');
@@ -78,6 +86,12 @@ function subscribeToCollectionStats(collectionId: number): void {
 
     collectionChannel.listen('.stats.updated', (message: StatsUpdateMessage) => {
         console.log(`📊 COLLECTION ${collectionId} STATS UPDATE RECEIVED!`, message);
+
+        // FILTRO: Aggiorna solo se il messaggio è effettivamente per questa collection
+        if (!message.collection_id || message.collection_id !== collectionId) {
+            console.log(`🚫 Ignoring update: expected collection ${collectionId}, got ${message.collection_id}`);
+            return;
+        }
 
         // Aggiorna solo i componenti che sono nel contesto di questa collection
         updateStatsForContext(message.stats, 'collection', collectionId);
