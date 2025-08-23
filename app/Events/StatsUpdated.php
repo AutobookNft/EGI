@@ -14,17 +14,28 @@ class StatsUpdated implements ShouldBroadcastNow {
     public array $stats;
     public string $updatedAt;
     public ?string $trigger; // Cosa ha causato l'aggiornamento (reservation, cancellation, etc.)
+    public ?int $collectionId; // ID della collection per stats specifiche (null = globali)
 
     public bool $afterCommit = true;
 
-    public function __construct(array $stats, string $updatedAt, ?string $trigger = null) {
+    public function __construct(array $stats, string $updatedAt, ?string $trigger = null, ?int $collectionId = null) {
         $this->stats = $stats;
         $this->updatedAt = $updatedAt;
         $this->trigger = $trigger;
+        $this->collectionId = $collectionId;
     }
 
-    public function broadcastOn(): Channel {
-        return new Channel("global.stats");
+    public function broadcastOn(): array {
+        $channels = [
+            new Channel("global.stats") // Sempre broadcast globale
+        ];
+        
+        // Se è per una collection specifica, aggiungi anche il canale collection
+        if ($this->collectionId) {
+            $channels[] = new Channel("collection.{$this->collectionId}.stats");
+        }
+        
+        return $channels;
     }
 
     public function broadcastAs(): string {
@@ -36,6 +47,8 @@ class StatsUpdated implements ShouldBroadcastNow {
             'stats' => $this->stats,
             'updated_at' => $this->updatedAt,
             'trigger' => $this->trigger,
+            'collection_id' => $this->collectionId,
+            'context' => $this->collectionId ? 'collection' : 'global'
         ];
     }
 }

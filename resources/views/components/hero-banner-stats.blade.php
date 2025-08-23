@@ -50,7 +50,9 @@ $instanceId = uniqid();
 
 {{-- Statistiche Hero Banner - Per la collezione corrente --}}
 <div class="p-4 bg-black border rounded-lg backdrop-blur-sm border-white/10 opacity-70"
-    id="heroBannerStatsContainer_{{ $instanceId }}">
+    id="heroBannerStatsContainer_{{ $instanceId }}"
+    data-stats-context="{{ $collection ? 'collection' : 'global' }}"
+    data-collection-id="{{ $collection ? $collection->id : '' }}">
     <div class="flex divide-x divide-white/20">
         {{-- VOLUME - Totale valore prenotazioni per questa collezione --}}
         <div class="pr-6">

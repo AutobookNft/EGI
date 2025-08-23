@@ -106,6 +106,74 @@ class ReservationController extends Controller {
     }
 
     /**
+     * Prepara le statistiche di una collection specifica per il broadcast real-time
+     *
+     * @param int $collectionId
+     * @return array
+     */
+    private function prepareCollectionStats(int $collectionId): array {
+        try {
+            $collection = \App\Models\Collection::findOrFail($collectionId);
+
+            // VOLUME - Solo distribuzioni di prenotazioni con sub_status = 'highest'
+            $totalVolume = \App\Models\PaymentDistribution::join('reservations', 'payment_distributions.reservation_id', '=', 'reservations.id')
+                ->where('payment_distributions.collection_id', $collection->id)
+                ->where('reservations.sub_status', 'highest')
+                ->sum('payment_distributions.amount_eur');
+
+            // EPP - Solo distribuzioni EPP di prenotazioni con sub_status = 'highest'
+            $eppTotal = \App\Models\PaymentDistribution::join('reservations', 'payment_distributions.reservation_id', '=', 'reservations.id')
+                ->where('payment_distributions.collection_id', $collection->id)
+                ->where('reservations.sub_status', 'highest')
+                ->where('payment_distributions.user_type', 'epp')
+                ->sum('payment_distributions.amount_eur');
+
+            // EGIS - Numero EGI in questa collezione
+            $totalEgis = $collection->egis()->count();
+
+            // SELL EGIS - EGI con prenotazioni attive in questa collezione
+            $sellEgis = $collection->egis()
+                ->whereHas('reservations', function($query) {
+                    $query->where('is_current', true)->where('status', 'active');
+                })->count();
+
+            // Formato dati raw
+            $data = [
+                'volume' => $totalVolume,
+                'epp' => $eppTotal,
+                'collections' => 1, // Siamo su una collection specifica
+                'sell_collections' => $collection->egis()->whereHas('reservations', function($query) {
+                    $query->where('is_current', true)->where('status', 'active');
+                })->exists() ? 1 : 0,
+                'total_egis' => $totalEgis,
+                'sell_egis' => $sellEgis
+            ];
+
+            // Formato dati formattati (usa helper di formattazione)
+            $formatted = [
+                'volume' => '€' . number_format($totalVolume, 2),
+                'epp' => '€' . number_format($eppTotal, 2),
+                'collections' => number_format(1),
+                'sell_collections' => number_format($data['sell_collections']),
+                'total_egis' => number_format($totalEgis),
+                'sell_egis' => number_format($sellEgis)
+            ];
+
+            return [
+                'success' => true,
+                'data' => $data,
+                'formatted' => $formatted
+            ];
+        } catch (\Exception $e) {
+            \Log::error('Errore nel prepareCollectionStats per broadcast', [
+                'collection_id' => $collectionId,
+                'error' => $e->getMessage()
+            ]);
+            return [];
+        }
+    }
+
+    /**
      * Handle web-based reservation requests
      *
      * @param Request $request
@@ -225,6 +293,19 @@ class ReservationController extends Controller {
                     now()->toISOString(),
                     'reservation_created'
                 );
+            }
+
+            // 📊 Emit real-time collection-specific stats update event
+            if ($reservation->egi && $reservation->egi->collection_id) {
+                $collectionStats = $this->prepareCollectionStats($reservation->egi->collection_id);
+                if (!empty($collectionStats)) {
+                    StatsUpdated::dispatch(
+                        $collectionStats,
+                        now()->toISOString(),
+                        'reservation_created',
+                        $reservation->egi->collection_id
+                    );
+                }
             }
 
             return redirect()->route('egi-certificates.show', $reservation->certificate->certificate_uuid)
@@ -396,6 +477,19 @@ class ReservationController extends Controller {
                     now()->toISOString(),
                     'api_reservation_created'
                 );
+            }
+
+            // 📊 Emit real-time collection-specific stats update event
+            if ($reservation->egi && $reservation->egi->collection_id) {
+                $collectionStats = $this->prepareCollectionStats($reservation->egi->collection_id);
+                if (!empty($collectionStats)) {
+                    StatsUpdated::dispatch(
+                        $collectionStats,
+                        now()->toISOString(),
+                        'api_reservation_created',
+                        $reservation->egi->collection_id
+                    );
+                }
             }
 
             return response()->json([

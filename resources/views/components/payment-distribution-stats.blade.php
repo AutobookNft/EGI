@@ -31,7 +31,8 @@ $instanceId = uniqid();
 
 {{-- Statistiche Payment Distribution GLOBALI --}}
 <div class="flex flex-col items-center justify-center w-full gap-4 sm:gap-6"
-    id="globalStatsContainer_{{ $instanceId }}">
+    id="globalStatsContainer_{{ $instanceId }}"
+    data-stats-context="global">
     <div class="p-4 border rounded-lg backdrop-blur-sm border-white/10" style="background-color: rgba(0, 0, 0, 0.5);">
         <div class="flex divide-x divide-white/20">
             {{-- VOLUME - Totale importo distribuito (€) --}}

@@ -42,21 +42,27 @@ export function initializeStatsRealTime(): void {
         return;
     }
 
-    // Sottoscrivi al canale globale delle statistiche
-    const statsChannel = window.Echo.channel('global.stats');
+    // Sottoscrivi al canale globale delle statistiche (sempre attivo)
+    const globalStatsChannel = window.Echo.channel('global.stats');
+    console.log('📊 Global stats channel created:', globalStatsChannel);
 
-    console.log('📊 Stats channel created:', statsChannel);
+    globalStatsChannel.listen('.stats.updated', (message: StatsUpdateMessage) => {
+        console.log('📊 GLOBAL STATS UPDATE RECEIVED!', message);
 
-    // Ascolta gli aggiornamenti delle statistiche
-    statsChannel.listen('.stats.updated', (message: StatsUpdateMessage) => {
-        console.log('📊 STATS UPDATE RECEIVED!', message);
+        // Aggiorna solo i componenti che sono nel contesto globale
+        updateStatsForContext(message.stats, 'global');
 
-        // Aggiorna tutte le statistiche trovate nella pagina
-        updateAllStatsElements(message.stats);
-
-        // Opzionale: mostra notifica visiva dell'aggiornamento
         if (message.trigger) {
             showStatsUpdateNotification(message.trigger);
+        }
+    });
+
+    // Rileva tutti i componenti con contesto collection e sottoscrive ai loro canali
+    const collectionContainers = document.querySelectorAll('[data-stats-context="collection"]');
+    collectionContainers.forEach(container => {
+        const collectionId = container.getAttribute('data-collection-id');
+        if (collectionId) {
+            subscribeToCollectionStats(parseInt(collectionId));
         }
     });
 
@@ -64,9 +70,47 @@ export function initializeStatsRealTime(): void {
 }
 
 /**
- * Aggiorna tutti gli elementi delle statistiche presenti nella pagina
+ * Sottoscrivi al canale statistiche di una collection specifica
  */
-function updateAllStatsElements(stats: StatsUpdateMessage['stats']): void {
+function subscribeToCollectionStats(collectionId: number): void {
+    const collectionChannel = window.Echo.channel(`collection.${collectionId}.stats`);
+    console.log(`📊 Collection ${collectionId} stats channel created:`, collectionChannel);
+
+    collectionChannel.listen('.stats.updated', (message: StatsUpdateMessage) => {
+        console.log(`📊 COLLECTION ${collectionId} STATS UPDATE RECEIVED!`, message);
+
+        // Aggiorna solo i componenti che sono nel contesto di questa collection
+        updateStatsForContext(message.stats, 'collection', collectionId);
+
+        if (message.trigger) {
+            showStatsUpdateNotification(`${message.trigger} (Collection)`);
+        }
+    });
+}
+
+/**
+ * Aggiorna tutti gli elementi delle statistiche presenti nella pagina per un contesto specifico
+ */
+function updateStatsForContext(stats: StatsUpdateMessage['stats'], context: 'global' | 'collection', collectionId?: number): void {
+    if (context === 'global') {
+        // Aggiorna solo i componenti che sono nel contesto globale
+        const globalContainers = document.querySelectorAll('[data-stats-context="global"]');
+        globalContainers.forEach(container => {
+            updateStatsInContainer(container as HTMLElement, stats);
+        });
+    } else if (context === 'collection' && collectionId) {
+        // Aggiorna solo i componenti che sono nel contesto di questa collection
+        const collectionContainers = document.querySelectorAll(`[data-stats-context="collection"][data-collection-id="${collectionId}"]`);
+        collectionContainers.forEach(container => {
+            updateStatsInContainer(container as HTMLElement, stats);
+        });
+    }
+}
+
+/**
+ * Aggiorna le statistiche all'interno di un container specifico
+ */
+function updateStatsInContainer(container: HTMLElement, stats: StatsUpdateMessage['stats']): void {
     // Funzione helper per formattazione abbreviata (replica della logica PHP/JS)
     function formatNumberAbbreviated(number: number, decimals = 0): string {
         if (number === null || number === undefined) return '0';
@@ -93,20 +137,7 @@ function updateAllStatsElements(stats: StatsUpdateMessage['stats']): void {
         return number.toLocaleString('it-IT');
     }
 
-    // Aggiorna elementi delle statistiche globali (payment-distribution-stats)
-    updateGlobalStatsElements(stats);
-
-    // Aggiorna elementi del hero banner
-    updateHeroBannerStatsElements(stats);
-
-    // Aggiorna altri componenti che potrebbero avere statistiche
-    updateMobileStatsElements(stats);
-}
-
-/**
- * Aggiorna gli elementi delle statistiche globali (desktop)
- */
-function updateGlobalStatsElements(stats: StatsUpdateMessage['stats']): void {
+    // Mappa degli elementi e valori
     const elements = [
         { pattern: 'statVolume_', value: stats.formatted.volume },
         { pattern: 'statEpp_', value: stats.formatted.epp },
@@ -117,28 +148,11 @@ function updateGlobalStatsElements(stats: StatsUpdateMessage['stats']): void {
     ];
 
     elements.forEach(({ pattern, value }) => {
-        const elementsFound = document.querySelectorAll(`[id^="${pattern}"]`);
-        elementsFound.forEach(element => {
-            updateStatElement(element as HTMLElement, value, stats.data);
-        });
+        const element = container.querySelector(`[id^="${pattern}"]`) as HTMLElement;
+        if (element) {
+            updateStatElement(element, value, stats.data);
+        }
     });
-}
-
-/**
- * Aggiorna gli elementi delle statistiche del hero banner
- */
-function updateHeroBannerStatsElements(stats: StatsUpdateMessage['stats']): void {
-    // Gli elementi del hero banner usano gli stessi pattern delle statistiche globali
-    // ma potrebbero avere formattazione responsive diversa
-    updateGlobalStatsElements(stats);
-}
-
-/**
- * Aggiorna gli elementi delle statistiche mobile
- */
-function updateMobileStatsElements(stats: StatsUpdateMessage['stats']): void {
-    // Gli elementi mobile potrebbero avere nomi diversi o logiche specifiche
-    updateGlobalStatsElements(stats);
 }
 
 /**
