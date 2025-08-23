@@ -33,7 +33,6 @@
 
     {{-- Carousel Content Only --}}
     <div id="mobile-content-container">
-        {{-- <x-homepage-egi-carousel :egis="$egis" :creators="$creators" :collections="$collections":collectors="$collectors" /> --}}
-        <x-collection-list :collections="$collections" />
+        <x-list-switcher :collections="$collections" defaultTab="collections" />
     </div>
 </div>

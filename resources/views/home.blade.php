@@ -27,12 +27,14 @@
 
         <x-collection-hero-banner :collections="$featuredCollections" id="mainHeroCarousel" />
 
-    </x-slot>
+    </x-slot>   
 
     {{-- Mobile: Toggle between Carousel and List modes --}}
     <x-slot name="egiCarousel">
-        <x-mobile-homepage-toggle :egis="$featuredEgis" :creators="$featuredCreators"
-            :collections="$featuredCollections" :collectors="$topCollectors" />
+        <div class="block lg:hidden">
+            <x-list-switcher :collections="$featuredCollections" defaultTab="collections" />
+        </div>
+        
         <x-desktop-egi-carousel :egis="$hyperEgis" />
     </x-slot>        
 
