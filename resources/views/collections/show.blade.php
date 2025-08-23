@@ -14,7 +14,7 @@ if (is_array($collection)) {
     $collection = collect($collection);
 }
 // Prendiamo il primo elemento se è una collezione di collezioni
-$firstCollection = $collection->first();
+// $firstCollection = $collection->first();
 
 @endphp
 
@@ -58,7 +58,7 @@ $firstCollection = $collection->first();
             </nav>
 
             {{-- Statistiche PaymentDistribution per desktop e mobile --}}
-            <x-hero-banner-stats :collection="$firstCollection" />
+            <x-hero-banner-stats :collection="$collection" />
         </div>
     </div>
 

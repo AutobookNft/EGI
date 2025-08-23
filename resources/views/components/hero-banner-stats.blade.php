@@ -6,38 +6,42 @@ use App\Models\Egi;
 
 // Se viene passata una collezione specifica, calcola le sue statistiche
 if ($collection) {
-// VOLUME - Solo distribuzioni di prenotazioni con sub_status = 'highest'
-$totalVolume = PaymentDistribution::join('reservations', 'payment_distributions.reservation_id', '=', 'reservations.id')
-->where('payment_distributions.collection_id', $collection->id)
-->where('reservations.sub_status', 'highest')
-->sum('payment_distributions.amount_eur');
+    // VOLUME - Solo distribuzioni di prenotazioni con sub_status = 'highest'
+    $totalVolume = PaymentDistribution::join('reservations', 'payment_distributions.reservation_id', '=', 'reservations.id')
+        ->where('payment_distributions.collection_id', $collection->id)
+        ->where('reservations.sub_status', 'highest')
+        ->sum('payment_distributions.amount_eur');
 
-// EPP - Solo distribuzioni EPP di prenotazioni con sub_status = 'highest'
-$eppTotal = PaymentDistribution::join('reservations', 'payment_distributions.reservation_id', '=', 'reservations.id')
-->where('payment_distributions.collection_id', $collection->id)
-->where('reservations.sub_status', 'highest')
-->where('payment_distributions.user_type', 'epp')
-->sum('payment_distributions.amount_eur');
+    // EPP - Solo distribuzioni EPP di prenotazioni con sub_status = 'highest'
+    $eppTotal = PaymentDistribution::join('reservations', 'payment_distributions.reservation_id', '=', 'reservations.id')
+        ->where('payment_distributions.collection_id', $collection->id)
+        ->where('reservations.sub_status', 'highest')
+        ->where('payment_distributions.user_type', 'epp')
+        ->sum('payment_distributions.amount_eur');
 
-// EGIS - Numero EGI in questa collezione
-$totalEgis = $collection->egis()->count();
+    // EGIS - Numero EGI in questa collezione
+    $totalEgis = $collection->egis()->count();
 
-// SELL EGIS - EGI con prenotazioni attive in questa collezione
-$sellEgis = $collection->egis()
-->whereHas('reservations', function($query) {
-$query->where('is_current', true)->where('status', 'active');
-})
-->count();
+    // SELL EGIS - EGI con prenotazioni attive in questa collezione
+    $sellEgis = $collection->egis()
+        ->whereHas('reservations', function($query) {
+            $query->where('is_current', true)->where('status', 'active');
+    })->count();
+
 } else {
-// Fallback: statistiche globali se non specificata collezione
-$distributionStats = PaymentDistribution::getDashboardStats();
-$totalVolume = $distributionStats['overview']['total_amount_distributed'];
-$eppTotal = collect($distributionStats['by_user_type'])
-->firstWhere('user_type', 'epp')['total_amount'] ?? 0;
-$totalEgis = Egi::count();
-$sellEgis = Egi::whereHas('reservations', function($query) {
-$query->where('is_current', true)->where('status', 'active');
-})->count();
+    // Fallback: statistiche globali se non specificata collezione
+    $distributionStats = PaymentDistribution::getDashboardStats();
+
+    $totalVolume = $distributionStats['overview']['total_amount_distributed'];
+
+    $eppTotal = collect($distributionStats['by_user_type'])
+        ->firstWhere('user_type', 'epp')['total_amount'] ?? 0;
+
+    $totalEgis = Egi::count();
+
+    $sellEgis = Egi::whereHas('reservations', function($query) {
+        $query->where('is_current', true)->where('status', 'active');
+    })->count();
 }
 
 // ID univoco per evitare conflitti
@@ -107,12 +111,12 @@ $instanceId = uniqid();
 document.addEventListener('DOMContentLoaded', function() {
     const instanceId = "{{ $instanceId }}";
     const heroBannerStatsContainer = document.getElementById('heroBannerStatsContainer_' + instanceId);
-    
+
     if (!heroBannerStatsContainer) return;
-    
+
     // ℹ️ Le statistiche si aggiornano automaticamente tramite WebSocket (stats-realtime.ts)
     // Qui facciamo solo una sincronizzazione iniziale opzionale se necessario
-    
+
     console.log('✅ Hero Banner Stats Container ready for real-time updates:', instanceId);
 });
 </script>

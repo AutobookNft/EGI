@@ -41,7 +41,7 @@ class ReservationController extends Controller {
 
     /**
      * Prepare structure changes data for real-time broadcasting
-     * 
+     *
      * @param \App\Models\Reservation $reservation
      * @param \App\Models\Egi $egi
      * @return array
@@ -82,7 +82,7 @@ class ReservationController extends Controller {
 
     /**
      * Prepara le statistiche globali per il broadcast real-time
-     * 
+     *
      * @return array
      */
     private function prepareGlobalStats(): array {
@@ -91,11 +91,11 @@ class ReservationController extends Controller {
             $statsController = new \App\Http\Controllers\Api\PaymentDistributionStatsController();
             $response = $statsController->getGlobalStats(request());
             $responseData = $response->getData(true);
-            
+
             if ($responseData['success']) {
                 return $responseData;
             }
-            
+
             return [];
         } catch (\Exception $e) {
             \Log::error('Errore nel prepareGlobalStats per broadcast', [

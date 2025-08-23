@@ -28,7 +28,7 @@ interface StatsBroadcastMessage {
 // Funzione helper per formattazione abbreviata (replica della PHP)
 function formatNumberAbbreviated(number: number, decimals: number = 0): string {
     if (number === null || number === undefined) return '0';
-    
+
     const num = Math.abs(number);
     const suffixes = [
         { threshold: 1000000000000, suffix: 'T' },
@@ -36,7 +36,7 @@ function formatNumberAbbreviated(number: number, decimals: number = 0): string {
         { threshold: 1000000, suffix: 'M' },
         { threshold: 1000, suffix: 'K' }
     ];
-    
+
     for (const { threshold, suffix } of suffixes) {
         if (num >= threshold) {
             const value = num / threshold;
@@ -47,39 +47,39 @@ function formatNumberAbbreviated(number: number, decimals: number = 0): string {
             }
         }
     }
-    
+
     return number.toLocaleString('it-IT');
 }
 
 // Funzione per aggiornare elemento con effetto brillamento e formattazione responsive
 function updateStatElementWithEffect(element: HTMLElement, rawValue: number, formattedValue: string): void {
     if (!element) return;
-    
+
     // Se l'elemento ha formattazione responsive
     const desktopSpan = element.querySelector('.hidden.md\\:inline') as HTMLElement;
     const mobileSpan = element.querySelector('.md\\:hidden') as HTMLElement;
-    
+
     if (desktopSpan && mobileSpan) {
         // Formattazione responsive: desktop standard, mobile abbreviated
         let desktopValue = formattedValue;
         let mobileValue = formattedValue;
-        
+
         // Per i numeri, usa la formattazione abbreviata su mobile
         if (typeof rawValue === 'number' && rawValue >= 1000) {
             mobileValue = formatNumberAbbreviated(rawValue);
         }
-        
+
         // Controlla se ci sono cambiamenti
-        if (desktopSpan.textContent?.trim() !== desktopValue || 
+        if (desktopSpan.textContent?.trim() !== desktopValue ||
             mobileSpan.textContent?.trim() !== mobileValue) {
-            
+
             element.style.transition = 'all 0.3s ease';
             element.style.transform = 'scale(1.05)';
             element.style.textShadow = '0 0 8px rgba(255, 255, 255, 0.6)';
-            
+
             desktopSpan.textContent = desktopValue;
             mobileSpan.textContent = mobileValue;
-            
+
             // Reset dell'effetto dopo 300ms
             setTimeout(() => {
                 element.style.transform = 'scale(1)';
@@ -94,7 +94,7 @@ function updateStatElementWithEffect(element: HTMLElement, rawValue: number, for
             element.style.transform = 'scale(1.05)';
             element.style.textShadow = '0 0 8px rgba(255, 255, 255, 0.6)';
             element.textContent = formattedValue;
-            
+
             setTimeout(() => {
                 element.style.transform = 'scale(1)';
                 element.style.textShadow = 'none';
@@ -119,16 +119,16 @@ function initializeStatsRealTime(): void {
     channel.listen('.stats.updated', (msg: StatsBroadcastMessage) => {
         console.log('📊 STATISTICHE AGGIORNATE!', msg);
         pending = msg;
-        
+
         // Throttle/coalesce: applica dopo un micro ritardo
         setTimeout(() => {
             if (!pending) return;
-            
+
             console.log('🎯 Aggiornamento statistiche:', pending);
-            
+
             // Trova tutti i componenti di statistiche nella pagina
             updateAllStatsComponents(pending.stats);
-            
+
             pending = null;
         }, 100);
     });
@@ -138,13 +138,13 @@ function initializeStatsRealTime(): void {
 function updateAllStatsComponents(stats: StatsData): void {
     // 1. Aggiorna hero banner stats
     updateHeroBannerStats(stats);
-    
+
     // 2. Aggiorna payment distribution stats (desktop)
     updatePaymentDistributionStats(stats);
-    
+
     // 3. Aggiorna payment distribution stats mobile
     updatePaymentDistributionStatsMobile(stats);
-    
+
     // 4. Altri componenti di statistiche che potrebbero esistere
     updateGenericStatsElements(stats);
 }
@@ -153,25 +153,25 @@ function updateAllStatsComponents(stats: StatsData): void {
 function updateHeroBannerStats(stats: StatsData): void {
     // Cerca tutti i container delle statistiche hero banner
     const containers = document.querySelectorAll('[id^="heroBannerStatsContainer_"]');
-    
+
     containers.forEach(container => {
         const volumeElement = container.querySelector('[id^="statVolume_"]') as HTMLElement;
         const eppElement = container.querySelector('[id^="statEpp_"]') as HTMLElement;
         const totalEgisElement = container.querySelector('[id^="statTotalEgis_"]') as HTMLElement;
         const sellEgisElement = container.querySelector('[id^="statSellEgis_"]') as HTMLElement;
-        
+
         if (volumeElement) {
             updateStatElementWithEffect(volumeElement, stats.data.volume, stats.formatted.volume);
         }
-        
+
         if (eppElement) {
             updateStatElementWithEffect(eppElement, stats.data.epp, stats.formatted.epp);
         }
-        
+
         if (totalEgisElement) {
             updateStatElementWithEffect(totalEgisElement, stats.data.total_egis, stats.formatted.total_egis);
         }
-        
+
         if (sellEgisElement) {
             updateStatElementWithEffect(sellEgisElement, stats.data.sell_egis, stats.formatted.sell_egis);
         }
@@ -181,7 +181,7 @@ function updateHeroBannerStats(stats: StatsData): void {
 // Aggiorna payment distribution stats desktop
 function updatePaymentDistributionStats(stats: StatsData): void {
     const containers = document.querySelectorAll('[id^="globalStatsContainer_"]');
-    
+
     containers.forEach(container => {
         const volumeElement = container.querySelector('[id^="statVolume_"]') as HTMLElement;
         const eppElement = container.querySelector('[id^="statEpp_"]') as HTMLElement;
@@ -189,27 +189,27 @@ function updatePaymentDistributionStats(stats: StatsData): void {
         const sellCollectionsElement = container.querySelector('[id^="statSellCollections_"]') as HTMLElement;
         const totalEgisElement = container.querySelector('[id^="statTotalEgis_"]') as HTMLElement;
         const sellEgisElement = container.querySelector('[id^="statSellEgis_"]') as HTMLElement;
-        
+
         if (volumeElement) {
             updateStatElementWithEffect(volumeElement, stats.data.volume, stats.formatted.volume);
         }
-        
+
         if (eppElement) {
             updateStatElementWithEffect(eppElement, stats.data.epp, stats.formatted.epp);
         }
-        
+
         if (collectionsElement) {
             updateStatElementWithEffect(collectionsElement, stats.data.collections, stats.formatted.collections);
         }
-        
+
         if (sellCollectionsElement) {
             updateStatElementWithEffect(sellCollectionsElement, stats.data.sell_collections, stats.formatted.sell_collections);
         }
-        
+
         if (totalEgisElement) {
             updateStatElementWithEffect(totalEgisElement, stats.data.total_egis, stats.formatted.total_egis);
         }
-        
+
         if (sellEgisElement) {
             updateStatElementWithEffect(sellEgisElement, stats.data.sell_egis, stats.formatted.sell_egis);
         }
@@ -220,7 +220,7 @@ function updatePaymentDistributionStats(stats: StatsData): void {
 function updatePaymentDistributionStatsMobile(stats: StatsData): void {
     // Mobile stats potrebbero avere ID o classi diverse, adattare se necessario
     const containers = document.querySelectorAll('[id^="mobileStatsContainer_"], .mobile-stats-container');
-    
+
     containers.forEach(container => {
         const volumeElement = container.querySelector('[id^="statVolume_"], .stat-volume') as HTMLElement;
         const eppElement = container.querySelector('[id^="statEpp_"], .stat-epp') as HTMLElement;
@@ -228,27 +228,27 @@ function updatePaymentDistributionStatsMobile(stats: StatsData): void {
         const sellCollectionsElement = container.querySelector('[id^="statSellCollections_"], .stat-sell-collections') as HTMLElement;
         const totalEgisElement = container.querySelector('[id^="statTotalEgis_"], .stat-total-egis') as HTMLElement;
         const sellEgisElement = container.querySelector('[id^="statSellEgis_"], .stat-sell-egis') as HTMLElement;
-        
+
         if (volumeElement) {
             updateStatElementWithEffect(volumeElement, stats.data.volume, stats.formatted.volume);
         }
-        
+
         if (eppElement) {
             updateStatElementWithEffect(eppElement, stats.data.epp, stats.formatted.epp);
         }
-        
+
         if (collectionsElement) {
             updateStatElementWithEffect(collectionsElement, stats.data.collections, stats.formatted.collections);
         }
-        
+
         if (sellCollectionsElement) {
             updateStatElementWithEffect(sellCollectionsElement, stats.data.sell_collections, stats.formatted.sell_collections);
         }
-        
+
         if (totalEgisElement) {
             updateStatElementWithEffect(totalEgisElement, stats.data.total_egis, stats.formatted.total_egis);
         }
-        
+
         if (sellEgisElement) {
             updateStatElementWithEffect(sellEgisElement, stats.data.sell_egis, stats.formatted.sell_egis);
         }
@@ -262,7 +262,7 @@ function updateGenericStatsElements(stats: StatsData): void {
     const eppElements = document.querySelectorAll('.global-epp-stat, [data-stat="epp"]') as NodeListOf<HTMLElement>;
     const egisElements = document.querySelectorAll('.global-egis-stat, [data-stat="total_egis"]') as NodeListOf<HTMLElement>;
     const sellEgisElements = document.querySelectorAll('.global-sell-egis-stat, [data-stat="sell_egis"]') as NodeListOf<HTMLElement>;
-    
+
     volumeElements.forEach(el => updateStatElementWithEffect(el, stats.data.volume, stats.formatted.volume));
     eppElements.forEach(el => updateStatElementWithEffect(el, stats.data.epp, stats.formatted.epp));
     egisElements.forEach(el => updateStatElementWithEffect(el, stats.data.total_egis, stats.formatted.total_egis));
@@ -270,7 +270,7 @@ function updateGenericStatsElements(stats: StatsData): void {
 }
 
 // Inizializza quando il DOM è pronto
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Ritarda leggermente l'inizializzazione per assicurarsi che Echo sia pronto
     setTimeout(initializeStatsRealTime, 1000);
 });
