@@ -53,6 +53,10 @@ class HomeController extends Controller {
         $featuredCreators = $this->getFeaturedCreators(); // Nuovo: recupera i Creator
         $topCollectors = $this->collectorCarouselService->getTopCollectors(10); // Nuovo: top collectors
         $featuredEgis = $this->getFeaturedEgis(); // Nuovo: ultimi 20 EGI per carousel homepage
+        $hyperEgis = Egi::where('is_published', true)
+            ->where('hyper', true)
+            ->with(['collection'])
+            ->get();
         $allEgis = Egi::where('is_published', true)
             ->with(['collection'])
             ->get();
@@ -71,6 +75,7 @@ class HomeController extends Controller {
             'topCollectors' => $topCollectors, // Nuovo: passa i Top Collectors alla vista
             'featuredEgis' => $featuredEgis, // Nuovo: ultimi 20 EGI per carousel homepage
             'allEgis' => $allEgis, // Nuovo: tutti gli EGI pubblicati per il carousel
+            'hyperEgis' => $hyperEgis, // Nuovo: tutti gli EGI Hyper pubblicati per il carousel
         ]);
     }
 

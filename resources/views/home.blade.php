@@ -33,14 +33,15 @@
     <x-slot name="egiCarousel">
         <x-mobile-homepage-toggle :egis="$featuredEgis" :creators="$featuredCreators"
             :collections="$featuredCollections" :collectors="$topCollectors" />
+        <x-desktop-egi-carousel :egis="$hyperEgis" />
     </x-slot>        
 
     {{-- Desktop: EGI Cards Carousel - SOLO desktop --}}
     <x-slot name="belowHeroContent">
-        <x-desktop-egi-carousel :egis="$featuredEgis" />
-
+        
         {{-- Creators carousel (era qui prima) --}}
         <div class="hidden lg:block">
+            <x-desktop-egi-carousel :egis="$featuredEgis" />
             <x-creators-carousel :creators="$featuredCreators" title="{{ __('guest_home.featured_creators_title') }}"
                 bgClass="bg-gray-900" marginClass="mb-12" />
         </div>
