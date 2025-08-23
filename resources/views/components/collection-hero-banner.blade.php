@@ -196,13 +196,80 @@ return [
     // Log per indicare che il blocco script è stato parsato
     // console.log('HERO BANNER SCRIPT BLOCK PARSED - Instance ID: {{ $instanceId }}');
 
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         const componentId = "{{ $instanceId }}";
         const heroBannerContainer = document.getElementById('heroBannerContainer_' + componentId);
 
         if (!heroBannerContainer) {
             console.error('CRITICAL: Hero Banner Container (heroBannerContainer_' + componentId + ') not found.');
             return;
+        }
+
+        // 🔥 HELPER: Formattazione abbreviata mobile-friendly (replica della logica PHP)
+        function formatNumberAbbreviated(number, decimals = 1, showZeroDecimals = false) {
+            if (number === null || number === undefined || number === '') {
+                return '0';
+            }
+
+            const num = Math.abs(parseFloat(number));
+            const isNegative = number < 0;
+
+            // Definisce le soglie e suffissi
+            const suffixes = [
+                { threshold: 1000000000000, suffix: 'T' }, // Trilioni
+                { threshold: 1000000000, suffix: 'B' },    // Miliardi
+                { threshold: 1000000, suffix: 'M' },       // Milioni
+                { threshold: 1000, suffix: 'K' }           // Migliaia
+            ];
+
+            let formatted = '';
+
+            // Cerca la soglia appropriata
+            for (const { threshold, suffix } of suffixes) {
+                if (num >= threshold) {
+                    const value = num / threshold;
+
+                    // Se il valore è >= 100, non mostrare decimali per leggibilità
+                    if (value >= 100) {
+                        formatted = Math.round(value).toLocaleString('it-IT', {
+                            useGrouping: false
+                        }) + suffix;
+                    }
+                    // Se il valore è un numero intero e non vogliamo mostrare .0
+                    else if (!showZeroDecimals && value === Math.floor(value)) {
+                        formatted = value.toLocaleString('it-IT', {
+                            useGrouping: false
+                        }) + suffix;
+                    } else {
+                        formatted = value.toLocaleString('it-IT', {
+                            minimumFractionDigits: decimals,
+                            maximumFractionDigits: decimals,
+                            useGrouping: false
+                        }) + suffix;
+                    }
+                    break;
+                }
+            }
+
+            // Se non ha raggiunto nessuna soglia, mostra il numero intero
+            if (!formatted) {
+                formatted = Math.round(num).toLocaleString('it-IT');
+            }
+
+            return isNegative ? '-' + formatted : formatted;
+        }
+
+        // 🔥 HELPER: Formattazione prezzo abbreviata
+        function formatPriceAbbreviated(price, decimals = 1, showZeroDecimals = false) {
+            if (price === null || price === undefined || price === '') {
+                return '€0';
+            }
+            return '€' + formatNumberAbbreviated(price, decimals, showZeroDecimals);
+        }
+
+        // 🔥 HELPER: Verifica se siamo su mobile per formattazione responsive
+        function isMobileDevice() {
+            return window.innerWidth < 768; // md breakpoint Tailwind
         }
 
         const collectionsData = @json($jsCollectionsData);
@@ -254,9 +321,7 @@ return [
                     bannerBackground.style.backgroundImage = `url('${currentCollection.banner}')`;
                     bannerBackground.style.opacity = '1';
                 }, 350);
-            }
-
-            // Aggiorna contenuto testuale
+            }            // Aggiorna contenuto testuale
             if (collectionSubTextElement) {
                 collectionSubTextElement.textContent = `${currentCollection.name} {{ __('guest_home.by') }} ${currentCollection.creator}`;
             }
@@ -273,24 +338,44 @@ return [
 
                     if (volumeElement) {
                         const volume = currentCollection.stats.volume || 0;
-                        volumeElement.textContent = volume > 0 ?
-                            '€' + new Intl.NumberFormat('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(volume) :
-                            '€0.00';
+                        // Responsive formatting: standard on desktop, abbreviated on mobile
+                        if (isMobileDevice()) {
+                            volumeElement.textContent = formatPriceAbbreviated(volume, 1);
+                        } else {
+                            volumeElement.textContent = volume > 0 ?
+                                '€' + new Intl.NumberFormat('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(volume) :
+                                '€0.00';
+                        }
                     }
 
                     if (eppElement) {
                         const epp = currentCollection.stats.epp || 0;
-                        eppElement.textContent = epp > 0 ?
-                            '€' + new Intl.NumberFormat('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(epp) :
-                            '€0.00';
+                        // Responsive formatting: standard on desktop, abbreviated on mobile
+                        if (isMobileDevice()) {
+                            eppElement.textContent = formatPriceAbbreviated(epp, 1);
+                        } else {
+                            eppElement.textContent = epp > 0 ?
+                                '€' + new Intl.NumberFormat('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(epp) :
+                                '€0.00';
+                        }
                     }
 
                     if (egisElement) {
-                        egisElement.textContent = new Intl.NumberFormat('it-IT').format(currentCollection.stats.egis || 0);
+                        // Use abbreviated format for large numbers on mobile
+                        if (isMobileDevice()) {
+                            egisElement.textContent = formatNumberAbbreviated(currentCollection.stats.egis || 0, 0);
+                        } else {
+                            egisElement.textContent = new Intl.NumberFormat('it-IT').format(currentCollection.stats.egis || 0);
+                        }
                     }
 
                     if (sellEgisElement) {
-                        sellEgisElement.textContent = new Intl.NumberFormat('it-IT').format(currentCollection.stats.sell_egis || 0);
+                        // Use abbreviated format for large numbers on mobile
+                        if (isMobileDevice()) {
+                            sellEgisElement.textContent = formatNumberAbbreviated(currentCollection.stats.sell_egis || 0, 0);
+                        } else {
+                            sellEgisElement.textContent = new Intl.NumberFormat('it-IT').format(currentCollection.stats.sell_egis || 0);
+                        }
                     }
                 }
             }
@@ -399,24 +484,24 @@ return [
 
                                 if (volumeElement) {
                                     const volume = currentCollection.stats.volume || 0;
-                                    volumeElement.textContent = volume > 0 ?
-                                        '€' + new Intl.NumberFormat('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(volume) :
-                                        '€0.00';
+                                    // Use abbreviated formatting for mobile
+                                    volumeElement.textContent = formatPriceAbbreviated(volume, 1);
                                 }
 
                                 if (eppElement) {
                                     const epp = currentCollection.stats.epp || 0;
-                                    eppElement.textContent = epp > 0 ?
-                                        '€' + new Intl.NumberFormat('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(epp) :
-                                        '€0.00';
+                                    // Use abbreviated formatting for mobile
+                                    eppElement.textContent = formatPriceAbbreviated(epp, 1);
                                 }
 
                                 if (egisElement) {
-                                    egisElement.textContent = new Intl.NumberFormat('it-IT').format(currentCollection.stats.egis || 0);
+                                    // Use abbreviated format for mobile
+                                    egisElement.textContent = formatNumberAbbreviated(currentCollection.stats.egis || 0, 0);
                                 }
 
                                 if (sellEgisElement) {
-                                    sellEgisElement.textContent = new Intl.NumberFormat('it-IT').format(currentCollection.stats.sell_egis || 0);
+                                    // Use abbreviated format for mobile
+                                    sellEgisElement.textContent = formatNumberAbbreviated(currentCollection.stats.sell_egis || 0, 0);
                                 }
                             }
                         }
@@ -444,6 +529,55 @@ return [
         // Gestione resize per rilevare cambio desktop/mobile
         window.addEventListener('resize', () => {
             checkIfMobile();
+            // Forza un aggiornamento delle statistiche quando cambia il breakpoint
+            if (collectionsData[currentIndex] && collectionsData[currentIndex].stats) {
+                const currentCollection = collectionsData[currentIndex];
+                const statsContainer = document.querySelector('[id^="heroBannerStatsContainer_"]');
+                if (statsContainer) {
+                    const volumeElement = statsContainer.querySelector('[id^="statVolume_"]');
+                    const eppElement = statsContainer.querySelector('[id^="statEpp_"]');
+                    const egisElement = statsContainer.querySelector('[id^="statTotalEgis_"]');
+                    const sellEgisElement = statsContainer.querySelector('[id^="statSellEgis_"]');
+
+                    if (volumeElement) {
+                        const volume = currentCollection.stats.volume || 0;
+                        if (isMobileDevice()) {
+                            volumeElement.textContent = formatPriceAbbreviated(volume, 1);
+                        } else {
+                            volumeElement.textContent = volume > 0 ?
+                                '€' + new Intl.NumberFormat('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(volume) :
+                                '€0.00';
+                        }
+                    }
+
+                    if (eppElement) {
+                        const epp = currentCollection.stats.epp || 0;
+                        if (isMobileDevice()) {
+                            eppElement.textContent = formatPriceAbbreviated(epp, 1);
+                        } else {
+                            eppElement.textContent = epp > 0 ?
+                                '€' + new Intl.NumberFormat('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(epp) :
+                                '€0.00';
+                        }
+                    }
+
+                    if (egisElement) {
+                        if (isMobileDevice()) {
+                            egisElement.textContent = formatNumberAbbreviated(currentCollection.stats.egis || 0, 0);
+                        } else {
+                            egisElement.textContent = new Intl.NumberFormat('it-IT').format(currentCollection.stats.egis || 0);
+                        }
+                    }
+
+                    if (sellEgisElement) {
+                        if (isMobileDevice()) {
+                            sellEgisElement.textContent = formatNumberAbbreviated(currentCollection.stats.sell_egis || 0, 0);
+                        } else {
+                            sellEgisElement.textContent = new Intl.NumberFormat('it-IT').format(currentCollection.stats.sell_egis || 0);
+                        }
+                    }
+                }
+            }
             updateBannerContent();
         });
 

@@ -20,7 +20,7 @@ function mountCurrentPrice(el: HTMLElement) {
         return;
     }
 
-    console.log('✅ Echo available, setting up channel for ID:', id);
+    // console.log('✅ Echo available, setting up channel for ID:', id);
     const channel = window.Echo.channel(`price.${id}`);
 
     console.log('📡 Channel created:', channel);
@@ -59,7 +59,7 @@ function mountCurrentPrice(el: HTMLElement) {
 
                 // Mostra notifica rapida
                 const notification = document.createElement('div');
-                notification.className = 'fixed top-4 right-4 bg-blue-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-all duration-300';
+                notification.className = 'fixed z-50 px-4 py-2 text-white transition-all duration-300 bg-blue-500 rounded-lg shadow-lg top-4 right-4';
                 notification.textContent = 'Aggiornamento EGI rilevato, ricaricando...';
                 document.body.appendChild(notification);
 

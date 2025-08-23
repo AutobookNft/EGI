@@ -2,7 +2,7 @@
  * 📜 Real-time EGI Structure Updates
  * 🎯 Purpose: Handle real-time structural changes to EGI components
  * 🧱 Core Logic: Sync structural changes across all connected browsers
- * 
+ *
  * @author GitHub Copilot for Fabio Cherici
  * @version 1.0.0
  * @date 2025-08-23
@@ -27,15 +27,15 @@ export class EgiStructureUpdater {
 
     /**
      * Update structure for any EGI element (card, list, show page)
-     * 
+     *
      * @param element The DOM element to update
      * @param changes The structure changes to apply
      */
     public static updateStructure(element: HTMLElement, changes: StructureChanges): void {
-        console.log('🔄 EgiStructureUpdater: Applying structural changes', {
-            egiId: element.dataset.egiId,
-            changes
-        });
+        // console.log('🔄 EgiStructureUpdater: Applying structural changes', {
+        //     egiId: element.dataset.egiId,
+        //     changes
+        // });
 
         // Determine element type and apply appropriate updates
         if (element.classList.contains('egi-card-list') || element.closest('.egi-card-list')) {
@@ -66,7 +66,7 @@ export class EgiStructureUpdater {
     }
 
     /**
-     * Update EGI card list structure  
+     * Update EGI card list structure
      */
     private static updateEgiCardList(element: HTMLElement, changes: StructureChanges): void {
         const cardList = (element.closest('.egi-card-list') || element) as HTMLElement;
@@ -125,7 +125,7 @@ export class EgiStructureUpdater {
      * Create new activator section
      */
     private static createActivatorSection(container: HTMLElement, activator: StructureChanges['activator']): void {
-        console.log('🆕 Creating new activator section');
+        // console.log('🆕 Creating new activator section');
 
         // Find appropriate insertion point (price section for cards)
         const priceSection = container.querySelector('.border-green-500\\/30') ||
@@ -214,7 +214,7 @@ export class EgiStructureUpdater {
      * Update reservation count display
      */
     private static updateReservationCount(container: HTMLElement, count: number): void {
-        console.log('📊 Updating reservation count to:', count);
+        // console.log('📊 Updating reservation count to:', count);
 
         const existingCountSection = container.querySelector('[data-reservation-count]');
 
@@ -235,7 +235,7 @@ export class EgiStructureUpdater {
      * Create new reservation count section
      */
     private static createReservationCountSection(container: HTMLElement, count: number): void {
-        console.log('🆕 Creating new reservation count section');
+        // console.log('🆕 Creating new reservation count section');
 
         // Find insertion point (after collection/creator info)
         const insertAfter = container.querySelector('[data-collection-info]') ||
