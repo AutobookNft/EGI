@@ -5,6 +5,19 @@
 {{-- Includiamo il layout principale per le collezioni --}}
 {{-- Questo layout gestisce il titolo, la descrizione e gli script condivisi --}}
 
+@props([
+'collection' => collect(),
+])
+
+@php
+if (is_array($collection)) {
+    $collection = collect($collection);
+}
+// Prendiamo il primo elemento se è una collezione di collezioni
+$firstCollection = $collection->first();
+
+@endphp
+
 <x-collection-layout :title="$collection->collection_name . ' | FlorenceEGI'"
     :metaDescription="Str::limit($collection->description, 155) ?? __('collection.show.details_for_collection') . ' ' . $collection->collection_name">
 
@@ -30,7 +43,7 @@
         </script>
     </x-slot>
 
-    {{-- 🎯 SEZIONE INFORMAZIONI CRITICHE (Sopra al Banner) --}}
+    {{-- 🎯 SEZIONE STATISTICHE PAYMENT DISTRIBUTION --}}
     <div class="bg-gray-900 border-b border-gray-800">
         <div class="container px-4 py-6 mx-auto sm:px-6 lg:px-8">
             {{-- Breadcrumb migliorato --}}
@@ -44,97 +57,13 @@
                 <span class="font-medium text-gray-300">{{ Str::limit($collection->collection_name, 30) }}</span>
             </nav>
 
-            {{-- Quick Stats Cards - Mobile First --}}
-            <div class="grid grid-cols-2 gap-3 lg:grid-cols-4 sm:gap-4">
-                <div class="p-3 text-center rounded-lg stat-card info-glass sm:p-4">
-                    <div class="text-xl font-bold sm:text-2xl text-emerald-400">{{ $collection->EGI_number ??
-                        $collection->egis_count ?? 0 }}</div>
-                    <div class="text-xs tracking-wider text-gray-400 uppercase">{{ __('collection.show.egis') }}</div>
-                </div>
-                <div class="p-3 text-center rounded-lg stat-card info-glass sm:p-4">
-                    <div class="text-xl font-bold text-pink-400 sm:text-2xl">{{ $collection->likes_count ?? 0 }}</div>
-                    <div class="text-xs tracking-wider text-gray-400 uppercase">{{ __('collection.show.likes') }}</div>
-                </div>
-                <div class="p-3 text-center rounded-lg stat-card info-glass sm:p-4">
-                    <div class="text-xl font-bold text-blue-400 sm:text-2xl">{{ $collection->reservations_count ?? 0 }}
-                    </div>
-                    <div class="text-xs tracking-wider text-gray-400 uppercase">{{ __('collection.show.reserved') }}
-                    </div>
-                </div>
-                <div class="p-3 text-center rounded-lg stat-card info-glass sm:p-4">
-                    @if($collection->floor_price && $collection->floor_price > 0)
-                    <div class="text-xl font-bold text-yellow-400 sm:text-2xl">{{
-                        number_format($collection->floor_price, 2) }}</div>
-                    <div class="text-xs tracking-wider text-gray-400 uppercase">{{ __('collection.show.algo_floor') }}
-                    </div>
-                    @else
-                    <div class="text-xl font-bold text-purple-400 sm:text-2xl">{{ __('collection.show.free_mint') }}
-                    </div>
-                    <div class="text-xs tracking-wider text-gray-400 uppercase">{{ __('collection.show.mint_label') }}
-                    </div>
-                    @endif
-                </div>
-            </div>
+            {{-- Statistiche PaymentDistribution per desktop e mobile --}}
+            <x-hero-banner-stats :collection="$firstCollection" />
         </div>
     </div>
 
-    {{-- 🎨 HERO BANNER POTENZIATO --}}
+    {{-- 🎨 HERO BANNER POTENZIATO - Mobile Responsive --}}
     <section class="relative overflow-hidden">
-        {{-- Statistiche sopra banner - Layout OpenSea --}}
-        <div class="bg-gray-900">
-            <div class="container px-4 py-4 mx-auto sm:px-6 lg:px-8">
-                <div class="grid grid-cols-3 gap-6 lg:grid-cols-5">
-                    <div class="text-center">
-                        <div class="text-2xl font-bold text-emerald-400">{{ $collection->EGI_number ??
-                            $collection->egis_count ?? 0 }}</div>
-                        <div class="text-sm text-gray-400">{{ __('collection.show.egis') }}</div>
-                    </div>
-                    <div class="text-center">
-                        <div class="text-2xl font-bold text-pink-400">{{ $collection->likes_count ?? 0 }}</div>
-                        <div class="text-sm text-gray-400">{{ __('collection.show.likes') }}</div>
-                    </div>
-                    <div class="text-center">
-                        <div class="text-2xl font-bold text-blue-400">{{ $collection->reservations_count ?? 0 }}</div>
-                        <div class="text-sm text-gray-400">{{ __('collection.show.reserved') }}</div>
-                    </div>
-                    <div class="text-center">
-                        @php
-                        // Calcola il totale delle prenotazioni attive
-                        $totalReservationsValue = $collection->egis()
-                        ->whereHas('reservations', function($query) {
-                        $query->where('is_current', true)->where('status', 'active');
-                        })
-                        ->with(['reservations' => function($query) {
-                        $query->where('is_current', true)->where('status', 'active');
-                        }])
-                        ->get()
-                        ->sum(function($egi) {
-                        return $egi->reservations->max('offer_amount_fiat') ?? 0;
-                        });
-                        @endphp
-                        @if($totalReservationsValue > 0)
-                        <div class="text-2xl font-bold text-yellow-400">{{ number_format($totalReservationsValue, 0) }}
-                            €</div>
-                        <div class="text-sm text-gray-400">{{ __('collection.show.total_volume') }}</div>
-                        @else
-                        <div class="text-2xl font-bold text-purple-400">{{ __('collection.show.free_mint') }}</div>
-                        <div class="text-sm text-gray-400">{{ __('collection.show.mint_label') }}</div>
-                        @endif
-                    </div>
-                    <div class="hidden text-center lg:block">
-                        @if($collection->floor_price && $collection->floor_price > 0)
-                        <div class="text-2xl font-bold text-orange-400">{{ number_format($collection->floor_price, 2) }}
-                            €</div>
-                        <div class="text-sm text-gray-400">{{ __('collection.show.algo_floor') }}</div>
-                        @else
-                        <div class="text-2xl font-bold text-gray-400">--</div>
-                        <div class="text-sm text-gray-400">{{ __('collection.show.algo_floor') }}</div>
-                        @endif
-                    </div>
-                </div>
-            </div>
-        </div>
-
         {{-- Background con Parallax Effect --}}
         <div class="absolute inset-0 z-0 parallax-banner">
             @if($collection->image_banner)
@@ -148,8 +77,8 @@
             <div class="absolute inset-0 bg-gradient-to-r from-black/30 to-transparent"></div>
         </div>
 
-        {{-- Hero Content --}}
-        <div class="container relative z-10 px-4 py-16 mx-auto sm:px-6 lg:px-8 sm:py-20 lg:py-24">
+        {{-- Hero Content - Mobile Responsive Height --}}
+        <div class="container relative z-10 px-4 py-8 mx-auto sm:px-6 lg:px-8 sm:py-12 lg:py-16">
             <div class="max-w-4xl">
                 <div class="flex items-center gap-3 mb-6">
                     @if($collection->creator)
@@ -616,7 +545,7 @@ const observer = new IntersectionObserver((entries) => {
 // Observe all animated elements
 document.querySelectorAll('.egi-item, .stat-card').forEach(el => {
     observer.observe(el);
-});
+    });
     </script>
     @endpush
 
