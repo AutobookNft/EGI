@@ -109,6 +109,11 @@ Route::get('/debug-user-lookup', function () {
     ];
 });
 
+// Route di test per il carousel delle collection
+Route::get('/test-carousel', function () {
+    return view('test-carousel');
+})->name('test.carousel');
+
 Route::get('/debug-session-direct', function () {
     return [
         'session_direct' => [

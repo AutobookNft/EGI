@@ -46,4 +46,14 @@ return [
     'sell_collections_description' => 'Collezioni con distribuzioni attive',
     'egis_description' => 'Numero totale di EGI',
     'sell_egis_description' => 'EGI con prenotazioni attive',
+
+    // Carousel Collections
+    'top_collections' => 'Top Collezioni',
+    'no_collections_data' => 'Nessuna collezione disponibile',
+    'collections_coming_soon' => 'Le collezioni saranno visualizzate qui quando disponibili',
+    'reservations' => 'Prenotazioni',
+    'avg_distribution' => 'Distr. Media',
+    'epp_ratio' => 'Ratio EPP',
+    'active' => 'Attiva',
+    'view_details' => 'Visualizza Dettagli',
 ];
