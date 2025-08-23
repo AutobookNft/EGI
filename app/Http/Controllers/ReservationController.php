@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Events\PriceUpdated;
+use App\Events\StatsUpdated;
 use App\Helpers\FegiAuth;
 use App\Models\Egi;
 use App\Models\Reservation;
@@ -77,6 +78,31 @@ class ReservationController extends Controller {
             'activator' => $activatorData,
             'button_state' => $isFirstReservation ? 'rilancia' : 'rilancia', // Sempre rilancia dopo prima prenotazione
         ];
+    }
+
+    /**
+     * Prepara le statistiche globali per il broadcast real-time
+     * 
+     * @return array
+     */
+    private function prepareGlobalStats(): array {
+        try {
+            // Usa il controller delle statistiche per ottenere i dati aggiornati
+            $statsController = new \App\Http\Controllers\Api\PaymentDistributionStatsController();
+            $response = $statsController->getGlobalStats(request());
+            $responseData = $response->getData(true);
+            
+            if ($responseData['success']) {
+                return $responseData;
+            }
+            
+            return [];
+        } catch (\Exception $e) {
+            \Log::error('Errore nel prepareGlobalStats per broadcast', [
+                'error' => $e->getMessage()
+            ]);
+            return [];
+        }
     }
 
     /**
@@ -190,6 +216,16 @@ class ReservationController extends Controller {
                 now()->toISOString(),
                 $structureChanges
             );
+
+            // 📊 Emit real-time global stats update event
+            $globalStats = $this->prepareGlobalStats();
+            if (!empty($globalStats)) {
+                StatsUpdated::dispatch(
+                    $globalStats,
+                    now()->toISOString(),
+                    'reservation_created'
+                );
+            }
 
             return redirect()->route('egi-certificates.show', $reservation->certificate->certificate_uuid)
                 ->with('success', __('reservation.success'));
@@ -351,6 +387,16 @@ class ReservationController extends Controller {
                 now()->toISOString(),
                 $structureChanges
             );
+
+            // 📊 Emit real-time global stats update event
+            $globalStats = $this->prepareGlobalStats();
+            if (!empty($globalStats)) {
+                StatsUpdated::dispatch(
+                    $globalStats,
+                    now()->toISOString(),
+                    'api_reservation_created'
+                );
+            }
 
             return response()->json([
                 'success' => true,
@@ -909,6 +955,16 @@ class ReservationController extends Controller {
                     now()->toISOString(),
                     $structureChanges
                 );
+
+                // 📊 Emit real-time global stats update event for pre-launch
+                $globalStats = $this->prepareGlobalStats();
+                if (!empty($globalStats)) {
+                    StatsUpdated::dispatch(
+                        $globalStats,
+                        now()->toISOString(),
+                        'prelaunch_reservation'
+                    );
+                }
             }
 
             return response()->json([
