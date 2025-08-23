@@ -6,11 +6,19 @@
 @php
 use App\Models\User;
 use App\Models\PaymentDistribution;
+use App\Models\Reservation;
 use App\Enums\PaymentDistribution\UserTypeEnum;
 
-// Prendi TUTTI gli utenti del tipo specificato
-$allUsers = User::where('usertype', $userType)
-    ->orderBy('created_at', 'desc');
+// Logica diversa per "activator" - prende utenti con qualsiasi prenotazione
+if ($userType === 'activator') {
+    // Usa la relazione reservations del modello User (qualsiasi prenotazione)
+    $allUsers = User::whereHas('reservations')
+        ->orderBy('created_at', 'desc');
+} else {
+    // Comportamento normale per creator e epp
+    $allUsers = User::where('usertype', $userType)
+        ->orderBy('created_at', 'desc');
+}
 
 if ($limit) {
     $allUsers->limit($limit);
@@ -20,24 +28,44 @@ $users = $allUsers->get();
 
 // Calcola le statistiche separatamente per ogni utente
 $usersWithStats = $users->map(function($user) use ($userType) {
-    // Calcola statistiche per questo specifico utente
-    $userStats = PaymentDistribution::where('user_id', $user->id)
-        ->where('user_type', $userType)
-        ->selectRaw('
-            COUNT(*) as distributions_count,
-            SUM(amount_eur) as total_earnings,
-            AVG(amount_eur) as avg_earnings
-        ')
-        ->first();
+    if ($userType === 'activator') {
+        // Per gli activator, usa il metodo getCollectorStats() del modello User
+        $collectorStats = $user->getCollectorStats();
 
-    return [
-        'user' => $user,
-        'stats' => [
-            'total_amount' => $userStats->total_earnings ?? 0,
-            'count' => $userStats->distributions_count ?? 0,
-            'avg_amount' => $userStats->avg_earnings ?? 0
-        ]
-    ];
+        // Calcola il totale delle prenotazioni (attive + completate)
+        $totalReservations = $user->reservations()->count();
+
+        return [
+            'user' => $user,
+            'stats' => [
+                'total_amount' => $collectorStats['total_spent_eur'] ?? 0,
+                'count' => $totalReservations,
+                'avg_amount' => $totalReservations > 0 ?
+                    ($collectorStats['total_spent_eur'] / $totalReservations) : 0
+            ]
+        ];
+    } else {
+        // Comportamento normale per altri tipi
+        $statsUserType = $userType;
+
+        $userStats = PaymentDistribution::where('user_id', $user->id)
+            ->where('user_type', $statsUserType)
+            ->selectRaw('
+                COUNT(*) as distributions_count,
+                SUM(amount_eur) as total_earnings,
+                AVG(amount_eur) as avg_earnings
+            ')
+            ->first();
+
+        return [
+            'user' => $user,
+            'stats' => [
+                'total_amount' => $userStats->total_earnings ?? 0,
+                'count' => $userStats->distributions_count ?? 0,
+                'avg_amount' => $userStats->avg_earnings ?? 0
+            ]
+        ];
+    }
 });
 
 // Riordina per totale guadagni (se hai statistiche) o per data creazione
@@ -53,10 +81,10 @@ $typeConfig = match($userType) {
         'icon' => 'palette',
         'color' => 'text-purple-400'
     ],
-    'collector' => [
-        'title' => __('statistics.top_collectors'),
-        'title_all' => __('statistics.all_collectors'),
-        'icon' => 'shopping_bag',
+    'activator' => [
+        'title' => __('statistics.top_activators'),
+        'title_all' => __('statistics.all_activators'),
+        'icon' => 'flash_on',
         'color' => 'text-blue-400'
     ],
     'epp' => [
@@ -86,7 +114,12 @@ $instanceId = uniqid();
             {{ $limit ? $typeConfig['title'] : $typeConfig['title_all'] }}
         </h3>
         <div class="mr-2 text-sm text-gray-400">
-            {{ count($topUsers) }} {{ __('statistics.' . $userType . '_count') }}
+            {{ count($topUsers) }}
+            @if($userType === 'activator')
+                {{ __('statistics.activators_count') }}
+            @else
+                {{ __('statistics.' . $userType . '_count') }}
+            @endif
             @if($usersWithStats->where('stats.total_amount', '>', 0)->count() > 0)
                 ({{ $usersWithStats->where('stats.total_amount', '>', 0)->count() }} {{ __('statistics.with_earnings') }})
             @endif

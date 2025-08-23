@@ -44,7 +44,7 @@
 
         <!-- Collectors Tab -->
         <div id="main-content-collectors" class="hidden tab-content-panel">
-            <x-user-list userType="collector" />
+            <x-user-list userType="activator" />
         </div>
 
         <!-- EPP Tab -->
@@ -119,7 +119,7 @@ document.addEventListener('DOMContentLoaded', function() {
         button.addEventListener('mouseenter', function() {
             console.log('🐭 Mouse entra su:', this.getAttribute('data-tab'));
         });
-        
+
         button.addEventListener('mouseleave', function() {
             console.log('🐭 Mouse esce da:', this.getAttribute('data-tab'));
         });

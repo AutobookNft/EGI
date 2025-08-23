@@ -48,6 +48,13 @@ $typeConfig = match($userType) {
         'count_label' => __('statistics.epp_count_label'),
         'route' => 'epp.home'
     ],
+    'activator' => [
+        'badge_color' => 'bg-blue-500',
+        'badge_icon' => 'flash_on',
+        'earnings_label' => __('statistics.activator_earnings'),
+        'count_label' => __('statistics.activator_count_label'),
+        'route' => 'collector.home'
+    ],
     default => [
         'badge_color' => 'bg-gray-500',
         'badge_icon' => 'person',

@@ -78,7 +78,19 @@ return [
     'creator_count_label' => 'Collezioni',
     'collector_count_label' => 'EGI',
     'epp_count_label' => 'Progetti',
+
+    // Activator labels
+    'activator_earnings' => 'Spese Totali',
+    'activator_count_label' => 'Prenotazioni',
+    'activator_count' => 'Attivatori',
+    'activators_count' => 'attivatori',
+    'top_activators' => 'Top Attivatori',
+    'all_activators' => 'Tutti gli Attivatori',
+
     'creator_count' => 'Creators',
+    'collector_count' => 'Collezionisti',
+    'commissioner_count' => 'Committenti',
+    'epp_count' => 'EPP',
 
     'reservations' => 'Prenotazioni',
     'avg_distribution' => 'Distr. Media',
