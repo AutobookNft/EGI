@@ -19,7 +19,14 @@ window.Echo = new Echo({
     cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER || 'eu',
     forceTLS: true,
     enabledTransports: ['ws', 'wss'],  // Per forzare WebSockets
-    enableLogging: true  // Attiva il logging
+    enableLogging: true,  // Attiva il logging
+    // Configurazioni specifiche per IP
+    authEndpoint: window.location.origin + '/broadcasting/auth',
+    auth: {
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+        }
+    }
 });
 
 // In bootstrap.js dopo l'inizializzazione di Echo

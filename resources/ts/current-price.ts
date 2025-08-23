@@ -22,7 +22,7 @@ function mountCurrentPrice(el: HTMLElement) {
 
     console.log('✅ Echo available, setting up channel for ID:', id);
     const channel = window.Echo.channel(`price.${id}`);
-    
+
     console.log('📡 Channel created:', channel);
 
     let pending: any = null; // coalescing base
@@ -39,35 +39,35 @@ function mountCurrentPrice(el: HTMLElement) {
 
             // 🎯 Detecta se siamo nella pagina di dettaglio EGI
             const currentPath = window.location.pathname;
-            const isDetailPage = currentPath.includes('/egis/') && 
-                                !currentPath.includes('/egis?') &&
-                                !currentPath.endsWith('/egis') &&
-                                !currentPath.endsWith('/egis/');
-            
-            console.log('🔍 Path check:', { 
-                currentPath, 
+            const isDetailPage = currentPath.includes('/egis/') &&
+                !currentPath.includes('/egis?') &&
+                !currentPath.endsWith('/egis') &&
+                !currentPath.endsWith('/egis/');
+
+            console.log('🔍 Path check:', {
+                currentPath,
                 isDetailPage,
-                hasStructureChanges: !!pending.structure_changes 
+                hasStructureChanges: !!pending.structure_changes
             });
 
             if (isDetailPage && pending.structure_changes) {
                 // 🔄 RELOAD automatico per pagina di dettaglio con cambiamenti strutturali
                 console.log('🔄 Reloading page per aggiornamenti strutturali EGI detail');
-                
+
                 // Effetto visivo prima del reload
                 el.classList.add('ring-2', 'ring-blue-400');
-                
+
                 // Mostra notifica rapida
                 const notification = document.createElement('div');
                 notification.className = 'fixed top-4 right-4 bg-blue-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-all duration-300';
                 notification.textContent = 'Aggiornamento EGI rilevato, ricaricando...';
                 document.body.appendChild(notification);
-                
+
                 // Reload dopo breve delay
                 setTimeout(() => {
                     window.location.reload();
                 }, 1500);
-                
+
                 pending = null;
                 return;
             }
@@ -104,7 +104,7 @@ export function mountAllCurrentPrices() {
     console.log('🚀 mountAllCurrentPrices() chiamato');
     const elements = document.querySelectorAll<HTMLElement>('.current-price');
     console.log(`📊 Trovati ${elements.length} elementi .current-price`);
-    
+
     elements.forEach((el, index) => {
         console.log(`🎯 Montaggio elemento ${index + 1}:`, el);
         mountCurrentPrice(el);
