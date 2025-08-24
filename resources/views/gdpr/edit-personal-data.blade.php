@@ -65,228 +65,24 @@
                 @csrf
                 @method('PUT')
 
-                {{-- Basic Information Section --}}
-                <div class="shadow-xl card bg-base-100">
-                    <div class="card-body">
-                        <h2 class="flex items-center mb-6 text-2xl card-title">
-                            <svg class="w-6 h-6 mr-2 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                            </svg>
-                            {{ __('profile.basic_information') }}
-                        </h2>
-
-                        <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-                            {{-- Name Field --}}
-                            <div class="form-control">
-                                <label class="label" for="name">
-                                    <span class="font-medium label-text">
-                                        {{ __('profile.name') }}
-                                        <span class="text-error" aria-label="{{ __('profile.required_field') }}">*</span>
-                                    </span>
-                                </label>
-                                <input type="text"
-                                       name="name"
-                                       id="name"
-                                       value="{{ old('name', $user->name) }}"
-                                       class="input input-bordered w-full @error('name') input-error @enderror"
-                                       required
-                                       aria-describedby="name-error"
-                                       autocomplete="name">
-                                @error('name')
-                                    <label class="label">
-                                        <span class="label-text-alt text-error" id="name-error" role="alert">{{ $message }}</span>
-                                    </label>
-                                @enderror
-                            </div>
-
-                            {{-- Email Field --}}
-                            <div class="form-control">
-                                <label class="label" for="email">
-                                    <span class="font-medium label-text">
-                                        {{ __('profile.email') }}
-                                        <span class="text-error" aria-label="{{ __('profile.required_field') }}">*</span>
-                                    </span>
-                                </label>
-                                <input type="email"
-                                       name="email"
-                                       id="email"
-                                       value="{{ old('email', $user->email) }}"
-                                       class="input input-bordered w-full @error('email') input-error @enderror"
-                                       required
-                                       aria-describedby="email-error"
-                                       autocomplete="email">
-                                @error('email')
-                                    <label class="label">
-                                        <span class="label-text-alt text-error" id="email-error" role="alert">{{ $message }}</span>
-                                    </label>
-                                @enderror
-                            </div>
-
-                            {{-- Phone Field --}}
-                            <div class="form-control">
-                                <label class="label" for="phone">
-                                    <span class="font-medium label-text">{{ __('profile.phone') }}</span>
-                                </label>
-                                <input type="tel"
-                                       name="phone"
-                                       id="phone"
-                                       value="{{ old('phone', $user->phone) }}"
-                                       class="input input-bordered w-full @error('phone') input-error @enderror"
-                                       aria-describedby="phone-error phone-help"
-                                       autocomplete="tel">
-                                <label class="label">
-                                    <span class="label-text-alt" id="phone-help">{{ __('profile.phone_help') }}</span>
-                                </label>
-                                @error('phone')
-                                    <label class="label">
-                                        <span class="label-text-alt text-error" id="phone-error" role="alert">{{ $message }}</span>
-                                    </label>
-                                @enderror
-                            </div>
-
-                            {{-- Date of Birth Field --}}
-                            <div class="form-control">
-                                <label class="label" for="date_of_birth">
-                                    <span class="font-medium label-text">{{ __('profile.date_of_birth') }}</span>
-                                </label>
-                                <input type="date"
-                                       name="date_of_birth"
-                                       id="date_of_birth"
-                                       value="{{ old('date_of_birth', $user->date_of_birth?->format('Y-m-d')) }}"
-                                       class="input input-bordered w-full @error('date_of_birth') input-error @enderror"
-                                       aria-describedby="date_of_birth-error"
-                                       autocomplete="bday">
-                                @error('date_of_birth')
-                                    <label class="label">
-                                        <span class="label-text-alt text-error" id="date_of_birth-error" role="alert">{{ $message }}</span>
-                                    </label>
-                                @enderror
-                            </div>
+                {{-- Notice: Basic and Address Information managed by main Personal Data form --}}
+                <div class="p-4 mb-6 rounded-lg alert alert-info">
+                    <svg class="w-6 h-6 stroke-current shrink-0" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <div>
+                        <h3 class="font-bold">{{ __('profile.main_form_notice') }}</h3>
+                        <div class="text-xs">
+                            {{ __('profile.main_form_description') }}
+                            <a href="{{ route('user.domains.personal-data.index') }}" class="link link-primary">
+                                {{ __('profile.go_to_main_form') }}
+                            </a>
                         </div>
                     </div>
                 </div>
 
-                {{-- Address Information Section --}}
-                <div class="shadow-xl card bg-base-100">
-                    <div class="card-body">
-                        <h2 class="flex items-center mb-6 text-2xl card-title">
-                            <svg class="w-6 h-6 mr-2 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                      d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                            {{ __('profile.address_information') }}
-                        </h2>
-
-                        <div class="grid grid-cols-1 gap-6">
-                            {{-- Street Address --}}
-                            <div class="form-control">
-                                <label class="label" for="address">
-                                    <span class="font-medium label-text">{{ __('profile.street_address') }}</span>
-                                </label>
-                                <input type="text"
-                                       name="address"
-                                       id="address"
-                                       value="{{ old('address', $user->address) }}"
-                                       class="input input-bordered w-full @error('address') input-error @enderror"
-                                       aria-describedby="address-error"
-                                       autocomplete="street-address">
-                                @error('address')
-                                    <label class="label">
-                                        <span class="label-text-alt text-error" id="address-error" role="alert">{{ $message }}</span>
-                                    </label>
-                                @enderror
-                            </div>
-
-                            <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
-                                {{-- City --}}
-                                <div class="form-control">
-                                    <label class="label" for="city">
-                                        <span class="font-medium label-text">{{ __('profile.city') }}</span>
-                                    </label>
-                                    <input type="text"
-                                           name="city"
-                                           id="city"
-                                           value="{{ old('city', $user->city) }}"
-                                           class="input input-bordered w-full @error('city') input-error @enderror"
-                                           aria-describedby="city-error"
-                                           autocomplete="address-level2">
-                                    @error('city')
-                                        <label class="label">
-                                            <span class="label-text-alt text-error" id="city-error" role="alert">{{ $message }}</span>
-                                        </label>
-                                    @enderror
-                                </div>
-
-                                {{-- State/Province --}}
-                                <div class="form-control">
-                                    <label class="label" for="state">
-                                        <span class="font-medium label-text">{{ __('profile.state') }}</span>
-                                    </label>
-                                    <input type="text"
-                                           name="state"
-                                           id="state"
-                                           value="{{ old('state', $user->state) }}"
-                                           class="input input-bordered w-full @error('state') input-error @enderror"
-                                           aria-describedby="state-error"
-                                           autocomplete="address-level1">
-                                    @error('state')
-                                        <label class="label">
-                                            <span class="label-text-alt text-error" id="state-error" role="alert">{{ $message }}</span>
-                                        </label>
-                                    @enderror
-                                </div>
-
-                                {{-- Postal Code --}}
-                                <div class="form-control">
-                                    <label class="label" for="postal_code">
-                                        <span class="font-medium label-text">{{ __('profile.postal_code') }}</span>
-                                    </label>
-                                    <input type="text"
-                                           name="postal_code"
-                                           id="postal_code"
-                                           value="{{ old('postal_code', $user->postal_code) }}"
-                                           class="input input-bordered w-full @error('postal_code') input-error @enderror"
-                                           aria-describedby="postal_code-error"
-                                           autocomplete="postal-code">
-                                    @error('postal_code')
-                                        <label class="label">
-                                            <span class="label-text-alt text-error" id="postal_code-error" role="alert">{{ $message }}</span>
-                                        </label>
-                                    @enderror
-                                </div>
-                            </div>
-
-                            {{-- Country --}}
-                            <div class="form-control">
-                                <label class="label" for="country">
-                                    <span class="font-medium label-text">{{ __('profile.country') }}</span>
-                                </label>
-                                <select name="country"
-                                        id="country"
-                                        class="select select-bordered w-full @error('country') select-error @enderror"
-                                        aria-describedby="country-error"
-                                        autocomplete="country">
-                                    <option value="">{{ __('profile.select_country') }}</option>
-                                    @foreach($countries as $code => $name)
-                                        <option value="{{ $code }}" {{ old('country', $user->country) == $code ? 'selected' : '' }}>
-                                            {{ $name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                @error('country')
-                                    <label class="label">
-                                        <span class="label-text-alt text-error" id="country-error" role="alert">{{ $message }}</span>
-                                    </label>
-                                @enderror
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- Profile Information Section --}}
+                {{-- Profile Bio Section (Unique to this form) --}}
                 <div class="shadow-xl card bg-base-100">
                     <div class="card-body">
                         <h2 class="flex items-center mb-6 text-2xl card-title">
@@ -294,7 +90,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                       d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
-                            {{ __('profile.profile_information') }}
+                            {{ __('profile.bio_section') }}
                         </h2>
 
                         {{-- Bio --}}
@@ -366,7 +162,7 @@
         </div>
     </div>
 
-    {{-- Enhanced Form Validation & UX JavaScript --}}
+    {{-- Simplified Form Validation & UX JavaScript --}}
     @push('scripts')
     <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -397,153 +193,26 @@
             });
         }
 
-        // Real-time validation for required fields
-        const requiredInputs = form.querySelectorAll('input[required]');
-        requiredInputs.forEach(input => {
-            input.addEventListener('blur', function() {
-                validateField(this);
-            });
-
-            input.addEventListener('input', function() {
-                // Clear error state when user starts typing
-                if (this.classList.contains('input-error')) {
-                    validateField(this);
-                }
-            });
-        });
-
-        // Email validation
-        const emailInput = document.getElementById('email');
-        if (emailInput) {
-            emailInput.addEventListener('blur', function() {
-                if (this.value && !isValidEmail(this.value)) {
-                    this.classList.add('input-error');
-                    showFieldError(this, '{{ __("profile.invalid_email") }}');
-                } else {
-                    clearFieldError(this);
-                }
-            });
-        }
-
-        // Phone number formatting
-        const phoneInput = document.getElementById('phone');
-        if (phoneInput) {
-            phoneInput.addEventListener('input', function(e) {
-                // Simple phone formatting (you can customize this based on locale)
-                let value = e.target.value.replace(/\D/g, '');
-                if (value.length > 0) {
-                    if (value.length <= 3) {
-                        value = value;
-                    } else if (value.length <= 6) {
-                        value = value.slice(0, 3) + ' ' + value.slice(3);
-                    } else if (value.length <= 10) {
-                        value = value.slice(0, 3) + ' ' + value.slice(3, 6) + ' ' + value.slice(6);
-                    } else {
-                        value = value.slice(0, 3) + ' ' + value.slice(3, 6) + ' ' + value.slice(6, 10);
-                    }
-                }
-                e.target.value = value;
-            });
-        }
-
         // Form submission with enhanced feedback
         form.addEventListener('submit', function(e) {
             e.preventDefault();
 
-            // Validate all required fields
-            let isFormValid = true;
-            requiredInputs.forEach(input => {
-                if (!validateField(input)) {
-                    isFormValid = false;
-                }
-            });
+            // Show loading state
+            const originalHTML = submitButton.innerHTML;
+            submitButton.innerHTML = `
+                <span class="loading loading-spinner loading-sm"></span>
+                {{ __('profile.saving') }}
+            `;
+            submitButton.disabled = true;
 
-            // Email specific validation
-            if (emailInput && emailInput.value && !isValidEmail(emailInput.value)) {
-                isFormValid = false;
-                emailInput.classList.add('input-error');
-                showFieldError(emailInput, '{{ __("profile.invalid_email") }}');
-            }
-
-            if (isFormValid) {
-                // Show loading state
-                const originalHTML = submitButton.innerHTML;
-                submitButton.innerHTML = `
-                    <span class="loading loading-spinner loading-sm"></span>
-                    {{ __('profile.saving') }}
-                `;
-                submitButton.disabled = true;
-
-                // Submit form
-                form.submit();
-            } else {
-                // Scroll to first error
-                const firstError = form.querySelector('.input-error, .select-error, .textarea-error');
-                if (firstError) {
-                    firstError.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'center'
-                    });
-                    firstError.focus();
-                }
-
-                // Show toast notification for validation errors
-                if (window.showToast) {
-                    window.showToast('{{ __("profile.validation_errors") }}', 'error');
-                }
-            }
+            // Submit form
+            form.submit();
         });
 
-        // Helper functions
-        function validateField(field) {
-            if (field.hasAttribute('required') && !field.value.trim()) {
-                field.classList.add('input-error');
-                showFieldError(field, '{{ __("profile.field_required") }}');
-                return false;
-            } else {
-                field.classList.remove('input-error');
-                clearFieldError(field);
-                return true;
-            }
-        }
-
-        function isValidEmail(email) {
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return emailRegex.test(email);
-        }
-
-        function showFieldError(field, message) {
-            const errorId = field.id + '-error';
-            let errorElement = document.getElementById(errorId);
-
-            if (!errorElement) {
-                errorElement = document.createElement('span');
-                errorElement.id = errorId;
-                errorElement.className = 'label-text-alt text-error';
-                errorElement.setAttribute('role', 'alert');
-
-                const label = field.closest('.form-control').querySelector('.label:last-of-type') ||
-                             field.closest('.form-control').appendChild(document.createElement('label'));
-                label.className = 'label';
-                label.appendChild(errorElement);
-            }
-
-            errorElement.textContent = message;
-        }
-
-        function clearFieldError(field) {
-            const errorId = field.id + '-error';
-            const errorElement = document.getElementById(errorId);
-            if (errorElement) {
-                errorElement.remove();
-            }
-        }
-
-        // Auto-save indicator (optional enhancement)
+        // Auto-save indicator for bio changes
         let saveTimeout;
-        const autoSaveInputs = form.querySelectorAll('input, textarea, select');
-        autoSaveInputs.forEach(input => {
-            input.addEventListener('input', function() {
+        if (bioTextarea) {
+            bioTextarea.addEventListener('input', function() {
                 clearTimeout(saveTimeout);
 
                 // Show "unsaved changes" indicator
@@ -565,7 +234,7 @@
                     }
                 }, 2000);
             });
-        });
+        }
     });
     </script>
     @endpush
