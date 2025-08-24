@@ -3,7 +3,7 @@
  * 🎯 Purpose: Handle modal UI rendering and DOM interactions
  * 🧱 Core Logic: Single responsibility for UI management
  * 🎨 Features: Modal creation, form rendering, event handling
- * 
+ *
  * @version 1.0.0
  * @date 2025-08-22
  * @author GitHub Copilot for Fabio Cherici
@@ -190,14 +190,14 @@ export class ReservationModalUI {
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
                         </div>
-                        
+
                         <h2 class="text-2xl font-bold text-gray-900 mb-2">🎉 Prenotazione Confermata!</h2>
-                        
+
                         <p class="text-gray-600 mb-6">
-                            La tua prenotazione è stata registrata con successo. 
+                            La tua prenotazione è stata registrata con successo.
                             Riceverai una notifica quando la criptovaluta sarà disponibile per il lancio.
                         </p>
-                        
+
                         <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
                             <div class="flex">
                                 <div class="flex-shrink-0">
@@ -207,14 +207,14 @@ export class ReservationModalUI {
                                 </div>
                                 <div class="ml-3">
                                     <p class="text-sm text-blue-700">
-                                        <strong>Importante:</strong> La prenotazione non è ancora definitiva. 
+                                        <strong>Importante:</strong> La prenotazione non è ancora definitiva.
                                         Potrai completare l'acquisto quando la criptovaluta sarà lanciata.
                                     </p>
                                 </div>
                             </div>
                         </div>
-                        
-                        <button onclick="document.getElementById('pre-launch-success-modal').remove()" 
+
+                        <button onclick="document.getElementById('pre-launch-success-modal').remove()"
                                 class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-200">
                             Perfetto!
                         </button>
@@ -272,8 +272,8 @@ export class ReservationModalUI {
             let userName = 'Utente'; // Fallback generico
             if (userDetails?.name) {
                 userName = `${userDetails.name}`;
-            } else if (userDetails?.wallet_address) {
-                userName = userDetails.wallet_address.substring(0, 12) + '...';
+            } else if (userDetails?.wallet) {
+                userName = userDetails.wallet.substring(0, 12) + '...';
             } else {
                 // 🔄 Fallback: prova a prendere l'utente autenticato attuale
                 const currentUser = (window as any).user || (window as any).Laravel?.user;
@@ -345,10 +345,10 @@ export class ReservationModalUI {
         // 🎯 AGGIORNA ANCHE IL BOTTONE NELL'EGI-CARD-LIST
         console.log('🔄 Aggiornamento bottone in egi-card-list...');
         const reserveButton = egiCard.querySelector('.reserve-button');
-        
+
         if (reserveButton) {
             console.log('✅ Trovato bottone in egi-card-list, aggiornamento...');
-            
+
             // Aggiorna HTML con icona "Rilancia"
             reserveButton.innerHTML = `
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -356,15 +356,15 @@ export class ReservationModalUI {
                 </svg>
                 Rilancia
             `;
-            
+
             // Aggiorna le classi CSS per il colore amber/orange
             const currentClassName = reserveButton.className;
             const newClassName = currentClassName
                 .replace(/bg-gradient-to-r from-purple-500 to-purple-600/, 'bg-gradient-to-r from-amber-500 to-orange-600')
                 .replace(/hover:from-purple-600 hover:to-purple-700/, 'hover:from-amber-600 hover:to-orange-700');
-            
+
             reserveButton.className = newClassName;
-            
+
             console.log('✅ BOTTONE EGI-CARD-LIST AGGIORNATO: "Prenota" → "Rilancia"');
         } else {
             console.log('❌ Bottone non trovato in egi-card-list');

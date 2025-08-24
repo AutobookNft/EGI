@@ -23,7 +23,7 @@ function mountCurrentPrice(el: HTMLElement) {
     // console.log('✅ Echo available, setting up channel for ID:', id);
     const channel = window.Echo.channel(`price.${id}`);
 
-    console.log('📡 Channel created:', channel);
+    // console.log('📡 Channel created:', channel);
 
     let pending: any = null; // coalescing base
 
@@ -106,7 +106,7 @@ export function mountAllCurrentPrices() {
     console.log(`📊 Trovati ${elements.length} elementi .current-price`);
 
     elements.forEach((el, index) => {
-        console.log(`🎯 Montaggio elemento ${index + 1}:`, el);
+        // console.log(`🎯 Montaggio elemento ${index + 1}:`, el);
         mountCurrentPrice(el);
     });
 }

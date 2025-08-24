@@ -230,13 +230,12 @@ $showBadge = $showBadge ?? $showOwnershipBadge;
             $activatorDisplay = formatActivatorDisplay($currentReservation->user);
             @endphp
             <div class="flex items-center gap-2 mb-1 text-sm" data-activation-status>
-                @if ($activatorDisplay && $activatorDisplay['is_commissioner'])
-                {{-- 👤 Commissioner: Mostra avatar personalizzato --}}
+                {{-- Avatar sempre presente dal backend (gestisce automaticamente la privacy) --}}
                 @if ($activatorDisplay['avatar'])
                 <img src="{{ $activatorDisplay['avatar'] }}" alt="{{ $activatorDisplay['name'] }}"
                     class="object-cover w-4 h-4 border rounded-full shadow-sm border-green-400/30">
                 @else
-                {{-- Fallback per commissioner senza avatar --}}
+                {{-- Fallback solo se non c'è avatar dal backend (caso molto raro) --}}
                 <div class="flex items-center justify-center w-4 h-4 bg-green-500 rounded-full shadow-sm">
                     <svg class="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
@@ -248,21 +247,6 @@ $showBadge = $showBadge ?? $showOwnershipBadge;
                     {{ $activatorDisplay['name'] }}
                 </span>
                 <span class="text-xs text-gray-400">({{ __('egi.reservation.activator') }})</span>
-                @else
-                {{-- 💰 Regular Collector: Icona generica + wallet abbreviato --}}
-                <div class="flex items-center justify-center w-4 h-4 bg-gray-600 rounded-full">
-                    <svg class="w-2 h-2 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                            clip-rule="evenodd" />
-                    </svg>
-                </div>
-                <span class="font-medium text-green-300" data-activator-name>
-                    {{ $activatorDisplay ? $activatorDisplay['name'] : ($currentReservation->user->wallet_address ?
-                    Str::limit($currentReservation->user->wallet_address, 12, '...') :
-                    $currentReservation->user->first_name . ' ' . $currentReservation->user->last_name) }}
-                </span>
-                <span class="text-xs text-gray-400">({{ __('egi.reservation.activator') }})</span>
-                @endif
             </div>
             @elseif ($context === 'creator')
             <div class="flex items-center gap-2 mb-1 text-sm" data-activation-status="available">

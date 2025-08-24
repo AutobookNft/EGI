@@ -1,8 +1,8 @@
 /**
- * 
+ *
  * Extracted from reservationService.ts as part of SOLID refactoring
  * Handles modal UI, form interaction, and accessibility features
- * 
+ *
  * @author Fabio Cherici
  * @extracted 2025-01-22 - Phase 12 SOLID Migration
  */
@@ -237,7 +237,7 @@ export class ReservationFormModal {
                             </div>
                             <div class="flex flex-col">
                                 <span class="text-sm text-green-800">Attivatore</span>
-                                <span class="text-xs text-green-600 font-mono">${data.activator.wallet_address}</span>
+                                <span class="text-xs text-green-600 font-mono">${data.activator.wallet}</span>
                             </div>
                         `;
                     }
@@ -532,13 +532,13 @@ export class ReservationFormModal {
             // 🎯 AGGIORNA TUTTI GLI ELEMENTI CON LO STESSO EGI ID
             Array.from(allEgiElements).forEach((element, cardIndex) => {
                 console.log(`\n🔄 Aggiornando elemento ${cardIndex}: ${element.tagName}.${element.className}`);
-                
+
                 // 🎯 SKIP i bottoni - processiamo solo le card vere
                 if (element.tagName === 'BUTTON') {
                     console.log('⏭️ SKIP: È un bottone, non una card');
                     return;
                 }
-                
+
                 // 🎯 Ora element è sicuramente una card (ARTICLE)
                 const egiCard = element;
                 console.log('✅ Card trovata!', egiCard);
@@ -636,8 +636,8 @@ export class ReservationFormModal {
                 if (userDetails?.name) {
                     userName = `${userDetails.name}`;
                     isGenericName = false;
-                } else if (userDetails?.wallet_address) {
-                    userName = userDetails.wallet_address.substring(0, 12) + '...';
+                } else if (userDetails?.wallet) {
+                    userName = userDetails.wallet.substring(0, 12) + '...';
                     isGenericName = false;
                 } else {
                     // 🔄 Fallback: prova a prendere l'utente autenticato attuale
@@ -722,19 +722,12 @@ export class ReservationFormModal {
                             activatorSubsection.className = 'flex items-center gap-2 pt-2 border-t border-green-500/20';
                             activatorSubsection.setAttribute('data-activator-section', 'true');
 
-                            // Avatar con logica corretta
+                            // Avatar - ora usiamo sempre l'avatar dal backend
                             let avatarElement = '';
                             if (avatarUrl) {
                                 avatarElement = `<img src="${avatarUrl}" alt="${userName}" class="object-cover w-4 h-4 border rounded-full border-white/20 activator-avatar">`;
-                            } else if (isCommissioner) {
-                                avatarElement = `
-                                    <div class="flex items-center justify-center flex-shrink-0 w-4 h-4 bg-green-600 rounded-full activator-avatar">
-                                        <svg class="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
-                                        </svg>
-                                    </div>
-                                `;
                             } else {
+                                // Fallback solo se non c'è avatar dal backend (caso molto raro)
                                 avatarElement = `
                                     <div class="flex items-center justify-center flex-shrink-0 w-4 h-4 bg-green-600 rounded-full activator-avatar">
                                         <svg class="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">

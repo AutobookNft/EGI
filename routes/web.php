@@ -535,6 +535,11 @@ Route::get('/biographies/{biography:slug}', [BiographyWebController::class, 'sho
 Route::post('/user/preferred-currency', [App\Http\Controllers\Api\UserPreferenceController::class, 'updatePreferredCurrency'])
     ->name('user.currency.update.legacy');
 
+// User currency preference routes
+Route::get('/user/preferences/currency', [App\Http\Controllers\Api\CurrencyController::class, 'getUserPreference'])
+    ->name('user.currency.get');
+
+
 Route::middleware(['auth'])->group(function () {
     /*
     |--------------------------------------------------------------------------
@@ -545,12 +550,8 @@ Route::middleware(['auth'])->group(function () {
     | Uses session authentication (not API tokens).
     |
     */
-
-    // User currency preference routes
-    Route::get('/user/preferences/currency', [App\Http\Controllers\Api\CurrencyController::class, 'getUserPreference'])
-        ->name('user.currency.get');
     Route::put('/user/preferences/currency', [App\Http\Controllers\Api\CurrencyController::class, 'updateUserPreference'])
-        ->name('user.currency.update');
+    ->name('user.currency.update');
 
 
     // Biography management (user's own biographies)

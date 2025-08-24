@@ -56,11 +56,19 @@ class ReservationController extends Controller {
         $activatorData = [];
 
         if ($user) {
+            // Solo i commissioner mostrano nome reale
+            if ($user->usertype === 'commissioner') {
+                $displayName = $user->name ?? ($user->wallet ? substr($user->wallet, 0, 12) . '...' : 'Commissioner');
+            } else {
+                // Altri utenti mostrano sempre wallet troncato (o fallback se non c'è)
+                $displayName = $user->wallet ? substr($user->wallet, 0, 12) . '...' : 'Utente Anonimo';
+            }
+
             $activatorData = [
-                'name' => $user->name ?? ($user->wallet_address ? substr($user->wallet_address, 0, 12) . '...' : 'Utente'),
-                'avatar' => $user->profile_photo_url ?? null,
-                'is_commissioner' => (bool)($user->is_commissioner ?? false),
-                'wallet_address' => $user->wallet_address ?? null
+                'name' => $displayName,
+                'avatar' => $user->profile_photo_url, // Gestisce automaticamente la privacy
+                'is_commissioner' => (bool)($user->usertype === 'commissioner'),
+                'wallet' => $user->wallet ?? null
             ];
         } else {
             // Fallback for anonymous reservations
@@ -68,7 +76,7 @@ class ReservationController extends Controller {
                 'name' => 'Utente',
                 'avatar' => null,
                 'is_commissioner' => false,
-                'wallet_address' => null
+                'wallet' => null
             ];
         }
 
@@ -498,11 +506,11 @@ class ReservationController extends Controller {
                 'data' => [
                     'user' => [
                         'id' => $user->id,
-                        'name' => $user->name ?? null,
-                        'last_name' => $user->last_name ?? null,
-                        'wallet_address' => $sessionWallet,
-                        'avatar' => $user->profile_photo_url ? $user->profile_photo_url  : null,
-                        'is_commissioner' => $user->hasRole('commissioner') || $user->can('display_public_name_on_egi')
+                        'name' => $user->usertype === 'commissioner' ? $user->name : null,
+                        'last_name' => $user->usertype === 'commissioner' ? $user->last_name : null,
+                        'wallet' => $sessionWallet,
+                        'avatar' => $user->profile_photo_url, // Ora gestisce automaticamente la privacy
+                        'is_commissioner' => $user->usertype === 'commissioner'
                     ],
                     'reservation' => [
                         'id' => $reservation->id,
@@ -1357,25 +1365,23 @@ class ReservationController extends Controller {
                 $activatorInfo = null;
 
                 if ($activator) {
-                    // Determina se è un commissioner
-                    $isCommissioner = $activator->hasRole('commissioner') ||
-                        $activator->can('display_public_name_on_egi');
-
-                    if ($isCommissioner) {
+                    // Usa la nuova logica basata su usertype
+                    if ($activator->usertype === 'commissioner') {
                         // Mostra informazioni complete
                         $activatorInfo = [
                             'type' => 'commissioner',
                             'name' => ($activator->first_name && $activator->last_name)
                                 ? $activator->first_name . ' ' . $activator->last_name
                                 : $activator->name,
-                            'avatar' => $activator->profile_photo_url,
+                            'avatar' => $activator->profile_photo_url, // Gestisce automaticamente la privacy
                             'id' => $activator->id
                         ];
                     } else {
-                        // Mostra solo icona e wallet
+                        // Mostra solo icona generata e wallet
                         $activatorInfo = [
                             'type' => 'anonymous',
-                            'wallet_address' => $activator->wallet ?? 'N/A',
+                            'avatar' => $activator->profile_photo_url, // Restituirà l'avatar generato
+                            'wallet' => $activator->wallet ?? 'N/A',
                             'id' => $activator->id
                         ];
                     }

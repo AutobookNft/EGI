@@ -460,10 +460,10 @@ return [
 
             mobileCarouselTrack.addEventListener('scroll', () => {
                 if (isScrolling) return;
-                
+
                 // Pausa l'auto-scroll durante la navigazione manuale
                 clearInterval(autoScrollInterval);
-                
+
                 // Debounce dello scroll per evitare troppi trigger
                 clearTimeout(scrollTimeout);
                 scrollTimeout = setTimeout(() => {
@@ -479,7 +479,7 @@ return [
                             // Usa updateBannerContent con skipScroll=true per evitare loop
                             updateBannerContent(true);
                         }
-                        
+
                         isScrolling = false;
                         // Riavvia l'auto-scroll dopo 3 secondi di inattività
                         setTimeout(() => {

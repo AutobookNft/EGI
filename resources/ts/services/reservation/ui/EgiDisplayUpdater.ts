@@ -1,10 +1,10 @@
 /**
  * 📜 EgiDisplayUpdater Class
  * 🎯 Purpose: Handles real-time structural UI updates for EGI cards and displays
- * 
+ *
  * Extracted from ReservationFormModal.updateEgiDisplay() for reusability
  * Used both locally and via real-time broadcasting events
- * 
+ *
  * @author GitHub Copilot for Fabio Cherici
  * @version 1.0.0
  * @date 2025-08-23
@@ -20,7 +20,7 @@ export interface StructureChanges {
         name: string;
         avatar?: string;
         is_commissioner: boolean;
-        wallet_address?: string;
+        wallet?: string;
     };
     button_state: 'prenota' | 'rilancia';
 }
@@ -35,10 +35,10 @@ export interface PriceUpdateData {
  * EgiDisplayUpdater - Handles real-time UI updates for EGI cards
  */
 export class EgiDisplayUpdater {
-    
+
     /**
      * Update a single card from reservation response
-     * 
+     *
      * @private
 
     /**
@@ -51,10 +51,10 @@ export class EgiDisplayUpdater {
         if (amountEl) amountEl.textContent = amount;
         if (currEl) currEl.textContent = currency;
     }
-    
+
     /**
      * Update all EGI displays for a specific EGI ID
-     * 
+     *
      * @param egiId The EGI ID to update
      * @param response The reservation response data
      */
@@ -80,7 +80,7 @@ export class EgiDisplayUpdater {
                     console.log('⏭️ SKIP: È un bottone, non una card');
                     return;
                 }
-                
+
                 const egiCard = element as HTMLElement;
                 console.log('✅ Card trovata!', egiCard);
 
@@ -106,7 +106,7 @@ export class EgiDisplayUpdater {
 
     /**
      * Update from real-time broadcast data
-     * 
+     *
      * @param egiId The EGI ID to update
      * @param data The price update data with structure changes
      */
@@ -128,12 +128,12 @@ export class EgiDisplayUpdater {
 
             Array.from(allEgiElements).forEach((element) => {
                 if (element.tagName === 'BUTTON') return;
-                
+
                 const egiCard = element as HTMLElement;
-                
+
                 // Aggiorna prezzo
                 this.updatePrice(egiCard, data.amount, data.currency);
-                
+
                 // Aggiorna struttura se necessario
                 if (data.structure_changes) {
                     this.updateStructure(egiCard, data.structure_changes);
@@ -146,7 +146,7 @@ export class EgiDisplayUpdater {
 
     /**
      * Update a single card from reservation response
-     * 
+     *
      * @private
      */
     private static updateSingleCard(egiCard: HTMLElement, response: ReservationResponse): void {
@@ -168,7 +168,7 @@ export class EgiDisplayUpdater {
 
     /**
      * Update price display
-     * 
+     *
      * @private
      */
     private static updatePrice(egiCard: HTMLElement, amount: string, currency: string): void {
@@ -176,7 +176,7 @@ export class EgiDisplayUpdater {
 
         // Usa selettore data-price-display specifico
         const priceElements = egiCard.querySelectorAll('[data-price-display]');
-        
+
         let priceUpdated = false;
         Array.from(priceElements).forEach((el) => {
             if (el instanceof HTMLElement) {
@@ -201,7 +201,7 @@ export class EgiDisplayUpdater {
             Array.from(fallbackElements).forEach((el) => {
                 if (el instanceof HTMLElement && el.textContent?.includes('€')) {
                     el.textContent = `€${amount}`;
-                    
+
                     // Evidenziazione visiva
                     el.style.backgroundColor = '#fef3c7';
                     el.style.fontWeight = 'bold';
@@ -218,20 +218,20 @@ export class EgiDisplayUpdater {
 
     /**
      * Update activator information
-     * 
+     *
      * @private
      */
     private static updateActivator(egiCard: HTMLElement, response: ReservationResponse): void {
         console.log('👤 Aggiornamento informazioni attivatore...');
-        
+
         const userDetails = response.data?.user;
-        
+
         // Calcola il nome dell'attivatore
         let userName = 'Utente';
         if (userDetails?.name) {
             userName = userDetails.name;
-        } else if (userDetails?.wallet_address) {
-            userName = userDetails.wallet_address.substring(0, 12) + '...';
+        } else if (userDetails?.wallet) {
+            userName = userDetails.wallet.substring(0, 12) + '...';
         } else {
             // Fallback: prova utente autenticato
             const currentUser = (window as any).user || (window as any).Laravel?.user;
@@ -269,7 +269,7 @@ export class EgiDisplayUpdater {
 
     /**
      * Create activator section in price box
-     * 
+     *
      * @private
      */
     private static createActivatorSection(egiCard: HTMLElement, userName: string, userDetails: any): void {
@@ -293,11 +293,12 @@ export class EgiDisplayUpdater {
                 const isCommissioner = userDetails?.is_commissioner || false;
                 const avatarUrl = userDetails?.avatar || null;
 
-                // Avatar con logica corretta
+                // Avatar - ora usiamo sempre l'avatar dal backend
                 let avatarElement = '';
                 if (avatarUrl) {
                     avatarElement = `<img src="${avatarUrl}" alt="${userName}" class="object-cover w-4 h-4 border rounded-full border-white/20 activator-avatar">`;
                 } else {
+                    // Fallback solo se non c'è avatar dal backend (caso molto raro)
                     avatarElement = `
                         <div class="flex items-center justify-center flex-shrink-0 w-4 h-4 bg-green-600 rounded-full activator-avatar">
                             <svg class="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -321,12 +322,12 @@ export class EgiDisplayUpdater {
 
     /**
      * Update button from "Prenota" to "Rilancia"
-     * 
+     *
      * @private
      */
     private static updateButton(egiCard: HTMLElement): void {
         console.log('🔄 Aggiornamento bottone prenotazione...');
-        
+
         let reserveButton = egiCard.querySelector('.reserve-button') as HTMLElement;
 
         // Fallback: cerca per testo
@@ -359,14 +360,14 @@ export class EgiDisplayUpdater {
 
     /**
      * Update or add reservation count section
-     * 
+     *
      * @private
      */
     private static updateReservationCount(egiCard: HTMLElement): void {
         console.log('📊 Aggiornamento conteggio prenotazioni...');
 
         const existingSection = egiCard.querySelector('[data-reservation-count] .text-gray-300');
-        
+
         if (existingSection && existingSection instanceof HTMLElement) {
             // Aggiorna conteggio esistente
             const currentCount = existingSection.textContent?.match(/(\d+)/)?.[1] || '0';
@@ -388,7 +389,7 @@ export class EgiDisplayUpdater {
 
     /**
      * Create new reservation count section
-     * 
+     *
      * @private
      */
     private static createReservationSection(egiCard: HTMLElement): void {
@@ -433,7 +434,7 @@ export class EgiDisplayUpdater {
 
     /**
      * Update structure from broadcast data
-     * 
+     *
      * @private
      */
     private static updateStructure(egiCard: HTMLElement, changes: StructureChanges): void {
@@ -455,18 +456,18 @@ export class EgiDisplayUpdater {
 
     /**
      * Update activator from broadcast data
-     * 
+     *
      * @private
      */
     private static updateActivatorFromBroadcast(egiCard: HTMLElement, activator: StructureChanges['activator']): void {
         const activatorElements = egiCard.querySelectorAll('[data-activator-name]');
-        
+
         if (activatorElements.length > 0) {
             // Aggiorna elementi esistenti
             Array.from(activatorElements).forEach((el) => {
                 if (el instanceof HTMLElement) {
                     el.textContent = activator.name;
-                    
+
                     // Evidenziazione visiva
                     el.style.backgroundColor = '#dcfce7';
                     el.style.fontWeight = 'bold';
@@ -484,15 +485,15 @@ export class EgiDisplayUpdater {
 
     /**
      * Update reservation count from broadcast data
-     * 
+     *
      * @private
      */
     private static updateReservationCountFromBroadcast(egiCard: HTMLElement, count: number): void {
         const existingSection = egiCard.querySelector('[data-reservation-count] .text-gray-300');
-        
+
         if (existingSection && existingSection instanceof HTMLElement) {
             existingSection.textContent = `${count} ${count === 1 ? 'Prenotazione' : 'Prenotazioni'}`;
-            
+
             // Evidenziazione visiva
             existingSection.style.backgroundColor = '#dcfce7';
             existingSection.style.fontWeight = 'bold';

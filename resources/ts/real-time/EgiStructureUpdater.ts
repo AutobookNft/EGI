@@ -15,7 +15,7 @@ export interface StructureChanges {
         name: string;
         avatar?: string | null;
         is_commissioner: boolean;
-        wallet_address?: string | null;
+        wallet?: string | null;
     };
     button_state: 'prenota' | 'rilancia';
 }
@@ -136,11 +136,12 @@ export class EgiStructureUpdater {
             activatorSection.className = 'flex items-center gap-2 pt-2 border-t border-green-500/20';
             activatorSection.setAttribute('data-activator-section', 'true');
 
-            // Create avatar element
+            // Create avatar element - ora usiamo sempre l'avatar dal backend
             let avatarElement = '';
             if (activator.avatar) {
                 avatarElement = `<img src="${activator.avatar}" alt="${activator.name}" class="object-cover w-4 h-4 border rounded-full border-white/20 activator-avatar">`;
             } else {
+                // Fallback solo se non c'è avatar dal backend (caso molto raro)
                 avatarElement = `
                     <div class="flex items-center justify-center flex-shrink-0 w-4 h-4 ${activator.is_commissioner ? 'bg-amber-600' : 'bg-green-600'} rounded-full activator-avatar">
                         <svg class="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">

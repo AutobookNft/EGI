@@ -3,23 +3,26 @@
 if (!function_exists('formatActivatorDisplay')) {
     /**
      * Format activator display based on user permissions
-     * 
+     *
      * @param \App\Models\User $user
      * @return array ['name' => string, 'avatar' => string|null, 'is_commissioner' => bool]
      */
     function formatActivatorDisplay($user) {
-        $isCommissioner = $user && $user->can('display_public_name_on_egi') && $user->can('display_public_avatar_on_egi');
+        // Usa la nuova logica basata su usertype
+        $isCommissioner = $user && $user->usertype === 'commissioner';
 
         if ($isCommissioner) {
-            // Commissioner: show real name and avatar
+            // Commissioner: show real name and real avatar (if uploaded) or generated
             $name = ($user->first_name && $user->last_name)
                 ? $user->first_name . ' ' . $user->last_name
-                : ($user->name ?? 'N/A');
+                : ($user->name ?? 'Commissioner');
 
-            // Get Spatie Media avatar if available
+            // Usa sempre profile_photo_url che ora gestisce automaticamente la privacy
             $avatar = null;
-            if ($user->hasMedia('avatar')) {
-                $avatar = $user->getFirstMediaUrl('avatar');
+            try {
+                $avatar = $user->profile_photo_url; // Ora include anche DiceBear
+            } catch (\Exception $e) {
+                $avatar = $user->defaultProfilePhotoUrl(); // Fallback
             }
 
             return [
@@ -29,15 +32,23 @@ if (!function_exists('formatActivatorDisplay')) {
                 'wallet_abbreviated' => null
             ];
         } else {
-            // Regular collector: show abbreviated wallet address
+            // Non-commissioner: mostra wallet troncato + avatar generato
             $walletAddress = $user->wallet ?? '';
             $abbreviated = strlen($walletAddress) >= 10
                 ? substr($walletAddress, 0, 6) . '...' . substr($walletAddress, -4)
-                : $walletAddress;
+                : ($walletAddress ?: 'Utente Anonimo');
+
+            // Usa sempre profile_photo_url che ora restituisce avatar generato per non-commissioner
+            $avatar = null;
+            try {
+                $avatar = $user->profile_photo_url; // Ora sempre presente
+            } catch (\Exception $e) {
+                $avatar = $user->defaultProfilePhotoUrl(); // Fallback
+            }
 
             return [
                 'name' => $abbreviated,
-                'avatar' => null,
+                'avatar' => $avatar, // Ora include l'avatar generato
                 'is_commissioner' => false,
                 'wallet_abbreviated' => $abbreviated
             ];
@@ -48,7 +59,7 @@ if (!function_exists('formatActivatorDisplay')) {
 if (!function_exists('getGenericActivatorIcon')) {
     /**
      * Get generic activator icon SVG
-     * 
+     *
      * @param string $classes
      * @return string
      */

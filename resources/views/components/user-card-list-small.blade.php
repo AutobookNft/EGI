@@ -10,19 +10,29 @@ $totalEarnings = $stats['total_amount'] ?? 0;
 $distributionsCount = $stats['count'] ?? 0;
 $avgAmount = $stats['avg_amount'] ?? 0;
 
-// Determina l'immagine da usare
+// Determina l'immagine da usare - ora usa la logica unificata di privacy
 $imageUrl = null;
-if ($user && $user->avatar_url) {
-    $imageUrl = $user->avatar_url;
-} elseif ($user && $user->profile_photo_url) {
+if ($user) {
+    // Usa profile_photo_url che ora gestisce automaticamente la privacy
     $imageUrl = $user->profile_photo_url;
 }
 
-// Se non ha immagine, usa le iniziali
-$initials = '';
+// Determina il nome da mostrare in base alla privacy
+$displayName = '';
 if ($user) {
-    $name = $user->name ?? ($user->first_name . ' ' . $user->last_name);
-    $initials = strtoupper(substr($name, 0, 2));
+    if ($user->usertype === 'commissioner') {
+        // Commissioner: mostra nome reale o fallback
+        $displayName = $user->name ?? ($user->first_name . ' ' . $user->last_name) ?? 'Commissioner';
+    } else {
+        // Non-commissioner: mostra wallet troncato
+        $displayName = $user->wallet ? substr($user->wallet, 0, 12) . '...' : 'Utente Anonimo';
+    }
+}
+
+// Iniziali per fallback avatar (basate sul nome appropriato)
+$initials = '';
+if ($displayName) {
+    $initials = strtoupper(substr($displayName, 0, 2));
 }
 
 // Configura i colori e le etichette basati sul user_type
@@ -77,7 +87,7 @@ $profileUrl = $user ? route($typeConfig['route'], ['id' => $user->id]) : '#';
                 {{-- Immagine User PICCOLA E TONDA (come OpenSea) --}}
                 <div class="flex-shrink-0 w-10 h-10 overflow-hidden bg-gray-700 rounded-full">
                     @if($imageUrl)
-                        <img src="{{ $imageUrl }}" alt="{{ $user->name ?? $user->first_name . ' ' . $user->last_name }}" class="object-cover w-full h-full">
+                        <img src="{{ $imageUrl }}" alt="{{ $displayName }}" class="object-cover w-full h-full">
                     @else
                         <div class="flex items-center justify-center w-full h-full text-sm font-bold text-white {{ $typeConfig['badge_color'] }}">
                             {{ $initials }}
@@ -85,10 +95,10 @@ $profileUrl = $user ? route($typeConfig['route'], ['id' => $user->id]) : '#';
                     @endif
                 </div>
 
-                {{-- Nome User e Badge --}}
+                {{-- Nome User e Badge - ora usa il nome rispettoso della privacy --}}
                 <div class="flex items-center">
                     <h3 class="mr-2 text-sm font-medium text-white">
-                        {{ $user->name ?? ($user->first_name . ' ' . $user->last_name) ?? __('statistics.unknown_user') }}
+                        {{ $displayName ?: __('statistics.unknown_user') }}
                     </h3>
                     <div class="flex items-center">
                         @if($user && $user->usertype === 'verified')

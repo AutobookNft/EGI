@@ -1177,28 +1177,40 @@ class User extends Authenticatable implements HasMedia {
 
     /**
      * @Oracode Method: Get Profile Photo URL (Override)
-     * 🎯 Purpose: Override default profile photo URL to use profile_photo_path
-     * 📤 Returns: URL string for current profile image
+     * 🎯 Purpose: Override default profile photo URL to respect privacy based on usertype
+     * 📤 Returns: URL string for current profile image or privacy-compliant default
+     * 🛡️ Privacy: Only commissioners show real photos, others get generated avatars
      */
     public function getProfilePhotoUrlAttribute(): string {
-        $currentImage = $this->getCurrentProfileImage();
+        // Solo i commissioner possono mostrare la loro foto reale
+        if ($this->usertype === 'commissioner') {
+            $currentImage = $this->getCurrentProfileImage();
 
-        if ($currentImage) {
-            return $currentImage->getUrl('thumb');
+            if ($currentImage) {
+                return $currentImage->getUrl('thumb');
+            }
         }
 
-        // Fallback to default
+        // Per tutti gli altri o se il commissioner non ha foto, usa avatar generato
         return $this->defaultProfilePhotoUrl();
     }
 
     /**
      * @Oracode Method: Get Default Profile Photo URL
-     * 🎯 Purpose: Get DiceBear generated avatar URL
+     * 🎯 Purpose: Get DiceBear generated avatar URL based on usertype
      * 📤 Returns: URL string for default avatar
+     * 🛡️ Privacy: Uses wallet for non-commissioners, name for commissioners
      */
     public function defaultProfilePhotoUrl(): string {
-        $name = urlencode($this->name ?? 'Anonymous');
-        return "https://api.dicebear.com/7.x/bottts/png?seed={$name}&backgroundColor=transparent&size=512";
+        // Per i commissioner, usa il nome se disponibile
+        if ($this->usertype === 'commissioner' && $this->name) {
+            $seed = urlencode($this->name);
+        } else {
+            // Per tutti gli altri o commissioner senza nome, usa wallet o fallback
+            $seed = urlencode($this->wallet ?? $this->name ?? 'Anonymous');
+        }
+
+        return "https://api.dicebear.com/7.x/bottts/png?seed={$seed}&backgroundColor=transparent&size=512";
     }
 
     // ======================== COLLECTOR RELATIONSHIPS ========================

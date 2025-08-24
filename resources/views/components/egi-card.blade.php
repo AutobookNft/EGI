@@ -474,13 +474,13 @@ $isCreator = auth()->check() && auth()->id() === $creatorId;
                                         <path fill-rule="evenodd" d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z" clip-rule="evenodd" />
                                     </svg>
                                 @else
-                                    {{-- Strong reservation: check for commissioner avatar --}}
-                                    @if ($activatorDisplay && $activatorDisplay['is_commissioner'] && $activatorDisplay['avatar'])
+                                    {{-- Strong reservation: usa sempre l'avatar dal backend --}}
+                                    @if ($activatorDisplay && $activatorDisplay['avatar'])
                                         <img src="{{ $activatorDisplay['avatar'] }}"
                                              alt="{{ $activatorDisplay['name'] }}"
                                              class="object-cover w-4 h-4 border rounded-full border-white/20">
                                     @else
-                                        {{-- Regular collector or commissioner without avatar --}}
+                                        {{-- Fallback solo se non c'è avatar dal backend (caso molto raro) --}}
                                         <svg class="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
                                             <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
                                         </svg>

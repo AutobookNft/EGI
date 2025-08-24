@@ -104,22 +104,15 @@ $isHyper = $egi->hyper ?? false;
             <div class="mb-2">
                 @if($activationStatus['status'] === 'activated' && $activationStatus['activator'])
                 <div class="flex items-center gap-2 text-sm">
-                    @if($activationStatus['activator']['is_commissioner'])
+                    {{-- Avatar sempre presente dal backend (gestisce automaticamente la privacy) --}}
                     @if($activationStatus['activator']['avatar'])
                     <img src="{{ $activationStatus['activator']['avatar'] }}"
                         alt="{{ $activationStatus['activator']['name'] }}"
                         class="object-cover w-5 h-5 border rounded-full border-emerald-400/30">
                     @else
+                    {{-- Fallback solo se non c'è avatar dal backend (caso molto raro) --}}
                     <div class="flex items-center justify-center w-5 h-5 rounded-full bg-emerald-500">
                         <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                                clip-rule="evenodd" />
-                        </svg>
-                    </div>
-                    @endif
-                    @else
-                    <div class="flex items-center justify-center w-5 h-5 bg-gray-600 rounded-full">
-                        <svg class="w-3 h-3 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
                                 clip-rule="evenodd" />
                         </svg>

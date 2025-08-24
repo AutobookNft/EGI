@@ -19,7 +19,7 @@ export interface ReservationFormData {
         email?: string;
         message?: string;
     };
-    wallet_address?: string;
+    wallet?: string;
 }
 
 export interface ReservationResponse {
@@ -30,7 +30,7 @@ export interface ReservationResponse {
             id: number;
             name?: string;
             last_name?: string;
-            wallet_address?: string;
+            wallet?: string;
             avatar?: string;
             is_commissioner?: boolean;
         };
@@ -58,7 +58,7 @@ export interface ReservationResponse {
             id: number;
             name?: string;
             last_name?: string;
-            wallet_address?: string;
+            wallet?: string;
             avatar?: string;
             is_commissioner?: boolean;
         };
