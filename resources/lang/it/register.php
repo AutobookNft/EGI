@@ -69,7 +69,10 @@ return [
 
     // Form Fields
     'label_name' => 'Nome completo',
-    'name_help' => 'Il nome che apparirà nel tuo profilo pubblico',
+    'name_help' => 'Il tuo nome reale per uso interno e identificazione',
+
+    'label_nick_name' => 'Nickname (pubblico)',
+    'nick_name_help' => 'Se inserisci un nickname, verrà mostrato pubblicamente al posto del tuo nome. Se lasci vuoto, verrà mostrato il tuo nome completo.',
 
     'label_email' => 'Indirizzo email',
     'email_help' => 'Useremo questo indirizzo per comunicazioni importanti',

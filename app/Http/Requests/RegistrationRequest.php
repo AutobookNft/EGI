@@ -82,10 +82,21 @@ class RegistrationRequest extends FormRequest {
 
         return [
             'name' => 'required|string|max:255',
+            'nick_name' => 'nullable|string|max:50|unique:users,nick_name',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
             'user_type' => $userTypeRule,
             'terms_accepted' => 'required|accepted',
+
+            // ═══ GDPR REQUIRED ═══
+            'privacy_policy_accepted' => 'required|accepted',
+            'age_confirmation' => 'required|accepted',
+
+            // ═══ GDPR OPTIONAL ═══
+            'consents' => 'sometimes|array',
+            'consents.analytics' => 'sometimes|string|in:1,0',
+            'consents.marketing' => 'sometimes|string|in:1,0',
+            'consents.profiling' => 'sometimes|string|in:1,0',
         ];
     }
 
@@ -112,6 +123,8 @@ class RegistrationRequest extends FormRequest {
             'name.required' => __('validation.custom.name.required'),
             'name.string' => __('validation.custom.name.string'),
             'name.max' => __('validation.custom.name.max'),
+            'nick_name.unique' => __('validation.custom.nick_name.unique'),
+            'nick_name.max' => __('validation.custom.nick_name.max'),
             'user_type.required' => __('validation.custom.usertype.required'),
             'user_type.in' => __('validation.custom.usertype.in'),
             'terms_accepted.accepted' => __('validation.custom.terms_accepted.accepted'),

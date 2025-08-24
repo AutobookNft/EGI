@@ -65,7 +65,10 @@ return [
 
     // Form Fields
     'label_name' => 'Full Name',
-    'name_help' => 'The name that will appear on your public profile',
+    'name_help' => 'Your real name for internal use and identification',
+
+    'label_nick_name' => 'Nickname (public)',
+    'nick_name_help' => 'If you enter a nickname, it will be displayed publicly instead of your name. If left empty, your full name will be shown.',
 
     'label_email' => 'Email Address',
     'email_help' => 'We will use this address for important communications',

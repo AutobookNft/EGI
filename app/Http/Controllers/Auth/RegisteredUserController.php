@@ -108,8 +108,8 @@ class RegisteredUserController extends Controller {
         ];
 
         try {
-            // ═══ VALIDATION ═══
-            $validated = $this->validateRegistration($request);
+            // ═══ GET VALIDATED DATA ═══
+            $validated = $request->validated();
             $logContext['user_type'] = $validated['user_type'];
 
             $this->logger->info('[Registration] Starting permission-based registration', $logContext);
@@ -254,6 +254,7 @@ class RegisteredUserController extends Controller {
             return User::create([
                 // ═══ CORE FIELDS ═══
                 'name' => $validated['name'],
+                'nick_name' => $validated['nick_name'] ?? null,
                 'email' => $validated['email'],
                 'password' => Hash::make($validated['password']),
                 'usertype' => $validated['user_type'],

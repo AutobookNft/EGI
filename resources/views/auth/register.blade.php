@@ -333,7 +333,7 @@
                         </fieldset>
 
                         {{-- Personal Information --}}
-                        <div class="grid grid-cols-1 gap-6 pt-6 border-t border-oro-fiorentino/20 sm:grid-cols-2">
+                        <div class="grid grid-cols-1 gap-6 pt-6 border-t border-oro-fiorentino/20">
                             <div>
                                 <label for="name" class="block mb-2 text-sm font-medium text-blu-algoritmo">{{ __('register.label_name') }} *</label>
                                 <input id="name" name="name" type="text" autocomplete="name" required
@@ -341,6 +341,16 @@
                                        value="{{ old('name') }}" aria-describedby="name-error name-help">
                                 <p id="name-help" class="mt-1 text-xs text-grigio-pietra">{{ __('register.name_help') }}</p>
                                 @error('name') <p id="name-error" class="mt-1 text-sm text-rosso-urgenza" role="alert">{{ $message }}</p> @enderror
+                            </div>
+                            <div>
+                                <label for="nick_name" class="block mb-2 text-sm font-medium text-blu-algoritmo">{{ __('register.label_nick_name') }}</label>
+                                <input id="nick_name" name="nick_name" type="text" autocomplete="nickname"
+                                       class="block w-full px-4 py-3 input-rinascimento font-corpo"
+                                       value="{{ old('nick_name') }}" aria-describedby="nick-name-error nick-name-help">
+                                <p id="nick-name-help" class="mt-1 text-xs text-grigio-pietra">
+                                    {{ __('register.nick_name_help') }}
+                                </p>
+                                @error('nick_name') <p id="nick-name-error" class="mt-1 text-sm text-rosso-urgenza" role="alert">{{ $message }}</p> @enderror
                             </div>
                             <div>
                                 <label for="email" class="block mb-2 text-sm font-medium text-blu-algoritmo">{{ __('register.label_email') }} *</label>
@@ -584,7 +594,7 @@
                     'text-verde-rinascita',
                     'text-verde-rinascita',
                     'text-verde-rinascita',
-                    
+
                 ];
 
                 if (length === 0) {

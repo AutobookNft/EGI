@@ -47,6 +47,7 @@ class User extends Authenticatable implements HasMedia {
      */
     protected $fillable = [
         'name',
+        'nick_name',
         'last_name',
         'email',
         'preferred_currency',
@@ -128,6 +129,24 @@ class User extends Authenticatable implements HasMedia {
 
         // Ritorna l'icon_style dall'attributo o un valore di default
         return $this->attributes['icon_style'] ?? config('icons.styles.default');
+    }
+
+    /**
+     * Get the display name (nickname if present, otherwise name).
+     *
+     * @return string
+     */
+    public function getNameAttribute(): string {
+        return $this->attributes['nick_name'] ?? $this->attributes['name'];
+    }
+
+    /**
+     * Get the legal name (always the raw name field).
+     *
+     * @return string
+     */
+    public function getLegalNameAttribute(): string {
+        return $this->attributes['name'];
     }
 
     /**

@@ -181,6 +181,10 @@ return [
             'string' => 'Name must be text only.',
             'max' => 'Name cannot be longer than :max characters.',
         ],
+        'nick_name' => [
+            'unique' => 'This nickname is already taken. Please choose another one.',
+            'max' => 'Nickname cannot be longer than :max characters.',
+        ],
         'usertype' => [
             'required' => 'Please select your account type.',
             'in' => 'Please select a valid account type.',
@@ -196,6 +200,7 @@ return [
         'password' => 'password',
         'password_confirmation' => 'password confirmation',
         'name' => 'full name',
+        'nick_name' => 'nickname',
         'usertype' => 'account type',
         'terms_accepted' => 'terms and conditions',
     ],
