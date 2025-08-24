@@ -27,8 +27,7 @@ use Ultra\UltraLogManager\UltraLogManager;
  * @oracode-dimension governance (consent management)
  * @oracode-dimension impact (data quality assurance)
  */
-class UpdatePersonalDataRequest extends FormRequest
-{
+class UpdatePersonalDataRequest extends FormRequest {
     /**
      * ULM Logger for audit trail
      * @var UltraLogManager
@@ -59,8 +58,7 @@ class UpdatePersonalDataRequest extends FormRequest
      * 🛡️ Privacy: Set up secure validation context with audit capability
      * 🧱 Core Logic: DI-first initialization with graceful fallbacks
      */
-    protected function initializeDependencies(): void
-    {
+    protected function initializeDependencies(): void {
         try {
             $this->logger = app(UltraLogManager::class);
             $this->errorManager = app(ErrorManagerInterface::class);
@@ -74,7 +72,6 @@ class UpdatePersonalDataRequest extends FormRequest
                 'request_ip' => $this->ip(),
                 'operation' => 'request_initialization'
             ]);
-
         } catch (\Throwable $e) {
             // ✅ OS1.5 PROACTIVE SECURITY: Graceful degradation if dependencies fail
             if (app()->bound(UltraLogManager::class)) {
@@ -99,8 +96,7 @@ class UpdatePersonalDataRequest extends FormRequest
      *
      * @return bool True if user authorized to update personal data
      */
-    public function authorize(): bool
-    {
+    public function authorize(): bool {
         $this->initializeDependencies();
 
         $this->logger->info('Personal data update authorization started', [
@@ -172,8 +168,7 @@ class UpdatePersonalDataRequest extends FormRequest
      *
      * @return array<string, mixed> Laravel validation rules array
      */
-    public function rules(): array
-    {
+    public function rules(): array {
         $this->initializeDependencies();
 
         $this->logger->info('Generating validation rules for personal data update', [
@@ -211,9 +206,18 @@ class UpdatePersonalDataRequest extends FormRequest
      *
      * @return array<string, string> Custom validation messages
      */
-    public function messages(): array
-    {
+    public function messages(): array {
         return [
+            // User basic fields
+            'name.required' => __('user_personal_data.validation.name_required'),
+            'name.regex' => __('user_personal_data.validation.name_format'),
+            'last_name.regex' => __('user_personal_data.validation.last_name_format'),
+            'email.required' => __('user_personal_data.validation.email_required'),
+            'email.email' => __('user_personal_data.validation.email_format'),
+            'email.unique' => __('user_personal_data.validation.email_unique'),
+            'nick_name.unique' => __('user_personal_data.validation.nickname_unique'),
+            'nick_name.max' => __('user_personal_data.validation.nickname_max'),
+
             // Personal Identity
             'birth_date.before' => __('user_personal_data.validation.birth_date_age'),
             'birth_date.after' => __('user_personal_data.validation.birth_date_valid'),
@@ -252,8 +256,7 @@ class UpdatePersonalDataRequest extends FormRequest
      *
      * @return array<string, string> Field name to label mapping
      */
-    public function attributes(): array
-    {
+    public function attributes(): array {
         return [
             'birth_date' => __('user_personal_data.birth_date'),
             'birth_place' => __('user_personal_data.birth_place'),
@@ -284,8 +287,7 @@ class UpdatePersonalDataRequest extends FormRequest
      * 🛡️ Privacy: Input sanitization for security
      * 🧱 Core Logic: OS1.5 proactive security through data cleaning
      */
-    protected function prepareForValidation(): void
-    {
+    protected function prepareForValidation(): void {
         $this->initializeDependencies();
 
         $this->logger->debug('Preparing personal data for validation', [
@@ -361,8 +363,7 @@ class UpdatePersonalDataRequest extends FormRequest
      * @param \App\Models\User $user User to check consent for
      * @return bool True if user has valid data processing consent
      */
-    private function hasRequiredGdprConsent(\App\Models\User $user): bool
-    {
+    private function hasRequiredGdprConsent(\App\Models\User $user): bool {
         try {
             // ✅ OS1.5 SIMPLICITY EMPOWERMENT: Check if user is setting up consent for first time
             if ($this->isFirstTimeConsentSetup()) {
@@ -386,7 +387,6 @@ class UpdatePersonalDataRequest extends FormRequest
             ]);
 
             return $hasConsent;
-
         } catch (\Throwable $e) {
             $this->logger->warning('GDPR consent check failed - using fallback', [
                 'component' => 'UpdatePersonalDataRequest',
@@ -408,13 +408,30 @@ class UpdatePersonalDataRequest extends FormRequest
      *
      * @return bool True if this is first-time consent setup
      */
-    private function isFirstTimeConsentSetup(): bool
-    {
+    private function isFirstTimeConsentSetup(): bool {
         $consentData = $this->input('consents', []);
 
-        // User is providing main consent for first time
-        return isset($consentData['allow-personal-data-processing'])
-               && $consentData['allow-personal-data-processing'] === '1';
+        // � DEBUG: Loggiamo cosa stiamo ricevendo
+        $this->logger->critical('🔍 FIRST-TIME CONSENT DEBUG', [
+            'consents_input' => $consentData,
+            'all_input_keys' => array_keys($this->all()),
+            'has_consents_key' => $this->has('consents'),
+            'request_method' => $this->method(),
+        ]);
+
+        // �🔧 FIX: Il form invia 'allow_personal_data_processing' (con underscore)
+        // mentre ConsentService usa 'allow-personal-data-processing' (con trattini)
+        $hasConsentField = isset($consentData['allow_personal_data_processing']);
+        $consentValue = $consentData['allow_personal_data_processing'] ?? null;
+        $isFirstTime = $hasConsentField && $consentValue === '1';
+
+        $this->logger->critical('🔍 FIRST-TIME CONSENT RESULT', [
+            'has_consent_field' => $hasConsentField,
+            'consent_value' => $consentValue,
+            'is_first_time' => $isFirstTime,
+        ]);
+
+        return $isFirstTime;
     }
 
     /**
@@ -427,8 +444,7 @@ class UpdatePersonalDataRequest extends FormRequest
      * @param \App\Models\User $user User to check
      * @return bool True if user has consent in database
      */
-    private function fallbackConsentCheck(\App\Models\User $user): bool
-    {
+    private function fallbackConsentCheck(\App\Models\User $user): bool {
         try {
             $hasConsent = \App\Models\UserConsent::where('user_id', $user->id)
                 ->where('consent_type', 'allow-personal-data-processing')
@@ -443,7 +459,6 @@ class UpdatePersonalDataRequest extends FormRequest
             ]);
 
             return $hasConsent;
-
         } catch (\Throwable $e) {
             $this->logger->error('Fallback consent check failed', [
                 'component' => 'UpdatePersonalDataRequest',
@@ -464,9 +479,36 @@ class UpdatePersonalDataRequest extends FormRequest
      *
      * @return array<string, mixed> Identity validation rules
      */
-    private function getPersonalIdentityRules(): array
-    {
+    private function getPersonalIdentityRules(): array {
+        $user = FegiAuth::user();
+
         return [
+            // Basic user fields
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                'regex:/^[\p{L}\s\-\.\,\']+$/u'
+            ],
+            'last_name' => [
+                'nullable',
+                'string',
+                'max:255',
+                'regex:/^[\p{L}\s\-\.\,\']+$/u'
+            ],
+            'email' => [
+                'required',
+                'email',
+                'max:255',
+                'unique:users,email,' . $user->id
+            ],
+            'nick_name' => [
+                'nullable',
+                'string',
+                'max:50',
+                'unique:users,nick_name,' . $user->id
+            ],
+            // Personal data fields
             'birth_date' => [
                 'nullable',
                 'date',
@@ -493,8 +535,7 @@ class UpdatePersonalDataRequest extends FormRequest
      *
      * @return array<string, mixed> Address validation rules
      */
-    private function getAddressRules(): array
-    {
+    private function getAddressRules(): array {
         return [
             'street' => [
                 'nullable',
@@ -549,8 +590,7 @@ class UpdatePersonalDataRequest extends FormRequest
      *
      * @return array<string, mixed> Contact validation rules
      */
-    private function getContactRules(): array
-    {
+    private function getContactRules(): array {
         return [
             'home_phone' => [
                 'nullable',
@@ -586,8 +626,7 @@ class UpdatePersonalDataRequest extends FormRequest
      *
      * @return array<string, mixed> Fiscal validation rules
      */
-    private function getFiscalRules(): array
-    {
+    private function getFiscalRules(): array {
         try {
             $validator = FiscalValidatorFactory::create($this->userCountry);
 
@@ -633,7 +672,6 @@ class UpdatePersonalDataRequest extends FormRequest
                     'regex:/^[A-Z0-9\-\s]+$/i'
                 ]
             ];
-
         } catch (\Exception $e) {
             $this->logger->warning('Fiscal validation setup failed - using generic rules', [
                 'component' => 'UpdatePersonalDataRequest',
@@ -656,8 +694,7 @@ class UpdatePersonalDataRequest extends FormRequest
      *
      * @return array<string, mixed> Consent validation rules
      */
-    private function getConsentRules(): array
-    {
+    private function getConsentRules(): array {
         return [
             'consents' => [
                 'sometimes',
@@ -705,8 +742,7 @@ class UpdatePersonalDataRequest extends FormRequest
      *
      * @return string ISO country code for validation context
      */
-    private function determineUserCountry(): string
-    {
+    private function determineUserCountry(): string {
         // Try from form data first
         if ($this->filled('country')) {
             return strtoupper($this->input('country'));
@@ -721,8 +757,12 @@ class UpdatePersonalDataRequest extends FormRequest
         // Try to detect from Accept-Language header (MVP countries)
         $acceptLanguage = $this->header('Accept-Language', '');
         $languageMap = [
-            'it' => 'IT', 'fr' => 'FR', 'es' => 'SP',
-            'pt' => 'PT', 'en-GB' => 'EN', 'de' => 'DE'
+            'it' => 'IT',
+            'fr' => 'FR',
+            'es' => 'SP',
+            'pt' => 'PT',
+            'en-GB' => 'EN',
+            'de' => 'DE'
         ];
 
         foreach ($languageMap as $lang => $country) {
@@ -742,8 +782,7 @@ class UpdatePersonalDataRequest extends FormRequest
      *
      * @return string Regex validation rule for postal codes
      */
-    private function getZipValidationRule(): string
-    {
+    private function getZipValidationRule(): string {
         return match ($this->userCountry) {
             'IT' => 'regex:/^[0-9]{5}$/',
             'DE' => 'regex:/^[0-9]{5}$/',
@@ -761,15 +800,31 @@ class UpdatePersonalDataRequest extends FormRequest
      *
      * @return array<string> Supported country codes
      */
-    private function getSupportedCountryCodes(): array
-    {
+    private function getSupportedCountryCodes(): array {
         return [
             // MVP Countries (Primary Support)
-            'IT', 'FR', 'SP', 'PT', 'EN', 'DE',
+            'IT',
+            'FR',
+            'SP',
+            'PT',
+            'EN',
+            'DE',
 
             // Additional Countries (Extended Support)
-            'US', 'NL', 'BE', 'CH', 'AT', 'SE', 'NO', 'DK',
-            'FI', 'IE', 'PL', 'CZ', 'HU', 'GR'
+            'US',
+            'NL',
+            'BE',
+            'CH',
+            'AT',
+            'SE',
+            'NO',
+            'DK',
+            'FI',
+            'IE',
+            'PL',
+            'CZ',
+            'HU',
+            'GR'
         ];
     }
 
@@ -782,8 +837,7 @@ class UpdatePersonalDataRequest extends FormRequest
      * @param string $input Raw text input
      * @return string Sanitized text
      */
-    private function sanitizeTextInput(string $input): string
-    {
+    private function sanitizeTextInput(string $input): string {
         return trim(strip_tags($input));
     }
 
@@ -796,8 +850,7 @@ class UpdatePersonalDataRequest extends FormRequest
      * @param array $consents Raw consent data
      * @return array Sanitized consent data
      */
-    private function sanitizeConsentData(array $consents): array
-    {
+    private function sanitizeConsentData(array $consents): array {
         $sanitized = [];
         $allowedConsents = ['allow-personal-data-processing', 'marketing', 'analytics'];
 
@@ -819,14 +872,17 @@ class UpdatePersonalDataRequest extends FormRequest
      * @param array $metadata Raw metadata
      * @return array Sanitized metadata
      */
-    private function sanitizeConsentMetadata(array $metadata): array
-    {
+    private function sanitizeConsentMetadata(array $metadata): array {
         $sanitized = [];
 
         if (isset($metadata['processing_purposes']) && is_array($metadata['processing_purposes'])) {
             $allowedPurposes = [
-                'account_management', 'service_delivery', 'legal_compliance',
-                'marketing', 'analytics', 'customer_support'
+                'account_management',
+                'service_delivery',
+                'legal_compliance',
+                'marketing',
+                'analytics',
+                'customer_support'
             ];
 
             $sanitized['processing_purposes'] = array_filter(

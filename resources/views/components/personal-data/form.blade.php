@@ -42,6 +42,65 @@
                     icon="user" />
 
                 <div class="grid grid-cols-1 gap-6 mt-4 md:grid-cols-2">
+                    {{-- Full Name --}}
+                    <div>
+                        <x-input-label for="name" :value="__('user_personal_data.full_name')" />
+                        <x-text-input
+                            id="name"
+                            name="name"
+                            type="text"
+                            class="block w-full mt-1"
+                            :value="old('name', $user->getRawOriginal('name'))"
+                            :disabled="!$canEdit"
+                            data-validation="name" />
+                        <x-input-error :messages="$errors->get('name')" class="mt-2" />
+                        <p class="mt-1 text-xs text-gray-600">{{ __('user_personal_data.full_name_help') }}</p>
+                    </div>
+
+                    {{-- Nickname --}}
+                    <div>
+                        <x-input-label for="nick_name" :value="__('user_personal_data.nickname')" />
+                        <x-text-input
+                            id="nick_name"
+                            name="nick_name"
+                            type="text"
+                            class="block w-full mt-1"
+                            :value="old('nick_name', $user->getRawOriginal('nick_name'))"
+                            :disabled="!$canEdit"
+                            data-validation="nick_name" />
+                        <x-input-error :messages="$errors->get('nick_name')" class="mt-2" />
+                        <p class="mt-1 text-xs text-gray-600">{{ __('user_personal_data.nickname_help') }}</p>
+                    </div>
+
+                    {{-- Last Name --}}
+                    <div>
+                        <x-input-label for="last_name" :value="__('user_personal_data.last_name')" />
+                        <x-text-input
+                            id="last_name"
+                            name="last_name"
+                            type="text"
+                            class="block w-full mt-1"
+                            :value="old('last_name', $user->getRawOriginal('last_name'))"
+                            :disabled="!$canEdit"
+                            data-validation="last_name" />
+                        <x-input-error :messages="$errors->get('last_name')" class="mt-2" />
+                    </div>
+
+                    {{-- Email --}}
+                    <div>
+                        <x-input-label for="email" :value="__('user_personal_data.email')" />
+                        <x-text-input
+                            id="email"
+                            name="email"
+                            type="email"
+                            class="block w-full mt-1"
+                            :value="old('email', $user->getRawOriginal('email'))"
+                            :disabled="!$canEdit"
+                            data-validation="email" />
+                        <x-input-error :messages="$errors->get('email')" class="mt-2" />
+                        <p class="mt-1 text-xs text-gray-600">{{ __('user_personal_data.email_help') }}</p>
+                    </div>
+
                     {{-- Birth Date --}}
                     <div>
                         <x-input-label for="birth_date" :value="__('user_personal_data.birth_date')" />

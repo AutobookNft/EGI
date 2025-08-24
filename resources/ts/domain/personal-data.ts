@@ -776,6 +776,9 @@ class PersonalDataManager {
         try {
             const formData = new FormData(this.form);
 
+            // Add Laravel method spoofing for PUT request
+            formData.append('_method', 'PUT');
+
             const response = await fetch(this.config.updateUrl, {
                 method: 'POST',
                 body: formData,

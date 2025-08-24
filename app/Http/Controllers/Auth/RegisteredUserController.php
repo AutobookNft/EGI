@@ -530,6 +530,19 @@ class RegisteredUserController extends Controller {
                 'consent_updated_at' => now(),
             ]);
 
+            // 🔧 FIX: Salva il consenso anche nella tabella user_consents per il ConsentService
+            \App\Models\UserConsent::create([
+                'user_id' => $user->id,
+                'consent_version_id' => 1, // Versione di consenso attiva
+                'consent_type' => 'allow-personal-data-processing',
+                'granted' => true,
+                'legal_basis' => 'consent', // ✅ CORRETTO: consent per dati personali
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+                'metadata' => json_encode(['source' => 'registration', 'purposes' => ['platform_operation']]),
+                'status' => 'active',
+            ]);
+
             // Organization Data (only for enterprise)
             if ($validated['user_type'] === 'enterprise') {
                 UserOrganizationData::create([

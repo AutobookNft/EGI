@@ -317,12 +317,12 @@ class UserPreferenceController extends Controller {
                 ]
             ];
 
-            $this->logger->info('Current collection data retrieved', [
-                'user_id' => $user->id,
-                'usertype' => $user->usertype,
-                'collection_name' => $collectionName,
-                'egi_count' => $egiCount
-            ]);
+            // $this->logger->info('Current collection data retrieved', [
+            //     'user_id' => $user->id,
+            //     'usertype' => $user->usertype,
+            //     'collection_name' => $collectionName,
+            //     'egi_count' => $egiCount
+            // ]);
 
             return response()->json($response);
         } catch (\Exception $e) {

@@ -94,7 +94,8 @@ class ConsentService
                     required:     $type->is_required,
                     defaultValue: false,
                     canWithdraw:  $type->can_withdraw,
-                    processingPurposes: json_decode($type->processing_purposes)
+                    // ✅ FIX: Il model cast 'array' restituisce array o null, gestiamo entrambi
+                    processingPurposes: $type->processing_purposes ?? []
                 );
             });
         });

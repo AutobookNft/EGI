@@ -44,6 +44,13 @@ return [
     // ===================================================================
     // FORM FIELDS
     // ===================================================================
+    'full_name' => 'Nome Completo',
+    'full_name_help' => 'Il tuo nome legale completo (per uso interno)',
+    'last_name' => 'Cognome',
+    'email' => 'Indirizzo Email',
+    'email_help' => 'Indirizzo email principale per comunicazioni',
+    'nickname' => 'Nickname',
+    'nickname_help' => 'Nome pubblico mostrato sui tuoi EGI (opzionale)',
     'first_name' => 'Nome',
     'first_name_placeholder' => 'Inserisci il tuo nome',
     'last_name' => 'Cognome',
@@ -135,6 +142,14 @@ return [
     // VALIDATION MESSAGES
     // ===================================================================
     'validation' => [
+        'name_required' => 'Il nome completo è obbligatorio',
+        'name_format' => 'Il nome può contenere solo lettere, spazi e apostrofi',
+        'last_name_format' => 'Il cognome può contenere solo lettere, spazi e apostrofi',
+        'email_required' => 'L\'indirizzo email è obbligatorio',
+        'email_format' => 'Inserisci un indirizzo email valido',
+        'email_unique' => 'Questo indirizzo email è già registrato',
+        'nickname_unique' => 'Questo nickname è già in uso',
+        'nickname_max' => 'Il nickname non può superare 50 caratteri',
         'first_name_required' => 'Il nome è obbligatorio',
         'last_name_required' => 'Il cognome è obbligatorio',
         'birth_date_required' => 'La data di nascita è obbligatoria',
