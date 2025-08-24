@@ -398,18 +398,20 @@
                             id="consent_allow_personal_data_processing"
                             name="consents[allow_personal_data_processing]"
                             value="1"
-                            {{ $isChecked ? 'checked' : '' }}
-                            @if(!$canEdit) disabled @endif
-                            class="mt-1 text-indigo-600 border-gray-300 rounded shadow-sm focus:ring-indigo-500"
-                            onchange="toggleProcessingPurposes(this.checked)" />
+                            checked
+                            disabled
+                            class="mt-1 text-indigo-600 border-gray-300 rounded shadow-sm opacity-75 cursor-not-allowed" />
+
+                        {{-- Campo hidden per garantire che il valore venga sempre inviato --}}
+                        <input type="hidden" name="consents[allow_personal_data_processing]" value="1" />
 
                         <div>
                             <label for="consent_allow_personal_data_processing" class="text-sm font-medium text-gray-700">
-                                {{ __('user_personal_data.consent_required') }}
-                                <span class="text-red-500">*</span>
+                                {{ __('user_personal_data.contract_data_processing') }}
+                                <span class="text-blue-600 text-xs font-semibold">({{ __('user_personal_data.contractual_basis') }})</span>
                             </label>
                             <p class="mt-1 text-sm text-gray-500">
-                                {{ __('user_personal_data.gdpr_notices.data_processing_info') }}
+                                {{ __('user_personal_data.gdpr_notices.contractual_processing_info') }}
                             </p>
                         </div>
                     </div>
@@ -535,20 +537,14 @@
         </form>
     </div>
 </div>
-{{-- JavaScript for Dynamic Show/Hide --}}
+{{-- JavaScript per gestione form dinamica --}}
 <script>
-function toggleProcessingPurposes(isChecked) {
+// Mostra sempre i processing purposes per il trattamento contrattuale
+document.addEventListener('DOMContentLoaded', function() {
     const purposesDiv = document.getElementById('processing-purposes');
     if (purposesDiv) {
-        purposesDiv.style.display = isChecked ? 'block' : 'none';
-    }
-}
-
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', function() {
-    const checkbox = document.getElementById('consent_allow_personal_data_processing');
-    if (checkbox) {
-        toggleProcessingPurposes(checkbox.checked);
+        // Sempre visibili per il trattamento contrattuale obbligatorio
+        purposesDiv.style.display = 'block';
     }
 });
 </script>

@@ -351,7 +351,7 @@ class GdprController extends Controller {
             $consentData = $this->consentService->getUserConsentStatus($user);
             $consentTypes = $this->consentService->getAvailableConsentTypes();
 
-            $this->auditService->logUserAction($user, 'consent_preferences_page_viewed');
+            $this->auditService->logUserAction($user, 'consent_preferences_page_viewed', [], GdprActivityCategory::GDPR_ACTIONS);
 
             // Use the main consent view with preferences mode
             return view('gdpr.consent.preferences', [
@@ -419,7 +419,7 @@ class GdprController extends Controller {
             $this->auditService->logUserAction($user, 'consents_updated', [
                 'previous_consents' => $result['previous'],
                 'new_consents' => $result['current']
-            ]);
+            ], GdprActivityCategory::GDPR_ACTIONS);
 
             return redirect()->route('gdpr.consent')
                 ->with('success', __('gdpr.consents_updated_successfully'));
@@ -469,7 +469,7 @@ class GdprController extends Controller {
             $this->auditService->logUserAction($user, 'consent_withdrawn', [
                 'consent_id' => $consentId,
                 'consent_type' => $consent->consent_type
-            ]);
+            ], GdprActivityCategory::GDPR_ACTIONS);
 
             return redirect()->route('gdpr.consent')
                 ->with('success', __('gdpr.consent.withdrawn_successfully'));
@@ -529,7 +529,7 @@ class GdprController extends Controller {
             $this->auditService->logUserAction($user, 'consent_renewed', [
                 'consent_id' => $consentId,
                 'consent_type' => $consent->consent_type
-            ]);
+            ], GdprActivityCategory::GDPR_ACTIONS);
 
             return redirect()->route('gdpr.consent')
                 ->with('success', __('gdpr.consent.renewed_successfully'));
@@ -565,7 +565,7 @@ class GdprController extends Controller {
             $user = Auth::user();
             $history = $this->consentService->getDetailedConsentHistory($user);
 
-            $this->auditService->logUserAction($user, 'consent_history_viewed');
+            $this->auditService->logUserAction($user, 'consent_history_viewed', [], GdprActivityCategory::GDPR_ACTIONS);
 
             // Redirect to main consent page with history data in session
             return redirect()->route('gdpr.consent')
@@ -1108,7 +1108,7 @@ class GdprController extends Controller {
             $this->auditService->logUserAction($user, 'rectification_requested', [
                 'request_id' => $request->id,
                 'field_name' => $validated['field_name']
-            ]);
+            ], GdprActivityCategory::PERSONAL_DATA_UPDATE);
 
             return redirect()->route('gdpr.edit-personal-data')
                 ->with('success', __('gdpr.rectification_request_submitted'));
@@ -1193,7 +1193,7 @@ class GdprController extends Controller {
             $this->auditService->logUserAction($user, 'processing_limits_updated', [
                 'previous_limits' => $result['previous'],
                 'new_limits' => $result['current']
-            ]);
+            ], GdprActivityCategory::GDPR_ACTIONS);
 
             return redirect()->route('gdpr.limit-processing')
                 ->with('success', __('gdpr.processing_limits_updated_successfully'));
@@ -1227,7 +1227,7 @@ class GdprController extends Controller {
             $deletionInfo = $this->gdprService->getDeletionInfo($user);
             $onChainDataSummary = $this->gdprService->getOnChainDataSummary($user);
 
-            $this->auditService->logUserAction($user, 'delete_account_page_viewed');
+            $this->auditService->logUserAction($user, 'delete_account_page_viewed', [], GdprActivityCategory::GDPR_ACTIONS);
 
             return view('gdpr.delete-account', [
                 'user' => $user,
@@ -1269,7 +1269,7 @@ class GdprController extends Controller {
             $this->auditService->logUserAction($user, 'deletion_requested', [
                 'request_id' => $deletionRequest->id,
                 'reason' => $validated['reason'] ?? null
-            ]);
+            ], GdprActivityCategory::GDPR_ACTIONS);
 
             return redirect()->route('gdpr.delete-account')
                 ->with('warning', __('gdpr.deletion_request_submitted'));
@@ -1312,7 +1312,7 @@ class GdprController extends Controller {
             $this->auditService->logUserAction($user, 'account_deleted', [
                 'deletion_result' => $deletionResult,
                 'final_action' => true
-            ]);
+            ], GdprActivityCategory::GDPR_ACTIONS);
 
             // Logout and invalidate session
             Auth::logout();
@@ -1352,7 +1352,7 @@ class GdprController extends Controller {
             $activities = $this->auditService->getUserActivityLog($user, 50);
             $activityStats = $this->auditService->getUserActivityStats($user);
 
-            $this->auditService->logUserAction($user, 'activity_log_viewed');
+            $this->auditService->logUserAction($user, 'activity_log_viewed', [], GdprActivityCategory::GDPR_ACTIONS);
 
             return view('gdpr.activity-log', [
                 'user' => $user,
@@ -1396,7 +1396,7 @@ class GdprController extends Controller {
                     'from' => $validated['date_from'] ?? null,
                     'to' => $validated['date_to'] ?? null
                 ]
-            ]);
+            ], GdprActivityCategory::DATA_ACCESS);
 
             return $this->auditService->exportUserActivityLog($user, $validated);
         } catch (\Exception $e) {
@@ -1429,7 +1429,7 @@ class GdprController extends Controller {
             $userReports = $this->gdprService->getUserBreachReports($user);
             $reportCategories = $this->gdprService->getBreachReportCategories();
 
-            $this->auditService->logUserAction($user, 'breach_report_page_viewed');
+            $this->auditService->logUserAction($user, 'breach_report_page_viewed', [], GdprActivityCategory::GDPR_ACTIONS);
 
             return view('gdpr.breach-report', [
                 'user' => $user,
@@ -1476,7 +1476,7 @@ class GdprController extends Controller {
                 'report_id' => $report->id,
                 'category' => $validated['category'],
                 'severity' => $validated['severity']
-            ]);
+            ], GdprActivityCategory::GDPR_ACTIONS);
 
             return redirect()->route('gdpr.breach-report')
                 ->with('success', __('gdpr.breach_report_submitted_successfully'));
@@ -1514,7 +1514,7 @@ class GdprController extends Controller {
 
             $this->auditService->logUserAction($user, 'breach_report_status_viewed', [
                 'report_id' => $report->id
-            ]);
+            ], GdprActivityCategory::GDPR_ACTIONS);
 
             return view('gdpr.breach-report-status', [
                 'user' => $user,
@@ -1566,7 +1566,7 @@ class GdprController extends Controller {
             $policyContent = $this->parsePolicyContent($currentPolicy);
 
             if ($user) {
-                $this->auditService->logUserAction($user, 'privacy_policy_viewed');
+                $this->auditService->logUserAction($user, 'privacy_policy_viewed', [], GdprActivityCategory::GDPR_ACTIONS);
             }
 
             // Version history - all versions for the current document type and language
@@ -1622,7 +1622,7 @@ class GdprController extends Controller {
             if ($user) {
                 $this->auditService->logUserAction($user, 'privacy_policy_version_viewed', [
                     'policy_id' => $policy->id
-                ]);
+                ], GdprActivityCategory::GDPR_ACTIONS);
             }
 
             return view('gdpr.privacy-policy-version', [
@@ -1678,24 +1678,24 @@ class GdprController extends Controller {
      * @return array Array of sections, each with title, anchor, and its own content.
      */
     protected function extractSectionsFromMarkdown(string $content): array {
-        $lines = explode("\n", $content);
+        $lines = \explode("\n", $content);
         $sections = [];
         $currentSection = null;
         $sectionIndex = 0;
 
         foreach ($lines as $lineNumber => $line) {
             // Check if the line is a header (H1, H2, H3)
-            if (preg_match('/^(#{1,3})\s+(.+)$/', trim($line), $matches)) {
+            if (\preg_match('/^(#{1,3})\s+(.+)$/', \trim($line), $matches)) {
                 // If there's a section being built, finalize it.
                 if ($currentSection !== null) {
                     // Trim trailing newlines from the content
-                    $currentSection['content'] = trim($currentSection['content']);
+                    $currentSection['content'] = \trim($currentSection['content']);
                     $sections[] = $currentSection;
                 }
 
                 // Start a new section
-                $headerLevel = strlen($matches[1]);
-                $rawTitle = trim($matches[2]);
+                $headerLevel = \strlen($matches[1]);
+                $rawTitle = \trim($matches[2]);
                 $cleanTitle = $this->cleanHeaderTitle($rawTitle);
 
                 // Aggiungi un controllo per i titoli vuoti
@@ -1738,26 +1738,26 @@ class GdprController extends Controller {
         $cleaned = $title;
 
         // Remove bold **text** and __text__
-        $cleaned = preg_replace('/\*\*(.*?)\*\*/', '$1', $cleaned);
-        $cleaned = preg_replace('/__(.*?)__/', '$1', $cleaned);
+        $cleaned = \preg_replace('/\*\*(.*?)\*\*/', '$1', $cleaned);
+        $cleaned = \preg_replace('/__(.*?)__/', '$1', $cleaned);
 
         // Remove italic *text* and _text_
-        $cleaned = preg_replace('/(?<!\*)\*([^*]+)\*(?!\*)/', '$1', $cleaned);
-        $cleaned = preg_replace('/(?<!_)_([^_]+)_(?!_)/', '$1', $cleaned);
+        $cleaned = \preg_replace('/(?<!\*)\*([^*]+)\*(?!\*)/', '$1', $cleaned);
+        $cleaned = \preg_replace('/(?<!_)_([^_]+)_(?!_)/', '$1', $cleaned);
 
         // Remove code `text`
-        $cleaned = preg_replace('/`([^`]+)`/', '$1', $cleaned);
+        $cleaned = \preg_replace('/`([^`]+)`/', '$1', $cleaned);
 
         // Remove links [text](url)
-        $cleaned = preg_replace('/\[([^\]]+)\]\([^)]+\)/', '$1', $cleaned);
+        $cleaned = \preg_replace('/\[([^\]]+)\]\([^)]+\)/', '$1', $cleaned);
 
         // Remove emojis and special characters for cleaner TOC
-        $cleaned = preg_replace('/[\x{1F600}-\x{1F64F}]/u', '', $cleaned); // Emoticons
-        $cleaned = preg_replace('/[\x{1F300}-\x{1F5FF}]/u', '', $cleaned); // Misc symbols
-        $cleaned = preg_replace('/[\x{1F680}-\x{1F6FF}]/u', '', $cleaned); // Transport
-        $cleaned = preg_replace('/[\x{1F1E0}-\x{1F1FF}]/u', '', $cleaned); // Flags
+        $cleaned = \preg_replace('/[\x{1F600}-\x{1F64F}]/u', '', $cleaned); // Emoticons
+        $cleaned = \preg_replace('/[\x{1F300}-\x{1F5FF}]/u', '', $cleaned); // Misc symbols
+        $cleaned = \preg_replace('/[\x{1F680}-\x{1F6FF}]/u', '', $cleaned); // Transport
+        $cleaned = \preg_replace('/[\x{1F1E0}-\x{1F1FF}]/u', '', $cleaned); // Flags
 
-        return trim($cleaned);
+        return \trim($cleaned);
     }
 
     /**
@@ -1863,7 +1863,7 @@ class GdprController extends Controller {
             $policyVersions = $this->gdprService->getPrivacyPolicyVersions();
 
             if ($user) {
-                $this->auditService->logUserAction($user, 'privacy_policy_changelog_viewed');
+                $this->auditService->logUserAction($user, 'privacy_policy_changelog_viewed', [], GdprActivityCategory::GDPR_ACTIONS);
             }
 
             return view('gdpr.privacy-policy-changelog', [
@@ -1897,7 +1897,7 @@ class GdprController extends Controller {
             $thirdPartyServices = $this->gdprService->getThirdPartyServices();
 
             if ($user) {
-                $this->auditService->logUserAction($user, 'data_processing_info_viewed');
+                $this->auditService->logUserAction($user, 'data_processing_info_viewed', [], GdprActivityCategory::GDPR_ACTIONS);
             }
 
             return view('gdpr.data-processing-info', [
@@ -1935,7 +1935,7 @@ class GdprController extends Controller {
             $dpoInfo = $this->gdprService->getDpoContactInformation();
             $userMessages = $this->gdprService->getUserDpoMessages($user);
 
-            $this->auditService->logUserAction($user, 'dpo_contact_page_viewed');
+            $this->auditService->logUserAction($user, 'dpo_contact_page_viewed', [], GdprActivityCategory::GDPR_ACTIONS);
 
             return view('gdpr.contact-dpo', [
                 'user' => $user,
@@ -1981,7 +1981,7 @@ class GdprController extends Controller {
                 'message_id' => $message->id,
                 'subject' => $validated['subject'],
                 'priority' => $validated['priority']
-            ]);
+            ], GdprActivityCategory::GDPR_ACTIONS);
 
             return redirect()->route('gdpr.contact-dpo')
                 ->with('success', __('gdpr.dpo_message_sent_successfully'));
@@ -2167,7 +2167,7 @@ class GdprController extends Controller {
 
             $this->auditService->logUserAction($user, 'legacy_data_downloaded', [
                 'export_token' => $exportToken
-            ]);
+            ], GdprActivityCategory::DATA_ACCESS);
 
             return $this->exportService->streamExportFile($export);
         } catch (\Exception $e) {

@@ -202,7 +202,6 @@ class PersonalDataController extends BaseUserDomainController {
             $result = DB::transaction(function () use ($user, $validatedData, $request) {
                 return $this->processPersonalDataUpdate($user, $validatedData, $request);
             });
-            $this->logger->critical('🔍 DETECTIVE: Transaction completed successfully');
 
             if ($result['success']) {
                 $this->auditDataAccess('personal_data_updated_successfully', [
@@ -526,8 +525,8 @@ class PersonalDataController extends BaseUserDomainController {
         // 2. GESTIONE DEI DATI PERSONALI (tabella user_personal_data)
         // ===================================================================
         $personalDataFields = [
-            'first_name',
-            'last_name',
+            // ❌ RIMOSSO: first_name non esiste in user_personal_data
+            // ❌ RIMOSSO: last_name è nella tabella users, non user_personal_data
             'birth_date',
             'birth_place',
             'gender',

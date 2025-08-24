@@ -105,6 +105,8 @@ return [
     'consent_description' => 'Gestisci i tuoi consensi per il trattamento dei dati',
     'consent_required' => 'Consenso Obbligatorio',
     'consent_optional' => 'Consenso Facoltativo',
+    'contract_data_processing' => 'Trattamento Dati Necessario al Servizio',
+    'contractual_basis' => 'Base Contrattuale',
     'consent_marketing' => 'Marketing e Comunicazioni',
     'consent_marketing_desc' => 'Consenso per ricevere comunicazioni commerciali',
     'consent_profiling' => 'Profilazione',
@@ -167,6 +169,7 @@ return [
     // ===================================================================
     'gdpr_notices' => [
         'data_processing_info' => 'I tuoi dati personali sono trattati in conformità al GDPR (UE) 2016/679',
+        'contractual_processing_info' => 'Questo trattamento è necessario per l\'esecuzione del contratto di servizio e non può essere revocato',
         'data_controller' => 'Titolare del trattamento: FlorenceEGI S.r.l.',
         'data_purpose' => 'Finalità: Gestione account utente e servizi della piattaforma',
         'data_retention' => 'Conservazione: I dati sono conservati per il tempo necessario ai servizi richiesti',

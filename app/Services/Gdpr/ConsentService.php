@@ -29,8 +29,7 @@ use App\Models\ConsentType;
  * @version 1.0.0
  * @date 2025-05-22
  */
-class ConsentService
-{
+class ConsentService {
 
     /**
      * Legal content service for fetching legal documents
@@ -65,7 +64,7 @@ class ConsentService
         $this->errorManager = $errorManager;
     }
 
-     /**
+    /**
      * @Oracode Method: Get All Consent Types as a DTO Collection (FINAL Refactored)
      * 🎯 Purpose: To be the single source of truth for consent configurations, respecting
      * the application's existing DTO contract.
@@ -74,8 +73,7 @@ class ConsentService
      * and maps the Eloquent Models to the pre-existing DTO structure to ensure
      * zero impact on the rest of the application.
      */
-    public function getConsentTypes(): Collection
-    {
+    public function getConsentTypes(): Collection {
         $cacheKey = 'consent_types.all_active_dtos.final'; // Nuova chiave per la massima sicurezza
 
         return Cache::rememberForever($cacheKey, function () {
@@ -88,12 +86,12 @@ class ConsentService
             return $consentTypesFromDb->map(function (ConsentType $type) {
                 return new ConsentTypeDto(
                     // Mappatura esplicita: Proprietà del DTO <-- Colonna della Tabella
-                    key:          $type->slug,
-                    category:     $type->legal_basis, // Usiamo la base legale come 'category' per coerenza
-                    legalBasis:   $type->legal_basis,
-                    required:     $type->is_required,
+                    key: $type->slug,
+                    category: $type->legal_basis, // Usiamo la base legale come 'category' per coerenza
+                    legalBasis: $type->legal_basis,
+                    required: $type->is_required,
                     defaultValue: false,
-                    canWithdraw:  $type->can_withdraw,
+                    canWithdraw: $type->can_withdraw,
                     // ✅ FIX: Il model cast 'array' restituisce array o null, gestiamo entrambi
                     processingPurposes: $type->processing_purposes ?? []
                 );
@@ -108,8 +106,7 @@ class ConsentService
      * 📥 Input: Consent type key
      * 📤 Output: ConsentTypeDto or null
      */
-    public function getConsentType(string $key): ?ConsentTypeDto
-    {
+    public function getConsentType(string $key): ?ConsentTypeDto {
         return $this->getConsentTypes()->firstWhere('key', $key);
     }
 
@@ -121,8 +118,7 @@ class ConsentService
      * 🛡️ Privacy: Returns user's own consent status only
      * 🧱 Core Logic: DTO-based consent status with localized descriptions
      */
-    public function getUserConsentStatus(User $user): array
-    {
+    public function getUserConsentStatus(User $user): array {
         try {
             $this->logger->info('Consent Service: Getting user consent status', [
                 'user_id' => $user->id,
@@ -181,7 +177,6 @@ class ConsentService
                 'consent_version' => $consentVersion->version,
                 'user_id' => $user->id
             ];
-
         } catch (\Exception $e) {
             $this->logger->error('Consent Service: Failed to get user consent status', [
                 'user_id' => $user->id,
@@ -201,8 +196,7 @@ class ConsentService
      * 🛡️ Privacy: GDPR-compliant consent updates with audit trail
      * 🧱 Core Logic: DTO-based validation and change detection
      */
-    public function updateUserConsents(User $user, array $consents): array
-    {
+    public function updateUserConsents(User $user, array $consents): array {
         try {
             $this->logger->info('Consent Service: Updating user consents', [
                 'user_id' => $user->id,
@@ -287,7 +281,6 @@ class ConsentService
                 'changes' => $changes,
                 'consent_version' => $consentVersion->version
             ];
-
         } catch (\Exception $e) {
             $this->logger->error('Consent Service: Failed to update user consents', [
                 'user_id' => $user->id,
@@ -307,8 +300,7 @@ class ConsentService
      * @return Collection
      * @privacy-safe Returns user's own consent history only
      */
-    public function getConsentHistory(User $user, int $limit = 50): Collection
-    {
+    public function getConsentHistory(User $user, int $limit = 50): Collection {
         try {
             $this->logger->info('Consent Service: Getting consent history', [
                 'user_id' => $user->id,
@@ -321,19 +313,19 @@ class ConsentService
                 ->orderBy('created_at', 'desc')
                 ->limit($limit)
                 ->get();
-                // ->map(function ($consent) {
-                //     return [
-                //         'id' => $consent->id,
-                //         'consent_type' => $consent->consent_type,
-                //         'granted' => $consent->granted,
-                //         'timestamp' => $consent->created_at,
-                //         'version' => $consent->consentVersion?->version,
-                //         'legal_basis' => $consent->legal_basis,
-                //         'ip_address' => $consent->ip_address,
-                //         'withdrawal_method' => $consent->withdrawal_method,
-                //         'source' => $consent->metadata['source'] ?? 'unknown'
-                //     ];
-                // });
+            // ->map(function ($consent) {
+            //     return [
+            //         'id' => $consent->id,
+            //         'consent_type' => $consent->consent_type,
+            //         'granted' => $consent->granted,
+            //         'timestamp' => $consent->created_at,
+            //         'version' => $consent->consentVersion?->version,
+            //         'legal_basis' => $consent->legal_basis,
+            //         'ip_address' => $consent->ip_address,
+            //         'withdrawal_method' => $consent->withdrawal_method,
+            //         'source' => $consent->metadata['source'] ?? 'unknown'
+            //     ];
+            // });
 
         } catch (\Exception $e) {
             $this->logger->error('Consent Service: Failed to get consent history', [
@@ -353,8 +345,7 @@ class ConsentService
      * @return Collection
      * @privacy-safe Returns user's detailed consent history
      */
-    public function getDetailedConsentHistory(User $user): Collection
-    {
+    public function getDetailedConsentHistory(User $user): Collection {
         try {
             $this->logger->info('Consent Service: Getting detailed consent history', [
                 'user_id' => $user->id,
@@ -385,7 +376,6 @@ class ConsentService
                         })->values()
                     ];
                 })->values();
-
         } catch (\Exception $e) {
             $this->logger->error('Consent Service: Failed to get detailed consent history', [
                 'user_id' => $user->id,
@@ -405,8 +395,7 @@ class ConsentService
      * 🛡️ Privacy: GDPR-compliant default consent setup
      * 🧱 Core Logic: Create consents using DTO configuration with proper defaults
      */
-    public function createDefaultConsents(User $user, array $initialConsents = []): array
-    {
+    public function createDefaultConsents(User $user, array $initialConsents = []): array {
         try {
             $this->logger->info('Consent Service: Creating default consents for new user', [
                 'user_id' => $user->id,
@@ -461,7 +450,6 @@ class ConsentService
             });
 
             return $createdConsents;
-
         } catch (\Exception $e) {
             $this->logger->error('Consent Service: Failed to create default consents', [
                 'user_id' => $user->id,
@@ -474,7 +462,7 @@ class ConsentService
     }
 
 
-   /**
+    /**
      * @Oracode Method: Grant Consent with Dual-Write Audit Trail
      * 🎯 Purpose: Grant or update a user's consent, ensuring a fast status check
      * and a parallel, detailed forensic audit log.
@@ -486,8 +474,7 @@ class ConsentService
      * 🧱 Core Logic: Transactional dual-write. A "hot" table (`user_consents`) for
      * application logic and a "cold" table (`consent_histories`) for auditing.
      */
-    public function grantConsent(User $user, string $consentType, array $metadata = []): bool
-    {
+    public function grantConsent(User $user, string $consentType, array $metadata = []): bool {
         try {
             $this->logger->info('ConsentService: Granting/updating specific consent', [
                 'user_id' => $user->id,
@@ -505,7 +492,7 @@ class ConsentService
             $consentVersion = $this->getCurrentConsentVersion();
 
             // CORREZIONE 3: L'array restituito da questa transazione viene assegnato alla variabile $result.
-             $result = DB::transaction(function () use ($user, $consentType, $consentConfig, $consentVersion, $metadata) {
+            $result = DB::transaction(function () use ($user, $consentType, $consentConfig, $consentVersion, $metadata) {
                 $existingConsent = UserConsent::where('user_id', $user->id)
                     ->where('consent_type', $consentType)
                     ->latest('created_at')
@@ -545,7 +532,6 @@ class ConsentService
 
             // Questo è il return che soddisfa la firma `: bool` del metodo.
             return true;
-
         } catch (\Exception $e) {
             $this->logger->error('ConsentService: Failed to grant consent', [
                 'user_id' => $user->id,
@@ -559,7 +545,7 @@ class ConsentService
     }
 
 
-/**
+    /**
      * @Oracode Method: Withdraw Consent with Dual-Write Audit Trail
      * 🎯 Purpose: Withdraw a user's consent, ensuring a fast status check
      * and a parallel, detailed forensic audit log of the withdrawal event.
@@ -570,8 +556,7 @@ class ConsentService
      * 🧱 Core Logic: Guarantees a complete and immutable audit trail for every withdrawal
      * action, separating application state from the forensic log.
      */
-    public function withdrawConsent(User $user, string $consentType, array $metadata = []): bool
-    {
+    public function withdrawConsent(User $user, string $consentType, array $metadata = []): bool {
         try {
             $this->logger->info('ConsentService: Withdrawing specific consent', [
                 'user_id' => $user->id,
@@ -631,7 +616,6 @@ class ConsentService
 
             // Questo è il return che soddisfa la firma `: bool` del metodo.
             return true;
-
         } catch (\Exception $e) {
             $this->logger->error('ConsentService: Failed to withdraw consent', [
                 'user_id' => $user->id,
@@ -652,8 +636,7 @@ class ConsentService
      * 🛡️ Privacy: GDPR-compliant consent renewal with complete audit trail
      * 🧱 Core Logic: Acts as a semantic alias for grantConsent to ensure clear intent
      */
-    public function renewConsent(User $user, string $consentType, array $metadata = []): bool
-    {
+    public function renewConsent(User $user, string $consentType, array $metadata = []): bool {
         $this->logger->info('ConsentService: Renewing specific consent', [
             'user_id' => $user->id,
             'consent_type' => $consentType,
@@ -674,8 +657,7 @@ class ConsentService
      * @return bool
      * @privacy-safe Checks consent for authenticated user only
      */
-    public function hasConsent(User $user, string $consentType): bool
-    {
+    public function hasConsent(User $user, string $consentType): bool {
         try {
             $cacheKey = "user_consent_{$user->id}_{$consentType}";
 
@@ -702,7 +684,6 @@ class ConsentService
 
                 return $consent->granted;
             });
-
         } catch (\Exception $e) {
             $this->logger->error('Consent Service: Failed to check consent', [
                 'user_id' => $user->id,
@@ -724,8 +705,7 @@ class ConsentService
      * 🛡️ Privacy: GDPR-compliant version tracking
      * 🧱 Core Logic: Store DTO-based consent types configuration
      */
-    public function createConsentVersion(string $version, array $changes = []): ConsentVersion
-    {
+    public function createConsentVersion(string $version, array $changes = []): ConsentVersion {
         try {
             $this->logger->info('Consent Service: Creating new consent version', [
                 'version' => $version,
@@ -740,7 +720,6 @@ class ConsentService
                 'created_by' => auth()->id(),
                 'consent_types' => $this->getConsentTypes()->mapWithKeys(fn($dto) => [$dto->key => $dto->toArray()])->toArray()
             ]);
-
         } catch (\Exception $e) {
             $this->logger->error('Consent Service: Failed to create consent version', [
                 'version' => $version,
@@ -760,8 +739,7 @@ class ConsentService
      * 🛡️ Privacy: Returns user's own consents only
      * 🧱 Core Logic: Query latest consent for each type using DTO keys
      */
-    private function getCurrentUserConsents(User $user): Collection
-    {
+    private function getCurrentUserConsents(User $user): Collection {
         return $user->consents()
             ->whereIn('consent_type', $this->getConsentTypes()->pluck('key')->toArray())
             ->latest('created_at')
@@ -772,8 +750,7 @@ class ConsentService
     /**
      * Get current consent version
      */
-    private function getCurrentConsentVersion(): ConsentVersion
-    {
+    private function getCurrentConsentVersion(): ConsentVersion {
         return ConsentVersion::latest('effective_date')->first()
             ?? ConsentVersion::create([
                 'version' => '1.0',
@@ -782,11 +759,10 @@ class ConsentService
             ]);
     }
 
-/**
+    /**
      * Update user's consent summary based on current consents
      */
-    private function updateUserConsentSummary(User $user): void
-    {
+    private function updateUserConsentSummary(User $user): void {
         $summary = [];
 
         foreach ($this->getConsentTypes() as $consentType) {
@@ -807,8 +783,7 @@ class ConsentService
     /**
      * Clear user consent cache
      */
-    private function clearUserConsentCache(User $user): void
-    {
+    private function clearUserConsentCache(User $user): void {
         foreach ($this->getConsentTypes() as $consentType) {
             Cache::forget("user_consent_{$user->id}_{$consentType->key}");
         }
@@ -828,13 +803,12 @@ class ConsentService
      * @param UserConsent|null $previousConsent The previous state, if any.
      * @return void
      */
-    private function recordInHistory(UserConsent $userConsent, string $action, ?UserConsent $previousConsent = null): void
-    {
+    private function recordInHistory(UserConsent $userConsent, string $action, ?UserConsent $previousConsent = null): void {
         try {
             // Prepara i dati per il record di audit forense.
             // Il modello ConsentHistory è ricco di campi per la massima compliance.
             // Qui popoliamo i più importanti basandoci sui dati a nostra disposizione.
-             ConsentHistory::create([
+            ConsentHistory::create([
                 'user_id' => $userConsent->user_id,
                 'user_consent_id' => $userConsent->id,
                 'consent_type_slug' => $userConsent->consent_type,
@@ -862,7 +836,6 @@ class ConsentService
                 'action' => $action,
                 'log_category' => 'CONSENT_HISTORY_SUCCESS'
             ]);
-
         } catch (\Exception $e) {
             // Logga l'errore in modo critico, ma non bloccare il flusso principale dell'utente.
             // La registrazione della cronologia non deve MAI impedire all'utente di completare l'azione.
@@ -880,8 +853,7 @@ class ConsentService
      * @return string|null
      * @privacy-safe Masks IP address for privacy compliance
      */
-    private function maskIpAddress(?string $ipAddress): ?string
-    {
+    private function maskIpAddress(?string $ipAddress): ?string {
         if (!$ipAddress) {
             return null;
         }
@@ -909,8 +881,7 @@ class ConsentService
      * 🛡️ Privacy: GDPR-compliant consent type definitions
      * 🧱 Core Logic: DTO-based configuration with localized content
      */
-    public function getAvailableConsentTypes(): array
-    {
+    public function getAvailableConsentTypes(): array {
         try {
             $this->logger->info('Consent Service: Getting available consent types', [
                 'log_category' => 'CONSENT_SERVICE_OPERATION'
@@ -939,7 +910,6 @@ class ConsentService
             }
 
             return $availableTypes;
-
         } catch (\Exception $e) {
             $this->logger->error('Consent Service: Failed to get available consent types', [
                 'error' => $e->getMessage(),
@@ -958,8 +928,7 @@ class ConsentService
      * @return string
      * @privacy-safe Returns privacy impact classification
      */
-    private function getPrivacyLevel(string $type): string
-    {
+    private function getPrivacyLevel(string $type): string {
         $privacyLevels = [
             'functional' => 'essential',
             'analytics' => 'standard',
@@ -977,20 +946,18 @@ class ConsentService
      * @return string
      * @privacy-safe Returns localized detailed purpose description
      */
-    private function getProcessingPurpose(string $type): string
-    {
+    private function getProcessingPurpose(string $type): string {
         return __("gdpr.consent.processing_purposes.{$type}");
     }
 
-   /**
+    /**
      * Get retention period for consent type
      *
      * @param string $type
      * @return string
      * @privacy-safe Returns localized data retention information
      */
-    private function getRetentionPeriod(string $type): string
-    {
+    private function getRetentionPeriod(string $type): string {
         return __("gdpr.consent.retention_periods.{$type}");
     }
 
@@ -1001,8 +968,7 @@ class ConsentService
      * @return array
      * @privacy-safe Returns localized third party data sharing information
      */
-    private function getThirdParties(string $type): array
-    {
+    private function getThirdParties(string $type): array {
         $translationKey = "gdpr.consent.third_parties.{$type}";
         $translated = __($translationKey);
 
@@ -1017,8 +983,7 @@ class ConsentService
      * @return array
      * @privacy-safe Returns localized user benefit information
      */
-    private function getUserBenefits(string $type): array
-    {
+    private function getUserBenefits(string $type): array {
         $translationKey = "gdpr.consent.user_benefits.{$type}";
         $translated = __($translationKey);
 
@@ -1033,8 +998,7 @@ class ConsentService
      * @return array
      * @privacy-safe Returns localized consequence information for informed decisions
      */
-    private function getWithdrawalConsequences(string $type): array
-    {
+    private function getWithdrawalConsequences(string $type): array {
         $translationKey = "gdpr.consent.withdrawal_consequences.{$type}";
         $translated = __($translationKey);
 
@@ -1057,8 +1021,7 @@ class ConsentService
      * @param string $locale
      * @return array|null
      */
-    public function getTermsForUserType(User $user, string $locale = 'it'): ?array
-    {
+    public function getTermsForUserType(User $user, string $locale = 'it'): ?array {
         return $this->legalContentService->getCurrentTermsContent($user->usertype, $locale);
     }
 
@@ -1074,8 +1037,7 @@ class ConsentService
      * @param array $context Additional metadata for the consent record.
      * @return bool
      */
-    public function recordTermsConsent(User $user, string $version, array $context = []): bool
-    {
+    public function recordTermsConsent(User $user, string $version, array $context = []): bool {
         $metadata = array_merge($context, [
             'version' => $version,
             'source' => $context['source'] ?? 'terms_acceptance_page',
@@ -1095,8 +1057,7 @@ class ConsentService
      * @param User $user
      * @return bool
      */
-    public function hasAcceptedCurrentTerms(User $user): bool
-    {
+    public function hasAcceptedCurrentTerms(User $user): bool {
         try {
             // 1. Get the version string of the currently active terms (e.g., "1.1.0")
             $currentVersion = $this->legalContentService->getCurrentVersionString();
@@ -1119,7 +1080,6 @@ class ConsentService
             // 5. Use version_compare to safely compare semantic versions.
             // Returns true if the accepted version is greater than or equal to the current one.
             return version_compare($acceptedVersion, $currentVersion, '>=');
-
         } catch (\Throwable $e) {
             $this->errorManager->handle('TERMS_ACCEPTANCE_CHECK_FAILED', [
                 'user_id' => $user->id,
