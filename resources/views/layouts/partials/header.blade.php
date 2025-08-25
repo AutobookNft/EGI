@@ -110,9 +110,9 @@
                     {{-- Natan Assistant - Posizionato vicino al logo --}}
                     @if($user)
                     <div class="hidden ml-6 md:block">
-                        <img src="{{ $user->profile_photo_url }}" alt="User Avatar" class="w-8 h-8 rounded-full">
-                        {{--
-                        <x-natan-assistant :suffix="'-desktop'" /> --}}
+                        {{-- <img src="{{ $user->profile_photo_url }}" alt="User Avatar" class="w-8 h-8 rounded-full"> --}}
+                        {{-- <x-natan-assistant :suffix="'-desktop'" /> --}}
+                        <x-navigation.vanilla-desktop-menu />
                     </div>
                     @endif
 
@@ -201,12 +201,14 @@
                         </div>
                         @endcan
 
+                        <x-navigation.vanilla-desktop-menu />
+
                         {{-- Create EGI Button - Solo per utenti con permesso --}}
 
                         {{-- Wallet e Auth --}}
                         <span class="h-6 mx-2 border-l border-gray-700" aria-hidden="true"></span>
 
-                        <div id="wallet-cta-container" class="ml-2">
+                        {{-- <div id="wallet-cta-container" class="ml-2">
                             <button id="connect-wallet-button" type="button"
                                 class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
                                 <svg class="w-5 h-5 mr-2 -ml-1" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
@@ -256,7 +258,7 @@
                                     </button>
                                 </div>
                             </div>
-                        </div>
+                        </div> --}}
                         <a href="{{ route('login') }}" id="login-link-desktop" class="{{ $navLinkClasses }}">{{
                             __('collection.login') }}</a>
                         <a href="{{ route('register') }}" id="register-link-desktop"
@@ -287,16 +289,6 @@
                         </div>
                         @endguest
 
-                        {{-- Natan Assistant Mobile --}}
-                        @if($user)
-                        <div class="block md:hidden">
-                            {{-- Mostra l'immagine dell'utente solo se loggato --}}
-                            <img src="{{ $user->profile_photo_url }}" alt="User Avatar" class="w-8 h-8 rounded-full">
-                            {{--
-                            <x-natan-assistant :suffix="'-mobile'" /> --}}
-                        </div>
-                        @endif
-
                         {{-- Butler Assistant Menu su mobile non lo mostro --}}
                         {{-- <button type="button" id="open-butler-assistant"
                             class="{{ $navLinkClasses }} flex items-center gap-1"
@@ -306,7 +298,7 @@
                             <span>{{ __('assistant.open_butler') }}</span>
                         </button> --}}
 
-                        <button type="button"
+                        {{-- <button type="button"
                             class="inline-flex items-center justify-center p-2 text-gray-400 bg-gray-900 rounded-md hover:bg-gray-800 hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
                             aria-controls="mobile-menu" aria-expanded="false" id="mobile-menu-button">
                             <span class="sr-only">{{ __('collection.open_main_menu') }}</span>
@@ -321,7 +313,8 @@
                                 stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                             </svg>
-                        </button>
+                        </button> --}}
+                        <x-navigation.vanilla-mobile-menu class="z-index-50"/>
                     </div>
                     {{-- Fine Prima Riga --}}
                 </div>
@@ -360,64 +353,7 @@
             </div>
         </div>
 
-        {{-- Menu Mobile Content --}}
-        <div class="hidden md:hidden" id="mobile-menu">
-            <div class="px-2 pt-2 pb-3 space-y-1 border-b border-gray-800 sm:px-3">
-                @include('partials.nav-links', ['isMobile' => true])
-            </div>
-            <div class="px-4 pt-4 pb-3 space-y-3 border-b border-gray-800" id="mobile-auth-section">
-                <div id="wallet-cta-container-mobile">
-                    <button id="connect-wallet-button-mobile" type="button"
-                        class="inline-flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        <svg class="w-5 h-5 mr-2 -ml-1" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                            stroke="currentColor" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M21 12a2.25 2.25 0 0 0-2.25-2.25H15a3 3 0 1 1-6 0H5.25A2.25 2.25 0 0 0 3 12m18 0v6a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 18v-6m18 0V9M3 12V9m18 3a2.25 2.25 0 0 0-2.25-2.25H15a3 3 0 1 0-6 0H5.25A2.25 2.25 0 0 0 3 12m15-3a3 3 0 0 0-3-3H6a3 3 0 0 0-3 3m12 6v2.25a2.25 2.25 0 0 1-2.25 2.25H9a2.25 2.25 0 0 1-2.25-2.25V15m3 0a3 3 0 0 0-3-3H6a3 3 0 0 0-3 3m9 0a3 3 0 0 0 3-3h1.5a3 3 0 0 0 3 3" />
-                        </svg>
-                        {{ __('collection.wallet.button_wallet_connect') }}
-                    </button>
-                    <div id="mobile-wallet-info-container" class="hidden pt-2 pb-1 space-y-2">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center text-emerald-400">
-                                <span
-                                    class="w-5 h-5 mr-2 material-symbols-outlined text-emerald-500">account_balance_wallet</span>
-                                <span id="mobile-wallet-address"
-                                    class="font-mono text-sm text-emerald-300">0x1234...5678</span>
-                            </div>
-                            <button id="mobile-copy-address" class="p-1 text-gray-400 rounded-md hover:bg-gray-800">
-                                <span class="material-symbols-outlined">content_copy</span>
-                            </button>
-                        </div>
-                        <div class="flex gap-2">
-                            <a href="{{ route('dashboard') }}" id="mobile-dashboard-link"
-                                class="flex flex-1 items-center justify-center rounded-md bg-gray-800 px-3 py-1.5 text-sm text-gray-300 hover:bg-gray-700">
-                                <span class="material-symbols-outlined mr-1.5 text-sm">dashboard</span>
-                                {{ __('collection.dashboard') }}
-                            </a>
-                            <button id="mobile-disconnect"
-                                class="flex flex-1 items-center justify-center rounded-md bg-gray-800 px-3 py-1.5 text-sm text-gray-300 hover:bg-gray-700">
-                                <span class="material-symbols-outlined mr-1.5 text-sm">logout</span>
-                                {{ __('collection.wallet.button_wallet_disconnect') }}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                {{-- Solo il bottone Registrati rimane nel menu mobile --}}
-                <div class="flex justify-center" id="mobile-register-button">
-                    <a href="{{ route('register') }}"
-                        class="flex-1 rounded-md border border-green-600 bg-green-800 px-4 py-2.5 text-center text-sm font-medium text-white hover:bg-green-700">{{
-                        __('collection.register') }}</a>
-                </div>
-            </div>
-            {{-- <div id="current-collection-badge-container-mobile"
-                class="hidden px-4 py-3 text-center border-t border-gray-800">
-                <a href="#" id="current-collection-badge-link-mobile"
-                    class="inline-flex items-center px-3 py-2 text-xs font-medium text-center transition border rounded-full border-sky-700 bg-sky-900/60 text-sky-300 hover:border-sky-600 hover:bg-sky-800">
-                    <span class="material-symbols-outlined mr-1.5 text-sm" aria-hidden="true">folder_managed</span>
-                    <span id="current-collection-badge-name-mobile"></span>
-                </a>
-            </div> --}}
-        </div>
+        {{-- CLEAN: Removed old mobile menu system - now using vanilla components --}}
     </header>
     <script>
         window.addEventListener('load', function() {
