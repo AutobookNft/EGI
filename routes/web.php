@@ -147,10 +147,15 @@ Route::get('/', function () {
 
 Route::get('/home', [HomeController::class, 'index'])->name('home');
 
-// Dashboard
+// Notification Center (ex-Dashboard)
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->name('dashboard');
+
+// Alias per chiarezza semantica
+Route::get('/notifications', function () {
+    return view('dashboard');
+})->name('notifications');
 
 
 Route::get('/archetypes/patron', function () {

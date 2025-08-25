@@ -114,14 +114,12 @@ Using proper HTML5 landmarks for accessibility (Pillar #4 - Interpretable by Ass
 
     {{--
     Main Application Container
-    Oracode 3.0: Maintains existing drawer structure for backward compatibility
+    Oracode 3.0: Simplified structure without drawer/sidebar
     --}}
-    <div class="drawer lg:drawer-open" role="application" aria-label="FlorenceEGI Application Interface">
-        {{-- Drawer toggle checkbox (DaisyUI pattern) --}}
-        <input id="main-drawer" type="checkbox" class="drawer-toggle" aria-label="Toggle navigation menu">
+    <div class="flex flex-col min-h-screen" role="application" aria-label="FlorenceEGI Application Interface">
 
         {{-- Main Content Area --}}
-        <div class="flex flex-col min-h-screen drawer-content">
+        <div class="flex flex-col min-h-screen">
             {{-- Navigation Header --}}
             {{-- MODIFICA: Aggiunto stile base per header, i componenti Livewire interni dovranno adattarsi --}}
             <header role="banner" aria-label="Main navigation" class="border-b shadow-sm border-base-300 bg-base-200">
@@ -156,15 +154,9 @@ Using proper HTML5 landmarks for accessibility (Pillar #4 - Interpretable by Ass
         </div>
 
         {{--
-        Navigation Sidebar
-        Oracode 3.0: Semantic navigation landmark (DaisyUI drawer structure preserved)
-        MODIFICA: La sidebar di DaisyUI usa bg-base-100, potremmo volerla bg-base-200/300 per stacco.
-        Questa personalizzazione va fatta nel componente livewire:sidebar o con CSS specifici.
+        Navigation Sidebar - RIMOSSA
+        La navigazione è ora gestita dal nuovo menu system moderno
         --}}
-        <livewire:sidebar /> {{-- Esempio: <aside class="drawer-side"><label for="main-drawer"
-                class="drawer-overlay"></label>
-            <ul class="min-h-full p-4 menu w-80 bg-base-200 text-base-content">...
-        </aside> --}}
 
         {{-- Modal Stack (for Livewire/Alpine modals) --}}
         @stack('modals')
