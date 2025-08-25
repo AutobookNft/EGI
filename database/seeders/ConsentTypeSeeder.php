@@ -19,32 +19,96 @@ class ConsentTypeSeeder extends Seeder
         DB::transaction(function () {
 
             $items = [
+                // CONSENSO FONDAMENTALE PER PROCESSING DATI PERSONALI
+                [
+                    'slug' => 'allow-personal-data-processing',
+                    'legal_basis' => 'contract',
+                    'data_categories' => [
+                        'personal_information',
+                        'contact_data',
+                        'usage_data'
+                    ],
+                    'processing_purposes' => [
+                        'platform_operation',
+                        'service_delivery',
+                        'account_management',
+                        'legal_compliance'
+                    ],
+                    'recipients' => [
+                        'internal_staff',
+                        'service_providers'
+                    ],
+                    'international_transfers' => false,
+                    'is_required' => true,
+                    'is_granular' => false,
+                    'can_withdraw' => true,
+                    'withdrawal_effect_days' => 30,
+                    'retention_period' => 'contract_duration',
+                    'deletion_method' => 'hard_delete',
+                    'priority_order' => 1,
+                    'is_active' => true,
+                    'requires_double_opt_in' => false,
+                    'requires_age_verification' => false,
+                ],
+
                 // ACCETTAZIONI E CONSENSI OBBLIGATORI
                 [
                     'slug' => 'platform-services',
                     'legal_basis' => 'contract',
+                    'data_categories' => [
+                        'account_data',
+                        'usage_data',
+                        'technical_data'
+                    ],
+                    'processing_purposes' => [
+                        'account_management', 'service_delivery', 'legal_compliance', 'customer_support'
+                    ],
+                    'recipients' => [
+                        'internal_staff',
+                        'service_providers'
+                    ],
                     'is_required' => true,
                     'is_active' => true,
-                    'priority_order' => 1,
-                    'processing_purposes' => json_encode([
-                        'account_management', 'service_delivery', 'legal_compliance', 'customer_support'
-                    ]),
+                    'priority_order' => 2,
                 ],
                 [
                     'slug' => 'terms-of-service',
                     'legal_basis' => 'contract',
+                    'data_categories' => [
+                        'legal_acceptance_data'
+                    ],
+                    'processing_purposes' => ['legal_compliance'],
+                    'recipients' => [
+                        'internal_staff',
+                        'legal_team'
+                    ],
                     'is_required' => true,
                     'priority_order' => 10,
                 ],
                 [
                     'slug' => 'privacy-policy',
                     'legal_basis' => 'legal_obligation',
+                    'data_categories' => [
+                        'legal_acceptance_data'
+                    ],
+                    'processing_purposes' => ['legal_compliance'],
+                    'recipients' => [
+                        'internal_staff',
+                        'legal_team'
+                    ],
                     'is_required' => true,
                     'priority_order' => 20,
                 ],
                 [
                     'slug' => 'age-confirmation',
                     'legal_basis' => 'contract',
+                    'data_categories' => [
+                        'age_verification_data'
+                    ],
+                    'processing_purposes' => ['legal_compliance'],
+                    'recipients' => [
+                        'internal_staff'
+                    ],
                     'is_required' => true,
                     'priority_order' => 30,
                 ],
@@ -53,18 +117,47 @@ class ConsentTypeSeeder extends Seeder
                 [
                     'slug' => 'analytics',
                     'legal_basis' => 'consent',
+                    'data_categories' => [
+                        'usage_data',
+                        'behavioral_data',
+                        'technical_data'
+                    ],
+                    'processing_purposes' => ['analytics', 'performance_monitoring'],
+                    'recipients' => [
+                        'internal_staff',
+                        'analytics_providers'
+                    ],
                     'is_required' => false,
                     'priority_order' => 40,
                 ],
                 [
                     'slug' => 'marketing',
                     'legal_basis' => 'consent',
+                    'data_categories' => [
+                        'contact_data',
+                        'preference_data',
+                        'behavioral_data'
+                    ],
+                    'processing_purposes' => ['marketing', 'promotional_communications'],
+                    'recipients' => [
+                        'internal_staff',
+                        'marketing_providers'
+                    ],
                     'is_required' => false,
                     'priority_order' => 50,
                 ],
                 [
                     'slug' => 'personalization',
                     'legal_basis' => 'consent',
+                    'data_categories' => [
+                        'preference_data',
+                        'behavioral_data',
+                        'usage_data'
+                    ],
+                    'processing_purposes' => ['personalization', 'user_experience'],
+                    'recipients' => [
+                        'internal_staff'
+                    ],
                     'is_required' => false,
                     'priority_order' => 60,
                 ]
