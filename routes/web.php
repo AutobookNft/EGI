@@ -147,6 +147,12 @@ Route::get('/', function () {
 
 Route::get('/home', [HomeController::class, 'index'])->name('home');
 
+// Dashboard
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->name('dashboard');
+
+
 Route::get('/archetypes/patron', function () {
     return view('archetypes.patron');
 })->name('archetypes.patron');
@@ -294,11 +300,6 @@ Route::post('/upload/egi', [EgiUploadController::class, 'handleUpload'])
 
 // Photo uploader component
 Route::get('/photo-uploader', PhotoUploader::class)->name('photo-uploader');
-
-// Dashboard
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->name('dashboard');
 
 
 /*

@@ -29,8 +29,8 @@
             <!-- Page Content -->
             <div class="flex flex-col min-h-screen drawer-content">
                 <!-- Navbar -->
-                <livewire:navigation-menu />
-
+                {{-- <livewire:navigation-menu /> --}}
+                @include('navigation-menu')
                 <!-- Page Heading -->
                 @if (isset($header))
                     <header class="shadow bg-base-100">

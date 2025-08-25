@@ -37,6 +37,8 @@
     <meta property="og:image" content="{{ $ogImage }}">
     @endif
 
+    <script>console.log('resources/views/layouts/app.blade.php');</script>
+
     {{-- Twitter Card Meta Tags --}}
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title"
@@ -123,7 +125,8 @@ Using proper HTML5 landmarks for accessibility (Pillar #4 - Interpretable by Ass
             {{-- Navigation Header --}}
             {{-- MODIFICA: Aggiunto stile base per header, i componenti Livewire interni dovranno adattarsi --}}
             <header role="banner" aria-label="Main navigation" class="border-b shadow-sm border-base-300 bg-base-200">
-                <livewire:navigation-menu />
+                {{-- <livewire:navigation-menu /> --}}
+                @include('navigation-menu')
             </header>
 
             {{-- Page Header Section (Optional) --}}

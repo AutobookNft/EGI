@@ -5,13 +5,11 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
-    public function up(): void
-    {
+    public function up(): void {
         // 1. Assicurati che il consent_type allow-personal-data-processing esista con i campi corretti
         DB::table('consent_types')->updateOrInsert(
             ['slug' => 'allow-personal-data-processing'],
@@ -94,8 +92,7 @@ return new class extends Migration
     /**
      * Reverse the migrations.
      */
-    public function down(): void
-    {
+    public function down(): void {
         // Non rimuovere il record, potrebbe essere usato da altri dati
         // Semplicemente disattivalo
         DB::table('consent_types')

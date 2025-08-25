@@ -6,16 +6,14 @@ use Illuminate\Database\Seeder;
 use App\Models\ConsentType;
 use Illuminate\Support\Facades\DB;
 
-class ConsentTypeSeeder extends Seeder
-{
+class ConsentTypeSeeder extends Seeder {
     /**
      * Run the database seeds.
      * Popola la tabella dei tipi di consenso con la configurazione di base.
      * Il testo (nome/descrizione) viene gestito tramite i file di traduzione,
      * usando lo 'slug' come chiave.
      */
-    public function run(): void
-    {
+    public function run(): void {
         DB::transaction(function () {
 
             $items = [
@@ -61,7 +59,10 @@ class ConsentTypeSeeder extends Seeder
                         'technical_data'
                     ],
                     'processing_purposes' => [
-                        'account_management', 'service_delivery', 'legal_compliance', 'customer_support'
+                        'account_management',
+                        'service_delivery',
+                        'legal_compliance',
+                        'customer_support'
                     ],
                     'recipients' => [
                         'internal_staff',

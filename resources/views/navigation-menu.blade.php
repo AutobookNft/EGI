@@ -1,3 +1,4 @@
+<script>console.log('resources/views/navigation-menu.blade.php');</script>
 <nav x-data="{ open: false }" class="bg-white border-b border-gray-100 dark:border-gray-700 dark:bg-gray-800">
     <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
@@ -77,7 +78,24 @@
                                 {{ __('menu.edit_personal_data') }}
                             </x-dropdown-link>
 
+                            @can('manage_profile')
+                                <x-dropdown-link href="{{ route('profile.show') }}">
+                                    {{ __('Profile') }}
+                                </x-dropdown-link>
+                            @endcan
+
                             <div class="border-t border-gray-200 dark:border-gray-600"></div>
+
+                            <!-- Privacy & GDPR Section -->
+                            <div class="block px-4 py-2 text-xs text-gray-400">
+                                {{ __('menu.gdpr_privacy') }}
+                            </div>
+
+                            @can('manage_consents')
+                                <x-dropdown-link href="{{ route('gdpr.consent') }}">
+                                    {{ __('gdpr.menu.gdpr_center') }}
+                                </x-dropdown-link>
+                            @endcan
 
                             <x-dropdown-link href="{{ route('gdpr.security') }}">
                                 {{ __('menu.security_password') }}
@@ -86,6 +104,109 @@
                             <x-dropdown-link href="{{ route('gdpr.profile-images') }}">
                                 {{ __('menu.profile_images') }}
                             </x-dropdown-link>
+
+                            @can('gdpr.export_data')
+                                <x-dropdown-link href="{{ route('gdpr.export-data') }}">
+                                    {{ __('menu.export_data') }}
+                                </x-dropdown-link>
+                            @endcan
+
+                            @can('gdpr.limit_processing')
+                                <x-dropdown-link href="{{ route('gdpr.limit-processing') }}">
+                                    {{ __('menu.limit_processing') }}
+                                </x-dropdown-link>
+                            @endcan
+
+                            <div class="border-t border-gray-200 dark:border-gray-600"></div>
+
+                            <!-- Collections & Assets Section -->
+                            @can('create_collection')
+                                <div class="block px-4 py-2 text-xs text-gray-400">
+                                    {{ __('menu.collections') }}
+                                </div>
+
+                                <x-dropdown-link href="{{ route('collections.index') }}">
+                                    {{ __('menu.my_collections') }}
+                                </x-dropdown-link>
+
+                                <x-dropdown-link href="{{ route('collections.create') }}">
+                                    {{ __('menu.new_collection') }}
+                                </x-dropdown-link>
+
+                                <div class="border-t border-gray-200 dark:border-gray-600"></div>
+                            @endcan
+
+                            <!-- Activity & Notifications -->
+                            <div class="block px-4 py-2 text-xs text-gray-400">
+                                {{ __('menu.activity') }}
+                            </div>
+
+                            @can('view_activity_log')
+                                <x-dropdown-link href="{{ route('gdpr.activity-log') }}">
+                                    {{ __('menu.activity_log') }}
+                                </x-dropdown-link>
+                            @endcan
+
+                            @can('view_notifications')
+                                <x-dropdown-link href="{{ route('notifications.index') }}">
+                                    {{ __('menu.notifications') }}
+                                </x-dropdown-link>
+                            @endcan
+
+                            <!-- Admin Tools Section -->
+                            @can('manage_roles')
+                                <div class="border-t border-gray-200 dark:border-gray-600"></div>
+                                <div class="block px-4 py-2 text-xs text-gray-400">
+                                    {{ __('menu.admin_tools') }}
+                                </div>
+
+                                <x-dropdown-link href="{{ route('admin.roles.index') }}">
+                                    {{ __('menu.permissions_roles') }}
+                                </x-dropdown-link>
+
+                                <x-dropdown-link href="{{ route('admin.users.index') }}">
+                                    {{ __('menu.user_management') }}
+                                </x-dropdown-link>
+                            @endcan
+
+                            @can('view_statistics')
+                                <x-dropdown-link href="{{ route('statistics.index') }}">
+                                    {{ __('menu.statistics') }}
+                                </x-dropdown-link>
+                            @endcan
+
+                            <div class="border-t border-gray-200 dark:border-gray-600"></div>
+
+                            <!-- Support & Legal -->
+                            <div class="block px-4 py-2 text-xs text-gray-400">
+                                {{ __('menu.support_legal') }}
+                            </div>
+
+                            <x-dropdown-link href="{{ route('gdpr.privacy-policy') }}">
+                                {{ __('menu.privacy_policy') }}
+                            </x-dropdown-link>
+
+                            <x-dropdown-link href="{{ route('gdpr.terms') }}">
+                                {{ __('menu.terms_of_service') }}
+                            </x-dropdown-link>
+
+                            @can('contact_dpo')
+                                <x-dropdown-link href="{{ route('gdpr.contact-dpo') }}">
+                                    {{ __('menu.contact_dpo') }}
+                                </x-dropdown-link>
+                            @endcan
+
+                            <!-- Dangerous Actions -->
+                            @can('gdpr.delete_account')
+                                <div class="border-t border-gray-200 dark:border-gray-600"></div>
+                                <div class="block px-4 py-2 text-xs text-red-500">
+                                    {{ __('menu.danger_zone') }}
+                                </div>
+
+                                <x-dropdown-link href="{{ route('gdpr.delete-account') }}" class="text-red-600 hover:text-red-700">
+                                    {{ __('menu.delete_account') }}
+                                </x-dropdown-link>
+                            @endcan
 
                             <div class="border-t border-gray-200 dark:border-gray-600"></div>
 
@@ -174,9 +295,31 @@
             </div>
 
             <div class="mt-3 space-y-1">
-                <x-responsive-nav-link href="{{ route('user.domains.personal-data') }}" :active="request()->routeIs('gdpr.edit-personal-data')">
+                <!-- Account Management -->
+                <div class="px-4 py-2 text-xs text-gray-400">
+                    {{ __('menu.manage_account') }}
+                </div>
+
+                <x-responsive-nav-link href="{{ route('user.domains.personal-data') }}" :active="request()->routeIs('user.domains.personal-data')">
                     {{ __('menu.edit_personal_data') }}
                 </x-responsive-nav-link>
+
+                @can('manage_profile')
+                    <x-responsive-nav-link href="{{ route('profile.show') }}" :active="request()->routeIs('profile.show')">
+                        {{ __('Profile') }}
+                    </x-responsive-nav-link>
+                @endcan
+
+                <!-- Privacy & GDPR Section -->
+                <div class="px-4 py-2 mt-4 text-xs text-gray-400">
+                    {{ __('menu.gdpr_privacy') }}
+                </div>
+
+                @can('manage_consents')
+                    <x-responsive-nav-link href="{{ route('gdpr.consent') }}" :active="request()->routeIs('gdpr.consent')">
+                        {{ __('gdpr.menu.gdpr_center') }}
+                    </x-responsive-nav-link>
+                @endcan
 
                 <x-responsive-nav-link href="{{ route('gdpr.security') }}" :active="request()->routeIs('gdpr.security')">
                     {{ __('menu.security_password') }}
@@ -185,6 +328,101 @@
                 <x-responsive-nav-link href="{{ route('gdpr.profile-images') }}" :active="request()->routeIs('gdpr.profile-images')">
                     {{ __('menu.profile_images') }}
                 </x-responsive-nav-link>
+
+                @can('gdpr.export_data')
+                    <x-responsive-nav-link href="{{ route('gdpr.export-data') }}" :active="request()->routeIs('gdpr.export-data')">
+                        {{ __('menu.export_data') }}
+                    </x-responsive-nav-link>
+                @endcan
+
+                @can('gdpr.limit_processing')
+                    <x-responsive-nav-link href="{{ route('gdpr.limit-processing') }}" :active="request()->routeIs('gdpr.limit-processing')">
+                        {{ __('menu.limit_processing') }}
+                    </x-responsive-nav-link>
+                @endcan
+
+                <!-- Collections & Assets Section -->
+                @can('create_collection')
+                    <div class="px-4 py-2 mt-4 text-xs text-gray-400">
+                        {{ __('menu.collections') }}
+                    </div>
+
+                    <x-responsive-nav-link href="{{ route('collections.index') }}" :active="request()->routeIs('collections.index')">
+                        {{ __('menu.my_collections') }}
+                    </x-responsive-nav-link>
+
+                    <x-responsive-nav-link href="{{ route('collections.create') }}" :active="request()->routeIs('collections.create')">
+                        {{ __('menu.new_collection') }}
+                    </x-responsive-nav-link>
+                @endcan
+
+                <!-- Activity & Notifications -->
+                <div class="px-4 py-2 mt-4 text-xs text-gray-400">
+                    {{ __('menu.activity') }}
+                </div>
+
+                @can('view_activity_log')
+                    <x-responsive-nav-link href="{{ route('gdpr.activity-log') }}" :active="request()->routeIs('gdpr.activity-log')">
+                        {{ __('menu.activity_log') }}
+                    </x-responsive-nav-link>
+                @endcan
+
+                @can('view_notifications')
+                    <x-responsive-nav-link href="{{ route('notifications.index') }}" :active="request()->routeIs('notifications.*')">
+                        {{ __('menu.notifications') }}
+                    </x-responsive-nav-link>
+                @endcan
+
+                <!-- Admin Tools Section -->
+                @can('manage_roles')
+                    <div class="px-4 py-2 mt-4 text-xs text-gray-400">
+                        {{ __('menu.admin_tools') }}
+                    </div>
+
+                    <x-responsive-nav-link href="{{ route('admin.roles.index') }}" :active="request()->routeIs('admin.roles.*')">
+                        {{ __('menu.permissions_roles') }}
+                    </x-responsive-nav-link>
+
+                    <x-responsive-nav-link href="{{ route('admin.users.index') }}" :active="request()->routeIs('admin.users.*')">
+                        {{ __('menu.user_management') }}
+                    </x-responsive-nav-link>
+                @endcan
+
+                @can('view_statistics')
+                    <x-responsive-nav-link href="{{ route('statistics.index') }}" :active="request()->routeIs('statistics.*')">
+                        {{ __('menu.statistics') }}
+                    </x-responsive-nav-link>
+                @endcan
+
+                <!-- Support & Legal -->
+                <div class="px-4 py-2 mt-4 text-xs text-gray-400">
+                    {{ __('menu.support_legal') }}
+                </div>
+
+                <x-responsive-nav-link href="{{ route('gdpr.privacy-policy') }}" :active="request()->routeIs('gdpr.privacy-policy')">
+                    {{ __('menu.privacy_policy') }}
+                </x-responsive-nav-link>
+
+                <x-responsive-nav-link href="{{ route('gdpr.terms') }}" :active="request()->routeIs('gdpr.terms')">
+                    {{ __('menu.terms_of_service') }}
+                </x-responsive-nav-link>
+
+                @can('contact_dpo')
+                    <x-responsive-nav-link href="{{ route('gdpr.contact-dpo') }}" :active="request()->routeIs('gdpr.contact-dpo')">
+                        {{ __('menu.contact_dpo') }}
+                    </x-responsive-nav-link>
+                @endcan
+
+                <!-- Dangerous Actions -->
+                @can('gdpr.delete_account')
+                    <div class="px-4 py-2 mt-4 text-xs text-red-500">
+                        {{ __('menu.danger_zone') }}
+                    </div>
+
+                    <x-responsive-nav-link href="{{ route('gdpr.delete-account') }}" :active="request()->routeIs('gdpr.delete-account')" class="text-red-600">
+                        {{ __('menu.delete_account') }}
+                    </x-responsive-nav-link>
+                @endcan
 
                 <!-- Authentication -->
                 <form method="POST" action="{{ route('logout') }}" x-data>
