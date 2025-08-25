@@ -174,7 +174,7 @@
             </div>
 
             <div class="mt-3 space-y-1">
-                <x-responsive-nav-link href="{{ route('gdpr.edit-personal-data') }}" :active="request()->routeIs('gdpr.edit-personal-data')">
+                <x-responsive-nav-link href="{{ route('user.domains.personal-data') }}" :active="request()->routeIs('gdpr.edit-personal-data')">
                     {{ __('menu.edit_personal_data') }}
                 </x-responsive-nav-link>
 
