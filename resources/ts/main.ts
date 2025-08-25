@@ -408,35 +408,35 @@ async function initializeFEGISystemOrchestrated(): Promise<void> {
         }
 
         // 12. Inizializza Natan Assistant
-        try {
-            if (typeof NatanAssistant === 'function') {
-                const natanAssistant = new NatanAssistant();
-                (window as any).natan = natanAssistant;
-                (window as any).natanAssistant = natanAssistant;
-                (window as any).testButlerModal = () => {
-                    // console.log('🎩 TEST: Forcing butler modal display from global function');
-                    natanAssistant.forceShowModal();
-                };
-                (window as any).testButler = () => {
-                    // console.log('🎩 TEST: Complete butler test with state reset');
-                    natanAssistant.testButler();
-                };
-                (window as any).resetButler = () => {
-                    // console.log('🎩 TEST: Resetting butler state');
-                    natanAssistant.resetButler();
-                };
-                // console.log('Padmin Main: Natan Assistant initialized.');
-                // console.log('🎩 Available test functions:');
-                // console.log('- window.testButlerModal() - Force show modal');
-                // console.log('- window.testButler() - Complete test with reset');
-                // console.log('- window.resetButler() - Reset state only');
-            } else {
-                console.warn('Padmin Main: NatanAssistant is not a constructor or function.');
-            }
-        } catch (error) {
-            console.error('Padmin Main: Error initializing Natan Assistant:', error);
-            UEM.handleClientError('CLIENT_INIT_FAIL_NATAN_TS', { originalError: error instanceof Error ? error.message : String(error) });
-        }
+        // try {
+        //     if (typeof NatanAssistant === 'function') {
+        //         const natanAssistant = new NatanAssistant();
+        //         (window as any).natan = natanAssistant;
+        //         (window as any).natanAssistant = natanAssistant;
+        //         (window as any).testButlerModal = () => {
+        //             // console.log('🎩 TEST: Forcing butler modal display from global function');
+        //             natanAssistant.forceShowModal();
+        //         };
+        //         (window as any).testButler = () => {
+        //             // console.log('🎩 TEST: Complete butler test with state reset');
+        //             natanAssistant.testButler();
+        //         };
+        //         (window as any).resetButler = () => {
+        //             // console.log('🎩 TEST: Resetting butler state');
+        //             natanAssistant.resetButler();
+        //         };
+        //         // console.log('Padmin Main: Natan Assistant initialized.');
+        //         // console.log('🎩 Available test functions:');
+        //         // console.log('- window.testButlerModal() - Force show modal');
+        //         // console.log('- window.testButler() - Complete test with reset');
+        //         // console.log('- window.resetButler() - Reset state only');
+        //     } else {
+        //         console.warn('Padmin Main: NatanAssistant is not a constructor or function.');
+        //     }
+        // } catch (error) {
+        //     console.error('Padmin Main: Error initializing Natan Assistant:', error);
+        //     UEM.handleClientError('CLIENT_INIT_FAIL_NATAN_TS', { originalError: error instanceof Error ? error.message : String(error) });
+        // }
 
         // 12. Setup FEGI-specific custom event listeners
         setupFegiCustomEvents();
