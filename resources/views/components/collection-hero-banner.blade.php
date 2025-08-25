@@ -88,20 +88,23 @@ return [
 
                 @if($isFirstImage)
                     {{-- First image loads immediately for LCP optimization --}}
-                    <img src="{{ $imageSrc }}"
-                         alt="{{ $collection->collection_name ?? '' }}"
-                         class="object-cover w-full h-full navbar-critical"
-                         loading="eager"
-                         decoding="sync"
-                         fetchpriority="high">
+                    <x-responsive-image
+                        :src="$imageSrc"
+                        :alt="$collection->collection_name ?? ''"
+                        class="object-cover w-full h-full navbar-critical"
+                        loading="eager"
+                        fetchpriority="high"
+                        type="banner"
+                        :fallback-only="false" />
                 @else
                     {{-- Other images use lazy loading --}}
-                    <img data-lazy="{{ $imageSrc }}"
-                         src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 600'%3E%3Crect width='100%25' height='100%25' fill='%23374151'/%3E%3C/svg%3E"
-                         alt="{{ $collection->collection_name ?? '' }}"
-                         class="object-cover w-full h-full lazy-image"
-                         loading="lazy"
-                         decoding="async">
+                    <x-responsive-image
+                        :src="$imageSrc"
+                        :alt="$collection->collection_name ?? ''"
+                        class="object-cover w-full h-full lazy-image"
+                        loading="lazy"
+                        type="banner"
+                        :fallback-only="false" />
                 @endif
 
                 <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10"></div>
@@ -111,11 +114,14 @@ return [
             @endforeach
             @else
             <div class="relative flex-shrink-0 w-full h-full snap-start" style="scroll-snap-align: start;">
-                <img src="{{ $defaultBannerUrl }}"
-                     alt="Default background"
-                     class="object-cover w-full h-full navbar-critical"
-                     loading="eager"
-                     decoding="sync">
+                <x-responsive-image
+                    :src="$defaultBannerUrl"
+                    alt="Default background"
+                    class="object-cover w-full h-full navbar-critical"
+                    loading="eager"
+                    fetchpriority="high"
+                    type="banner"
+                    :fallback-only="true" />
                 <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10"></div>
                 <div class="absolute inset-0 opacity-75 bg-gradient-to-r from-black/50 via-transparent to-transparent">
                 </div>

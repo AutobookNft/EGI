@@ -1,5 +1,51 @@
 /* Performance optimizations for component loading states */
 
+/* Responsive images optimization */
+picture {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+picture img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: opacity 0.3s ease;
+}
+
+/* Fallback for browsers without picture support */
+.no-picture picture {
+    display: none;
+}
+
+.no-picture .fallback-img {
+    display: block;
+}
+
+/* WebP support detection */
+.webp .webp-image {
+    display: block;
+}
+
+.no-webp .webp-image {
+    display: none;
+}
+
+.webp .fallback-image {
+    display: none;
+}
+
+.no-webp .fallback-image {
+    display: block;
+}
+
+/* Optimized hero banner images */
+.hero-banner-image {
+    will-change: transform;
+    transform: translateZ(0); /* Force hardware acceleration */
+}
+
 /* Loading states for heavy components */
 .component-loading {
     opacity: 0.7;
