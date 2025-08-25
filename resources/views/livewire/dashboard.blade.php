@@ -11,7 +11,38 @@
         </div>
 
         <!-- Main Notification Container -->
-        <div class="p-6 text-white border shadow-2xl bg-white/10 backdrop-blur-lg border-white/20 rounded-3xl">
+        <div class="p-6 text-white border shadow-2xl bg-white/10 backdrop-blur-lg border-white/20 rounded-3xl" 
+             x-data="{ 
+                 loading: false, 
+                 selectedNotification: null,
+                 loadingTimeout: null
+             }"
+             x-init="
+                 // Initialize loading states
+                 $wire.on('notification-loading', () => {
+                     loading = true;
+                     loadingTimeout = setTimeout(() => loading = false, 3000);
+                 });
+                 $wire.on('notification-loaded', () => {
+                     loading = false;
+                     if(loadingTimeout) clearTimeout(loadingTimeout);
+                 });
+             ">
+            
+            <!-- Loading Overlay -->
+            <div x-show="loading" 
+                 x-transition:enter="transition-opacity ease-out duration-300"
+                 x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100"
+                 x-transition:leave="transition-opacity ease-in duration-200"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0"
+                 class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+                <div class="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-8 text-center">
+                    <div class="w-12 h-12 mx-auto mb-4 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+                    <p class="text-white font-medium">{{ __('Loading notification...') }}</p>
+                </div>
+            </div>
             @php
                 use App\Repositories\IconRepository;
             @endphp
@@ -21,23 +52,39 @@
 
 
             <!-- Notification Thumbnails Section -->
-            <div id="head-notifications-container" class="mb-8">
+                        <!-- Notification Thumbnails Section -->
+            <div id="head-notifications-container" 
+                 class="mb-8"
+                 x-data="{ isVisible: false }"
+                 x-init="setTimeout(() => isVisible = true, 100)"
+                 x-show="isVisible"
+                 x-transition:enter="transition-all ease-out duration-500"
+                 x-transition:enter-start="opacity-0 transform translate-y-4"
+                 x-transition:enter-end="opacity-100 transform translate-y-0">
+                
                 <div class="flex items-center justify-between mb-4">
-                    <h2 class="flex items-center text-xl font-semibold text-white">
-                        <svg class="w-6 h-6 mr-2 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <h2 class="text-xl font-semibold text-white flex items-center">
+                        <svg class="w-6 h-6 mr-2 text-purple-400 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5-5-5h5v-12h0z"></path>
                         </svg>
                         {{ __('Pending Notifications') }}
                     </h2>
                     @if(count($pendingNotifications) > 0)
-                        <span class="px-3 py-1 text-sm font-medium text-white rounded-full bg-gradient-to-r from-purple-600 to-blue-600">
+                        <span class="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-3 py-1 rounded-full text-sm font-medium animate-bounce">
                             {{ count($pendingNotifications) }} {{ __('pending') }}
                         </span>
                     @endif
                 </div>
 
-                <!-- Thumbnails Grid/List -->
-                @include('livewire.partials.head-thumbnails-list')
+                <!-- Thumbnails Grid/List with staggered animation -->
+                <div x-data="{ showThumbnails: false }"
+                     x-init="setTimeout(() => showThumbnails = true, 200)"
+                     x-show="showThumbnails"
+                     x-transition:enter="transition-all ease-out duration-700"
+                     x-transition:enter-start="opacity-0 transform scale-95"
+                     x-transition:enter-end="opacity-100 transform scale-100">
+                    @include('livewire.partials.head-thumbnails-list')
+                </div>
             </div>
 
             <!-- Notification Details Section -->
