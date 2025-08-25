@@ -75,7 +75,7 @@
                         <h3 class="font-bold">{{ __('profile.main_form_notice') }}</h3>
                         <div class="text-xs">
                             {{ __('profile.main_form_description') }}
-                            <a href="{{ route('user.domains.personal-data.index') }}" class="link link-primary">
+                            <a href="{{ route('user.domains.personal-data') }}" class="link link-primary">
                                 {{ __('profile.go_to_main_form') }}
                             </a>
                         </div>
