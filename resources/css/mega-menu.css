@@ -1,0 +1,765 @@
+/* ====================================================
+   MEGA MENU REVOLUTIONARY STYLES - Mobile First
+   Designed for incredible UX and visual impact
+   ==================================================== */
+
+/* Base animations and variables */
+:root {
+    --menu-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    --menu-shadow-dark: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+    --card-hover-transform: translateY(-4px) scale(1.02);
+    --icon-hover-scale: scale(1.15) rotate(5deg);
+    --transition-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    --transition-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Mega menu container with glassmorphism */
+.mega-menu-container {
+    position: relative;
+    backdrop-filter: blur(24px) saturate(1.8);
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: var(--menu-shadow),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    animation: menuSlideIn 0.4s var(--transition-bounce);
+    transform-origin: top right;
+}
+
+.dark .mega-menu-container {
+    background: rgba(17, 24, 39, 0.95);
+    border: 1px solid rgba(75, 85, 99, 0.3);
+    box-shadow: var(--menu-shadow-dark),
+                inset 0 1px 0 rgba(75, 85, 99, 0.2);
+}
+
+/* Menu entrance animation */
+@keyframes menuSlideIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.9) translateY(-10px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* User header card with gradient animation */
+.user-header-card {
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(8px);
+    transition: all 0.3s var(--transition-smooth);
+}
+
+.user-header-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.6s;
+}
+
+.user-header-card:hover::before {
+    left: 100%;
+}
+
+.user-header-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.15);
+}
+
+/* Menu cards with incredible hover effects */
+.menu-card {
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(8px);
+    cursor: pointer;
+    transition: all 0.3s var(--transition-bounce);
+    border: 1px solid transparent;
+}
+
+.menu-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.menu-card:hover::before {
+    opacity: 1;
+}
+
+.menu-card:hover {
+    transform: var(--card-hover-transform);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.dark .menu-card:hover {
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    border-color: rgba(75, 85, 99, 0.5);
+}
+
+/* Icon hover animations */
+.menu-card .group-hover\:scale-110 {
+    transition: transform 0.3s var(--transition-bounce);
+}
+
+.menu-card:hover .group-hover\:scale-110 {
+    transform: var(--icon-hover-scale);
+}
+
+/* Staggered animation for menu items */
+.menu-grid .menu-card:nth-child(1) { animation-delay: 0.1s; }
+.menu-grid .menu-card:nth-child(2) { animation-delay: 0.15s; }
+.menu-grid .menu-card:nth-child(3) { animation-delay: 0.2s; }
+.menu-grid .menu-card:nth-child(4) { animation-delay: 0.25s; }
+.menu-grid .menu-card:nth-child(5) { animation-delay: 0.3s; }
+
+.menu-grid .menu-card {
+    animation: cardSlideIn 0.5s var(--transition-bounce) backwards;
+}
+
+@keyframes cardSlideIn {
+    0% {
+        opacity: 0;
+        transform: translateY(20px) scale(0.9);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Link hover effects with smooth underlines */
+.menu-card a {
+    position: relative;
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: all 0.2s var(--transition-smooth);
+}
+
+.menu-card a::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: currentColor;
+    transition: all 0.3s var(--transition-smooth);
+    transform: translateX(-50%);
+}
+
+.menu-card a:hover::before {
+    width: calc(100% - 16px);
+}
+
+.menu-card a:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateX(4px);
+}
+
+.dark .menu-card a:hover {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+/* Support section with subtle animations */
+.support-section {
+    position: relative;
+}
+
+.support-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 100px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(156, 163, 175, 0.5), transparent);
+    transform: translateX(-50%);
+}
+
+/* Action section with special logout button */
+.action-section form button {
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(8px);
+    transition: all 0.3s var(--transition-bounce);
+}
+
+.action-section form button::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: all 0.4s;
+}
+
+.action-section form button:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+.action-section form button:active {
+    transform: scale(0.98);
+}
+
+/* MOBILE FIRST - Revolutionary Mobile Experience */
+@media (max-width: 640px) {
+    /* Full-screen mobile menu overlay */
+    .mega-menu-container {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        min-width: unset !important;
+        max-width: unset !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border-radius: 0 !important;
+        z-index: 9999 !important;
+        backdrop-filter: blur(24px) saturate(1.8);
+        background: rgba(255, 255, 255, 0.98);
+        border: none;
+        box-shadow: none;
+        animation: mobileSlideUp 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .dark .mega-menu-container {
+        background: rgba(17, 24, 39, 0.98);
+    }
+    
+    /* Mobile slide up animation */
+    @keyframes mobileSlideUp {
+        0% {
+            opacity: 0;
+            transform: translateY(100%);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Mobile content container with safe areas */
+    .mega-menu-container > * {
+        padding: env(safe-area-inset-top, 1rem) 1.5rem env(safe-area-inset-bottom, 2rem) 1.5rem;
+    }
+    
+    /* Mobile header with close button */
+    .user-header-card {
+        position: relative;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        margin: 0 0 2rem 0;
+        padding: 2rem 1.5rem 1.5rem 1.5rem;
+        border-radius: 0 0 24px 24px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+    
+    .user-header-card::before {
+        content: '×';
+        position: absolute;
+        top: 1rem;
+        right: 1.5rem;
+        font-size: 2rem;
+        font-weight: 300;
+        color: white;
+        cursor: pointer;
+        z-index: 10;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(8px);
+        transition: all 0.3s;
+    }
+    
+    .user-header-card::before:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: rotate(90deg);
+    }
+    
+    /* Mobile avatar enhancement */
+    .user-header-card .w-12 {
+        width: 4rem !important;
+        height: 4rem !important;
+        font-size: 1.5rem !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    }
+    
+    /* Mobile menu grid - single column with enhanced spacing */
+    .menu-grid {
+        grid-template-columns: 1fr !important;
+        gap: 1.5rem;
+        padding: 0 1.5rem;
+    }
+    
+    /* Mobile menu cards - larger touch targets */
+    .menu-card {
+        padding: 1.5rem;
+        border-radius: 16px;
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(12px);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        transform: translateY(0);
+        min-height: 120px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    
+    .dark .menu-card {
+        background: rgba(31, 41, 55, 0.8);
+        border-color: rgba(75, 85, 99, 0.3);
+    }
+    
+    /* Mobile card hover/touch effects */
+    .menu-card:active,
+    .menu-card:hover {
+        transform: translateY(-4px) scale(1.02);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        border-color: rgba(103, 126, 234, 0.3);
+    }
+    
+    /* Mobile card icons - larger and more prominent */
+    .menu-card .w-10 {
+        width: 3rem !important;
+        height: 3rem !important;
+        border-radius: 12px !important;
+    }
+    
+    .menu-card .w-5 {
+        width: 1.25rem !important;
+        height: 1.25rem !important;
+    }
+    
+    /* Mobile card titles */
+    .menu-card h4 {
+        font-size: 1.125rem !important;
+        font-weight: 600 !important;
+        margin-bottom: 0.75rem !important;
+    }
+    
+    /* Mobile links - larger touch targets */
+    .menu-card a {
+        padding: 0.75rem 1rem !important;
+        margin: 0.25rem 0 !important;
+        border-radius: 8px !important;
+        font-size: 0.95rem !important;
+        font-weight: 500 !important;
+        background: rgba(255, 255, 255, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.3s;
+        display: block;
+        text-align: center;
+    }
+    
+    .dark .menu-card a {
+        background: rgba(0, 0, 0, 0.2);
+        border-color: rgba(75, 85, 99, 0.3);
+    }
+    
+    .menu-card a:hover,
+    .menu-card a:active {
+        background: rgba(255, 255, 255, 0.8);
+        border-color: rgba(103, 126, 234, 0.3);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .dark .menu-card a:hover,
+    .dark .menu-card a:active {
+        background: rgba(0, 0, 0, 0.4);
+    }
+    
+    /* Admin tools card - special mobile layout */
+    .menu-card.sm\\:col-span-2 .grid-cols-2 {
+        grid-template-columns: 1fr !important;
+        gap: 0.5rem !important;
+    }
+    
+    /* Mobile support section */
+    .support-section {
+        padding: 2rem 1.5rem 1rem 1.5rem;
+        background: rgba(249, 250, 251, 0.8);
+        margin: 2rem -1.5rem 0 -1.5rem;
+        backdrop-filter: blur(8px);
+    }
+    
+    .dark .support-section {
+        background: rgba(17, 24, 39, 0.8);
+    }
+    
+    .support-section .flex {
+        flex-direction: column !important;
+        gap: 1rem !important;
+        align-items: stretch !important;
+    }
+    
+    .support-section a {
+        padding: 0.75rem 1rem !important;
+        background: rgba(255, 255, 255, 0.6) !important;
+        border: 1px solid rgba(156, 163, 175, 0.3) !important;
+        border-radius: 8px !important;
+        text-align: center !important;
+        font-weight: 500 !important;
+        transition: all 0.3s !important;
+    }
+    
+    .dark .support-section a {
+        background: rgba(31, 41, 55, 0.6) !important;
+        border-color: rgba(75, 85, 99, 0.3) !important;
+    }
+    
+    /* Mobile action section */
+    .action-section {
+        padding: 1.5rem 1.5rem 2rem 1.5rem;
+        background: rgba(254, 242, 242, 0.8);
+        margin: 1rem -1.5rem 0 -1.5rem;
+        backdrop-filter: blur(8px);
+    }
+    
+    .dark .action-section {
+        background: rgba(127, 29, 29, 0.1);
+    }
+    
+    .action-section .flex {
+        flex-direction: column !important;
+        gap: 1rem !important;
+        align-items: stretch !important;
+    }
+    
+    /* Mobile logout button - full width and prominent */
+    .action-section form {
+        width: 100% !important;
+    }
+    
+    .action-section form button {
+        width: 100% !important;
+        padding: 1rem 1.5rem !important;
+        font-size: 1.1rem !important;
+        font-weight: 600 !important;
+        border-radius: 12px !important;
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+        box-shadow: 0 8px 32px rgba(239, 68, 68, 0.3) !important;
+        justify-content: center !important;
+    }
+    
+    .action-section form button:active {
+        transform: scale(0.98) !important;
+        box-shadow: 0 4px 16px rgba(239, 68, 68, 0.4) !important;
+    }
+    
+    /* Mobile delete account link */
+    .action-section a {
+        padding: 0.75rem 1rem !important;
+        background: rgba(239, 68, 68, 0.1) !important;
+        border: 1px solid rgba(239, 68, 68, 0.3) !important;
+        border-radius: 8px !important;
+        text-align: center !important;
+        font-weight: 500 !important;
+        transition: all 0.3s !important;
+    }
+    
+    /* Mobile staggered animations with better timing */
+    .menu-grid .menu-card:nth-child(1) { animation-delay: 0.1s; }
+    .menu-grid .menu-card:nth-child(2) { animation-delay: 0.2s; }
+    .menu-grid .menu-card:nth-child(3) { animation-delay: 0.3s; }
+    .menu-grid .menu-card:nth-child(4) { animation-delay: 0.4s; }
+    .menu-grid .menu-card:nth-child(5) { animation-delay: 0.5s; }
+    
+    /* Mobile performance optimizations */
+    .menu-card,
+    .user-header-card,
+    .support-section,
+    .action-section {
+        will-change: transform;
+        transform: translateZ(0);
+    }
+    
+    /* Mobile safe area adjustments */
+    .mega-menu-container {
+        padding-top: env(safe-area-inset-top, 0);
+        padding-bottom: env(safe-area-inset-bottom, 0);
+    }
+    
+    /* Hide desktop-only effects on mobile */
+    .menu-card::before,
+    .user-header-card::before:not([content="×"]) {
+        display: none;
+    }
+}
+
+/* Ultra-wide screen optimizations */
+@media (min-width: 1024px) {
+    .mega-menu-container {
+        min-width: 560px;
+    }
+    
+    /* Enhanced animations for desktop */
+    .menu-card {
+        transition: all 0.4s var(--transition-bounce);
+    }
+    
+    .menu-card:hover {
+        transform: translateY(-6px) scale(1.03);
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .mega-menu-container {
+        border: 2px solid;
+        backdrop-filter: none;
+        background: white;
+    }
+    
+    .dark .mega-menu-container {
+        background: #1f2937;
+    }
+    
+    .menu-card {
+        border: 1px solid;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .mega-menu-container,
+    .menu-card,
+    .user-header-card,
+    .menu-card a,
+    .action-section form button {
+        animation: none;
+        transition: none;
+    }
+    
+    .menu-card:hover {
+        transform: none;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+}
+
+/* Print styles */
+@media print {
+    .mega-menu-container {
+        display: none;
+    }
+}
+
+/* Focus styles for accessibility */
+.menu-card:focus-within {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+.menu-card a:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+/* Loading state animation */
+.mega-menu-container.loading {
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.8; }
+}
+
+/* Gradient borders for premium feel */
+.menu-card.premium-card {
+    background: linear-gradient(white, white) padding-box,
+                linear-gradient(135deg, #667eea 0%, #764ba2 100%) border-box;
+    border: 2px solid transparent;
+}
+
+.dark .menu-card.premium-card {
+    background: linear-gradient(#1f2937, #1f2937) padding-box,
+                linear-gradient(135deg, #667eea 0%, #764ba2 100%) border-box;
+}
+
+/* ====================================================
+   MOBILE FIRST REVOLUTIONARY FULLSCREEN EXPERIENCE
+   ==================================================== */
+
+/* Mobile optimizations - REVOLUTIONARY FULLSCREEN EXPERIENCE */
+@media (max-width: 640px) {
+    /* Hide desktop mega menu on mobile */
+    .mega-menu-container {
+        display: none !important;
+    }
+    
+    /* Mobile fullscreen overlay animation */
+    .mobile-menu-overlay {
+        animation: fadeInOverlay 0.3s ease-out;
+    }
+    
+    @keyframes fadeInOverlay {
+        0% { opacity: 0; }
+        100% { opacity: 1; }
+    }
+    
+    /* Mobile menu slide in from right */
+    .mobile-menu-container {
+        animation: slideInFromRight 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        transform-origin: right center;
+    }
+    
+    @keyframes slideInFromRight {
+        0% {
+            opacity: 0;
+            transform: translateX(100%);
+        }
+        100% {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+    
+    /* Mobile navigation items staggered animation */
+    .mobile-nav-item {
+        animation: slideInFromBottom 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) backwards;
+    }
+    
+    .mobile-nav-item:nth-child(1) { animation-delay: 0.1s; }
+    .mobile-nav-item:nth-child(2) { animation-delay: 0.15s; }
+    .mobile-nav-item:nth-child(3) { animation-delay: 0.2s; }
+    .mobile-nav-item:nth-child(4) { animation-delay: 0.25s; }
+    
+    @keyframes slideInFromBottom {
+        0% {
+            opacity: 0;
+            transform: translateY(30px) scale(0.9);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+    
+    /* Mobile card animations */
+    .mobile-card {
+        animation: cardSlideInMobile 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) backwards;
+        transition: all 0.3s ease;
+    }
+    
+    .mobile-card:nth-child(1) { animation-delay: 0.3s; }
+    .mobile-card:nth-child(2) { animation-delay: 0.35s; }
+    .mobile-card:nth-child(3) { animation-delay: 0.4s; }
+    .mobile-card:nth-child(4) { animation-delay: 0.45s; }
+    .mobile-card:nth-child(5) { animation-delay: 0.5s; }
+    
+    @keyframes cardSlideInMobile {
+        0% {
+            opacity: 0;
+            transform: translateX(50px) scale(0.9);
+        }
+        100% {
+            opacity: 1;
+            transform: translateX(0) scale(1);
+        }
+    }
+    
+    /* Mobile touch interactions */
+    .mobile-nav-item:active {
+        transform: scale(0.98);
+        background: rgba(0, 0, 0, 0.05);
+    }
+    
+    .mobile-card:active {
+        transform: scale(0.98);
+    }
+    
+    /* Mobile gradient header animation */
+    .mobile-header-gradient {
+        background: linear-gradient(45deg, #3b82f6, #8b5cf6, #06b6d4, #8b5cf6, #3b82f6);
+        background-size: 300% 300%;
+        animation: gradientShift 3s ease infinite;
+    }
+    
+    @keyframes gradientShift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+    
+    /* Mobile scroll optimization */
+    .mobile-menu-content {
+        -webkit-overflow-scrolling: touch;
+        scroll-behavior: smooth;
+    }
+    
+    /* Mobile safe area support */
+    .mobile-menu-container {
+        padding-top: env(safe-area-inset-top);
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+    
+    /* Performance optimizations for mobile */
+    .mobile-card,
+    .mobile-nav-item {
+        will-change: transform;
+        transform: translateZ(0);
+        backface-visibility: hidden;
+    }
+    
+    /* Keep desktop mega menu for larger screens */
+    .mega-menu-container {
+        min-width: calc(100vw - 2rem) !important;
+        max-width: calc(100vw - 2rem);
+        margin: 0 1rem;
+        padding: 1rem;
+    }
+    
+    .menu-grid {
+        grid-template-columns: 1fr !important;
+        gap: 0.75rem;
+    }
+    
+    .menu-card {
+        padding: 1rem;
+    }
+    
+    .user-header-card {
+        margin-bottom: 1rem;
+    }
+    
+    /* Reduce animation intensity on mobile for better performance */
+    .menu-card:hover {
+        transform: translateY(-2px) scale(1.01);
+    }
+    
+    .menu-card .group-hover\:scale-110:hover {
+        transform: scale(1.08);
+    }
+}

@@ -26,7 +26,9 @@ export default defineConfig(({ mode }) => {
                     'resources/css/create-collection-modal-context.css',
                     'resources/css/creator-home.css',
                     'resources/css/reservation-history.css', // Stili per cronologia prenotazioni
+                    'resources/css/mega-menu.css', // Revolutionary mega menu styles
                     'resources/js/creator-home.js',
+                    'resources/js/mega-menu-mobile.js', // Mobile mega menu functionality
                     'resources/css/collections-show.css',
                     'resources/js/app.js',
                     'resources/js/collection.js',
