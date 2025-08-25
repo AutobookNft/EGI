@@ -50,6 +50,7 @@ export default defineConfig(({ mode }) => {
                     // Ultra Upload Manager
                     'vendor/ultra/ultra-upload-manager/resources/ts/core/file_upload_manager.ts',
                     'vendor/ultra/ultra-upload-manager/resources/css/app.css',
+                    'resources/js/components/vanilla-mobile-menu.js'
                 ],
                 refresh: [
                     'resources/**',
