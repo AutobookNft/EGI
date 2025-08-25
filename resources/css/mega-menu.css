@@ -1,3 +1,15 @@
+/* Gradient header animation - SHARED between mobile and desktop */
+.mobile-header-gradient {
+    background: linear-gradient(45deg, #3b82f6, #8b5cf6, #06b6d4, #8b5cf6, #3b82f6);
+    background-size: 300% 300%;
+    animation: gradientShift 3s ease infinite;
+}
+
+@keyframes gradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
 /* ====================================================
    MEGA MENU REVOLUTIONARY STYLES - Mobile First
    Designed for incredible UX and visual impact
@@ -19,8 +31,7 @@
     backdrop-filter: blur(24px) saturate(1.8);
     background: rgba(255, 255, 255, 0.95);
     border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: var(--menu-shadow),
-                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    box-shadow: var(--menu-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.3);
     animation: menuSlideIn 0.4s var(--transition-bounce);
     transform-origin: top right;
 }
@@ -28,8 +39,7 @@
 .dark .mega-menu-container {
     background: rgba(17, 24, 39, 0.95);
     border: 1px solid rgba(75, 85, 99, 0.3);
-    box-shadow: var(--menu-shadow-dark),
-                inset 0 1px 0 rgba(75, 85, 99, 0.2);
+    box-shadow: var(--menu-shadow-dark), inset 0 1px 0 rgba(75, 85, 99, 0.2);
 }
 
 /* Menu entrance animation */
@@ -53,13 +63,18 @@
 }
 
 .user-header-card::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.2),
+        transparent
+    );
     transition: left 0.6s;
 }
 
@@ -83,13 +98,17 @@
 }
 
 .menu-card::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.1),
+        rgba(255, 255, 255, 0)
+    );
     opacity: 0;
     transition: opacity 0.3s;
 }
@@ -119,11 +138,21 @@
 }
 
 /* Staggered animation for menu items */
-.menu-grid .menu-card:nth-child(1) { animation-delay: 0.1s; }
-.menu-grid .menu-card:nth-child(2) { animation-delay: 0.15s; }
-.menu-grid .menu-card:nth-child(3) { animation-delay: 0.2s; }
-.menu-grid .menu-card:nth-child(4) { animation-delay: 0.25s; }
-.menu-grid .menu-card:nth-child(5) { animation-delay: 0.3s; }
+.menu-grid .menu-card:nth-child(1) {
+    animation-delay: 0.1s;
+}
+.menu-grid .menu-card:nth-child(2) {
+    animation-delay: 0.15s;
+}
+.menu-grid .menu-card:nth-child(3) {
+    animation-delay: 0.2s;
+}
+.menu-grid .menu-card:nth-child(4) {
+    animation-delay: 0.25s;
+}
+.menu-grid .menu-card:nth-child(5) {
+    animation-delay: 0.3s;
+}
 
 .menu-grid .menu-card {
     animation: cardSlideIn 0.5s var(--transition-bounce) backwards;
@@ -150,7 +179,7 @@
 }
 
 .menu-card a::before {
-    content: '';
+    content: "";
     position: absolute;
     bottom: 0;
     left: 50%;
@@ -180,13 +209,18 @@
 }
 
 .support-section::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     left: 50%;
     width: 100px;
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(156, 163, 175, 0.5), transparent);
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(156, 163, 175, 0.5),
+        transparent
+    );
     transform: translateX(-50%);
 }
 
@@ -199,7 +233,7 @@
 }
 
 .action-section form button::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 50%;
     left: 50%;
@@ -245,11 +279,11 @@
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
     }
-    
+
     .dark .mega-menu-container {
         background: rgba(17, 24, 39, 0.98);
     }
-    
+
     /* Mobile slide up animation */
     @keyframes mobileSlideUp {
         0% {
@@ -261,12 +295,13 @@
             transform: translateY(0);
         }
     }
-    
+
     /* Mobile content container with safe areas */
     .mega-menu-container > * {
-        padding: env(safe-area-inset-top, 1rem) 1.5rem env(safe-area-inset-bottom, 2rem) 1.5rem;
+        padding: env(safe-area-inset-top, 1rem) 1.5rem
+            env(safe-area-inset-bottom, 2rem) 1.5rem;
     }
-    
+
     /* Mobile header with close button */
     .user-header-card {
         position: relative;
@@ -277,9 +312,9 @@
         border-radius: 0 0 24px 24px;
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     }
-    
+
     .user-header-card::before {
-        content: '×';
+        content: "×";
         position: absolute;
         top: 1rem;
         right: 1.5rem;
@@ -298,12 +333,12 @@
         backdrop-filter: blur(8px);
         transition: all 0.3s;
     }
-    
+
     .user-header-card::before:hover {
         background: rgba(255, 255, 255, 0.2);
         transform: rotate(90deg);
     }
-    
+
     /* Mobile avatar enhancement */
     .user-header-card .w-12 {
         width: 4rem !important;
@@ -311,14 +346,14 @@
         font-size: 1.5rem !important;
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
     }
-    
+
     /* Mobile menu grid - single column with enhanced spacing */
     .menu-grid {
         grid-template-columns: 1fr !important;
         gap: 1.5rem;
         padding: 0 1.5rem;
     }
-    
+
     /* Mobile menu cards - larger touch targets */
     .menu-card {
         padding: 1.5rem;
@@ -334,12 +369,12 @@
         flex-direction: column;
         justify-content: space-between;
     }
-    
+
     .dark .menu-card {
         background: rgba(31, 41, 55, 0.8);
         border-color: rgba(75, 85, 99, 0.3);
     }
-    
+
     /* Mobile card hover/touch effects */
     .menu-card:active,
     .menu-card:hover {
@@ -347,26 +382,26 @@
         box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
         border-color: rgba(103, 126, 234, 0.3);
     }
-    
+
     /* Mobile card icons - larger and more prominent */
     .menu-card .w-10 {
         width: 3rem !important;
         height: 3rem !important;
         border-radius: 12px !important;
     }
-    
+
     .menu-card .w-5 {
         width: 1.25rem !important;
         height: 1.25rem !important;
     }
-    
+
     /* Mobile card titles */
     .menu-card h4 {
         font-size: 1.125rem !important;
         font-weight: 600 !important;
         margin-bottom: 0.75rem !important;
     }
-    
+
     /* Mobile links - larger touch targets */
     .menu-card a {
         padding: 0.75rem 1rem !important;
@@ -380,12 +415,12 @@
         display: block;
         text-align: center;
     }
-    
+
     .dark .menu-card a {
         background: rgba(0, 0, 0, 0.2);
         border-color: rgba(75, 85, 99, 0.3);
     }
-    
+
     .menu-card a:hover,
     .menu-card a:active {
         background: rgba(255, 255, 255, 0.8);
@@ -393,18 +428,18 @@
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
-    
+
     .dark .menu-card a:hover,
     .dark .menu-card a:active {
         background: rgba(0, 0, 0, 0.4);
     }
-    
+
     /* Admin tools card - special mobile layout */
     .menu-card.sm\\:col-span-2 .grid-cols-2 {
         grid-template-columns: 1fr !important;
         gap: 0.5rem !important;
     }
-    
+
     /* Mobile support section */
     .support-section {
         padding: 2rem 1.5rem 1rem 1.5rem;
@@ -412,17 +447,17 @@
         margin: 2rem -1.5rem 0 -1.5rem;
         backdrop-filter: blur(8px);
     }
-    
+
     .dark .support-section {
         background: rgba(17, 24, 39, 0.8);
     }
-    
+
     .support-section .flex {
         flex-direction: column !important;
         gap: 1rem !important;
         align-items: stretch !important;
     }
-    
+
     .support-section a {
         padding: 0.75rem 1rem !important;
         background: rgba(255, 255, 255, 0.6) !important;
@@ -432,12 +467,12 @@
         font-weight: 500 !important;
         transition: all 0.3s !important;
     }
-    
+
     .dark .support-section a {
         background: rgba(31, 41, 55, 0.6) !important;
         border-color: rgba(75, 85, 99, 0.3) !important;
     }
-    
+
     /* Mobile action section */
     .action-section {
         padding: 1.5rem 1.5rem 2rem 1.5rem;
@@ -445,38 +480,42 @@
         margin: 1rem -1.5rem 0 -1.5rem;
         backdrop-filter: blur(8px);
     }
-    
+
     .dark .action-section {
         background: rgba(127, 29, 29, 0.1);
     }
-    
+
     .action-section .flex {
         flex-direction: column !important;
         gap: 1rem !important;
         align-items: stretch !important;
     }
-    
+
     /* Mobile logout button - full width and prominent */
     .action-section form {
         width: 100% !important;
     }
-    
+
     .action-section form button {
         width: 100% !important;
         padding: 1rem 1.5rem !important;
         font-size: 1.1rem !important;
         font-weight: 600 !important;
         border-radius: 12px !important;
-        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+        background: linear-gradient(
+            135deg,
+            #ef4444 0%,
+            #dc2626 100%
+        ) !important;
         box-shadow: 0 8px 32px rgba(239, 68, 68, 0.3) !important;
         justify-content: center !important;
     }
-    
+
     .action-section form button:active {
         transform: scale(0.98) !important;
         box-shadow: 0 4px 16px rgba(239, 68, 68, 0.4) !important;
     }
-    
+
     /* Mobile delete account link */
     .action-section a {
         padding: 0.75rem 1rem !important;
@@ -487,14 +526,24 @@
         font-weight: 500 !important;
         transition: all 0.3s !important;
     }
-    
+
     /* Mobile staggered animations with better timing */
-    .menu-grid .menu-card:nth-child(1) { animation-delay: 0.1s; }
-    .menu-grid .menu-card:nth-child(2) { animation-delay: 0.2s; }
-    .menu-grid .menu-card:nth-child(3) { animation-delay: 0.3s; }
-    .menu-grid .menu-card:nth-child(4) { animation-delay: 0.4s; }
-    .menu-grid .menu-card:nth-child(5) { animation-delay: 0.5s; }
-    
+    .menu-grid .menu-card:nth-child(1) {
+        animation-delay: 0.1s;
+    }
+    .menu-grid .menu-card:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+    .menu-grid .menu-card:nth-child(3) {
+        animation-delay: 0.3s;
+    }
+    .menu-grid .menu-card:nth-child(4) {
+        animation-delay: 0.4s;
+    }
+    .menu-grid .menu-card:nth-child(5) {
+        animation-delay: 0.5s;
+    }
+
     /* Mobile performance optimizations */
     .menu-card,
     .user-header-card,
@@ -503,13 +552,13 @@
         will-change: transform;
         transform: translateZ(0);
     }
-    
+
     /* Mobile safe area adjustments */
     .mega-menu-container {
         padding-top: env(safe-area-inset-top, 0);
         padding-bottom: env(safe-area-inset-bottom, 0);
     }
-    
+
     /* Hide desktop-only effects on mobile */
     .menu-card::before,
     .user-header-card::before:not([content="×"]) {
@@ -532,20 +581,101 @@
         transform: translateY(-6px) scale(1.03);
         box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
     }
-}
-
-/* High contrast mode support */
+    
+    /* DESKTOP CONTRAST IMPROVEMENTS - More saturated backgrounds */
+    .menu-card.desktop-emerald {
+        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%) !important;
+        border-color: rgba(52, 211, 153, 0.4) !important;
+    }
+    
+    .dark .menu-card.desktop-emerald {
+        background: linear-gradient(135deg, rgba(6, 78, 59, 0.4) 0%, rgba(4, 120, 87, 0.4) 100%) !important;
+        border-color: rgba(52, 211, 153, 0.3) !important;
+    }
+    
+    .menu-card.desktop-blue {
+        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%) !important;
+        border-color: rgba(59, 130, 246, 0.4) !important;
+    }
+    
+    .dark .menu-card.desktop-blue {
+        background: linear-gradient(135deg, rgba(30, 58, 138, 0.4) 0%, rgba(37, 99, 235, 0.4) 100%) !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+    
+    .menu-card.desktop-purple {
+        background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%) !important;
+        border-color: rgba(168, 85, 247, 0.4) !important;
+    }
+    
+    .dark .menu-card.desktop-purple {
+        background: linear-gradient(135deg, rgba(88, 28, 135, 0.4) 0%, rgba(124, 58, 237, 0.4) 100%) !important;
+        border-color: rgba(168, 85, 247, 0.3) !important;
+    }
+    
+    .menu-card.desktop-orange {
+        background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%) !important;
+        border-color: rgba(251, 146, 60, 0.4) !important;
+    }
+    
+    .dark .menu-card.desktop-orange {
+        background: linear-gradient(135deg, rgba(154, 52, 18, 0.4) 0%, rgba(194, 65, 12, 0.4) 100%) !important;
+        border-color: rgba(251, 146, 60, 0.3) !important;
+    }
+    
+    .menu-card.desktop-gray {
+        background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%) !important;
+        border-color: rgba(100, 116, 139, 0.4) !important;
+    }
+    
+    .dark .menu-card.desktop-gray {
+        background: linear-gradient(135deg, rgba(51, 65, 85, 0.4) 0%, rgba(71, 85, 105, 0.4) 100%) !important;
+        border-color: rgba(100, 116, 139, 0.3) !important;
+    }
+    
+    /* Enhanced text contrast on desktop */
+    .menu-card h4 {
+        color: rgba(17, 24, 39, 0.9) !important;
+        font-weight: 600 !important;
+    }
+    
+    .dark .menu-card h4 {
+        color: rgba(249, 250, 251, 0.95) !important;
+    }
+    
+    .menu-card a {
+        color: rgba(55, 65, 81, 0.8) !important;
+        font-weight: 500 !important;
+    }
+    
+    .dark .menu-card a {
+        color: rgba(209, 213, 219, 0.9) !important;
+    }
+    
+    /* Stronger hover states for better visibility */
+    .menu-card a:hover {
+        background: rgba(255, 255, 255, 0.6) !important;
+        color: rgba(17, 24, 39, 1) !important;
+        transform: translateX(6px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .dark .menu-card a:hover {
+        background: rgba(0, 0, 0, 0.3) !important;
+        color: rgba(255, 255, 255, 1) !important;
+    }
+}/* High contrast mode support */
 @media (prefers-contrast: high) {
     .mega-menu-container {
         border: 2px solid;
         backdrop-filter: none;
         background: white;
     }
-    
+
     .dark .mega-menu-container {
         background: #1f2937;
     }
-    
+
     .menu-card {
         border: 1px solid;
     }
@@ -561,7 +691,7 @@
         animation: none;
         transition: none;
     }
-    
+
     .menu-card:hover {
         transform: none;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -593,20 +723,25 @@
 }
 
 @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.8; }
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.8;
+    }
 }
 
 /* Gradient borders for premium feel */
 .menu-card.premium-card {
     background: linear-gradient(white, white) padding-box,
-                linear-gradient(135deg, #667eea 0%, #764ba2 100%) border-box;
+        linear-gradient(135deg, #667eea 0%, #764ba2 100%) border-box;
     border: 2px solid transparent;
 }
 
 .dark .menu-card.premium-card {
     background: linear-gradient(#1f2937, #1f2937) padding-box,
-                linear-gradient(135deg, #667eea 0%, #764ba2 100%) border-box;
+        linear-gradient(135deg, #667eea 0%, #764ba2 100%) border-box;
 }
 
 /* ====================================================
@@ -619,23 +754,27 @@
     .mega-menu-container {
         display: none !important;
     }
-    
+
     /* Mobile fullscreen overlay animation */
     .mobile-menu-overlay {
         animation: fadeInOverlay 0.3s ease-out;
     }
-    
+
     @keyframes fadeInOverlay {
-        0% { opacity: 0; }
-        100% { opacity: 1; }
+        0% {
+            opacity: 0;
+        }
+        100% {
+            opacity: 1;
+        }
     }
-    
+
     /* Mobile menu slide in from right */
     .mobile-menu-container {
         animation: slideInFromRight 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         transform-origin: right center;
     }
-    
+
     @keyframes slideInFromRight {
         0% {
             opacity: 0;
@@ -646,17 +785,26 @@
             transform: translateX(0);
         }
     }
-    
+
     /* Mobile navigation items staggered animation */
     .mobile-nav-item {
-        animation: slideInFromBottom 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) backwards;
+        animation: slideInFromBottom 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55)
+            backwards;
     }
-    
-    .mobile-nav-item:nth-child(1) { animation-delay: 0.1s; }
-    .mobile-nav-item:nth-child(2) { animation-delay: 0.15s; }
-    .mobile-nav-item:nth-child(3) { animation-delay: 0.2s; }
-    .mobile-nav-item:nth-child(4) { animation-delay: 0.25s; }
-    
+
+    .mobile-nav-item:nth-child(1) {
+        animation-delay: 0.1s;
+    }
+    .mobile-nav-item:nth-child(2) {
+        animation-delay: 0.15s;
+    }
+    .mobile-nav-item:nth-child(3) {
+        animation-delay: 0.2s;
+    }
+    .mobile-nav-item:nth-child(4) {
+        animation-delay: 0.25s;
+    }
+
     @keyframes slideInFromBottom {
         0% {
             opacity: 0;
@@ -667,19 +815,30 @@
             transform: translateY(0) scale(1);
         }
     }
-    
+
     /* Mobile card animations */
     .mobile-card {
-        animation: cardSlideInMobile 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) backwards;
+        animation: cardSlideInMobile 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55)
+            backwards;
         transition: all 0.3s ease;
     }
-    
-    .mobile-card:nth-child(1) { animation-delay: 0.3s; }
-    .mobile-card:nth-child(2) { animation-delay: 0.35s; }
-    .mobile-card:nth-child(3) { animation-delay: 0.4s; }
-    .mobile-card:nth-child(4) { animation-delay: 0.45s; }
-    .mobile-card:nth-child(5) { animation-delay: 0.5s; }
-    
+
+    .mobile-card:nth-child(1) {
+        animation-delay: 0.3s;
+    }
+    .mobile-card:nth-child(2) {
+        animation-delay: 0.35s;
+    }
+    .mobile-card:nth-child(3) {
+        animation-delay: 0.4s;
+    }
+    .mobile-card:nth-child(4) {
+        animation-delay: 0.45s;
+    }
+    .mobile-card:nth-child(5) {
+        animation-delay: 0.5s;
+    }
+
     @keyframes cardSlideInMobile {
         0% {
             opacity: 0;
@@ -690,41 +849,29 @@
             transform: translateX(0) scale(1);
         }
     }
-    
+
     /* Mobile touch interactions */
     .mobile-nav-item:active {
         transform: scale(0.98);
         background: rgba(0, 0, 0, 0.05);
     }
-    
+
     .mobile-card:active {
         transform: scale(0.98);
     }
-    
-    /* Mobile gradient header animation */
-    .mobile-header-gradient {
-        background: linear-gradient(45deg, #3b82f6, #8b5cf6, #06b6d4, #8b5cf6, #3b82f6);
-        background-size: 300% 300%;
-        animation: gradientShift 3s ease infinite;
-    }
-    
-    @keyframes gradientShift {
-        0%, 100% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-    }
-    
+
     /* Mobile scroll optimization */
     .mobile-menu-content {
         -webkit-overflow-scrolling: touch;
         scroll-behavior: smooth;
     }
-    
+
     /* Mobile safe area support */
     .mobile-menu-container {
         padding-top: env(safe-area-inset-top);
         padding-bottom: env(safe-area-inset-bottom);
     }
-    
+
     /* Performance optimizations for mobile */
     .mobile-card,
     .mobile-nav-item {
@@ -732,7 +879,7 @@
         transform: translateZ(0);
         backface-visibility: hidden;
     }
-    
+
     /* Keep desktop mega menu for larger screens */
     .mega-menu-container {
         min-width: calc(100vw - 2rem) !important;
@@ -740,25 +887,25 @@
         margin: 0 1rem;
         padding: 1rem;
     }
-    
+
     .menu-grid {
         grid-template-columns: 1fr !important;
         gap: 0.75rem;
     }
-    
+
     .menu-card {
         padding: 1rem;
     }
-    
+
     .user-header-card {
         margin-bottom: 1rem;
     }
-    
+
     /* Reduce animation intensity on mobile for better performance */
     .menu-card:hover {
         transform: translateY(-2px) scale(1.01);
     }
-    
+
     .menu-card .group-hover\:scale-110:hover {
         transform: scale(1.08);
     }

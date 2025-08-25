@@ -6,29 +6,29 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Mobile menu management
     initializeMobileMenu();
-    
+
     // Touch gesture support
     if (window.innerWidth <= 640) {
         initializeTouchGestures();
     }
-    
+
     // Handle orientation change
     window.addEventListener('orientationchange', handleOrientationChange);
 });
 
 function initializeMobileMenu() {
     const isMobile = window.innerWidth <= 640;
-    
+
     if (!isMobile) return;
-    
+
     // Find all dropdown triggers
     const dropdownTriggers = document.querySelectorAll('[data-dropdown-toggle]');
-    
+
     dropdownTriggers.forEach(trigger => {
         trigger.addEventListener('click', function(e) {
             e.preventDefault();
             const dropdown = this.nextElementSibling?.querySelector('.mega-menu-container');
-            
+
             if (dropdown) {
                 openMobileMenu(dropdown);
             }
@@ -39,21 +39,21 @@ function initializeMobileMenu() {
 function openMobileMenu(menuContainer) {
     // Add mobile overlay class
     menuContainer.classList.add('mobile-active');
-    
+
     // Prevent body scroll
     document.body.style.overflow = 'hidden';
     document.body.style.position = 'fixed';
     document.body.style.width = '100%';
-    
+
     // Add close button functionality
     addCloseButtonListener(menuContainer);
-    
+
     // Add backdrop click to close
     addBackdropCloseListener(menuContainer);
-    
+
     // Add escape key listener
     addEscapeKeyListener(menuContainer);
-    
+
     // Trigger enter animation
     requestAnimationFrame(() => {
         menuContainer.style.transform = 'translateY(0)';
@@ -64,19 +64,19 @@ function openMobileMenu(menuContainer) {
 function closeMobileMenu(menuContainer) {
     // Remove mobile overlay class
     menuContainer.classList.remove('mobile-active');
-    
+
     // Restore body scroll
     document.body.style.overflow = '';
     document.body.style.position = '';
     document.body.style.width = '';
-    
+
     // Trigger exit animation
     menuContainer.style.transform = 'translateY(100%)';
     menuContainer.style.opacity = '0';
-    
+
     // Remove event listeners
     removeAllListeners();
-    
+
     // Close dropdown after animation
     setTimeout(() => {
         const dropdownComponent = menuContainer.closest('[x-data]');
@@ -88,7 +88,7 @@ function closeMobileMenu(menuContainer) {
 
 function addCloseButtonListener(menuContainer) {
     const userHeader = menuContainer.querySelector('.user-header-card');
-    
+
     if (userHeader) {
         userHeader.addEventListener('click', function(e) {
             // Check if click is on the close button area (top-right)
@@ -99,10 +99,10 @@ function addCloseButtonListener(menuContainer) {
                 right: rect.right,
                 bottom: rect.top + 80
             };
-            
-            if (e.clientX >= closeButtonArea.left && 
+
+            if (e.clientX >= closeButtonArea.left &&
                 e.clientX <= closeButtonArea.right &&
-                e.clientY >= closeButtonArea.top && 
+                e.clientY >= closeButtonArea.top &&
                 e.clientY <= closeButtonArea.bottom) {
                 closeMobileMenu(menuContainer);
             }
@@ -124,9 +124,9 @@ function addEscapeKeyListener(menuContainer) {
             closeMobileMenu(menuContainer);
         }
     }
-    
+
     document.addEventListener('keydown', handleEscape);
-    
+
     // Store reference for cleanup
     menuContainer._escapeHandler = handleEscape;
 }
@@ -146,25 +146,25 @@ function initializeTouchGestures() {
     let startY = 0;
     let currentY = 0;
     let isDragging = false;
-    
+
     document.addEventListener('touchstart', function(e) {
         const menuContainer = e.target.closest('.mega-menu-container');
         if (!menuContainer || !menuContainer.classList.contains('mobile-active')) return;
-        
+
         startY = e.touches[0].clientY;
         isDragging = true;
         menuContainer.style.transition = 'none';
     }, { passive: true });
-    
+
     document.addEventListener('touchmove', function(e) {
         if (!isDragging) return;
-        
+
         const menuContainer = e.target.closest('.mega-menu-container');
         if (!menuContainer) return;
-        
+
         currentY = e.touches[0].clientY;
         const deltaY = currentY - startY;
-        
+
         // Only allow downward swipe to close
         if (deltaY > 0) {
             const translateY = Math.min(deltaY, window.innerHeight);
@@ -172,19 +172,19 @@ function initializeTouchGestures() {
             menuContainer.style.opacity = Math.max(0, 1 - (deltaY / (window.innerHeight * 0.3)));
         }
     }, { passive: true });
-    
+
     document.addEventListener('touchend', function(e) {
         if (!isDragging) return;
-        
+
         const menuContainer = e.target.closest('.mega-menu-container');
         if (!menuContainer) return;
-        
+
         isDragging = false;
         menuContainer.style.transition = '';
-        
+
         const deltaY = currentY - startY;
         const threshold = window.innerHeight * 0.2;
-        
+
         if (deltaY > threshold) {
             closeMobileMenu(menuContainer);
         } else {
@@ -201,7 +201,7 @@ function handleOrientationChange() {
     activeMobileMenus.forEach(menu => {
         closeMobileMenu(menu);
     });
-    
+
     // Re-initialize if switching to mobile
     setTimeout(() => {
         if (window.innerWidth <= 640) {
@@ -217,7 +217,7 @@ window.addEventListener('resize', function() {
     resizeTimeout = setTimeout(() => {
         const isMobile = window.innerWidth <= 640;
         const activeMobileMenus = document.querySelectorAll('.mega-menu-container.mobile-active');
-        
+
         // Close mobile menus if switching to desktop
         if (!isMobile && activeMobileMenus.length > 0) {
             activeMobileMenus.forEach(menu => {
@@ -239,7 +239,7 @@ if (window.innerWidth <= 640) {
             bottom: 0 !important;
             z-index: 9999 !important;
         }
-        
+
         body.mobile-menu-open {
             overflow: hidden !important;
             position: fixed !important;
