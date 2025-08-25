@@ -39,4 +39,13 @@ return [
         'manage' => 'Gestisci biografie',
         'view' => 'Visualizza biografia',
     ],
+
+    // Navigation Menu Translations
+    'manage_account' => 'Gestisci Account',
+    'profile_overview' => 'Panoramica Profilo',
+    'edit_personal_data' => 'Modifica Dati Personali',
+    'security_password' => 'Sicurezza e Password',
+    'profile_images' => 'Immagini Profilo',
+    'my_profile_nav' => 'Il Mio Profilo',
+    'logout' => 'Disconnetti',
 ];

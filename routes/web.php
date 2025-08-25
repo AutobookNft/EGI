@@ -331,6 +331,12 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         Route::get('/profile', [GdprController::class, 'showProfile'])
             ->name('gdpr.profile');
 
+        // Dedicated GDPR view routes for separated interface
+        Route::get('/profile/security', [GdprController::class, 'showSecurity'])
+            ->name('gdpr.security');
+        Route::get('/profile/images', [GdprController::class, 'showProfileImages'])
+            ->name('gdpr.profile-images');
+
         // Profile Image Management Routes
         Route::post('/profile/upload-image', [App\Http\Controllers\ProfileImageController::class, 'uploadImage'])
             ->name('profile.upload-image');
@@ -551,7 +557,7 @@ Route::middleware(['auth'])->group(function () {
     |
     */
     Route::put('/user/preferences/currency', [App\Http\Controllers\Api\CurrencyController::class, 'updateUserPreference'])
-    ->name('user.currency.update');
+        ->name('user.currency.update');
 
 
     // Biography management (user's own biographies)

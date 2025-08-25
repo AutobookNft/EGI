@@ -178,6 +178,75 @@ class GdprController extends Controller {
         }
     }
 
+    /**
+     * Show GDPR Security Management Interface
+     *
+     * @return \Illuminate\View\View
+     * @seo-purpose Provide dedicated security management interface for users
+     * @accessibility-trait Full ARIA landmark structure for security controls
+     */
+    public function showSecurity() {
+        try {
+            $user = auth()->user();
+
+            $this->auditService->logUserAction($user, 'security_page_viewed', ['route' => 'gdpr.security'], GdprActivityCategory::GDPR_ACTIONS);
+
+            return view('gdpr.security', [
+                'user' => $user,
+                'pageTitle' => __('profile.security_management_title'),
+                'features' => [
+                    'password_updates' => \Laravel\Fortify\Features::enabled(\Laravel\Fortify\Features::updatePasswords()),
+                    'two_factor_auth' => \Laravel\Fortify\Features::canManageTwoFactorAuthentication(),
+                    'browser_sessions' => true,
+                ]
+            ]);
+        } catch (\Exception $e) {
+            $this->errorManager->handle('GDPR_SECURITY_PAGE_LOAD_ERROR', [
+                'user_id' => auth()->id(),
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+                'error' => $e->getMessage()
+            ], $e);
+
+            return view('error.generic', [
+                'message' => __('gdpr.errors.general'),
+                'return_url' => route('dashboard')
+            ]);
+        }
+    }
+
+    /**
+     * Show GDPR Profile Images Management Interface
+     *
+     * @return \Illuminate\View\View
+     * @seo-purpose Provide dedicated profile images management interface
+     * @accessibility-trait Full ARIA landmark structure for image management
+     */
+    public function showProfileImages() {
+        try {
+            $user = auth()->user();
+
+            $this->auditService->logUserAction($user, 'profile_images_page_viewed', ['route' => 'gdpr.profile-images'], GdprActivityCategory::GDPR_ACTIONS);
+
+            return view('gdpr.profile-images', [
+                'user' => $user,
+                'pageTitle' => __('profile.profile_images_management_title'),
+            ]);
+        } catch (\Exception $e) {
+            $this->errorManager->handle('GDPR_PROFILE_IMAGES_PAGE_LOAD_ERROR', [
+                'user_id' => auth()->id(),
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+                'error' => $e->getMessage()
+            ], $e);
+
+            return view('error.generic', [
+                'message' => __('gdpr.errors.general'),
+                'return_url' => route('dashboard')
+            ]);
+        }
+    }
+
 
     /**
      * Store a new processing limitation request.

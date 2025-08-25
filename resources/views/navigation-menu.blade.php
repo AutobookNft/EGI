@@ -1,11 +1,11 @@
-<nav x-data="{ open: false }" class="border-b border-gray-100 bg-white dark:border-gray-700 dark:bg-gray-800">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="flex h-16 justify-between">
+<nav x-data="{ open: false }" class="bg-white border-b border-gray-100 dark:border-gray-700 dark:bg-gray-800">
+    <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+        <div class="flex justify-between h-16">
             <div class="flex">
                 <!-- Logo -->
-                <div class="flex shrink-0 items-center">
+                <div class="flex items-center shrink-0">
                     <a href="{{ route('dashboard') }}">
-                        <x-application-mark class="block h-9 w-auto" />
+                        <x-application-mark class="block w-auto h-9" />
                     </a>
                 </div>
 
@@ -32,7 +32,7 @@
             </div>
 
             <div class="flex">
-                <div class="flex shrink-0 items-center text-4xl text-gray-700 dark:text-gray-500">
+                <div class="flex items-center text-4xl text-gray-700 shrink-0 dark:text-gray-500">
                     {{ Auth::user()?->name ?? '' }}
                 </div>
             </div>
@@ -46,15 +46,15 @@
                         <x-slot name="trigger">
                             @if (Laravel\Jetstream\Jetstream::managesProfilePhotos())
                                 <button
-                                    class="flex rounded-full border-2 border-transparent text-sm transition focus:border-gray-300 focus:outline-none">
-                                    <img class="size-8 rounded-full object-cover"
+                                    class="flex text-sm transition border-2 border-transparent rounded-full focus:border-gray-300 focus:outline-none">
+                                    <img class="object-cover rounded-full size-8"
                                         src="{{ Auth::user()?->profile_photo_url ?? null }}"
                                         alt="{{ Auth::user()?->name ?? '' }}" />
                                 </button>
                             @else
                                 <span class="inline-flex rounded-md">
                                     <button type="button"
-                                        class="inline-flex items-center rounded-md border border-transparent bg-white px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out hover:text-gray-700 focus:bg-gray-50 focus:outline-none active:bg-gray-50 dark:bg-gray-800 dark:text-gray-400 dark:hover:text-gray-300 dark:focus:bg-gray-700 dark:active:bg-gray-700">
+                                        class="inline-flex items-center px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out bg-white border border-transparent rounded-md hover:text-gray-700 focus:bg-gray-50 focus:outline-none active:bg-gray-50 dark:bg-gray-800 dark:text-gray-400 dark:hover:text-gray-300 dark:focus:bg-gray-700 dark:active:bg-gray-700">
                                         {{ Auth::user()?->name ?? '' }}
 
                                         <svg class="-me-0.5 ms-2 size-4" xmlns="http://www.w3.org/2000/svg"
@@ -70,11 +70,21 @@
                         <x-slot name="content">
                             <!-- Account Management -->
                             <div class="block px-4 py-2 text-xs text-gray-400">
-                                {{ __('Manage Account') }}
+                                {{ __('menu.manage_account') }}
                             </div>
 
-                            <x-dropdown-link href="{{ route('profile.show') }}">
-                                {{ __('Profile') }}
+                            <x-dropdown-link href="{{ route('user.domains.personal-data') }}">
+                                {{ __('menu.edit_personal_data') }}
+                            </x-dropdown-link>
+
+                            <div class="border-t border-gray-200 dark:border-gray-600"></div>
+
+                            <x-dropdown-link href="{{ route('gdpr.security') }}">
+                                {{ __('menu.security_password') }}
+                            </x-dropdown-link>
+
+                            <x-dropdown-link href="{{ route('gdpr.profile-images') }}">
+                                {{ __('menu.profile_images') }}
                             </x-dropdown-link>
 
                             <div class="border-t border-gray-200 dark:border-gray-600"></div>
@@ -84,7 +94,7 @@
                                 @csrf
 
                                 <x-dropdown-link href="{{ route('logout') }}" @click.prevent="$root.submit();">
-                                    {{ __('Log Out') }}
+                                    {{ __('menu.logout') }}
                                 </x-dropdown-link>
                             </form>
                         </x-slot>
@@ -93,11 +103,11 @@
             </div>
 
             <!-- Sezione mobile (schermi piccoli) con due pulsanti: uno per la navbar, uno per la sidebar -->
-            <div class="-me-2 flex items-center sm:hidden">
+            <div class="flex items-center -me-2 sm:hidden">
                 <!-- Pulsante per togglare la SIDEBAR (Drawer DaisyUI) -->
                 <!-- Usa un'icona diversa per distinguere questo dal menu navbar -->
                 <label for="main-drawer"
-                    class="ms-2 inline-flex items-center justify-center rounded-md p-2 text-gray-400 transition duration-150 ease-in-out hover:bg-gray-100 hover:text-gray-500 focus:outline-none dark:text-gray-500 dark:hover:bg-gray-900 dark:hover:text-gray-400">
+                    class="inline-flex items-center justify-center p-2 text-gray-400 transition duration-150 ease-in-out rounded-md ms-2 hover:bg-gray-100 hover:text-gray-500 focus:outline-none dark:text-gray-500 dark:hover:bg-gray-900 dark:hover:text-gray-400">
                     <svg class="size-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                         <!-- Ad esempio puntini che simboleggiano la sidebar -->
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -107,7 +117,7 @@
 
                 <!-- Pulsante per togglare il menu della NAVBAR (Alpine) -->
                 <button @click="open = ! open"
-                    class="inline-flex items-center justify-center rounded-md p-2 text-gray-400 transition duration-150 ease-in-out hover:bg-gray-100 hover:text-gray-500 focus:outline-none dark:text-gray-500 dark:hover:bg-gray-900 dark:hover:text-gray-400">
+                    class="inline-flex items-center justify-center p-2 text-gray-400 transition duration-150 ease-in-out rounded-md hover:bg-gray-100 hover:text-gray-500 focus:outline-none dark:text-gray-500 dark:hover:bg-gray-900 dark:hover:text-gray-400">
                     <svg class="size-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                         <!-- Icona hamburger (visibile quando open = false) -->
                         <path :class="{ 'inline-flex': !open, 'hidden': open }" class="inline-flex"
@@ -127,7 +137,7 @@
     <!-- Responsive Navigation Menu (Alpine) -->
     <!-- Menu responsive della NAVBAR con tutti i link come nella versione desktop -->
     <div :class="{ 'block': open, 'hidden': !open }" class="hidden sm:hidden">
-        <div class="space-y-1 pb-3 pt-2">
+        <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link href="{{ route('home') }}" :active="request()->routeIs('home')">
                 {{ __('Home') }}
             </x-responsive-nav-link>
@@ -146,11 +156,11 @@
         </div>
 
         <!-- Responsive Settings Options -->
-        <div class="border-t border-gray-200 pb-1 pt-4 dark:border-gray-600">
+        <div class="pt-4 pb-1 border-t border-gray-200 dark:border-gray-600">
             <div class="flex items-center px-4">
                 @if (Laravel\Jetstream\Jetstream::managesProfilePhotos())
                     <div class="me-3 shrink-0">
-                        <img class="size-10 rounded-full object-cover"
+                        <img class="object-cover rounded-full size-10"
                             src="{{ Auth::user()?->profile_photo_url ?? null }}"
                             alt="{{ Auth::user()?->name ?? '' }}" />
                     </div>
@@ -164,15 +174,23 @@
             </div>
 
             <div class="mt-3 space-y-1">
-                <x-responsive-nav-link href="{{ route('profile.show') }}" :active="request()->routeIs('profile.show')">
-                    {{ __('Profile') }}
+                <x-responsive-nav-link href="{{ route('gdpr.edit-personal-data') }}" :active="request()->routeIs('gdpr.edit-personal-data')">
+                    {{ __('menu.edit_personal_data') }}
+                </x-responsive-nav-link>
+
+                <x-responsive-nav-link href="{{ route('gdpr.security') }}" :active="request()->routeIs('gdpr.security')">
+                    {{ __('menu.security_password') }}
+                </x-responsive-nav-link>
+
+                <x-responsive-nav-link href="{{ route('gdpr.profile-images') }}" :active="request()->routeIs('gdpr.profile-images')">
+                    {{ __('menu.profile_images') }}
                 </x-responsive-nav-link>
 
                 <!-- Authentication -->
                 <form method="POST" action="{{ route('logout') }}" x-data>
                     @csrf
                     <x-responsive-nav-link href="{{ route('logout') }}" @click.prevent="$root.submit();">
-                        {{ __('Log Out') }}
+                        {{ __('menu.logout') }}
                     </x-responsive-nav-link>
                 </form>
 

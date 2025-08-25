@@ -16,22 +16,22 @@
 @php
     $config = [
         'strong' => [
-            'label' => __('auth.strong_auth'),
-            'description' => __('auth.strong_auth_description'),
+            'label' => __('profile.strong_auth'),
+            'description' => __('profile.strong_auth_description'),
             'icon' => 'shield-check',
             'classes' => 'bg-green-100 text-green-800 border-green-200',
             'iconClasses' => 'text-green-600'
         ],
         'weak' => [
-            'label' => __('auth.weak_auth'),
-            'description' => __('auth.weak_auth_description'),
+            'label' => __('profile.weak_auth'),
+            'description' => __('profile.weak_auth_description'),
             'icon' => 'wallet',
             'classes' => 'bg-blue-100 text-blue-800 border-blue-200',
             'iconClasses' => 'text-blue-600'
         ],
         'guest' => [
-            'label' => __('auth.guest'),
-            'description' => __('auth.guest_description'),
+            'label' => __('profile.guest'),
+            'description' => __('profile.guest_description'),
             'icon' => 'user',
             'classes' => 'bg-gray-100 text-gray-800 border-gray-200',
             'iconClasses' => 'text-gray-600'

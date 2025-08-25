@@ -7,6 +7,7 @@
  */
 
 return [
+    'strong_auth' => 'Starke Authentifizierung',
     'biography' => 'Biografie',
     'account' => 'Konto',
     'first_name' => 'Vorname',

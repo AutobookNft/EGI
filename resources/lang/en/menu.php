@@ -21,4 +21,12 @@ return [
     'assign_permissions' => 'Assign Permissions',
     'collection_staff' => 'Collection Staff',
     'general' => 'General',
+
+    // Navigation
+    'manage_account' => 'Manage Account',
+    'profile_overview' => 'Profile Overview',
+    'edit_personal_data' => 'Edit Personal Data',
+    'security_password' => 'Security & Password',
+    'profile_images' => 'Profile Images',
+    'logout' => 'Logout',
 ];
