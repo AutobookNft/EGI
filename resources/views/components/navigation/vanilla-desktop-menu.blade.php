@@ -15,8 +15,8 @@
     <div class="relative">
         @if (Laravel\Jetstream\Jetstream::managesProfilePhotos())
             <button type="button" data-dropdown-trigger
-                class="flex text-sm transition border-2 border-transparent rounded-full focus:border-gray-300 focus:outline-none hover:scale-110 transform duration-300">
-                <img class="object-cover rounded-full size-8 ring-2 ring-blue-500/20 hover:ring-blue-500/60 transition-all duration-300"
+                class="flex text-sm transition duration-300 transform border-2 border-transparent rounded-full focus:border-gray-300 focus:outline-none hover:scale-110">
+                <img class="object-cover transition-all duration-300 rounded-full size-8 ring-2 ring-blue-500/20 hover:ring-blue-500/60"
                     src="{{ Auth::user()?->profile_photo_url ?? null }}"
                     alt="{{ Auth::user()?->name ?? '' }}" />
             </button>
@@ -41,14 +41,14 @@
     </div>
 
     <!-- Dropdown Content -->
-    <div data-dropdown-content 
-         class="absolute right-0 z-50 mt-2 opacity-0 invisible transform scale-95 transition-all duration-200 ease-out origin-top-right">
-        
+    <div data-dropdown-content
+         class="absolute right-0 z-50 invisible mt-2 transition-all duration-200 ease-out origin-top-right transform scale-95 opacity-0">
+
         <!-- Revolutionary Mega Menu Container -->
         <div class="mega-menu-container bg-white/95 backdrop-blur-xl border border-gray-200/50 rounded-2xl shadow-2xl p-6 min-w-[380px] sm:min-w-[420px] lg:min-w-[500px] dark:bg-gray-900/95 dark:border-gray-700/50">
 
             <!-- User Header Card -->
-            <div class="user-header-card bg-gradient-to-r from-blue-500 to-purple-600 mobile-header-gradient rounded-xl p-4 mb-6 border border-blue-300/40 dark:border-blue-700/40">
+            <div class="p-4 mb-6 border user-header-card bg-gradient-to-r from-blue-500 to-purple-600 mobile-header-gradient rounded-xl border-blue-300/40 dark:border-blue-700/40">
                 <div class="flex items-center space-x-3">
                     @if (Laravel\Jetstream\Jetstream::managesProfilePhotos())
                         <img class="object-cover rounded-full size-12 ring-2 ring-white/30"
@@ -68,9 +68,9 @@
 
             <!-- Menu Grid -->
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                
+
                 <!-- Account Management Card -->
-                <div class="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 rounded-2xl p-4 border border-emerald-200/30 dark:border-emerald-800/30 mega-card">
+                <div class="p-4 border bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 rounded-2xl border-emerald-200/30 dark:border-emerald-800/30 mega-card">
                     <div class="flex items-center mb-3 space-x-3">
                         <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500">
                             <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -80,11 +80,11 @@
                         <h4 class="font-semibold text-gray-900 dark:text-gray-100">{{ __('menu.manage_account') }}</h4>
                     </div>
                     <div class="space-y-2">
-                        <a href="{{ route('user.domains.personal-data') }}" class="block text-sm text-gray-600 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors duration-200 px-2 py-1 rounded-lg hover:bg-white/50 dark:hover:bg-black/20">
+                        <a href="{{ route('user.domains.personal-data') }}" class="block px-2 py-1 text-sm text-gray-600 transition-colors duration-200 rounded-lg dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-white/50 dark:hover:bg-black/20">
                             {{ __('menu.edit_personal_data') }}
                         </a>
                         @can('manage_profile')
-                            <a href="{{ route('profile.show') }}" class="block text-sm text-gray-600 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors duration-200 px-2 py-1 rounded-lg hover:bg-white/50 dark:hover:bg-black/20">
+                            <a href="{{ route('profile.show') }}" class="block px-2 py-1 text-sm text-gray-600 transition-colors duration-200 rounded-lg dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-white/50 dark:hover:bg-black/20">
                                 {{ __('Profile') }}
                             </a>
                         @endcan
@@ -92,7 +92,7 @@
                 </div>
 
                 <!-- Privacy & GDPR Card -->
-                <div class="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-2xl p-4 border border-blue-200/30 dark:border-blue-800/30 mega-card">
+                <div class="p-4 border bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-2xl border-blue-200/30 dark:border-blue-800/30 mega-card">
                     <div class="flex items-center mb-3 space-x-3">
                         <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-500">
                             <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -103,18 +103,18 @@
                     </div>
                     <div class="space-y-2">
                         @can('manage_consents')
-                            <a href="{{ route('gdpr.consent') }}" class="block text-sm text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 px-2 py-1 rounded-lg hover:bg-white/50 dark:hover:bg-black/20">
+                            <a href="{{ route('gdpr.consent') }}" class="block px-2 py-1 text-sm text-gray-600 transition-colors duration-200 rounded-lg dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-white/50 dark:hover:bg-black/20">
                                 {{ __('gdpr.menu.gdpr_center') }}
                             </a>
                         @endcan
-                        <a href="{{ route('gdpr.security') }}" class="block text-sm text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 px-2 py-1 rounded-lg hover:bg-white/50 dark:hover:bg-black/20">
+                        <a href="{{ route('gdpr.security') }}" class="block px-2 py-1 text-sm text-gray-600 transition-colors duration-200 rounded-lg dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-white/50 dark:hover:bg-black/20">
                             {{ __('menu.security_password') }}
                         </a>
-                        <a href="{{ route('gdpr.profile-images') }}" class="block text-sm text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 px-2 py-1 rounded-lg hover:bg-white/50 dark:hover:bg-black/20">
+                        <a href="{{ route('gdpr.profile-images') }}" class="block px-2 py-1 text-sm text-gray-600 transition-colors duration-200 rounded-lg dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-white/50 dark:hover:bg-black/20">
                             {{ __('menu.profile_images') }}
                         </a>
                         @can('gdpr.export_data')
-                            <a href="{{ route('gdpr.export-data') }}" class="block text-sm text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 px-2 py-1 rounded-lg hover:bg-white/50 dark:hover:bg-black/20">
+                            <a href="{{ route('gdpr.export-data') }}" class="block px-2 py-1 text-sm text-gray-600 transition-colors duration-200 rounded-lg dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-white/50 dark:hover:bg-black/20">
                                 {{ __('menu.export_data') }}
                             </a>
                         @endcan
@@ -123,7 +123,7 @@
 
                 <!-- Collections Card -->
                 @can('create_collection')
-                    <div class="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-2xl p-4 border border-purple-200/30 dark:border-purple-800/30 mega-card">
+                    <div class="p-4 border bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-2xl border-purple-200/30 dark:border-purple-800/30 mega-card">
                         <div class="flex items-center mb-3 space-x-3">
                             <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500">
                                 <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -133,10 +133,10 @@
                             <h4 class="font-semibold text-gray-900 dark:text-gray-100">{{ __('menu.collections') }}</h4>
                         </div>
                         <div class="space-y-2">
-                            <a href="{{ route('collections.index') }}" class="block text-sm text-gray-600 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 transition-colors duration-200 px-2 py-1 rounded-lg hover:bg-white/50 dark:hover:bg-black/20">
+                            <a href="{{ route('collections.index') }}" class="block px-2 py-1 text-sm text-gray-600 transition-colors duration-200 rounded-lg dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-white/50 dark:hover:bg-black/20">
                                 {{ __('menu.my_collections') }}
                             </a>
-                            <a href="{{ route('collections.create') }}" class="block text-sm text-gray-600 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 transition-colors duration-200 px-2 py-1 rounded-lg hover:bg-white/50 dark:hover:bg-black/20">
+                            <a href="{{ route('collections.create') }}" class="block px-2 py-1 text-sm text-gray-600 transition-colors duration-200 rounded-lg dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-white/50 dark:hover:bg-black/20">
                                 {{ __('menu.new_collection') }}
                             </a>
                         </div>
@@ -144,7 +144,7 @@
                 @endcan
 
                 <!-- Activity & Notifications Card -->
-                <div class="bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 rounded-2xl p-4 border border-orange-200/30 dark:border-orange-800/30 mega-card">
+                <div class="p-4 border bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 rounded-2xl border-orange-200/30 dark:border-orange-800/30 mega-card">
                     <div class="flex items-center mb-3 space-x-3">
                         <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-orange-500 to-red-500">
                             <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -155,12 +155,12 @@
                     </div>
                     <div class="space-y-2">
                         @can('view_activity_log')
-                            <a href="{{ route('gdpr.activity-log') }}" class="block text-sm text-gray-600 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 transition-colors duration-200 px-2 py-1 rounded-lg hover:bg-white/50 dark:hover:bg-black/20">
+                            <a href="{{ route('gdpr.activity-log') }}" class="block px-2 py-1 text-sm text-gray-600 transition-colors duration-200 rounded-lg dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-white/50 dark:hover:bg-black/20">
                                 {{ __('menu.activity_log') }}
                             </a>
                         @endcan
                         @can('view_notifications')
-                            <a href="{{ route('notifications.index') }}" class="block text-sm text-gray-600 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 transition-colors duration-200 px-2 py-1 rounded-lg hover:bg-white/50 dark:hover:bg-black/20">
+                            <a href="{{ route('notifications.index') }}" class="block px-2 py-1 text-sm text-gray-600 transition-colors duration-200 rounded-lg dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-white/50 dark:hover:bg-black/20">
                                 {{ __('menu.notifications') }}
                             </a>
                         @endcan
@@ -169,7 +169,7 @@
 
                 <!-- Admin Tools Card -->
                 @can('manage_roles')
-                    <div class="col-span-1 sm:col-span-2 bg-gradient-to-br from-gray-50 to-slate-50 dark:from-gray-900/20 dark:to-slate-900/20 rounded-2xl p-4 border border-gray-200/30 dark:border-gray-800/30 mega-card">
+                    <div class="col-span-1 p-4 border sm:col-span-2 bg-gradient-to-br from-gray-50 to-slate-50 dark:from-gray-900/20 dark:to-slate-900/20 rounded-2xl border-gray-200/30 dark:border-gray-800/30 mega-card">
                         <div class="flex items-center mb-3 space-x-3">
                             <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-gray-600 to-slate-600">
                                 <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -179,15 +179,15 @@
                             </div>
                             <h4 class="font-semibold text-gray-900 dark:text-gray-100">{{ __('menu.admin_tools') }}</h4>
                         </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                            <a href="{{ route('admin.roles.index') }}" class="block text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 transition-colors duration-200 px-2 py-1 rounded-lg hover:bg-white/50 dark:hover:bg-black/20">
+                        <div class="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                            <a href="{{ route('admin.roles.index') }}" class="block px-2 py-1 text-sm text-gray-600 transition-colors duration-200 rounded-lg dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-white/50 dark:hover:bg-black/20">
                                 {{ __('menu.permissions_roles') }}
                             </a>
-                            <a href="{{ route('admin.users.index') }}" class="block text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 transition-colors duration-200 px-2 py-1 rounded-lg hover:bg-white/50 dark:hover:bg-black/20">
+                            <a href="{{ route('admin.users.index') }}" class="block px-2 py-1 text-sm text-gray-600 transition-colors duration-200 rounded-lg dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-white/50 dark:hover:bg-black/20">
                                 {{ __('menu.user_management') }}
                             </a>
                             @can('view_statistics')
-                                <a href="{{ route('statistics.index') }}" class="block text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 transition-colors duration-200 px-2 py-1 rounded-lg hover:bg-white/50 dark:hover:bg-black/20">
+                                <a href="{{ route('statistics.index') }}" class="block px-2 py-1 text-sm text-gray-600 transition-colors duration-200 rounded-lg dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-white/50 dark:hover:bg-black/20">
                                     {{ __('menu.statistics') }}
                                 </a>
                             @endcan
@@ -216,10 +216,10 @@
                                 {{ __('menu.delete_account') }}
                             </a>
                         @endcan
-                        
+
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
-                            <button type="submit" class="flex items-center space-x-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-sm rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-lg">
+                            <button type="submit" class="flex items-center px-4 py-2 space-x-2 text-sm text-white transition-all duration-300 bg-red-500 rounded-lg hover:bg-red-600 hover:scale-105 hover:shadow-lg">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
                                 </svg>

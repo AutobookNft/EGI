@@ -107,23 +107,6 @@
                         </a>
                     </div>
 
-                    {{-- Natan Assistant - Posizionato vicino al logo --}}
-                    @if($user)
-                    <div class="hidden ml-6 md:block">
-                        {{-- <img src="{{ $user->profile_photo_url }}" alt="User Avatar" class="w-8 h-8 rounded-full"> --}}
-                        {{-- <x-natan-assistant :suffix="'-desktop'" /> --}}
-                        <x-navigation.vanilla-desktop-menu />
-                    </div>
-                    @endif
-
-                    <button type="button" id="open-butler-assistant"
-                        class="{{ $navLinkClasses }} items-center gap-1 hidden ml-6 md:flex"
-                        aria-label="{{ __('assistant.open_butler_aria') }}">
-                        <span class="material-symbols-outlined" aria-hidden="true"
-                            style="font-size: 1.1em;">support_agent</span>
-                        <span>{{ __('assistant.open_butler') }}</span>
-                    </button>
-
                     {{-- Welcome Message Desktop - Solo per utenti autenticati - Dopo Assistenza --}}
                     @if ($user)
                     <div class="items-center hidden ml-4 md:flex">
@@ -140,7 +123,7 @@
                     @endif
 
                     {{-- EUR → ALGO Badge (Desktop) - Fixed Currency, Live Rate --}}
-                    <x-currency-badge size="desktop" position="header" />
+                    {{-- <x-currency-badge size="desktop" position="header" /> --}}
 
                     {{-- Collection Badge (Desktop) --}}
                     {{-- <div id="current-collection-badge-container-desktop" class="items-center hidden ml-3 md:flex">
@@ -153,7 +136,6 @@
                     </div> --}}
 
                     {{-- NEW: Test Autonomous Collection Badge Component --}}
-                    <x-collection-badge size="desktop" :show-when-empty="true" position="navbar" />
 
                     {{-- Professional Currency Badge (Always Visible - Mobile First) --}}
 
@@ -267,7 +249,7 @@
                     </nav>
 
                     {{-- Menu Mobile Button --}}
-                    <div class="flex items-center gap-2 -mr-2 md:hidden">
+                    {{-- <div class="flex items-center gap-2 -mr-2 md:hidden"> --}}
 
                         {{-- Notification Badge (Mobile) --}}
                         @if(App\Helpers\FegiAuth::check())
@@ -275,9 +257,22 @@
                         @endif
 
                         {{-- EUR → ALGO Badge (Mobile) - Fixed Currency, Live Rate --}}
-                        <x-currency-badge size="mobile" position="header" />
+                        {{-- <x-currency-badge size="mobile" position="header" /> --}}
 
                         {{-- Menu Mobile Button --}}
+                        @auth
+                        <button type="button" data-mobile-menu-trigger class="block p-1 transition-colors rounded-full md:hidden hover:bg-gray-800/50">
+                            @if (Laravel\Jetstream\Jetstream::managesProfilePhotos())
+                                <img class="object-cover rounded-full size-8 ring-2 ring-gray-600"
+                                    src="{{ Auth::user()->profile_photo_url }}"
+                                    alt="{{ Auth::user()->name }}" />
+                            @else
+                                <div class="flex items-center justify-center w-8 h-8 text-sm font-bold text-white bg-gray-600 rounded-full">
+                                    {{ substr(Auth::user()->name, 0, 1) }}
+                                </div>
+                            @endif
+                        </button>
+                        @endauth
 
                         {{-- Bottone Accedi (Solo per guest su mobile) --}}
                         @guest
@@ -289,34 +284,9 @@
                         </div>
                         @endguest
 
-                        {{-- Butler Assistant Menu su mobile non lo mostro --}}
-                        {{-- <button type="button" id="open-butler-assistant"
-                            class="{{ $navLinkClasses }} flex items-center gap-1"
-                            aria-label="{{ __('assistant.open_butler_aria') }}">
-                            <span class="material-symbols-outlined" aria-hidden="true"
-                                style="font-size: 1.1em;">support_agent</span>
-                            <span>{{ __('assistant.open_butler') }}</span>
-                        </button> --}}
-
-                        {{-- <button type="button"
-                            class="inline-flex items-center justify-center p-2 text-gray-400 bg-gray-900 rounded-md hover:bg-gray-800 hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
-                            aria-controls="mobile-menu" aria-expanded="false" id="mobile-menu-button">
-                            <span class="sr-only">{{ __('collection.open_main_menu') }}</span>
-                            <svg class="block w-6 h-6" id="hamburger-icon" aria-hidden="true"
-                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-                            </svg>
-                            <svg class="hidden w-6 h-6" id="close-icon" aria-hidden="true"
-                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button> --}}
-                        <x-navigation.vanilla-mobile-menu class="z-index-50"/>
-                    </div>
+                    {{-- </div> --}}
                     {{-- Fine Prima Riga --}}
+
                 </div>
 
                 {{-- Seconda Riga: Solo per utenti autenticati (Mobile) --}}
@@ -355,6 +325,10 @@
 
         {{-- CLEAN: Removed old mobile menu system - now using vanilla components --}}
     </header>
+
+    {{-- Mobile Menu Component - Outside header for proper overlay positioning --}}
+    <x-navigation.vanilla-mobile-menu />
+
     <script>
         window.addEventListener('load', function() {
         const header = document.querySelector('header[role="banner"]');
@@ -365,312 +339,312 @@
     });
 
     // Currency Badge Manager
-    class CurrencyBadgeManager {
-        constructor() {
-            this.elements = {
-                // Desktop elements
-                symbol: document.getElementById('currency-symbol'),
-                rateValue: document.getElementById('currency-rate-value'),
-                lastUpdated: document.getElementById('currency-last-updated'),
-                // Mobile elements
-                symbolMobile: document.getElementById('currency-symbol-mobile'),
-                rateValueMobile: document.getElementById('currency-rate-value-mobile'),
-                lastUpdatedMobile: document.getElementById('currency-last-updated-mobile'),
-                // Switch elements (future use)
-                switchButton: document.getElementById('currency-switch-button'),
-                switchMenu: document.getElementById('currency-switch-menu'),
-                currencyOptions: document.querySelectorAll('.currency-option')
-            };
+    // class CurrencyBadgeManager {
+    //     constructor() {
+    //         this.elements = {
+    //             // Desktop elements
+    //             symbol: document.getElementById('currency-symbol'),
+    //             rateValue: document.getElementById('currency-rate-value'),
+    //             lastUpdated: document.getElementById('currency-last-updated'),
+    //             // Mobile elements
+    //             symbolMobile: document.getElementById('currency-symbol-mobile'),
+    //             rateValueMobile: document.getElementById('currency-rate-value-mobile'),
+    //             lastUpdatedMobile: document.getElementById('currency-last-updated-mobile'),
+    //             // Switch elements (future use)
+    //             switchButton: document.getElementById('currency-switch-button'),
+    //             switchMenu: document.getElementById('currency-switch-menu'),
+    //             currencyOptions: document.querySelectorAll('.currency-option')
+    //         };
 
-            this.currentCurrency = 'EUR'; // Fixed to EUR in simplified system
-            this.updateInterval = null;
-            this.init();
-        }
+    //         this.currentCurrency = 'EUR'; // Fixed to EUR in simplified system
+    //         this.updateInterval = null;
+    //         this.init();
+    //     }
 
-        init() {
-            this.fetchAndUpdateRate();
-            this.startAutoUpdate();
-            this.bindEvents();
-        }
+    //     init() {
+    //         this.fetchAndUpdateRate();
+    //         this.startAutoUpdate();
+    //         this.bindEvents();
+    //     }
 
-        startAutoUpdate() {
-            // Update every 30 seconds
-            this.updateInterval = setInterval(() => {
-                this.fetchAndUpdateRate();
-            }, 60000);
-        }
+    //     startAutoUpdate() {
+    //         // Update every 30 seconds
+    //         this.updateInterval = setInterval(() => {
+    //             this.fetchAndUpdateRate();
+    //         }, 60000);
+    //     }
 
-        async fetchAndUpdateRate() {
-            try {
-                // Step 1: Always get EUR rate (simplified EUR-only system)
-                const response = await fetch('/api/currency/rate/EUR', {
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                });
+    //     async fetchAndUpdateRate() {
+    //         try {
+    //             // Step 1: Always get EUR rate (simplified EUR-only system)
+    //             const response = await fetch('/api/currency/rate/EUR', {
+    //                 headers: {
+    //                     'Accept': 'application/json',
+    //                     'X-Requested-With': 'XMLHttpRequest'
+    //                 }
+    //             });
 
-                if (!response.ok) {
-                    throw new Error(`Failed to fetch EUR rate: ${response.status}`);
-                }
+    //             if (!response.ok) {
+    //                 throw new Error(`Failed to fetch EUR rate: ${response.status}`);
+    //             }
 
-                const data = await response.json();
+    //             const data = await response.json();
 
-                if (data.success) {
-                    // Use the standardized API response format
-                    const currency = data.data?.fiat_currency || userCurrency;
-                    const rate = data.data?.rate_to_algo || 0;
-                    const timestamp = data.data?.timestamp || new Date().toISOString();
+    //             if (data.success) {
+    //                 // Use the standardized API response format
+    //                 const currency = data.data?.fiat_currency || userCurrency;
+    //                 const rate = data.data?.rate_to_algo || 0;
+    //                 const timestamp = data.data?.timestamp || new Date().toISOString();
 
-                    this.updateBadge(currency, rate, timestamp);
-                } else {
-                    this.showError();
-                }
-            } catch (error) {
-                console.error('Failed to fetch currency rate:', error);
-                this.showError();
-            }
-        }
+    //                 this.updateBadge(currency, rate, timestamp);
+    //             } else {
+    //                 this.showError();
+    //             }
+    //         } catch (error) {
+    //             console.error('Failed to fetch currency rate:', error);
+    //             this.showError();
+    //         }
+    //     }
 
-        updateBadge(currency, rate, updatedAt) {
-            // Check if currency has actually changed
-            const currencyChanged = this.currentCurrency !== currency;
+    //     updateBadge(currency, rate, updatedAt) {
+    //         // Check if currency has actually changed
+    //         const currencyChanged = this.currentCurrency !== currency;
 
-            // Animate currency symbol change (Desktop)
-            if (this.elements.symbol && this.elements.symbol.textContent !== currency) {
-                this.animateValueChange(this.elements.symbol, currency);
-            }
+    //         // Animate currency symbol change (Desktop)
+    //         if (this.elements.symbol && this.elements.symbol.textContent !== currency) {
+    //             this.animateValueChange(this.elements.symbol, currency);
+    //         }
 
-            // Animate currency symbol change (Mobile)
-            if (this.elements.symbolMobile && this.elements.symbolMobile.textContent !== currency) {
-                this.animateValueChange(this.elements.symbolMobile, currency);
-            }
+    //         // Animate currency symbol change (Mobile)
+    //         if (this.elements.symbolMobile && this.elements.symbolMobile.textContent !== currency) {
+    //             this.animateValueChange(this.elements.symbolMobile, currency);
+    //         }
 
-            // Format and animate rate change (Desktop)
-            if (this.elements.rateValue) {
-                const formattedRate = this.formatRate(rate);
-                if (this.elements.rateValue.textContent !== formattedRate) {
-                    this.animateValueChange(this.elements.rateValue, formattedRate);
-                }
-            }
+    //         // Format and animate rate change (Desktop)
+    //         if (this.elements.rateValue) {
+    //             const formattedRate = this.formatRate(rate);
+    //             if (this.elements.rateValue.textContent !== formattedRate) {
+    //                 this.animateValueChange(this.elements.rateValue, formattedRate);
+    //             }
+    //         }
 
-            // Format and animate rate change (Mobile)
-            if (this.elements.rateValueMobile) {
-                const formattedRate = this.formatRate(rate);
-                if (this.elements.rateValueMobile.textContent !== formattedRate) {
-                    this.animateValueChange(this.elements.rateValueMobile, formattedRate);
-                }
-            }
+    //         // Format and animate rate change (Mobile)
+    //         if (this.elements.rateValueMobile) {
+    //             const formattedRate = this.formatRate(rate);
+    //             if (this.elements.rateValueMobile.textContent !== formattedRate) {
+    //                 this.animateValueChange(this.elements.rateValueMobile, formattedRate);
+    //             }
+    //         }
 
-            // Update timestamp with elegant formatting (Desktop)
-            if (this.elements.lastUpdated) {
-                const time = this.formatTimestamp(updatedAt);
-                this.elements.lastUpdated.textContent = time;
-            }
+    //         // Update timestamp with elegant formatting (Desktop)
+    //         if (this.elements.lastUpdated) {
+    //             const time = this.formatTimestamp(updatedAt);
+    //             this.elements.lastUpdated.textContent = time;
+    //         }
 
-            // Update timestamp with elegant formatting (Mobile)
-            if (this.elements.lastUpdatedMobile) {
-                const time = this.formatTimestamp(updatedAt);
-                this.elements.lastUpdatedMobile.textContent = time;
-            }
+    //         // Update timestamp with elegant formatting (Mobile)
+    //         if (this.elements.lastUpdatedMobile) {
+    //             const time = this.formatTimestamp(updatedAt);
+    //             this.elements.lastUpdatedMobile.textContent = time;
+    //         }
 
-            this.currentCurrency = currency;
+    //         this.currentCurrency = currency;
 
-            // 🚀 NOTIFY CURRENCY DISPLAY COMPONENT IF CURRENCY CHANGED
-            if (currencyChanged) {
-                const currencyChangeEvent = new CustomEvent('currencyChanged', {
-                    detail: { currency: currency }
-                });
-                document.dispatchEvent(currencyChangeEvent);
-            }
+    //         // 🚀 NOTIFY CURRENCY DISPLAY COMPONENT IF CURRENCY CHANGED
+    //         if (currencyChanged) {
+    //             const currencyChangeEvent = new CustomEvent('currencyChanged', {
+    //                 detail: { currency: currency }
+    //             });
+    //             document.dispatchEvent(currencyChangeEvent);
+    //         }
 
-            // Add success flash animation
-            this.flashSuccess();
-        }
+    //         // Add success flash animation
+    //         this.flashSuccess();
+    //     }
 
-        formatRate(rate) {
-            if (rate === 0 || !rate) return '--';
+    //     formatRate(rate) {
+    //         if (rate === 0 || !rate) return '--';
 
-            // Professional number formatting with appropriate decimals
-            if (rate >= 1) {
-                return rate.toFixed(4);
-            } else if (rate >= 0.01) {
-                return rate.toFixed(6);
-            } else {
-                return rate.toFixed(8);
-            }
-        }
+    //         // Professional number formatting with appropriate decimals
+    //         if (rate >= 1) {
+    //             return rate.toFixed(4);
+    //         } else if (rate >= 0.01) {
+    //             return rate.toFixed(6);
+    //         } else {
+    //             return rate.toFixed(8);
+    //         }
+    //     }
 
-        formatTimestamp(timestamp) {
-            try {
-                const date = new Date(timestamp);
-                const now = new Date();
-                const diffMs = now - date;
-                const diffSecs = Math.floor(diffMs / 1000);
+    //     formatTimestamp(timestamp) {
+    //         try {
+    //             const date = new Date(timestamp);
+    //             const now = new Date();
+    //             const diffMs = now - date;
+    //             const diffSecs = Math.floor(diffMs / 1000);
 
-                if (diffSecs < 30) return 'Just now';
-                if (diffSecs < 60) return `${diffSecs}s ago`;
-                if (diffSecs < 3600) return `${Math.floor(diffSecs / 60)}m ago`;
+    //             if (diffSecs < 30) return 'Just now';
+    //             if (diffSecs < 60) return `${diffSecs}s ago`;
+    //             if (diffSecs < 3600) return `${Math.floor(diffSecs / 60)}m ago`;
 
-                return date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-            } catch (e) {
-                return 'Updated';
-            }
-        }
+    //             return date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    //         } catch (e) {
+    //             return 'Updated';
+    //         }
+    //     }
 
-        animateValueChange(element, newValue) {
-            // Professional fade-in animation for value changes
-            element.style.opacity = '0.5';
-            element.style.transform = 'scale(0.95)';
+    //     animateValueChange(element, newValue) {
+    //         // Professional fade-in animation for value changes
+    //         element.style.opacity = '0.5';
+    //         element.style.transform = 'scale(0.95)';
 
-            setTimeout(() => {
-                element.textContent = newValue;
-                element.style.opacity = '1';
-                element.style.transform = 'scale(1)';
-                element.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
-            }, 150);
-        }
+    //         setTimeout(() => {
+    //             element.textContent = newValue;
+    //             element.style.opacity = '1';
+    //             element.style.transform = 'scale(1)';
+    //             element.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+    //         }, 150);
+    //     }
 
-        flashSuccess() {
-            // Add subtle success animation to badge
-            const badge = document.getElementById('currency-badge');
-            if (badge) {
-                badge.style.boxShadow = '0 20px 25px -5px rgba(16, 185, 129, 0.3), 0 10px 10px -5px rgba(16, 185, 129, 0.2)';
-                setTimeout(() => {
-                    badge.style.boxShadow = '';
-                    badge.style.transition = 'box-shadow 1s ease-out';
-                }, 500);
-            }
-        }
+    //     flashSuccess() {
+    //         // Add subtle success animation to badge
+    //         const badge = document.getElementById('currency-badge');
+    //         if (badge) {
+    //             badge.style.boxShadow = '0 20px 25px -5px rgba(16, 185, 129, 0.3), 0 10px 10px -5px rgba(16, 185, 129, 0.2)';
+    //             setTimeout(() => {
+    //                 badge.style.boxShadow = '';
+    //                 badge.style.transition = 'box-shadow 1s ease-out';
+    //             }, 500);
+    //         }
+    //     }
 
-        showError() {
-            // Professional error state with visual feedback
-            const badge = document.getElementById('currency-badge');
+    //     showError() {
+    //         // Professional error state with visual feedback
+    //         const badge = document.getElementById('currency-badge');
 
-            // Desktop elements
-            if (this.elements.rateValue) {
-                this.animateValueChange(this.elements.rateValue, 'ERROR');
-            }
+    //         // Desktop elements
+    //         if (this.elements.rateValue) {
+    //             this.animateValueChange(this.elements.rateValue, 'ERROR');
+    //         }
 
-            if (this.elements.lastUpdated) {
-                this.elements.lastUpdated.textContent = 'Connection failed';
-            }
+    //         if (this.elements.lastUpdated) {
+    //             this.elements.lastUpdated.textContent = 'Connection failed';
+    //         }
 
-            // Mobile elements
-            if (this.elements.rateValueMobile) {
-                this.animateValueChange(this.elements.rateValueMobile, 'ERROR');
-            }
+    //         // Mobile elements
+    //         if (this.elements.rateValueMobile) {
+    //             this.animateValueChange(this.elements.rateValueMobile, 'ERROR');
+    //         }
 
-            if (this.elements.lastUpdatedMobile) {
-                this.elements.lastUpdatedMobile.textContent = 'Connection failed';
-            }
+    //         if (this.elements.lastUpdatedMobile) {
+    //             this.elements.lastUpdatedMobile.textContent = 'Connection failed';
+    //         }
 
-            // Add error visual feedback
-            if (badge) {
-                badge.style.boxShadow = '0 20px 25px -5px rgba(239, 68, 68, 0.3), 0 10px 10px -5px rgba(239, 68, 68, 0.2)';
-                badge.style.borderColor = 'rgba(239, 68, 68, 0.5)';
+    //         // Add error visual feedback
+    //         if (badge) {
+    //             badge.style.boxShadow = '0 20px 25px -5px rgba(239, 68, 68, 0.3), 0 10px 10px -5px rgba(239, 68, 68, 0.2)';
+    //             badge.style.borderColor = 'rgba(239, 68, 68, 0.5)';
 
-                setTimeout(() => {
-                    badge.style.boxShadow = '';
-                    badge.style.borderColor = '';
-                    badge.style.transition = 'all 1s ease-out';
-                }, 2000);
-            }
+    //             setTimeout(() => {
+    //                 badge.style.boxShadow = '';
+    //                 badge.style.borderColor = '';
+    //                 badge.style.transition = 'all 1s ease-out';
+    //             }, 2000);
+    //         }
 
-            // Retry after a short delay
-            setTimeout(() => {
-                this.fetchAndUpdateRate();
-            }, 5000);
-        }
+    //         // Retry after a short delay
+    //         setTimeout(() => {
+    //             this.fetchAndUpdateRate();
+    //         }, 5000);
+    //     }
 
-        bindEvents() {
-            // Currency switch dropdown
-            if (this.elements.switchButton && this.elements.switchMenu) {
-                this.elements.switchButton.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    this.elements.switchMenu.classList.toggle('hidden');
-                });
+    //     bindEvents() {
+    //         // Currency switch dropdown
+    //         if (this.elements.switchButton && this.elements.switchMenu) {
+    //             this.elements.switchButton.addEventListener('click', (e) => {
+    //                 e.preventDefault();
+    //                 e.stopPropagation();
+    //                 this.elements.switchMenu.classList.toggle('hidden');
+    //             });
 
-                // Close dropdown when clicking outside
-                document.addEventListener('click', (e) => {
-                    if (!this.elements.switchButton.contains(e.target) &&
-                        !this.elements.switchMenu.contains(e.target)) {
-                        this.elements.switchMenu.classList.add('hidden');
-                    }
-                });
-            }
+    //             // Close dropdown when clicking outside
+    //             document.addEventListener('click', (e) => {
+    //                 if (!this.elements.switchButton.contains(e.target) &&
+    //                     !this.elements.switchMenu.contains(e.target)) {
+    //                     this.elements.switchMenu.classList.add('hidden');
+    //                 }
+    //             });
+    //         }
 
-            // Currency option clicks
-            this.elements.currencyOptions.forEach(option => {
-                option.addEventListener('click', async (e) => {
-                    e.preventDefault();
-                    const newCurrency = option.getAttribute('data-currency');
-                    await this.switchCurrency(newCurrency);
-                    this.elements.switchMenu.classList.add('hidden');
-                });
-            });
-        }
+    //         // Currency option clicks
+    //         this.elements.currencyOptions.forEach(option => {
+    //             option.addEventListener('click', async (e) => {
+    //                 e.preventDefault();
+    //                 const newCurrency = option.getAttribute('data-currency');
+    //                 await this.switchCurrency(newCurrency);
+    //                 this.elements.switchMenu.classList.add('hidden');
+    //             });
+    //         });
+    //     }
 
-        async switchCurrency(newCurrency) {
-            try {
-                const response = await fetch('/api/user/preferred-currency', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    body: JSON.stringify({ preferred_currency: newCurrency })
-                });
+    //     async switchCurrency(newCurrency) {
+    //         try {
+    //             const response = await fetch('/api/user/preferred-currency', {
+    //                 method: 'POST',
+    //                 headers: {
+    //                     'Content-Type': 'application/json',
+    //                     'Accept': 'application/json',
+    //                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+    //                     'X-Requested-With': 'XMLHttpRequest'
+    //                 },
+    //                 body: JSON.stringify({ preferred_currency: newCurrency })
+    //             });
 
-                if (response.ok) {
-                    // Update current currency
-                    this.currentCurrency = newCurrency;
+    //             if (response.ok) {
+    //                 // Update current currency
+    //                 this.currentCurrency = newCurrency;
 
-                    // Immediately fetch new rate (this will emit the currencyChanged event via updateBadge)
-                    this.fetchAndUpdateRate();
+    //                 // Immediately fetch new rate (this will emit the currencyChanged event via updateBadge)
+    //                 this.fetchAndUpdateRate();
 
-                    // Show success feedback
-                    this.showSuccess(`Currency switched to ${newCurrency}`);
-                } else {
-                    throw new Error('Failed to update currency preference');
-                }
-            } catch (error) {
-                console.error('Failed to switch currency:', error);
-                this.showError('Failed to switch currency');
-            }
-        }
+    //                 // Show success feedback
+    //                 this.showSuccess(`Currency switched to ${newCurrency}`);
+    //             } else {
+    //                 throw new Error('Failed to update currency preference');
+    //             }
+    //         } catch (error) {
+    //             console.error('Failed to switch currency:', error);
+    //             this.showError('Failed to switch currency');
+    //         }
+    //     }
 
-        showSuccess(message) {
-            // Simple success indicator - you can enhance this
-            const badge = document.getElementById('currency-badge');
-            if (badge) {
-                badge.classList.add('ring-2', 'ring-emerald-400');
-                setTimeout(() => {
-                    badge.classList.remove('ring-2', 'ring-emerald-400');
-                }, 1500);
-            }
-        }
+    //     showSuccess(message) {
+    //         // Simple success indicator - you can enhance this
+    //         const badge = document.getElementById('currency-badge');
+    //         if (badge) {
+    //             badge.classList.add('ring-2', 'ring-emerald-400');
+    //             setTimeout(() => {
+    //                 badge.classList.remove('ring-2', 'ring-emerald-400');
+    //             }, 1500);
+    //         }
+    //     }
 
-        destroy() {
-            if (this.updateInterval) {
-                clearInterval(this.updateInterval);
-            }
-        }
-    }
+    //     destroy() {
+    //         if (this.updateInterval) {
+    //             clearInterval(this.updateInterval);
+    //         }
+    //     }
+    // }
 
     // Initialize Currency Badge Manager
-    let currencyBadgeManager;
-    document.addEventListener('DOMContentLoaded', function() {
-        currencyBadgeManager = new CurrencyBadgeManager();
-    });
+    // let currencyBadgeManager;
+    // document.addEventListener('DOMContentLoaded', function() {
+    //     currencyBadgeManager = new CurrencyBadgeManager();
+    // });
 
-    // Cleanup on page unload
-    window.addEventListener('beforeunload', function() {
-        if (currencyBadgeManager) {
-            currencyBadgeManager.destroy();
-        }
-    });
+    // // Cleanup on page unload
+    // window.addEventListener('beforeunload', function() {
+    //     if (currencyBadgeManager) {
+    //         currencyBadgeManager.destroy();
+    //     }
+    // });
     </script>

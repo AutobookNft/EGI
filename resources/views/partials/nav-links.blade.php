@@ -110,14 +110,14 @@ $navLinkClasses = $isMobile
 <button type="button" data-action="open-create-collection-modal"
     class="{{ $navLinkClasses }} w-full text-left flex items-center gap-1"
     aria-label="{{ __('collection.create_collection') }}">
-    <span class="material-symbols-outlined text-base" aria-hidden="true">add</span>
+    <span class="text-base material-symbols-outlined" aria-hidden="true">add</span>
     <span>{{ __('collection.create_collection') }}</span>
 </button>
 @else
 {{-- Versione Desktop - stile menu normale --}}
 <button type="button" data-action="open-create-collection-modal"
     class="{{ $navLinkClasses }} inline-flex items-center gap-1" aria-label="{{ __('collection.create_collection') }}">
-    <span class="material-symbols-outlined text-sm" aria-hidden="true">add</span>
+    <span class="text-sm material-symbols-outlined" aria-hidden="true">add</span>
     <span class="hidden sm:inline">{{ __('collection.create_collection') }}</span>
     <span class="sm:hidden">{{ __('collection.create') }}</span>
 </button>
