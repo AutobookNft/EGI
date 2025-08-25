@@ -11,6 +11,7 @@ Implementare un sistema di **ottimizzazione automatica delle immagini** nell'Ult
 ## 🏗️ ARCHITETTURA PATH ESISTENTE (DA RISPETTARE ASSOLUTAMENTE)
 
 ### Struttura Path Attuale (`config/paths.php`)
+
 ```php
 'paths' => [
     'collections' => 'users_files/collections_{collectionId}/',
@@ -28,12 +29,14 @@ Implementare un sistema di **ottimizzazione automatica delle immagini** nell'Ult
 ```
 
 ### Configurazione Spatie Media Library
-- **Path Generator**: Ho configurato `CustomPathGenerator` (attualmente usa `DefaultPathGenerator`)
-- **Storage**: Sistema multi-disk con Digital Ocean come storage primario
-- **Media Collections**: `main_gallery` e `featured_image` configurate
-- **Conversions**: Temporaneamente disabilitate (da riattivare con ottimizzazioni)
+
+-   **Path Generator**: Ho configurato `CustomPathGenerator` (attualmente usa `DefaultPathGenerator`)
+-   **Storage**: Sistema multi-disk con Digital Ocean come storage primario
+-   **Media Collections**: `main_gallery` e `featured_image` configurate
+-   **Conversions**: Temporaneamente disabilitate (da riattivare con ottimizzazioni)
 
 ### CRITICAL: Strategia di Conservazione Path
+
 ```
 // ORIGINALE (SEMPRE PRESERVATO)
 users_files/collections_123/EGIs/original_image.jpg
@@ -41,7 +44,7 @@ users_files/collections_123/EGIs/original_image.jpg
 // VARIANTI OTTIMIZZATE (NUOVE - sottocartella /optimized/)
 users_files/collections_123/EGIs/optimized/
 ├── thumbnail/original_image_150x150.webp
-├── mobile/original_image_400x400.webp  
+├── mobile/original_image_400x400.webp
 ├── tablet/original_image_600x600.webp
 └── desktop/original_image_800x800.webp
 
@@ -49,36 +52,37 @@ users_files/collections_123/EGIs/optimized/
 users_files/collections_123/head/banner/original_banner.jpg
 users_files/collections_123/head/banner/optimized/
 ├── mobile/original_banner_800x400.webp
-├── tablet/original_banner_1200x600.webp  
+├── tablet/original_banner_1200x600.webp
 └── desktop/original_banner_1920x960.webp
 ```
 
 ## 📊 SCALA MASSIVA DEL PROGETTO
 
-- **Immagini esistenti**: Centinaia di migliaia di EGI + hero banner
-- **Upload giornalieri**: Decine di nuove immagini dai Creator
-- **Performance target**: LCP < 2.5s (attualmente 10.15s)
-- **Backward compatibility**: Fondamentale per immagini esistenti
+-   **Immagini esistenti**: Centinaia di migliaia di EGI + hero banner
+-   **Upload giornalieri**: Decine di nuove immagini dai Creator
+-   **Performance target**: LCP < 2.5s (attualmente 10.15s)
+-   **Backward compatibility**: Fondamentale per immagini esistenti
 
 ## 🔧 SPECIFICHE TECNICHE RICHIESTE
 
 ### 1. **ImageOptimizationProcessor** (Nuovo)
+
 ```php
 // Posizione: packages/ultra/egi-module/src/Services/ImageOptimizationProcessor.php
 
-class ImageOptimizationProcessor 
+class ImageOptimizationProcessor
 {
     /**
      * Genera varianti responsive rispettando path esistenti
      * MANTIENE sempre originale ad alta definizione
      */
     public function processImage(string $originalPath, string $collectionId): array
-    
+
     /**
      * Configurazione varianti per diversi contesti
      */
     public function getVariantConfigurations(): array
-    
+
     /**
      * Integrazione con CustomPathGenerator esistente
      */
@@ -89,21 +93,25 @@ class ImageOptimizationProcessor
 ### 2. **Varianti Richieste**
 
 #### Per EGI Standard:
-- **Thumbnail**: 150x150px WebP (quality 85)
-- **Mobile**: 400x400px WebP (quality 80)
-- **Tablet**: 600x600px WebP (quality 75)
-- **Desktop**: 800x800px WebP (quality 75)
+
+-   **Thumbnail**: 150x150px WebP (quality 85)
+-   **Mobile**: 400x400px WebP (quality 80)
+-   **Tablet**: 600x600px WebP (quality 75)
+-   **Desktop**: 800x800px WebP (quality 75)
 
 #### Per Hero Banner:
-- **Mobile**: 800x400px WebP (quality 80)
-- **Tablet**: 1200x600px WebP (quality 75)
-- **Desktop**: 1920x960px WebP (quality 70)
+
+-   **Mobile**: 800x400px WebP (quality 80)
+-   **Tablet**: 1200x600px WebP (quality 75)
+-   **Desktop**: 1920x960px WebP (quality 70)
 
 #### Per Altri Formati:
-- **Card**: 300x300px WebP (quality 85)
-- **Avatar**: 200x200px WebP (quality 90)
+
+-   **Card**: 300x300px WebP (quality 85)
+-   **Avatar**: 200x200px WebP (quality 90)
 
 ### 3. **OptimizeImageJob** (Queue Job)
+
 ```php
 // Posizione: packages/ultra/egi-module/src/Jobs/OptimizeImageJob.php
 
@@ -114,7 +122,7 @@ class OptimizeImageJob implements ShouldQueue
      * Gestisce fallback per errori di ottimizzazione
      */
     public function handle(): void
-    
+
     /**
      * Batch processing per immagini esistenti
      */
@@ -123,6 +131,7 @@ class OptimizeImageJob implements ShouldQueue
 ```
 
 ### 4. **Integrazione con Upload Esistente**
+
 ```php
 // Modifica: packages/ultra/egi-module/src/Handlers/EgiUploadHandler.php
 
@@ -137,16 +146,17 @@ protected function triggerImageOptimization(string $savedPath, int $collectionId
 ## 🔄 GESTIONE BACKWARD COMPATIBILITY
 
 ### 1. **Helper per Frontend**
+
 ```php
 // Nuovo: app/Helpers/ResponsiveImageHelper.php
 
-class ResponsiveImageHelper 
+class ResponsiveImageHelper
 {
     /**
      * Genera tag <picture> con fallback all'originale
      */
     public static function picture(string $originalUrl, array $options = []): string
-    
+
     /**
      * Ottiene URL variante ottimizzata o fallback originale
      */
@@ -155,10 +165,11 @@ class ResponsiveImageHelper
 ```
 
 ### 2. **Comando Artisan per Batch**
+
 ```php
 // Nuovo: packages/ultra/egi-module/src/Console/Commands/OptimizeExistingImages.php
 
-php artisan egi:optimize-images 
+php artisan egi:optimize-images
 php artisan egi:optimize-images --collection=123
 php artisan egi:optimize-images --dry-run
 ```
@@ -166,18 +177,21 @@ php artisan egi:optimize-images --dry-run
 ## ⚡ STRATEGIA DI IMPLEMENTAZIONE
 
 ### Fase 1: Core Development
+
 1. **ImageOptimizationProcessor** con configurazioni varianti
-2. **OptimizeImageJob** per processing asincrono 
+2. **OptimizeImageJob** per processing asincrono
 3. **Integrazione CustomPathGenerator** per path corretti
 4. **Testing con immagini di prova**
 
 ### Fase 2: Integration
+
 1. **Hook in EgiUploadHandler** post-upload
 2. **ResponsiveImageHelper** per frontend
 3. **Comando batch** per immagini esistenti
 4. **Configurazione queue** per performance
 
 ### Fase 3: Deployment
+
 1. **Testing su subset** immagini esistenti
 2. **Batch processing** graduale (chunked)
 3. **Monitoraggio performance** e storage
@@ -243,15 +257,15 @@ return [
 
 ## 📋 CHECKLIST IMPLEMENTAZIONE
 
-- [ ] **ImageOptimizationProcessor** con path integration
-- [ ] **OptimizeImageJob** con queue processing
-- [ ] **EgiUploadHandler** hook post-upload
-- [ ] **ResponsiveImageHelper** per frontend
-- [ ] **CustomPathGenerator** enhancement
-- [ ] **Comando Artisan** batch processing
-- [ ] **Configurazione varianti** completa
-- [ ] **Testing** su dataset campione
-- [ ] **Documentation** per deployment
+-   [ ] **ImageOptimizationProcessor** con path integration
+-   [ ] **OptimizeImageJob** con queue processing
+-   [ ] **EgiUploadHandler** hook post-upload
+-   [ ] **ResponsiveImageHelper** per frontend
+-   [ ] **CustomPathGenerator** enhancement
+-   [ ] **Comando Artisan** batch processing
+-   [ ] **Configurazione varianti** completa
+-   [ ] **Testing** su dataset campione
+-   [ ] **Documentation** per deployment
 
 ## 🚨 VINCOLI CRITICI
 

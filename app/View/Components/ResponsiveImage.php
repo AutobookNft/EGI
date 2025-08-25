@@ -7,11 +7,10 @@ use Illuminate\View\Component;
 
 /**
  * ResponsiveImage Component
- * 
+ *
  * Blade component per immagini responsive ottimizzate
  */
-class ResponsiveImage extends Component
-{
+class ResponsiveImage extends Component {
     public string $src;
     public string $alt;
     public string $class;
@@ -44,8 +43,7 @@ class ResponsiveImage extends Component
     /**
      * Get the view / contents that represent the component.
      */
-    public function render()
-    {
+    public function render() {
         // Se fallbackOnly è true o non ci sono varianti ottimizzate, usa img semplice
         if ($this->fallbackOnly || !ResponsiveImageHelper::hasOptimizedVariants($this->src, $this->type)) {
             return view('components.responsive-image-fallback');
@@ -58,8 +56,7 @@ class ResponsiveImage extends Component
     /**
      * Genera il tag picture HTML
      */
-    public function getPictureHtml(): string
-    {
+    public function getPictureHtml(): string {
         return ResponsiveImageHelper::picture($this->src, [
             'alt' => $this->alt,
             'class' => $this->class,
@@ -72,8 +69,7 @@ class ResponsiveImage extends Component
     /**
      * Ottiene attributi per img tag
      */
-    public function getImgAttributes(): array
-    {
+    public function getImgAttributes(): array {
         $attributes = [
             'src' => $this->src,
             'alt' => $this->alt,
