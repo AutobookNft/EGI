@@ -18,6 +18,12 @@ export default defineConfig(({ mode }) => {
         plugins: [
             laravel({
                 input: [
+                    // 🚀 PERFORMANCE CRITICAL - Load first for fast navbar
+                    'resources/css/critical-navbar.css',
+                    'resources/css/performance.css',
+                    'resources/js/navbar-performance.js',
+                    'resources/js/lazy-loader.js',
+                    // Regular assets
                     'resources/js/logo3d.js',
                     'resources/css/app.css',
                     'resources/css/guest.css',
@@ -51,8 +57,7 @@ export default defineConfig(({ mode }) => {
                     'vendor/ultra/ultra-upload-manager/resources/ts/core/file_upload_manager.ts',
                     'vendor/ultra/ultra-upload-manager/resources/css/app.css',
                     'resources/js/components/vanilla-mobile-menu.js',
-                    'resources/js/components/vanilla-desktop-menu.js',
-                    'resources/css/mega-menu.css'
+                    'resources/js/components/vanilla-desktop-menu.js'
                 ],
                 refresh: [
                     'resources/**',

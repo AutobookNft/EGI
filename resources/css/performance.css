@@ -1,0 +1,194 @@
+/* Performance optimizations for component loading states */
+
+/* Loading states for heavy components */
+.component-loading {
+    opacity: 0.7;
+    pointer-events: none;
+    position: relative;
+}
+
+.component-loading::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.1),
+        transparent
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    z-index: 1;
+}
+
+.component-loaded {
+    opacity: 1;
+    pointer-events: auto;
+    transition: opacity 0.3s ease-in-out;
+}
+
+/* Lazy image states */
+.lazy-image {
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+    background-color: #374151;
+}
+
+.lazy-image.loaded {
+    opacity: 1;
+}
+
+.lazy-image.error {
+    opacity: 0.5;
+    filter: grayscale(100%);
+    position: relative;
+}
+
+.lazy-image.error::after {
+    content: "⚠️ Image failed to load";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 12px;
+    color: #9ca3af;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 4px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+}
+
+/* Progressive enhancement for carousel components */
+.collection-carousel,
+.egi-carousel,
+.creator-carousel {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.5s ease-out;
+}
+
+.collection-carousel.component-loaded,
+.egi-carousel.component-loaded,
+.creator-carousel.component-loaded {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Skeleton loading states */
+.skeleton {
+    background: linear-gradient(90deg, #374151, #4b5563, #374151);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 4px;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+/* Critical performance optimizations */
+.will-change-transform {
+    will-change: transform;
+}
+
+.will-change-opacity {
+    will-change: opacity;
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+    .lazy-image,
+    .component-loading,
+    .component-loaded,
+    .collection-carousel,
+    .egi-carousel,
+    .creator-carousel {
+        transition: none !important;
+        animation: none !important;
+    }
+}
+
+/* Performance hints for images */
+img[loading="lazy"] {
+    content-visibility: auto;
+}
+
+/* Optimize heavy components with content-visibility */
+.collection-carousel,
+.egi-carousel,
+.creator-carousel,
+.payment-stats {
+    content-visibility: auto;
+    contain-intrinsic-size: 0 300px;
+}
+
+/* Loading progress indicator */
+.loading-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 2px;
+    background: linear-gradient(to right, #10b981, #059669);
+    z-index: 9999;
+    transition: width 0.3s ease;
+}
+
+.loading-progress.hidden {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* Navbar specific optimizations */
+.navbar-critical {
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.navbar-loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.navbar-loaded {
+    opacity: 1;
+    pointer-events: auto;
+    transition: opacity 0.3s ease-in-out;
+}
+
+/* Priority loading for above-the-fold content */
+.above-the-fold img {
+    loading: eager;
+    decoding: sync;
+    fetchpriority: high;
+}
+
+/* Below-the-fold content optimization */
+.below-the-fold {
+    content-visibility: auto;
+    contain-intrinsic-size: 0 400px;
+}
+
+.below-the-fold img {
+    loading: lazy;
+    decoding: async;
+}
+
+/* Hero section optimizations */
+.hero-section {
+    contain: layout style paint;
+}
+
+.hero-section img:first-child {
+    loading: eager;
+    decoding: sync;
+    fetchpriority: high;
+}

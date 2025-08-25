@@ -353,7 +353,7 @@ function handleCreateEgiAction(authType) {
         if (typeof window.showLoginModal === 'function') {
             window.showLoginModal();
         } else {
-            // No fallback redirect - evita navigazione indesiderata  
+            // No fallback redirect - evita navigazione indesiderata
             console.log('No auth modal function found - check your global functions');
         }
     }

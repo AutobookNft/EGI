@@ -21,7 +21,8 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preload" href="{{ asset('images/logo/logo_1.webp') }}" as="image">
+    <link rel="preload" href="{{ asset('images/logo/logo_1.webp') }}" as="image" fetchpriority="high">
+    <link rel="preload" href="{{ asset('images/logo/apple-touch-icon.png') }}" as="image">
 
     <link
         href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600;1,700;1,800;1,900&family=Source+Sans+Pro:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600;1,700&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
@@ -37,7 +38,25 @@
 
 
     {{-- Asset CSS (Vite) --}}
-    @vite(['resources/css/app.css', 'resources/css/guest.css', 'resources/css/modal-fix.css'])
+    @vite(['resources/css/critical-navbar.css', 'resources/css/performance.css', 'resources/css/app.css', 'resources/css/guest.css', 'resources/css/modal-fix.css'])
+
+    {{-- Critical CSS inline for immediate navbar rendering --}}
+    <style>
+        /* Critical navbar styles - inline for immediate rendering */
+        header[role="banner"] {
+            visibility: visible !important;
+            opacity: 1 !important;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: rgba(17, 24, 39, 0.9);
+            backdrop-filter: blur(12px);
+        }
+        .navbar-loading { opacity: 0.6; }
+        .navbar-loaded { opacity: 1; transition: opacity 0.3s ease; }
+        .lazy-image { opacity: 0; transition: opacity 0.3s ease; }
+        .lazy-image.loaded { opacity: 1; }
+    </style>
 
     {{-- Font Awesome --}}
     {{-- Schema.org Markup per il WebSite (Generale) --}}
@@ -95,12 +114,15 @@
                     @endphp
 
 
-                    {{-- Logo --}}
-                    <div class="flex items-center flex-shrink-0">
+                    {{-- Logo - Critical loading for fast navbar render --}}
+                    <div class="flex items-center flex-shrink-0 navbar-logo">
                         <a href="{{ url('/home') }}" class="flex items-center gap-2 group"
                             aria-label="{{ __('collection.logo_home_link_aria_label') }}">
                             <img src="{{ asset('images/logo/logo_1.webp') }}" alt="Frangette Logo"
-                                class="w-auto h-7 sm:h-8 md:h-9" loading="lazy" decoding="async">
+                                class="w-auto h-7 sm:h-8 md:h-9 navbar-critical"
+                                loading="eager"
+                                decoding="sync"
+                                fetchpriority="high">
                             <span
                                 class="hidden text-base font-semibold text-gray-400 transition group-hover:text-emerald-400 sm:inline md:text-lg">{{
                                 __('Frangette') }}</span>
@@ -328,6 +350,9 @@
 
     {{-- Mobile Menu Component - Outside header for proper overlay positioning --}}
     <x-navigation.vanilla-mobile-menu />
+
+    {{-- Load performance monitoring and lazy loader after DOM is ready --}}
+    @vite(['resources/js/navbar-performance.js', 'resources/js/lazy-loader.js'])
 
     <script>
         window.addEventListener('load', function() {

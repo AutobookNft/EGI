@@ -81,8 +81,29 @@ return [
             @if($hasCollections)
             @foreach($collections as $index => $collection)
             <div class="relative flex-shrink-0 w-full h-full snap-start" style="scroll-snap-align: start;">
-                <img src="{{ $collection->image_banner ? asset($collection->image_banner) : $defaultBannerUrl }}"
-                    alt="{{ $collection->collection_name ?? '' }}" class="object-cover w-full h-full">
+                @php
+                    $imageSrc = $collection->image_banner ? asset($collection->image_banner) : $defaultBannerUrl;
+                    $isFirstImage = $index === 0;
+                @endphp
+
+                @if($isFirstImage)
+                    {{-- First image loads immediately for LCP optimization --}}
+                    <img src="{{ $imageSrc }}"
+                         alt="{{ $collection->collection_name ?? '' }}"
+                         class="object-cover w-full h-full navbar-critical"
+                         loading="eager"
+                         decoding="sync"
+                         fetchpriority="high">
+                @else
+                    {{-- Other images use lazy loading --}}
+                    <img data-lazy="{{ $imageSrc }}"
+                         src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 600'%3E%3Crect width='100%25' height='100%25' fill='%23374151'/%3E%3C/svg%3E"
+                         alt="{{ $collection->collection_name ?? '' }}"
+                         class="object-cover w-full h-full lazy-image"
+                         loading="lazy"
+                         decoding="async">
+                @endif
+
                 <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10"></div>
                 <div class="absolute inset-0 opacity-75 bg-gradient-to-r from-black/50 via-transparent to-transparent">
                 </div>
@@ -90,10 +111,14 @@ return [
             @endforeach
             @else
             <div class="relative flex-shrink-0 w-full h-full snap-start" style="scroll-snap-align: start;">
-                <img src="{{ $defaultBannerUrl }}" alt="Default background" class="object-cover w-full h-full">
+                <img src="{{ $defaultBannerUrl }}"
+                     alt="Default background"
+                     class="object-cover w-full h-full navbar-critical"
+                     loading="eager"
+                     decoding="sync">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10"></div>
                 <div class="absolute inset-0 opacity-75 bg-gradient-to-r from-black/50 via-transparent to-transparent">
-                </div>\
+                </div>
             </div>
             @endif
         </div>
