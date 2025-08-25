@@ -1,4 +1,10 @@
 {{-- Desktop Mega Menu Component --}}
+
+{{-- Component-specific styles --}}
+@push('styles')
+    @vite('resources/css/mega-menu.css')
+@endpush
+
 <div class="relative ms-3">
     <x-dropdown align="right" width="96" contentClasses="bg-transparent border-0 shadow-none p-0">
         <x-slot name="trigger">

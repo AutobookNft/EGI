@@ -1,4 +1,14 @@
 {{-- Mobile Navigation Menu Component --}}
+
+{{-- Component-specific assets --}}
+@push('styles')
+    @vite('resources/css/mega-menu.css')
+@endpush
+
+@push('scripts')
+    @vite('resources/js/mega-menu-mobile.js')
+@endpush
+
 <div :class="{ 'block': open, 'hidden': !open }" class="hidden sm:hidden">
     <!-- Mobile Menu Overlay -->
     <div class="fixed inset-0 z-50 bg-black/20 backdrop-blur-sm mobile-menu-overlay" @click="open = false"></div>
