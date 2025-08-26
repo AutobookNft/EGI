@@ -48,7 +48,7 @@ export async function sendAction(actionRequest, baseUrl) {
 
         return data;
     } catch (error) {
-        console.error(`Errore nell'azione ${action} per la notifica ${notificationId}:`, error);
+        console.error(`Errore nell'azione ${actionRequest.action} per la notifica ${actionRequest.notificationId}:`, error);
         throw error;
     }
 }

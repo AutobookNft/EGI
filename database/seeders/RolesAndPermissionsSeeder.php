@@ -36,6 +36,7 @@ class RolesAndPermissionsSeeder extends Seeder
         'update_collection_image_header',
         'delete_collection',
         'read_collection_header',
+        'read_collection',
         'open_collection',
         'view_collection',
         'view_collection_header',
@@ -84,7 +85,7 @@ class RolesAndPermissionsSeeder extends Seeder
         'can_request_export',
         'can_request_deletion',
 
-        
+
         // Patron specifici
         'support_creators',
         'view_creator_projects',
@@ -193,7 +194,7 @@ class RolesAndPermissionsSeeder extends Seeder
 
         // ✅ NUOVI PERMESSI PER VISIBILITÀ COMMISSIONER
         'display_public_avatar_on_egi', // Permette di mostrare l'avatar (Spatie) sull'EGI
-        'display_public_name_on_egi',   // Permette di mostrare nome e cognome sull'EGI 
+        'display_public_name_on_egi',   // Permette di mostrare nome e cognome sull'EGI
 
     ];
 
@@ -204,7 +205,7 @@ class RolesAndPermissionsSeeder extends Seeder
 
         'creator' => [
             // ═══ PERMESSI ESISTENTI DEL CREATOR (NON TOCCARE) ═══
-            'create_team', 'update_team', 'delete_team',
+            'create_team', 'update_team', 'delete_team', 'read_collection',
             'add_team_member', 'remove_team_member', 'modify_team_roles',
             'create_collection', 'update_collection', 'delete_collection','update_collection_image_header', 'open_collection',
             'create_EGI', 'update_EGI', 'delete_EGI', 'manage_EGI',
@@ -241,7 +242,7 @@ class RolesAndPermissionsSeeder extends Seeder
 
         'admin' => [
             // ═══ PERMESSI ESISTENTI DELL'ADMIN (NON TOCCARE) ═══
-            'create_team', 'remove_team_member', 'modify_team_roles',
+            'create_team', 'remove_team_member', 'modify_team_roles', 'read_collection',
             'update_collection', 'update_collection_image_header', 'open_collection',
             'create_EGI', 'update_EGI', 'delete_EGI', 'manage_EGI',
             'view_user', 'view_profile', 'view_team', 'view_dashboard', 'view_bio', 'view_settings',
@@ -270,7 +271,7 @@ class RolesAndPermissionsSeeder extends Seeder
         'guest' => [
             // ═══ PERMESSI ESISTENTI DEL GUEST (NON TOCCARE) ═══
             'view_collection_header', 'view_dashboard', 'view_documentation', 'view_statistics',
-            'view_EGI',
+            'view_EGI','read_collection',
             'view_privacy_policy', 'edit_personal_data', 'limit_data_processing',
             'access_dashboard'
         ],
@@ -283,7 +284,7 @@ class RolesAndPermissionsSeeder extends Seeder
 
             // Base permissions
             'access_dashboard', 'view_dashboard', 'view_collection', 'view_EGI',
-            'view_statistics', 'view_documentation', 'view_collection_header',
+            'view_statistics', 'view_documentation', 'view_collection_header', 'read_collection',
 
             // Patron specific
             'support_creators', 'view_creator_projects', 'make_donations', 'patronage_management',
@@ -314,7 +315,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'manage_bio_profile',
             'can_request_export',
             'can_request_deletion',
-           
+
         ],
 
         'collector' => [
@@ -518,11 +519,11 @@ class RolesAndPermissionsSeeder extends Seeder
             'priority_reservations',
             'full_auction_access',
             'manage_advanced_settings',
-            'can_request_export',   
+            'can_request_export',
             'can_request_deletion',
             'manage_own_biographies',
             'manage_bio_profile',
-            
+
         ],
 
         'weak_connect' => [
