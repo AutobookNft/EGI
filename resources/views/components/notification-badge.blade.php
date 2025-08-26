@@ -97,7 +97,7 @@
 
             {{-- View All Link --}}
             <div class="px-4 py-3 border-t border-gray-200 bg-gray-50">
-                <a href="{{ route('notifications.index') }}"
+                <a href="{{ route('dashboard') }}"
                     class="block text-sm font-medium text-center text-indigo-600 transition-colors duration-150 notification-view-all hover:text-indigo-500">
                     {{ __('notification.badge.view_all') }}
                 </a>

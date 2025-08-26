@@ -236,6 +236,16 @@ class InvitationService {
 
                 // die();
 
+                // Controlla se l'utente è già membro della collezione
+                $existingMember = CollectionUser::where('collection_id', $invitationData->collection_id)
+                    ->where('user_id', $receiver->id)
+                    ->first();
+
+                if ($existingMember) {
+                    // Utente già membro - returna errore specifico per frontend
+                    throw new Exception('ALREADY_MEMBER:' . __('collection.invitation.already_member'));
+                }
+
                 // // Aggiungi l'utente alla collezione
                 $collectionUser = CollectionUser::create($invitationData->toCollectionUser());
 

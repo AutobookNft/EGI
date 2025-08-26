@@ -11,9 +11,9 @@
         </div>
 
         <!-- Main Notification Container -->
-        <div class="p-6 text-white border shadow-2xl bg-white/10 backdrop-blur-lg border-white/20 rounded-3xl" 
-             x-data="{ 
-                 loading: false, 
+        <div class="p-6 text-white border shadow-2xl bg-white/10 backdrop-blur-lg border-white/20 rounded-3xl"
+             x-data="{
+                 loading: false,
                  selectedNotification: null,
                  loadingTimeout: null
              }"
@@ -28,9 +28,9 @@
                      if(loadingTimeout) clearTimeout(loadingTimeout);
                  });
              ">
-            
+
             <!-- Loading Overlay -->
-            <div x-show="loading" 
+            <div x-show="loading"
                  x-transition:enter="transition-opacity ease-out duration-300"
                  x-transition:enter-start="opacity-0"
                  x-transition:enter-end="opacity-100"
@@ -53,7 +53,7 @@
 
             <!-- Notification Thumbnails Section -->
                         <!-- Notification Thumbnails Section -->
-            <div id="head-notifications-container" 
+            <div id="head-notifications-container"
                  class="mb-8"
                  x-data="{ isVisible: false }"
                  x-init="setTimeout(() => isVisible = true, 100)"
@@ -61,7 +61,7 @@
                  x-transition:enter="transition-all ease-out duration-500"
                  x-transition:enter-start="opacity-0 transform translate-y-4"
                  x-transition:enter-end="opacity-100 transform translate-y-0">
-                
+
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="text-xl font-semibold text-white flex items-center">
                         <svg class="w-6 h-6 mr-2 text-purple-400 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">

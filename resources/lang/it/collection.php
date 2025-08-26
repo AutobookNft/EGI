@@ -332,6 +332,7 @@ return [
         'deletion_error' => 'Errore durante l\'eliminazione.',
         'deletion_error_generic' => 'Si è verificato un errore durante l\'eliminazione.',
         'create_invitation' => 'Crea un invito',
+        'already_member' => 'Sei già membro di questa collezione!',
     ],
     'collaborators' => [
         'add_denied' => 'Non hai i permessi per aggiungere collaboratori',

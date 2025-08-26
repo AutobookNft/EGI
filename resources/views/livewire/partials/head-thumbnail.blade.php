@@ -3,10 +3,10 @@
     $priority = 'medium'; // default
     $priorityColors = [
         'high' => 'from-red-500 to-pink-600',
-        'medium' => 'from-yellow-500 to-orange-500', 
+        'medium' => 'from-yellow-500 to-orange-500',
         'low' => 'from-green-500 to-emerald-500'
     ];
-    
+
     $borderColors = [
         'high' => 'border-red-500/30 hover:border-red-400/50',
         'medium' => 'border-yellow-500/30 hover:border-yellow-400/50',
@@ -31,7 +31,7 @@
         $priorityLabel = __('Older');
         $priorityIcon = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>';
     }
-    
+
     $gradientClass = $priorityColors[$priority];
     $borderClass = $borderColors[$priority];
 @endphp
@@ -45,7 +45,7 @@
 
     <!-- Priority Indicator Strip -->
     <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r {{ $gradientClass }}"></div>
-    
+
     <!-- Priority Badge (Top Right) -->
     <div class="absolute -top-2 -right-2 bg-gradient-to-r {{ $gradientClass }} text-white text-xs px-2 py-1 rounded-full font-medium shadow-lg {{ $priority === 'high' ? 'animate-pulse' : '' }}">
         {{ $priorityLabel }}
@@ -68,7 +68,7 @@
                     </svg>
                 </div>
             @endif
-            
+
             <!-- Type Badge with Priority Context -->
             <span class="bg-gradient-to-r from-purple-600 to-blue-600 text-white text-xs px-2 py-1 rounded-full font-medium">
                 @if($notif->type === 'App\Notifications\Wallets\WalletCreation')
