@@ -77,6 +77,10 @@ return [
         'egi_update_failed' => 'Aggiornamento EGI fallito: :error per utente :user_id su EGI :egi_id',
         'egi_delete_failed' => 'Eliminazione EGI fallita: :error per utente :user_id su EGI :egi_id',
 
+        // Errori CRUD Collection (messaggi per sviluppatori)
+        'collection_update_failed' => 'Aggiornamento collezione fallito: :error per utente :user_id sulla collezione :collection_id',
+        'collection_delete_failed' => 'Eliminazione collezione fallita: :error per utente :user_id sulla collezione :collection_id',
+
         // Errori di validazione (messaggi per sviluppatori)
         'invalid_egi_file' => 'Validazione del file EGI fallita con errori: :validation_errors',
 
@@ -258,7 +262,7 @@ return [
         'registration_required_field_missing' => 'Validazione registrazione fallita: Campi obbligatori mancanti: :fields',
         'registration_validation_comprehensive_failed' => 'Validazione registrazione fallita: Rilevati errori di validazione multipli',
 
-        // Biography errors
+        // Biography Core Errors - Developer Messages
         'biography_index_failed' => 'Errore nel recupero delle biografie utente. Verifica la query di paginazione e i filtri applicati.',
         'biography_validation_failed' => 'Validazione fallita per creazione/aggiornamento biografia. Controlla le regole di validazione Laravel.',
         'biography_create_failed' => 'Fallimento critico nella creazione biografia. Possibili cause: DB constraint violation, filesystem error.',
@@ -269,23 +273,33 @@ return [
         'biography_type_change_invalid' => 'Tentativo cambio tipo biografia da "chapters" a "single" con capitoli esistenti.',
         'biography_delete_denied' => 'Tentativo eliminazione biografia senza ownership. User ID non corrisponde al proprietario.',
         'biography_delete_failed' => 'Fallimento eliminazione biografia. Possibili cause: DB constraint violation, cascade delete failure.',
-
-        // Chapter errors
         'biography_chapter_validation_failed' => 'Validazione fallita per operazione capitolo biografia. Controlla date range validation.',
         'biography_chapter_create_failed' => 'Fallimento creazione capitolo biografia. Possibili cause: parent biography type mismatch.',
         'biography_chapter_access_denied' => 'Accesso negato a capitolo biografia. Verifica ownership via parent biography.',
         'biography_chapter_update_failed' => 'Fallimento aggiornamento capitolo biografia. Possibili cause: date constraint violation.',
         'biography_chapter_delete_failed' => 'Fallimento eliminazione capitolo biografia. Possibili cause: DB constraint.',
         'biography_chapter_reorder_failed' => 'Fallimento riordinamento capitoli biografia. Possibili cause: transaction rollback.',
-
-        // Media errors
         'biography_media_upload_failed' => 'Fallimento upload media biografia. Possibili cause: Spatie media library error.',
         'biography_media_validation_failed' => 'Validazione media biografia fallita. Controlla file type validation, size limits.',
         'biography_media_delete_failed' => 'Fallimento eliminazione media biografia. Possibili cause: Spatie media library error.',
-
-        // Missing Chapter Error Codes - Developer Messages
         'biography_chapter_index_failed' => 'Errore nel recupero dei capitoli biografia. Verifica la query di ordinamento e i filtri di pubblicazione. Context: biography_id, user_id, order_by.',
         'biography_chapter_show_failed' => 'Errore nel caricamento dettagli capitolo biografia. Possibili cause: relazione mancante, eager loading fallito, o corruzione dati capitolo. Context: biography_id, chapter_id, user_id.',
+
+        // Multi-Currency System Error Messages - Dev Messages
+        'currency_exchange_service_failed' => 'Servizio di cambio valuta non disponibile. Utilizzato fallback per codice :code.',
+        'currency_unsupported' => 'Valuta non supportata richiesta: :currency. Sistema configurato per supportare: :supported.',
+        'currency_rate_expired' => 'Tasso di cambio scaduto per :currency. Ultimo aggiornamento: :timestamp.',
+        'currency_conversion_failed' => 'Conversione valuta fallita da :from a :to per importo :amount. Errore: :error.',
+        'user_currency_update_failed' => 'Aggiornamento preferenza valuta utente fallito per user_id :user_id. Valuta tentata: :currency.',
+        'currency_exchange_service_unavailable' => 'Servizio CoinGecko non raggiungibile. Status HTTP: :status. Endpoint: :endpoint.',
+        'currency_rate_cache_error' => 'Errore cache Redis per chiave tasso valuta :key. Errore: :error.',
+        'currency_invalid_rate_data' => 'Dati tasso valuta non validi ricevuti da API. Risposta: :response.',
+        'currency_conversion_error' => 'Errore conversione :amount :from_currency a :to_currency. Tasso: :rate.',
+        'currency_unsupported_currency' => 'Valuta :currency non supportata dal sistema. Supportate: :supported_currencies.',
+        'user_preference_update_failed' => 'Aggiornamento preferenze utente fallito per user_id :user_id. Errore DB: :error.',
+        'currency_conversion_validation_error' => 'Validazione conversione valuta fallita. Parametri: :params. Errori: :errors.',
+        'user_preference_fetch_error' => 'Impossibile recuperare preferenze per user_id :user_id. Errore: :error.',
+        'currency_preference_validation_error' => 'Validazione preferenza valuta fallita per :currency. Errore: :validation_error.',
 
         // Payment Distribution Service Error Messages - Developer Messages
         'payment_distribution_error' => 'Distribuzione pagamento fallita per prenotazione :reservation_id. Errore: :error.',
@@ -297,7 +311,6 @@ return [
         'no_wallets_found' => 'Nessun wallet trovato per collezione :collection_id.',
         'invalid_mint_percentages' => 'Le percentuali dei wallet della collezione :collection_id non sommano al 100% (attuale: :current_percentage%).',
         'user_activity_logging_failed' => 'Errore nel logging attività utente per user :user_id, distribuzione :distribution_id. Errore: :error.',
-
     ],
     'user' => [
         // == Existing Entries ==
@@ -363,6 +376,11 @@ return [
         'egi_page_rendering_error' => 'Si è verificato un problema durante il caricamento della pagina. Riprova più tardi o contatta l\'assistenza.',
         'egi_update_failed' => 'Impossibile aggiornare l\'EGI. Si prega di riprovare.',
         'egi_delete_failed' => 'Impossibile eliminare l\'EGI. Si prega di riprovare.',
+
+        // Errori CRUD Collection (messaggi per utenti)
+        'collection_update_failed' => 'Impossibile aggiornare la collezione. Si prega di riprovare.',
+        'collection_delete_failed' => 'Impossibile eliminare la collezione. Si prega di riprovare.',
+
         'invalid_egi_file' => 'Il file EGI non può essere elaborato a causa di errori di validazione. Verifica il formato e il contenuto del file.',
         'error_during_egi_processing' => 'Si è verificato un errore durante l\'elaborazione del file EGI. Il nostro team è stato avvisato e analizzerà il problema.',
 
@@ -509,21 +527,15 @@ return [
         'biography_type_change_invalid' => 'Impossibile cambiare il tipo di biografia perché sono presenti dei capitoli. Elimina prima tutti i capitoli.',
         'biography_delete_denied' => 'Non hai i permessi per eliminare questa biografia.',
         'biography_delete_failed' => 'Non è stato possibile eliminare la biografia. Riprova tra qualche momento.',
-
-        // Chapter errors
         'biography_chapter_validation_failed' => 'Alcuni campi del capitolo non sono stati compilati correttamente.',
         'biography_chapter_create_failed' => 'Non è stato possibile creare il capitolo. Controlla che la biografia sia impostata per "capitoli".',
         'biography_chapter_access_denied' => 'Non hai i permessi per visualizzare questo capitolo.',
         'biography_chapter_update_failed' => 'Non è stato possibile salvare le modifiche al capitolo.',
         'biography_chapter_delete_failed' => 'Non è stato possibile eliminare il capitolo.',
         'biography_chapter_reorder_failed' => 'Non è stato possibile riordinare i capitoli. Riprova o aggiorna la pagina.',
-
-        // Media errors
         'biography_media_upload_failed' => 'Non è stato possibile caricare l\'immagine. Controlla che sia un\'immagine valida (JPG, PNG) sotto i 5MB.',
         'biography_media_validation_failed' => 'Il file selezionato non è valido. Usa immagini JPG, PNG o WebP fino a 5MB.',
         'biography_media_delete_failed' => 'Non è stato possibile eliminare l\'immagine. Riprova tra qualche momento.',
-
-        // Missing Chapter Error Codes - User Messages
         'biography_chapter_index_failed' => 'Non è stato possibile caricare i capitoli della biografia. Riprova tra qualche momento o aggiorna la pagina.',
         'biography_chapter_show_failed' => 'Non è stato possibile caricare i dettagli del capitolo. Riprova tra qualche momento.',
 

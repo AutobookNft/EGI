@@ -1016,6 +1016,32 @@ return [
         ],
 
         // ====================================================
+        // Errori specifici per Collection CRUD Operations
+        // ====================================================
+
+        'COLLECTION_UPDATE_FAILED' => [
+            'type' => 'critical',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.collection_update_failed',
+            'user_message_key' => 'error-manager::errors.user.collection_update_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'COLLECTION_DELETE_FAILED' => [
+            'type' => 'critical',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.collection_delete_failed',
+            'user_message_key' => 'error-manager::errors.user.collection_delete_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        // ====================================================
         // Errori specifici per la validazione EGI
         // ====================================================
         'INVALID_EGI_FILE' => [

@@ -32,7 +32,7 @@
 
             <div>
                 <label class="block mb-1 text-sm text-gray-300">{{ __('collection.show.field_description') }}</label>
-                <textarea name="description" maxlength="2000" rows="3"
+                <textarea name="description" maxlength="10000" rows="3"
                           class="w-full px-3 py-2 text-white bg-gray-800 border border-gray-700 rounded">{{ $collection->description }}</textarea>
             </div>
 

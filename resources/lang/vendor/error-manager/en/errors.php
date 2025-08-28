@@ -77,6 +77,10 @@ return [
         'egi_update_failed' => 'EGI update failed: :error for user :user_id on EGI :egi_id',
         'egi_delete_failed' => 'EGI deletion failed: :error for user :user_id on EGI :egi_id',
 
+        // Collection CRUD Errors (developer messages)
+        'collection_update_failed' => 'Collection update failed: :error for user :user_id on collection :collection_id',
+        'collection_delete_failed' => 'Collection deletion failed: :error for user :user_id on collection :collection_id',
+
         // Validation Related Errors (developer messages)
         'invalid_egi_file' => 'EGI file validation failed with errors: :validation_errors',
 
@@ -278,8 +282,6 @@ return [
         'biography_media_upload_failed' => 'Biography media upload failure. Possible causes: Spatie media library error, filesystem permission, or image processing failure. Context: biography_id, file_info.',
         'biography_media_validation_failed' => 'Biography media validation failed. Check file type validation, size limits, and Spatie media collection rules. Context: biography_id, file_validation_errors.',
         'biography_media_delete_failed' => 'Biography media deletion failure. Possible causes: Spatie media library error, filesystem permission, or missing media record. Context: biography_id, media_id.',
-
-        // Missing Chapter Error Codes - Developer Messages
         'biography_chapter_index_failed' => 'Error retrieving biography chapters. Check ordering query and publication filters. Context: biography_id, user_id, order_by.',
         'biography_chapter_show_failed' => 'Error loading biography chapter details. Possible causes: missing relationship, eager loading failure, or chapter data corruption. Context: biography_id, chapter_id, user_id.',
 
@@ -374,6 +376,11 @@ return [
         'egi_page_rendering_error' => 'An issue occurred while loading the page. Please try again later or contact support.',
         'egi_update_failed' => 'Unable to update the EGI. Please try again.',
         'egi_delete_failed' => 'Unable to delete the EGI. Please try again.',
+
+        // Collection CRUD Errors (user messages)
+        'collection_update_failed' => 'Unable to update the collection. Please try again.',
+        'collection_delete_failed' => 'Unable to delete the collection. Please try again.',
+
         'invalid_egi_file' => 'The EGI file cannot be processed due to validation errors. Please verify the file format and content.',
         'error_during_egi_processing' => 'An error occurred while processing the EGI file. Our team has been notified and will investigate the issue.',
 
@@ -529,8 +536,6 @@ return [
         'biography_media_upload_failed' => 'Unable to upload the image. Check that the file is a valid image (JPG, PNG) and does not exceed 5MB.',
         'biography_media_validation_failed' => 'The selected file is not valid. Make sure to upload an image in JPG, PNG or WebP format with a maximum size of 5MB.',
         'biography_media_delete_failed' => 'Unable to delete the image. Please try again in a moment.',
-
-        // Missing Chapter Error Codes - User Messages
         'biography_chapter_index_failed' => 'Unable to load biography chapters. Please try again in a moment or refresh the page.',
         'biography_chapter_show_failed' => 'Unable to load chapter details. Please try again in a moment.',
 

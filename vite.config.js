@@ -58,6 +58,7 @@ export default defineConfig(({ mode }) => {
                     'vendor/ultra/ultra-upload-manager/resources/css/app.css',
                     'resources/js/components/vanilla-mobile-menu.js',
                     'resources/js/components/vanilla-desktop-menu.js',
+                    'resources/js/collection-edit-modal.js', // Modal per editing collection metadata
                     'public/js/collection-edit-modal.js'
                 ],
                 refresh: [

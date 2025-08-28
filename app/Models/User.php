@@ -1203,7 +1203,7 @@ class User extends Authenticatable implements HasMedia {
     public function getProfilePhotoUrlAttribute(): string {
         // Se l'utente ha caricato un'immagine, la mostra (consenso implicito)
         $currentImage = $this->getCurrentProfileImage();
-        
+
         if ($currentImage) {
             return $currentImage->getUrl('thumb');
         }
@@ -1221,7 +1221,7 @@ class User extends Authenticatable implements HasMedia {
     public function defaultProfilePhotoUrl(): string {
         // Usa wallet come identificatore unico se disponibile, altrimenti nome
         $seed = urlencode($this->wallet ?? $this->name ?? "user-{$this->id}");
-        
+
         return "https://api.dicebear.com/7.x/bottts/png?seed={$seed}&backgroundColor=transparent&size=512";
     }
 

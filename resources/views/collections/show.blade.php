@@ -676,8 +676,8 @@ document.querySelectorAll('.egi-item, .stat-card').forEach(el => {
     }
 })();
     </script>
-    {{-- JS per modale Edit Meta (esterno, non tocca il resto) --}}
-    @vite(['public/js/collection-edit-modal.js'])
+    {{-- JS per modale Edit Meta --}}
+    @vite(['resources/js/collection-edit-modal.js'])
     @endpush
 
 </x-collection-layout>
