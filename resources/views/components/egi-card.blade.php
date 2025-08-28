@@ -131,7 +131,7 @@ $isCreator = auth()->check() && auth()->id() === $creatorId;
             // � OTTIMIZZAZIONE IMMAGINI: Usa varianti ottimizzate con fallback
             // Prima prova a usare l'immagine ottimizzata 'card' (400x400 WebP)
             $optimizedImageUrl = $this->getOptimizedImageUrl();
-            
+
             // Fallback: Se non c'è immagine ottimizzata, usa la logica originale
             if (!$optimizedImageUrl) {
                 $imageRelativePath =
@@ -151,10 +151,10 @@ $isCreator = auth()->check() && auth()->id() === $creatorId;
 
             {{-- 🎯 Immagine Principale o Placeholder --}}
             @if ($optimizedImageUrl)
-            <img src="{{ $optimizedImageUrl }}" {{-- Usa l'URL ottimizzato con fallback --}} 
+            <img src="{{ $optimizedImageUrl }}" {{-- Usa l'URL ottimizzato con fallback --}}
                 alt="{{ $egi->title ?? 'EGI Image' }}"
                 class="object-contain object-center w-full h-full transition-transform duration-300 ease-in-out bg-gray-800 group-hover:scale-105"
-                loading="lazy" 
+                loading="lazy"
                 {{-- Supporto WebP con fallback automatico del browser --}}
                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
             @else

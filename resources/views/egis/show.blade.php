@@ -56,12 +56,12 @@
                                 @if($egi->main_image_url)
                                 {{-- Trigger per lo zoom --}}
                                 <div id="zoom-container" class="overflow-hidden">
-                                    <img id="zoom-image-trigger" 
+                                    <img id="zoom-image-trigger"
                                         src="{{ $egi->main_image_url }}"
                                         data-zoom-src="{{ $egi->original_image_url ?? $egi->main_image_url }}"
                                         alt="{{ $egi->title ?? __('egi.image_alt_default') }}"
-                                        class="w-full h-auto cursor-zoom-in" 
-                                        loading="lazy" 
+                                        class="w-full h-auto cursor-zoom-in"
+                                        loading="lazy"
                                         />
                                 </div>
                                 @else

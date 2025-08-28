@@ -53,10 +53,7 @@ class HomeController extends Controller {
         $featuredCreators = $this->getFeaturedCreators(); // Nuovo: recupera i Creator
         $topCollectors = $this->collectorCarouselService->getTopCollectors(10); // Nuovo: top collectors
         $featuredEgis = $this->getFeaturedEgis(); // Nuovo: ultimi 20 EGI per carousel homepage
-        $hyperEgis = Egi::where('is_published', true)
-            ->where('hyper', true)
-            ->with(['collection'])
-            ->get();
+        $hyperEgis = $this->getHyperEgis();
         $allEgis = Egi::where('is_published', true)
             ->with(['collection'])
             ->get();
@@ -186,5 +183,18 @@ class HomeController extends Controller {
         // return Transaction::where('type', 'plastic_recovery')
         //      ->where('status', 'confirmed')
         //      ->sum('amount');
+    }
+
+    /**
+     * Ottiene EGI Hyper per carousel
+     *
+     * @privacy-safe Utilizza solo EGI pubblicati pubblicamente
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    private function getHyperEgis() {
+        return Egi::where('is_published', true)
+            ->where('hyper', true)
+            ->with(['collection'])
+            ->get();
     }
 }
