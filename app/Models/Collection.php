@@ -122,8 +122,8 @@ class Collection extends Model implements HasMedia {
         $hasPendingWalletProposals = NotificationPayloadWallet::whereHas('walletModel', function ($query) {
             $query->where('collection_id', $this->id);
         })
-        ->where('status', 'LIKE', '%pending%')
-        ->exists();
+            ->where('status', 'LIKE', '%pending%')
+            ->exists();
 
         // Si può pubblicare se non esistono proposte wallet in pending
         return !$hasPendingWalletProposals;

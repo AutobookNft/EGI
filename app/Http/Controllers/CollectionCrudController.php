@@ -7,10 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
-class CollectionCrudController extends Controller
-{
-    public function update(Request $request, Collection $collection)
-    {
+class CollectionCrudController extends Controller {
+    public function update(Request $request, Collection $collection) {
         $user = $request->user();
         if (!$user) {
             return response()->json(['message' => 'Unauthenticated'], 401);
@@ -22,7 +20,7 @@ class CollectionCrudController extends Controller
             return response()->json(['message' => 'Forbidden'], 403);
         }
 
-    $rules = [
+        $rules = [
             'collection_name'   => ['required', 'string', 'max:150'],
             'description'       => ['nullable', 'string', 'max:2000'],
             'url_collection_site' => ['nullable', 'url', 'max:255'],
@@ -98,8 +96,7 @@ class CollectionCrudController extends Controller
         ]);
     }
 
-    public function destroy(Request $request, Collection $collection)
-    {
+    public function destroy(Request $request, Collection $collection) {
         $user = $request->user();
         if (!$user) {
             return response()->json(['message' => 'Unauthenticated'], 401);

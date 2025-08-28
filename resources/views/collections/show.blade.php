@@ -23,7 +23,7 @@ if (is_array($collection)) {
 
     {{-- Schema.org ottimizzato --}}
     <x-slot name="schemaMarkup">
-        <script type="application/ld+json" id="collection-schema" data-fallback-image="{{ (method_exists($collection, 'getFirstMediaUrl') && $collection->getFirstMediaUrl('head', 'banner')) ? $collection->getFirstMediaUrl('head', 'banner') : ($collection->image_banner ? Storage::url($collection->image_banner) : asset('images/default_banner.jpg')) }}">
+        <script type="application/ld+json">
             {
             "@context": "https://schema.org",
             "@type": "CollectionPage",
@@ -96,10 +96,6 @@ if (is_array($collection)) {
 
         {{-- Hero Content - Mobile Responsive Height --}}
         <div class="container relative z-10 px-4 py-8 mx-auto sm:px-6 lg:px-8 sm:py-12 lg:py-16">
-            @php
-                // Il pulsante Edit data è visibile solo al creator della collection
-                $canEditMeta = auth()->check() && auth()->id() === ($collection->creator_id ?? null);
-            @endphp
             <div class="max-w-4xl">
                 <div class="flex items-center gap-3 mb-6">
                     @if($collection->creator)
@@ -184,15 +180,11 @@ if (is_array($collection)) {
                             {{ $collection->collection_name }}
                         </h1>
 
-                        <div id="collection-description-container">
-                            @if($collection->description)
-                            <p id="collection-description" class="text-base leading-relaxed text-gray-200 sm:text-lg line-clamp-3 sm:line-clamp-none">
-                                {{ $collection->description }}
-                            </p>
-                            @else
-                            <p id="collection-description" class="hidden text-base leading-relaxed text-gray-200 sm:text-lg line-clamp-3 sm:line-clamp-none"></p>
-                            @endif
-                        </div>
+                        @if($collection->description)
+                        <p id="collection-description" class="text-base leading-relaxed text-gray-200 sm:text-lg line-clamp-3 sm:line-clamp-none">
+                            {{ $collection->description }}
+                        </p>
+                        @endif
                     </div>
                 </div>
 
@@ -217,17 +209,20 @@ if (is_array($collection)) {
                         {{ __('collection.show.share') }}
                     </button>
 
-                    @if($canEditMeta)
+                    @if(auth()->check() && auth()->id() === ($collection->creator_id ?? null))
                     <button id="editMetaBtn"
-                        class="flex items-center justify-center px-6 py-3 text-sm font-semibold text-white transition-all duration-300 border rounded-lg bg-emerald-600 hover:bg-emerald-700 border-white/20 sm:text-base">
+                        class="flex items-center justify-center px-6 py-3 text-sm font-semibold text-white transition-all duration-300 border rounded-lg bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/20 sm:text-base">
                         <span class="mr-2 material-symbols-outlined">edit</span>
-                        {{ __('collection.show.edit_button') }}
+                        Modifica dati
                     </button>
                     @endif
                 </div>
             </div>
         </div>
     </section>
+
+    {{-- Edit Meta Modal (partial) --}}
+    @include('collections.partials.edit-meta-modal', ['collection' => $collection])
 
     {{-- 🌳 EPP SECTION (Se presente) --}}
     @if($collection->epp)
@@ -580,187 +575,6 @@ document.querySelectorAll('.egi-item, .stat-card').forEach(el => {
     observer.observe(el);
     });
 
-// ===== Modal Edit Data (CRUD metadata) =====
-(function() {
-        const canEdit = {{ isset($canEditMeta) && $canEditMeta ? 'true' : 'false' }};
-        if (!canEdit) return;
-
-        // Create modal lazily to keep template clean
-            const modalHtml = `
-        <div id="editMetaModal" class="fixed inset-0 z-50 items-center justify-center hidden">
-            <div class="absolute inset-0 bg-black/60"></div>
-            <div class="relative w-full max-w-2xl p-6 mx-auto bg-gray-900 border border-gray-700 rounded-xl">
-                <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-semibold text-white">{{ __('collection.show.edit_modal_title') }}</h3>
-                    <button id="editMetaClose" class="text-gray-300 hover:text-white material-symbols-outlined">close</button>
-                </div>
-                <form id="editMetaForm" class="space-y-4">
-                    <div>
-                            <label class="block mb-1 text-sm text-gray-300">{{ __('collection.show.field_name') }}</label>
-                        <input name="collection_name" type="text" maxlength="150" required class="w-full px-3 py-2 text-white bg-gray-800 border border-gray-700 rounded" value="{{ e($collection->collection_name) }}" />
-                    </div>
-                    <div>
-                            <label class="block mb-1 text-sm text-gray-300">{{ __('collection.show.field_description') }}</label>
-                        <textarea name="description" maxlength="2000" rows="3" class="w-full px-3 py-2 text-white bg-gray-800 border border-gray-700 rounded">{{ e($collection->description) }}</textarea>
-                    </div>
-                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        <div>
-                                <label class="block mb-1 text-sm text-gray-300">{{ __('collection.show.field_website_url') }}</label>
-                            <input name="url_collection_site" type="url" maxlength="255" class="w-full px-3 py-2 text-white bg-gray-800 border border-gray-700 rounded" value="{{ e($collection->url_collection_site) }}" />
-                        </div>
-                        <div>
-                                <label class="block mb-1 text-sm text-gray-300">{{ __('collection.show.field_type') }}</label>
-                            <input name="type" type="text" maxlength="50" class="w-full px-3 py-2 text-white bg-gray-800 border border-gray-700 rounded" value="{{ e($collection->type) }}" />
-                        </div>
-                    </div>
-                                <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                                    <div>
-                                <label class="block mb-1 text-sm text-gray-300">{{ __('collection.show.field_floor_price') }}</label>
-                                        <input name="floor_price" type="number" min="0" step="0.01" class="w-full px-3 py-2 text-white bg-gray-800 border border-gray-700 rounded" value="{{ e($collection->floor_price) }}" />
-                                    </div>
-                                    <div class="flex items-center gap-2 mt-6">
-                            <input id="is_published_input" name="is_published" type="checkbox" class="w-4 h-4" {{ $collection->is_published ? 'checked' : '' }} {{ (method_exists($collection,'canBePublished') && !$collection->canBePublished()) ? 'disabled' : '' }} />
-                                <label for="is_published_input" class="text-sm text-gray-300">{{ __('collection.show.toggle_published') }}</label>
-                        </div>
-                    </div>
-                    <div id="editMetaErrors" class="hidden p-3 text-sm text-red-300 bg-red-900/30 rounded"></div>
-                    <div class="flex justify-end gap-3">
-                            <button type="button" id="editMetaCancel" class="px-4 py-2 font-medium text-gray-200 bg-gray-700 rounded hover:bg-gray-600">{{ __('collection.show.btn_cancel') }}</button>
-                            <button type="submit" class="px-4 py-2 font-medium text-white rounded bg-emerald-600 hover:bg-emerald-700">{{ __('collection.show.btn_save') }}</button>
-                    </div>
-                </form>
-            </div>
-        </div>`;
-
-        document.body.insertAdjacentHTML('beforeend', modalHtml);
-
-        const openBtn = document.getElementById('editMetaBtn');
-        const modal = document.getElementById('editMetaModal');
-        const closeBtn = document.getElementById('editMetaClose');
-        const cancelBtn = document.getElementById('editMetaCancel');
-        const form = document.getElementById('editMetaForm');
-        const errorsBox = document.getElementById('editMetaErrors');
-
-        function openModal() { modal.classList.remove('hidden'); modal.classList.add('flex'); }
-        function closeModal() { modal.classList.add('hidden'); modal.classList.remove('flex'); }
-
-        openBtn && openBtn.addEventListener('click', openModal);
-        closeBtn && closeBtn.addEventListener('click', closeModal);
-        cancelBtn && cancelBtn.addEventListener('click', closeModal);
-
-        form && form.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                errorsBox.classList.add('hidden');
-                errorsBox.textContent = '';
-
-                const formData = new FormData(form);
-                const payload = Object.fromEntries(formData.entries());
-                // Normalizza checkbox
-                payload.is_published = form.querySelector('input[name="is_published"]').checked ? 1 : 0;
-
-                const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-                const url = "{{ route('collections.update', ['collection' => $collection->id]) }}";
-
-                try {
-                        const res = await fetch(url, {
-                                method: 'PATCH',
-                                headers: {
-                                        'X-CSRF-TOKEN': csrf,
-                                        'Accept': 'application/json',
-                                        'Content-Type': 'application/json',
-                                },
-                                body: JSON.stringify(payload),
-                        });
-
-                        const data = await res.json();
-                        if (!res.ok || !data.success) {
-                                if (data && data.errors) {
-                                        errorsBox.innerHTML = Object.values(data.errors).flat().join('<br>');
-                                        errorsBox.classList.remove('hidden');
-                                }
-                                throw new Error(data && data.message ? data.message : 'Update failed');
-                        }
-
-                        // Update DOM
-                        const c = data.collection;
-                        const titleEl = document.getElementById('collection-title');
-                        const descEl = document.getElementById('collection-description');
-                        const descWrap = document.getElementById('collection-description-container');
-                        if (titleEl && c.collection_name) titleEl.textContent = c.collection_name;
-                        if (descEl) {
-                                const hasDesc = !!c.description;
-                                descEl.textContent = c.description || '';
-                                descEl.classList.toggle('hidden', !hasDesc);
-                        }
-
-                        // Optional live binds if present in DOM
-                        const siteLink = document.getElementById('collection-website-link');
-                        if (siteLink && 'url_collection_site' in c) {
-                            if (c.url_collection_site) {
-                                siteLink.href = c.url_collection_site;
-                                siteLink.classList.remove('hidden');
-                            } else {
-                                siteLink.classList.add('hidden');
-                            }
-                        }
-
-                        const typeEl = document.getElementById('collection-type');
-                        if (typeEl && 'type' in c) {
-                            typeEl.textContent = c.type || '';
-                            typeEl.classList.toggle('hidden', !(c.type));
-                        }
-
-                        const floorEl = document.getElementById('collection-floor-price');
-                        if (floorEl && 'floor_price' in c) {
-                            floorEl.textContent = c.floor_price ? Number(c.floor_price).toFixed(2) : '';
-                            floorEl.classList.toggle('hidden', !(c.floor_price));
-                        }
-
-                        const eppEl = document.getElementById('collection-epp-id');
-                        if (eppEl && 'epp_id' in c) {
-                            eppEl.textContent = c.epp_id || '';
-                            eppEl.classList.toggle('hidden', !(c.epp_id));
-                        }
-
-                        const pubBadge = document.getElementById('collection-published-badge');
-                        if (pubBadge && 'is_published' in c) {
-                            pubBadge.textContent = c.is_published ? 'Published' : 'Draft';
-                            pubBadge.classList.toggle('bg-emerald-600', !!c.is_published);
-                            pubBadge.classList.toggle('bg-gray-600', !c.is_published);
-                        }
-
-                        // Update JSON-LD
-                        const schemaEl = document.getElementById('collection-schema');
-                        if (schemaEl) {
-                                const schema = {
-                                        "@context": "https://schema.org",
-                                        "@type": "CollectionPage",
-                                        "name": c.collection_name,
-                                        "description": c.description || '',
-                                        "image": data.schema_image || schemaEl.dataset.fallbackImage || '' ,
-                                        "author": {
-                                                "@type": "Person",
-                                                "name": "{{ $collection->creator->name ?? __('collection.show.unknown_creator_schema') }}"
-                                        },
-                                        "numberOfItems": "{{ $collection->egis_count ?? 0 }}",
-                                        "mainEntity": {"@type": "CreativeWork", "name": c.collection_name}
-                                };
-                                schemaEl.textContent = JSON.stringify(schema);
-                        }
-
-                        // Toast ok
-                        const toast = document.createElement('div');
-                        toast.className = 'fixed z-50 px-4 py-2 text-sm font-medium text-white transform -translate-x-1/2 bg-emerald-600 rounded-lg bottom-4 left-1/2';
-                        toast.textContent = {{ json_encode(__('collection.show.toast_updated')) }};
-                        document.body.appendChild(toast);
-                        setTimeout(() => toast.remove(), 2500);
-                        closeModal();
-                } catch (err) {
-                        console.error('Update error', err);
-                }
-        });
-})();
-
 // Banner upload (vanilla JS)
 (function() {
     const btn = document.getElementById('uploadBannerBtn');
@@ -830,8 +644,8 @@ document.querySelectorAll('.egi-item, .stat-card').forEach(el => {
     });
 })();
     </script>
+    {{-- JS per modale Edit Meta (esterno, non tocca il resto) --}}
+    @vite(['public/js/collection-edit-modal.js'])
     @endpush
 
 </x-collection-layout>
-
-{{-- @vite(['resources/js/collections-show.js']) --}}

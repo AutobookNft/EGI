@@ -452,17 +452,17 @@ return [
         // JavaScript messages
         'link_copied_to_clipboard' => 'Link copiato negli appunti!',
 
-    // Edit data modal
-    'edit_button' => 'Modifica dati',
-    'edit_modal_title' => 'Modifica dati collezione',
-    'field_name' => 'Nome',
-    'field_description' => 'Descrizione',
-    'field_website_url' => 'URL del sito',
-    'field_type' => 'Tipo',
-    'field_floor_price' => 'Prezzo minimo',
-    'toggle_published' => 'Pubblicata',
-    'btn_cancel' => 'Annulla',
-    'btn_save' => 'Salva',
-    'toast_updated' => 'Collezione aggiornata',
+        // Edit data modal
+        'edit_button' => 'Modifica dati',
+        'edit_modal_title' => 'Modifica dati collezione',
+        'field_name' => 'Nome',
+        'field_description' => 'Descrizione',
+        'field_website_url' => 'URL del sito',
+        'field_type' => 'Tipo',
+        'field_floor_price' => 'Prezzo minimo',
+        'toggle_published' => 'Pubblicata',
+        'btn_cancel' => 'Annulla',
+        'btn_save' => 'Salva',
+        'toast_updated' => 'Collezione aggiornata',
     ],
 ];

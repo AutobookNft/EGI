@@ -154,11 +154,11 @@ Route::middleware(['auth'])
         Route::post('{collection}/banner', [\App\Http\Controllers\CollectionBannerController::class, 'store'])
             ->name('banner.upload');
 
-            // CRUD metadata Collection (Spatie permissions checked in controller)
-            Route::patch('{collection}', [\App\Http\Controllers\CollectionCrudController::class, 'update'])
-                ->name('update');
-            Route::delete('{collection}', [\App\Http\Controllers\CollectionCrudController::class, 'destroy'])
-                ->name('destroy');
+        // CRUD metadata Collection (Spatie permissions checked in controller)
+        Route::patch('{collection}', [\App\Http\Controllers\CollectionCrudController::class, 'update'])
+            ->name('update');
+        Route::delete('{collection}', [\App\Http\Controllers\CollectionCrudController::class, 'destroy'])
+            ->name('destroy');
     });
 
 // Notification Center (ex-Dashboard)
