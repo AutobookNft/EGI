@@ -6,8 +6,6 @@
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
     initializeDesktopMegaMenu();
-    initializeDesktopCollectionsDropdowns();
-    initializeDesktopActionButtons();
 });
 
 function initializeDesktopMegaMenu() {
@@ -187,97 +185,3 @@ window.VanillaDesktopMenu = {
     closeAll: closeAllDropdowns,
     init: initializeDesktopMegaMenu
 };
-
-// --- Extra behaviors aligned with mobile ---
-function initializeDesktopCollectionsDropdowns() {
-    // Guest layout
-    const guestBtn = document.getElementById('desktop-collection-list-dropdown-button');
-    const guestMenu = document.getElementById('desktop-collection-list-dropdown-menu');
-    // App layout
-    const appBtn = document.getElementById('desktop-collection-list-dropdown-button-app');
-    const appMenu = document.getElementById('desktop-collection-list-dropdown-menu-app');
-
-    if (guestBtn && guestMenu) setupDropdown(guestBtn, guestMenu, 'guest');
-    if (appBtn && appMenu) setupDropdown(appBtn, appMenu, 'app');
-}
-
-function setupDropdown(button, menu, layout) {
-    let isOpen = false;
-    function toggle() {
-        isOpen = !isOpen;
-        button.setAttribute('aria-expanded', isOpen);
-        menu.classList.toggle('hidden', !isOpen);
-        if (isOpen) loadCollections(layout);
-    }
-    button.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); toggle(); });
-    document.addEventListener('click', (e) => {
-        if (!button.contains(e.target) && !menu.contains(e.target) && isOpen) {
-            isOpen = false;
-            menu.classList.add('hidden');
-            button.setAttribute('aria-expanded', false);
-        }
-    });
-}
-
-async function loadCollections(layout) {
-    const suffix = layout === 'app' ? '-app' : '';
-    const loading = document.getElementById(`desktop-collection-list-loading${suffix}`);
-    const empty = document.getElementById(`desktop-collection-list-empty${suffix}`);
-    const error = document.getElementById(`desktop-collection-list-error${suffix}`);
-    loading?.classList.remove('hidden');
-    empty?.classList.add('hidden');
-    error?.classList.add('hidden');
-    try {
-        await new Promise(r => setTimeout(r, 800));
-        loading?.classList.add('hidden');
-        empty?.classList.remove('hidden');
-    } catch (e) {
-        console.error('Failed to load collections (desktop):', e);
-        loading?.classList.add('hidden');
-        error?.classList.remove('hidden');
-    }
-}
-
-function initializeDesktopActionButtons() {
-    document.querySelectorAll('.js-create-egi-contextual-button').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.preventDefault(); e.stopPropagation();
-            const authType = btn.getAttribute('data-auth-type');
-            handleCreateEgiActionDesktop(authType);
-        });
-    });
-    document.querySelectorAll('[data-action="open-create-collection-modal"]').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.preventDefault(); e.stopPropagation();
-            handleCreateCollectionActionDesktop();
-        });
-    });
-}
-
-function handleCreateEgiActionDesktop(authType) {
-    if (authType === 'authenticated') {
-        if (typeof window.openCreateEgiModal === 'function') {
-            window.openCreateEgiModal();
-        } else if (typeof window.createEgiFlow === 'function') {
-            window.createEgiFlow();
-        } else {
-            console.log('No EGI creation function found (desktop)');
-        }
-    } else {
-        if (typeof window.showLoginModal === 'function') {
-            window.showLoginModal();
-        } else {
-            console.log('No auth modal function found (desktop)');
-        }
-    }
-}
-
-function handleCreateCollectionActionDesktop() {
-    if (typeof window.openCreateCollectionModal === 'function') {
-        window.openCreateCollectionModal();
-    } else if (typeof window.createCollectionFlow === 'function') {
-        window.createCollectionFlow();
-    } else {
-        console.log('No collection creation function found (desktop)');
-    }
-}
