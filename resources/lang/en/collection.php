@@ -435,6 +435,19 @@ return [
 
         // JavaScript messages
         'link_copied_to_clipboard' => 'Link copied to clipboard!',
+
+    // Edit data modal
+    'edit_button' => 'Edit data',
+    'edit_modal_title' => 'Edit collection data',
+    'field_name' => 'Name',
+    'field_description' => 'Description',
+    'field_website_url' => 'Website URL',
+    'field_type' => 'Type',
+    'field_floor_price' => 'Floor price',
+    'toggle_published' => 'Published',
+    'btn_cancel' => 'Cancel',
+    'btn_save' => 'Save',
+    'toast_updated' => 'Collection updated',
     ],
 
 ];
