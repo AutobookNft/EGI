@@ -54,9 +54,10 @@ class HomeController extends Controller {
         $topCollectors = $this->collectorCarouselService->getTopCollectors(10); // Nuovo: top collectors
         $featuredEgis = $this->getFeaturedEgis(); // Nuovo: ultimi 20 EGI per carousel homepage
         $hyperEgis = $this->getHyperEgis();
-        $allEgis = Egi::where('is_published', true)
-            ->with(['collection'])
-            ->get();
+        // ⚡ PERFORMANCE: Rimossa query $allEgis che caricava tutti gli EGI
+        // $allEgis = Egi::where('is_published', true)
+        //     ->with(['collection'])
+        //     ->get();
 
         // Dati impatto ambientale - valore hardcoded per MVP
         // TODO: In futuro, recuperare da database o API dedicata
@@ -71,7 +72,7 @@ class HomeController extends Controller {
             'featuredCreators' => $featuredCreators, // Nuovo: passa i Creator alla vista
             'topCollectors' => $topCollectors, // Nuovo: passa i Top Collectors alla vista
             'featuredEgis' => $featuredEgis, // Nuovo: ultimi 20 EGI per carousel homepage
-            'allEgis' => $allEgis, // Nuovo: tutti gli EGI pubblicati per il carousel
+            'allEgis' => null, // ⚡ PERFORMANCE: Disabilitato per ora
             'hyperEgis' => $hyperEgis, // Nuovo: tutti gli EGI Hyper pubblicati per il carousel
         ]);
     }
@@ -83,9 +84,10 @@ class HomeController extends Controller {
      * @return \Illuminate\Database\Eloquent\Collection
      */
     private function getRandomEgis() {
+        // ⚡ PERFORMANCE: Rimosso inRandomOrder() e prendiamo solo i più recenti
         return Egi::where('is_published', true)
             ->with(['collection'])
-            ->inRandomOrder()
+            ->latest() // Più veloce di inRandomOrder()
             ->take(5)
             ->get();
     }

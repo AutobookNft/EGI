@@ -47,38 +47,23 @@ class FeaturedCollectionService {
      */
     public function getFeaturedCollections(int $limit = self::MAX_CAROUSEL_ITEMS): IlluminateCollection {
         try {
-            // Approccio semplificato: prima ottengo le Collection candidate, poi calcolo l'impatto
+            // ⚡ PERFORMANCE FIX: Selezione randomica semplice senza calcoli pesanti
+            // Eliminiamo completamente le query alle reservations per ora
             $candidateCollections = Collection::where('is_published', true)
-                ->with(['creator', 'egis.reservations' => function ($query) {
-                    $query->where('is_current', true)
-                        ->orderBy('offer_amount_fiat', 'desc');
-                }])
-                ->withCount('egis')
+                ->where('featured_in_guest', true) // Solo collections featured
+                ->with(['creator']) // Solo creator, niente egis.reservations
+                ->withCount('egis') // Solo conteggio egis
+                ->inRandomOrder() // ⚡ Selezione randomica
+                ->take($limit) // Prendiamo direttamente il numero richiesto
                 ->get();
 
-            // Calcolo l'impatto per ogni Collection e ordino
-            $collections = $candidateCollections->map(function ($collection) {
-                $estimatedImpact = $collection->egis->sum(function ($egi) {
-                    $highestReservation = $egi->reservations->first();
-                    return $highestReservation ? $highestReservation->offer_amount_fiat * self::EPP_PERCENTAGE : 0;
-                });
-
-                $collection->estimated_impact = $estimatedImpact;
-                return $collection;
-            })->sortBy([
-                // Prima ordinamento: posizione forzata
+            // ⚡ SEMPLIFICATO: Nessun calcolo di impatto, solo ordinamento per posizione
+            $collections = $candidateCollections->sortBy([
+                // Ordinamento per posizione forzata
                 function ($collection) {
                     return $collection->featured_position ?? 999;
-                },
-                // Secondo ordinamento: featured prima di non-featured
-                function ($collection) {
-                    return $collection->featured_in_guest ? 0 : 1;
-                },
-                // Terzo ordinamento: impatto decrescente
-                function ($collection) {
-                    return -$collection->estimated_impact;
                 }
-            ])->take($limit);            // Log per debugging in ambiente di sviluppo
+            ]);            // Log per debugging in ambiente di sviluppo
             if (config('app.debug')) {
                 Log::info('Featured Collections retrieved', [
                     'count' => $collections->count(),
@@ -87,7 +72,7 @@ class FeaturedCollectionService {
                             'id' => $collection->id,
                             'name' => $collection->collection_name,
                             'featured_position' => $collection->featured_position,
-                            'estimated_impact' => $collection->estimated_impact ?? 0,
+                            'egis_count' => $collection->egis_count,
                         ];
                     })->toArray()
                 ]);
