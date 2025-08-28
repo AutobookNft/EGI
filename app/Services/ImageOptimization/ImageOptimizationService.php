@@ -66,6 +66,9 @@ class ImageOptimizationService {
 
             // Verify original file exists
             if (!$this->verifyOriginalFile($originalPath)) {
+                $this->errorManager->handle('IMAGE_OPTIMIZATION_INVALID_FILE', [
+                    'file_path' => $originalPath
+                ]);
                 throw new Exception("Original file not found: {$originalPath}");
             }
 
@@ -84,6 +87,13 @@ class ImageOptimizationService {
                         array_merge($logContext, ['variant' => $variant, 'files_created' => count($result)])
                     );
                 } catch (Exception $e) {
+                    $this->errorManager->handle('IMAGE_OPTIMIZATION_VARIANT_CREATION_FAILED', [
+                        'variant_type' => $variant,
+                        'dimensions' => 'processing',
+                        'error' => $e->getMessage()
+                    ]);
+                    
+                    // Log for debugging
                     $this->logger->error(
                         "[ImageOptimization] Failed to process variant '{$variant}'",
                         array_merge($logContext, ['variant' => $variant, 'error' => $e->getMessage()])
@@ -101,6 +111,12 @@ class ImageOptimizationService {
 
             return $results;
         } catch (Exception $e) {
+            $this->errorManager->handle('IMAGE_OPTIMIZATION_PROCESSING_FAILED', [
+                'file_path' => $egi->id ?? 'unknown',
+                'error' => $e->getMessage()
+            ]);
+            
+            // Still log for debugging purposes
             $this->logger->error(
                 '[ImageOptimization] EGI optimization failed',
                 array_merge($logContext, ['error' => $e->getMessage()])
@@ -145,6 +161,9 @@ class ImageOptimizationService {
 
         foreach ($required as $field) {
             if (empty($egi->$field)) {
+                $this->errorManager->handle('IMAGE_OPTIMIZATION_INVALID_FILE', [
+                    'file_path' => "EGI field: {$field}"
+                ]);
                 throw new Exception("EGI missing required field: {$field}");
             }
         }
@@ -189,6 +208,10 @@ class ImageOptimizationService {
 
         foreach ($formats as $format) {
             if (!isset($this->converters[$format])) {
+                $this->errorManager->handle('IMAGE_OPTIMIZATION_UNSUPPORTED_FORMAT', [
+                    'format' => $format,
+                    'supported_formats' => 'webp, jpg, jpeg'
+                ]);
                 throw new Exception("No converter available for format: {$format}");
             }
 
