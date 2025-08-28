@@ -146,6 +146,14 @@ Route::get('/', function () {
 });
 
 Route::get('/home', [HomeController::class, 'index'])->name('home');
+// Collection Banner Upload (creator-only)
+Route::middleware(['auth'])
+    ->prefix('collections')
+    ->name('collections.')
+    ->group(function () {
+        Route::post('{collection}/banner', [\App\Http\Controllers\CollectionBannerController::class, 'store'])
+            ->name('banner.upload');
+    });
 
 // Notification Center (ex-Dashboard)
 Route::get('/dashboard', function () {

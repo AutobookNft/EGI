@@ -5,8 +5,7 @@
 return [
 
     /*
-     * The disk on which to store added files and derived images by default. Choose
-     * one or more of the disks you've configured in config/filesystems.php.
+     * The disk on which to store added files and derived images by default.
      */
     'disk_name' => env('MEDIA_DISK', 'public'),
 
@@ -83,8 +82,7 @@ return [
     /*
      * The class that contains the strategy for determining a media file's path.
      */
-    // 'path_generator' => App\Media\CustomPathGenerator::class,
-
+    // Global default path generator (kept as default). We override per-model below.
     'path_generator' => Spatie\MediaLibrary\Support\PathGenerator\DefaultPathGenerator::class,
 
     /*
@@ -96,9 +94,8 @@ return [
      * Here you can specify which path generator should be used for the given class.
      */
     'custom_path_generators' => [
-        // Model::class => PathGenerator::class
-        // or
-        // 'model_morph_alias' => PathGenerator::class
+        // Use custom paths for Collection banners
+        App\Models\Collection::class => App\Media\CustomPathGenerator::class,
     ],
 
     /*

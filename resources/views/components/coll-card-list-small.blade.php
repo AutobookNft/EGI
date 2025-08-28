@@ -8,14 +8,23 @@
 $totalDistributed = $stats['total_distributed'] ?? 0;
 $totalToEpp = $stats['total_to_epp'] ?? 0;
 
-// Determina l'immagine da usare
+// Determina l'immagine da usare (preferisci la più piccola tra le conversions Spatie)
 $imageUrl = null;
-if ($collection->image_card) {
-    $imageUrl = $collection->image_card;
-} elseif ($collection->image_avatar) {
-    $imageUrl = $collection->image_avatar;
-} elseif ($collection->image_cover) {
-    $imageUrl = $collection->image_cover;
+if (method_exists($collection, 'getFirstMediaUrl')) {
+    $thumbUrl = $collection->getFirstMediaUrl('head', 'thumb');
+    if (!empty($thumbUrl)) {
+        $imageUrl = $thumbUrl;
+    }
+}
+// Fallback legacy
+if (!$imageUrl) {
+    if ($collection->image_card) {
+        $imageUrl = $collection->image_card;
+    } elseif ($collection->image_avatar) {
+        $imageUrl = $collection->image_avatar;
+    } elseif ($collection->image_cover) {
+        $imageUrl = $collection->image_cover;
+    }
 }
 @endphp
 

@@ -11,10 +11,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
-class Collection extends Model {
+class Collection extends Model implements HasMedia {
     use HasFactory;
     use SoftDeletes; // Gestione SoftDeletes
+    use InteractsWithMedia;
 
     /**
      * Gli attributi assegnabili in massa.
@@ -166,6 +170,44 @@ class Collection extends Model {
      */
     public function paymentDistributions(): HasMany {
         return $this->hasMany(PaymentDistribution::class);
+    }
+
+    /**
+     * Spatie Media: definizione della media collection per il banner (head)
+     */
+    public function registerMediaCollections(): void {
+        $this->addMediaCollection('head')
+            ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp', 'image/avif'])
+            ->singleFile();
+    }
+
+    /**
+     * Spatie Media: conversioni per i tre formati richiesti
+     * - banner: immagine wide per hero
+     * - card: formato scheda
+     * - thumb: miniatura quadrata
+     */
+    public function registerMediaConversions(?Media $media = null): void {
+        // Banner ampio per hero
+        $this->addMediaConversion('banner')
+            ->width(1920)
+            ->height(600)
+            ->optimize()
+            ->nonQueued();
+
+        // Formato scheda
+        $this->addMediaConversion('card')
+            ->width(800)
+            ->height(600)
+            ->optimize()
+            ->nonQueued();
+
+        // Miniatura
+        $this->addMediaConversion('thumb')
+            ->width(300)
+            ->height(300)
+            ->optimize()
+            ->nonQueued();
     }
 
     /**

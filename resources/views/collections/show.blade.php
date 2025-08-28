@@ -29,7 +29,7 @@ if (is_array($collection)) {
             "@type": "CollectionPage",
             "name": "{{ $collection->collection_name }}",
             "description": "{{ $collection->description }}",
-            "image": "{{ $collection->image_banner ? Storage::url($collection->image_banner) : asset('images/default_banner.jpg') }}",
+            "image": "{{ (method_exists($collection, 'getFirstMediaUrl') && $collection->getFirstMediaUrl('head', 'banner')) ? $collection->getFirstMediaUrl('head', 'banner') : ($collection->image_banner ? Storage::url($collection->image_banner) : asset('images/default_banner.jpg')) }}",
             "author": {
                 "@type": "Person",
                 "name": "{{ $collection->creator->name ?? __('collection.show.unknown_creator_schema') }}"
@@ -66,8 +66,14 @@ if (is_array($collection)) {
     <section class="relative overflow-hidden">
         {{-- Background con Parallax Effect --}}
         <div class="absolute inset-0 z-0 parallax-banner">
-            @if($collection->image_banner)
-            <img src="{{ $collection->image_banner }}" alt="Banner for {{ $collection->collection_name }}"
+            @php
+                // Prova ad usare Spatie Media se disponibile
+                $bannerUrl = method_exists($collection, 'getFirstMediaUrl')
+                    ? $collection->getFirstMediaUrl('head', 'banner')
+                    : null;
+            @endphp
+            @if($bannerUrl || $collection->image_banner)
+            <img src="{{ $bannerUrl ?: $collection->image_banner }}" alt="Banner for {{ $collection->collection_name }}"
                 class="object-cover w-full h-full scale-105">
             @else
             <div class="w-full h-full bg-gradient-to-br from-indigo-900 via-purple-900 to-gray-900"></div>
@@ -75,6 +81,17 @@ if (is_array($collection)) {
             {{-- Overlay gradiente potenziato --}}
             <div class="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent"></div>
             <div class="absolute inset-0 bg-gradient-to-r from-black/30 to-transparent"></div>
+
+            {{-- Pulsante Upload visibile solo al creator --}}
+            @if(auth()->check() && auth()->id() === ($collection->creator_id ?? null))
+            <div class="absolute z-20 flex items-center gap-2 p-2 rounded-lg top-4 right-4 bg-black/50 backdrop-blur-sm">
+                <button id="uploadBannerBtn" class="flex items-center gap-1 px-3 py-1 text-sm font-medium text-white transition-colors bg-indigo-600 rounded hover:bg-indigo-700">
+                    <span class="text-sm material-symbols-outlined">upload</span>
+                    {{ __('Upload banner') }}
+                </button>
+                <input type="file" id="bannerFileInput" accept="image/*" class="hidden" />
+            </div>
+            @endif
         </div>
 
         {{-- Hero Content - Mobile Responsive Height --}}
@@ -546,6 +563,75 @@ const observer = new IntersectionObserver((entries) => {
 document.querySelectorAll('.egi-item, .stat-card').forEach(el => {
     observer.observe(el);
     });
+
+// Banner upload (vanilla JS)
+(function() {
+    const btn = document.getElementById('uploadBannerBtn');
+    const input = document.getElementById('bannerFileInput');
+    if (!btn || !input) return;
+
+    btn.addEventListener('click', () => input.click());
+
+    input.addEventListener('change', async () => {
+        const file = input.files && input.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('banner', file);
+
+        const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        const url = "{{ route('collections.banner.upload', ['collection' => $collection->id ?? 0]) }}";
+
+        try {
+            btn.disabled = true;
+            btn.textContent = 'Uploading…';
+
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: { 'X-CSRF-TOKEN': csrf },
+                body: formData,
+            });
+
+            const data = await res.json();
+            if (!res.ok || !data.success) {
+                throw new Error((data && data.message) || 'Upload failed');
+            }
+
+            // Aggiorna l'immagine del banner a caldo
+            let img = document.querySelector('.parallax-banner img');
+            const newSrc = (data.banner_url || data.original_url) ? (data.banner_url || data.original_url) + `?t=${Date.now()}` : null;
+            if (newSrc) {
+                if (!img) {
+                    // Se non esiste ancora, crea l'elemento img e inseriscilo all'inizio della parallax-banner
+                    const parallax = document.querySelector('.parallax-banner');
+                    img = document.createElement('img');
+                    img.alt = 'Banner for {{ $collection->collection_name }}';
+                    img.className = 'object-cover w-full h-full scale-105';
+                    parallax && parallax.insertBefore(img, parallax.firstChild);
+                }
+                img.src = newSrc;
+            }
+
+            // Toast
+            const toast = document.createElement('div');
+            toast.className = 'fixed z-50 px-4 py-2 text-sm font-medium text-white transform -translate-x-1/2 bg-emerald-600 rounded-lg bottom-4 left-1/2';
+            toast.textContent = 'Banner aggiornato';
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2500);
+        } catch (e) {
+            console.error('Upload error', e);
+            const toast = document.createElement('div');
+            toast.className = 'fixed z-50 px-4 py-2 text-sm font-medium text-white transform -translate-x-1/2 bg-red-600 rounded-lg bottom-4 left-1/2';
+            toast.textContent = 'Errore upload banner';
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Upload banner';
+            input.value = '';
+        }
+    });
+})();
     </script>
     @endpush
 
