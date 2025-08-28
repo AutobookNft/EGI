@@ -119,11 +119,14 @@ class Collection extends Model implements HasMedia {
      * @return bool
      */
     public function canBePublished(): bool {
-        $pendingApprovals = NotificationPayloadWallet::whereHas('wallet', function ($query) {
+        $hasPendingWalletProposals = NotificationPayloadWallet::whereHas('walletModel', function ($query) {
             $query->where('collection_id', $this->id);
-        })->where('status', 'pending')->exists();
+        })
+        ->where('status', 'LIKE', '%pending%')
+        ->exists();
 
-        return !$pendingApprovals && $this->status === 'published';
+        // Si può pubblicare se non esistono proposte wallet in pending
+        return !$hasPendingWalletProposals;
     }
 
     public function epp() {
