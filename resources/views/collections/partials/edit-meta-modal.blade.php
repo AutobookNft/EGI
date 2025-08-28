@@ -27,13 +27,13 @@
                 <label class="block mb-1 text-sm text-gray-300">{{ __('collection.show.field_name') }}</label>
                 <input name="collection_name" type="text" maxlength="150" required
                        class="w-full px-3 py-2 text-white bg-gray-800 border border-gray-700 rounded"
-                       value="{{ e($collection->collection_name) }}" />
+                       value="{{ $collection->collection_name }}" />
             </div>
 
             <div>
                 <label class="block mb-1 text-sm text-gray-300">{{ __('collection.show.field_description') }}</label>
                 <textarea name="description" maxlength="2000" rows="3"
-                          class="w-full px-3 py-2 text-white bg-gray-800 border border-gray-700 rounded">{{ e($collection->description) }}</textarea>
+                          class="w-full px-3 py-2 text-white bg-gray-800 border border-gray-700 rounded">{{ $collection->description }}</textarea>
             </div>
 
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -41,13 +41,13 @@
                     <label class="block mb-1 text-sm text-gray-300">{{ __('collection.show.field_website_url') }}</label>
                     <input name="url_collection_site" type="url" maxlength="255"
                            class="w-full px-3 py-2 text-white bg-gray-800 border border-gray-700 rounded"
-                           value="{{ e($collection->url_collection_site) }}" />
+                           value="{{ $collection->url_collection_site }}" />
                 </div>
                 <div>
                     <label class="block mb-1 text-sm text-gray-300">{{ __('collection.show.field_type') }}</label>
                     <input name="type" type="text" maxlength="50"
                            class="w-full px-3 py-2 text-white bg-gray-800 border border-gray-700 rounded"
-                           value="{{ e($collection->type) }}" />
+                           value="{{ $collection->type }}" />
                 </div>
             </div>
 
@@ -56,7 +56,7 @@
                     <label class="block mb-1 text-sm text-gray-300">{{ __('collection.show.field_floor_price') }}</label>
                     <input name="floor_price" type="number" min="0" step="0.01"
                            class="w-full px-3 py-2 text-white bg-gray-800 border border-gray-700 rounded"
-                           value="{{ e($collection->floor_price) }}" />
+                           value="{{ $collection->floor_price }}" />
                 </div>
                 <div class="flex items-center gap-2 mt-6">
                     <input id="is_published_input" name="is_published" type="checkbox" class="w-4 h-4"
