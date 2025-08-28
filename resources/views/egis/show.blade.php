@@ -5,10 +5,8 @@
     {{-- Schema.org nel head --}}
     <x-slot name="schemaMarkup">
         @php
-        $egiImageUrl = $egi->collection_id && $egi->user_id && $egi->key_file && $egi->extension
-        ? asset(sprintf('storage/users_files/collections_%d/creator_%d/%d.%s',
-        $egi->collection_id, $egi->user_id, $egi->key_file, $egi->extension))
-        : asset('images/default_egi_placeholder.jpg');
+        // Usa l'immagine ottimizzata per Schema.org e fallback
+        $egiImageUrl = $egi->main_image_url ?? asset('images/default_egi_placeholder.jpg');
 
         // Controllo se l'utente loggato è il creator dell'EGI
         $isCreator = App\Helpers\FegiAuth::check() && App\Helpers\FegiAuth::id() === $egi->user_id;
@@ -55,27 +53,16 @@
 
                             {{-- Main Image Display --}}
                             <div class="relative w-full max-w-5xl mx-auto">
-                                @if($imageUrl = (
-                                $egi->collection_id
-                                && $egi->user_id
-                                && $egi->key_file
-                                && $egi->extension
-                                )
-                                ? asset(sprintf(
-                                'storage/users_files/collections_%d/creator_%d/%d.%s',
-                                $egi->collection_id,
-                                $egi->user_id,
-                                $egi->key_file,
-                                $egi->extension
-                                ))
-                                : null
-                                )
+                                @if($egi->main_image_url)
                                 {{-- Trigger per lo zoom --}}
                                 <div id="zoom-container" class="overflow-hidden">
-                                    <img id="zoom-image-trigger" src="{{ $imageUrl }}"
+                                    <img id="zoom-image-trigger" 
+                                        src="{{ $egi->main_image_url }}"
+                                        data-zoom-src="{{ $egi->original_image_url ?? $egi->main_image_url }}"
                                         alt="{{ $egi->title ?? __('egi.image_alt_default') }}"
-                                        class="w-full h-auto cursor-zoom-in" {{-- OPZIONALE: aggiungi data-zoom-src per
-                                        immagine high-res --}} {{-- data-zoom-src="{{ $imageUrl }}" --}} />
+                                        class="w-full h-auto cursor-zoom-in" 
+                                        loading="lazy" 
+                                        />
                                 </div>
                                 @else
                                 {{-- Placeholder quando non c'è immagine --}}

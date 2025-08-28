@@ -92,7 +92,7 @@ class ImageOptimizationService {
                         'dimensions' => 'processing',
                         'error' => $e->getMessage()
                     ]);
-                    
+
                     // Log for debugging
                     $this->logger->error(
                         "[ImageOptimization] Failed to process variant '{$variant}'",
@@ -115,7 +115,7 @@ class ImageOptimizationService {
                 'file_path' => $egi->id ?? 'unknown',
                 'error' => $e->getMessage()
             ]);
-            
+
             // Still log for debugging purposes
             $this->logger->error(
                 '[ImageOptimization] EGI optimization failed',

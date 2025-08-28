@@ -243,8 +243,9 @@ class Egi extends Model {
     }
 
     /**
-     * Get the main image URL for this EGI
-     * Constructs the image path based on collection, creator and file info
+     * Get main image URL with optimization support
+     * Uses 'card' variant for optimal card display (400x400 WebP)
+     * Falls back to original if optimization not available
      *
      * @return string|null
      */
@@ -253,6 +254,25 @@ class Egi extends Model {
             return null;
         }
 
+        // Try to get optimized 'card' variant first
+        $storageBasePath = sprintf(
+            'users_files/collections_%d/creator_%d',
+            $this->collection_id,
+            $this->user_id
+        );
+
+        $optimizedUrl = \App\Services\ImageVariantHelper::getVariantUrlWithFallback(
+            $storageBasePath,
+            $this->key_file,
+            'card', // 400x400 optimized variant
+            'public'
+        );
+
+        if ($optimizedUrl) {
+            return $optimizedUrl;
+        }
+
+        // Fallback to original
         $path = sprintf(
             'storage/users_files/collections_%d/creator_%d/%d.%s',
             $this->collection_id,
@@ -262,6 +282,81 @@ class Egi extends Model {
         );
 
         return asset($path);
+    }
+
+    /**
+     * Get thumbnail image URL for smaller displays
+     * Uses 'thumbnail' variant (200x200 WebP)
+     *
+     * @return string|null
+     */
+    public function getThumbnailImageUrlAttribute(): ?string {
+        if (!$this->collection_id || !$this->user_id || !$this->key_file) {
+            return null;
+        }
+
+        $storageBasePath = sprintf(
+            'users_files/collections_%d/creator_%d',
+            $this->collection_id,
+            $this->user_id
+        );
+
+        return \App\Services\ImageVariantHelper::getVariantUrlWithFallback(
+            $storageBasePath,
+            $this->key_file,
+            'thumbnail', // 200x200 optimized variant
+            'public'
+        );
+    }
+
+    /**
+     * Get avatar image URL for very small displays
+     * Uses 'avatar' variant (80x80 WebP)
+     *
+     * @return string|null
+     */
+    public function getAvatarImageUrlAttribute(): ?string {
+        if (!$this->collection_id || !$this->user_id || !$this->key_file) {
+            return null;
+        }
+
+        $storageBasePath = sprintf(
+            'users_files/collections_%d/creator_%d',
+            $this->collection_id,
+            $this->user_id
+        );
+
+        return \App\Services\ImageVariantHelper::getVariantUrlWithFallback(
+            $storageBasePath,
+            $this->key_file,
+            'avatar', // 80x80 optimized variant
+            'public'
+        );
+    }
+
+    /**
+     * Get original image URL for full-size display (e.g., zoom view)
+     * Uses 'original' optimized variant or falls back to original file
+     *
+     * @return string|null
+     */
+    public function getOriginalImageUrlAttribute(): ?string {
+        if (!$this->collection_id || !$this->user_id || !$this->key_file) {
+            return null;
+        }
+
+        $storageBasePath = sprintf(
+            'users_files/collections_%d/creator_%d',
+            $this->collection_id,
+            $this->user_id
+        );
+
+        return \App\Services\ImageVariantHelper::getVariantUrlWithFallback(
+            $storageBasePath,
+            $this->key_file,
+            'original', // Optimized original
+            'public'
+        );
     }
 
     // Add other relationships as needed (e.g., with Auction, Drop models later)

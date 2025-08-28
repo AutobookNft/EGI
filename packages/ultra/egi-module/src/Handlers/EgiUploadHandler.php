@@ -519,7 +519,7 @@ class EgiUploadHandler {
 
         // Check if this is an image file that supports optimization
         if ($this->isImageMimeType($file) && $this->imageOptimizationManager->isOptimizationSupported($file->getMimeType())) {
-            
+
             $this->logger->info('[EGI Upload] Starting image optimization process', [
                 'egi_id' => $egi->id,
                 'collection_id' => $collection->id,
@@ -555,7 +555,6 @@ class EgiUploadHandler {
                     'optimized_variants' => $optimizedVariants,
                     'optimization_enabled' => true
                 ]);
-
             } catch (\Exception $e) {
                 // If optimization fails, log and continue with standard storage
                 $this->logger->info('[EGI Upload] Image optimization failed, using standard storage', [
@@ -726,7 +725,6 @@ class EgiUploadHandler {
                 }
 
                 Log::channel($this->logChannel)->info('[EGI Upload] File saved successfully', array_merge($diskLogContext, ['url' => $savedInfo[$disk]]));
-            
             } catch (Throwable $e_store) {
                 $errorMsg = "Failed to save to disk '{$disk}': " . $e_store->getMessage();
                 Log::channel($this->logChannel)->error('[EGI Upload] ' . $errorMsg, $diskLogContext);
@@ -797,12 +795,16 @@ class EgiUploadHandler {
         $fileNameForLog = $file->getClientOriginalName();
         $detectedMimeType = $file->getMimeType();
         $extension = strtolower($file->getClientOriginalExtension());
-        
+
         // Extra debug logging for HEIC/HEIF detection
         $isHeicHeifByExtension = in_array($extension, ['heic', 'heif']);
         $isHeicHeifByMime = $detectedMimeType && in_array($detectedMimeType, [
-            'image/heic', 'image/heif', 'image/x-heic', 'image/x-heif', 
-            'application/heic', 'application/heif'
+            'image/heic',
+            'image/heif',
+            'image/x-heic',
+            'image/x-heif',
+            'application/heic',
+            'application/heif'
         ]);
 
         Log::channel($this->logChannel)->info('[EGI Upload] Enhanced file validation with HEIC/HEIF debug', [
@@ -835,8 +837,8 @@ class EgiUploadHandler {
         // 2. Enhanced MIME type validation with HEIC/HEIF special handling
         if ($detectedMimeType) {
             $mimeAllowed = in_array($detectedMimeType, $allowedMimeTypes);
-            
-            // Special case: if file has HEIC/HEIF extension but wrong MIME type, 
+
+            // Special case: if file has HEIC/HEIF extension but wrong MIME type,
             // we'll be more permissive due to browser/system variations
             if (!$mimeAllowed && $isHeicHeifByExtension) {
                 Log::channel($this->logChannel)->warning('[EGI Upload] HEIC/HEIF file with unexpected MIME type - allowing due to extension', [
@@ -996,7 +998,7 @@ class EgiUploadHandler {
     protected function isImageMimeType(UploadedFile $file): bool {
         $imageMimeTypes = [
             'image/jpeg',
-            'image/jpg', 
+            'image/jpg',
             'image/png',
             'image/gif',
             'image/webp',
