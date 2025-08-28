@@ -6,7 +6,7 @@
 
 @php
 $instanceId = $attributes->get('id', $componentElementId ?: 'chb_'.uniqid());
-$logo = "15.jpg";
+$logo = "0.jpg";
 $defaultBannerUrl = asset("images/default/random_background/$logo");
 
 if (is_array($collections)) {
@@ -123,8 +123,7 @@ return [
                     type="banner"
                     :fallback-only="true" />
                 <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10"></div>
-                <div class="absolute inset-0 opacity-75 bg-gradient-to-r from-black/50 via-transparent to-transparent">
-                </div>
+                <div class="absolute inset-0 opacity-75 bg-gradient-to-r from-black/50 via-transparent to-transparent"></div>
             </div>
             @endif
         </div>

@@ -128,25 +128,10 @@ $isCreator = auth()->check() && auth()->id() === $creatorId;
     <figure class="relative aspect-[4/5] w-full overflow-hidden bg-black">
         <a href="{{ route('egis.show', $egi->id) }}" class="block w-full h-full">
             @php
-            // � OTTIMIZZAZIONE IMMAGINI: Usa varianti ottimizzate con fallback
-            // Prima prova a usare l'immagine ottimizzata 'card' (400x400 WebP)
-            $optimizedImageUrl = $this->getOptimizedImageUrl();
-
-            // Fallback: Se non c'è immagine ottimizzata, usa la logica originale
-            if (!$optimizedImageUrl) {
-                $imageRelativePath =
-                    $egi->collection_id && $egi->user_id && $egi->key_file && $egi->extension
-                    ? sprintf(
-                        'users_files/collections_%d/creator_%d/%d.%s',
-                        $egi->collection_id,
-                        $egi->user_id,
-                        $egi->key_file,
-                        $egi->extension,
-                    )
-                    : null;
-
-                $optimizedImageUrl = $imageRelativePath ? asset('storage/' . $imageRelativePath) : null;
-            }
+            // � OTTIMIZZAZIONE IMMAGINI: usa l'accessor del modello con fallback interno
+            // getMainImageUrlAttribute() restituisce la variante 'card' se presente,
+            // altrimenti fa fallback all'originale su disco pubblico.
+            $optimizedImageUrl = $egi->main_image_url;
             @endphp
 
             {{-- 🎯 Immagine Principale o Placeholder --}}
