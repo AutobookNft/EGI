@@ -984,4 +984,28 @@ class EgiUploadHandler {
             }
         }
     }
+
+    /**
+     * Check if uploaded file is an image based on MIME type
+     *
+     * @param UploadedFile $file
+     * @return bool
+     *
+     * @oracode-helper Simple MIME type check for image optimization eligibility
+     */
+    protected function isImageMimeType(UploadedFile $file): bool {
+        $imageMimeTypes = [
+            'image/jpeg',
+            'image/jpg', 
+            'image/png',
+            'image/gif',
+            'image/webp',
+            'image/heic',
+            'image/heif',
+            'image/bmp',
+            'image/tiff'
+        ];
+
+        return in_array(strtolower($file->getMimeType()), $imageMimeTypes);
+    }
 }
