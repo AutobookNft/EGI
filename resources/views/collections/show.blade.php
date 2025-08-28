@@ -63,9 +63,9 @@ if (is_array($collection)) {
     </div>
 
     {{-- 🎨 HERO BANNER POTENZIATO - Mobile Responsive --}}
-    <section class="relative overflow-hidden">
-        {{-- Background con Parallax Effect --}}
-        <div class="absolute inset-0 z-0 parallax-banner">
+    <section class="relative overflow-hidden min-h-[50vh] sm:min-h-[55vh]">
+        {{-- Background senza Parallax Effect --}}
+        <div class="absolute inset-0 z-0">
             @php
                 // Prova ad usare Spatie Media se disponibile
                 $bannerUrl = method_exists($collection, 'getFirstMediaUrl')
@@ -74,151 +74,190 @@ if (is_array($collection)) {
             @endphp
             @if($bannerUrl || $collection->image_banner)
             <img src="{{ $bannerUrl ?: $collection->image_banner }}" alt="Banner for {{ $collection->collection_name }}"
-                class="object-cover w-full h-full scale-105">
+                class="object-cover w-full h-full">
             @else
             <div class="w-full h-full bg-gradient-to-br from-indigo-900 via-purple-900 to-gray-900"></div>
             @endif
             {{-- Overlay gradiente potenziato --}}
             <div class="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent"></div>
             <div class="absolute inset-0 bg-gradient-to-r from-black/30 to-transparent"></div>
+        </div>
 
-            {{-- Pulsante Upload visibile solo al creator --}}
-            @if(auth()->check() && auth()->id() === ($collection->creator_id ?? null))
-            <div class="absolute z-20 flex items-center gap-2 p-2 rounded-lg top-4 right-4 bg-black/50 backdrop-blur-sm">
-                <button id="uploadBannerBtn" class="flex items-center gap-1 px-3 py-1 text-sm font-medium text-white transition-colors bg-indigo-600 rounded hover:bg-indigo-700"
+        {{-- Top Section: Creator Info + Upload Button - Solo mobile positioning --}}
+        <div class="absolute z-20 flex items-center justify-between top-4 left-4 right-4 sm:top-8 sm:left-8 sm:right-8 sm:bottom-8 sm:flex-col sm:items-start sm:justify-between sm:h-auto sm:static sm:bg-transparent">
+            {{-- Creator Info - Desktop: parte della hero content, Mobile: top bar --}}
+            <div class="sm:hidden">
+                @if($collection->creator)
+                <a href="{{ route('creator.home', ['id' => $collection->creator->id]) }}"
+                    class="flex items-center gap-3 transition-all duration-200 hover:opacity-80 group">
+                    <div class="flex-shrink-0">
+                        @if ($collection->creator->profile_photo_url)
+                        <img src="{{ $collection->creator->profile_photo_url }}"
+                            alt="{{ $collection->creator->name }}"
+                            class="object-cover w-10 h-10 transition-transform duration-200 border-2 rounded-full border-white/30 group-hover:scale-110">
+                        @else
+                        <div
+                            class="flex items-center justify-center w-10 h-10 transition-transform duration-200 rounded-full bg-gradient-to-br from-emerald-500 to-blue-500 group-hover:scale-110">
+                            <span class="text-sm font-bold text-white">{{ substr($collection->creator->name ?? 'U', 0, 1) }}</span>
+                        </div>
+                        @endif
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-semibold text-white transition-colors duration-200 group-hover:text-emerald-400">{{
+                                $collection->creator->name ?? __('collection.show.unknown_creator') }}</span>
+                            @if ($collection->creator->usertype === 'verified')
+                            <span class="text-sm text-blue-400 material-symbols-outlined"
+                                title="{{ __('collection.show.verified_creator') }}">verified</span>
+                            @endif
+                        </div>
+                        <p class="text-xs text-gray-300 transition-colors duration-200 group-hover:text-gray-200">{{
+                            __('collection.show.collection_creator') }}</p>
+                    </div>
+                </a>
+                @else
+                <div class="flex items-center gap-3">
+                    <div class="flex-shrink-0">
+                        <div class="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-blue-500">
+                            <span class="text-sm font-bold text-white">U</span>
+                        </div>
+                    </div>
+                    <div>
+                        <span class="text-sm font-semibold text-white">{{ __('collection.show.unknown_creator') }}</span>
+                        <p class="text-xs text-gray-300">{{ __('collection.show.collection_creator') }}</p>
+                    </div>
+                </div>
+                @endif
+            </div>
+
+            {{-- Upload Button - Solo mobile top bar --}}
+            <div class="sm:hidden">
+                @if(auth()->check() && auth()->id() === ($collection->creator_id ?? null))
+                <button id="uploadBannerBtn" class="flex items-center justify-center w-10 h-10 text-white transition-colors bg-indigo-600 rounded-lg hover:bg-indigo-700 backdrop-blur-sm"
                         data-uploading-label="{{ __('collection.show.uploading') }}"
                         data-upload-success="{{ __('collection.show.banner_updated') }}"
                         data-upload-error="{{ __('collection.show.banner_upload_error') }}"
-                        data-upload-label="{{ __('collection.show.upload_banner') }}">
-                    <span class="text-sm material-symbols-outlined">upload</span>
-                    {{ __('collection.show.upload_banner') }}
+                        data-upload-label="{{ __('collection.show.upload_banner') }}"
+                        title="{{ __('collection.show.upload_banner') }}">
+                    <span class="text-lg material-symbols-outlined">upload</span>
                 </button>
                 <input type="file" id="bannerFileInput" accept="image/*" class="hidden" />
+                @endif
             </div>
+        </div>
+
+        {{-- Desktop Upload Button - Posizionamento originale --}}
+        <div class="absolute z-20 hidden top-8 right-8 sm:block">
+            @if(auth()->check() && auth()->id() === ($collection->creator_id ?? null))
+            <button id="uploadBannerBtnDesktop" class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white transition-colors bg-indigo-600 rounded-lg hover:bg-indigo-700 backdrop-blur-sm"
+                    data-uploading-label="{{ __('collection.show.uploading') }}"
+                    data-upload-success="{{ __('collection.show.banner_updated') }}"
+                    data-upload-error="{{ __('collection.show.banner_upload_error') }}"
+                    data-upload-label="{{ __('collection.show.upload_banner') }}"
+                    title="{{ __('collection.show.upload_banner') }}">
+                <span class="text-base material-symbols-outlined">upload</span>
+                <span>{{ __('collection.show.upload_banner') }}</span>
+            </button>
+            <input type="file" id="bannerFileInputDesktop" accept="image/*" class="hidden" />
             @endif
         </div>
 
-        {{-- Hero Content - Mobile Responsive Height --}}
+        {{-- CTA Section - Positioned at bottom right --}}
+        <div class="absolute z-20 flex gap-2 bottom-6 right-4 sm:bottom-8 sm:right-8">
+                {{-- Like Button - Compact --}}
+                <button
+                    class="btn-primary-glow flex items-center justify-center rounded-lg text-white font-medium like-button {{ $collection->is_liked ?? false ? 'is-liked' : '' }}
+                    w-10 h-10 sm:w-auto sm:h-auto sm:px-4 sm:py-2 text-sm backdrop-blur-sm"
+                    data-collection-id="{{ $collection->id }}" data-resource-type="collection"
+                    data-resource-id="{{ $collection->id }}"
+                    data-like-url="{{ route('api.toggle.collection.like', $collection->id) }}"
+                    title="{{ $collection->is_liked ?? false ? __('collection.show.liked') : __('collection.show.like_collection') }}">
+                    <span class="material-symbols-outlined icon-heart text-lg sm:text-base {{ $collection->is_liked ?? false ? 'mr-0 sm:mr-1' : 'mr-0 sm:mr-1' }}">{{ $collection->is_liked ?? false ?
+                        'favorite' : 'favorite_border' }}</span>
+                    <span class="hidden text-sm like-text sm:inline">{{ $collection->is_liked ?? false ? __('collection.show.liked') :
+                        __('collection.show.like_collection') }}</span>
+                    <span class="ml-0 text-xs sm:ml-1 like-count-display">({{ $collection->likes_count ?? 0 }})</span>
+                </button>
+
+                {{-- Share Button - Compact --}}
+                <button
+                    class="flex items-center justify-center w-10 h-10 text-sm font-medium text-white transition-all duration-300 border rounded-lg bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/20 sm:w-auto sm:h-auto sm:px-4 sm:py-2"
+                    onclick="navigator.share ? navigator.share({title: '{{ $collection->collection_name }}', url: window.location.href}) : copyToClipboard(window.location.href)"
+                    title="{{ __('collection.show.share') }}">
+                    <span class="mr-0 text-lg material-symbols-outlined sm:text-base sm:mr-1">share</span>
+                    <span class="hidden text-sm sm:inline">{{ __('collection.show.share') }}</span>
+                </button>
+
+                {{-- Edit Button - Compact --}}
+                @if(auth()->check() && auth()->id() === ($collection->creator_id ?? null))
+                <button id="editMetaBtn"
+                    class="flex items-center justify-center w-10 h-10 text-sm font-medium text-white transition-all duration-300 border rounded-lg bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/20 sm:w-auto sm:h-auto sm:px-4 sm:py-2"
+                    title="{{ __('collection.show.edit_button') }}">
+                    <span class="mr-0 text-lg material-symbols-outlined sm:text-base sm:mr-1">edit</span>
+                    <span class="hidden text-sm sm:inline">{{ __('collection.show.edit_button') }}</span>
+                </button>
+                @endif
+            </div>
+        </div>
+
+        {{-- Hero Content - Layout responsive --}}
         <div class="container relative z-10 px-4 py-8 mx-auto sm:px-6 lg:px-8 sm:py-12 lg:py-16">
             <div class="max-w-4xl">
-                <div class="flex items-center gap-3 mb-6">
+                {{-- Creator Info - Solo Desktop in alto --}}
+                <div class="hidden mb-8 sm:block">
                     @if($collection->creator)
-                    {{-- Se il creator esiste, rendi tutto cliccabile --}}
                     <a href="{{ route('creator.home', ['id' => $collection->creator->id]) }}"
-                        class="flex items-center gap-3 transition-all duration-200 hover:opacity-80 group">
-
-                        {{-- Avatar Creator --}}
+                        class="inline-flex items-center gap-4 transition-all duration-200 hover:opacity-90 group">
                         <div class="flex-shrink-0">
                             @if ($collection->creator->profile_photo_url)
                             <img src="{{ $collection->creator->profile_photo_url }}"
                                 alt="{{ $collection->creator->name }}"
-                                class="object-cover w-12 h-12 transition-transform duration-200 border-2 rounded-full border-white/30 group-hover:scale-110">
+                                class="object-cover w-16 h-16 transition-transform duration-200 border-2 rounded-full border-white/40 group-hover:scale-105">
                             @else
                             <div
-                                class="flex items-center justify-center w-12 h-12 transition-transform duration-200 rounded-full bg-gradient-to-br from-emerald-500 to-blue-500 group-hover:scale-110">
-                                <span class="text-lg font-bold text-white">{{ substr($collection->creator->name ?? 'U',
-                                    0, 1) }}</span>
+                                class="flex items-center justify-center w-16 h-16 transition-transform duration-200 rounded-full bg-gradient-to-br from-emerald-500 to-blue-500 group-hover:scale-105">
+                                <span class="text-xl font-bold text-white">{{ substr($collection->creator->name ?? 'U', 0, 1) }}</span>
                             </div>
                             @endif
                         </div>
-
-                        {{-- Creator Name + Badge --}}
                         <div>
-                            <div class="flex items-center gap-2">
-                                <span
-                                    class="font-semibold text-white transition-colors duration-200 group-hover:text-emerald-400">{{
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-xl font-bold text-white transition-colors duration-200 group-hover:text-emerald-400">{{
                                     $collection->creator->name ?? __('collection.show.unknown_creator') }}</span>
                                 @if ($collection->creator->usertype === 'verified')
-                                <span class="text-lg text-blue-400 material-symbols-outlined"
+                                <span class="text-xl text-blue-400 material-symbols-outlined"
                                     title="{{ __('collection.show.verified_creator') }}">verified</span>
                                 @endif
                             </div>
-                            <p class="text-sm text-gray-300 transition-colors duration-200 group-hover:text-gray-200">{{
+                            <p class="text-base text-gray-200 transition-colors duration-200 group-hover:text-white">{{
                                 __('collection.show.collection_creator') }}</p>
                         </div>
                     </a>
                     @else
-                    {{-- Se il creator non esiste, mostra solo un div non cliccabile --}}
-                    <div class="flex items-center gap-3">
-                        {{-- Avatar placeholder --}}
+                    <div class="inline-flex items-center gap-4">
                         <div class="flex-shrink-0">
-                            <div
-                                class="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-emerald-500 to-blue-500">
-                                <span class="text-lg font-bold text-white">U</span>
+                            <div class="flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-emerald-500 to-blue-500">
+                                <span class="text-xl font-bold text-white">U</span>
                             </div>
                         </div>
-
-                        {{-- Creator Name placeholder --}}
                         <div>
-                            <div class="flex items-center gap-2">
-                                <span class="font-semibold text-white">{{ __('collection.show.unknown_creator')
-                                    }}</span>
-                            </div>
-                            <p class="text-sm text-gray-300">{{ __('collection.show.collection_creator') }}</p>
+                            <span class="text-xl font-bold text-white">{{ __('collection.show.unknown_creator') }}</span>
+                            <p class="text-base text-gray-200">{{ __('collection.show.collection_creator') }}</p>
                         </div>
                     </div>
                     @endif
                 </div>
 
-                {{-- Titolo della Collezione --}}
+                {{-- Collection Title + Description --}}
+                <div class="mt-16 sm:mt-40">
+                    <h1 id="collection-title" class="mb-4 text-3xl font-bold leading-tight text-white sm:text-4xl lg:text-5xl">
+                        {{ $collection->collection_name }}
+                    </h1>
 
-                {{-- Collection Name + Avatar --}}
-                <div class="flex flex-col items-start gap-6 mb-8 sm:flex-row sm:items-center">
-                    {{-- Collection Avatar --}}
-                    <div
-                        class="flex-shrink-0 w-24 h-24 overflow-hidden bg-gray-800 border-4 sm:w-32 sm:h-32 rounded-2xl border-white/20">
-                        @if($collection->image_avatar)
-                        <img src="{{ $collection->image_avatar }}" alt="{{ $collection->collection_name }}"
-                            class="object-cover w-full h-full">
-                        @else
-                        <div
-                            class="flex items-center justify-center w-full h-full bg-gradient-to-br from-purple-500 to-pink-500">
-                            <span class="text-3xl text-white material-symbols-outlined">image</span>
-                        </div>
-                        @endif
-                    </div>
-
-                    {{-- Title + Description --}}
-                    <div class="flex-1 min-w-0">
-                        <h1 id="collection-title" class="mb-4 text-3xl font-bold leading-tight text-white sm:text-4xl lg:text-5xl">
-                            {{ $collection->collection_name }}
-                        </h1>
-
-                        @if($collection->description)
-                        <p id="collection-description" class="text-base leading-relaxed text-gray-200 sm:text-lg line-clamp-3 sm:line-clamp-none">
-                            {{ $collection->description }}
-                        </p>
-                        @endif
-                    </div>
-                </div>
-
-                {{-- CTA Section --}}
-                <div class="flex flex-col gap-4 sm:flex-row">
-                    <button
-                        class="btn-primary-glow flex items-center justify-center px-6 py-3 rounded-lg text-white font-semibold text-sm sm:text-base like-button {{ $collection->is_liked ?? false ? 'is-liked' : '' }}"
-                        data-collection-id="{{ $collection->id }}" data-resource-type="collection"
-                        data-resource-id="{{ $collection->id }}"
-                        data-like-url="{{ route('api.toggle.collection.like', $collection->id) }}">
-                        <span class="mr-2 material-symbols-outlined icon-heart">{{ $collection->is_liked ?? false ?
-                            'favorite' : 'favorite_border' }}</span>
-                        <span class="like-text">{{ $collection->is_liked ?? false ? __('collection.show.liked') :
-                            __('collection.show.like_collection') }}</span>
-                        <span class="ml-2 like-count-display">({{ $collection->likes_count ?? 0 }})</span>
-                    </button>
-
-                    <button
-                        class="flex items-center justify-center px-6 py-3 text-sm font-semibold text-white transition-all duration-300 border rounded-lg bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/20 sm:text-base"
-                        onclick="navigator.share ? navigator.share({title: '{{ $collection->collection_name }}', url: window.location.href}) : copyToClipboard(window.location.href)">
-                        <span class="mr-2 material-symbols-outlined">share</span>
-                        {{ __('collection.show.share') }}
-                    </button>
-
-                    @if(auth()->check() && auth()->id() === ($collection->creator_id ?? null))
-                    <button id="editMetaBtn"
-                        class="flex items-center justify-center px-6 py-3 text-sm font-semibold text-white transition-all duration-300 border rounded-lg bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/20 sm:text-base">
-                        <span class="mr-2 material-symbols-outlined">edit</span>
-                        {{ __('collection.show.edit_button') }}
-                    </button>
+                    @if($collection->description)
+                    <p id="collection-description" class="text-base leading-relaxed text-gray-200 sm:text-lg line-clamp-3 sm:line-clamp-none">
+                        {{ $collection->description }}
+                    </p>
                     @endif
                 </div>
             </div>
@@ -521,29 +560,7 @@ document.getElementById('egis-sort').addEventListener('change', function() {
     items.forEach(item => container.appendChild(item));
 });
 
-// Parallax effect (performance-conscious)
-let ticking = false;
-
-function updateParallax() {
-    const scrolled = window.pageYOffset;
-    const parallax = document.querySelector('.parallax-banner');
-
-    if (parallax) {
-        const speed = scrolled * 0.5;
-        parallax.style.transform = `translateY(${speed}px)`;
-    }
-
-    ticking = false;
-}
-
-function requestTick() {
-    if (!ticking) {
-        requestAnimationFrame(updateParallax);
-        ticking = true;
-    }
-}
-
-window.addEventListener('scroll', requestTick);
+// Parallax rimosso per evitare effetti strani sui pulsanti
 
 // Copy to clipboard utility
 function copyToClipboard(text) {
@@ -578,16 +595,19 @@ const observer = new IntersectionObserver((entries) => {
 document.querySelectorAll('.egi-item, .stat-card').forEach(el => {
     observer.observe(el);
     });
-
-// Banner upload (vanilla JS)
+min-h-[60vh]
+// Banner upload (vanilla JS) - Gestisce sia mobile che desktop
 (function() {
-    const btn = document.getElementById('uploadBannerBtn');
-    const input = document.getElementById('bannerFileInput');
-    if (!btn || !input) return;
+    // Setup per mobile
+    const btnMobile = document.getElementById('uploadBannerBtn');
+    const inputMobile = document.getElementById('bannerFileInput');
 
-    btn.addEventListener('click', () => input.click());
+    // Setup per desktop
+    const btnDesktop = document.getElementById('uploadBannerBtnDesktop');
+    const inputDesktop = document.getElementById('bannerFileInputDesktop');
 
-    input.addEventListener('change', async () => {
+    // Funzione condivisa per upload
+    const handleUpload = async (btn, input) => {
         const file = input.files && input.files[0];
         if (!file) return;
 
@@ -599,7 +619,8 @@ document.querySelectorAll('.egi-item, .stat-card').forEach(el => {
 
         try {
             btn.disabled = true;
-            btn.textContent = btn.getAttribute('data-uploading-label') || 'Uploading…';
+            const originalContent = btn.innerHTML;
+            btn.innerHTML = btn.getAttribute('data-uploading-label') || 'Uploading…';
 
             const res = await fetch(url, {
                 method: 'POST',
@@ -613,17 +634,9 @@ document.querySelectorAll('.egi-item, .stat-card').forEach(el => {
             }
 
             // Aggiorna l'immagine del banner a caldo
-            let img = document.querySelector('.parallax-banner img');
+            let img = document.querySelector('section img');
             const newSrc = (data.banner_url || data.original_url) ? (data.banner_url || data.original_url) + `?t=${Date.now()}` : null;
-            if (newSrc) {
-                if (!img) {
-                    // Se non esiste ancora, crea l'elemento img e inseriscilo all'inizio della parallax-banner
-                    const parallax = document.querySelector('.parallax-banner');
-                    img = document.createElement('img');
-                    img.alt = 'Banner for {{ $collection->collection_name }}';
-                    img.className = 'object-cover w-full h-full scale-105';
-                    parallax && parallax.insertBefore(img, parallax.firstChild);
-                }
+            if (newSrc && img) {
                 img.src = newSrc;
             }
 
@@ -633,6 +646,8 @@ document.querySelectorAll('.egi-item, .stat-card').forEach(el => {
             toast.textContent = btn.getAttribute('data-upload-success') || 'Updated';
             document.body.appendChild(toast);
             setTimeout(() => toast.remove(), 2500);
+
+            btn.innerHTML = originalContent;
         } catch (e) {
             console.error('Upload error', e);
             const toast = document.createElement('div');
@@ -640,12 +655,25 @@ document.querySelectorAll('.egi-item, .stat-card').forEach(el => {
             toast.textContent = btn.getAttribute('data-upload-error') || 'Error';
             document.body.appendChild(toast);
             setTimeout(() => toast.remove(), 3000);
+
+            btn.innerHTML = btn.getAttribute('data-upload-label') || 'Upload banner';
         } finally {
             btn.disabled = false;
-            btn.textContent = btn.getAttribute('data-upload-label') || 'Upload banner';
             input.value = '';
         }
-    });
+    };
+
+    // Event listeners per mobile
+    if (btnMobile && inputMobile) {
+        btnMobile.addEventListener('click', () => inputMobile.click());
+        inputMobile.addEventListener('change', () => handleUpload(btnMobile, inputMobile));
+    }
+
+    // Event listeners per desktop
+    if (btnDesktop && inputDesktop) {
+        btnDesktop.addEventListener('click', () => inputDesktop.click());
+        inputDesktop.addEventListener('change', () => handleUpload(btnDesktop, inputDesktop));
+    }
 })();
     </script>
     {{-- JS per modale Edit Meta (esterno, non tocca il resto) --}}
