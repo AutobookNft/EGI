@@ -595,7 +595,7 @@ const observer = new IntersectionObserver((entries) => {
 document.querySelectorAll('.egi-item, .stat-card').forEach(el => {
     observer.observe(el);
     });
-min-h-[60vh]
+
 // Banner upload (vanilla JS) - Gestisce sia mobile che desktop
 (function() {
     // Setup per mobile
