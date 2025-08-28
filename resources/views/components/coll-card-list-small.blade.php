@@ -30,14 +30,14 @@ if (!$imageUrl) {
 
 {{-- Card Collection IDENTICA a OpenSea --}}
 <a href="{{ route('home.collections.show', ['id' => $collection->id]) }}">
-    <div class="p-2 transition-colors rounded-lg cursor-pointer hover:bg-gray-800/30">
+    <div class="px-2 py-1 transition-colors rounded-lg cursor-pointer hover:bg-gray-800/30">
         {{-- Layout come OpenSea: immagine piccola tonda a sinistra --}}
         <div class="flex items-center justify-between">
             {{-- Parte sinistra: immagine + nome --}}
             <div class="flex items-center space-x-3">
-                {{-- Immagine Collection PICCOLA E TONDA (come OpenSea) --}}
+                {{-- Immagine Collection PICCOLA E QUADRATA con angoli stondati --}}
 
-                    <div class="flex-shrink-0 w-10 h-10 overflow-hidden bg-gray-700 rounded-full">
+                    <div class="flex-shrink-0 w-10 h-10 overflow-hidden bg-gray-700 rounded-lg">
                         @if($imageUrl)
                             <img src="{{ $imageUrl }}" alt="{{ $collection->collection_name }}" class="object-cover w-full h-full">
                         @else
