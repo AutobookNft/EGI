@@ -85,9 +85,13 @@ if (is_array($collection)) {
             {{-- Pulsante Upload visibile solo al creator --}}
             @if(auth()->check() && auth()->id() === ($collection->creator_id ?? null))
             <div class="absolute z-20 flex items-center gap-2 p-2 rounded-lg top-4 right-4 bg-black/50 backdrop-blur-sm">
-                <button id="uploadBannerBtn" class="flex items-center gap-1 px-3 py-1 text-sm font-medium text-white transition-colors bg-indigo-600 rounded hover:bg-indigo-700">
+                <button id="uploadBannerBtn" class="flex items-center gap-1 px-3 py-1 text-sm font-medium text-white transition-colors bg-indigo-600 rounded hover:bg-indigo-700"
+                        data-uploading-label="{{ __('collection.show.uploading') }}"
+                        data-upload-success="{{ __('collection.show.banner_updated') }}"
+                        data-upload-error="{{ __('collection.show.banner_upload_error') }}"
+                        data-upload-label="{{ __('collection.show.upload_banner') }}">
                     <span class="text-sm material-symbols-outlined">upload</span>
-                    {{ __('Upload banner') }}
+                    {{ __('collection.show.upload_banner') }}
                 </button>
                 <input type="file" id="bannerFileInput" accept="image/*" class="hidden" />
             </div>
@@ -213,7 +217,7 @@ if (is_array($collection)) {
                     <button id="editMetaBtn"
                         class="flex items-center justify-center px-6 py-3 text-sm font-semibold text-white transition-all duration-300 border rounded-lg bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/20 sm:text-base">
                         <span class="mr-2 material-symbols-outlined">edit</span>
-                        Modifica dati
+                        {{ __('collection.show.edit_button') }}
                     </button>
                     @endif
                 </div>
@@ -595,7 +599,7 @@ document.querySelectorAll('.egi-item, .stat-card').forEach(el => {
 
         try {
             btn.disabled = true;
-            btn.textContent = 'Uploading…';
+            btn.textContent = btn.getAttribute('data-uploading-label') || 'Uploading…';
 
             const res = await fetch(url, {
                 method: 'POST',
@@ -626,19 +630,19 @@ document.querySelectorAll('.egi-item, .stat-card').forEach(el => {
             // Toast
             const toast = document.createElement('div');
             toast.className = 'fixed z-50 px-4 py-2 text-sm font-medium text-white transform -translate-x-1/2 bg-emerald-600 rounded-lg bottom-4 left-1/2';
-            toast.textContent = 'Banner aggiornato';
+            toast.textContent = btn.getAttribute('data-upload-success') || 'Updated';
             document.body.appendChild(toast);
             setTimeout(() => toast.remove(), 2500);
         } catch (e) {
             console.error('Upload error', e);
             const toast = document.createElement('div');
             toast.className = 'fixed z-50 px-4 py-2 text-sm font-medium text-white transform -translate-x-1/2 bg-red-600 rounded-lg bottom-4 left-1/2';
-            toast.textContent = 'Errore upload banner';
+            toast.textContent = btn.getAttribute('data-upload-error') || 'Error';
             document.body.appendChild(toast);
             setTimeout(() => toast.remove(), 3000);
         } finally {
             btn.disabled = false;
-            btn.textContent = 'Upload banner';
+            btn.textContent = btn.getAttribute('data-upload-label') || 'Upload banner';
             input.value = '';
         }
     });

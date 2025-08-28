@@ -59,10 +59,10 @@
         descEl.classList.toggle('hidden', !(c.description));
       }
 
-      // Toast ok
-      const toast = document.createElement('div');
-      toast.className = 'fixed z-50 px-4 py-2 text-sm font-medium text-white transform -translate-x-1/2 bg-emerald-600 rounded-lg bottom-4 left-1/2';
-      toast.textContent = document.documentElement.lang === 'it' ? 'Dati aggiornati' : 'Updated';
+  // Toast ok (testo passato dal blade via data-*)
+  const toast = document.createElement('div');
+  toast.className = 'fixed z-50 px-4 py-2 text-sm font-medium text-white transform -translate-x-1/2 bg-emerald-600 rounded-lg bottom-4 left-1/2';
+  toast.textContent = modal.getAttribute('data-toast-updated') || 'Updated';
       document.body.appendChild(toast);
       setTimeout(() => toast.remove(), 2500);
       closeModal();

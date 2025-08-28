@@ -448,6 +448,11 @@ return [
         'btn_cancel' => 'Cancel',
         'btn_save' => 'Save',
         'toast_updated' => 'Collection updated',
+        // Banner upload strings
+        'upload_banner' => 'Upload banner',
+        'uploading' => 'Uploading…',
+        'banner_updated' => 'Banner updated',
+        'banner_upload_error' => 'Banner upload error',
     ],
 
 ];

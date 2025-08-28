@@ -464,5 +464,10 @@ return [
         'btn_cancel' => 'Annulla',
         'btn_save' => 'Salva',
         'toast_updated' => 'Collezione aggiornata',
+        // Banner upload strings
+        'upload_banner' => 'Carica banner',
+        'uploading' => 'Caricamento…',
+        'banner_updated' => 'Banner aggiornato',
+        'banner_upload_error' => 'Errore upload banner',
     ],
 ];
