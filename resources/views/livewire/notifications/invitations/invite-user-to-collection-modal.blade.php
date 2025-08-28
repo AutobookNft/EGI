@@ -1,14 +1,14 @@
 <div>
 
     <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-        <div class="w-full max-w-md rounded-2xl bg-gray-800 p-6 shadow-lg">
+        <div class="w-full max-w-md p-6 bg-gray-800 shadow-lg rounded-2xl">
             <h3 class="mb-4 text-2xl font-bold text-white">{{ __('Invite Collection Member') }}</h3>
 
             <!-- Email -->
             <div class="mb-4">
                 <label for="email" class="block text-sm font-medium text-gray-300">{{ __('Email') }}</label>
                 <input type="email" id="email" wire:model="email"
-                    class="input input-bordered input-primary w-full bg-gray-700 text-white"
+                    class="w-full text-white bg-gray-700 input input-bordered input-primary"
                     placeholder="{{ __('Enter user email') }}">
                 @error('email')
                     <span class="text-sm text-error">{{ $message }}</span>
@@ -19,7 +19,7 @@
             <div class="mb-4">
                 <label for="role" class="block text-sm font-medium text-gray-300">{{ __('Role') }}</label>
                 <select id="role" wire:model="role"
-                    class="select select-bordered select-primary w-full bg-gray-700 text-white">
+                    class="w-full text-white bg-gray-700 select select-bordered select-primary">
                     <option value="" disabled>{{ __('Select a role') }}</option>
                     @foreach ($roles as $role)
                         <option value="{{ $role }}">{{ ucfirst($role) }}</option>
@@ -32,15 +32,15 @@
 
             <!-- Errori generali -->
             @error('invitation')
-                <div class="mb-4 rounded-md border border-red-600 bg-red-900 p-3">
+                <div class="p-3 mb-4 bg-red-900 border border-red-600 rounded-md">
                     <span class="text-sm text-red-300">{{ $message }}</span>
                 </div>
             @enderror
 
             <!-- Azioni -->
-            <div class="mt-6 flex justify-end space-x-4">
+            <div class="flex justify-end mt-6 space-x-4">
                 <button wire:click="closeModal" class="btn btn-secondary">{{ __('Cancel') }}</button>
-                <button wire:click="invite" class="btn btn-primary">{{ __('Send Invitation') }}</button>
+                <button wire:click="invite" class="btn btn-primary">{{ __('Spedisi invito') }}</button>
             </div>
         </div>
     </div>

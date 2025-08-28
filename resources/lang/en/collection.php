@@ -330,6 +330,8 @@ return [
         'deletion_error' => 'Error during deletion.',
         'deletion_error_generic' => 'An error occurred during deletion.',
         'create_invitation' => 'Create an invitation',
+        'already_member' => 'This user is already a member of this collection!',
+        'user_already_member' => 'The user you are trying to invite is already a member of this collection!',
     ],
     'collaborators' => [
         'add_denied' => 'You don\'t have permission to add collaborators',

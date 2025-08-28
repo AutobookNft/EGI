@@ -331,6 +331,8 @@ return [
         'deletion_error' => 'Erreur lors de la suppression.',
         'deletion_error_generic' => 'Une erreur s’est produite lors de la suppression.',
         'create_invitation' => 'Créer une invitation',
+        'already_member' => 'Cet utilisateur est déjà membre de cette collection !',
+        'user_already_member' => 'L\'utilisateur que vous essayez d\'inviter est déjà membre de cette collection !',
     ],
     'collaborators' => [
         'add_denied' => 'Vous n\'avez pas la permission d\'ajouter des collaborateurs',

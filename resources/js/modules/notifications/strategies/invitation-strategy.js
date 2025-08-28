@@ -66,7 +66,7 @@ export class InvitationStrategy {
             // Controlla se è l'errore specifico "già membro"
             if (error.message && error.message.includes('ALREADY_MEMBER:')) {
                 const message = error.message.replace('ALREADY_MEMBER:', '');
-                
+
                 await Swal.fire({
                     icon: 'info',
                     title: 'Già membro!',
@@ -76,10 +76,10 @@ export class InvitationStrategy {
                     background: 'rgba(255, 255, 255, 0.95)',
                     backdrop: 'rgba(0, 0, 0, 0.5)'
                 });
-                
+
                 // Rimuovi la notifica dal DOM dato che l'utente è già membro
                 this.notificationInstance.removeNotificationFromDOM(actionRequest.notificationId);
-                
+
             } else {
                 // Altri errori - mostra errore generico
                 await Swal.fire({
@@ -90,7 +90,7 @@ export class InvitationStrategy {
                     confirmButtonColor: '#EF4444'
                 });
             }
-            
+
             console.error('Errore nell\'accettazione invito:', error);
             throw error;
         }

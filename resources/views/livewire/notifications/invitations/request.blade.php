@@ -151,16 +151,30 @@
             $wire.on('notification-response', (event) => {
                 if (event.detail.success) {
                     Swal.fire(
-                        event.detail.option === 'accept' ? 'Invito accettato!' : 'Invito rifiutato!',
+                        event.detail.option === 'accepted' ? 'Invito accettato!' : 'Invito rifiutato!',
                         'Operazione completata con successo.',
                         'success'
                     );
                 } else {
-                    Swal.fire(
-                        'Errore!',
-                        event.detail.error || 'Si è verificato un errore.',
-                        'error'
-                    );
+                    // Gestione specifica per l'errore "già membro"
+                    if (event.detail.error === 'ALREADY_MEMBER') {
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'Già membro!',
+                            text: event.detail.message || 'Sei già membro di questa collezione!',
+                            confirmButtonText: 'Ho capito',
+                            confirmButtonColor: '#3B82F6',
+                            background: 'rgba(255, 255, 255, 0.95)',
+                            backdrop: 'rgba(0, 0, 0, 0.5)'
+                        });
+                    } else {
+                        // Altri errori - mostra errore generico
+                        Swal.fire(
+                            'Errore!',
+                            event.detail.message || event.detail.error || 'Si è verificato un errore.',
+                            'error'
+                        );
+                    }
                 }
             });
         </script>

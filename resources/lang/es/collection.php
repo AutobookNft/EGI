@@ -331,6 +331,8 @@ return [
         'deletion_error' => 'Error durante la eliminación.',
         'deletion_error_generic' => 'Ocurrió un error durante la eliminación.',
         'create_invitation' => 'Crear una invitación',
+        'already_member' => '¡Este usuario ya es miembro de esta colección!',
+        'user_already_member' => '¡El usuario que intentas invitar ya es miembro de esta colección!',
     ],
     'collaborators' => [
         'add_denied' => 'No tienes permisos para añadir colaboradores',

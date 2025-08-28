@@ -364,21 +364,21 @@ export default class Notification {
      */
     removeNotificationFromDOM(notificationId) {
         console.log(`🗑 Rimozione notifica ${notificationId} dal DOM`);
-        
+
         // Rimuovi thumbnail dalla lista
         const thumbnail = document.querySelector(`.notification-thumbnail[data-notification-id="${notificationId}"]`);
         if (thumbnail) {
             thumbnail.remove();
             console.log(`✅ Thumbnail rimossa per notifica ${notificationId}`);
         }
-        
+
         // Rimuovi item dalla lista notifiche (se presente)
         const notificationItem = document.querySelector(`.notification-item[data-notification-id="${notificationId}"]`);
         if (notificationItem) {
             notificationItem.remove();
             console.log(`✅ Item rimosso per notifica ${notificationId}`);
         }
-        
+
         // Pulisci dettagli se questa notifica era selezionata
         const detailsContainer = document.getElementById('notification-details');
         if (detailsContainer) {

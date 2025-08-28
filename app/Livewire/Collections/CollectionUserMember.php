@@ -189,6 +189,28 @@ class CollectionUserMember extends Component {
                 return;
             }
 
+            // CONTROLLO PREVENTIVO: Verifica se l'utente è già membro della collezione
+            $invitedUser = \App\Models\User::where('email', $this->email)->first();
+
+            if ($invitedUser) {
+                $existingMember = CollectionUser::where('collection_id', $this->collectionId)
+                    ->where('user_id', $invitedUser->id)
+                    ->first();
+
+                if ($existingMember) {
+                    Log::channel('florenceegi')->warning('Tentativo di invitare utente già membro della collezione da CollectionUserMember', [
+                        'invited_email' => $this->email,
+                        'invited_user_id' => $invitedUser->id,
+                        'collection_id' => $this->collectionId,
+                        'existing_role' => $existingMember->role,
+                        'inviter_user_id' => auth()->id()
+                    ]);
+
+                    $this->addError('email', __('collection.invitation.user_already_member'));
+                    return;
+                }
+            }
+
             $this->invitationService->createInvitation(
                 $collection,
                 $this->email,

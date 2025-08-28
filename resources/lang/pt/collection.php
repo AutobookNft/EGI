@@ -331,6 +331,8 @@ return [
         'deletion_error' => 'Erro durante a exclusão.',
         'deletion_error_generic' => 'Ocorreu um erro durante a exclusão.',
         'create_invitation' => 'Criar um convite',
+        'already_member' => 'Este usuário já é membro desta coleção!',
+        'user_already_member' => 'O usuário que você está tentando convidar já é membro desta coleção!',
     ],
     'collaborators' => [
         'add_denied' => 'Você não tem permissão para adicionar colaboradores',

@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Notifications\Invitations;
 
-use App\DataTransferObjects\Payloads\Wallets\InvitationAcceptRequest;
+use App\DataTransferObjects\Payloads\Invitations\InvitationAcceptRequest;
 use App\Enums\NotificationStatus;
 use App\Models\CollectionUser;
 use App\Models\NotificationPayloadInvitation;
@@ -14,13 +14,11 @@ use Livewire\Component;
 use Illuminate\Support\Facades\DB;
 use Exception;
 
-class Request extends Component
-{
+class Request extends Component {
 
     public mixed $notification;
 
-    public function mount(mixed $notification)
-    {
+    public function mount(mixed $notification) {
         $this->notification = $notification;
     }
 
@@ -45,8 +43,7 @@ class Request extends Component
      * - Il metodo utilizza la factory NotificationHandlerFactory per gestire l'invio della notifica.
      */
     #[On('response')]
-    public function response($option)
-    {
+    public function response($option) {
 
         try {
             // Inizio della transazione
@@ -65,7 +62,41 @@ class Request extends Component
 
             // Accetta o rifiuta l'invito
             if ($option === 'accepted') {
-                $invitationService->acceptInvitation($invitationAcceptRequest);
+                // CONTROLLO PREVENTIVO: Verifica se l'utente invitato è già membro della collezione
+                // L'email dell'invitato è nel payload dell'invito
+                $invitedUser = \App\Models\User::where('email', $notificationPayloadInvitation->email)->first();
+
+                if ($invitedUser) {
+                    $existingMember = CollectionUser::where('collection_id', $notificationPayloadInvitation->collection_id)
+                        ->where('user_id', $invitedUser->id)
+                        ->first();
+
+                    if ($existingMember) {
+                        // Utente invitato già membro - annulla transazione e invia errore al frontend
+                        DB::rollBack();
+
+                        Log::channel('florenceegi')->warning('Tentativo di accettare invito per utente già membro della collezione', [
+                            'invited_email' => $notificationPayloadInvitation->email,
+                            'invited_user_id' => $invitedUser->id,
+                            'collection_id' => $notificationPayloadInvitation->collection_id,
+                            'existing_role' => $existingMember->role,
+                            'acceptor_user_id' => Auth::id()
+                        ]);
+
+                        // Dispatcha evento di errore specifico al frontend
+                        $this->dispatch(
+                            'notification-response',
+                            option: $option,
+                            success: false,
+                            error: 'ALREADY_MEMBER',
+                            message: __('collection.invitation.already_member')
+                        );
+
+                        return;
+                    }
+                }
+
+                $invitationService->acceptInvitation($notificationPayloadInvitation, $this->notification->id);
             } else {
                 $this->reject($notificationPayloadInvitation);
             }
@@ -83,9 +114,8 @@ class Request extends Component
 
             Log::channel('florenceegi')->info('Transazione completata con successo per la risposta all\'invito.');
 
-             // Dispatcha un evento di successo al frontend
+            // Dispatcha un evento di successo al frontend
             $this->dispatch('notification-response', option: $option, success: true);
-
         } catch (Exception $e) {
             // Annulla la transazione in caso di errore
             DB::rollBack();
@@ -101,8 +131,7 @@ class Request extends Component
         }
     }
 
-    public function accept($notificationPayloadInvitation)
-    {
+    public function accept($notificationPayloadInvitation) {
 
         Log::channel('florenceegi')->info('InvitationAccepted:accept', [
             'notificationPayloadInvitation' => $notificationPayloadInvitation,
@@ -120,7 +149,7 @@ class Request extends Component
             // L'utente che sta approvando l'invito
             $receiver = Auth::user();
 
-            $metadata=""; // Eventuali dati aggiuntivi da salvare
+            $metadata = ""; // Eventuali dati aggiuntivi da salvare
 
             $data = [
                 'collection_id' => $notificationPayloadInvitation->collection_id,
@@ -148,7 +177,6 @@ class Request extends Component
             $this->notification['receiver_id'] = $receiver->id;
             $this->notification['receiver_name'] = $receiver->name . ' ' . $receiver->last_name;
             $this->notification['receiver_email'] = $receiver->email;
-
         } catch (Exception $e) {
             Log::error('Errore durante l\'accettazione dell\'invito:', [
                 'message' => $e->getMessage(),
@@ -159,8 +187,7 @@ class Request extends Component
         }
     }
 
-    public function reject($notificationPayloadInvitation)
-    {
+    public function reject($notificationPayloadInvitation) {
 
 
         $user = Auth::user();
@@ -214,8 +241,7 @@ class Request extends Component
         }
     }
 
-    public function render()
-    {
+    public function render() {
         return view('livewire.notifications.invitations.request');
     }
 }

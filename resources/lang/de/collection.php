@@ -331,6 +331,8 @@ return [
         'deletion_error' => 'Fehler beim Löschen.',
         'deletion_error_generic' => 'Beim Löschen ist ein Fehler aufgetreten.',
         'create_invitation' => 'Eine Einladung erstellen',
+        'already_member' => 'Dieser Benutzer ist bereits Mitglied dieser Sammlung!',
+        'user_already_member' => 'Der Benutzer, den Sie einladen möchten, ist bereits Mitglied dieser Sammlung!',
     ],
     'collaborators' => [
         'add_denied' => 'Sie haben keine Berechtigung, Mitarbeiter hinzuzufügen',
