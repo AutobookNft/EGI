@@ -37,6 +37,7 @@ use Ultra\ErrorManager\Interfaces\ErrorManagerInterface;
 use App\Services\CollectionService;
 use Ultra\EgiModule\Contracts\WalletServiceInterface;
 use Ultra\EgiModule\Contracts\UserRoleServiceInterface;
+use App\Contracts\ImageOptimizationManagerInterface;
 
 /**
  * @Oracode Handler: EgiUploadHandler (v2.0 - Service-Based Architecture)
@@ -138,6 +139,12 @@ class EgiUploadHandler {
     protected readonly UserRoleServiceInterface $userRoleService;
 
     /**
+     * Image optimization service for multi-variant processing
+     * @var ImageOptimizationManagerInterface
+     */
+    protected readonly ImageOptimizationManagerInterface $imageOptimizationManager;
+
+    /**
      * Constructor: Injects all required services for clean DI pattern
      *
      * @param ErrorManagerInterface $errorManager UEM for error handling
@@ -145,6 +152,7 @@ class EgiUploadHandler {
      * @param CollectionService $collectionService Collection management service
      * @param WalletServiceInterface $walletService Wallet operations service
      * @param UserRoleServiceInterface $userRoleService User role assignment service
+     * @param ImageOptimizationManagerInterface $imageOptimizationManager Image optimization service
      *
      * @oracode-di-pattern Proper dependency injection replacing trait approach
      * @oracode-service-layer All business logic delegated to appropriate services
@@ -154,13 +162,15 @@ class EgiUploadHandler {
         UltraLogManager $logger,
         CollectionService $collectionService,
         WalletServiceInterface $walletService,
-        UserRoleServiceInterface $userRoleService
+        UserRoleServiceInterface $userRoleService,
+        ImageOptimizationManagerInterface $imageOptimizationManager
     ) {
         $this->errorManager = $errorManager;
         $this->logger = $logger;
         $this->collectionService = $collectionService;
         $this->walletService = $walletService;
         $this->userRoleService = $userRoleService;
+        $this->imageOptimizationManager = $imageOptimizationManager;
     }
 
     /**
@@ -494,7 +504,7 @@ class EgiUploadHandler {
     }
 
     /**
-     * Store EGI file using enhanced multi-disk strategy
+     * Store EGI file using enhanced multi-disk strategy with image optimization
      *
      * @param UploadedFile $file
      * @param Collection $collection
@@ -507,6 +517,55 @@ class EgiUploadHandler {
         $basePath = 'users_files/collections_' . $collection->id . '/creator_' . $creatorUser->id . '/';
         $finalPathKey = $basePath . $egi->key_file . '.' . $egi->extension;
 
+        // Check if this is an image file that supports optimization
+        if ($this->isImageMimeType($file) && $this->imageOptimizationManager->isOptimizationSupported($file->getMimeType())) {
+            
+            $this->logger->info('[EGI Upload] Starting image optimization process', [
+                'egi_id' => $egi->id,
+                'collection_id' => $collection->id,
+                'mime_type' => $file->getMimeType(),
+                'file_size' => $file->getSize()
+            ]);
+
+            try {
+                // Generate optimized variants using the ImageOptimizationManager
+                $optimizedVariants = $this->imageOptimizationManager->optimizeImage(
+                    $file,
+                    $basePath,
+                    $egi->key_file,
+                    [], // Use default variants
+                    ['local', 'public'] // Save to both disks
+                );
+
+                $this->logger->info('[EGI Upload] Image optimization completed successfully', [
+                    'egi_id' => $egi->id,
+                    'variants_created' => array_keys($optimizedVariants),
+                    'total_variants' => count($optimizedVariants)
+                ]);
+
+                // Store the original file path as main path
+                $mainStorageResult = $this->saveToMultipleDisks(
+                    $finalPathKey,
+                    $file->getRealPath(),
+                    ['collection_id' => $collection->id, 'egi_id' => $egi->id]
+                );
+
+                // Add variant paths to the storage result
+                return array_merge($mainStorageResult, [
+                    'optimized_variants' => $optimizedVariants,
+                    'optimization_enabled' => true
+                ]);
+
+            } catch (\Exception $e) {
+                // If optimization fails, log and continue with standard storage
+                $this->logger->info('[EGI Upload] Image optimization failed, using standard storage', [
+                    'egi_id' => $egi->id,
+                    'error' => $e->getMessage()
+                ]);
+            }
+        }
+
+        // Standard file storage for non-images or when optimization fails
         return $this->saveToMultipleDisks(
             $finalPathKey,
             $file->getRealPath(),

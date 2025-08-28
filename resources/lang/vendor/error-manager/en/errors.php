@@ -57,7 +57,18 @@ return [
         'egi_db_error' => 'Database error processing EGI :egi_id for collection :collection_id.',
         'egi_storage_critical_failure' => 'Critical failure saving EGI :egi_id file to disk(s): :disks',
         'egi_storage_config_error' => "'local' storage disk required for fallback is not configured.",
-        'egi_unexpected_error' => 'Unexpected error during EGI processing for file :original_filename.',
+        'egi_unexpected_error' => 'Unexpected error during EGI processing for file :original_filename. Error: :error.',
+
+        // Image Optimization Developer Error Messages
+        'image_optimization_invalid_file' => 'Invalid image file provided for optimization. File: :file_path.',
+        'image_optimization_unsupported_format' => 'Unsupported image format: :format. Supported formats: :supported_formats.',
+        'image_optimization_processing_failed' => 'Imagick processing failed for file :file_path. Error: :error.',
+        'image_optimization_storage_failed' => 'Failed to store optimized image variants. Original file: :original_file, Error: :error.',
+        'image_optimization_imagick_unavailable' => 'Imagick extension is not available or properly configured.',
+        'image_optimization_conversion_failed' => 'Failed to convert image from :source_format to :target_format. File: :file_path, Error: :error.',
+        'image_optimization_variant_creation_failed' => 'Failed to create image variant :variant_type. Dimensions: :dimensions, Error: :error.',
+        'image_optimization_file_too_large' => 'Image file exceeds maximum size limit. File size: :file_size, Limit: :max_size.',
+        'image_optimization_invalid_dimensions' => 'Invalid image dimensions. Width: :width, Height: :height, Minimum: :min_dimensions.',
         'egi_unauthorized_access' => 'Unauthenticated attempt to access the EGI upload page.',
         'record_not_found_egi_in_reservation_controller' => 'EGI with ID :egi_id not found in the reservation controller.',
         // UI Related Errors (developer messages)
@@ -348,6 +359,17 @@ return [
         'egi_collection_init_error' => 'Unable to prepare your collection. Contact support if the issue persists.',
         'egi_storage_failure' => 'Failed to securely save the EGI file. Please try again or contact support.',
         'egi_unexpected_error' => 'An unexpected error occurred while processing your EGI. Please try again later.',
+
+        // Image Optimization Error Messages
+        'image_optimization_invalid_file' => 'The uploaded file is not a valid image. Please select a valid image file.',
+        'image_optimization_unsupported_format' => 'The image format is not supported. Please use JPEG, PNG, WebP, or GIF files.',
+        'image_optimization_processing_failed' => 'Failed to process the image. Please try again or contact support if the issue persists.',
+        'image_optimization_storage_failed' => 'Failed to save the optimized image. Please try again or contact support.',
+        'image_optimization_imagick_unavailable' => 'Image processing is temporarily unavailable. Contact the administrator if the issue persists.',
+        'image_optimization_conversion_failed' => 'Failed to convert the image to the required format. Please try with a different image.',
+        'image_optimization_variant_creation_failed' => 'Failed to create image variants. Please try again or contact support.',
+        'image_optimization_file_too_large' => 'The image file is too large. Please reduce the file size and try again.',
+        'image_optimization_invalid_dimensions' => 'The image dimensions are not valid. Please check the image size requirements.',
         'egi_unauthorized_access' => 'Unauthorized access. Please log in.',
         'egi_page_rendering_error' => 'An issue occurred while loading the page. Please try again later or contact support.',
         'egi_update_failed' => 'Unable to update the EGI. Please try again.',

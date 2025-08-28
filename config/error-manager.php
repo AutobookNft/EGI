@@ -1117,6 +1117,108 @@ return [
         ],
 
         // ====================================================
+        // Image Optimization Error Codes
+        // ====================================================
+        'IMAGE_OPTIMIZATION_INVALID_FILE' => [
+            'type' => 'error',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.image_optimization_invalid_file',
+            'user_message_key' => 'error-manager::errors.user.image_optimization_invalid_file',
+            'http_status_code' => 400,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'IMAGE_OPTIMIZATION_UNSUPPORTED_FORMAT' => [
+            'type' => 'error',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.image_optimization_unsupported_format',
+            'user_message_key' => 'error-manager::errors.user.image_optimization_unsupported_format',
+            'http_status_code' => 400,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'IMAGE_OPTIMIZATION_PROCESSING_FAILED' => [
+            'type' => 'critical',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.image_optimization_processing_failed',
+            'user_message_key' => 'error-manager::errors.user.image_optimization_processing_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'IMAGE_OPTIMIZATION_STORAGE_FAILED' => [
+            'type' => 'critical',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.image_optimization_storage_failed',
+            'user_message_key' => 'error-manager::errors.user.image_optimization_storage_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'IMAGE_OPTIMIZATION_IMAGICK_UNAVAILABLE' => [
+            'type' => 'critical',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.image_optimization_imagick_unavailable',
+            'user_message_key' => 'error-manager::errors.user.image_optimization_imagick_unavailable',
+            'http_status_code' => 503,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'IMAGE_OPTIMIZATION_CONVERSION_FAILED' => [
+            'type' => 'critical',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.image_optimization_conversion_failed',
+            'user_message_key' => 'error-manager::errors.user.image_optimization_conversion_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'IMAGE_OPTIMIZATION_VARIANT_CREATION_FAILED' => [
+            'type' => 'critical',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.image_optimization_variant_creation_failed',
+            'user_message_key' => 'error-manager::errors.user.image_optimization_variant_creation_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'IMAGE_OPTIMIZATION_FILE_TOO_LARGE' => [
+            'type' => 'error',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.image_optimization_file_too_large',
+            'user_message_key' => 'error-manager::errors.user.image_optimization_file_too_large',
+            'http_status_code' => 413,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'IMAGE_OPTIMIZATION_INVALID_DIMENSIONS' => [
+            'type' => 'error',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.image_optimization_invalid_dimensions',
+            'user_message_key' => 'error-manager::errors.user.image_optimization_invalid_dimensions',
+            'http_status_code' => 400,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        // ====================================================
         // System / Environment Errors (Esistenti - Verified/Adjusted)
         // ====================================================
         'IMAGICK_NOT_AVAILABLE' => [

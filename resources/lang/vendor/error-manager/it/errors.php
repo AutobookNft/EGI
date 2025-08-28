@@ -58,6 +58,17 @@ return [
         'egi_storage_critical_failure' => 'Fallimento critico nel salvataggio del file EGI :egi_id sul/i disco/hi: :disks',
         'egi_storage_config_error' => "Il disco di storage 'local' richiesto per il fallback non è configurato.",
         'egi_unexpected_error' => 'Errore inaspettato durante l\'elaborazione dell\'EGI per il file :original_filename.',
+
+        // Messaggi di errore per sviluppatori - ottimizzazione immagini
+        'image_optimization_invalid_file' => 'File immagine non valido fornito per l\'ottimizzazione. File: :file_path.',
+        'image_optimization_unsupported_format' => 'Formato immagine non supportato: :format. Formati supportati: :supported_formats.',
+        'image_optimization_processing_failed' => 'Elaborazione Imagick fallita per il file :file_path. Errore: :error.',
+        'image_optimization_storage_failed' => 'Impossibile memorizzare le varianti dell\'immagine ottimizzata. File originale: :original_file, Errore: :error.',
+        'image_optimization_imagick_unavailable' => 'L\'estensione Imagick non è disponibile o configurata correttamente.',
+        'image_optimization_conversion_failed' => 'Impossibile convertire l\'immagine da :source_format a :target_format. File: :file_path, Errore: :error.',
+        'image_optimization_variant_creation_failed' => 'Impossibile creare la variante dell\'immagine :variant_type. Dimensioni: :dimensions, Errore: :error.',
+        'image_optimization_file_too_large' => 'Il file immagine supera il limite massimo di dimensione. Dimensione file: :file_size, Limite: :max_size.',
+        'image_optimization_invalid_dimensions' => 'Dimensioni dell\'immagine non valide. Larghezza: :width, Altezza: :height, Minimo: :min_dimensions.',
         'egi_unauthorized_access' => 'Tentativo non autenticato di accedere alla pagina di upload EGI.',
         'record_not_found_egi_in_reservation_controller' => 'Nessun record EGI trovato per l\'ID :egi_id nella prenotazione. Verificare che l\'EGI esista e sia accessibile.',
         // Errori relativi all'interfaccia utente (messaggi per sviluppatori)
@@ -337,6 +348,17 @@ return [
         'egi_collection_init_error' => 'Impossibile preparare la tua collection. Contatta il supporto se il problema persiste.',
         'egi_storage_failure' => 'Fallito il salvataggio sicuro del file EGI. Riprova o contatta il supporto.',
         'egi_unexpected_error' => 'Si è verificato un errore inaspettato durante l\'elaborazione del tuo EGI. Riprova più tardi.',
+
+        // Messaggi di errore per l'ottimizzazione delle immagini
+        'image_optimization_invalid_file' => 'Il file caricato non è un\'immagine valida. Seleziona un file immagine valido.',
+        'image_optimization_unsupported_format' => 'Il formato dell\'immagine non è supportato. Utilizza file JPEG, PNG, WebP o GIF.',
+        'image_optimization_processing_failed' => 'Elaborazione dell\'immagine fallita. Riprova o contatta il supporto se il problema persiste.',
+        'image_optimization_storage_failed' => 'Impossibile salvare l\'immagine ottimizzata. Riprova o contatta il supporto.',
+        'image_optimization_imagick_unavailable' => 'L\'elaborazione delle immagini è temporaneamente non disponibile. Contatta l\'amministratore se il problema persiste.',
+        'image_optimization_conversion_failed' => 'Impossibile convertire l\'immagine nel formato richiesto. Prova con un\'immagine diversa.',
+        'image_optimization_variant_creation_failed' => 'Impossibile creare le varianti dell\'immagine. Riprova o contatta il supporto.',
+        'image_optimization_file_too_large' => 'Il file immagine è troppo grande. Riduci le dimensioni del file e riprova.',
+        'image_optimization_invalid_dimensions' => 'Le dimensioni dell\'immagine non sono valide. Controlla i requisiti di dimensione dell\'immagine.',
         'egi_unauthorized_access' => 'Accesso non autorizzato. Effettua il login.',
         'egi_page_rendering_error' => 'Si è verificato un problema durante il caricamento della pagina. Riprova più tardi o contatta l\'assistenza.',
         'egi_update_failed' => 'Impossibile aggiornare l\'EGI. Si prega di riprovare.',

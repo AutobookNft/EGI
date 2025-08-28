@@ -27,8 +27,7 @@ use App\Services\CollectionService;
  * @date 2025-05-25
  * @changelog 2.1.0 - Removed error code registration, cleaned up boot method
  */
-class EgiModuleServiceProvider extends ServiceProvider
-{
+class EgiModuleServiceProvider extends ServiceProvider {
     /**
      * Log channel for this provider
      * @var string
@@ -39,8 +38,7 @@ class EgiModuleServiceProvider extends ServiceProvider
      * Register any application services.
      * Enhanced to support service-based EgiUploadHandler
      */
-    public function register(): void
-    {
+    public function register(): void {
         // 1. Register interface bindings first
         $this->app->bind(WalletServiceInterface::class, WalletService::class);
         $this->app->bind(UserRoleServiceInterface::class, UserRoleService::class);
@@ -78,7 +76,8 @@ class EgiModuleServiceProvider extends ServiceProvider
                 $app->make(UltraLogManager::class),
                 $app->make(CollectionService::class),           // Service injection
                 $app->make(WalletServiceInterface::class),       // Service injection
-                $app->make(UserRoleServiceInterface::class)      // Service injection
+                $app->make(UserRoleServiceInterface::class),     // Service injection
+                $app->make(\App\Contracts\ImageOptimizationManagerInterface::class)  // Image optimization service
             );
         });
 
@@ -115,41 +114,40 @@ class EgiModuleServiceProvider extends ServiceProvider
      * Bootstrap any application services.
      * Enhanced and cleaned up for service-based architecture
      */
-    public function boot(): void
-    {
+    public function boot(): void {
         // Load views with EGI module namespace
-        $this->loadViewsFrom(__DIR__.'/../../resources/views', 'egimodule');
+        $this->loadViewsFrom(__DIR__ . '/../../resources/views', 'egimodule');
 
         // Load routes for EGI module
-        $this->loadRoutesFrom(__DIR__.'/../../routes/web.php');
+        $this->loadRoutesFrom(__DIR__ . '/../../routes/web.php');
 
         // Publishing configuration for console environments
         if ($this->app->runningInConsole()) {
 
             // Publish EGI module configuration
             $this->publishes([
-                __DIR__.'/../../config/egi.php' => config_path('egi.php'),
+                __DIR__ . '/../../config/egi.php' => config_path('egi.php'),
             ], 'egi-config');
 
             // Publish EGI module views
             $this->publishes([
-                __DIR__.'/../../resources/views' => resource_path('views/vendor/egimodule'),
+                __DIR__ . '/../../resources/views' => resource_path('views/vendor/egimodule'),
             ], 'egi-views');
 
             // Publish EGI module assets
             $this->publishes([
-                __DIR__.'/../../resources/assets' => public_path('vendor/egimodule'),
+                __DIR__ . '/../../resources/assets' => public_path('vendor/egimodule'),
             ], 'egi-assets');
 
             // Publish enhanced storage configuration
             $this->publishes([
-                __DIR__.'/../../config/storage.php' => config_path('egi-storage.php'),
+                __DIR__ . '/../../config/storage.php' => config_path('egi-storage.php'),
             ], 'egi-storage-config');
 
             // Publish error translation files
             $this->publishes([
-                __DIR__.'/../../resources/lang/it/error-manager.php' => resource_path('lang/it/error-manager.php'),
-                __DIR__.'/../../resources/lang/en/error-manager.php' => resource_path('lang/en/error-manager.php'),
+                __DIR__ . '/../../resources/lang/it/error-manager.php' => resource_path('lang/it/error-manager.php'),
+                __DIR__ . '/../../resources/lang/en/error-manager.php' => resource_path('lang/en/error-manager.php'),
             ], 'egi-error-translations');
         }
 
@@ -164,8 +162,7 @@ class EgiModuleServiceProvider extends ServiceProvider
      * Boot service-specific configurations
      * Enhanced configuration for service-based architecture
      */
-    protected function bootServiceConfigurations(): void
-    {
+    protected function bootServiceConfigurations(): void {
         // Configure storage defaults for EGI uploads
         $this->app['config']->set('egi.storage.disks', ['public', 's3']);
         $this->app['config']->set('egi.storage.critical_disks', ['public']);
@@ -213,8 +210,7 @@ class EgiModuleServiceProvider extends ServiceProvider
      *
      * @return array
      */
-    public function provides(): array
-    {
+    public function provides(): array {
         return [
             EgiUploadHandler::class,
             EgiUploadController::class,

@@ -38,6 +38,8 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Queue\Events\JobFailed;
 use Illuminate\Support\Facades\Log;
 use Spatie\ImageOptimizer\OptimizerChain;
+use App\Services\ImageOptimizationManager;
+use App\Contracts\ImageOptimizationManagerInterface;
 
 class AppServiceProvider extends ServiceProvider {
 
@@ -91,6 +93,14 @@ class AppServiceProvider extends ServiceProvider {
                 $app->make(UltraLogManager::class),
                 $app->make(ConsentService::class),
                 $app->make(AuditLogService::class)
+            );
+        });
+
+        // Register ImageOptimizationManager with proper DI
+        $this->app->bind(ImageOptimizationManagerInterface::class, function ($app) {
+            return new ImageOptimizationManager(
+                $app->make(UltraLogManager::class),
+                $app->make(ErrorManagerInterface::class)
             );
         });
     }
