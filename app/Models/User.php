@@ -1196,39 +1196,32 @@ class User extends Authenticatable implements HasMedia {
 
     /**
      * @Oracode Method: Get Profile Photo URL (Override)
-     * 🎯 Purpose: Override default profile photo URL to respect privacy based on usertype
-     * 📤 Returns: URL string for current profile image or privacy-compliant default
-     * 🛡️ Privacy: Only commissioners show real photos, others get generated avatars
+     * 🎯 Purpose: Override default profile photo URL - se c'è immagine la mostra, altrimenti avatar generato
+     * 📤 Returns: URL string for current profile image or generated avatar
+     * 🛡️ GDPR: Se user carica immagine = consenso implicito alla pubblicazione
      */
     public function getProfilePhotoUrlAttribute(): string {
-        // Solo i commissioner possono mostrare la loro foto reale
-        if ($this->usertype === 'commissioner') {
-            $currentImage = $this->getCurrentProfileImage();
-
-            if ($currentImage) {
-                return $currentImage->getUrl('thumb');
-            }
+        // Se l'utente ha caricato un'immagine, la mostra (consenso implicito)
+        $currentImage = $this->getCurrentProfileImage();
+        
+        if ($currentImage) {
+            return $currentImage->getUrl('thumb');
         }
 
-        // Per tutti gli altri o se il commissioner non ha foto, usa avatar generato
+        // Altrimenti usa avatar generato
         return $this->defaultProfilePhotoUrl();
     }
 
     /**
      * @Oracode Method: Get Default Profile Photo URL
-     * 🎯 Purpose: Get DiceBear generated avatar URL based on usertype
+     * 🎯 Purpose: Get DiceBear generated avatar URL basato su identificatore unico
      * 📤 Returns: URL string for default avatar
-     * 🛡️ Privacy: Uses wallet for non-commissioners, name for commissioners
+     * � Logic: Usa wallet come seed se disponibile, altrimenti nome o fallback
      */
     public function defaultProfilePhotoUrl(): string {
-        // Per i commissioner, usa il nome se disponibile
-        if ($this->usertype === 'commissioner' && $this->name) {
-            $seed = urlencode($this->name);
-        } else {
-            // Per tutti gli altri o commissioner senza nome, usa wallet o fallback
-            $seed = urlencode($this->wallet ?? $this->name ?? 'Anonymous');
-        }
-
+        // Usa wallet come identificatore unico se disponibile, altrimenti nome
+        $seed = urlencode($this->wallet ?? $this->name ?? "user-{$this->id}");
+        
         return "https://api.dicebear.com/7.x/bottts/png?seed={$seed}&backgroundColor=transparent&size=512";
     }
 
