@@ -105,15 +105,21 @@
                                 class="hidden text-base font-semibold text-gray-400 transition group-hover:text-emerald-400 sm:inline md:text-lg">{{
                                 __('Frangette') }}</span>
                         </a>
+                        {{-- Welcome Message - Dopo il logo per tutte le dimensioni --}}
+                        @if ($user)
+                        <div class="items-center flex ml-4">
+                            <span class="text-sm font-medium text-emerald-400 hidden sm:inline">{{ App\Helpers\FegiAuth::getWelcomeMessage() }}</span>
+                            <span class="text-xs font-medium text-emerald-500 sm:hidden">
+                                @php
+                                $welcomeMessage = App\Helpers\FegiAuth::getWelcomeMessage();
+                                // Rimuovi "Benvenuto/a," dalla versione mobile
+                                $mobileMessage = preg_replace('/^Benvenuto\/a,?\s*/i', '', $welcomeMessage);
+                                @endphp
+                                {{ $mobileMessage }}
+                            </span>
+                        </div>
+                        @endif
                     </div>
-
-                    {{-- Welcome Message Desktop - Solo per utenti autenticati - Dopo Assistenza --}}
-                    @if ($user)
-                    <div class="items-center hidden ml-4 md:flex">
-                        <span class="text-sm font-medium text-emerald-400">{{ App\Helpers\FegiAuth::getWelcomeMessage()
-                            }}</span>
-                    </div>
-                    @endif
 
                     {{-- Notification Badge (Desktop) --}}
                     @if(App\Helpers\FegiAuth::check())
@@ -292,36 +298,6 @@
 
                 </div>
 
-                {{-- Seconda Riga: Solo per utenti autenticati (Mobile) --}}
-                @if ($user)
-                <div
-                    class="flex items-center justify-between px-4 py-2 border-t bg-gray-800/30 border-gray-700/50 md:hidden">
-                    {{-- Welcome Message --}}
-                    <div class="flex-1">
-                        <span class="text-xs font-medium text-emerald-500">
-                            @php
-                            $welcomeMessage = App\Helpers\FegiAuth::getWelcomeMessage();
-                            // Rimuovi "Benvenuto/a," dalla versione mobile
-                            $mobileMessage = preg_replace('/^Benvenuto\/a,?\s*/i', '', $welcomeMessage);
-                            @endphp
-                            {{ $mobileMessage }}
-                        </span>
-                    </div>
-
-                    {{-- Collection Badge (spostato qui dalla prima riga) --}}
-                    {{-- <div id="current-collection-badge-container" class="flex items-center ml-2">
-                        <a href="#" id="current-collection-badge-link"
-                            class="flex items-center px-2 py-1 text-xs font-semibold transition border rounded-full border-sky-700 bg-sky-900/60 text-sky-300 hover:border-sky-600 hover:bg-sky-800">
-                            <span class="mr-1 text-xs leading-none material-symbols-outlined"
-                                aria-hidden="true">folder_managed</span>
-                            <span id="current-collection-badge-name"></span>
-                        </a>
-                    </div> --}}
-
-                    {{-- NEW: Test Autonomous Collection Badge Component --}}
-                    <x-collection-badge size="mobile" :show-when-empty="true" position="navbar" />
-                </div>
-                @endif
                 {{-- Fine Container Principale --}}
             </div>
         </div>

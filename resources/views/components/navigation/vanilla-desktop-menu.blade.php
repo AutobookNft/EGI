@@ -82,6 +82,11 @@
                 </div>
             </div>
 
+            <!-- Collection Badge Section -->
+            <div class="mb-6">
+                <x-collection-badge size="desktop" :show-when-empty="true" position="desktop-menu" />
+            </div>
+
             <!-- Main Navigation (allineata al menu mobile) -->
             <div class="mb-6 space-y-2">
                 <h4 class="px-1 text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">{{ __('menu.navigation') }}</h4>

@@ -104,6 +104,13 @@ $canCreateEgi = $user && $user->can('create_egi');
                 </button>
             </div>
 
+            <!-- Collection Badge Section -->
+            @auth
+            <div class="px-4 py-2 border-b border-gray-200 dark:border-gray-700">
+                <x-collection-badge size="mobile" :show-when-empty="true" position="mobile-menu" />
+            </div>
+            @endauth
+
             <!-- Navigation Content -->
             <div class="flex-1 p-4 space-y-4 overflow-y-auto mobile-menu-content" style="background-color: white !important; color: #374151 !important; opacity: 1 !important;">
 
