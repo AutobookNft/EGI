@@ -132,12 +132,28 @@ class User extends Authenticatable implements HasMedia {
     }
 
     /**
-     * Get the display name (nickname if present, otherwise name).
+     * Get the display name following GDPR privacy rules.
+     *
+     * Logic:
+     * 1. If nickname exists -> show nickname (user choice to be public)
+     * 2. If no nickname but has name/last_name -> show wallet abbreviation (privacy protection)
+     * 3. Fallback -> wallet abbreviation or "Utente Anonimo"
      *
      * @return string
      */
     public function getNameAttribute(): string {
-        return $this->attributes['nick_name'] ?? $this->attributes['name'];
+        // Se c'è nickname, mostralo (scelta dell'utente di essere pubblico)
+        if (!empty($this->attributes['nick_name'])) {
+            return $this->attributes['nick_name'];
+        }
+
+        // Se ci sono nome/cognome ma NO nickname -> abbreviazione wallet (privacy GDPR)
+        if (!empty($this->attributes['name']) || !empty($this->attributes['last_name'])) {
+            return $this->getWalletAbbreviation();
+        }
+
+        // Fallback: abbreviazione wallet o anonimo
+        return $this->getWalletAbbreviation();
     }
 
     /**
@@ -147,6 +163,38 @@ class User extends Authenticatable implements HasMedia {
      */
     public function getLegalNameAttribute(): string {
         return $this->attributes['name'];
+    }
+
+    /**
+     * Get wallet abbreviation for GDPR-compliant display.
+     *
+     * @return string
+     */
+    public function getWalletAbbreviation(): string {
+        if (!empty($this->attributes['wallet'])) {
+            $wallet = $this->attributes['wallet'];
+
+            // Se il wallet è lungo, prendi primi 6 e ultimi 4 caratteri
+            if (strlen($wallet) > 12) {
+                return substr($wallet, 0, 6) . '...' . substr($wallet, -4);
+            }
+
+            // Se è più corto, prendi primi 8 caratteri
+            return substr($wallet, 0, min(8, strlen($wallet))) . (strlen($wallet) > 8 ? '...' : '');
+        }
+
+        return 'Utente Anonimo';
+    }
+
+    /**
+     * Get the full legal name for administrative purposes only.
+     * Use with caution - GDPR compliance required.
+     *
+     * @return string
+     */
+    public function getFullLegalName(): string {
+        $name = trim(($this->attributes['name'] ?? '') . ' ' . ($this->attributes['last_name'] ?? ''));
+        return !empty($name) ? $name : $this->getWalletAbbreviation();
     }
 
     /**
