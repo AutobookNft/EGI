@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes; // Importa SoftDeletes
 
@@ -240,6 +241,17 @@ class Egi extends Model {
                     END")
             ->orderBy('offer_amount_fiat', 'desc')
             ->orderBy('created_at', 'desc'); // Tie-breaker per stesso prezzo
+    }
+
+    /**
+     * Relationship with utility
+     * One-to-one relationship: each EGI can have one utility
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function utility()
+    {
+        return $this->hasOne(Utility::class);
     }
 
     /**
