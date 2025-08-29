@@ -92,11 +92,20 @@
             border: 2px solid rgba(212, 165, 116, 0.3);
             border-radius: 8px;
             transition: all 0.3s ease;
+            color: #1f2937; /* Grigio scuro per il testo */
+            background-color: #ffffff; /* Background bianco esplicito */
         }
+
+        .input-rinascimento::placeholder {
+            color: #6b7280; /* Grigio medio per placeholder */
+            opacity: 1;
+        }
+
         .input-rinascimento:focus {
             border-color: var(--oro-fiorentino);
             box-shadow: 0 0 0 3px rgba(212, 165, 116, 0.1);
             outline: none;
+            color: #111827; /* Grigio ancora più scuro quando in focus */
         }
         .input-rinascimento.error {
             border-color: var(--rosso-urgenza);
