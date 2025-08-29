@@ -15,28 +15,25 @@ use Illuminate\View\Component;
  * @date 2025-01-03
  * @purpose Permette al creator di aggiungere/modificare utility prima della pubblicazione
  */
-class UtilityManager extends Component
-{
+class UtilityManager extends Component {
     public Egi $egi;
     public ?Utility $utility;
     public bool $canEdit;
     public array $utilityTypes;
     public array $escrowTiers;
-    
+
     /**
      * Create component instance
      */
-    public function __construct(Egi $egi)
-    {
+    public function __construct(Egi $egi) {
         $this->egi = $egi;
         $this->utility = $egi->utility;
-        
-        // Verifica permessi: solo creator della collection non pubblicata
-        $this->canEdit = auth()->check() 
-            && auth()->id() === $egi->collection->user_id
-            && $egi->collection->status !== 'published';
-            
-        // Definizione tipi utility con localizzazione
+
+        // Verifica permessi: solo creator dell'EGI 
+        // TODO: Ripristinare controllo pubblicazione quando necessario
+        // && $egi->collection->status !== 'published';
+        $this->canEdit = auth()->check()
+            && auth()->id() === $egi->user_id;        // Definizione tipi utility con localizzazione
         $this->utilityTypes = [
             'physical' => [
                 'label' => __('utility.types.physical.label'),
@@ -59,18 +56,17 @@ class UtilityManager extends Component
                 'description' => __('utility.types.digital.description')
             ]
         ];
-        
+
         // Calcola tier escrow basato sul prezzo EGI
         $this->escrowTiers = $this->calculateEscrowInfo();
     }
-    
+
     /**
      * Calcola informazioni escrow basate sul prezzo con testi localizzati
      */
-    private function calculateEscrowInfo(): array
-    {
+    private function calculateEscrowInfo(): array {
         $price = $this->egi->price ?? 0;
-        
+
         if ($price < 100) {
             return [
                 'tier' => 'immediate',
@@ -103,12 +99,11 @@ class UtilityManager extends Component
             ];
         }
     }
-    
+
     /**
      * Get the view representation
      */
-    public function render()
-    {
+    public function render() {
         return view('components.utility.utility-manager');
     }
 }

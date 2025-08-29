@@ -6,7 +6,7 @@ return [
     'subtitle' => 'Aggiungi valore reale al tuo EGI',
     'status_configured' => 'Utility Configurata',
     'status_none' => 'Nessuna Utility',
-    
+
     // Alert e messaggi
     'info_edit_before_publish' => 'La utility può essere aggiunta o modificata solo prima della pubblicazione della collection. Una volta pubblicata, non sarà più possibile modificarla.',
     'success_created' => 'Utility aggiunta con successo!',
@@ -14,7 +14,7 @@ return [
     'confirm_reset' => 'Sei sicuro di voler annullare? Le modifiche non salvate andranno perse.',
     'confirm_remove_image' => 'Rimuovere questa immagine?',
     'note' => 'Nota',
-    
+
     // Tipi di utility
     'types' => [
         'label' => 'Tipo di Utility',
@@ -36,7 +36,7 @@ return [
         ],
         'remove' => 'Rimuovi Utility'
     ],
-    
+
     // Campi form base
     'fields' => [
         'title' => 'Titolo Utility',
@@ -44,14 +44,14 @@ return [
         'description' => 'Descrizione Dettagliata',
         'description_placeholder' => 'Descrivi in dettaglio cosa riceverà l\'acquirente...',
     ],
-    
+
     // Sezione spedizione
     'shipping' => [
         'title' => 'Dettagli Spedizione',
         'weight' => 'Peso (kg)',
         'dimensions' => 'Dimensioni (cm)',
         'length' => 'Lunghezza',
-        'width' => 'Larghezza', 
+        'width' => 'Larghezza',
         'height' => 'Altezza',
         'days' => 'Giorni preparazione/spedizione',
         'fragile' => 'Oggetto Fragile',
@@ -59,7 +59,7 @@ return [
         'notes' => 'Note per la Spedizione',
         'notes_placeholder' => 'Istruzioni speciali per l\'imballaggio o la spedizione...'
     ],
-    
+
     // Sezione servizio
     'service' => [
         'title' => 'Dettagli Servizio',
@@ -70,7 +70,7 @@ return [
         'instructions' => 'Istruzioni per l\'Attivazione',
         'instructions_placeholder' => 'Come l\'acquirente può usufruire del servizio...'
     ],
-    
+
     // Escrow
     'escrow' => [
         'immediate' => [
@@ -90,7 +90,7 @@ return [
             'requirement_insurance' => 'Assicurazione consigliata'
         ]
     ],
-    
+
     // Media/Gallery
     'media' => [
         'title' => 'Galleria Immagini Dettagli',
@@ -99,7 +99,7 @@ return [
         'current_images' => 'Immagini Attuali:',
         'remove_image' => 'Rimuovi'
     ],
-    
+
     // Validation errors
     'validation' => [
         'title_required' => 'Il titolo è obbligatorio',

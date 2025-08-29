@@ -6,7 +6,7 @@ return [
     'subtitle' => 'Añade valor real a tu EGI',
     'status_configured' => 'Utilidad Configurada',
     'status_none' => 'Sin Utilidad',
-    
+
     // Alertas y mensajes
     'info_edit_before_publish' => 'La utilidad solo puede agregarse o modificarse antes de que se publique la colección. Una vez publicada, no se puede modificar.',
     'success_created' => '¡Utilidad añadida con éxito!',
@@ -14,7 +14,7 @@ return [
     'confirm_reset' => '¿Estás seguro de que quieres cancelar? Se perderán los cambios no guardados.',
     'confirm_remove_image' => '¿Eliminar esta imagen?',
     'note' => 'Nota',
-    
+
     // Tipos de utilidad
     'types' => [
         'label' => 'Tipo de Utilidad',
@@ -36,7 +36,7 @@ return [
         ],
         'remove' => 'Eliminar Utilidad'
     ],
-    
+
     // Campos del formulario base
     'fields' => [
         'title' => 'Título de Utilidad',
@@ -44,7 +44,7 @@ return [
         'description' => 'Descripción Detallada',
         'description_placeholder' => 'Describe en detalle lo que recibirá el comprador...',
     ],
-    
+
     // Sección de envío
     'shipping' => [
         'title' => 'Detalles de Envío',
@@ -59,7 +59,7 @@ return [
         'notes' => 'Notas de Envío',
         'notes_placeholder' => 'Instrucciones especiales para el embalaje o envío...'
     ],
-    
+
     // Sección de servicio
     'service' => [
         'title' => 'Detalles del Servicio',
@@ -70,7 +70,7 @@ return [
         'instructions' => 'Instrucciones de Activación',
         'instructions_placeholder' => 'Cómo el comprador puede usar el servicio...'
     ],
-    
+
     // Escrow
     'escrow' => [
         'immediate' => [
@@ -90,7 +90,7 @@ return [
             'requirement_insurance' => 'Seguro recomendado'
         ]
     ],
-    
+
     // Media/Galería
     'media' => [
         'title' => 'Galería de Imágenes Detalle',
@@ -99,7 +99,7 @@ return [
         'current_images' => 'Imágenes Actuales:',
         'remove_image' => 'Eliminar'
     ],
-    
+
     // Errores de validación
     'validation' => [
         'title_required' => 'El título es obligatorio',

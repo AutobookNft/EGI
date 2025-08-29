@@ -694,30 +694,26 @@
                                     {{ __('egi.view_full_collection') }}
                                 </a>
                             </div>
+
+                            {{-- Component Utility Manager (solo per creator) --}}
+                            @if(auth()->id() === $egi->user_id)
+                                <div class="pt-6 border-t border-gray-700/50">
+                                    <x-utility.utility-manager :egi="$egi" />
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>
-            </div>
         </div>
+    </div>
 
-        {{-- Component Utility Manager (solo per creator prima della pubblicazione) --}}
-        @auth
-            @if(auth()->id() === $egi->collection->user_id && $egi->collection->status !== 'published')
-                <div class="max-w-6xl mx-auto">
-                    <x-utility.utility-manager :egi="$egi" />
-                </div>
-            @endif
-        @endauth
-
-        {{-- Se utility presente e collection pubblicata, mostra solo in lettura --}}
-        @if($egi->utility && $egi->collection->status === 'published')
-            <div class="max-w-6xl mx-auto">
-                {{-- TODO: Creare component utility-display per visualizzazione read-only --}}
-                {{-- <x-utility.utility-display :utility="$egi->utility" /> --}}
-            </div>
-        @endif
-
-        {{-- Delete Confirmation Modal --}}
+    {{-- Se utility presente e collection pubblicata, mostra solo in lettura --}}
+    @if($egi->utility && $egi->collection->status === 'published')
+        <div class="max-w-6xl mx-auto">
+            {{-- TODO: Creare component utility-display per visualizzazione read-only --}}
+            {{-- <x-utility.utility-display :utility="$egi->utility" /> --}}
+        </div>
+    @endif        {{-- Delete Confirmation Modal --}}
         @if($canDeleteEgi)
         <div id="delete-modal"
             class="fixed inset-0 z-50 items-center justify-center hidden bg-black/50 backdrop-blur-sm">

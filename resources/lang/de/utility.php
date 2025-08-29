@@ -6,7 +6,7 @@ return [
     'subtitle' => 'Fügen Sie echten Wert zu Ihrem EGI hinzu',
     'status_configured' => 'Nutzen Konfiguriert',
     'status_none' => 'Kein Nutzen',
-    
+
     // Warnungen und Nachrichten
     'info_edit_before_publish' => 'Der Nutzen kann nur vor der Veröffentlichung der Sammlung hinzugefügt oder geändert werden. Nach der Veröffentlichung kann er nicht mehr geändert werden.',
     'success_created' => 'Nutzen erfolgreich hinzugefügt!',
@@ -14,7 +14,7 @@ return [
     'confirm_reset' => 'Sind Sie sicher, dass Sie abbrechen möchten? Nicht gespeicherte Änderungen gehen verloren.',
     'confirm_remove_image' => 'Dieses Bild entfernen?',
     'note' => 'Hinweis',
-    
+
     // Nutzen-Typen
     'types' => [
         'label' => 'Nutzen-Typ',
@@ -36,7 +36,7 @@ return [
         ],
         'remove' => 'Nutzen Entfernen'
     ],
-    
+
     // Basis-Formularfelder
     'fields' => [
         'title' => 'Nutzen-Titel',
@@ -44,7 +44,7 @@ return [
         'description' => 'Detaillierte Beschreibung',
         'description_placeholder' => 'Beschreiben Sie detailliert, was der Käufer erhalten wird...',
     ],
-    
+
     // Versand-Bereich
     'shipping' => [
         'title' => 'Versanddetails',
@@ -59,7 +59,7 @@ return [
         'notes' => 'Versandnotizen',
         'notes_placeholder' => 'Spezielle Anweisungen für Verpackung oder Versand...'
     ],
-    
+
     // Service-Bereich
     'service' => [
         'title' => 'Service-Details',
@@ -70,7 +70,7 @@ return [
         'instructions' => 'Aktivierungsanweisungen',
         'instructions_placeholder' => 'Wie der Käufer den Service nutzen kann...'
     ],
-    
+
     // Escrow
     'escrow' => [
         'immediate' => [
@@ -90,7 +90,7 @@ return [
             'requirement_insurance' => 'Versicherung empfohlen'
         ]
     ],
-    
+
     // Media/Galerie
     'media' => [
         'title' => 'Detail-Bilder Galerie',
@@ -99,7 +99,7 @@ return [
         'current_images' => 'Aktuelle Bilder:',
         'remove_image' => 'Entfernen'
     ],
-    
+
     // Validierungsfehler
     'validation' => [
         'title_required' => 'Titel ist erforderlich',

@@ -10,22 +10,22 @@ use Spatie\MediaLibrary\InteractsWithMedia;
  * 📜 Oracode Eloquent Model: Utility
  * Represents a utility associated with an EGI, providing additional value
  * beyond the digital asset (physical goods, services, digital content, or hybrid).
- * 
+ *
  * @package     App\Models
  * @version     1.0.0 (FlorenceEGI - Utility System)
  * @author      Padmin D. Curtis (AI Partner OS3.0) for Fabio Cherici
  * @copyright   2025 Fabio Cherici
  * @license     Proprietary
- * 
+ *
  * @purpose     Manages utility data for EGIs including shipping information,
  *              service details, escrow configuration, and media gallery.
  *              Enables creators to add real-world value to their NFTs.
- * 
+ *
  * @context     Used by UtilityManager component, controllers, and services
  *              to handle utility creation, modification, and display.
- * 
+ *
  * @state       Represents the state of a single row in the 'utilities' table.
- * 
+ *
  * @property int $id Primary key
  * @property int $egi_id Foreign key to EGI (unique relationship)
  * @property string $type Utility type: physical, service, hybrid, digital
@@ -48,10 +48,9 @@ use Spatie\MediaLibrary\InteractsWithMedia;
  * @property string|null $activation_instructions Service activation instructions
  * @property array|null $metadata Additional metadata in JSON format
  */
-class Utility extends Model implements HasMedia
-{
+class Utility extends Model implements HasMedia {
     use InteractsWithMedia;
-    
+
     protected $fillable = [
         'egi_id',
         'type',
@@ -74,7 +73,7 @@ class Utility extends Model implements HasMedia
         'activation_instructions',
         'metadata'
     ];
-    
+
     protected $casts = [
         'dimensions' => 'array',
         'metadata' => 'array',
@@ -84,55 +83,51 @@ class Utility extends Model implements HasMedia
         'valid_from' => 'date',
         'valid_until' => 'date'
     ];
-    
+
     /**
      * Boot method - auto-set values
      */
-    protected static function boot()
-    {
+    protected static function boot() {
         parent::boot();
-        
+
         static::creating(function ($utility) {
             // Auto-set requires_shipping based on type
             if (in_array($utility->type, ['physical', 'hybrid'])) {
                 $utility->requires_shipping = true;
             }
-            
+
             // Calculate escrow tier based on EGI price
             $utility->escrow_tier = $utility->calculateEscrowTier();
         });
     }
-    
+
     /**
      * Relationship to EGI
      */
-    public function egi()
-    {
+    public function egi() {
         return $this->belongsTo(Egi::class);
     }
-    
+
     /**
      * Register media collections
      */
-    public function registerMediaCollections(): void
-    {
+    public function registerMediaCollections(): void {
         $this->addMediaCollection('utility_gallery')
             ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp'])
             ->useDisk('public')
             ->useFallbackUrl('/images/no-image.jpg');
-            
+
         $this->addMediaCollection('utility_documents')
             ->acceptsMimeTypes(['application/pdf'])
             ->useDisk('public');
     }
-    
+
     /**
      * Calculate escrow tier based on EGI price
      */
-    public function calculateEscrowTier(): string
-    {
+    public function calculateEscrowTier(): string {
         $price = $this->egi->price ?? 0;
-        
+
         if ($price < 100) {
             return 'immediate';
         } elseif ($price <= 2000) {

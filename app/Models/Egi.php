@@ -249,8 +249,7 @@ class Egi extends Model {
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
-    public function utility()
-    {
+    public function utility() {
         return $this->hasOne(Utility::class);
     }
 

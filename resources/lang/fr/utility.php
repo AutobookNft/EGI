@@ -6,7 +6,7 @@ return [
     'subtitle' => 'Ajoutez de la valeur réelle à votre EGI',
     'status_configured' => 'Utilité Configurée',
     'status_none' => 'Aucune Utilité',
-    
+
     // Alertes et messages
     'info_edit_before_publish' => 'L\'utilité ne peut être ajoutée ou modifiée qu\'avant la publication de la collection. Une fois publiée, elle ne peut plus être modifiée.',
     'success_created' => 'Utilité ajoutée avec succès !',
@@ -14,7 +14,7 @@ return [
     'confirm_reset' => 'Êtes-vous sûr de vouloir annuler ? Les modifications non sauvegardées seront perdues.',
     'confirm_remove_image' => 'Supprimer cette image ?',
     'note' => 'Note',
-    
+
     // Types d'utilité
     'types' => [
         'label' => 'Type d\'Utilité',
@@ -36,7 +36,7 @@ return [
         ],
         'remove' => 'Supprimer l\'Utilité'
     ],
-    
+
     // Champs du formulaire de base
     'fields' => [
         'title' => 'Titre de l\'Utilité',
@@ -44,7 +44,7 @@ return [
         'description' => 'Description Détaillée',
         'description_placeholder' => 'Décrivez en détail ce que l\'acheteur recevra...',
     ],
-    
+
     // Section expédition
     'shipping' => [
         'title' => 'Détails d\'Expédition',
@@ -59,7 +59,7 @@ return [
         'notes' => 'Notes d\'Expédition',
         'notes_placeholder' => 'Instructions spéciales pour l\'emballage ou l\'expédition...'
     ],
-    
+
     // Section service
     'service' => [
         'title' => 'Détails du Service',
@@ -70,7 +70,7 @@ return [
         'instructions' => 'Instructions d\'Activation',
         'instructions_placeholder' => 'Comment l\'acheteur peut utiliser le service...'
     ],
-    
+
     // Escrow
     'escrow' => [
         'immediate' => [
@@ -90,7 +90,7 @@ return [
             'requirement_insurance' => 'Assurance recommandée'
         ]
     ],
-    
+
     // Media/Galerie
     'media' => [
         'title' => 'Galerie d\'Images Détail',
@@ -99,7 +99,7 @@ return [
         'current_images' => 'Images Actuelles :',
         'remove_image' => 'Supprimer'
     ],
-    
+
     // Erreurs de validation
     'validation' => [
         'title_required' => 'Le titre est obligatoire',

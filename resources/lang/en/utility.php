@@ -6,7 +6,7 @@ return [
     'subtitle' => 'Add real value to your EGI',
     'status_configured' => 'Utility Configured',
     'status_none' => 'No Utility',
-    
+
     // Alerts and messages
     'info_edit_before_publish' => 'The utility can only be added or modified before the collection is published. Once published, it cannot be modified.',
     'success_created' => 'Utility successfully added!',
@@ -14,7 +14,7 @@ return [
     'confirm_reset' => 'Are you sure you want to cancel? Unsaved changes will be lost.',
     'confirm_remove_image' => 'Remove this image?',
     'note' => 'Note',
-    
+
     // Utility types
     'types' => [
         'label' => 'Utility Type',
@@ -36,7 +36,7 @@ return [
         ],
         'remove' => 'Remove Utility'
     ],
-    
+
     // Base form fields
     'fields' => [
         'title' => 'Utility Title',
@@ -44,7 +44,7 @@ return [
         'description' => 'Detailed Description',
         'description_placeholder' => 'Describe in detail what the buyer will receive...',
     ],
-    
+
     // Shipping section
     'shipping' => [
         'title' => 'Shipping Details',
@@ -59,7 +59,7 @@ return [
         'notes' => 'Shipping Notes',
         'notes_placeholder' => 'Special instructions for packaging or shipping...'
     ],
-    
+
     // Service section
     'service' => [
         'title' => 'Service Details',
@@ -70,7 +70,7 @@ return [
         'instructions' => 'Activation Instructions',
         'instructions_placeholder' => 'How the buyer can use the service...'
     ],
-    
+
     // Escrow
     'escrow' => [
         'immediate' => [
@@ -90,7 +90,7 @@ return [
             'requirement_insurance' => 'Insurance recommended'
         ]
     ],
-    
+
     // Media/Gallery
     'media' => [
         'title' => 'Detail Images Gallery',
@@ -99,7 +99,7 @@ return [
         'current_images' => 'Current Images:',
         'remove_image' => 'Remove'
     ],
-    
+
     // Validation errors
     'validation' => [
         'title_required' => 'Title is required',
