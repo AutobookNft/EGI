@@ -68,13 +68,29 @@ $canCreateEgi = $user && $user->can('create_egi');
             <div class="flex items-center justify-between p-6 bg-gradient-to-r from-blue-500 to-purple-600 mobile-header-gradient" style="opacity: 1 !important; background: linear-gradient(to right, #3b82f6, #9333ea) !important; color: white !important;">
                 <div class="flex items-center space-x-3">
                     @if (Laravel\Jetstream\Jetstream::managesProfilePhotos())
-                        <img class="object-cover rounded-full size-12 ring-2 ring-white/30"
-                            src="{{ Auth::user()?->profile_photo_url ?? null }}"
-                            alt="{{ Auth::user()?->name ?? '' }}" />
+                        @if(Auth::check() && Auth::user()->id)
+                            <a href="{{ route('creator.home', Auth::user()->id) }}" class="block transition-transform duration-300 hover:scale-105">
+                                <img class="object-cover rounded-full size-12 ring-2 ring-white/30 hover:ring-white/60 transition-all duration-300"
+                                    src="{{ Auth::user()?->profile_photo_url ?? null }}"
+                                    alt="{{ Auth::user()?->name ?? '' }}" />
+                            </a>
+                        @else
+                            <img class="object-cover rounded-full size-12 ring-2 ring-white/30"
+                                src="{{ Auth::user()?->profile_photo_url ?? null }}"
+                                alt="{{ Auth::user()?->name ?? '' }}" />
+                        @endif
                     @else
-                        <div class="flex items-center justify-center w-12 h-12 text-lg font-bold text-white rounded-full bg-white/20">
-                            {{ substr(Auth::user()?->name ?? 'U', 0, 1) }}
-                        </div>
+                        @if(Auth::check() && Auth::user()->id)
+                            <a href="{{ route('creator.home', Auth::user()->id) }}" class="block transition-transform duration-300 hover:scale-105">
+                                <div class="flex items-center justify-center w-12 h-12 text-lg font-bold text-white rounded-full bg-white/20 hover:bg-white/30 transition-all duration-300">
+                                    {{ substr(Auth::user()?->name ?? 'U', 0, 1) }}
+                                </div>
+                            </a>
+                        @else
+                            <div class="flex items-center justify-center w-12 h-12 text-lg font-bold text-white rounded-full bg-white/20">
+                                {{ substr(Auth::user()?->name ?? 'U', 0, 1) }}
+                            </div>
+                        @endif
                     @endif
                     <div>
                         <h3 class="font-semibold text-white">{{ Auth::user()?->name ?? '' }}</h3>
