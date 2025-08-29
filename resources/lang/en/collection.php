@@ -17,9 +17,22 @@ return [
     'name_help_text' => '2-100 characters, letters, numbers, spaces, and basic punctuation allowed',
     'minimum_2_characters' => 'Minimum 2 characters',
     'create_collection' => 'Create Collection',
+    'my_collections' => 'My Collections',
+    'no_collections' => 'No Collections',
+    'no_egis' => 'No EGIs',
+    'no_price' => 'No Price',
     'creating' => 'Creating...',
     'create' => 'Create',
     'new' => 'New',
+
+    // Collection Status
+    'status' => [
+        'active' => 'Active',
+        'draft' => 'Draft',
+        'inactive' => 'Inactive',
+        'pending' => 'Pending',
+        'local' => 'Local',
+    ],
 
     // Success States
     'creation_success_title' => 'Collection Created!',

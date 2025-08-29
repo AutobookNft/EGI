@@ -17,10 +17,23 @@ return [
     'name_help_text' => 'Da 2 a 100 caratteri, sono consentiti lettere, numeri, spazi e punteggiatura di base',
     'minimum_2_characters' => 'Minimo 2 caratteri',
     'create_collection' => 'Crea Collezione',
+    'my_collections' => 'Le Mie Collezioni',
+    'no_collections' => 'Nessuna Collezione',
+    'no_egis' => 'Nessun EGI',
+    'no_price' => 'Nessun Prezzo',
     'creating' => 'Creazione in corso...',
     'from_collection' => 'Dalla Collezione',
     'create' => 'Crea',
     'new' => 'Nuovo',
+
+    // Collection Status
+    'status' => [
+        'active' => 'Attiva',
+        'draft' => 'Bozza',
+        'inactive' => 'Inattiva',
+        'pending' => 'In Attesa',
+        'local' => 'Locale',
+    ],
 
     // Success States
     'creation_success_title' => 'Collezione Creata!',

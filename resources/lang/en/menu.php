@@ -29,4 +29,11 @@ return [
     'security_password' => 'Security & Password',
     'profile_images' => 'Profile Images',
     'logout' => 'Logout',
+
+    // Collections Carousel
+    'my_collections' => 'My Collections',
+    'view_all' => 'View All',
+    'navigation' => 'Navigation',
+    'activity' => 'Activity',
+    'user_management' => 'User Management',
 ];

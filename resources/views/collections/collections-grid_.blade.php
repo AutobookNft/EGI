@@ -91,10 +91,10 @@
                     <p class="mb-6 text-gray-600">{{ __('No collections match your current filters. Why not create one?') }}</p>
                     {{-- @permission-check: Show create button only if user can create collections --}}
                     @can('create_collection')
-                        <a href="{{ route('collections.create') }}" {{-- Assicurati che questa rotta esista --}}
+                        <button type="button" data-action="open-create-collection-modal" {{-- Usa il modal invece della rotta --}}
                            class="inline-flex items-center px-6 py-3 text-sm font-semibold text-white transition duration-150 ease-in-out bg-green-600 border border-transparent rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
                            {{ __('Create Your First Collection') }}
-                        </a>
+                        </button>
                     @endcan
                 </div>
             @endforelse

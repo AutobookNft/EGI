@@ -73,7 +73,7 @@
             </button>
             <div id="{{ $idPrefix }}-collection-list-dropdown-menu" class="{{ $marginGuest }} mb-2 mt-1 hidden max-h-[40vh] overflow-y-auto rounded-xl border border-gray-200 bg-white py-2 shadow-lg dark:border-gray-700 dark:bg-gray-800">
                 <div id="{{ $idPrefix }}-collection-list-loading" class="px-4 py-3 text-sm text-center text-gray-500 dark:text-gray-400">{{ __('collection.loading_galleries') }}</div>
-                <div id="{{ $idPrefix }}-collection-list-empty" class="hidden px-4 py-3 text-sm text-center text-gray-500 dark:text-gray-400">{{ __('collection.no_galleries_found') }} <a href="{{ route('collections.create') }}" class="underline hover:text-emerald-400">{{ __('collection.create_one_question') }}</a></div>
+                <div id="{{ $idPrefix }}-collection-list-empty" class="hidden px-4 py-3 text-sm text-center text-gray-500 dark:text-gray-400">{{ __('collection.no_galleries_found') }} <button type="button" data-action="open-create-collection-modal" class="underline hover:text-emerald-400">{{ __('collection.create_one_question') }}</button></div>
                 <div id="{{ $idPrefix }}-collection-list-error" class="hidden px-4 py-3 text-sm text-center text-red-500">{{ __('collection.error_loading_galleries') }}</div>
             </div>
         @endauth
@@ -143,7 +143,7 @@
             </button>
             <div id="{{ $idPrefix }}-collection-list-dropdown-menu-app" class="{{ $marginApp }} mb-2 mt-1 hidden max-h-[40vh] overflow-y-auto rounded-md border border-gray-700 bg-gray-800 py-1 shadow-lg">
                 <div id="{{ $idPrefix }}-collection-list-loading-app" class="px-4 py-3 text-sm text-center text-gray-400">{{ __('collection.loading_galleries') }}</div>
-                <div id="{{ $idPrefix }}-collection-list-empty-app" class="hidden px-4 py-3 text-sm text-center text-gray-400">{{ __('collection.no_galleries_found') }} <a href="{{ route('collections.create') }}" class="underline hover:text-emerald-400">{{ __('collection.create_one_question') }}</a></div>
+                <div id="{{ $idPrefix }}-collection-list-empty-app" class="hidden px-4 py-3 text-sm text-center text-gray-400">{{ __('collection.no_galleries_found') }} <button type="button" data-action="open-create-collection-modal" class="underline hover:text-emerald-400">{{ __('collection.create_one_question') }}</button></div>
                 <div id="{{ $idPrefix }}-collection-list-error-app" class="hidden px-4 py-3 text-sm text-center text-red-400">{{ __('collection.error_loading_galleries') }}</div>
             </div>
         @endauth

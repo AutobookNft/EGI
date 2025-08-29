@@ -20,4 +20,6 @@ return [
     'delete' => 'Elimina',
     'created_at' => 'Creato il',
     'updated_at' => 'Aggiornato il',
+    'published' => 'Pubblicato',
+    'draft' => 'Bozza',
 ];

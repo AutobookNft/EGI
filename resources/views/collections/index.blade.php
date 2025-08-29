@@ -153,7 +153,7 @@
                     <h3 class="mb-2 text-xl font-semibold text-white">{{ __('collection.index.no_collections_found') }}</h3>
                     <p class="max-w-md mx-auto mb-6">{{ __('collection.index.no_collections_criteria_message') }}</p>
                     @can('create_collection')
-                        <a href="{{ route('collections.create') }}"
+                        <button type="button" data-action="open-create-collection-modal"
                         class="inline-flex items-center px-6 py-3 text-sm font-semibold tracking-widest text-white uppercase transition duration-150 ease-in-out border border-transparent rounded-md bg-verde-rinascita hover:bg-verde-rinascita-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-verde-rinascita">
                         <svg class="w-5 h-5 mr-2 -ml-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                             <path d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" />

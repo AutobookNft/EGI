@@ -171,10 +171,10 @@
                                     {{ __('collection.loading_galleries') }}</div>
                                 <div id="collection-list-empty"
                                     class="hidden px-4 py-3 text-sm text-center text-gray-400">
-                                    {{ __('collection.no_galleries_found') }} <a
-                                        href="{{ route('collections.create') }}"
+                                    {{ __('collection.no_galleries_found') }} <button
+                                        type="button" data-action="open-create-collection-modal"
                                         class="underline hover:text-emerald-400">{{ __('collection.create_one_question')
-                                        }}</a>
+                                        }}</button>
                                 </div>
                                 <div id="collection-list-error"
                                     class="hidden px-4 py-3 text-sm text-center text-red-400">

@@ -811,6 +811,89 @@ function setupFegiCustomEvents(): void {
     // console.log('Padmin Main: FEGI custom events setup complete.');
 }
 
+// --- 🌍 FUNZIONI GLOBALI PER COMPATIBILITÀ JAVASCRIPT ---
+// Queste funzioni vengono chiamate dal menu mobile e altri script vanilla JS
+
+/**
+ * 📜 Oracode Global Function: openCreateCollectionModal
+ * 🎯 Funzione globale per aprire la creazione collezione da JavaScript vanilla
+ * 💡 Usa la stessa logica dei bottoni con data-action="open-create-collection-modal"
+ */
+(window as any).openCreateCollectionModal = () => {
+    console.log('Global openCreateCollectionModal called');
+    
+    if (!mainAppConfig) {
+        console.error('Main app config not initialized');
+        return;
+    }
+
+    const authStatus = getAuthStatus(mainAppConfig);
+    
+    if (authStatus === 'logged-in') {
+        // Utente loggato: apri il modal invece di navigare
+        const modal = document.getElementById('create-collection-modal');
+        if (modal) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            modal.setAttribute('aria-hidden', 'false');
+            
+            // Anima l'apertura del modal
+            const container = document.getElementById('create-collection-modal-container');
+            if (container) {
+                setTimeout(() => {
+                    container.classList.remove('scale-95', 'opacity-0');
+                    container.classList.add('scale-100', 'opacity-100');
+                }, 10);
+            }
+            
+            // Focus sul primo input
+            const firstInput = modal.querySelector('input') as HTMLInputElement;
+            if (firstInput) {
+                setTimeout(() => firstInput.focus(), 100);
+            }
+        } else {
+            console.error('create-collection-modal element not found');
+            // Fallback: prova a trovare un bottone con data-action e triggerarlo
+            const triggerButton = document.querySelector('[data-action="open-create-collection-modal"]') as HTMLElement;
+            if (triggerButton) {
+                triggerButton.click();
+            }
+        }
+    } else if (authStatus === 'connected') {
+        // Wallet connesso ma non registrato: chiedi registrazione
+        if (window.Swal) {
+            window.Swal.fire({
+                icon: 'info',
+                title: appTranslate('registrationRequiredTitle', mainAppConfig.translations),
+                text: appTranslate('registrationRequiredTextCollections', mainAppConfig.translations),
+                confirmButtonText: appTranslate('registerNowButton', mainAppConfig.translations),
+                showCancelButton: true,
+                cancelButtonText: appTranslate('laterButton', mainAppConfig.translations),
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#aaa'
+            }).then((result: { isConfirmed: boolean }) => {
+                if (result.isConfirmed) {
+                    window.location.href = mainAppConfig.routes.register;
+                }
+            });
+        } else {
+            alert(appTranslate('registrationRequiredTextCollections', mainAppConfig.translations));
+            window.location.href = mainAppConfig.routes.register;
+        }
+    } else {
+        // Nessuna connessione: apri modal wallet
+        openSecureWalletModal(mainAppConfig, DOMElements, 'create-collection');
+    }
+};
+
+/**
+ * 📜 Oracode Global Function: createCollectionFlow  
+ * 🎯 Alias per openCreateCollectionModal (compatibilità multipla)
+ */
+(window as any).createCollectionFlow = (window as any).openCreateCollectionModal;
+
+// console.log('Padmin Main: Global functions for collection creation setup complete.');
+
 // --- 🚀 PUNTO DI INGRESSO ORCHESTRATO DELL'APPLICAZIONE ---
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initializeApplicationOrchestrated);

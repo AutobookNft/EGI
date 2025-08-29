@@ -122,9 +122,9 @@
                                 <a href="{{ route('collections.index') }}" class="block text-sm text-gray-600 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 transition-colors duration-200">
                                     {{ __('menu.my_collections') }}
                                 </a>
-                                <a href="{{ route('collections.create') }}" class="block text-sm text-gray-600 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 transition-colors duration-200">
+                                <button type="button" data-action="open-create-collection-modal" class="block text-sm text-gray-600 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 transition-colors duration-200">
                                     {{ __('menu.new_collection') }}
-                                </a>
+                                </button>
                             </div>
                         </div>
                     @endcan

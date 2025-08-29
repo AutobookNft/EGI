@@ -154,9 +154,9 @@
                             <a href="{{ route('collections.index') }}" class="block px-2 py-1 text-sm text-gray-600 transition-colors duration-200 rounded-lg dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-white/50 dark:hover:bg-black/20">
                                 {{ __('menu.my_collections') }}
                             </a>
-                            <a href="{{ route('collections.create') }}" class="block px-2 py-1 text-sm text-gray-600 transition-colors duration-200 rounded-lg dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-white/50 dark:hover:bg-black/20">
+                            <button type="button" data-action="open-create-collection-modal" class="block px-2 py-1 text-sm text-gray-600 transition-colors duration-200 rounded-lg dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-white/50 dark:hover:bg-black/20">
                                 {{ __('menu.new_collection') }}
-                            </a>
+                            </button>
                         </div>
                     </div>
                 @endcan

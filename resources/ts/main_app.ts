@@ -552,6 +552,35 @@ function setupFegiCustomEvents(): void {
     console.log('Padmin Main: FEGI custom events setup complete.');
 }
 
+// --- 🌍 FUNZIONI GLOBALI PER MENU MOBILE ---
+// Esporta le funzioni di creazione collezioni nel window globale per i menu
+(window as any).openCreateCollectionModal = () => {
+    const authStatus = getAuthStatus(mainAppConfig);
+    if (authStatus === 'logged-in') {
+        window.location.href = mainAppConfig.routes.collectionsCreate;
+    } else if (authStatus === 'connected') {
+        // Mostra messaggio per registrazione completa
+        if (window.Swal) {
+            window.Swal.fire({
+                icon: 'info',
+                title: appTranslate('registrationRequiredTitle', mainAppConfig.translations),
+                text: appTranslate('registrationRequiredText', mainAppConfig.translations),
+                confirmButtonText: appTranslate('completeRegistration', mainAppConfig.translations),
+                showCancelButton: true,
+                cancelButtonText: appTranslate('cancel', mainAppConfig.translations)
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = mainAppConfig.routes.register;
+                }
+            });
+        }
+    } else {
+        openSecureWalletModal(mainAppConfig, DOMElements, 'create-collection');
+    }
+};
+
+(window as any).createCollectionFlow = (window as any).openCreateCollectionModal;
+
 // --- 🚀 PUNTO DI INGRESSO ORCHESTRATO DELL'APPLICAZIONE ---
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initializeApplicationOrchestrated);

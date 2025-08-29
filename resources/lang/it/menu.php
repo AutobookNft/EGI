@@ -48,4 +48,11 @@ return [
     'profile_images' => 'Immagini Profilo',
     'my_profile_nav' => 'Il Mio Profilo',
     'logout' => 'Disconnetti',
+
+    // Collections Carousel
+    'my_collections' => 'Le Mie Collezioni',
+    'view_all' => 'Vedi Tutte',
+    'navigation' => 'Navigazione',
+    'activity' => 'Attività',
+    'user_management' => 'Gestione Utenti',
 ];
