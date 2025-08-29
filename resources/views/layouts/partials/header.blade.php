@@ -241,11 +241,10 @@
                                 </div>
                             </div>
                         </div> --}}
-                        <a href="{{ route('login') }}" id="login-link-desktop" class="{{ $navLinkClasses }}">{{
-                            __('collection.login') }}</a>
+                        <a href="{{ route('login') }}" id="login-link-desktop" class="{{ $navLinkClasses }}">{{__('collection.login') }}</a>
                         <a href="{{ route('register') }}" id="register-link-desktop"
-                            class="inline-flex items-center px-4 py-2 ml-2 text-sm font-medium text-gray-300 bg-gray-800 border border-gray-700 rounded-md hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">{{
-                            __('collection.register') }}</a>
+                            class="inline-flex items-center px-4 py-2 ml-2 text-sm font-medium text-gray-300 bg-gray-800 border border-gray-700 rounded-md hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                            {{ __('collection.register') }}</a>
                     </nav>
 
                     {{-- Menu Mobile Button --}}
@@ -280,6 +279,10 @@
                             <a href="{{ route('login') }}"
                                 class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-300 bg-gray-800 border border-gray-700 rounded-md hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
                                 {{ __('collection.login') }}
+                            </a>
+                            <a href="{{ route('register') }}" id="register-link-desktop"
+                                class="inline-flex items-center px-4 py-2 ml-2 text-sm font-medium text-gray-300 bg-gray-800 border border-gray-700 rounded-md hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                {{ __('collection.register') }}
                             </a>
                         </div>
                         @endguest
