@@ -52,9 +52,9 @@
                         <div class="relative w-full max-w-5xl">
 
                             {{-- Collection Navigation Carousel - OpenSea Style --}}
-                            <x-egi-collection-navigator 
-                                :collectionEgis="$collectionEgis" 
-                                :currentEgi="$egi" 
+                            <x-egi-collection-navigator
+                                :collectionEgis="$collectionEgis"
+                                :currentEgi="$egi"
                             />
 
                             {{-- Main Image Display --}}

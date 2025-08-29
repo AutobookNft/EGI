@@ -125,7 +125,7 @@ function _renderMobileCollectionListMenu(config: AppConfig, DOM: typeof DOMEleme
     // Aggiungi le collection possedute
     if (currentUserCollectionsDataState.owned_collections.length > 0) {
         const ownedHeader = document.createElement('div');
-        ownedHeader.className = 'px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider mobile-collection-list-header border-b border-gray-700';
+        ownedHeader.className = 'px-4 py-2 text-xs font-semibold tracking-wider text-gray-500 uppercase border-b border-gray-700 mobile-collection-list-header';
         ownedHeader.textContent = appTranslate('myOwnedGalleries', config.translations);
         DOM.mobileCollectionListDropdownMenuEl.appendChild(ownedHeader);
 
@@ -143,7 +143,7 @@ function _renderMobileCollectionListMenu(config: AppConfig, DOM: typeof DOMEleme
         }
 
         const collabHeader = document.createElement('div');
-        collabHeader.className = 'px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider mobile-collection-list-header border-b border-gray-700';
+        collabHeader.className = 'px-4 py-2 text-xs font-semibold tracking-wider text-gray-500 uppercase border-b border-gray-700 mobile-collection-list-header';
         collabHeader.textContent = appTranslate('myCollaboratingGalleries', config.translations);
         DOM.mobileCollectionListDropdownMenuEl.appendChild(collabHeader);
 

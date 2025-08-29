@@ -821,14 +821,14 @@ function setupFegiCustomEvents(): void {
  */
 (window as any).openCreateCollectionModal = () => {
     console.log('Global openCreateCollectionModal called');
-    
+
     if (!mainAppConfig) {
         console.error('Main app config not initialized');
         return;
     }
 
     const authStatus = getAuthStatus(mainAppConfig);
-    
+
     if (authStatus === 'logged-in') {
         // Utente loggato: apri il modal invece di navigare
         const modal = document.getElementById('create-collection-modal');
@@ -836,7 +836,7 @@ function setupFegiCustomEvents(): void {
             modal.classList.remove('hidden');
             modal.classList.add('flex');
             modal.setAttribute('aria-hidden', 'false');
-            
+
             // Anima l'apertura del modal
             const container = document.getElementById('create-collection-modal-container');
             if (container) {
@@ -845,7 +845,7 @@ function setupFegiCustomEvents(): void {
                     container.classList.add('scale-100', 'opacity-100');
                 }, 10);
             }
-            
+
             // Focus sul primo input
             const firstInput = modal.querySelector('input') as HTMLInputElement;
             if (firstInput) {

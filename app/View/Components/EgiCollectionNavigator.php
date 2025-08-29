@@ -7,8 +7,7 @@ use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\View\Component;
 use App\Models\Egi;
 
-class EgiCollectionNavigator extends Component
-{
+class EgiCollectionNavigator extends Component {
     /**
      * The collection of EGIs for navigation.
      *
@@ -29,8 +28,7 @@ class EgiCollectionNavigator extends Component
      * @param \Illuminate\Database\Eloquent\Collection $collectionEgis
      * @param \App\Models\Egi $currentEgi
      */
-    public function __construct(EloquentCollection $collectionEgis, Egi $currentEgi)
-    {
+    public function __construct(EloquentCollection $collectionEgis, Egi $currentEgi) {
         $this->collectionEgis = $collectionEgis;
         $this->currentEgi = $currentEgi;
     }
@@ -38,8 +36,7 @@ class EgiCollectionNavigator extends Component
     /**
      * Get the view / contents that represent the component.
      */
-    public function render(): View
-    {
+    public function render(): View {
         return view('components.egi-collection-navigator');
     }
 }

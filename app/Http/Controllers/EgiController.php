@@ -28,8 +28,7 @@ use Ultra\ErrorManager\Interfaces\ErrorManagerInterface;
  * @date 2025-06-28
  * @solution FegiAuth integration + collection permission validation + Ultra ecosystem compliance
  */
-class EgiController extends Controller
-{
+class EgiController extends Controller {
     /**
      * Ultra Error Manager instance for standardized error handling
      *
@@ -79,8 +78,7 @@ class EgiController extends Controller
      * @param int $id EGI ID
      * @return View
      */
-    public function show($id): View | RedirectResponse
-    {
+    public function show($id): View | RedirectResponse {
         try {
             $egi = Egi::with([
                 'collection.creator',
@@ -129,7 +127,6 @@ class EgiController extends Controller
                 ->get();
 
             return view('egis.show', compact('egi', 'collection', 'canManage', 'collectionEgis'));
-
         } catch (\Exception $e) {
             return $this->errorManager->handle('EGI_PAGE_RENDERING_ERROR', [
                 'egi_id' => $id,
@@ -149,8 +146,7 @@ class EgiController extends Controller
      * @param Egi $egi
      * @return JsonResponse|RedirectResponse
      */
-    public function update(Request $request, Egi $egi)
-    {
+    public function update(Request $request, Egi $egi) {
         try {
             // Check authentication
             if (!FegiAuth::check()) {
@@ -262,7 +258,6 @@ class EgiController extends Controller
 
             return redirect()->route('egis.show', $egi)
                 ->with('success', __('egi.crud.update_success'));
-
         } catch (\Exception $e) {
             return $this->errorManager->handle('EGI_UPDATE_FAILED', [
                 'user_id' => FegiAuth::id(),
@@ -282,8 +277,7 @@ class EgiController extends Controller
      * @param Egi $egi
      * @return JsonResponse|RedirectResponse
      */
-    public function destroy(Request $request, Egi $egi)
-    {
+    public function destroy(Request $request, Egi $egi) {
         try {
             // Check authentication
             if (!FegiAuth::check()) {
@@ -367,7 +361,6 @@ class EgiController extends Controller
 
             return redirect()->route('home.collections.show', $egi->collection)
                 ->with('success', __('egi.crud.delete_success'));
-
         } catch (\Exception $e) {
             return $this->errorManager->handle('EGI_DELETE_FAILED', [
                 'user_id' => FegiAuth::id(),
@@ -387,8 +380,7 @@ class EgiController extends Controller
      * @param Egi $egi EGI being accessed
      * @return bool True if user can manage this EGI
      */
-    protected function canManageEgi($user, Egi $egi): bool
-    {
+    protected function canManageEgi($user, Egi $egi): bool {
         try {
             $collection = $egi->collection;
 
@@ -405,7 +397,6 @@ class EgiController extends Controller
             $userRole = $membership->pivot->role ?? null;
 
             return in_array($userRole, ['admin', 'editor', 'creator']);
-
         } catch (\Exception $e) {
             // Log error (developers only - English)
             $this->logger->error('EGI_PERMISSION_CHECK_ERROR: Failed to check EGI management permissions', [

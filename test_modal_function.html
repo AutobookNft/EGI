@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Test Modal Function</title>
+</head>
+
+<body>
+    <h1>Test Create Collection Modal</h1>
+
+    <!-- Simula il modal come quello vero -->
+    <div id="create-collection-modal" class="hidden" style="display: none;">
+        <div id="create-collection-modal-container" class="scale-95 opacity-0">
+            <h2>Mock Modal</h2>
+            <input type="text" placeholder="Collection name">
+        </div>
+    </div>
+
+    <!-- Simula bottone con data-action -->
+    <button data-action="open-create-collection-modal">Test Button with data-action</button>
+
+    <!-- Test buttons -->
+    <button onclick="testModal()">Test Modal Opening</button>
+
+    <script>
+        // Simula l'oggetto mainAppConfig
+        const mainAppConfig = {
+            routes: {
+                login: '/login',
+                register: '/register'
+            },
+            translations: {}
+        };
+
+        // Simula getAuthStatus function
+        function getAuthStatus() {
+            return 'logged-in'; // Simula utente loggato
+        }
+
+        // Copia la nostra funzione dal main.ts
+        function openCreateCollectionModal() {
+            console.log('Global openCreateCollectionModal called');
+
+            if (!mainAppConfig) {
+                console.error('Main app config not initialized');
+                return;
+            }
+
+            const authStatus = getAuthStatus(mainAppConfig);
+
+            if (authStatus === 'logged-in') {
+                // Utente loggato: apri il modal invece di navigare
+                const modal = document.getElementById('create-collection-modal');
+                if (modal) {
+                    modal.classList.remove('hidden');
+                    modal.classList.add('flex');
+                    modal.setAttribute('aria-hidden', 'false');
+                    modal.style.display = 'flex';
+
+                    // Anima l'apertura del modal
+                    const container = document.getElementById('create-collection-modal-container');
+                    if (container) {
+                        setTimeout(() => {
+                            container.classList.remove('scale-95', 'opacity-0');
+                            container.classList.add('scale-100', 'opacity-100');
+                        }, 10);
+                    }
+
+                    // Focus sul primo input
+                    const firstInput = modal.querySelector('input');
+                    if (firstInput) {
+                        setTimeout(() => firstInput.focus(), 100);
+                    }
+
+                    console.log('Modal opened successfully!');
+                } else {
+                    console.error('create-collection-modal element not found');
+                    // Fallback: prova a trovare un bottone con data-action e triggerarlo
+                    const triggerButton = document.querySelector('[data-action="open-create-collection-modal"]');
+                    if (triggerButton) {
+                        console.log('Clicking fallback button');
+                        triggerButton.click();
+                    }
+                }
+            }
+        }
+
+        function testModal() {
+            openCreateCollectionModal();
+        }
+    </script>
+</body>
+
+</html>

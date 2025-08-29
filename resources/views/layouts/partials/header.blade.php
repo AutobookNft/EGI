@@ -151,7 +151,7 @@
 
                         {{-- Dropdown My Galleries --}}
                         @can('create_collection')
-                        <div id="collection-list-dropdown-container" class="relative hidden">
+                        <div id="collection-list-dropdown-container" class="relative">
                             <button id="collection-list-dropdown-button" type="button"
                                 class="{{ $navLinkClasses }} inline-flex items-center" aria-expanded="false"
                                 aria-haspopup="true">
@@ -171,10 +171,10 @@
                                     {{ __('collection.loading_galleries') }}</div>
                                 <div id="collection-list-empty"
                                     class="hidden px-4 py-3 text-sm text-center text-gray-400">
-                                    {{ __('collection.no_galleries_found') }} <button
-                                        type="button" data-action="open-create-collection-modal"
+                                    {{ __('collection.no_galleries_found') }} <a
+                                        href="{{ route('collections.create') }}"
                                         class="underline hover:text-emerald-400">{{ __('collection.create_one_question')
-                                        }}</button>
+                                        }}</a>
                                 </div>
                                 <div id="collection-list-error"
                                     class="hidden px-4 py-3 text-sm text-center text-red-400">

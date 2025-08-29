@@ -263,7 +263,7 @@ async function initializeFEGISystemOrchestrated(): Promise<void> {
 
         // 3. Carica configurazione dal server
         mainAppConfig = await initializeAppConfig();
-        console.log(`${appTranslate('padminGreeting', mainAppConfig?.translations || {padminGreeting:'Padmin'})} FEGI Configuration loaded successfully.`);
+        console.log(`${appTranslate('padminGreeting', mainAppConfig?.translations || { padminGreeting: 'Padmin' })} FEGI Configuration loaded successfully.`);
 
         // 4. Conferma riferimenti DOM
         DOMElements.confirmDOMReferencesLoaded();
@@ -391,7 +391,7 @@ async function initializeApplicationOrchestrated(): Promise<void> {
 
         // Setup listeners per transizioni pagina
         document.querySelectorAll('a[href^="/"]').forEach(link => {
-            link.addEventListener('click', function(e) {
+            link.addEventListener('click', function (e) {
                 if (this.hostname === window.location.hostname) {
                     e.preventDefault();
                     document.body.classList.add('page-transitioning');
