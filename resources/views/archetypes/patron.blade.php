@@ -217,7 +217,7 @@
         header {
             /* Immagine di sfondo aggiornata (placeholder per il canvas) */
             background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
-            url('{{ asset(' images/default/patron_banner_background_rinascimento_1.png') }}') no-repeat center center/cover;
+            url('{{ asset('images/default/patron_banner_background_rinascimento_1.png') }}') no-repeat center center/cover;
             color: var(--white);
             padding: 80px 20px;
             text-align: center;

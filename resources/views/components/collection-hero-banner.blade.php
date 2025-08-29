@@ -20,7 +20,11 @@ $jsCollectionsData = [];
 if ($hasCollections) {
 $jsCollectionsData = $collections->map(function($c) use($logo) {
 $creatorName = $c->creator ? $c->creator->name : null;
-$bannerPath = $c->image_banner;
+// Prova ad usare Spatie Media se disponibile per i dati JS
+$bannerUrl = method_exists($c, 'getFirstMediaUrl')
+    ? $c->getFirstMediaUrl('head', 'banner')
+    : null;
+$bannerPath = $bannerUrl ?: $c->image_banner;
 
 // Calcola le statistiche per ogni collezione per l'aggiornamento dinamico
 $egisCount = $c->egis()->count();
@@ -50,7 +54,7 @@ return [
 'id' => $c->id,
 'name' => $c->collection_name ?? '',
 'creator' => $creatorName ?: __('guest_home.unknown_artist'),
-'banner' => $bannerPath ? asset($bannerPath) : asset("images/default/random_background/$logo"),
+'banner' => $bannerPath ? ($bannerUrl ? $bannerUrl : asset($bannerPath)) : asset("images/default/random_background/$logo"),
 'stats' => [
 'egis' => $egisCount,
 'sell_egis' => $sellEgisCount,
@@ -68,7 +72,7 @@ return [
     {{-- Desktop: Banner con background-image --}}
     <div class="absolute inset-0 hidden transition-opacity duration-700 ease-in-out bg-center bg-cover hero-banner-background md:block"
         id="heroBannerBackground_{{ $instanceId }}"
-        style="background-image: url('{{ $hasCollections && $firstCollection && $firstCollection->image_banner ? asset($firstCollection->image_banner) : $defaultBannerUrl }}')">
+        style="background-image: url('{{ $hasCollections && $firstCollection ? (method_exists($firstCollection, 'getFirstMediaUrl') ? ($firstCollection->getFirstMediaUrl('head', 'banner') ?: ($firstCollection->image_banner ? asset($firstCollection->image_banner) : $defaultBannerUrl)) : ($firstCollection->image_banner ? asset($firstCollection->image_banner) : $defaultBannerUrl)) : $defaultBannerUrl }}')">
         <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10"></div>
         <div class="absolute inset-0 opacity-75 bg-gradient-to-r from-black/50 via-transparent to-transparent"></div>
     </div>
@@ -82,7 +86,11 @@ return [
             @foreach($collections as $index => $collection)
             <div class="relative flex-shrink-0 w-full h-full snap-start" style="scroll-snap-align: start;">
                 @php
-                    $imageSrc = $collection->image_banner ? asset($collection->image_banner) : $defaultBannerUrl;
+                    // Prova ad usare Spatie Media se disponibile
+                    $bannerUrl = method_exists($collection, 'getFirstMediaUrl')
+                        ? $collection->getFirstMediaUrl('head', 'banner')
+                        : null;
+                    $imageSrc = $bannerUrl ?: ($collection->image_banner ? asset($collection->image_banner) : $defaultBannerUrl);
                     $isFirstImage = $index === 0;
                 @endphp
 
