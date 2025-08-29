@@ -210,4 +210,9 @@ return [
         'utilities' => 'Utility',
         'upload_file' => 'Carica file',
     ],
+    'collection_navigation' => [
+        'navigate_collection' => 'Naviga nella collezione',
+        'previous_egi' => 'EGI precedente',
+        'next_egi' => 'EGI successivo',
+    ],
 ];

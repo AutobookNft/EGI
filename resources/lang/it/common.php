@@ -22,4 +22,6 @@ return [
     'updated_at' => 'Aggiornato il',
     'published' => 'Pubblicato',
     'draft' => 'Bozza',
+    'browse_collection' => 'Sfoglia la collezione',
+    'current_egi' => 'EGI corrente',
 ];

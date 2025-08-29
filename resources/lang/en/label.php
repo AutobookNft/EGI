@@ -210,4 +210,9 @@ return [
         'utilities' => 'Utilities',
         'upload_file' => 'Upload file',
     ],
+    'collection_navigation' => [
+        'navigate_collection' => 'Navigate collection',
+        'previous_egi' => 'Previous EGI',
+        'next_egi' => 'Next EGI',
+    ],
 ];

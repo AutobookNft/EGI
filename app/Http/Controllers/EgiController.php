@@ -119,7 +119,16 @@ class EgiController extends Controller
             $egi->likes_count = $egi->likes()->count();
             $collection = $egi->collection;
 
-            return view('egis.show', compact('egi', 'collection', 'canManage'));
+            // Get all EGIs from the same collection for the navigation carousel
+            $collectionEgis = $collection->egis()
+                ->where('is_published', true)
+                ->whereNotNull('key_file')
+                ->whereNotNull('extension')
+                ->orderBy('position')
+                ->orderBy('id')
+                ->get();
+
+            return view('egis.show', compact('egi', 'collection', 'canManage', 'collectionEgis'));
 
         } catch (\Exception $e) {
             return $this->errorManager->handle('EGI_PAGE_RENDERING_ERROR', [
