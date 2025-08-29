@@ -182,7 +182,7 @@ class HomeController extends Controller {
         return User::where('usertype', 'creator')
             ->withCount(['createdEgis as egis_count', 'createdCollections as collections_count'])
             ->inRandomOrder()
-            ->take(8) // Puoi regolare il numero di creator da mostrare
+            ->take(50) // Puoi regolare il numero di creator da mostrare
             ->get();
     }
 

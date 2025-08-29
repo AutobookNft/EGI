@@ -89,6 +89,16 @@ return [
 'sell_egis' => $sellEgisCount,
 'volume' => $totalVolume,
 'epp' => $eppTotal
+],
+// Debug: Aggiungiamo più informazioni
+'debug_info' => [
+'collection_id' => $c->id,
+'egis_count' => $egisCount,
+'sell_egis_count' => $sellEgisCount,
+'volume' => $totalVolume,
+'epp' => $eppTotal,
+'has_egis_relation' => method_exists($c, 'egis'),
+'egis_table_check' => \DB::table('egis')->where('collection_id', $c->id)->count()
 ]
 ];
 })->values()->all();
@@ -231,9 +241,9 @@ return [
             <x-hero-banner-stats :carousel-instance-id="$instanceId" />
             @endif
 
-            <!-- Pulsanti di navigazione (prev/next) - COMMENTATI -->
-            {{-- @if($collections->count() > 1)
-            <div class="flex order-2 space-x-3 pointer-events-auto md:order-1">
+            <!-- Pulsanti di navigazione (prev/next) - SOLO DESKTOP -->
+            @if($collections->count() > 1)
+            <div class="hidden order-2 space-x-3 pointer-events-auto md:flex md:order-1">
                 <button id="prevSlide_{{ $instanceId }}" aria-label="{{ __('guest_home.previous_slide') }}"
                     class="p-2 text-white transition-colors duration-300 rounded-full pointer-events-auto sm:p-3 bg-black/40 hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/50">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 sm:w-6 sm:h-6" fill="none"
@@ -251,7 +261,7 @@ return [
             </div>
             @else
             <div class="order-2 md:order-1"></div>
-            @endif --}}
+            @endif
 
 
         </div>
@@ -354,7 +364,7 @@ return [
         const reserveButton = document.getElementById('reserveButton_' + componentId);
         const prevButton = document.getElementById('prevSlide_' + componentId);
         const nextButton = document.getElementById('nextSlide_' + componentId);
-        const slideIndicatorsContainer = document.querySelector('#heroBannerContainer_' + componentId + ' .slide-indicators');
+        const slideIndicatorsContainer = document.querySelector('#slideIndicators_' + componentId);
         const slideIndicators = slideIndicatorsContainer ? slideIndicatorsContainer.querySelectorAll('[data-index]') : [];
 
         const totalCollections = collectionsData.length;
@@ -362,6 +372,16 @@ return [
         let currentIndex = 0;
         let autoScrollInterval = null;
         let isMobile = window.innerWidth < 768; // md breakpoint
+
+        // Debug log per verificare elementi trovati
+        console.log('Hero Banner Debug - Component ID:', componentId);
+        console.log('Collections data:', collectionsData.length, 'items');
+        console.log('First few collections with debug info:', collectionsData.slice(0, 3));
+        console.log('Desktop banner element:', bannerBackground ? 'FOUND' : 'NOT FOUND');
+        console.log('Mobile carousel element:', mobileCarouselTrack ? 'FOUND' : 'NOT FOUND');
+        console.log('Prev button:', prevButton ? 'FOUND' : 'NOT FOUND');
+        console.log('Next button:', nextButton ? 'FOUND' : 'NOT FOUND');
+        console.log('Is mobile:', isMobile);
 
         // Funzione per rilevare se siamo su mobile
         function checkIfMobile() {
@@ -375,6 +395,8 @@ return [
             const currentCollection = collectionsData[currentIndex];
             if (!currentCollection) return;
 
+            console.log('Updating banner content - Index:', currentIndex, 'Collection:', currentCollection.name, 'Is Mobile:', isMobile);
+
             if (isMobile && mobileCarouselTrack && !skipScroll) {
                 // Mobile: scroll nativo - solo se non stiamo già gestendo uno scroll
                 const slideWidth = mobileCarouselTrack.offsetWidth;
@@ -384,11 +406,15 @@ return [
                 });
             } else if (!isMobile && bannerBackground) {
                 // Desktop: background image transition
+                console.log('Desktop mode - Updating background image to:', currentCollection.banner);
                 bannerBackground.style.opacity = '0.3';
                 setTimeout(() => {
                     bannerBackground.style.backgroundImage = `url('${currentCollection.banner}')`;
                     bannerBackground.style.opacity = '1';
+                    console.log('Background image updated successfully');
                 }, 350);
+            } else {
+                console.warn('No valid update path - isMobile:', isMobile, 'mobileCarouselTrack:', !!mobileCarouselTrack, 'bannerBackground:', !!bannerBackground);
             }            // Aggiorna contenuto testuale
             if (collectionSubTextElement) {
                 collectionSubTextElement.textContent = `${currentCollection.name} {{ __('guest_home.by') }} ${currentCollection.creator}`;
@@ -396,16 +422,26 @@ return [
 
             // Aggiorna statistiche per la collezione corrente
             if (currentCollection.stats) {
+                console.log('=== UPDATING STATS ===');
+                console.log('Collection:', currentCollection.name, '(ID:', currentCollection.id, ')');
+                console.log('Stats received:', currentCollection.stats);
+                console.log('Debug info:', currentCollection.debug_info);
+                
                 // Cerca il container delle statistiche con l'ID specifico del carousel
                 const statsContainer = document.getElementById('heroBannerStatsContainer_' + componentId + '_stats');
+                console.log('Stats container:', statsContainer ? 'FOUND' : 'NOT FOUND', 'ID:', 'heroBannerStatsContainer_' + componentId + '_stats');
+                
                 if (statsContainer) {
                     const volumeElement = statsContainer.querySelector('[id^="statVolume_"]');
                     const eppElement = statsContainer.querySelector('[id^="statEpp_"]');
                     const egisElement = statsContainer.querySelector('[id^="statTotalEgis_"]');
                     const sellEgisElement = statsContainer.querySelector('[id^="statSellEgis_"]');
 
+                    console.log('Found elements - Volume:', !!volumeElement, 'EPP:', !!eppElement, 'EGIs:', !!egisElement, 'Sell EGIs:', !!sellEgisElement);
+
                     if (volumeElement) {
                         const volume = currentCollection.stats.volume || 0;
+                        console.log('Updating volume to:', volume);
                         // Responsive formatting: standard on desktop, abbreviated on mobile
                         if (isMobileDevice()) {
                             volumeElement.textContent = formatPriceAbbreviated(volume, 1);
@@ -418,6 +454,7 @@ return [
 
                     if (eppElement) {
                         const epp = currentCollection.stats.epp || 0;
+                        console.log('Updating EPP to:', epp);
                         // Responsive formatting: standard on desktop, abbreviated on mobile
                         if (isMobileDevice()) {
                             eppElement.textContent = formatPriceAbbreviated(epp, 1);
@@ -429,23 +466,32 @@ return [
                     }
 
                     if (egisElement) {
+                        const egis = currentCollection.stats.egis || 0;
+                        console.log('Updating EGIs to:', egis);
                         // Use abbreviated format for large numbers on mobile
                         if (isMobileDevice()) {
-                            egisElement.textContent = formatNumberAbbreviated(currentCollection.stats.egis || 0, 0);
+                            egisElement.textContent = formatNumberAbbreviated(egis, 0);
                         } else {
-                            egisElement.textContent = new Intl.NumberFormat('it-IT').format(currentCollection.stats.egis || 0);
+                            egisElement.textContent = new Intl.NumberFormat('it-IT').format(egis);
                         }
                     }
 
                     if (sellEgisElement) {
+                        const sellEgis = currentCollection.stats.sell_egis || 0;
+                        console.log('Updating Sell EGIs to:', sellEgis);
                         // Use abbreviated format for large numbers on mobile
                         if (isMobileDevice()) {
-                            sellEgisElement.textContent = formatNumberAbbreviated(currentCollection.stats.sell_egis || 0, 0);
+                            sellEgisElement.textContent = formatNumberAbbreviated(sellEgis, 0);
                         } else {
-                            sellEgisElement.textContent = new Intl.NumberFormat('it-IT').format(currentCollection.stats.sell_egis || 0);
+                            sellEgisElement.textContent = new Intl.NumberFormat('it-IT').format(sellEgis);
                         }
                     }
+                } else {
+                    console.error('Stats container not found! Looking for ID:', 'heroBannerStatsContainer_' + componentId + '_stats');
+                    console.log('Available elements with heroBannerStats prefix:', document.querySelectorAll('[id*="heroBannerStats"]'));
                 }
+            } else {
+                console.warn('No stats data for current collection:', currentCollection.name);
             }
 
             if (reserveButton) {
@@ -497,9 +543,17 @@ return [
 
         // Event listeners per i bottoni
         if (prevButton && nextButton && totalCollections > 1) {
-            prevButton.addEventListener('click', () => cycleSlide(-1));
-            nextButton.addEventListener('click', () => cycleSlide(1));
+            console.log('Setting up navigation buttons');
+            prevButton.addEventListener('click', () => {
+                console.log('Previous button clicked');
+                cycleSlide(-1);
+            });
+            nextButton.addEventListener('click', () => {
+                console.log('Next button clicked');
+                cycleSlide(1);
+            });
         } else {
+            console.log('Navigation buttons setup skipped - Prev button:', !!prevButton, 'Next button:', !!nextButton, 'Total collections:', totalCollections);
             if (totalCollections <= 1) {
                 if(prevButton) prevButton.style.display = 'none';
                 if(nextButton) nextButton.style.display = 'none';
@@ -559,7 +613,11 @@ return [
 
         // Gestione resize per rilevare cambio desktop/mobile
         window.addEventListener('resize', () => {
+            const wasIsMobile = isMobile;
             checkIfMobile();
+            if (wasIsMobile !== isMobile) {
+                console.log('Device type changed - was mobile:', wasIsMobile, 'now mobile:', isMobile);
+            }
             // Forza un aggiornamento delle statistiche quando cambia il breakpoint
             updateBannerContent(false);
         });
@@ -580,10 +638,16 @@ return [
 
         // Inizializzazione
         if (collectionsData.length > 0) {
+            console.log('Initializing hero banner with', collectionsData.length, 'collections');
             updateBannerContent();
             if (totalCollections > 1) {
+                console.log('Starting auto-scroll with interval:', autoplayInterval);
                 startAutoScroll();
+            } else {
+                console.log('Single collection - auto-scroll disabled');
             }
+        } else {
+            console.warn('No collections data available for hero banner');
         }
     });
 </script>

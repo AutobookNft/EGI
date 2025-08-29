@@ -95,8 +95,8 @@ $instanceId = $carouselInstanceId ? $carouselInstanceId . '_stats' : uniqid();
             </div>
         </div>
 
-        {{-- SELL EGIS - EGI con prenotazioni attive in questa collezione --}}
-        <div class="pl-6">
+        {{-- SELL EGIS - EGI con prenotazioni attive in questa collezione - NASCOSTA SU MOBILE --}}
+        <div class="hidden pl-6 md:block">
             <div class="text-xs font-medium tracking-wider text-gray-300 uppercase">{{ __('statistics.sell_egis') }}
             </div>
             <div class="font-bold text-white" style="font-size: 14px; color: #ffffff;"

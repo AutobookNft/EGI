@@ -20,13 +20,9 @@ if ($user) {
 // Determina il nome da mostrare in base alla privacy
 $displayName = '';
 if ($user) {
-    if ($user->usertype === 'commissioner') {
-        // Commissioner: mostra nome reale o fallback
-        $displayName = $user->name ?? ($user->first_name . ' ' . $user->last_name) ?? 'Commissioner';
-    } else {
-        // Non-commissioner: mostra wallet troncato
-        $displayName = $user->wallet ? substr($user->wallet, 0, 12) . '...' : 'Utente Anonimo';
-    }
+    // Nel model User c'è la gestione del name
+    $displayName = $user->name;
+
 }
 
 // Iniziali per fallback avatar (basate sul nome appropriato)
