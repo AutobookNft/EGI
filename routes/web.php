@@ -295,6 +295,13 @@ Route::group(['prefix' => 'egis'], function () {
         ->name('egis.destroy');
 });
 
+// Utility management routes
+Route::middleware(['auth'])->group(function () {
+    Route::post('utilities', [App\Http\Controllers\UtilityController::class, 'store'])->name('utilities.store');
+    Route::put('utilities/{utility}', [App\Http\Controllers\UtilityController::class, 'update'])->name('utilities.update');
+    Route::delete('utilities/{utility}', [App\Http\Controllers\UtilityController::class, 'destroy'])->name('utilities.destroy');
+});
+
 // EPP routes
 Route::get('/epps', [EppController::class, 'index'])->name('epps.index');
 Route::get('/epps/{epp}', [EppController::class, 'show'])->name('epps.show');
