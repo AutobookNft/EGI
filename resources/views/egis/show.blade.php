@@ -700,6 +700,23 @@
             </div>
         </div>
 
+        {{-- Component Utility Manager (solo per creator prima della pubblicazione) --}}
+        @auth
+            @if(auth()->id() === $egi->collection->user_id && $egi->collection->status !== 'published')
+                <div class="max-w-6xl mx-auto">
+                    <x-utility.utility-manager :egi="$egi" />
+                </div>
+            @endif
+        @endauth
+
+        {{-- Se utility presente e collection pubblicata, mostra solo in lettura --}}
+        @if($egi->utility && $egi->collection->status === 'published')
+            <div class="max-w-6xl mx-auto">
+                {{-- TODO: Creare component utility-display per visualizzazione read-only --}}
+                {{-- <x-utility.utility-display :utility="$egi->utility" /> --}}
+            </div>
+        @endif
+
         {{-- Delete Confirmation Modal --}}
         @if($canDeleteEgi)
         <div id="delete-modal"
