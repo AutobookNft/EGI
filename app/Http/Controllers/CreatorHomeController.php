@@ -96,7 +96,16 @@ class CreatorHomeController extends Controller {
             })->count(),
         ];
 
-        return view('creator.portfolio', compact('creator', 'egis', 'stats', 'query', 'collection_filter', 'sort', 'view'));
+        // Statistiche avanzate per i widget usando PaymentDistribution
+        $advancedStats = null;
+        try {
+            $advancedStats = \App\Models\PaymentDistribution::getCreatorPortfolioStats($creator->id);
+        } catch (\Exception $e) {
+            // Fallback silenzioso se non ci sono dati PaymentDistribution
+            \Log::warning("Could not load advanced stats for creator {$creator->id}: " . $e->getMessage());
+        }
+
+        return view('creator.portfolio', compact('creator', 'egis', 'stats', 'advancedStats', 'query', 'collection_filter', 'sort', 'view'));
     }
     /**
      * @Oracode Method: Display Creator Home Page
