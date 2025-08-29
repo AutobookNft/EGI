@@ -46,7 +46,7 @@
                 <div class="grid min-h-screen grid-cols-1 lg:grid-cols-12">
 
                     {{-- Left: Artwork Area (Ridotta da 8-9 a 6-7) --}}
-                    <div class="relative flex items-center justify-center p-4 lg:col-span-6 xl:col-span-7 lg:p-8">
+                    <div class="relative flex items-center justify-center p-2 lg:col-span-6 xl:col-span-7 lg:p-8">
 
                         {{-- Artwork Container --}}
                         <div class="relative w-full max-w-5xl">
@@ -349,8 +349,7 @@
                                             <input type="hidden" name="is_published" value="0">
                                             <input type="checkbox" id="is_published" name="is_published" value="1" {{
                                                 old('is_published', $egi->is_published) ? 'checked' : '' }}
-                                            class="w-4 h-4 rounded text-emerald-600 bg-black/30 border-emerald-700/50
-                                            focus:ring-emerald-500 focus:ring-2">
+                                            class="w-4 h-4 rounded text-emerald-600 bg-black/30 border-emerald-700/50 focus:ring-emerald-500 focus:ring-2">
                                             <span class="ml-3 text-sm font-medium text-emerald-300">
                                                 {{ __('egi.crud.is_published') }}
                                             </span>
