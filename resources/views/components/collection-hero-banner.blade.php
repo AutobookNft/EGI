@@ -7,7 +7,7 @@
 @php
 $instanceId = $attributes->get('id', $componentElementId ?: 'chb_'.uniqid());
 $logo = "0.jpg";
-$defaultBannerUrl = asset("images/default/random_background/$logo");
+$defaultBannerUrl = asset(config("app.welcome_background"));
 
 if (is_array($collections)) {
 $collections = collect($collections);
@@ -18,7 +18,7 @@ $firstCollection = null;
 if ($hasCollections) {
     foreach ($collections as $collection) {
         $hasMedia = false;
-        
+
         // Controlla Spatie Media
         if (method_exists($collection, 'getFirstMediaUrl')) {
             $bannerUrl = $collection->getFirstMediaUrl('head', 'banner');
@@ -26,18 +26,18 @@ if ($hasCollections) {
                 $hasMedia = true;
             }
         }
-        
+
         // Controlla image_banner tradizionale
         if (!$hasMedia && !empty($collection->image_banner)) {
             $hasMedia = true;
         }
-        
+
         if ($hasMedia) {
             $firstCollection = $collection;
             break;
         }
     }
-    
+
     // Se nessuna collezione ha immagini, usa la prima come fallback
     if (!$firstCollection) {
         $firstCollection = $collections->first();
@@ -226,9 +226,9 @@ return [
         <div class="flex flex-col items-center justify-center w-full gap-4 sm:gap-6">
             {{-- Statistiche Hero Banner per la collezione corrente --}}
             @if($hasCollections && $firstCollection)
-            <x-hero-banner-stats :collection="$firstCollection" />
+            <x-hero-banner-stats :collection="$firstCollection" :carousel-instance-id="$instanceId" />
             @else
-            <x-hero-banner-stats />
+            <x-hero-banner-stats :carousel-instance-id="$instanceId" />
             @endif
 
             <!-- Pulsanti di navigazione (prev/next) - COMMENTATI -->
@@ -396,8 +396,8 @@ return [
 
             // Aggiorna statistiche per la collezione corrente
             if (currentCollection.stats) {
-                // Cerca il container delle statistiche (ID dinamico dal componente)
-                const statsContainer = document.querySelector('[id^="heroBannerStatsContainer_"]');
+                // Cerca il container delle statistiche con l'ID specifico del carousel
+                const statsContainer = document.getElementById('heroBannerStatsContainer_' + componentId + '_stats');
                 if (statsContainer) {
                     const volumeElement = statsContainer.querySelector('[id^="statVolume_"]');
                     const eppElement = statsContainer.querySelector('[id^="statEpp_"]');

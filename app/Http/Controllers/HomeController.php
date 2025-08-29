@@ -92,7 +92,7 @@ class HomeController extends Controller {
             ->get();
     }
 
-        /**
+    /**
      * 🎯 HERO CAROUSEL: Ottiene le collezioni per il carousel principale
      *
      * Algoritmo di selezione avanzato:

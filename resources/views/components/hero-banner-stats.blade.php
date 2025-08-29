@@ -1,4 +1,4 @@
-@props(['collection' => null])
+@props(['collection' => null, 'carouselInstanceId' => null])
 
 @php
 use App\Models\PaymentDistribution;
@@ -44,8 +44,8 @@ if ($collection) {
     })->count();
 }
 
-// ID univoco per evitare conflitti
-$instanceId = uniqid();
+// ID univoco per evitare conflitti - usa carousel instance ID se fornito
+$instanceId = $carouselInstanceId ? $carouselInstanceId . '_stats' : uniqid();
 @endphp
 
 {{-- Statistiche Hero Banner - Per la collezione corrente --}}

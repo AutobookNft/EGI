@@ -130,7 +130,7 @@ return [
     'logo_04' => env('LOGO_04'),
     'favicon' => env('FAVICON'),
     'default_cover' => env('DEFAULT_COVER'),
-    'welcome_background' => env('WELCOME_BACKGROUD'),
+    'welcome_background' => env('WELCOME_BACKGROUND'),
 
     'platform_slogan' => env('PLATFORM_SLOGAN', 'pazzia'),
 
