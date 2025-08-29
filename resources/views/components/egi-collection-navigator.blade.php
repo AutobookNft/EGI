@@ -64,7 +64,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const track = document.getElementById('carousel-track');
-    
+
     if (!track) return;
 
     // Auto-scroll to current item on load

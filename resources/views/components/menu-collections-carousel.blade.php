@@ -14,7 +14,7 @@
             <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ __('collection.my_collections') }}</h4>
         </div>
 
-        @if(count($collections) > 1)
+        {{-- @if(count($collections) > 1)
             <div class="flex space-x-1">
                 <button type="button" class="p-1 text-gray-400 transition-colors carousel-prev-menu hover:text-purple-600">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -27,13 +27,14 @@
                     </svg>
                 </button>
             </div>
-        @endif
+        @endif --}}
     </div>
 
     <div class="relative menu-collections-carousel">
         <div class="flex gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-hide">
             @forelse($collections as $collection)
                 <div class="flex-shrink-0 w-full snap-start collection-slide">
+
                     <a href="{{ route('home.collections.show', $collection->id) }}"
                        class="block p-3 transition-all duration-200 rounded-lg bg-white/50 dark:bg-black/20 hover:bg-white/70 dark:hover:bg-black/30 hover:scale-105 group">
 
@@ -52,6 +53,7 @@
                                     </div>
                                 @endif
                             </div>
+
 
                             <!-- Collection Info -->
                             <div class="flex-1 min-w-0">
@@ -95,17 +97,16 @@
                                             </span>
                                         @endif
                                     </div>
-
-                                    @if($collection->status)
-                                        <span class="px-2 py-0.5 text-xs font-medium rounded-full {{
-                                            $collection->status === 'active' ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300' :
-                                            ($collection->status === 'local' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300' :
-                                            'bg-gray-200 text-gray-900 dark:bg-gray-600 dark:text-gray-100')
-                                        }}">
-                                            {{ __('collection.status.' . $collection->status) }}
-                                        </span>
-                                    @endif
                                 </div>
+                                @if($collection->type)
+                                    <span class="px-2 py-0.5 text-xs font-medium rounded-full mb-2 {{
+                                        $collection->status === 'active' ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300' :
+                                        ($collection->status === 'local' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300' :
+                                        'bg-gray-200 text-gray-900 dark:bg-gray-600 dark:text-gray-100')
+                                    }}">
+                                        {{ __('collection.type_' . $collection->type) }}
+                                    </span>
+                                @endif
                             </div>                            <!-- Arrow indicator -->
                             <div class="flex-shrink-0">
                                 <svg class="w-4 h-4 text-gray-400 transition-transform duration-200 group-hover:text-purple-600 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
