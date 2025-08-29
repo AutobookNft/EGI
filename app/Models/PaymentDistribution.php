@@ -476,4 +476,358 @@ class PaymentDistribution extends Model {
             'top_epp_generators' => static::getTopUsersForEPP(5),
         ];
     }
+
+    // ================================
+    // 🎨 CREATOR-SPECIFIC STATISTICS
+    // ================================
+
+    /**
+     * Get total earnings for a specific creator
+     * @param int $creatorId
+     * @return array
+     */
+    public static function getCreatorEarnings(int $creatorId): array {
+        $earnings = static::join('reservations', 'payment_distributions.reservation_id', '=', 'reservations.id')
+            ->join('egis', 'reservations.egi_id', '=', 'egis.id')
+            ->join('collections', 'egis.collection_id', '=', 'collections.id')
+            ->where('collections.creator_id', $creatorId)
+            ->where('payment_distributions.user_type', UserTypeEnum::CREATOR)
+            ->where('reservations.sub_status', 'highest')
+            ->selectRaw('
+                COUNT(DISTINCT payment_distributions.id) as total_distributions,
+                SUM(payment_distributions.amount_eur) as total_earnings,
+                AVG(payment_distributions.amount_eur) as avg_earnings_per_distribution,
+                MIN(payment_distributions.amount_eur) as min_earnings,
+                MAX(payment_distributions.amount_eur) as max_earnings,
+                COUNT(DISTINCT reservations.id) as total_sales,
+                COUNT(DISTINCT egis.collection_id) as collections_with_sales
+            ')
+            ->first();
+
+        return [
+            'total_earnings' => round($earnings->total_earnings ?? 0, 2),
+            'total_distributions' => $earnings->total_distributions ?? 0,
+            'total_sales' => $earnings->total_sales ?? 0,
+            'avg_earnings_per_distribution' => round($earnings->avg_earnings_per_distribution ?? 0, 2),
+            'avg_earnings_per_sale' => $earnings->total_sales > 0 ? round($earnings->total_earnings / $earnings->total_sales, 2) : 0,
+            'min_earnings' => round($earnings->min_earnings ?? 0, 2),
+            'max_earnings' => round($earnings->max_earnings ?? 0, 2),
+            'collections_with_sales' => $earnings->collections_with_sales ?? 0,
+        ];
+    }
+
+    /**
+     * Get monthly earnings trend for a creator
+     * @param int $creatorId
+     * @param int $months Number of months to retrieve
+     * @return array
+     */
+    public static function getCreatorMonthlyEarnings(int $creatorId, int $months = 12): array {
+        return static::join('reservations', 'payment_distributions.reservation_id', '=', 'reservations.id')
+            ->join('egis', 'reservations.egi_id', '=', 'egis.id')
+            ->join('collections', 'egis.collection_id', '=', 'collections.id')
+            ->where('collections.creator_id', $creatorId)
+            ->where('payment_distributions.user_type', UserTypeEnum::CREATOR)
+            ->where('reservations.sub_status', 'highest')
+            ->where('payment_distributions.created_at', '>=', now()->subMonths($months))
+            ->selectRaw('
+                DATE_FORMAT(payment_distributions.created_at, "%Y-%m") as month,
+                COUNT(payment_distributions.id) as distributions_count,
+                SUM(payment_distributions.amount_eur) as monthly_earnings,
+                AVG(payment_distributions.amount_eur) as avg_earnings,
+                COUNT(DISTINCT reservations.id) as sales_count
+            ')
+            ->groupByRaw('DATE_FORMAT(payment_distributions.created_at, "%Y-%m")')
+            ->orderByRaw('DATE_FORMAT(payment_distributions.created_at, "%Y-%m") DESC')
+            ->limit($months)
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'month' => $item->month,
+                    'distributions_count' => $item->distributions_count,
+                    'monthly_earnings' => round($item->monthly_earnings, 2),
+                    'avg_earnings' => round($item->avg_earnings, 2),
+                    'sales_count' => $item->sales_count,
+                ];
+            })
+            ->toArray();
+    }
+
+    /**
+     * Get earnings performance by collection for a creator
+     * @param int $creatorId
+     * @param int $limit
+     * @return array
+     */
+    public static function getCreatorCollectionPerformance(int $creatorId, int $limit = 10): array {
+        return static::join('reservations', 'payment_distributions.reservation_id', '=', 'reservations.id')
+            ->join('egis', 'reservations.egi_id', '=', 'egis.id')
+            ->join('collections', 'egis.collection_id', '=', 'collections.id')
+            ->where('collections.creator_id', $creatorId)
+            ->where('payment_distributions.user_type', UserTypeEnum::CREATOR)
+            ->where('reservations.sub_status', 'highest')
+            ->selectRaw('
+                collections.id as collection_id,
+                collections.collection_name as collection_name,
+                collections.floor_price as floor_price,
+                COUNT(DISTINCT payment_distributions.id) as distributions_count,
+                SUM(payment_distributions.amount_eur) as total_earnings,
+                AVG(payment_distributions.amount_eur) as avg_earnings,
+                COUNT(DISTINCT reservations.id) as sales_count,
+                COUNT(DISTINCT egis.id) as egis_sold,
+                MAX(payment_distributions.amount_eur) as best_sale
+            ')
+            ->groupBy('collections.id', 'collections.collection_name', 'collections.floor_price')
+            ->orderBy('total_earnings', 'DESC')
+            ->limit($limit)
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'collection_id' => $item->collection_id,
+                    'collection_name' => $item->collection_name,
+                    'floor_price' => round($item->floor_price, 2),
+                    'distributions_count' => $item->distributions_count,
+                    'total_earnings' => round($item->total_earnings, 2),
+                    'avg_earnings' => round($item->avg_earnings, 2),
+                    'sales_count' => $item->sales_count,
+                    'egis_sold' => $item->egis_sold,
+                    'best_sale' => round($item->best_sale, 2),
+                    'conversion_rate' => $item->egis_sold > 0 ? round(($item->sales_count / $item->egis_sold) * 100, 2) : 0,
+                ];
+            })
+            ->toArray();
+    }
+
+    /**
+     * Get creator engagement and impact statistics
+     * @param int $creatorId
+     * @return array
+     */
+    public static function getCreatorEngagementStats(int $creatorId): array {
+        // Total collectors reached (unique buyers)
+        $collectorsReached = static::join('reservations', 'payment_distributions.reservation_id', '=', 'reservations.id')
+            ->join('egis', 'reservations.egi_id', '=', 'egis.id')
+            ->join('collections', 'egis.collection_id', '=', 'collections.id')
+            ->where('collections.creator_id', $creatorId)
+            ->where('reservations.sub_status', 'highest')
+            ->distinct('reservations.user_id')
+            ->count('reservations.user_id');
+
+        // EPP impact generated through creator's works
+        $eppImpact = static::join('reservations', 'payment_distributions.reservation_id', '=', 'reservations.id')
+            ->join('egis', 'reservations.egi_id', '=', 'egis.id')
+            ->join('collections', 'egis.collection_id', '=', 'collections.id')
+            ->where('collections.creator_id', $creatorId)
+            ->where('payment_distributions.user_type', UserTypeEnum::EPP)
+            ->where('reservations.sub_status', 'highest')
+            ->sum('payment_distributions.amount_eur');
+
+        // Total volume generated (all distributions from creator's works)
+        $totalVolumeGenerated = static::join('reservations', 'payment_distributions.reservation_id', '=', 'reservations.id')
+            ->join('egis', 'reservations.egi_id', '=', 'egis.id')
+            ->join('collections', 'egis.collection_id', '=', 'collections.id')
+            ->where('collections.creator_id', $creatorId)
+            ->where('reservations.sub_status', 'highest')
+            ->sum('payment_distributions.amount_eur');
+
+        return [
+            'collectors_reached' => $collectorsReached,
+            'epp_impact_generated' => round($eppImpact, 2),
+            'total_volume_generated' => round($totalVolumeGenerated, 2),
+            'avg_impact_per_collector' => $collectorsReached > 0 ? round($totalVolumeGenerated / $collectorsReached, 2) : 0,
+            'epp_percentage' => $totalVolumeGenerated > 0 ? round(($eppImpact / $totalVolumeGenerated) * 100, 2) : 0,
+        ];
+    }
+
+    /**
+     * Get creator distribution status breakdown
+     * @param int $creatorId
+     * @return array
+     */
+    public static function getCreatorDistributionStatus(int $creatorId): array {
+        return static::join('reservations', 'payment_distributions.reservation_id', '=', 'reservations.id')
+            ->join('egis', 'reservations.egi_id', '=', 'egis.id')
+            ->join('collections', 'egis.collection_id', '=', 'collections.id')
+            ->where('collections.creator_id', $creatorId)
+            ->where('payment_distributions.user_type', UserTypeEnum::CREATOR)
+            ->selectRaw('
+                payment_distributions.distribution_status,
+                COUNT(*) as count,
+                SUM(payment_distributions.amount_eur) as total_amount,
+                AVG(payment_distributions.amount_eur) as avg_amount
+            ')
+            ->groupBy('payment_distributions.distribution_status')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'status' => $item->distribution_status->value,
+                    'count' => $item->count,
+                    'total_amount' => round($item->total_amount, 2),
+                    'avg_amount' => round($item->avg_amount, 2),
+                ];
+            })
+            ->toArray();
+    }
+
+    /**
+     * Get comprehensive creator portfolio statistics
+     * @param int $creatorId
+     * @return array
+     */
+    public static function getCreatorPortfolioStats(int $creatorId): array {
+        return [
+            'earnings' => static::getCreatorEarnings($creatorId),
+            'monthly_trend' => static::getCreatorMonthlyEarnings($creatorId, 6),
+            'collection_performance' => static::getCreatorCollectionPerformance($creatorId, 5),
+            'engagement' => static::getCreatorEngagementStats($creatorId),
+            'distribution_status' => static::getCreatorDistributionStatus($creatorId),
+        ];
+    }
+
+    // ================================
+    // 🛒 COLLECTOR-SPECIFIC STATISTICS
+    // ================================
+
+    /**
+     * Get total spending/investment for a specific collector
+     * @param int $collectorId
+     * @return array
+     */
+    public static function getCollectorSpending(int $collectorId): array {
+        $spending = static::join('reservations', 'payment_distributions.reservation_id', '=', 'reservations.id')
+            ->where('reservations.user_id', $collectorId)
+            ->where('payment_distributions.user_type', UserTypeEnum::COLLECTOR)
+            ->where('reservations.sub_status', 'highest')
+            ->selectRaw('
+                COUNT(DISTINCT payment_distributions.id) as total_distributions,
+                SUM(payment_distributions.amount_eur) as total_spent,
+                AVG(payment_distributions.amount_eur) as avg_spent_per_distribution,
+                COUNT(DISTINCT reservations.id) as total_purchases,
+                COUNT(DISTINCT payment_distributions.collection_id) as collections_purchased_from
+            ')
+            ->first();
+
+        return [
+            'total_spent' => round($spending->total_spent ?? 0, 2),
+            'total_distributions' => $spending->total_distributions ?? 0,
+            'total_purchases' => $spending->total_purchases ?? 0,
+            'avg_spent_per_distribution' => round($spending->avg_spent_per_distribution ?? 0, 2),
+            'avg_spent_per_purchase' => $spending->total_purchases > 0 ? round($spending->total_spent / $spending->total_purchases, 2) : 0,
+            'collections_purchased_from' => $spending->collections_purchased_from ?? 0,
+        ];
+    }
+
+    /**
+     * Get EPP impact contributed by a specific collector
+     * @param int $collectorId
+     * @return array
+     */
+    public static function getCollectorEPPImpact(int $collectorId): array {
+        $eppContributions = static::join('reservations', 'payment_distributions.reservation_id', '=', 'reservations.id')
+            ->where('reservations.user_id', $collectorId)
+            ->where('payment_distributions.user_type', UserTypeEnum::EPP)
+            ->where('reservations.sub_status', 'highest')
+            ->selectRaw('
+                COUNT(*) as epp_contributions,
+                SUM(payment_distributions.amount_eur) as total_epp_impact,
+                AVG(payment_distributions.amount_eur) as avg_epp_per_purchase
+            ')
+            ->first();
+
+        return [
+            'epp_contributions' => $eppContributions->epp_contributions ?? 0,
+            'total_epp_impact' => round($eppContributions->total_epp_impact ?? 0, 2),
+            'avg_epp_per_purchase' => round($eppContributions->avg_epp_per_purchase ?? 0, 2),
+        ];
+    }
+
+    // ================================
+    // 📊 GENERAL USER STATISTICS
+    // ================================
+
+    /**
+     * Get user statistics regardless of user type
+     * @param int $userId
+     * @param UserTypeEnum|null $filterUserType Optional filter by specific distribution type
+     * @return array
+     */
+    public static function getUserDistributionStats(int $userId, ?UserTypeEnum $filterUserType = null): array {
+        $query = static::join('reservations', 'payment_distributions.reservation_id', '=', 'reservations.id')
+            ->where('reservations.user_id', $userId)
+            ->where('reservations.sub_status', 'highest');
+
+        if ($filterUserType) {
+            $query->where('payment_distributions.user_type', $filterUserType);
+        }
+
+        $stats = $query->selectRaw('
+                payment_distributions.user_type,
+                COUNT(*) as distributions_count,
+                SUM(payment_distributions.amount_eur) as total_amount,
+                AVG(payment_distributions.amount_eur) as avg_amount,
+                MIN(payment_distributions.amount_eur) as min_amount,
+                MAX(payment_distributions.amount_eur) as max_amount
+            ')
+            ->groupBy('payment_distributions.user_type')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'user_type' => $item->user_type->value,
+                    'distributions_count' => $item->distributions_count,
+                    'total_amount' => round($item->total_amount, 2),
+                    'avg_amount' => round($item->avg_amount, 2),
+                    'min_amount' => round($item->min_amount, 2),
+                    'max_amount' => round($item->max_amount, 2),
+                ];
+            })
+            ->keyBy('user_type')
+            ->toArray();
+
+        return $stats;
+    }
+
+    /**
+     * Get comprehensive user portfolio statistics
+     * @param int $userId
+     * @param string $userRole ('creator', 'collector', or 'any')
+     * @return array
+     */
+    public static function getUserPortfolioStats(int $userId, string $userRole = 'any'): array {
+        $baseStats = [
+            'user_id' => $userId,
+            'user_role' => $userRole,
+            'general_stats' => static::getUserDistributionStats($userId),
+        ];
+
+        switch ($userRole) {
+            case 'creator':
+                return array_merge($baseStats, [
+                    'creator_stats' => static::getCreatorPortfolioStats($userId),
+                ]);
+
+            case 'collector':
+                return array_merge($baseStats, [
+                    'collector_stats' => [
+                        'spending' => static::getCollectorSpending($userId),
+                        'epp_impact' => static::getCollectorEPPImpact($userId),
+                    ],
+                ]);
+
+            default:
+                // For users with multiple roles or undefined roles
+                return array_merge($baseStats, [
+                    'collector_stats' => [
+                        'spending' => static::getCollectorSpending($userId),
+                        'epp_impact' => static::getCollectorEPPImpact($userId),
+                    ],
+                    // Only add creator stats if user has creator distributions
+                    'has_creator_activity' => static::join('reservations', 'payment_distributions.reservation_id', '=', 'reservations.id')
+                        ->join('egis', 'reservations.egi_id', '=', 'egis.id')
+                        ->join('collections', 'egis.collection_id', '=', 'collections.id')
+                        ->where('collections.creator_id', $userId)
+                        ->where('payment_distributions.user_type', UserTypeEnum::CREATOR)
+                        ->exists(),
+                ]);
+        }
+    }
 }

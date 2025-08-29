@@ -70,7 +70,7 @@ $canCreateEgi = $user && $user->can('create_egi');
                     @if (Laravel\Jetstream\Jetstream::managesProfilePhotos())
                         @if(Auth::check() && Auth::user()->id)
                             <a href="{{ route('creator.home', Auth::user()->id) }}" class="block transition-transform duration-300 hover:scale-105">
-                                <img class="object-cover rounded-full size-12 ring-2 ring-white/30 hover:ring-white/60 transition-all duration-300"
+                                <img class="object-cover transition-all duration-300 rounded-full size-12 ring-2 ring-white/30 hover:ring-white/60"
                                     src="{{ Auth::user()?->profile_photo_url ?? null }}"
                                     alt="{{ Auth::user()?->name ?? '' }}" />
                             </a>
@@ -82,7 +82,7 @@ $canCreateEgi = $user && $user->can('create_egi');
                     @else
                         @if(Auth::check() && Auth::user()->id)
                             <a href="{{ route('creator.home', Auth::user()->id) }}" class="block transition-transform duration-300 hover:scale-105">
-                                <div class="flex items-center justify-center w-12 h-12 text-lg font-bold text-white rounded-full bg-white/20 hover:bg-white/30 transition-all duration-300">
+                                <div class="flex items-center justify-center w-12 h-12 text-lg font-bold text-white transition-all duration-300 rounded-full bg-white/20 hover:bg-white/30">
                                     {{ substr(Auth::user()?->name ?? 'U', 0, 1) }}
                                 </div>
                             </a>
