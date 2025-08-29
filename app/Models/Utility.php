@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 /**
  * 📜 Oracode Eloquent Model: Utility
@@ -120,6 +121,32 @@ class Utility extends Model implements HasMedia {
         $this->addMediaCollection('utility_documents')
             ->acceptsMimeTypes(['application/pdf'])
             ->useDisk('public');
+    }
+
+    /**
+     * Register media conversions for image optimization
+     */
+    public function registerMediaConversions(\Spatie\MediaLibrary\MediaCollections\Models\Media $media = null): void {
+        $this->addMediaConversion('thumb')
+            ->width(300)
+            ->height(300)
+            ->sharpen(10)
+            ->optimize()
+            ->performOnCollections('utility_gallery');
+
+        $this->addMediaConversion('medium')
+            ->width(600)
+            ->height(600)
+            ->sharpen(10)
+            ->optimize()
+            ->performOnCollections('utility_gallery');
+
+        $this->addMediaConversion('large')
+            ->width(1200)
+            ->height(1200)
+            ->sharpen(10)
+            ->optimize()
+            ->performOnCollections('utility_gallery');
     }
 
     /**
