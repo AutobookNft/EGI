@@ -426,11 +426,11 @@ return [
                 console.log('Collection:', currentCollection.name, '(ID:', currentCollection.id, ')');
                 console.log('Stats received:', currentCollection.stats);
                 console.log('Debug info:', currentCollection.debug_info);
-                
+
                 // Cerca il container delle statistiche con l'ID specifico del carousel
                 const statsContainer = document.getElementById('heroBannerStatsContainer_' + componentId + '_stats');
                 console.log('Stats container:', statsContainer ? 'FOUND' : 'NOT FOUND', 'ID:', 'heroBannerStatsContainer_' + componentId + '_stats');
-                
+
                 if (statsContainer) {
                     const volumeElement = statsContainer.querySelector('[id^="statVolume_"]');
                     const eppElement = statsContainer.querySelector('[id^="statEpp_"]');

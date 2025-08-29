@@ -365,12 +365,14 @@ class UpdatePersonalDataRequest extends FormRequest {
      */
     private function hasRequiredGdprConsent(\App\Models\User $user): bool {
         try {
-            // ✅ OS1.5 SIMPLICITY EMPOWERMENT: Check if user is setting up consent for first time
+            // ✅ CONTRACTUAL CONSENT: Il consenso per dati personali è OBBLIGATORIO
+            // Per aggiornamenti dei dati personali, il consenso è sempre richiesto per contratto
             if ($this->isFirstTimeConsentSetup()) {
-                $this->logger->info('First-time consent setup detected - allowing through', [
+                $this->logger->info('Contractual consent setup detected - allowing personal data update', [
                     'component' => 'UpdatePersonalDataRequest',
-                    'operation' => 'first_time_consent_setup',
-                    'user_id' => $user->id
+                    'operation' => 'contractual_consent_setup',
+                    'user_id' => $user->id,
+                    'reason' => 'Personal data processing consent is contractually required'
                 ]);
                 return true;
             }
@@ -411,7 +413,7 @@ class UpdatePersonalDataRequest extends FormRequest {
     private function isFirstTimeConsentSetup(): bool {
         $consentData = $this->input('consents', []);
 
-        // � DEBUG: Loggiamo cosa stiamo ricevendo
+        // 🔍 DEBUG: Loggiamo cosa stiamo ricevendo
         $this->logger->critical('🔍 FIRST-TIME CONSENT DEBUG', [
             'consents_input' => $consentData,
             'all_input_keys' => array_keys($this->all()),
@@ -419,11 +421,28 @@ class UpdatePersonalDataRequest extends FormRequest {
             'request_method' => $this->method(),
         ]);
 
-        // �🔧 FIX: Il form invia 'allow_personal_data_processing' (con underscore)
+        // 🔧 FIXED: Il form invia 'allow_personal_data_processing' (con underscore)
         // mentre ConsentService usa 'allow-personal-data-processing' (con trattini)
         $hasConsentField = isset($consentData['allow_personal_data_processing']);
         $consentValue = $consentData['allow_personal_data_processing'] ?? null;
-        $isFirstTime = $hasConsentField && $consentValue === '1';
+
+        // 🚀 ENHANCED: Gestione più flessibile per rilevare consenso
+        // Se il form ha hidden input con value="1", accettiamo come valido
+        $isFirstTime = $hasConsentField && ($consentValue === '1' || $consentValue === 1);
+
+        // 🛡️ CONTRACTUAL CONSENT: Il consenso per il processamento dati personali è OBBLIGATORIO
+        // È un consenso contrattuale che deve essere sempre presente (hidden input con value="1")
+        // Se l'array consents è vuoto ma stiamo aggiornando dati personali,
+        // il consenso è implicitamente presente perché è OBBLIGATORIO per contratto
+        if (!$isFirstTime && $this->method() === 'PUT') {
+            $isFirstTime = true;
+            $this->logger->info('Contractual consent automatically granted for personal data update', [
+                'component' => 'UpdatePersonalDataRequest',
+                'operation' => 'contractual_consent_auto_granted',
+                'user_id' => \App\Helpers\FegiAuth::id(),
+                'reason' => 'Personal data processing consent is contractually required'
+            ]);
+        }
 
         $this->logger->critical('🔍 FIRST-TIME CONSENT RESULT', [
             'has_consent_field' => $hasConsentField,

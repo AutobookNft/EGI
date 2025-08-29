@@ -27,26 +27,11 @@ Dal 19 agosto 2025 abbiamo implementato un sistema di commit strutturato che DEV
 -   `[DOC]` = documentazione aggiunta o aggiornata
 -   `[TEST]` = aggiunta o modifica di test
 -   `[CHORE]` = attività di manutenzione o setup (config, dipendenze, script, ecc.)
+-   Aggiunto conteggio e percentuali per ogni categoria
+-   Creata sezione statistiche TAG con tipo più frequente
+-   Aggiunti suggerimenti intelligenti basati sulla distribuzione TAG
 
-### Esempi corretti:
-
-```bash
-[FIX] Risolto errore getUrl() su null nell'header
-
-- Aggiunto controllo $user esistenza prima di chiamare profile_photo_url
-- Sostituito getCurrentProfileImage()->getUrl() con accessor automatico
-- Rimosso div spurio che causava disallineamento navbar
-- Gestione robusta per utenti non autenticati
-```
-
-```bash
-[FEAT] Aggiunta analisi commit per categorie TAG
-
-- Implementato parsing messaggi commit per riconoscere TAG
-- Aggiunto conteggio e percentuali per ogni categoria
-- Creata sezione statistiche TAG con tipo più frequente
-- Aggiunti suggerimenti intelligenti basati sulla distribuzione TAG
-```
+````
 
 ## 📊 SISTEMA DI MONITORAGGIO PRODUTTIVITÀ
 
@@ -66,7 +51,7 @@ Abbiamo creato degli script bash per monitorare:
 
 # Analisi tempo di coding
 ./bash_files/coding-time-tracker.sh 2025-08-19
-```
+````
 
 ## ⏱️ TIME TRACKING E AI ASSISTANCE
 
