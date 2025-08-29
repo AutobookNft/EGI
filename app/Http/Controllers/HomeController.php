@@ -47,7 +47,7 @@ class HomeController extends Controller {
     public function index(): View {
         // Recupera dati per la homepage
         $randomEgis = $this->getRandomEgis();
-        $featuredCollections = $this->getFeaturedCollections();
+        $featuredCollections = $this->getRandomCollections();
         $latestCollections = $this->getLatestCollections($featuredCollections->pluck('id'));
         $highlightedEpps = $this->getHighlightedEpps();
         $featuredCreators = $this->getFeaturedCreators(); // Nuovo: recupera i Creator
@@ -92,10 +92,10 @@ class HomeController extends Controller {
             ->get();
     }
 
-    /**
-     * Ottiene collezioni in evidenza basate su metriche di impatto e override manuale
+        /**
+     * 🎯 HERO CAROUSEL: Ottiene le collezioni per il carousel principale
      *
-     * 🎯 Implementa algoritmo di selezione intelligente:
+     * Algoritmo di selezione avanzato:
      * - Filtra per featured_in_guest = true e is_published = true
      * - Priorità alle posizioni forzate (featured_position 1-10)
      * - Ordina le restanti per impatto stimato (quota EPP 20% delle prenotazioni più alte)
@@ -109,6 +109,24 @@ class HomeController extends Controller {
         $featuredService = app(\App\Services\FeaturedCollectionService::class);
 
         return $featuredService->getFeaturedCollections(10);
+    }
+
+    /**
+     * 🎲 RANDOM COLLECTIONS: Ottiene collezioni casuali per test/sviluppo
+     *
+     * Algoritmo di selezione semplice:
+     * - Filtra solo per is_published = true (NESSUN filtro featured_in_guest)
+     * - Selezione completamente casuale
+     * - Include collezioni con media Spatie per test visualizzazione
+     *
+     * @privacy-safe Utilizza solo collezioni pubblicate pubblicamente
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    private function getRandomCollections() {
+        // Utilizziamo il service dedicato per la selezione random
+        $featuredService = app(\App\Services\FeaturedCollectionService::class);
+
+        return $featuredService->getRandomCollections(10);
     }
 
     /**

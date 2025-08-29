@@ -91,6 +91,54 @@ class FeaturedCollectionService {
     }
 
     /**
+     * Ottiene Collection casuali per il carousel guest (SENZA filtro featured_in_guest)
+     *
+     * 🎯 Selezione completamente random per sviluppo e test:
+     * 1. Filtra solo per is_published = true
+     * 2. Ordinamento casuale
+     * 3. Include tutte le Collection, anche quelle con media Spatie
+     *
+     * @param int $limit Numero massimo di Collection da restituire
+     * @return IlluminateCollection Collection di Collection casuali
+     */
+    public function getRandomCollections(int $limit = self::MAX_CAROUSEL_ITEMS): IlluminateCollection {
+        try {
+            $collections = Collection::where('is_published', true)
+                ->with(['creator', 'media']) // Include anche media per verificare immagini
+                ->withCount('egis') // Conteggio egis
+                ->inRandomOrder() // Ordinamento casuale
+                ->take($limit)
+                ->get();
+
+            // Log per debugging in ambiente di sviluppo
+            if (config('app.debug')) {
+                Log::info('Random Collections retrieved', [
+                    'count' => $collections->count(),
+                    'collections' => $collections->map(function ($collection) {
+                        return [
+                            'id' => $collection->id,
+                            'name' => $collection->collection_name,
+                            'egis_count' => $collection->egis_count,
+                            'has_media' => $collection->media->count() > 0,
+                            'has_banner' => !empty($collection->image_banner),
+                        ];
+                    })->toArray()
+                ]);
+            }
+
+            return $collections;
+        } catch (\Exception $e) {
+            Log::error('Error retrieving random collections', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            // Fallback: usa il metodo getFallbackFeaturedCollections ma senza filtro featured
+            return $this->getFallbackRandomCollections($limit);
+        }
+    }
+
+    /**
      * Calcola l'impatto stimato per una Collection specifica
      *
      * 🎯 Utilizza la stessa logica del carousel ma per una singola Collection
@@ -218,6 +266,21 @@ class FeaturedCollectionService {
             ->with(['creator'])
             ->withCount('egis')
             ->orderByRaw('CASE WHEN featured_position IS NOT NULL THEN featured_position ELSE 999 END ASC')
+            ->orderBy('updated_at', 'desc')
+            ->take($limit)
+            ->get();
+    }
+
+    /**
+     * Metodo di fallback per collezioni random nel caso di errori
+     *
+     * @param int $limit
+     * @return IlluminateCollection
+     */
+    private function getFallbackRandomCollections(int $limit): IlluminateCollection {
+        return Collection::where('is_published', true)
+            ->with(['creator', 'media'])
+            ->withCount('egis')
             ->orderBy('updated_at', 'desc')
             ->take($limit)
             ->get();
