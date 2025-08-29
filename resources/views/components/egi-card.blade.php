@@ -505,6 +505,87 @@ $isCreator = auth()->check() && auth()->id() === $creatorId;
             @endif
         </div>
     </div>
+{{-- Utility Images Carousel --}}
+@if($egi->utility && $egi->utility->getMedia('utility_gallery')->count() > 0)
+<div class="px-2 pb-2 border-t border-white/5">
+    <!-- Container con larghezza massima per forzare overflow -->
+    <div class="relative w-full" style="max-width: 280px;">
+        <!-- Scrollable Container -->
+        <div class="flex gap-2 py-1 overflow-x-auto utility-scroll-container scrollbar-hide"
+             style="scrollbar-width: none; -ms-overflow-style: none; -webkit-overflow-scrolling: touch;">
+            @foreach($egi->utility->getMedia('utility_gallery') as $index => $media)
+            <div class="flex-shrink-0 w-12 h-12 overflow-hidden transition-all duration-200 rounded-lg cursor-pointer hover:scale-105 hover:shadow-lg hover:ring-2 hover:ring-white/50"
+                 onclick="openUtilityImageModal('{{ $media->getUrl('large') }}', '{{ $egi->utility->title }}', {{ $index }})">
+                <img src="{{ $media->getUrl('thumb') }}" 
+                     alt="{{ $egi->utility->title }} - Image {{ $index + 1 }}"
+                     class="object-cover w-full h-full transition-opacity duration-200 opacity-80 hover:opacity-100"
+                     loading="lazy">
+            </div>
+            @endforeach
+        </div>
+    </div>
+
+    @if($egi->utility->getMedia('utility_gallery')->count() > 5)
+    <div class="mt-1 text-center">
+        <span class="text-[10px] text-gray-400">
+            Scorri per {{ $egi->utility->getMedia('utility_gallery')->count() }} immagini →
+        </span>
+    </div>
+    @endif
+</div>
+
+<style>
+.scrollbar-hide {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+
+/* Forza lo scroll anche su desktop */
+.utility-scroll-container {
+    overflow-x: scroll !important;
+    cursor: grab;
+}
+
+.utility-scroll-container:active {
+    cursor: grabbing;
+}
+</style>
+
+<script>
+// Abilita drag scroll su desktop
+document.querySelectorAll('.utility-scroll-container').forEach(container => {
+    let isDown = false;
+    let startX;
+    let scrollLeft;
+
+    container.addEventListener('mousedown', (e) => {
+        isDown = true;
+        startX = e.pageX - container.offsetLeft;
+        scrollLeft = container.scrollLeft;
+    });
+
+    container.addEventListener('mouseleave', () => {
+        isDown = false;
+    });
+
+    container.addEventListener('mouseup', () => {
+        isDown = false;
+    });
+
+    container.addEventListener('mousemove', (e) => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - container.offsetLeft;
+        const walk = (x - startX) * 2;
+        container.scrollLeft = scrollLeft - walk;
+    });
+});
+</script>
+@endif
+
 
     {{-- 🔥 Reserve/Outbid Button - MANTIENE LA CLASSE reserve-button PER TYPESCRIPT --}}
     {{-- @if(!$isCreator && !$hideReserveButton && $egi->price && $egi->price > 0)
@@ -566,3 +647,13 @@ $isCreator = auth()->check() && auth()->id() === $creatorId;
     </div>
     @endif
 </article>
+
+<style>
+.scrollbar-hide {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+</style>

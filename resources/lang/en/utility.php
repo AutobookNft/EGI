@@ -72,6 +72,12 @@ return [
     ],
 
     // Escrow
+    'escrow_tiers' => [
+        'immediate' => 'Immediate Payment',
+        'standard' => 'Standard Escrow',
+        'premium' => 'Premium Escrow'
+    ],
+
     'escrow' => [
         'immediate' => [
             'label' => 'Immediate Payment',
@@ -97,7 +103,9 @@ return [
         'description' => 'Add photos of the object from various angles, important details, authenticity certificates, etc. (Max 10 images)',
         'upload_prompt' => 'Click to upload or drag images here',
         'current_images' => 'Current Images:',
-        'remove_image' => 'Remove'
+        'remove_image' => 'Remove',
+        'images' => 'images',
+        'no_images' => 'No images available'
     ],
 
     // Validation errors

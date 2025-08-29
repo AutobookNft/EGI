@@ -72,6 +72,12 @@ return [
     ],
 
     // Escrow
+    'escrow_tiers' => [
+        'immediate' => 'Pagamento Immediato',
+        'standard' => 'Escrow Standard',
+        'premium' => 'Escrow Premium'
+    ],
+
     'escrow' => [
         'immediate' => [
             'label' => 'Pagamento Immediato',
@@ -97,7 +103,9 @@ return [
         'description' => 'Aggiungi foto dell\'oggetto da vari angoli, dettagli importanti, certificati di autenticità, etc. (Max 10 immagini)',
         'upload_prompt' => 'Clicca per caricare o trascina le immagini qui',
         'current_images' => 'Immagini Attuali:',
-        'remove_image' => 'Rimuovi'
+        'remove_image' => 'Rimuovi',
+        'images' => 'immagini',
+        'no_images' => 'Nessuna immagine disponibile'
     ],
 
     // Validation errors

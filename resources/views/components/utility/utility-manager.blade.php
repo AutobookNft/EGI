@@ -272,27 +272,32 @@
         {{-- Upload Media Gallery --}}
         <div id="utility-media-section"
              style="display: {{ $utility ? 'block' : 'none' }}"
-             class="bg-gray-50 p-4 rounded-lg">
+             class="bg-gray-800/30 p-4 rounded-lg">
 
-            <h4 class="font-semibold text-gray-800 mb-4">
+            <h4 class="font-semibold text-white mb-4">
                 <span class="mr-2">📸</span>
                 {{ __('utility.media.title') }}
             </h4>
 
-            <p class="text-sm text-gray-600 mb-4">
+            <p class="text-sm text-gray-400 mb-4">
                 {{ __('utility.media.description') }}
             </p>
 
             {{-- Drag & Drop Area --}}
-            <div class="upload-area border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+            <div class="upload-area border-2 border-dashed border-gray-600 rounded-lg p-6 text-center hover:border-emerald-500 transition-colors"
+                 ondrop="dropHandler(event);" 
+                 ondragover="dragOverHandler(event);"
+                 ondragenter="dragEnterHandler(event);"
+                 ondragleave="dragLeaveHandler(event);">
                 <input type="file"
                        name="gallery[]"
                        multiple
                        accept="image/*"
                        class="hidden"
-                       id="gallery-upload">
+                       id="gallery-upload"
+                       onchange="fileSelectHandler(event);">
 
-                <label for="gallery-upload" class="cursor-pointer">
+                <label for="gallery-upload" class="cursor-pointer block">
                     <div class="text-gray-400">
                         <svg class="mx-auto h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -301,23 +306,31 @@
                         <p class="mt-2 text-sm">
                             {{ __('utility.media.upload_prompt') }}
                         </p>
+                        <p class="mt-1 text-xs text-gray-500">
+                            Trascina qui le immagini o clicca per selezionare
+                        </p>
                     </div>
                 </label>
+            </div>
+
+            {{-- Preview area per nuove immagini --}}
+            <div id="image-preview" class="mt-4 grid grid-cols-4 gap-2" style="display: none;">
+                <!-- Qui verranno mostrate le anteprime delle immagini selezionate -->
             </div>
 
             {{-- Preview immagini esistenti --}}
             @if($utility && $utility->getMedia('utility_gallery')->count() > 0)
             <div class="existing-images mt-4">
-                <p class="text-sm font-medium text-gray-700 mb-2">{{ __('utility.media.current_images') }}</p>
+                <p class="text-sm font-medium text-gray-300 mb-2">{{ __('utility.media.current_images') }}</p>
                 <div class="grid grid-cols-4 gap-2">
                     @foreach($utility->getMedia('utility_gallery') as $media)
                     <div class="relative group">
                         <img src="{{ $media->getUrl('thumb') }}"
-                             class="w-full h-24 object-cover rounded">
+                             class="w-full h-24 object-cover rounded border border-gray-600">
                         <button type="button"
                                 onclick="removeMedia({{ $media->id }})"
                                 class="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1
-                                       opacity-0 group-hover:opacity-100 transition">
+                                       opacity-0 group-hover:opacity-100 transition w-6 h-6 flex items-center justify-center text-xs">
                             ×
                         </button>
                     </div>
@@ -346,6 +359,8 @@
 
 {{-- JavaScript per gestione form con testi localizzati --}}
 <script>
+let selectedFiles = [];
+
 function toggleUtilitySections(type) {
     // Mostra sezione base
     document.getElementById('utility-base-section').style.display = type ? 'block' : 'none';
@@ -362,6 +377,9 @@ function toggleUtilitySections(type) {
 function resetUtilityForm() {
     if (confirm('{{ __('utility.confirm_reset') }}')) {
         document.getElementById('utility-form').reset();
+        selectedFiles = [];
+        document.getElementById('image-preview').style.display = 'none';
+        document.getElementById('image-preview').innerHTML = '';
         toggleUtilitySections('');
     }
 }
@@ -378,6 +396,111 @@ function removeMedia(mediaId) {
         // Nascondi visivamente l'immagine
         event.target.closest('.relative').style.display = 'none';
     }
+}
+
+// Drag & Drop handlers
+function dragOverHandler(ev) {
+    ev.preventDefault();
+    ev.currentTarget.classList.add('border-emerald-500', 'bg-gray-700/30');
+}
+
+function dragEnterHandler(ev) {
+    ev.preventDefault();
+}
+
+function dragLeaveHandler(ev) {
+    ev.preventDefault();
+    ev.currentTarget.classList.remove('border-emerald-500', 'bg-gray-700/30');
+}
+
+function dropHandler(ev) {
+    ev.preventDefault();
+    ev.currentTarget.classList.remove('border-emerald-500', 'bg-gray-700/30');
+    
+    const files = ev.dataTransfer.files;
+    handleFiles(files);
+}
+
+function fileSelectHandler(ev) {
+    const files = ev.target.files;
+    handleFiles(files);
+}
+
+function handleFiles(files) {
+    const imageFiles = Array.from(files).filter(file => file.type.startsWith('image/'));
+    
+    if (imageFiles.length === 0) {
+        alert('Per favore seleziona solo file immagine.');
+        return;
+    }
+    
+    // Verifica dimensione massima (10MB)
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    const oversizedFiles = imageFiles.filter(file => file.size > maxSize);
+    
+    if (oversizedFiles.length > 0) {
+        alert('Alcune immagini superano i 10MB e non possono essere caricate.');
+        return;
+    }
+    
+    // Aggiungi file all'array
+    selectedFiles.push(...imageFiles);
+    
+    // Aggiorna l'input file con tutti i file selezionati
+    updateFileInput();
+    
+    // Mostra preview
+    showImagePreviews();
+}
+
+function updateFileInput() {
+    const input = document.getElementById('gallery-upload');
+    const dt = new DataTransfer();
+    
+    selectedFiles.forEach(file => {
+        dt.items.add(file);
+    });
+    
+    input.files = dt.files;
+}
+
+function showImagePreviews() {
+    const previewContainer = document.getElementById('image-preview');
+    
+    if (selectedFiles.length === 0) {
+        previewContainer.style.display = 'none';
+        return;
+    }
+    
+    previewContainer.style.display = 'grid';
+    previewContainer.innerHTML = '';
+    
+    selectedFiles.forEach((file, index) => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const div = document.createElement('div');
+            div.className = 'relative group';
+            div.innerHTML = `
+                <img src="${e.target.result}" class="w-full h-24 object-cover rounded border border-gray-600">
+                <button type="button" onclick="removeSelectedFile(${index})" 
+                        class="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1
+                               opacity-0 group-hover:opacity-100 transition w-6 h-6 flex items-center justify-center text-xs">
+                    ×
+                </button>
+                <div class="absolute bottom-1 left-1 bg-black/50 text-white text-xs px-1 rounded">
+                    ${file.name.length > 15 ? file.name.substring(0, 15) + '...' : file.name}
+                </div>
+            `;
+            previewContainer.appendChild(div);
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+function removeSelectedFile(index) {
+    selectedFiles.splice(index, 1);
+    updateFileInput();
+    showImagePreviews();
 }
 
 // Inizializza stato form se utility esistente

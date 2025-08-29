@@ -616,6 +616,11 @@
                                 </div>
                             </div>
 
+                            {{-- Utility Display Section --}}
+                            @if($egi->utility)
+                            <x-utility.utility-display :utility="$egi->utility" />
+                            @endif
+
                             {{-- Properties Section --}}
                             <div class="space-y-4">
                                 <h3 class="text-lg font-semibold text-white">{{ __('egi.properties') }}</h3>
