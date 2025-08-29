@@ -336,8 +336,8 @@
             </button>
 
             <button type="submit"
-                    class="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700
-                           focus:outline-none focus:ring-2 focus:ring-primary-500">
+                    class="px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700
+                           focus:outline-none focus:ring-2 focus:ring-emerald-500">
                 {{ $utility ? __('label.update') : __('label.save') }} {{ __('utility.title') }}
             </button>
         </div>
