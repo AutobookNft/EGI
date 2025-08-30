@@ -24,15 +24,15 @@
     transform: translateY(-1px);
 }
 .egi-traits-manager {
-    --oro-fiorentino: #D4A574;
-    --verde-rinascita: #2D5016;
-    --blu-algoritmo: #1B365D;
-    --grigio-pietra: #6B6B6B;
-    --rosso-urgenza: #C13120;
-    --arancio-energia: #E67E22;
-    --viola-innovazione: #8E44AD;
-    
-    font-family: 'Source Sans Pro', 'Open Sans', sans-serif;
+    --oro-fiorentino: #d4a574;
+    --verde-rinascita: #2d5016;
+    --blu-algoritmo: #1b365d;
+    --grigio-pietra: #6b6b6b;
+    --rosso-urgenza: #c13120;
+    --arancio-energia: #e67e22;
+    --viola-innovazione: #8e44ad;
+
+    font-family: "Source Sans Pro", "Open Sans", sans-serif;
     position: relative;
 }
 
@@ -47,7 +47,7 @@
 }
 
 .traits-title {
-    font-family: 'Playfair Display', 'Crimson Text', serif;
+    font-family: "Playfair Display", "Crimson Text", serif;
     font-size: 1.5rem;
     font-weight: 600;
     color: white; /* CAMBIATO per dark mode */
@@ -79,14 +79,14 @@
 
 .trait-counter.near-limit {
     background: rgba(193, 49, 32, 0.2);
-    color: #FF6B6B; /* Rosso più chiaro per contrasto */
+    color: #ff6b6b; /* Rosso più chiaro per contrasto */
 }
 
 .trait-status {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    color: #4ADE80; /* Verde più chiaro per dark mode */
+    color: #4ade80; /* Verde più chiaro per dark mode */
     font-size: 0.875rem;
     font-weight: 500;
 }
@@ -114,7 +114,7 @@
     border: 1px solid rgba(212, 165, 116, 0.3);
     border-radius: 0.5rem;
     font-size: 0.875rem;
-    color: #E5E5E5; /* Grigio chiaro per dark mode */
+    color: #e5e5e5; /* Grigio chiaro per dark mode */
     cursor: pointer;
     transition: all 0.3s ease;
     white-space: nowrap;
@@ -129,7 +129,7 @@
 .category-tab.active {
     background: var(--oro-fiorentino);
     border-color: var(--oro-fiorentino);
-    color: #1B365D; /* Blu scuro su oro per contrasto */
+    color: #1b365d; /* Blu scuro su oro per contrasto */
     font-weight: 600;
 }
 
@@ -178,7 +178,7 @@
 }
 
 .empty-text {
-    color: #A0A0A0; /* Grigio più chiaro per dark mode */
+    color: #a0a0a0; /* Grigio più chiaro per dark mode */
     margin-bottom: 1rem;
 }
 
@@ -194,7 +194,7 @@
 }
 
 .empty-cta:hover {
-    background: #E5B584; /* Oro più chiaro */
+    background: #e5b584; /* Oro più chiaro */
     transform: translateY(-1px);
 }
 
@@ -220,7 +220,11 @@
 }
 
 .trait-card.rare {
-    background: linear-gradient(135deg, rgba(142, 68, 173, 0.15) 0%, rgba(212, 165, 116, 0.15) 100%);
+    background: linear-gradient(
+        135deg,
+        rgba(142, 68, 173, 0.15) 0%,
+        rgba(212, 165, 116, 0.15) 100%
+    );
     border-color: var(--viola-innovazione);
 }
 
@@ -249,7 +253,7 @@
     align-items: center;
     justify-content: center;
     background: rgba(193, 49, 32, 0.2);
-    color: #FF6B6B;
+    color: #ff6b6b;
     border: none;
     border-radius: 50%;
     font-size: 1.25rem;
@@ -269,7 +273,7 @@
 
 .trait-type {
     font-size: 0.75rem;
-    color: #A0A0A0; /* Grigio chiaro per dark mode */
+    color: #a0a0a0; /* Grigio chiaro per dark mode */
     text-transform: uppercase;
     letter-spacing: 0.025em;
     margin-bottom: 0.25rem;
@@ -303,13 +307,17 @@
 
 .rarity-fill {
     height: 100%;
-    background: linear-gradient(90deg, var(--viola-innovazione) 0%, var(--oro-fiorentino) 100%);
+    background: linear-gradient(
+        90deg,
+        var(--viola-innovazione) 0%,
+        var(--oro-fiorentino) 100%
+    );
     transition: width 0.5s ease;
 }
 
 .rarity-text {
     font-size: 0.75rem;
-    color: #A0A0A0;
+    color: #a0a0a0;
 }
 
 /* Add Trait Button */
@@ -353,7 +361,7 @@
 }
 
 .modal-content {
-    background: #FFFFFF; /* Modal rimane bianca per leggibilità */
+    background: #ffffff; /* Modal rimane bianca per leggibilità */
     border-radius: 0.75rem;
     max-width: 500px;
     width: 100%;
@@ -367,12 +375,16 @@
     justify-content: space-between;
     align-items: center;
     padding: 1.5rem;
-    border-bottom: 1px solid #E5E5E5;
-    background: linear-gradient(135deg, rgba(212, 165, 116, 0.1) 0%, rgba(255, 255, 255, 1) 100%);
+    border-bottom: 1px solid #e5e5e5;
+    background: linear-gradient(
+        135deg,
+        rgba(212, 165, 116, 0.1) 0%,
+        rgba(255, 255, 255, 1) 100%
+    );
 }
 
 .modal-title {
-    font-family: 'Playfair Display', 'Crimson Text', serif;
+    font-family: "Playfair Display", "Crimson Text", serif;
     font-size: 1.25rem;
     font-weight: 600;
     color: var(--blu-algoritmo);
@@ -437,7 +449,7 @@
     gap: 0.5rem;
     padding: 1rem 0.5rem;
     background: white;
-    border: 2px solid #E5E5E5;
+    border: 2px solid #e5e5e5;
     border-radius: 0.5rem;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -466,7 +478,7 @@
     width: 100%;
     padding: 0.75rem;
     background: white;
-    border: 1px solid #D1D5DB;
+    border: 1px solid #d1d5db;
     border-radius: 0.5rem;
     font-size: 1rem;
     color: var(--blu-algoritmo);
@@ -522,8 +534,8 @@
     justify-content: flex-end;
     gap: 0.75rem;
     padding: 1.5rem;
-    border-top: 1px solid #E5E5E5;
-    background: #FAFAFA;
+    border-top: 1px solid #e5e5e5;
+    background: #fafafa;
 }
 
 .btn-cancel {
@@ -538,7 +550,7 @@
 }
 
 .btn-cancel:hover {
-    background: #F5F5F5;
+    background: #f5f5f5;
     border-color: var(--blu-algoritmo);
     color: var(--blu-algoritmo);
 }
@@ -572,7 +584,7 @@
     .trait-card {
         background: rgba(255, 255, 255, 0.03);
     }
-    
+
     .category-tab {
         background: rgba(255, 255, 255, 0.03);
     }
@@ -583,7 +595,7 @@
     .traits-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .category-selector {
         grid-template-columns: repeat(3, 1fr);
     }
@@ -610,6 +622,10 @@
 }
 
 @keyframes pulse {
-    from { opacity: 0.5; }
-    to { opacity: 1; }
+    from {
+        opacity: 0.5;
+    }
+    to {
+        opacity: 1;
+    }
 }

@@ -6,11 +6,12 @@ return [
     'empty_state' => 'No se han añadido rasgos. Los rasgos hacen que tu EGI sea único y buscable.',
     'add_first_trait' => 'Añadir primer rasgo',
     'add_trait' => 'Añadir Rasgo',
+    'add_new_trait' => 'Añadir Nuevo Rasgo',
     'remove_trait' => 'Eliminar rasgo',
     'have_this' => 'tienen esto',
-    
+
     // Modal
-    'add_new_trait' => 'Añadir Nuevo Rasgo',
+    'modal_title' => 'Añadir Nuevo Rasgo',
     'select_category' => 'Seleccionar Categoría',
     'select_type' => 'Seleccionar Tipo',
     'select_value' => 'Seleccionar o Introducir Valor',
@@ -20,7 +21,22 @@ return [
     'preview' => 'Vista previa',
     'cancel' => 'Cancelar',
     'add' => 'Añadir',
+    'loading_categories' => 'Cargando categorías...',
+    'loading_types' => 'Cargando tipos...',
+    'insert_value' => 'Introducir valor',
+    'insert_numeric_value' => 'Introducir valor numérico',
+
+    // Counter
+    'traits_counter' => ':count/30',
+    'save_all_traits' => 'Guardar Todos los Rasgos',
     
+    // Messages
+    'modal_error' => 'Error al abrir el modal. Inténtalo de nuevo.',
+    'save_success' => '¡Rasgos guardados con éxito!',
+    'save_error' => 'Error al guardar',
+    'network_error' => 'Error de red al guardar',
+    'unknown_error' => 'Error desconocido',
+
     // Categories
     'categories' => [
         'materials' => 'Materiales',
@@ -29,7 +45,7 @@ return [
         'special' => 'Especial',
         'sustainability' => 'Sostenibilidad',
     ],
-    
+
     // Trait Types
     'types' => [
         'primary_material' => 'Material Principal',

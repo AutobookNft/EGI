@@ -1,7 +1,9 @@
 {{-- resources/views/components/egi/traits-editor.blade.php --}}
 {{-- 
     EGI Traits Editor Component - EDITING
-    Gestione aggiunta/rimozione traits
+    Gestion                <select class="form-select" id="trait-type-select" onchange="TraitsEditor.onTypeChanged()">
+                    <option value="">{{ __('traits.choose_type') }}</option>
+                </select>ggiunta/rimozione traits
 --}}
 @props([
     'egi' => null
@@ -16,9 +18,9 @@
     
     {{-- Header con counter --}}
     <div class="traits-header">
-        <h3 class="traits-title">
+                <h3 class="traits-title">
             <span class="traits-icon">🎯</span>
-            {{ __('Gestione Tratti') }}
+            {{ __('traits.title') }}
         </h3>
         <div class="traits-meta">
             <span class="trait-counter">
@@ -40,11 +42,11 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                       d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
             </svg>
-            <p class="empty-text">Nessun tratto aggiunto. I tratti rendono il tuo EGI unico e ricercabile.</p>
+            <p class="empty-text">{{ __('traits.empty_state') }}</p>
             <button type="button" 
                     class="empty-cta"
                     onclick="TraitsEditor.openModal()">
-                Aggiungi il primo tratto
+                {{ __('traits.add_first_trait') }}
             </button>
         </div>
 
@@ -54,7 +56,7 @@
                     class="btn btn-primary add-trait-btn"
                     onclick="TraitsEditor.openModal()">
                 <span class="btn-icon">+</span>
-                <span class="btn-text">Aggiungi Nuovo Tratto</span>
+                <span class="btn-text">{{ __('traits.add_new_trait') }}</span>
             </button>
         </div>
         </div>
@@ -74,7 +76,7 @@
         <svg class="button-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
         </svg>
-        Aggiungi Tratto
+        {{ __('traits.add_trait') }}
     </button>
     
     {{-- Save All Traits Button --}}
@@ -87,7 +89,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                 d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3-3m0 0l-3 3m3-3v12"/>
         </svg>
-        Save All Traits
+        {{ __('traits.save_all_traits') }}
     </button>
 
     {{-- Hidden input for form submission --}}
@@ -102,7 +104,7 @@
 <div class="trait-modal" id="trait-modal" style="display: none;">
     <div class="modal-content">
         <div class="modal-header">
-            <h4 class="modal-title">Aggiungi Nuovo Tratto</h4>
+            <h4 class="modal-title">{{ __('traits.modal_title') }}</h4>
             <button type="button" 
                     class="modal-close"
                     onclick="TraitsEditor.closeModal()">
@@ -113,7 +115,7 @@
         <div class="modal-body">
             {{-- Step 1: Select Category --}}
             <div class="form-group">
-                <label class="form-label">Seleziona Categoria</label>
+                <label class="form-label">{{ __('traits.select_category') }}</label>
                 <div class="category-selector" id="category-selector">
                     {{-- Categories will be inserted here by JS --}}
                 </div>
@@ -121,15 +123,15 @@
 
             {{-- Step 2: Select Trait Type --}}
             <div class="form-group" id="type-selector-group" style="display: none;">
-                <label class="form-label">Seleziona Tipo</label>
+                <label class="form-label">{{ __('traits.select_type') }}</label>
                 <select class="form-select" id="trait-type-select" onchange="TraitsEditor.onTypeSelected()">
-                    <option value="">Scegli un tipo...</option>
+                    <option value="">{{ __('traits.choose_type') }}</option>
                 </select>
             </div>
 
             {{-- Step 3: Select/Input Value --}}
             <div class="form-group" id="value-selector-group" style="display: none;">
-                <label class="form-label">Inserisci Valore</label>
+                <label class="form-label">{{ __('traits.select_value') }}</label>
                 <div id="value-input-container">
                     {{-- Input will be inserted here based on type --}}
                 </div>
@@ -137,7 +139,7 @@
 
             {{-- Preview --}}
             <div class="trait-preview" id="trait-preview" style="display: none;">
-                <div class="preview-label">Anteprima</div>
+                <div class="preview-label">{{ __('traits.preview') }}</div>
                 <div class="preview-card">
                     <span class="preview-type"></span>:
                     <span class="preview-value"></span>
@@ -150,14 +152,14 @@
             <button type="button" 
                     class="btn-cancel"
                     onclick="TraitsEditor.closeModal()">
-                Annulla
+                {{ __('traits.cancel') }}
             </button>
             <button type="button" 
                     class="btn-confirm"
                     id="confirm-trait-btn"
                     onclick="TraitsEditor.addTrait()"
                     disabled>
-                Aggiungi
+                {{ __('traits.add') }}
             </button>
         </div>
     </div>
@@ -165,6 +167,22 @@
 @endonce
 
 <script>
+// Traduzioni per JavaScript
+window.TraitsTranslations = {
+    loading_categories: '{{ __('traits.loading_categories') }}',
+    loading_types: '{{ __('traits.loading_types') }}',
+    choose_type: '{{ __('traits.choose_type') }}',
+    choose_value: '{{ __('traits.choose_value') }}',
+    insert_value: '{{ __('traits.insert_value') }}',
+    insert_numeric_value: '{{ __('traits.insert_numeric_value') }}',
+    preview: '{{ __('traits.preview') }}',
+    modal_error: '{{ __('traits.modal_error') }}',
+    save_success: '{{ __('traits.save_success') }}',
+    save_error: '{{ __('traits.save_error') }}',
+    network_error: '{{ __('traits.network_error') }}',
+    unknown_error: '{{ __('traits.unknown_error') }}'
+};
+
 // Include traits-common.js functions here if needed, or load external file
 </script>
 
@@ -331,7 +349,7 @@
             } catch (error) {
                 console.error('Error opening modal:', error);
                 // Mostra un messaggio di errore all'utente se necessario
-                alert('Errore nell\'apertura della modale. Riprova.');
+                alert(window.TraitsTranslations.modal_error);
             }
         },
 
@@ -390,7 +408,7 @@
 
             // Se le categorie non sono ancora caricate, mostra un placeholder
             if (this.state.categories.length === 0) {
-                selector.innerHTML = '<div class="loading-placeholder">Caricamento categorie...</div>';
+                selector.innerHTML = '<div class="loading-placeholder">' + window.TraitsTranslations.loading_categories + '</div>';
                 return;
             }
 
@@ -432,7 +450,7 @@
             const select = document.getElementById('trait-type-select');
             if (!select) return;
 
-            select.innerHTML = '<option value="">Scegli un tipo...</option>' + 
+            select.innerHTML = '<option value="">' + window.TraitsTranslations.choose_type + '</option>' + 
                 this.state.availableTypes.map(type => 
                     `<option value="${type.id}">${type.name}</option>`
                 ).join('');
@@ -474,7 +492,7 @@
                 // Dropdown for predefined values
                 inputHtml = `
                     <select class="form-select" id="trait-value-input" onchange="TraitsEditor.onValueChanged()">
-                        <option value="">Scegli un valore...</option>
+                        <option value="">{{ __('traits.choose_value') }}</option>
                         ${allowedValues.map(val => `<option value="${val}">${val}</option>`).join('')}
                     </select>
                 `;
@@ -490,7 +508,7 @@
                                ${min !== '' ? `min="${min}"` : ''}
                                ${max !== '' ? `max="${max}"` : ''}
                                step="0.01"
-                               placeholder="Inserisci valore numerico"
+                               placeholder="${window.TraitsTranslations.insert_numeric_value}"
                                oninput="TraitsEditor.onValueChanged()">
                         ${type.unit ? `<span class="input-suffix">${type.unit}</span>` : ''}
                     </div>
@@ -509,7 +527,7 @@
                     <input type="text" 
                            class="form-input" 
                            id="trait-value-input" 
-                           placeholder="Inserisci valore"
+                           placeholder="${window.TraitsTranslations.insert_value}"
                            oninput="TraitsEditor.onValueChanged()">
                 `;
             }
@@ -674,7 +692,7 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    alert('Traits salvati con successo!');
+                    alert(window.TraitsTranslations.save_success);
                     // Reset editing state
                     this.state.editingTraits = [];
                     this.updateUI();
@@ -682,11 +700,11 @@
                     // Reload page to show updated viewer
                     location.reload();
                 } else {
-                    alert('Errore nel salvataggio: ' + (data.message || 'Errore sconosciuto'));
+                    alert(window.TraitsTranslations.save_error + ': ' + (data.message || window.TraitsTranslations.unknown_error));
                 }
             } catch (error) {
                 console.error('Error saving traits:', error);
-                alert('Errore di rete nel salvataggio');
+                alert(window.TraitsTranslations.network_error);
             }
         },
 

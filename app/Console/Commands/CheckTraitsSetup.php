@@ -7,8 +7,7 @@ use Illuminate\Support\Facades\Schema;
 use App\Models\TraitCategory;
 use App\Models\TraitType;
 
-class CheckTraitsSetup extends Command
-{
+class CheckTraitsSetup extends Command {
     /**
      * The name and signature of the console command.
      *
@@ -26,31 +25,30 @@ class CheckTraitsSetup extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
-    {
+    public function handle() {
         $this->info('Checking traits setup...');
-        
+
         // Check if tables exist
         if (!Schema::hasTable('trait_categories')) {
             $this->error('Table trait_categories does not exist. Run migrations first.');
             return 1;
         }
-        
+
         if (!Schema::hasTable('trait_types')) {
             $this->error('Table trait_types does not exist. Run migrations first.');
             return 1;
         }
-        
+
         // Check categories
         $categoriesCount = TraitCategory::count();
         $systemCategoriesCount = TraitCategory::where('is_system', true)->count();
-        
+
         $this->info("Categories in database: {$categoriesCount}");
         $this->info("System categories: {$systemCategoriesCount}");
-        
+
         if ($categoriesCount === 0) {
             $this->warn('No categories found in database!');
-            
+
             if ($this->option('fix')) {
                 $this->info('Creating default categories...');
                 $this->createDefaultCategories();
@@ -60,27 +58,28 @@ class CheckTraitsSetup extends Command
             }
         } else {
             $this->info('Categories check: OK');
-            
+
             // Show existing categories
             $categories = TraitCategory::all();
-            $this->table(['ID', 'Name', 'Slug', 'Is System', 'Collection ID'], 
+            $this->table(
+                ['ID', 'Name', 'Slug', 'Is System', 'Collection ID'],
                 $categories->map(fn($c) => [
-                    $c->id, 
-                    $c->name, 
-                    $c->slug, 
+                    $c->id,
+                    $c->name,
+                    $c->slug,
                     $c->is_system ? 'Yes' : 'No',
                     $c->collection_id ?? 'null'
                 ])
             );
         }
-        
+
         // Check types
         $typesCount = TraitType::count();
         $this->info("Trait types in database: {$typesCount}");
-        
+
         if ($typesCount === 0 && $categoriesCount > 0) {
             $this->warn('No trait types found but categories exist!');
-            
+
             if ($this->option('fix')) {
                 $this->info('Creating default trait types...');
                 $this->createDefaultTypes();
@@ -89,12 +88,11 @@ class CheckTraitsSetup extends Command
                 $this->info('Run with --fix to create default trait types');
             }
         }
-        
+
         return 0;
     }
-    
-    private function createDefaultCategories()
-    {
+
+    private function createDefaultCategories() {
         $categories = [
             ['name' => 'Materials', 'slug' => 'materials', 'icon' => '📦', 'sort_order' => 1],
             ['name' => 'Visual', 'slug' => 'visual', 'icon' => '🎨', 'sort_order' => 2],
@@ -102,7 +100,7 @@ class CheckTraitsSetup extends Command
             ['name' => 'Special', 'slug' => 'special', 'icon' => '⚡', 'sort_order' => 4],
             ['name' => 'Sustainability', 'slug' => 'sustainability', 'icon' => '🌿', 'sort_order' => 5],
         ];
-        
+
         foreach ($categories as $categoryData) {
             TraitCategory::create([
                 'name' => $categoryData['name'],
@@ -114,13 +112,12 @@ class CheckTraitsSetup extends Command
             ]);
         }
     }
-    
-    private function createDefaultTypes()
-    {
+
+    private function createDefaultTypes() {
         $materials = TraitCategory::where('slug', 'materials')->first();
         $visual = TraitCategory::where('slug', 'visual')->first();
         $dimensions = TraitCategory::where('slug', 'dimensions')->first();
-        
+
         if ($materials) {
             TraitType::create([
                 'category_id' => $materials->id,
@@ -130,7 +127,7 @@ class CheckTraitsSetup extends Command
                 'is_system' => true
             ]);
         }
-        
+
         if ($visual) {
             TraitType::create([
                 'category_id' => $visual->id,
@@ -140,7 +137,7 @@ class CheckTraitsSetup extends Command
                 'is_system' => true
             ]);
         }
-        
+
         if ($dimensions) {
             TraitType::create([
                 'category_id' => $dimensions->id,

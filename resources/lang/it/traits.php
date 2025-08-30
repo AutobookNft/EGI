@@ -6,11 +6,12 @@ return [
     'empty_state' => 'Nessun tratto aggiunto. I tratti rendono il tuo EGI unico e ricercabile.',
     'add_first_trait' => 'Aggiungi il primo tratto',
     'add_trait' => 'Aggiungi Tratto',
+    'add_new_trait' => 'Aggiungi Nuovo Tratto',
     'remove_trait' => 'Rimuovi tratto',
     'have_this' => 'hanno questo',
-    
+
     // Modal
-    'add_new_trait' => 'Aggiungi Nuovo Tratto',
+    'modal_title' => 'Aggiungi Nuovo Tratto',
     'select_category' => 'Seleziona Categoria',
     'select_type' => 'Seleziona Tipo',
     'select_value' => 'Seleziona o Inserisci Valore',
@@ -20,7 +21,22 @@ return [
     'preview' => 'Anteprima',
     'cancel' => 'Annulla',
     'add' => 'Aggiungi',
+    'loading_categories' => 'Caricamento categorie...',
+    'loading_types' => 'Caricamento tipi...',
+    'insert_value' => 'Inserisci valore',
+    'insert_numeric_value' => 'Inserisci valore numerico',
+
+    // Counter
+    'traits_counter' => ':count/30',
+    'save_all_traits' => 'Salva Tutti i Tratti',
     
+    // Messages
+    'modal_error' => 'Errore nell\'apertura della modale. Riprova.',
+    'save_success' => 'Tratti salvati con successo!',
+    'save_error' => 'Errore nel salvataggio',
+    'network_error' => 'Errore di rete nel salvataggio',
+    'unknown_error' => 'Errore sconosciuto',
+
     // Categories
     'categories' => [
         'materials' => 'Materiali',
@@ -29,7 +45,7 @@ return [
         'special' => 'Speciale',
         'sustainability' => 'Sostenibilità',
     ],
-    
+
     // Trait Types
     'types' => [
         'primary_material' => 'Materiale Primario',

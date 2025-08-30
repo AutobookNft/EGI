@@ -6,11 +6,12 @@ return [
     'empty_state' => 'Aucun trait ajouté. Les traits rendent votre EGI unique et recherchable.',
     'add_first_trait' => 'Ajouter le premier trait',
     'add_trait' => 'Ajouter un Trait',
+    'add_new_trait' => 'Ajouter un Nouveau Trait',
     'remove_trait' => 'Supprimer le trait',
     'have_this' => 'ont ceci',
-    
+
     // Modal
-    'add_new_trait' => 'Ajouter un Nouveau Trait',
+    'modal_title' => 'Ajouter un Nouveau Trait',
     'select_category' => 'Sélectionner une Catégorie',
     'select_type' => 'Sélectionner le Type',
     'select_value' => 'Sélectionner ou Entrer une Valeur',
@@ -20,7 +21,22 @@ return [
     'preview' => 'Aperçu',
     'cancel' => 'Annuler',
     'add' => 'Ajouter',
+    'loading_categories' => 'Chargement des catégories...',
+    'loading_types' => 'Chargement des types...',
+    'insert_value' => 'Entrer la valeur',
+    'insert_numeric_value' => 'Entrer une valeur numérique',
+
+    // Counter
+    'traits_counter' => ':count/30',
+    'save_all_traits' => 'Enregistrer Tous les Traits',
     
+    // Messages
+    'modal_error' => 'Erreur lors de l\'ouverture de la modal. Veuillez réessayer.',
+    'save_success' => 'Traits enregistrés avec succès!',
+    'save_error' => 'Erreur lors de l\'enregistrement',
+    'network_error' => 'Erreur réseau lors de l\'enregistrement',
+    'unknown_error' => 'Erreur inconnue',
+
     // Categories
     'categories' => [
         'materials' => 'Matériaux',
@@ -29,7 +45,7 @@ return [
         'special' => 'Spécial',
         'sustainability' => 'Durabilité',
     ],
-    
+
     // Trait Types
     'types' => [
         'primary_material' => 'Matériau Principal',
