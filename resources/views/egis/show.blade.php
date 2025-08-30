@@ -96,16 +96,16 @@
         @endphp
         
         {{-- Gallery Layout - Cinema Style con 3 Colonne --}}
-        <div class="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
+        <div class="bg-gradient-to-br from-gray-900 via-black to-gray-900">
 
             {{-- Cinematic Artwork Display --}}
             <div class="relative w-full">
 
                 {{-- Main Gallery Grid - MODIFICATO per 3 colonne --}}
-                <div class="grid min-h-screen grid-cols-1 lg:grid-cols-12">
+                <div class="grid grid-cols-1 lg:grid-cols-12">
 
                     {{-- Left: Artwork Area (Ridotta da 8-9 a 6-7) --}}
-                    <div class="relative flex items-center justify-center p-2 lg:col-span-6 xl:col-span-7 lg:p-8">
+                    <div class="relative p-2 lg:col-span-6 xl:col-span-7 lg:p-8">
 
                         {{-- Artwork Container --}}
                         <div class="relative w-full max-w-5xl">
@@ -128,7 +128,6 @@
 
                     {{-- Center: CRUD Box --}}
                     @include('egis.partials.sidebar.crud-panel', compact('egi', 'canUpdateEgi', 'canDeleteEgi', 'isPriceLocked', 'displayPrice', 'displayUser', 'highestPriorityReservation'))
-                     
 
                     {{-- Right: Sidebar Esistente (Ridotta da 4-3 a 3) --}}
                     <div
