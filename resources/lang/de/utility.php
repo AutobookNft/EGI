@@ -6,6 +6,7 @@ return [
     'subtitle' => 'Fügen Sie echten Wert zu Ihrem EGI hinzu',
     'status_configured' => 'Nutzen Konfiguriert',
     'status_none' => 'Kein Nutzen',
+    'available_images' => 'Es sind :count Bilder für ":title" verfügbar',
 
     // Warnungen und Nachrichten
     'info_edit_before_publish' => 'Der Nutzen kann nur vor der Veröffentlichung der Sammlung hinzugefügt oder geändert werden. Nach der Veröffentlichung kann er nicht mehr geändert werden.',

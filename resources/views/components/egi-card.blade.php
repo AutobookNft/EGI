@@ -505,9 +505,19 @@ $isCreator = auth()->check() && auth()->id() === $creatorId;
             @endif
         </div>
     </div>
-{{-- Utility Images Carousel --}}
+
+    {{-- Utility Images Carousel --}}
 @if($egi->utility && $egi->utility->getMedia('utility_gallery')->count() > 0)
 <div class="px-2 pb-2 border-t border-white/5">
+    
+    @if($egi->utility->getMedia('utility_gallery')->count() > 5)
+    <div class="mt-1 text-center">
+        <span class="text-[10px] text-gray-400">
+            {{ __('utility.available_images', ['title' => $egi->utility->title, 'count' => $egi->utility->getMedia('utility_gallery')->count()]) }}
+        </span>
+    </div>
+    @endif
+    
     <!-- Container con larghezza massima per forzare overflow -->
     <div class="relative w-full" style="max-width: 280px;">
         <!-- Scrollable Container -->
@@ -525,13 +535,7 @@ $isCreator = auth()->check() && auth()->id() === $creatorId;
         </div>
     </div>
 
-    @if($egi->utility->getMedia('utility_gallery')->count() > 5)
-    <div class="mt-1 text-center">
-        <span class="text-[10px] text-gray-400">
-            Scorri per {{ $egi->utility->getMedia('utility_gallery')->count() }} immagini →
-        </span>
-    </div>
-    @endif
+    
 </div>
 
 <style>

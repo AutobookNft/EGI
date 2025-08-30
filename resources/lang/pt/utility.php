@@ -6,6 +6,7 @@ return [
     'subtitle' => 'Adicione valor real ao seu EGI',
     'status_configured' => 'Utilidade Configurada',
     'status_none' => 'Sem Utilidade',
+    'available_images' => ':count imagens disponíveis para ":title"',
 
     // Alertas e mensagens
     'info_edit_before_publish' => 'A utilidade só pode ser adicionada ou modificada antes da publicação da coleção. Uma vez publicada, não pode mais ser modificada.',
