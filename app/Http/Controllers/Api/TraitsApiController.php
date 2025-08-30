@@ -34,31 +34,39 @@ class TraitsApiController extends Controller
         $collectionId = $request->get('collection_id');
         
         try {
-            $categories = Cache::remember(
-                "trait_categories_{$collectionId}", 
-                3600, 
-                function () use ($collectionId) {
-                    $query = TraitCategory::query();
-                    
-                    if ($collectionId) {
-                        $query->where(function ($q) use ($collectionId) {
-                            $q->where('is_system', true)
-                              ->orWhere('collection_id', $collectionId);
-                        });
-                    } else {
-                        // Se non c'è collection_id, prendi solo le categorie di sistema
-                        $query->where('is_system', true);
-                    }
-                    
-                    return $query->orderBy('sort_order')
-                                ->orderBy('name')
-                                ->get();
-                }
-            );
+            // Temporaneamente disabilitiamo la cache per il debug
+            $query = TraitCategory::query();
+            
+            if ($collectionId) {
+                $query->where(function ($q) use ($collectionId) {
+                    $q->where('is_system', true)
+                      ->orWhere('collection_id', $collectionId);
+                });
+            } else {
+                // Se non c'è collection_id, prendi solo le categorie di sistema
+                $query->where('is_system', true);
+            }
+            
+            $categories = $query->orderBy('sort_order')
+                               ->orderBy('name')
+                               ->get();
+
+            \Log::info('TraitsApiController: Categories query result', [
+                'collection_id' => $collectionId,
+                'categories_count' => $categories->count(),
+                'query_sql' => $query->toSql(),
+                'categories' => $categories->toArray()
+            ]);
 
             return response()->json([
                 'success' => true,
-                'categories' => $categories
+                'categories' => $categories,
+                'debug' => [
+                    'collection_id' => $collectionId,
+                    'total_categories_in_db' => TraitCategory::count(),
+                    'system_categories_count' => TraitCategory::where('is_system', true)->count(),
+                    'query_sql' => $query->toSql()
+                ]
             ]);
         } catch (\Exception $e) {
             \Log::error('Error loading trait categories: ' . $e->getMessage());

@@ -257,11 +257,18 @@
                 
                 const data = await response.json();
                 console.log('TraitsEditor: Categories response:', data);
+                console.log('TraitsEditor: Debug info:', data.debug);
                 
                 if (data.success && data.categories && Array.isArray(data.categories)) {
-                    this.state.categories = data.categories;
-                    console.log('TraitsEditor: Categories loaded successfully:', this.state.categories.length);
-                    this.renderCategories();
+                    if (data.categories.length > 0) {
+                        this.state.categories = data.categories;
+                        console.log('TraitsEditor: Categories loaded successfully:', this.state.categories.length);
+                        this.renderCategories();
+                    } else {
+                        console.warn('TraitsEditor: Server returned empty categories array - using fallback');
+                        console.warn('TraitsEditor: Debug data:', data.debug);
+                        throw new Error('Server returned empty categories array');
+                    }
                 } else {
                     throw new Error(data.message || 'Failed to load categories - invalid response format');
                 }
