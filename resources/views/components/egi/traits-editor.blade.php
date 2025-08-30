@@ -48,6 +48,17 @@
             </button>
         </div>
 
+        <!-- Add Trait Button -->
+        <div class="add-trait-section" style="display: none;">
+            <button type="button" 
+                    class="btn btn-primary add-trait-btn"
+                    onclick="TraitsEditor.openModal()">
+                <span class="btn-icon">+</span>
+                <span class="btn-text">Aggiungi Nuovo Tratto</span>
+            </button>
+        </div>
+        </div>
+
         {{-- Traits Grid --}}
         <div class="traits-grid" id="traits-grid-editor">
             {{-- Editing traits will be inserted here by JS --}}
@@ -258,12 +269,24 @@
             `).join('');
         },
 
-        openModal() {
-            const modal = document.getElementById('trait-modal');
-            if (modal) {
+        async openModal() {
+            try {
+                const modal = document.getElementById('trait-modal');
+                if (!modal) return;
+
+                // Assicurati che le categorie siano caricate prima di aprire la modale
+                if (this.state.categories.length === 0) {
+                    console.log('TraitsEditor: Categories not loaded, loading now...');
+                    await this.loadCategories();
+                }
+
                 modal.style.display = 'flex';
                 this.resetModal();
                 this.renderModalCategories();
+            } catch (error) {
+                console.error('Error opening modal:', error);
+                // Mostra un messaggio di errore all'utente se necessario
+                alert('Errore nell\'apertura della modale. Riprova.');
             }
         },
 
@@ -292,6 +315,12 @@
         renderModalCategories() {
             const selector = document.getElementById('category-selector');
             if (!selector) return;
+
+            // Se le categorie non sono ancora caricate, mostra un placeholder
+            if (this.state.categories.length === 0) {
+                selector.innerHTML = '<div class="loading-placeholder">Caricamento categorie...</div>';
+                return;
+            }
 
             selector.innerHTML = this.state.categories.map(cat => `
                 <button type="button" 
