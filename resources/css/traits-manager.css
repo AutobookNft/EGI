@@ -368,12 +368,39 @@
 
 .rarity-fill {
     height: 100%;
-    background: linear-gradient(
-        90deg,
-        var(--viola-innovazione) 0%,
-        var(--oro-fiorentino) 100%
-    );
     transition: width 0.5s ease;
+}
+
+/* Colori dinamici per rarità */
+.rarity-fill.common {
+    background: linear-gradient(90deg, #27ae60, #2ecc71); /* Verde - molto comune (70-100%) */
+}
+
+.rarity-fill.uncommon {
+    background: linear-gradient(90deg, #f39c12, #e67e22); /* Arancione - poco comune (40-69%) */
+}
+
+.rarity-fill.rare {
+    background: linear-gradient(90deg, #e74c3c, #c0392b); /* Rosso - raro (20-39%) */
+}
+
+.rarity-fill.epic {
+    background: linear-gradient(90deg, #9b59b6, #8e44ad); /* Viola - epico (10-19%) */
+}
+
+.rarity-fill.legendary {
+    background: linear-gradient(90deg, #d4a574, #b8860b); /* Oro - leggendario (5-9%) */
+}
+
+.rarity-fill.mythic {
+    background: linear-gradient(90deg, #ff6b6b, #ffd700, #ff6b6b); /* Arcobaleno - mitico (0-4%) */
+    background-size: 200% 100%;
+    animation: shimmer 2s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
 }
 
 .rarity-text {

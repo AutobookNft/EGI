@@ -73,9 +73,41 @@
                             
                             {{-- Barra di rarità --}}
                             @if(isset($trait->rarity_percentage) && $trait->rarity_percentage)
+                                @php
+                                    // Determina la classe di rarità in base alla percentuale
+                                    if ($trait->rarity_percentage >= 70) {
+                                        $rarityClass = 'common';
+                                    } elseif ($trait->rarity_percentage >= 40) {
+                                        $rarityClass = 'uncommon';
+                                    } elseif ($trait->rarity_percentage >= 20) {
+                                        $rarityClass = 'rare';
+                                    } elseif ($trait->rarity_percentage >= 10) {
+                                        $rarityClass = 'epic';
+                                    } elseif ($trait->rarity_percentage >= 5) {
+                                        $rarityClass = 'legendary';
+                                    } else {
+                                        $rarityClass = 'mythic';
+                                    }
+                                    
+                                    // Formula semplice e diretta: più è raro, più la barra è lunga
+                                    // Invertiamo direttamente la percentuale per creare differenze evidenti
+                                    if ($trait->rarity_percentage <= 5) {
+                                        $barWidth = 90; // Leggendario/Mitico - barra quasi piena
+                                    } elseif ($trait->rarity_percentage <= 10) {
+                                        $barWidth = 75; // Epico
+                                    } elseif ($trait->rarity_percentage <= 20) {
+                                        $barWidth = 60; // Raro
+                                    } elseif ($trait->rarity_percentage <= 40) {
+                                        $barWidth = 40; // Poco comune
+                                    } elseif ($trait->rarity_percentage <= 70) {
+                                        $barWidth = 25; // Comune
+                                    } else {
+                                        $barWidth = 10; // Molto comune - barra quasi vuota
+                                    }
+                                @endphp
                                 <div class="trait-rarity">
                                     <div class="rarity-bar">
-                                        <div class="rarity-fill" style="width: {{ 100 - $trait->rarity_percentage }}%"></div>
+                                        <div class="rarity-fill {{ $rarityClass }}" style="width: {{ number_format($barWidth, 1) }}%"></div>
                                     </div>
                                     <span class="rarity-text">{{ number_format($trait->rarity_percentage, 1) }}% have this</span>
                                 </div>
