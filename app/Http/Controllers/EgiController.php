@@ -409,7 +409,6 @@ class EgiController extends Controller {
             $userRole = $membership->pivot->role ?? null;
 
             return in_array($userRole, ['admin', 'editor', 'creator']);
-        
         } catch (\Exception $e) {
             // Log error (developers only - English)
             $this->logger->error('EGI_PERMISSION_CHECK_ERROR: Failed to check EGI management permissions', [

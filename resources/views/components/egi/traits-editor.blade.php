@@ -1076,7 +1076,7 @@ window.ToastManager = {
             // Implementation for category filtering if needed
             console.log('Filter by category:', categoryId);
         }
-        }
+        
     };
 
     // Auto-initialize quando il DOM è pronto
