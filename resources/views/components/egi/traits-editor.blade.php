@@ -729,6 +729,13 @@ window.ToastManager = {
 
             emptyState.style.display = 'none';
             
+            // Forza layout mobile se necessario
+            if (window.innerWidth <= 768) {
+                grid.style.display = 'grid';
+                grid.style.gridTemplateColumns = 'repeat(3, 1fr)';
+                grid.style.gap = '0.5rem';
+            }
+            
             grid.innerHTML = this.state.editingTraits.map((trait, index) => {
                 const categoryColor = this.getCategoryColor(trait.category_id);
                 
