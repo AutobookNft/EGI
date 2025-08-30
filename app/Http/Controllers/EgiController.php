@@ -86,16 +86,28 @@ class EgiController extends Controller {
                 'user',
                 'owner',
                 'likes',
-                'reservationCertificates'
+                'reservationCertificates',
+                'traits.category',
+                'traits.traitType'
             ])->findOrFail($id);
 
             // Log page access (developers only - English)
             $this->logger->info('EGI_PAGE_ACCESS: EGI detail page accessed successfully', [
+                'traits_count' => $egi->traits->count(),
                 'egi_id' => $egi->id,
                 'collection_id' => $egi->collection_id,
                 'user_id' => FegiAuth::id(),
                 'auth_type' => FegiAuth::getAuthType()
             ]);
+
+            // Calculate rarity for each trait
+            foreach ($egi->traits as $trait) {
+                $trait->rarity_percentage = $this->calculateRarity(
+                    $trait->trait_type_id,
+                    $trait->value,
+                    $egi->collection_id
+                );
+            }
 
             // Check if user can see CRUD box
             $canManage = false;
@@ -397,6 +409,7 @@ class EgiController extends Controller {
             $userRole = $membership->pivot->role ?? null;
 
             return in_array($userRole, ['admin', 'editor', 'creator']);
+        
         } catch (\Exception $e) {
             // Log error (developers only - English)
             $this->logger->error('EGI_PERMISSION_CHECK_ERROR: Failed to check EGI management permissions', [
@@ -407,5 +420,35 @@ class EgiController extends Controller {
 
             return false;
         }
+    }
+
+    /**
+     * Calculate rarity percentage for a trait value
+     * 
+     * @param int $traitTypeId
+     * @param string $value
+     * @param int $collectionId
+     * @return float
+     */
+    private function calculateRarity($traitTypeId, $value, $collectionId) {
+        $cacheKey = "trait_rarity_{$collectionId}_{$traitTypeId}_{$value}";
+
+        return \Illuminate\Support\Facades\Cache::remember($cacheKey, 3600, function () use ($traitTypeId, $value, $collectionId) {
+            // Total EGIs in collection
+            $totalEgis = \App\Models\Egi::where('collection_id', $collectionId)->count();
+
+            if ($totalEgis === 0) {
+                return 0;
+            }
+
+            // EGIs with this trait value
+            $egisWithTrait = \App\Models\EgiTrait::join('egis', 'egis.id', '=', 'egi_traits.egi_id')
+                ->where('egis.collection_id', $collectionId)
+                ->where('egi_traits.trait_type_id', $traitTypeId)
+                ->where('egi_traits.value', $value)
+                ->count();
+
+            return round(($egisWithTrait / $totalEgis) * 100, 2);
+        });
     }
 }

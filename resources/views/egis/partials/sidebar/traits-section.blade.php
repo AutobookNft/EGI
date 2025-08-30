@@ -7,6 +7,7 @@
 
 {{-- Traits Section - Forza il posizionamento naturale --}}
 <div class="traits-container" style="order: 0; position: relative; z-index: 1;">
+      
     
     @if(isset($canManage) && $canManage)
         {{-- Solo il creator vede l'editor completo --}}
@@ -15,7 +16,7 @@
         </div>
     @else
         {{-- Tutti gli altri vedono SOLO i traits esistenti (se ci sono) --}}
-        @if($egi->egiTraits && $egi->egiTraits->count() > 0)
+        @if($egi->traits && $egi->traits->count() > 0)
             <div class="space-y-4">
                 <x-egi.traits-viewer :egi="$egi" />
             </div>
