@@ -29,7 +29,7 @@ return [
     // Counter
     'traits_counter' => ':count/30',
     'save_all_traits' => 'Salva Tutti i Tratti',
-    
+
     // Messages
     'modal_error' => 'Errore nell\'apertura della modale. Riprova.',
     'save_success' => 'Tratti salvati con successo!',

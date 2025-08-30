@@ -29,7 +29,7 @@ return [
     // Counter
     'traits_counter' => ':count/30',
     'save_all_traits' => 'Save All Traits',
-    
+
     // Messages
     'modal_error' => 'Error opening modal. Please try again.',
     'save_success' => 'Traits saved successfully!',

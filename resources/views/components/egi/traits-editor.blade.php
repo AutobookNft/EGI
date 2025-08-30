@@ -166,6 +166,11 @@
 </div>
 @endonce
 
+{{-- Toast Container --}}
+@once
+<div class="toast-container" id="toast-container"></div>
+@endonce
+
 <script>
 // Traduzioni per JavaScript
 window.TraitsTranslations = {
@@ -184,6 +189,85 @@ window.TraitsTranslations = {
 };
 
 // Include traits-common.js functions here if needed, or load external file
+
+// Toast Notification System
+window.ToastManager = {
+    container: null,
+    
+    init() {
+        this.container = document.getElementById('toast-container');
+        if (!this.container) {
+            this.container = document.createElement('div');
+            this.container.className = 'toast-container';
+            this.container.id = 'toast-container';
+            document.body.appendChild(this.container);
+        }
+    },
+    
+    show(message, type = 'info', title = null, duration = 4000) {
+        this.init();
+        
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        
+        const icons = {
+            success: '✅',
+            error: '❌', 
+            warning: '⚠️',
+            info: 'ℹ️'
+        };
+        
+        const content = `
+            <div class="toast-content">
+                <span class="toast-icon">${icons[type] || icons.info}</span>
+                <div class="toast-text">
+                    ${title ? `<div class="toast-title">${title}</div>` : ''}
+                    <div class="toast-message">${message}</div>
+                </div>
+            </div>
+            <button class="toast-close" onclick="ToastManager.close(this.parentNode)">×</button>
+            <div class="toast-progress animate"></div>
+        `;
+        
+        toast.innerHTML = content;
+        this.container.appendChild(toast);
+        
+        // Trigger animation
+        setTimeout(() => toast.classList.add('show'), 10);
+        
+        // Auto remove
+        setTimeout(() => this.close(toast), duration);
+        
+        return toast;
+    },
+    
+    close(toast) {
+        if (!toast || !toast.parentNode) return;
+        
+        toast.classList.add('hide');
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.parentNode.removeChild(toast);
+            }
+        }, 300);
+    },
+    
+    success(message, title = null) {
+        return this.show(message, 'success', title);
+    },
+    
+    error(message, title = null) {
+        return this.show(message, 'error', title);
+    },
+    
+    warning(message, title = null) {
+        return this.show(message, 'warning', title);
+    },
+    
+    info(message, title = null) {
+        return this.show(message, 'info', title);
+    }
+};
 </script>
 
 <script>
@@ -348,8 +432,8 @@ window.TraitsTranslations = {
                 this.renderModalCategories();
             } catch (error) {
                 console.error('Error opening modal:', error);
-                // Mostra un messaggio di errore all'utente se necessario
-                alert(window.TraitsTranslations.modal_error);
+                // Mostra un toast di errore elegante
+                ToastManager.error(window.TraitsTranslations.modal_error, '🎯 Traits Editor');
             }
         },
 
@@ -692,19 +776,19 @@ window.TraitsTranslations = {
                 const data = await response.json();
                 
                 if (data.success) {
-                    alert(window.TraitsTranslations.save_success);
+                    ToastManager.success(window.TraitsTranslations.save_success, '🎯 Traits Salvati');
                     // Reset editing state
                     this.state.editingTraits = [];
                     this.updateUI();
                     
                     // Reload page to show updated viewer
-                    location.reload();
+                    setTimeout(() => location.reload(), 1500);
                 } else {
-                    alert(window.TraitsTranslations.save_error + ': ' + (data.message || window.TraitsTranslations.unknown_error));
+                    ToastManager.error(window.TraitsTranslations.save_error + ': ' + (data.message || window.TraitsTranslations.unknown_error), '❌ Errore Salvataggio');
                 }
             } catch (error) {
                 console.error('Error saving traits:', error);
-                alert(window.TraitsTranslations.network_error);
+                ToastManager.error(window.TraitsTranslations.network_error, '🌐 Errore di Rete');
             }
         },
 

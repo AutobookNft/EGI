@@ -29,7 +29,7 @@ return [
     // Counter
     'traits_counter' => ':count/30',
     'save_all_traits' => 'Guardar Todos los Rasgos',
-    
+
     // Messages
     'modal_error' => 'Error al abrir el modal. Inténtalo de nuevo.',
     'save_success' => '¡Rasgos guardados con éxito!',

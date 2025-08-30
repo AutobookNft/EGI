@@ -29,7 +29,7 @@ return [
     // Counter
     'traits_counter' => ':count/30',
     'save_all_traits' => 'Alle Eigenschaften Speichern',
-    
+
     // Messages
     'modal_error' => 'Fehler beim Öffnen des Modals. Bitte versuchen Sie es erneut.',
     'save_success' => 'Eigenschaften erfolgreich gespeichert!',
