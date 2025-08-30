@@ -257,7 +257,6 @@
                 
                 const data = await response.json();
                 console.log('TraitsEditor: Categories response:', data);
-                console.log('TraitsEditor: Debug info:', data.debug);
                 
                 if (data.success && data.categories && Array.isArray(data.categories)) {
                     if (data.categories.length > 0) {
@@ -266,7 +265,6 @@
                         this.renderCategories();
                     } else {
                         console.warn('TraitsEditor: Server returned empty categories array - using fallback');
-                        console.warn('TraitsEditor: Debug data:', data.debug);
                         throw new Error('Server returned empty categories array');
                     }
                 } else {

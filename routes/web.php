@@ -312,6 +312,9 @@ Route::prefix('traits')->group(function () {
         ->name('traits.types');
     Route::get('/categories/{category}/types', [TraitsApiController::class, 'getTraitTypesByCategory'])
         ->name('traits.categories.types');
+    Route::post('/clear-cache', [TraitsApiController::class, 'clearCache'])
+        ->name('traits.clear-cache')
+        ->middleware('auth'); // Solo utenti autenticati possono pulire la cache
 });
 
 // Utility management routes

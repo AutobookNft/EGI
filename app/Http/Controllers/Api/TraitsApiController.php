@@ -34,39 +34,43 @@ class TraitsApiController extends Controller
         $collectionId = $request->get('collection_id');
         
         try {
-            // Temporaneamente disabilitiamo la cache per il debug
-            $query = TraitCategory::query();
+            // Cache con chiave più specifica e timeout più breve
+            $cacheKey = "trait_categories_v2_{$collectionId}_" . md5(serialize([
+                'collection_id' => $collectionId,
+                'timestamp' => now()->format('Y-m-d-H') // Invalidazione ogni ora
+            ]));
             
-            if ($collectionId) {
-                $query->where(function ($q) use ($collectionId) {
-                    $q->where('is_system', true)
-                      ->orWhere('collection_id', $collectionId);
-                });
-            } else {
-                // Se non c'è collection_id, prendi solo le categorie di sistema
-                $query->where('is_system', true);
-            }
-            
-            $categories = $query->orderBy('sort_order')
-                               ->orderBy('name')
-                               ->get();
+            $categories = Cache::remember(
+                $cacheKey, 
+                1800, // 30 minuti invece di 1 ora
+                function () use ($collectionId) {
+                    $query = TraitCategory::query();
+                    
+                    if ($collectionId) {
+                        $query->where(function ($q) use ($collectionId) {
+                            $q->where('is_system', true)
+                              ->orWhere('collection_id', $collectionId);
+                        });
+                    } else {
+                        // Se non c'è collection_id, prendi solo le categorie di sistema
+                        $query->where('is_system', true);
+                    }
+                    
+                    return $query->orderBy('sort_order')
+                                ->orderBy('name')
+                                ->get();
+                }
+            );
 
-            \Log::info('TraitsApiController: Categories query result', [
+            \Log::info('TraitsApiController: Categories loaded', [
                 'collection_id' => $collectionId,
                 'categories_count' => $categories->count(),
-                'query_sql' => $query->toSql(),
-                'categories' => $categories->toArray()
+                'cache_key' => $cacheKey
             ]);
 
             return response()->json([
                 'success' => true,
-                'categories' => $categories,
-                'debug' => [
-                    'collection_id' => $collectionId,
-                    'total_categories_in_db' => TraitCategory::count(),
-                    'system_categories_count' => TraitCategory::where('is_system', true)->count(),
-                    'query_sql' => $query->toSql()
-                ]
+                'categories' => $categories
             ]);
         } catch (\Exception $e) {
             \Log::error('Error loading trait categories: ' . $e->getMessage());
@@ -376,5 +380,26 @@ class TraitsApiController extends Controller
             'external_url' => route('egis.show', $egi->id),
             'background_color' => 'D4A574' // Oro Fiorentino
         ];
+    }
+    
+    /**
+     * Clear traits cache (utile per testing o aggiornamenti)
+     */
+    public function clearCache(Request $request)
+    {
+        try {
+            // Per semplicità, usiamo artisan cache:clear per pulire tutto
+            \Artisan::call('cache:clear');
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Traits cache cleared successfully'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error clearing cache: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }
