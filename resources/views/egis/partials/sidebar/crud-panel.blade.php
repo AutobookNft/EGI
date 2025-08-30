@@ -8,9 +8,9 @@
 {{-- Center: CRUD Box --}}
 @if($canUpdateEgi)
 <div
-    class="overflow-y-auto border-l border-r lg:col-span-3 xl:col-span-2 bg-gradient-to-b from-emerald-900/20 to-emerald-900/10 backdrop-blur-xl border-emerald-700/30">
-    {{-- CRUD Box Content --}}
-    <div class="sticky top-0 p-4 lg:p-6">
+        class="overflow-y-auto border-l border-r lg:col-span-3 xl:col-span-2 bg-gradient-to-b from-emerald-900/20 to-emerald-900/10 backdrop-blur-xl border-emerald-700/30">
+        {{-- CRUD Box Content --}}
+        <div class="p-4 lg:p-6">
         <div
             class="p-6 border bg-gradient-to-br from-emerald-800/20 to-emerald-900/20 rounded-xl border-emerald-700/30">
 

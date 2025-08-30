@@ -18,7 +18,7 @@
     
     {{-- Header con counter --}}
     <div class="traits-header">
-                <h3 class="traits-title">
+        <h3 class="traits-title">
             <span class="traits-icon">🎯</span>
             {{ __('traits.title') }}
         </h3>
@@ -72,8 +72,18 @@
             class="add-trait-button"
             id="add-trait-btn"
             onclick="TraitsEditor.openModal()"
-            style="display: none;">
-        <svg class="button-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            style="display: none; 
+                   background: transparent !important; 
+                   border: 2px dashed #d4a574 !important; 
+                   color: #d4a574 !important; 
+                   padding: 0.75rem 1.5rem !important; 
+                   border-radius: 0.5rem !important; 
+                   font-weight: 600 !important; 
+                   cursor: pointer !important; 
+                   width: 100% !important; 
+                   margin-top: 1rem !important;
+                   font-size: 1rem !important;">
+        <svg class="button-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 1.25rem; height: 1.25rem; margin-right: 0.5rem;">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
         </svg>
         {{ __('traits.add_trait') }}
@@ -83,9 +93,20 @@
     <button type="button" 
             class="save-traits-button"
             onclick="TraitsEditor.saveTraits()"
-            style="display: none;"
+            style="display: none;
+                   background: #2d5016 !important; 
+                   border: none !important; 
+                   color: white !important; 
+                   padding: 0.75rem 1.5rem !important; 
+                   border-radius: 0.5rem !important; 
+                   font-weight: 600 !important; 
+                   cursor: pointer !important; 
+                   width: 100% !important; 
+                   margin-top: 1rem !important;
+                   font-size: 1rem !important;
+                   box-shadow: 0 2px 4px rgba(45, 80, 22, 0.2) !important;"
             id="save-traits-btn">
-        <svg class="button-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="button-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 1.25rem; height: 1.25rem; margin-right: 0.5rem;">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                 d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3-3m0 0l-3 3m3-3v12"/>
         </svg>
@@ -407,6 +428,9 @@ window.ToastManager = {
                     <span class="category-count" data-category="${cat.id}">0</span>
                 </button>
             `).join('');
+            
+            // Aggiorna i conteggi dopo aver renderizzato le categorie
+            this.updateCategoryCounters();
         },
 
         async openModal() {
@@ -686,6 +710,7 @@ window.ToastManager = {
         updateUI() {
             this.renderEditingTraits();
             this.updateCounter();
+            this.updateCategoryCounters();
             this.updateButtons();
             this.updateHiddenInput();
         },
@@ -736,6 +761,31 @@ window.ToastManager = {
             if (counter) {
                 counter.textContent = this.state.editingTraits.length;
             }
+        },
+
+        updateCategoryCounters() {
+            // Conteggio traits per categoria
+            const categoryCounts = {};
+            
+            // Inizializza tutti i conteggi a 0
+            this.state.categories.forEach(cat => {
+                categoryCounts[cat.id] = 0;
+            });
+            
+            // Conta i traits per categoria (include sia editing che esistenti)
+            this.state.editingTraits.forEach(trait => {
+                if (categoryCounts.hasOwnProperty(trait.category_id)) {
+                    categoryCounts[trait.category_id]++;
+                }
+            });
+            
+            // Aggiorna i badge delle categorie
+            Object.keys(categoryCounts).forEach(categoryId => {
+                const badge = document.querySelector(`[data-category="${categoryId}"]`);
+                if (badge) {
+                    badge.textContent = categoryCounts[categoryId];
+                }
+            });
         },
 
         updateButtons() {

@@ -134,16 +134,16 @@
                         class="overflow-y-auto border-l lg:col-span-3 bg-gray-900/95 backdrop-blur-xl border-gray-700/50">
 
                         {{-- Sidebar Content (Invariato) --}}
-                        <div class="sticky top-0 p-6 space-y-8 lg:p-8">
+                        <div class="p-6 space-y-8 lg:p-8">
 
                             {{-- Price & Purchase Section --}}
                             @include('egis.partials.sidebar.price-purchase-section', compact('egi', 'isForSale', 'displayPrice', 'priceLabel', 'displayUser', 'highestPriorityReservation', 'isCreator', 'canBeReserved'))
 
+                            {{-- Traits Section - SPOSTATO IN ALTO --}}
+                            @include('egis.partials.sidebar.traits-section', compact('egi'))
+
                             {{-- Utility Display Section --}}
                             @include('egis.partials.sidebar.utility-section', compact('egi'))
-                            
-                            {{-- Traits Section --}}
-                            @include('egis.partials.sidebar.traits-section', compact('egi'))
 
                             {{-- Description Section --}}
                             @include('egis.partials.sidebar.description-section', compact('egi'))
