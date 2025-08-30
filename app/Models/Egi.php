@@ -168,6 +168,38 @@ class Egi extends Model {
     //--------------------------------------------------------------------------
 
     /**
+     * Get the traits for this EGI
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function traits(): HasMany
+    {
+        return $this->hasMany(EgiTrait::class, 'egi_id')->orderBy('sort_order');
+    }
+
+    /**
+     * Get traits grouped by category
+     *
+     * @return \Illuminate\Support\Collection
+     */
+    public function getTraitsByCategoryAttribute()
+    {
+        return $this->traits->groupBy('category_id');
+    }
+
+    /**
+     * Check if EGI has rare traits
+     *
+     * @return bool
+     */
+    public function hasRareTraits(): bool
+    {
+        return $this->traits->contains(function ($trait) {
+            return $trait->isRare();
+        });
+    }
+
+    /**
      * 🔗 Defines the relationship: An EGI belongs to one Collection.
      *
      * @return BelongsTo

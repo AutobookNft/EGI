@@ -354,8 +354,12 @@
                                                 {{ __('egi.crud.is_published') }}
                                             </span>
                                         </label>
-                                        <div class="mt-1 text-xs text-gray-400 ml-7">{{ __('egi.crud.is_published_hint')
-                                            }}</div>
+                                        <div class="mt-1 text-xs text-gray-400 ml-7">{{ __('egi.crud.is_published_hint')}}</div>
+                                    </div>
+
+                                    {{-- Traits Manager --}}
+                                    <div class="pt-6 mt-6 border-t border-emerald-700/30">
+                                        <x-egi.traits-manager :egi="$egi" :readonly="false" />
                                     </div>
 
                                     {{-- Action Buttons --}}
@@ -628,30 +632,30 @@
                                             </svg>
                                             {{ __('utility.title') }}
                                         </h3>
-                                        <span class="px-3 py-1 text-xs font-medium text-white rounded-full bg-orange-500/20 border border-orange-400/30">
+                                        <span class="px-3 py-1 text-xs font-medium text-white border rounded-full bg-orange-500/20 border-orange-400/30">
                                             {{ __('utility.types.' . $egi->utility->type . '.label') }}
                                         </span>
                                     </div>
                                     
                                     <div class="mb-4">
-                                        <h4 class="font-medium text-white mb-2">{{ $egi->utility->title }}</h4>
+                                        <h4 class="mb-2 font-medium text-white">{{ $egi->utility->title }}</h4>
                                         <p class="text-sm text-gray-300 line-clamp-2">{{ Str::limit($egi->utility->description, 100) }}</p>
                                     </div>
 
                                     @if($egi->utility->getMedia('utility_gallery')->count() > 0)
                                     <div class="mb-4">
-                                        <p class="text-xs text-orange-300 mb-2">
+                                        <p class="mb-2 text-xs text-orange-300">
                                             {{ __('utility.available_images', ['count' => $egi->utility->getMedia('utility_gallery')->count(), 'title' => $egi->utility->title]) }}
                                         </p>
                                         <div class="flex gap-2 overflow-x-auto">
                                             @foreach($egi->utility->getMedia('utility_gallery')->take(3) as $media)
                                             <img src="{{ $media->getUrl('thumb') }}" 
                                                  alt="Utility image" 
-                                                 class="w-12 h-12 object-cover rounded-lg flex-shrink-0 border border-orange-500/30">
+                                                 class="flex-shrink-0 object-cover w-12 h-12 border rounded-lg border-orange-500/30">
                                             @endforeach
                                             @if($egi->utility->getMedia('utility_gallery')->count() > 3)
-                                            <div class="w-12 h-12 bg-orange-500/20 rounded-lg flex items-center justify-center border border-orange-500/30 flex-shrink-0">
-                                                <span class="text-xs text-orange-300 font-medium">+{{ $egi->utility->getMedia('utility_gallery')->count() - 3 }}</span>
+                                            <div class="flex items-center justify-center flex-shrink-0 w-12 h-12 border rounded-lg bg-orange-500/20 border-orange-500/30">
+                                                <span class="text-xs font-medium text-orange-300">+{{ $egi->utility->getMedia('utility_gallery')->count() - 3 }}</span>
                                             </div>
                                             @endif
                                         </div>
@@ -671,55 +675,10 @@
                                 </div>
                             </div>
                             @endif
-
-                            {{-- Properties Section --}}
+                            
+                            {{-- Traits Section --}}
                             <div class="space-y-4">
-                                <h3 class="text-lg font-semibold text-white">{{ __('egi.properties') }}</h3>
-                                <div class="grid grid-cols-1 gap-3">
-                                    @if($collection->epp)
-                                    <div class="p-4 border rounded-lg bg-emerald-500/10 border-emerald-400/20">
-                                        <div class="flex items-center justify-between">
-                                            <div>
-                                                <p class="mb-1 text-xs font-medium uppercase text-emerald-400">{{
-                                                    __('egi.supports_epp') }}</p>
-                                                <a href="{{ route('epps.show', $collection->epp->id) }}"
-                                                    class="text-sm font-semibold transition-colors text-emerald-300 hover:text-emerald-200">
-                                                    {{ Str::limit($collection->epp->name, 25) }}
-                                                </a>
-                                            </div>
-                                            <div class="w-2 h-2 rounded-full bg-emerald-400"></div>
-                                        </div>
-                                    </div>
-                                    @endif
-
-                                    @if($egi->type)
-                                    <div class="p-4 border rounded-lg bg-blue-500/10 border-blue-400/20">
-                                        <div class="flex items-center justify-between">
-                                            <div>
-                                                <p class="mb-1 text-xs font-medium text-blue-400 uppercase">{{
-                                                    __('egi.asset_type') }}</p>
-                                                <p class="text-sm font-semibold text-blue-300">{{ ucfirst($egi->type) }}
-                                                </p>
-                                            </div>
-                                            <div class="w-2 h-2 bg-blue-400 rounded-full"></div>
-                                        </div>
-                                    </div>
-                                    @endif
-
-                                    @if($egi->extension)
-                                    <div class="p-4 border rounded-lg bg-purple-500/10 border-purple-400/20">
-                                        <div class="flex items-center justify-between">
-                                            <div>
-                                                <p class="mb-1 text-xs font-medium text-purple-400 uppercase">{{
-                                                    __('egi.format') }}</p>
-                                                <p class="text-sm font-semibold text-purple-300">{{
-                                                    strtoupper($egi->extension) }}</p>
-                                            </div>
-                                            <div class="w-2 h-2 bg-purple-400 rounded-full"></div>
-                                        </div>
-                                    </div>
-                                    @endif
-                                </div>
+                                <x-egi.traits-manager :egi="$egi" :readonly="true" />
                             </div>
 
                             {{-- Description Section --}}
@@ -931,7 +890,7 @@
         <div id="utility-modal" class="fixed inset-0 z-50 items-center justify-center hidden bg-black/80 backdrop-blur-sm">
             <div class="relative w-full max-w-4xl mx-4 my-8 max-h-[90vh] overflow-hidden">
                 {{-- Modal Content --}}
-                <div class="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl border border-orange-500/30 shadow-2xl">
+                <div class="border shadow-2xl bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl border-orange-500/30">
                     {{-- Modal Header --}}
                     <div class="flex items-center justify-between p-6 border-b border-orange-500/20">
                         <div class="flex items-center space-x-3">
@@ -942,12 +901,12 @@
                             </div>
                             <div>
                                 <h2 class="text-xl font-bold text-white">{{ $egi->utility->title }}</h2>
-                                <span class="px-3 py-1 text-xs font-medium text-white rounded-full bg-orange-500/20 border border-orange-400/30">
+                                <span class="px-3 py-1 text-xs font-medium text-white border rounded-full bg-orange-500/20 border-orange-400/30">
                                     {{ __('utility.types.' . $egi->utility->type . '.label') }}
                                 </span>
                             </div>
                         </div>
-                        <button id="utility-modal-close" class="p-2 text-gray-400 hover:text-white transition-colors">
+                        <button id="utility-modal-close" class="p-2 text-gray-400 transition-colors hover:text-white">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                             </svg>
@@ -956,7 +915,7 @@
 
                     {{-- Modal Body --}}
                     <div class="overflow-y-auto max-h-[calc(90vh-180px)]">
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
+                        <div class="grid grid-cols-1 gap-6 p-6 lg:grid-cols-2">
                             {{-- Left Column: Images Carousel --}}
                             @if($egi->utility->getMedia('utility_gallery')->count() > 0)
                             <div class="space-y-4">
@@ -964,25 +923,25 @@
                                 
                                 {{-- Main Carousel Image --}}
                                 <div class="relative">
-                                    <div id="utility-carousel-container" class="relative rounded-xl overflow-hidden bg-black/30">
+                                    <div id="utility-carousel-container" class="relative overflow-hidden rounded-xl bg-black/30">
                                         <div id="utility-carousel-track" class="flex transition-transform duration-300 ease-in-out">
                                             @foreach($egi->utility->getMedia('utility_gallery') as $index => $media)
-                                            <div class="w-full flex-shrink-0">
+                                            <div class="flex-shrink-0 w-full">
                                                 <img src="{{ $media->getUrl() }}" 
                                                      alt="Utility image {{ $index + 1 }}" 
-                                                     class="w-full h-64 md:h-80 object-cover">
+                                                     class="object-cover w-full h-64 md:h-80">
                                             </div>
                                             @endforeach
                                         </div>
                                         
                                         {{-- Carousel Controls --}}
                                         @if($egi->utility->getMedia('utility_gallery')->count() > 1)
-                                        <button id="utility-carousel-prev" class="absolute left-4 top-1/2 transform -translate-y-1/2 p-2 bg-black/50 text-white rounded-full hover:bg-black/70 transition-colors">
+                                        <button id="utility-carousel-prev" class="absolute p-2 text-white transition-colors transform -translate-y-1/2 rounded-full left-4 top-1/2 bg-black/50 hover:bg-black/70">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                                             </svg>
                                         </button>
-                                        <button id="utility-carousel-next" class="absolute right-4 top-1/2 transform -translate-y-1/2 p-2 bg-black/50 text-white rounded-full hover:bg-black/70 transition-colors">
+                                        <button id="utility-carousel-next" class="absolute p-2 text-white transition-colors transform -translate-y-1/2 rounded-full right-4 top-1/2 bg-black/50 hover:bg-black/70">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                                             </svg>
@@ -992,7 +951,7 @@
 
                                     {{-- Carousel Indicators --}}
                                     @if($egi->utility->getMedia('utility_gallery')->count() > 1)
-                                    <div class="flex justify-center space-x-2 mt-4">
+                                    <div class="flex justify-center mt-4 space-x-2">
                                         @foreach($egi->utility->getMedia('utility_gallery') as $index => $media)
                                         <button class="utility-carousel-indicator w-2 h-2 rounded-full transition-colors {{ $index === 0 ? 'bg-orange-500' : 'bg-gray-500 hover:bg-orange-400' }}" data-slide="{{ $index }}"></button>
                                         @endforeach
@@ -1002,7 +961,7 @@
                                     {{-- Auto-play Toggle --}}
                                     @if($egi->utility->getMedia('utility_gallery')->count() > 1)
                                     <div class="flex justify-center mt-3">
-                                        <button id="utility-carousel-autoplay" class="flex items-center space-x-2 px-3 py-1 bg-orange-500/20 text-orange-300 rounded-lg hover:bg-orange-500/30 transition-colors">
+                                        <button id="utility-carousel-autoplay" class="flex items-center px-3 py-1 space-x-2 text-orange-300 transition-colors rounded-lg bg-orange-500/20 hover:bg-orange-500/30">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h1m4 0h1m6-7a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                             </svg>
@@ -1018,15 +977,15 @@
                             <div class="space-y-6">
                                 {{-- Description --}}
                                 <div>
-                                    <h3 class="text-lg font-semibold text-orange-400 mb-3">{{ __('utility.fields.description') }}</h3>
-                                    <p class="text-gray-300 leading-relaxed">{{ $egi->utility->description }}</p>
+                                    <h3 class="mb-3 text-lg font-semibold text-orange-400">{{ __('utility.fields.description') }}</h3>
+                                    <p class="leading-relaxed text-gray-300">{{ $egi->utility->description }}</p>
                                 </div>
 
                                 {{-- Type-specific Details --}}
                                 @if($egi->utility->type === 'physical')
                                     {{-- Physical Item Details --}}
-                                    <div class="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
-                                        <h4 class="text-blue-400 font-semibold mb-3">{{ __('utility.shipping.title') }}</h4>
+                                    <div class="p-4 border rounded-lg bg-blue-500/10 border-blue-500/20">
+                                        <h4 class="mb-3 font-semibold text-blue-400">{{ __('utility.shipping.title') }}</h4>
                                         <div class="grid grid-cols-2 gap-4 text-sm">
                                             @if($egi->utility->weight)
                                             <div>
@@ -1048,7 +1007,7 @@
                                             @endif
                                             @if($egi->utility->is_fragile)
                                             <div class="col-span-2">
-                                                <span class="inline-flex items-center px-2 py-1 bg-yellow-500/20 text-yellow-300 rounded-lg text-xs">
+                                                <span class="inline-flex items-center px-2 py-1 text-xs text-yellow-300 rounded-lg bg-yellow-500/20">
                                                     <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                                         <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
                                                     </svg>
@@ -1059,16 +1018,16 @@
                                         </div>
                                         @if($egi->utility->shipping_notes)
                                         <div class="mt-3">
-                                            <span class="text-gray-400 text-sm">{{ __('utility.shipping.notes') }}:</span>
-                                            <p class="text-white text-sm mt-1">{{ $egi->utility->shipping_notes }}</p>
+                                            <span class="text-sm text-gray-400">{{ __('utility.shipping.notes') }}:</span>
+                                            <p class="mt-1 text-sm text-white">{{ $egi->utility->shipping_notes }}</p>
                                         </div>
                                         @endif
                                     </div>
 
                                 @elseif($egi->utility->type === 'service')
                                     {{-- Service Details --}}
-                                    <div class="bg-green-500/10 border border-green-500/20 rounded-lg p-4">
-                                        <h4 class="text-green-400 font-semibold mb-3">{{ __('utility.service.title') }}</h4>
+                                    <div class="p-4 border rounded-lg bg-green-500/10 border-green-500/20">
+                                        <h4 class="mb-3 font-semibold text-green-400">{{ __('utility.service.title') }}</h4>
                                         <div class="space-y-3 text-sm">
                                             @if($egi->utility->valid_from || $egi->utility->valid_until)
                                             <div>
@@ -1088,7 +1047,7 @@
                                             @if($egi->utility->service_instructions)
                                             <div>
                                                 <span class="text-gray-400">{{ __('utility.service.instructions') }}:</span>
-                                                <p class="text-white mt-1">{{ $egi->utility->service_instructions }}</p>
+                                                <p class="mt-1 text-white">{{ $egi->utility->service_instructions }}</p>
                                             </div>
                                             @endif
                                         </div>
@@ -1098,8 +1057,8 @@
                                     {{-- Hybrid: Both Physical and Service --}}
                                     <div class="space-y-4">
                                         {{-- Physical Part --}}
-                                        <div class="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
-                                            <h4 class="text-blue-400 font-semibold mb-3">Componente Fisico</h4>
+                                        <div class="p-4 border rounded-lg bg-blue-500/10 border-blue-500/20">
+                                            <h4 class="mb-3 font-semibold text-blue-400">Componente Fisico</h4>
                                             <div class="grid grid-cols-2 gap-4 text-sm">
                                                 @if($egi->utility->weight)
                                                 <div>
@@ -1116,8 +1075,8 @@
                                             </div>
                                         </div>
                                         {{-- Service Part --}}
-                                        <div class="bg-green-500/10 border border-green-500/20 rounded-lg p-4">
-                                            <h4 class="text-green-400 font-semibold mb-3">Componente Servizio</h4>
+                                        <div class="p-4 border rounded-lg bg-green-500/10 border-green-500/20">
+                                            <h4 class="mb-3 font-semibold text-green-400">Componente Servizio</h4>
                                             <div class="text-sm">
                                                 @if($egi->utility->service_instructions)
                                                 <p class="text-white">{{ $egi->utility->service_instructions }}</p>
@@ -1128,8 +1087,8 @@
 
                                 @elseif($egi->utility->type === 'digital')
                                     {{-- Digital Content --}}
-                                    <div class="bg-purple-500/10 border border-purple-500/20 rounded-lg p-4">
-                                        <h4 class="text-purple-400 font-semibold mb-3">Contenuto Digitale</h4>
+                                    <div class="p-4 border rounded-lg bg-purple-500/10 border-purple-500/20">
+                                        <h4 class="mb-3 font-semibold text-purple-400">Contenuto Digitale</h4>
                                         <div class="space-y-3 text-sm">
                                             @if($egi->utility->valid_from || $egi->utility->valid_until)
                                             <div>
@@ -1143,7 +1102,7 @@
                                             @if($egi->utility->service_instructions)
                                             <div>
                                                 <span class="text-gray-400">Istruzioni di accesso:</span>
-                                                <p class="text-white mt-1">{{ $egi->utility->service_instructions }}</p>
+                                                <p class="mt-1 text-white">{{ $egi->utility->service_instructions }}</p>
                                             </div>
                                             @endif
                                         </div>
@@ -1151,8 +1110,8 @@
                                 @endif
 
                                 {{-- Escrow Information --}}
-                                <div class="bg-gray-700/30 border border-gray-600/30 rounded-lg p-4">
-                                    <h4 class="text-gray-300 font-semibold mb-3">{{ __('utility.escrow.' . $egi->utility->escrow_tier . '.label') }}</h4>
+                                <div class="p-4 border rounded-lg bg-gray-700/30 border-gray-600/30">
+                                    <h4 class="mb-3 font-semibold text-gray-300">{{ __('utility.escrow.' . $egi->utility->escrow_tier . '.label') }}</h4>
                                     <p class="text-sm text-gray-400">{{ __('utility.escrow.' . $egi->utility->escrow_tier . '.description') }}</p>
                                     @if($egi->utility->escrow_tier !== 'immediate')
                                     <div class="mt-2 space-y-1">
