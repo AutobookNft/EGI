@@ -16,7 +16,7 @@
      style="position: relative !important; order: -1 !important; margin-top: 0 !important; margin-bottom: 2rem !important;">
     
     {{-- Header con counter --}}
-    <div class="traits-header">
+    {{-- <div class="traits-header">
         <h3 class="traits-title">
             <span class="traits-icon">🎯</span>
             {{ __('Tratti e Attributi') }}
@@ -26,7 +26,7 @@
                 <span class="traits-count">{{ $egi && $egi->traits ? $egi->traits->count() : 0 }}</span>/30
             </span>
         </div>
-    </div>
+    </div> --}}
 
     {{-- Traits Grid (readonly) renderizzato con PHP --}}
     <div class="traits-list readonly">

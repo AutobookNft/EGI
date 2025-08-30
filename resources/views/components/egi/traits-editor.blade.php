@@ -85,7 +85,7 @@
 
         {{-- Save Button - Solo per utenti autorizzati --}}
         <button type="button" 
-                onclick="TraitsEditor.saveAllTraits()"
+                onclick="TraitsEditor.saveTraits()"
                 class="save-traits-btn"
                 style="background: #2d5016 !important; 
                        color: white !important; 
@@ -1003,6 +1003,13 @@ window.ToastManager = {
         },
 
         async saveTraits() {
+            // Blocca il salvataggio se non in modalità editing
+            if (!this.state.canEdit) {
+                console.warn('TraitsEditor: Save traits denied - readonly mode');
+                ToastManager.warning('Solo il creator può modificare i traits di questo EGI');
+                return;
+            }
+            
             if (this.state.editingTraits.length === 0) return;
 
             try {
@@ -1069,43 +1076,6 @@ window.ToastManager = {
             // Implementation for category filtering if needed
             console.log('Filter by category:', categoryId);
         }
-        },
-
-        async saveAllTraits() {
-            // Blocca il salvataggio se non in modalità editing
-            if (!this.state.canEdit) {
-                console.warn('TraitsEditor: Save traits denied - readonly mode');
-                ToastManager.warning('Solo il creator può modificare i traits di questo EGI');
-                return;
-            }
-
-            try {
-                ToastManager.info('Salvataggio traits in corso...');
-                
-                const response = await fetch(`/egis/${this.state.egiId}/traits`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    },
-                    body: JSON.stringify({
-                        traits: this.state.editingTraits
-                    })
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    ToastManager.success('Traits salvati con successo!');
-                    // Ricarica i traits dal server per sincronizzare gli ID
-                    await this.loadExistingTraits();
-                } else {
-                    ToastManager.error(data.message || 'Errore durante il salvataggio');
-                }
-            } catch (error) {
-                console.error('Error saving traits:', error);
-                ToastManager.error('Errore di connessione durante il salvataggio');
-            }
         }
     };
 
