@@ -2,33 +2,14 @@
 <x-guest-layout :title="$egi->title . ' | ' . $collection->collection_name"
     :metaDescription="Str::limit($egi->description, 155) ?? __('egi.meta_description_default', ['title' => $egi->title])">
 
+    @php
+    // Controllo se l'utente loggato è il creator dell'EGI
+    $isCreator = App\Helpers\FegiAuth::check() && App\Helpers\FegiAuth::id() === $egi->user_id;
+    @endphp
+
     {{-- Schema.org nel head --}}
     <x-slot name="schemaMarkup">
-        @php
-        // Usa l'immagine ottimizzata per Schema.org e fallback
-        $egiImageUrl = $egi->main_image_url ?? asset('images/default_egi_placeholder.jpg');
-
-        // Controllo se l'utente loggato è il creator dell'EGI
-        $isCreator = App\Helpers\FegiAuth::check() && App\Helpers\FegiAuth::id() === $egi->user_id;
-        @endphp
-        <script type="application/ld+json">
-            {
-        "@context": "https://schema.org",
-        "@type": "VisualArtwork",
-        "name": "{{ $egi->title }}",
-        "description": "{{ $egi->description }}",
-        "image": "{{ $egiImageUrl }}",
-        "isPartOf": {
-            "@type": "CollectionPage",
-            "name": "{{ $collection->collection_name }}",
-            "url": "{{ route('home.collections.show', $collection->id) }}"
-        },
-        "author": {
-            "@type": "Person",
-            "name": "{{ $egi->user->name ?? $collection->creator->name ?? 'Unknown Creator' }}"
-        }
-    }
-        </script>
+        @include('egis.partials.schema-markup', compact('egi', 'collection', 'isCreator'))
     </x-slot>
 
     {{-- Slot personalizzato per disabilitare la hero section --}}
