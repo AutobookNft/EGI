@@ -232,16 +232,47 @@
 
         async loadCategories() {
             try {
-                const response = await fetch('/traits/categories');
-                const data = await response.json();
+                console.log('TraitsEditor: Loading categories...');
                 
-                if (data.success) {
+                // Aggiungi timeout per server lenti
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 secondi timeout
+                
+                const response = await fetch('/traits/categories', {
+                    signal: controller.signal,
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                
+                clearTimeout(timeoutId);
+                
+                console.log('TraitsEditor: Response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('TraitsEditor: Categories response:', data);
+                
+                if (data.success && data.categories && Array.isArray(data.categories)) {
                     this.state.categories = data.categories;
+                    console.log('TraitsEditor: Categories loaded successfully:', this.state.categories.length);
                     this.renderCategories();
+                } else {
+                    throw new Error(data.message || 'Failed to load categories - invalid response format');
                 }
             } catch (error) {
-                console.error('Error loading categories:', error);
-                // Fallback data
+                console.error('TraitsEditor: Error loading categories:', error);
+                
+                if (error.name === 'AbortError') {
+                    console.error('TraitsEditor: Request timeout - server too slow');
+                }
+                
+                // Fallback: usa categorie statiche se il server fallisce
                 this.state.categories = [
                     {id: 1, name: 'Materials', slug: 'materials', icon: '📦'},
                     {id: 2, name: 'Visual', slug: 'visual', icon: '🎨'},
@@ -249,6 +280,8 @@
                     {id: 4, name: 'Special', slug: 'special', icon: '⚡'},
                     {id: 5, name: 'Sustainability', slug: 'sustainability', icon: '🌿'}
                 ];
+                
+                console.log('TraitsEditor: Using fallback categories');
                 this.renderCategories();
             }
         },
@@ -274,19 +307,53 @@
                 const modal = document.getElementById('trait-modal');
                 if (!modal) return;
 
-                // Assicurati che le categorie siano caricate prima di aprire la modale
-                if (this.state.categories.length === 0) {
-                    console.log('TraitsEditor: Categories not loaded, loading now...');
-                    await this.loadCategories();
-                }
-
                 modal.style.display = 'flex';
                 this.resetModal();
+                
+                // Mostra subito il placeholder
+                this.renderModalCategories();
+
+                // Forza il caricamento delle categorie se non sono caricate
+                if (this.state.categories.length === 0) {
+                    console.log('TraitsEditor: Modal opened, categories not loaded, forcing load...');
+                    await this.loadCategoriesWithRetry();
+                } else {
+                    console.log('TraitsEditor: Modal opened with cached categories');
+                }
+                
+                // Rendi nuovamente le categorie dopo il caricamento
                 this.renderModalCategories();
             } catch (error) {
                 console.error('Error opening modal:', error);
                 // Mostra un messaggio di errore all'utente se necessario
                 alert('Errore nell\'apertura della modale. Riprova.');
+            }
+        },
+
+        async loadCategoriesWithRetry(maxRetries = 3) {
+            for (let attempt = 1; attempt <= maxRetries; attempt++) {
+                try {
+                    console.log(`TraitsEditor: Loading categories attempt ${attempt}/${maxRetries}`);
+                    await this.loadCategories();
+                    
+                    // Se siamo arrivati qui senza errori e abbiamo categorie, esce
+                    if (this.state.categories.length > 0) {
+                        console.log('TraitsEditor: Categories loaded successfully on attempt', attempt);
+                        return;
+                    }
+                } catch (error) {
+                    console.error(`TraitsEditor: Attempt ${attempt} failed:`, error);
+                    
+                    if (attempt === maxRetries) {
+                        console.log('TraitsEditor: All attempts failed, using fallback categories');
+                        throw error;
+                    }
+                    
+                    // Aspetta prima di ritentare (backoff esponenziale)
+                    const delay = Math.pow(2, attempt - 1) * 1000; // 1s, 2s, 4s
+                    console.log(`TraitsEditor: Waiting ${delay}ms before retry...`);
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                }
             }
         },
 

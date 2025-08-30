@@ -24,32 +24,51 @@ use Illuminate\Support\Facades\Log;
 class TraitsApiController extends Controller
 {
     /**
-     * Get all trait categories
+     * Get all available trait categories
      * 
+     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function getCategories(Request $request)
     {
         $collectionId = $request->get('collection_id');
         
-        $categories = Cache::remember(
-            "trait_categories_{$collectionId}", 
-            3600, 
-            function () use ($collectionId) {
-                return TraitCategory::where(function ($query) use ($collectionId) {
-                    $query->where('is_system', true)
-                          ->orWhere('collection_id', $collectionId);
-                })
-                ->orderBy('sort_order')
-                ->orderBy('name')
-                ->get();
-            }
-        );
-        
-        return response()->json([
-            'success' => true,
-            'categories' => $categories
-        ]);
+        try {
+            $categories = Cache::remember(
+                "trait_categories_{$collectionId}", 
+                3600, 
+                function () use ($collectionId) {
+                    $query = TraitCategory::query();
+                    
+                    if ($collectionId) {
+                        $query->where(function ($q) use ($collectionId) {
+                            $q->where('is_system', true)
+                              ->orWhere('collection_id', $collectionId);
+                        });
+                    } else {
+                        // Se non c'è collection_id, prendi solo le categorie di sistema
+                        $query->where('is_system', true);
+                    }
+                    
+                    return $query->orderBy('sort_order')
+                                ->orderBy('name')
+                                ->get();
+                }
+            );
+
+            return response()->json([
+                'success' => true,
+                'categories' => $categories
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error loading trait categories: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Error loading categories',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
     
     /**
