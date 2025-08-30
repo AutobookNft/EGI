@@ -618,7 +618,58 @@
 
                             {{-- Utility Display Section --}}
                             @if($egi->utility)
-                            <x-utility.utility-display :utility="$egi->utility" />
+                            {{-- Utility Preview Card with Modal Trigger --}}
+                            <div class="space-y-4">
+                                <div class="p-6 border bg-gradient-to-br from-orange-800/20 to-orange-900/20 rounded-xl border-orange-700/30">
+                                    <div class="flex items-center justify-between mb-4">
+                                        <h3 class="text-lg font-semibold text-orange-400">
+                                            <svg class="inline w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                            </svg>
+                                            {{ __('utility.title') }}
+                                        </h3>
+                                        <span class="px-3 py-1 text-xs font-medium text-white rounded-full bg-orange-500/20 border border-orange-400/30">
+                                            {{ __('utility.types.' . $egi->utility->type . '.label') }}
+                                        </span>
+                                    </div>
+                                    
+                                    <div class="mb-4">
+                                        <h4 class="font-medium text-white mb-2">{{ $egi->utility->title }}</h4>
+                                        <p class="text-sm text-gray-300 line-clamp-2">{{ Str::limit($egi->utility->description, 100) }}</p>
+                                    </div>
+
+                                    @if($egi->utility->getMedia('utility_gallery')->count() > 0)
+                                    <div class="mb-4">
+                                        <p class="text-xs text-orange-300 mb-2">
+                                            {{ __('utility.available_images', ['count' => $egi->utility->getMedia('utility_gallery')->count(), 'title' => $egi->utility->title]) }}
+                                        </p>
+                                        <div class="flex gap-2 overflow-x-auto">
+                                            @foreach($egi->utility->getMedia('utility_gallery')->take(3) as $media)
+                                            <img src="{{ $media->getUrl('thumb') }}" 
+                                                 alt="Utility image" 
+                                                 class="w-12 h-12 object-cover rounded-lg flex-shrink-0 border border-orange-500/30">
+                                            @endforeach
+                                            @if($egi->utility->getMedia('utility_gallery')->count() > 3)
+                                            <div class="w-12 h-12 bg-orange-500/20 rounded-lg flex items-center justify-center border border-orange-500/30 flex-shrink-0">
+                                                <span class="text-xs text-orange-300 font-medium">+{{ $egi->utility->getMedia('utility_gallery')->count() - 3 }}</span>
+                                            </div>
+                                            @endif
+                                        </div>
+                                    </div>
+                                    @endif
+
+                                    <button 
+                                        id="utility-modal-trigger"
+                                        class="inline-flex items-center justify-center w-full px-4 py-3 font-medium text-white transition-all duration-200 rounded-lg bg-gradient-to-r from-orange-600/80 to-orange-700/80 hover:from-orange-600 hover:to-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                    >
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                        </svg>
+                                        {{ __('utility.view_details') }}
+                                    </button>
+                                </div>
+                            </div>
                             @endif
 
                             {{-- Properties Section --}}
@@ -864,7 +915,7 @@
         </script>
         {{-- Lightbox Zoom Overlay --}}
         <div id="zoom-overlay"
-            class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black/80 backdrop-blur-sm">
+            class="fixed inset-0 z-50 items-center justify-center hidden bg-black/80 backdrop-blur-sm">
             <div id="zoom-content" class="relative max-w-[90%] max-h-[90%]">
                 <img id="zoom-overlay-image" src="" alt="" class="max-w-full max-h-full touch-none user-select-none"
                     style="object-fit: contain;" />
@@ -874,6 +925,267 @@
                 </button>
             </div>
         </div>
+
+        {{-- Utility Details Modal --}}
+        @if($egi->utility)
+        <div id="utility-modal" class="fixed inset-0 z-50 items-center justify-center hidden bg-black/80 backdrop-blur-sm">
+            <div class="relative w-full max-w-4xl mx-4 my-8 max-h-[90vh] overflow-hidden">
+                {{-- Modal Content --}}
+                <div class="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl border border-orange-500/30 shadow-2xl">
+                    {{-- Modal Header --}}
+                    <div class="flex items-center justify-between p-6 border-b border-orange-500/20">
+                        <div class="flex items-center space-x-3">
+                            <div class="p-2 rounded-lg bg-orange-500/20">
+                                <svg class="w-6 h-6 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h2 class="text-xl font-bold text-white">{{ $egi->utility->title }}</h2>
+                                <span class="px-3 py-1 text-xs font-medium text-white rounded-full bg-orange-500/20 border border-orange-400/30">
+                                    {{ __('utility.types.' . $egi->utility->type . '.label') }}
+                                </span>
+                            </div>
+                        </div>
+                        <button id="utility-modal-close" class="p-2 text-gray-400 hover:text-white transition-colors">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+
+                    {{-- Modal Body --}}
+                    <div class="overflow-y-auto max-h-[calc(90vh-180px)]">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
+                            {{-- Left Column: Images Carousel --}}
+                            @if($egi->utility->getMedia('utility_gallery')->count() > 0)
+                            <div class="space-y-4">
+                                <h3 class="text-lg font-semibold text-orange-400">{{ __('utility.media.title') }}</h3>
+                                
+                                {{-- Main Carousel Image --}}
+                                <div class="relative">
+                                    <div id="utility-carousel-container" class="relative rounded-xl overflow-hidden bg-black/30">
+                                        <div id="utility-carousel-track" class="flex transition-transform duration-300 ease-in-out">
+                                            @foreach($egi->utility->getMedia('utility_gallery') as $index => $media)
+                                            <div class="w-full flex-shrink-0">
+                                                <img src="{{ $media->getUrl() }}" 
+                                                     alt="Utility image {{ $index + 1 }}" 
+                                                     class="w-full h-64 md:h-80 object-cover">
+                                            </div>
+                                            @endforeach
+                                        </div>
+                                        
+                                        {{-- Carousel Controls --}}
+                                        @if($egi->utility->getMedia('utility_gallery')->count() > 1)
+                                        <button id="utility-carousel-prev" class="absolute left-4 top-1/2 transform -translate-y-1/2 p-2 bg-black/50 text-white rounded-full hover:bg-black/70 transition-colors">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                                            </svg>
+                                        </button>
+                                        <button id="utility-carousel-next" class="absolute right-4 top-1/2 transform -translate-y-1/2 p-2 bg-black/50 text-white rounded-full hover:bg-black/70 transition-colors">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                            </svg>
+                                        </button>
+                                        @endif
+                                    </div>
+
+                                    {{-- Carousel Indicators --}}
+                                    @if($egi->utility->getMedia('utility_gallery')->count() > 1)
+                                    <div class="flex justify-center space-x-2 mt-4">
+                                        @foreach($egi->utility->getMedia('utility_gallery') as $index => $media)
+                                        <button class="utility-carousel-indicator w-2 h-2 rounded-full transition-colors {{ $index === 0 ? 'bg-orange-500' : 'bg-gray-500 hover:bg-orange-400' }}" data-slide="{{ $index }}"></button>
+                                        @endforeach
+                                    </div>
+                                    @endif
+
+                                    {{-- Auto-play Toggle --}}
+                                    @if($egi->utility->getMedia('utility_gallery')->count() > 1)
+                                    <div class="flex justify-center mt-3">
+                                        <button id="utility-carousel-autoplay" class="flex items-center space-x-2 px-3 py-1 bg-orange-500/20 text-orange-300 rounded-lg hover:bg-orange-500/30 transition-colors">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h1m4 0h1m6-7a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                            </svg>
+                                            <span class="text-xs">Auto-play</span>
+                                        </button>
+                                    </div>
+                                    @endif
+                                </div>
+                            </div>
+                            @endif
+
+                            {{-- Right Column: Utility Details --}}
+                            <div class="space-y-6">
+                                {{-- Description --}}
+                                <div>
+                                    <h3 class="text-lg font-semibold text-orange-400 mb-3">{{ __('utility.fields.description') }}</h3>
+                                    <p class="text-gray-300 leading-relaxed">{{ $egi->utility->description }}</p>
+                                </div>
+
+                                {{-- Type-specific Details --}}
+                                @if($egi->utility->type === 'physical')
+                                    {{-- Physical Item Details --}}
+                                    <div class="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
+                                        <h4 class="text-blue-400 font-semibold mb-3">{{ __('utility.shipping.title') }}</h4>
+                                        <div class="grid grid-cols-2 gap-4 text-sm">
+                                            @if($egi->utility->weight)
+                                            <div>
+                                                <span class="text-gray-400">{{ __('utility.shipping.weight') }}:</span>
+                                                <span class="text-white">{{ $egi->utility->weight }} kg</span>
+                                            </div>
+                                            @endif
+                                            @if($egi->utility->dimensions_length || $egi->utility->dimensions_width || $egi->utility->dimensions_height)
+                                            <div>
+                                                <span class="text-gray-400">{{ __('utility.shipping.dimensions') }}:</span>
+                                                <span class="text-white">{{ $egi->utility->dimensions_length }}x{{ $egi->utility->dimensions_width }}x{{ $egi->utility->dimensions_height }} cm</span>
+                                            </div>
+                                            @endif
+                                            @if($egi->utility->shipping_days)
+                                            <div>
+                                                <span class="text-gray-400">{{ __('utility.shipping.days') }}:</span>
+                                                <span class="text-white">{{ $egi->utility->shipping_days }} giorni</span>
+                                            </div>
+                                            @endif
+                                            @if($egi->utility->is_fragile)
+                                            <div class="col-span-2">
+                                                <span class="inline-flex items-center px-2 py-1 bg-yellow-500/20 text-yellow-300 rounded-lg text-xs">
+                                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                                    </svg>
+                                                    {{ __('utility.shipping.fragile') }}
+                                                </span>
+                                            </div>
+                                            @endif
+                                        </div>
+                                        @if($egi->utility->shipping_notes)
+                                        <div class="mt-3">
+                                            <span class="text-gray-400 text-sm">{{ __('utility.shipping.notes') }}:</span>
+                                            <p class="text-white text-sm mt-1">{{ $egi->utility->shipping_notes }}</p>
+                                        </div>
+                                        @endif
+                                    </div>
+
+                                @elseif($egi->utility->type === 'service')
+                                    {{-- Service Details --}}
+                                    <div class="bg-green-500/10 border border-green-500/20 rounded-lg p-4">
+                                        <h4 class="text-green-400 font-semibold mb-3">{{ __('utility.service.title') }}</h4>
+                                        <div class="space-y-3 text-sm">
+                                            @if($egi->utility->valid_from || $egi->utility->valid_until)
+                                            <div>
+                                                <span class="text-gray-400">Validità:</span>
+                                                <span class="text-white">
+                                                    @if($egi->utility->valid_from) Dal {{ $egi->utility->valid_from->format('d/m/Y') }} @endif
+                                                    @if($egi->utility->valid_until) al {{ $egi->utility->valid_until->format('d/m/Y') }} @endif
+                                                </span>
+                                            </div>
+                                            @endif
+                                            @if($egi->utility->max_uses)
+                                            <div>
+                                                <span class="text-gray-400">{{ __('utility.service.max_uses') }}:</span>
+                                                <span class="text-white">{{ $egi->utility->max_uses }}</span>
+                                            </div>
+                                            @endif
+                                            @if($egi->utility->service_instructions)
+                                            <div>
+                                                <span class="text-gray-400">{{ __('utility.service.instructions') }}:</span>
+                                                <p class="text-white mt-1">{{ $egi->utility->service_instructions }}</p>
+                                            </div>
+                                            @endif
+                                        </div>
+                                    </div>
+
+                                @elseif($egi->utility->type === 'hybrid')
+                                    {{-- Hybrid: Both Physical and Service --}}
+                                    <div class="space-y-4">
+                                        {{-- Physical Part --}}
+                                        <div class="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
+                                            <h4 class="text-blue-400 font-semibold mb-3">Componente Fisico</h4>
+                                            <div class="grid grid-cols-2 gap-4 text-sm">
+                                                @if($egi->utility->weight)
+                                                <div>
+                                                    <span class="text-gray-400">{{ __('utility.shipping.weight') }}:</span>
+                                                    <span class="text-white">{{ $egi->utility->weight }} kg</span>
+                                                </div>
+                                                @endif
+                                                @if($egi->utility->shipping_days)
+                                                <div>
+                                                    <span class="text-gray-400">{{ __('utility.shipping.days') }}:</span>
+                                                    <span class="text-white">{{ $egi->utility->shipping_days }} giorni</span>
+                                                </div>
+                                                @endif
+                                            </div>
+                                        </div>
+                                        {{-- Service Part --}}
+                                        <div class="bg-green-500/10 border border-green-500/20 rounded-lg p-4">
+                                            <h4 class="text-green-400 font-semibold mb-3">Componente Servizio</h4>
+                                            <div class="text-sm">
+                                                @if($egi->utility->service_instructions)
+                                                <p class="text-white">{{ $egi->utility->service_instructions }}</p>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                @elseif($egi->utility->type === 'digital')
+                                    {{-- Digital Content --}}
+                                    <div class="bg-purple-500/10 border border-purple-500/20 rounded-lg p-4">
+                                        <h4 class="text-purple-400 font-semibold mb-3">Contenuto Digitale</h4>
+                                        <div class="space-y-3 text-sm">
+                                            @if($egi->utility->valid_from || $egi->utility->valid_until)
+                                            <div>
+                                                <span class="text-gray-400">Accesso valido:</span>
+                                                <span class="text-white">
+                                                    @if($egi->utility->valid_from) Dal {{ $egi->utility->valid_from->format('d/m/Y') }} @endif
+                                                    @if($egi->utility->valid_until) al {{ $egi->utility->valid_until->format('d/m/Y') }} @endif
+                                                </span>
+                                            </div>
+                                            @endif
+                                            @if($egi->utility->service_instructions)
+                                            <div>
+                                                <span class="text-gray-400">Istruzioni di accesso:</span>
+                                                <p class="text-white mt-1">{{ $egi->utility->service_instructions }}</p>
+                                            </div>
+                                            @endif
+                                        </div>
+                                    </div>
+                                @endif
+
+                                {{-- Escrow Information --}}
+                                <div class="bg-gray-700/30 border border-gray-600/30 rounded-lg p-4">
+                                    <h4 class="text-gray-300 font-semibold mb-3">{{ __('utility.escrow.' . $egi->utility->escrow_tier . '.label') }}</h4>
+                                    <p class="text-sm text-gray-400">{{ __('utility.escrow.' . $egi->utility->escrow_tier . '.description') }}</p>
+                                    @if($egi->utility->escrow_tier !== 'immediate')
+                                    <div class="mt-2 space-y-1">
+                                        <div class="flex items-center text-xs text-gray-400">
+                                            <svg class="w-3 h-3 mr-1 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                                            </svg>
+                                            {{ __('utility.escrow.' . $egi->utility->escrow_tier . '.requirement_tracking') }}
+                                        </div>
+                                        @if($egi->utility->escrow_tier === 'premium')
+                                        <div class="flex items-center text-xs text-gray-400">
+                                            <svg class="w-3 h-3 mr-1 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                                            </svg>
+                                            {{ __('utility.escrow.' . $egi->utility->escrow_tier . '.requirement_signature') }}
+                                        </div>
+                                        <div class="flex items-center text-xs text-gray-400">
+                                            <svg class="w-3 h-3 mr-1 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                                            </svg>
+                                            {{ __('utility.escrow.' . $egi->utility->escrow_tier . '.requirement_insurance') }}
+                                        </div>
+                                        @endif
+                                    </div>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
     </x-slot>
 
 
@@ -911,6 +1223,61 @@
         #zoom-overlay:not(.hidden) {
             opacity: 1;
             pointer-events: all;
+        }
+
+        /* Utility Modal Styles */
+        #utility-modal {
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        #utility-modal.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #utility-modal:not(.hidden) {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        /* Utility Carousel Styles */
+        .utility-carousel-indicator {
+            transition: all 0.3s ease;
+        }
+
+        .utility-carousel-indicator:hover {
+            transform: scale(1.2);
+        }
+
+        /* Line clamp utility */
+        .line-clamp-2 {
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
+        }
+
+        /* Smooth scrolling for modal */
+        #utility-modal .overflow-y-auto {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(249, 115, 22, 0.3) transparent;
+        }
+
+        #utility-modal .overflow-y-auto::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #utility-modal .overflow-y-auto::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        #utility-modal .overflow-y-auto::-webkit-scrollbar-thumb {
+            background: rgba(249, 115, 22, 0.3);
+            border-radius: 3px;
+        }
+
+        #utility-modal .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+            background: rgba(249, 115, 22, 0.5);
         }
     </style>
 
@@ -1258,4 +1625,212 @@ window.addEventListener('load', () => {
 });
 
 console.log('📝 ZOOM: Script loaded successfully');
+</script>
+
+{{-- Utility Modal JavaScript --}}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Modal elements
+    const utilityModal = document.getElementById('utility-modal');
+    const utilityModalTrigger = document.getElementById('utility-modal-trigger');
+    const utilityModalClose = document.getElementById('utility-modal-close');
+    
+    // Carousel elements
+    const carouselTrack = document.getElementById('utility-carousel-track');
+    const carouselPrev = document.getElementById('utility-carousel-prev');
+    const carouselNext = document.getElementById('utility-carousel-next');
+    const carouselAutoplay = document.getElementById('utility-carousel-autoplay');
+    const carouselIndicators = document.querySelectorAll('.utility-carousel-indicator');
+    
+    let currentSlide = 0;
+    let totalSlides = carouselIndicators.length;
+    let autoplayInterval = null;
+    let isAutoplayActive = false;
+
+    // Modal functions
+    function openModal() {
+        utilityModal.classList.remove('hidden');
+        utilityModal.classList.add('flex');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+        utilityModal.classList.add('hidden');
+        utilityModal.classList.remove('flex');
+        document.body.style.overflow = '';
+        stopAutoplay();
+    }
+
+    // Carousel functions
+    function updateCarousel() {
+        if (carouselTrack && totalSlides > 0) {
+            const translateX = -currentSlide * 100;
+            carouselTrack.style.transform = `translateX(${translateX}%)`;
+            
+            // Update indicators
+            carouselIndicators.forEach((indicator, index) => {
+                if (index === currentSlide) {
+                    indicator.classList.remove('bg-gray-500');
+                    indicator.classList.add('bg-orange-500');
+                } else {
+                    indicator.classList.remove('bg-orange-500');
+                    indicator.classList.add('bg-gray-500');
+                }
+            });
+        }
+    }
+
+    function nextSlide() {
+        currentSlide = (currentSlide + 1) % totalSlides;
+        updateCarousel();
+    }
+
+    function prevSlide() {
+        currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+        updateCarousel();
+    }
+
+    function goToSlide(slideIndex) {
+        currentSlide = slideIndex;
+        updateCarousel();
+    }
+
+    function startAutoplay() {
+        if (totalSlides > 1) {
+            autoplayInterval = setInterval(nextSlide, 4000); // 4 seconds
+            isAutoplayActive = true;
+            if (carouselAutoplay) {
+                carouselAutoplay.classList.add('bg-orange-500/30', 'text-orange-200');
+                carouselAutoplay.classList.remove('bg-orange-500/20', 'text-orange-300');
+            }
+        }
+    }
+
+    function stopAutoplay() {
+        if (autoplayInterval) {
+            clearInterval(autoplayInterval);
+            autoplayInterval = null;
+            isAutoplayActive = false;
+            if (carouselAutoplay) {
+                carouselAutoplay.classList.remove('bg-orange-500/30', 'text-orange-200');
+                carouselAutoplay.classList.add('bg-orange-500/20', 'text-orange-300');
+            }
+        }
+    }
+
+    function toggleAutoplay() {
+        if (isAutoplayActive) {
+            stopAutoplay();
+        } else {
+            startAutoplay();
+        }
+    }
+
+    // Event listeners
+    if (utilityModalTrigger) {
+        utilityModalTrigger.addEventListener('click', openModal);
+    }
+
+    if (utilityModalClose) {
+        utilityModalClose.addEventListener('click', closeModal);
+    }
+
+    // Close modal on background click
+    if (utilityModal) {
+        utilityModal.addEventListener('click', function(e) {
+            if (e.target === utilityModal) {
+                closeModal();
+            }
+        });
+    }
+
+    // Close modal on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && !utilityModal.classList.contains('hidden')) {
+            closeModal();
+        }
+    });
+
+    // Carousel controls
+    if (carouselNext) {
+        carouselNext.addEventListener('click', function() {
+            stopAutoplay(); // Stop autoplay when user manually navigates
+            nextSlide();
+        });
+    }
+
+    if (carouselPrev) {
+        carouselPrev.addEventListener('click', function() {
+            stopAutoplay(); // Stop autoplay when user manually navigates
+            prevSlide();
+        });
+    }
+
+    // Carousel indicators
+    carouselIndicators.forEach((indicator, index) => {
+        indicator.addEventListener('click', function() {
+            stopAutoplay(); // Stop autoplay when user manually navigates
+            goToSlide(index);
+        });
+    });
+
+    // Autoplay toggle
+    if (carouselAutoplay) {
+        carouselAutoplay.addEventListener('click', toggleAutoplay);
+    }
+
+    // Touch/swipe support for mobile
+    if (carouselTrack) {
+        let startX = 0;
+        let endX = 0;
+        let isDragging = false;
+
+        carouselTrack.addEventListener('touchstart', function(e) {
+            startX = e.touches[0].clientX;
+            isDragging = true;
+        });
+
+        carouselTrack.addEventListener('touchmove', function(e) {
+            if (!isDragging) return;
+            endX = e.touches[0].clientX;
+        });
+
+        carouselTrack.addEventListener('touchend', function() {
+            if (!isDragging) return;
+            isDragging = false;
+            
+            const diff = startX - endX;
+            const threshold = 50; // Minimum swipe distance
+            
+            if (Math.abs(diff) > threshold) {
+                stopAutoplay(); // Stop autoplay on swipe
+                if (diff > 0) {
+                    nextSlide(); // Swipe left - next slide
+                } else {
+                    prevSlide(); // Swipe right - prev slide
+                }
+            }
+        });
+
+        // Prevent default touch behavior
+        carouselTrack.addEventListener('touchmove', function(e) {
+            e.preventDefault();
+        }, { passive: false });
+    }
+
+    // Initialize carousel
+    if (totalSlides > 0) {
+        updateCarousel();
+        
+        // Start autoplay if there are multiple slides
+        if (totalSlides > 1) {
+            // Start autoplay when modal opens
+            if (utilityModalTrigger) {
+                utilityModalTrigger.addEventListener('click', function() {
+                    setTimeout(startAutoplay, 500); // Small delay to let modal open
+                });
+            }
+        }
+    }
+});
 </script>

@@ -7,6 +7,7 @@ return [
     'status_configured' => 'Utilidad Configurada',
     'status_none' => 'Sin Utilidad',
     'available_images' => ':count imágenes disponibles para ":title"',
+    'view_details' => 'Ver Detalles',
 
     // Alertas y mensajes
     'info_edit_before_publish' => 'La utilidad solo puede agregarse o modificarse antes de que se publique la colección. Una vez publicada, no se puede modificar.',

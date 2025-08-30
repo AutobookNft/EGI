@@ -7,6 +7,7 @@ return [
     'status_configured' => 'Utility Configured',
     'status_none' => 'No Utility',
     'available_images' => ':count images available for ":title"',
+    'view_details' => 'View Details',
 
     // Alerts and messages
     'info_edit_before_publish' => 'The utility can only be added or modified before the collection is published. Once published, it cannot be modified.',
