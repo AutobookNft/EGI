@@ -7,6 +7,7 @@ use App\Http\Controllers\EgiController;
 use App\Http\Controllers\EPPController;
 use App\Http\Controllers\Formazione;
 use App\Http\Controllers\Api\LikeController;
+use App\Http\Controllers\Api\TraitsApiController;
 use App\Http\Controllers\Notifications\Invitations\NotificationInvitationResponseController;
 use App\Http\Controllers\Notifications\NotificationDetailsController;
 use App\Http\Controllers\Notifications\Wallets\NotificationWalletResponseController;
@@ -293,6 +294,24 @@ Route::group(['prefix' => 'egis'], function () {
     // Delete EGI - DELETE per eliminazione
     Route::delete('/{egi}', [App\Http\Controllers\EgiController::class, 'destroy'])
         ->name('egis.destroy');
+
+    // Trait management routes
+    Route::middleware('auth')->group(function () {
+        Route::get('/{egi}/traits', [TraitsApiController::class, 'getEgiTraits'])
+            ->name('egis.traits.get');
+        Route::post('/{egi}/traits', [TraitsApiController::class, 'saveEgiTraits'])
+            ->name('egis.traits.save');
+    });
+});
+
+// Trait system routes
+Route::prefix('traits')->group(function () {
+    Route::get('/categories', [TraitsApiController::class, 'getCategories'])
+        ->name('traits.categories');
+    Route::get('/types', [TraitsApiController::class, 'getTraitTypes'])
+        ->name('traits.types');
+    Route::get('/categories/{category}/types', [TraitsApiController::class, 'getTraitTypesByCategory'])
+        ->name('traits.categories.types');
 });
 
 // Utility management routes

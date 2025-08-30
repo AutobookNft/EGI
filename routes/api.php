@@ -11,17 +11,6 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-Route::prefix('traits')->group(function () {
-    Route::get('/categories', [TraitsApiController::class, 'getCategories']);
-    Route::get('/types', [TraitsApiController::class, 'getTraitTypes']);
-});
-
-Route::prefix('egis')->group(function () {
-    Route::get('/{egi}/traits', [TraitsApiController::class, 'getEgiTraits']);
-    Route::post('/{egi}/traits', [TraitsApiController::class, 'saveEgiTraits'])->middleware('auth');
-    Route::get('/{egi}/metadata', [TraitsApiController::class, 'generateMetadata']);
-});
-
 /*
 |--------------------------------------------------------------------------
 | Multi-Currency API Routes (Mixed Security Approach)

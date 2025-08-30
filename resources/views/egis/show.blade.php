@@ -357,11 +357,6 @@
                                         <div class="mt-1 text-xs text-gray-400 ml-7">{{ __('egi.crud.is_published_hint')}}</div>
                                     </div>
 
-                                    {{-- Traits Manager --}}
-                                    <div class="pt-6 mt-6 border-t border-emerald-700/30">
-                                        <x-egi.traits-manager :egi="$egi" :readonly="false" />
-                                    </div>
-
                                     {{-- Action Buttons --}}
                                     <div class="flex gap-3 pt-4">
                                         <button type="submit"
@@ -478,8 +473,10 @@
                                 </div>
                             </div>
                         </div>
+                      
                     </div>
                     @endif
+                     
 
                     {{-- Right: Sidebar Esistente (Ridotta da 4-3 a 3) --}}
                     <div
@@ -676,9 +673,15 @@
                             </div>
                             @endif
                             
-                            {{-- Traits Section --}}
+                            {{-- Traits Section - Solo se ci sono traits esistenti --}}
+                            @if($egi->egiTraits && $egi->egiTraits->count() > 0)
                             <div class="space-y-4">
-                                <x-egi.traits-manager :egi="$egi" :readonly="true" />
+                                <x-egi.traits-viewer :egi="$egi" />
+                            </div>
+                            @endif
+                              {{-- Traits Manager --}}
+                            <div class="pt-6 mt-6 border-t border-emerald-700/30">
+                                <x-egi.traits-editor :egi="$egi" />
                             </div>
 
                             {{-- Description Section --}}
@@ -717,6 +720,7 @@
                                 </div>
                             @endif
                         </div>
+                       
                     </div>
                 </div>
         </div>

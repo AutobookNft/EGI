@@ -7,6 +7,7 @@ use App\Models\Egi;
 use App\Models\TraitCategory;
 use App\Models\TraitType;
 use App\Models\EgiTrait;
+use App\Helpers\FegiAuth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
@@ -81,6 +82,31 @@ class TraitsApiController extends Controller
     }
     
     /**
+     * Get trait types for a specific category via URL parameter
+     * 
+     * @param int $categoryId
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getTraitTypesByCategory($categoryId, Request $request)
+    {
+        $collectionId = $request->get('collection_id');
+        
+        $types = TraitType::where('category_id', $categoryId)
+            ->where(function ($query) use ($collectionId) {
+                $query->where('is_system', true)
+                      ->orWhere('collection_id', $collectionId);
+            })
+            ->orderBy('name')
+            ->get();
+        
+        return response()->json([
+            'success' => true,
+            'types' => $types
+        ]);
+    }
+    
+    /**
      * Get traits for an EGI
      * 
      * @param int $egiId
@@ -134,14 +160,16 @@ class TraitsApiController extends Controller
     public function saveEgiTraits(Request $request, $egiId)
     {
         Log::info('SaveEgiTraits called for EGI: ' . $egiId);
+        Log::info('Authenticated user ID: ' . (auth()->id() ?? 'NULL'));
         
         try {
             // Verifica che l'EGI esista
             $egi = Egi::findOrFail($egiId);
+            Log::info('EGI found - Owner ID: ' . $egi->user_id);
             
             // Verifica autorizzazione
             if ($egi->user_id !== auth()->id()) {
-                Log::warning('Unauthorized trait save attempt for EGI: ' . $egiId);
+                Log::warning('Unauthorized trait save attempt for EGI: ' . $egiId . ' by user: ' . (auth()->id() ?? 'NULL'));
                 return response()->json([
                     'success' => false,
                     'message' => 'Unauthorized'
@@ -158,22 +186,80 @@ class TraitsApiController extends Controller
             
             $traits = $request->input('traits', []);
             Log::info('Traits to save:', $traits);
+            Log::info('Request data:', $request->all());
+            
+            if (empty($traits)) {
+                Log::warning('No traits provided in request');
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No traits provided'
+                ], 400);
+            }
             
             DB::transaction(function () use ($egiId, $traits) {
-                // Elimina i traits esistenti
-                EgiTrait::where('egi_id', $egiId)->delete();
+                // Ottieni i trait esistenti
+                $existingTraits = EgiTrait::where('egi_id', $egiId)->get();
+                Log::info("Found {$existingTraits->count()} existing traits for EGI {$egiId}");
                 
-                // Inserisci i nuovi traits
-                foreach ($traits as $index => $traitData) {
-                    EgiTrait::create([
-                        'egi_id' => $egiId,
-                        'category_id' => $traitData['category_id'],
-                        'trait_type_id' => $traitData['trait_type_id'],
-                        'value' => $traitData['value'],
-                        'display_value' => $traitData['display_value'] ?? $traitData['value'],
-                        'sort_order' => $index,
-                        'is_locked' => false
-                    ]);
+                // Prepara i trait inviati per il confronto
+                $incomingTraits = collect($traits);
+                $keptTraitIds = [];
+                
+                // Processo trait per trait
+                foreach ($incomingTraits as $index => $traitData) {
+                    // Se il trait ha un ID esistente, aggiornalo
+                    if (isset($traitData['id']) && $traitData['id'] > 0) {
+                        $existingTrait = $existingTraits->where('id', $traitData['id'])->first();
+                        
+                        if ($existingTrait) {
+                            // Aggiorna il trait esistente
+                            $existingTrait->update([
+                                'category_id' => $traitData['category_id'],
+                                'trait_type_id' => $traitData['trait_type_id'],
+                                'value' => $traitData['value'],
+                                'display_value' => $traitData['display_value'] ?? $traitData['value'],
+                                'sort_order' => $index
+                            ]);
+                            $keptTraitIds[] = $existingTrait->id;
+                            Log::info("Updated existing trait ID: {$existingTrait->id} with value: {$traitData['value']}");
+                        } else {
+                            // ID non trovato, crea nuovo trait
+                            $created = EgiTrait::create([
+                                'egi_id' => $egiId,
+                                'category_id' => $traitData['category_id'],
+                                'trait_type_id' => $traitData['trait_type_id'],
+                                'value' => $traitData['value'],
+                                'display_value' => $traitData['display_value'] ?? $traitData['value'],
+                                'sort_order' => $index,
+                                'is_locked' => false
+                            ]);
+                            $keptTraitIds[] = $created->id;
+                            Log::info("Created new trait (missing ID) with ID: {$created->id} and value: {$traitData['value']}");
+                        }
+                    } else {
+                        // Nuovo trait (nessun ID o ID negativo/temporaneo)
+                        $created = EgiTrait::create([
+                            'egi_id' => $egiId,
+                            'category_id' => $traitData['category_id'],
+                            'trait_type_id' => $traitData['trait_type_id'],
+                            'value' => $traitData['value'],
+                            'display_value' => $traitData['display_value'] ?? $traitData['value'],
+                            'sort_order' => $index,
+                            'is_locked' => false
+                        ]);
+                        $keptTraitIds[] = $created->id;
+                        Log::info("Created new trait with ID: {$created->id} and value: {$traitData['value']}");
+                    }
+                }
+                
+                // Elimina solo i trait che non sono più presenti nei dati inviati
+                $traitsToDelete = $existingTraits->whereNotIn('id', $keptTraitIds);
+                if ($traitsToDelete->count() > 0) {
+                    $deletedIds = $traitsToDelete->pluck('id')->toArray();
+                    EgiTrait::whereIn('id', $deletedIds)->delete();
+                    Log::info("Deleted " . count($deletedIds) . " traits no longer present: " . implode(', ', $deletedIds));
+                } else {
+                    Log::info("No traits deleted - all existing traits were preserved or updated");
                 }
             });
             
