@@ -19,46 +19,15 @@
      data-egi-id="{{ $egi ? $egi->id : '' }}"
      data-can-edit="{{ $canEdit ? 'true' : 'false' }}">
     
-    {{-- Header con counter --}}
-    <div class="traits-header">
-        <h3 class="traits-title">
-            <span class="traits-icon">🎯</span>
-            {{ __('traits.title') }}
-        </h3>
-        <div class="traits-meta">
-            <span class="trait-counter">
-                <span class="traits-count">0</span>/30
-            </span>
-        </div>
-    </div>
-
     {{-- Categories Navigation --}}
     <div class="trait-categories" id="categories-nav">
         {{-- Categories will be inserted here by JS --}}
     </div>
 
     @if($canEdit)
-        {{-- Editing Area - Solo per utenti autorizzati --}}
-        <div class="traits-list editing">
-            {{-- Empty State --}}
-            <div class="empty-state" id="empty-state" style="display: block;">
-                <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                          d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
-                </svg>
-                <p class="empty-text">{{ __('traits.empty_state') }}</p>
-                <button type="button" 
-                        class="empty-cta"
-                        onclick="TraitsEditor.openModal()">
-                    {{ __('traits.add_first_trait') }}
-                </button>
-            </div>
-
-            {{-- Traits Grid (editing mode) --}}
-            <div class="traits-grid" id="traits-grid">
-                {{-- Traits will be inserted here by JS --}}
-            </div>
-
+        {{-- Area Editor - Solo bottoni di controllo per il creator --}}
+        <div class="traits-editor-controls" style="margin-top: 1rem;">
+            
             {{-- Add Trait Button --}}
             <button type="button" 
                     class="add-trait-btn"
@@ -71,7 +40,7 @@
                            font-weight: 600 !important; 
                            cursor: pointer !important; 
                            width: 100% !important; 
-                           margin-top: 1rem !important;
+                           margin-bottom: 1rem !important;
                            font-size: 1rem !important;
                            transition: all 0.2s ease !important;"
                     onmouseover="this.style.backgroundColor='rgba(212, 175, 55, 0.1)'"
@@ -81,30 +50,33 @@
                 </svg>
                 {{ __('traits.add_trait') }}
             </button>
-        </div>
 
-        {{-- Save Button - Solo per utenti autorizzati --}}
-        <button type="button" 
-                onclick="TraitsEditor.saveTraits()"
-                class="save-traits-btn"
-                style="background: #2d5016 !important; 
-                       color: white !important; 
-                       border: none !important; 
-                       padding: 0.75rem 1.5rem !important; 
-                       border-radius: 0.5rem !important; 
-                       font-weight: 600 !important; 
-                       cursor: pointer !important; 
-                       width: 100% !important; 
-                       margin-top: 1rem !important;
-                       font-size: 1rem !important;
-                       box-shadow: 0 2px 4px rgba(45, 80, 22, 0.2) !important;"
-                id="save-traits-btn">
-            <svg class="button-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 1.25rem; height: 1.25rem; margin-right: 0.5rem;">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                    d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3-3m0 0l-3 3m3-3v12"/>
-            </svg>
-            {{ __('traits.save_all_traits') }}
-        </button>
+            {{-- Save Button --}}
+            <button type="button" 
+                    onclick="TraitsEditor.saveTraits()"
+                    class="save-traits-btn"
+                    style="background: #2d5016 !important; 
+                           color: white !important; 
+                           border: none !important; 
+                           padding: 0.75rem 1.5rem !important; 
+                           border-radius: 0.5rem !important; 
+                           font-weight: 600 !important; 
+                           cursor: pointer !important; 
+                           width: 100% !important; 
+                           font-size: 1rem !important;
+                           box-shadow: 0 2px 4px rgba(45, 80, 22, 0.2) !important;"
+                    onmouseover="this.style.backgroundColor='#3d6026'"
+                    onmouseout="this.style.backgroundColor='#2d5016'">
+                {{ __('traits.save_traits') }}
+            </button>
+
+            {{-- Hidden area for editing state (used by JS) --}}
+            <div class="traits-list editing" style="display: none;">
+                <div class="traits-grid" id="traits-grid">
+                    {{-- Traits will be inserted here by JS for editing --}}
+                </div>
+            </div>
+        </div>
 
         {{-- Hidden input for form submission --}}
         <input type="hidden" 
@@ -128,121 +100,6 @@
             </div>
         </div>
     @endif
-</div>
-
-@props([
-    'egi' => null
-])
-
-{{-- Include CSS con Vite --}}
-@vite(['resources/css/traits-manager.css'])
-
-<div class="egi-traits-editor" 
-     id="traits-editor-{{ $egi ? $egi->id : 'new' }}"
-     data-egi-id="{{ $egi ? $egi->id : '' }}">
-    
-    {{-- Header con counter --}}
-    <div class="traits-header">
-        <h3 class="traits-title">
-            <span class="traits-icon">🎯</span>
-            {{ __('traits.title') }}
-        </h3>
-        <div class="traits-meta">
-            <span class="trait-counter">
-                <span class="traits-count">0</span>/30
-            </span>
-        </div>
-    </div>
-
-    {{-- Categories Navigation --}}
-    <div class="trait-categories" id="categories-nav">
-        {{-- Categories will be inserted here by JS --}}
-    </div>
-
-    {{-- Editing Area --}}
-    <div class="traits-list editing">
-        {{-- Empty State --}}
-        <div class="empty-state" id="empty-state" style="display: block;">
-            <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                      d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
-            </svg>
-            <p class="empty-text">{{ __('traits.empty_state') }}</p>
-            <button type="button" 
-                    class="empty-cta"
-                    onclick="TraitsEditor.openModal()">
-                {{ __('traits.add_first_trait') }}
-            </button>
-        </div>
-
-        <!-- Add Trait Button -->
-        <div class="add-trait-section" style="display: none;">
-            <button type="button" 
-                    class="btn btn-primary add-trait-btn"
-                    onclick="TraitsEditor.openModal()">
-                <span class="btn-icon">+</span>
-                <span class="btn-text">{{ __('traits.add_new_trait') }}</span>
-            </button>
-        </div>
-        </div>
-
-        {{-- Traits Grid --}}
-        <div class="traits-grid" id="traits-grid-editor">
-            {{-- Editing traits will be inserted here by JS --}}
-        </div>
-    </div>
-
-    {{-- Add Trait Button --}}
-    <button type="button" 
-            class="add-trait-button"
-            id="add-trait-btn"
-            onclick="TraitsEditor.openModal()"
-            style="display: none; 
-                   background: transparent !important; 
-                   border: 2px dashed #d4a574 !important; 
-                   color: #d4a574 !important; 
-                   padding: 0.75rem 1.5rem !important; 
-                   border-radius: 0.5rem !important; 
-                   font-weight: 600 !important; 
-                   cursor: pointer !important; 
-                   width: 100% !important; 
-                   margin-top: 1rem !important;
-                   font-size: 1rem !important;">
-        <svg class="button-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 1.25rem; height: 1.25rem; margin-right: 0.5rem;">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-        </svg>
-        {{ __('traits.add_trait') }}
-    </button>
-    
-    {{-- Save All Traits Button --}}
-    <button type="button" 
-            class="save-traits-button"
-            onclick="TraitsEditor.saveTraits()"
-            style="display: none;
-                   background: #2d5016 !important; 
-                   border: none !important; 
-                   color: white !important; 
-                   padding: 0.75rem 1.5rem !important; 
-                   border-radius: 0.5rem !important; 
-                   font-weight: 600 !important; 
-                   cursor: pointer !important; 
-                   width: 100% !important; 
-                   margin-top: 1rem !important;
-                   font-size: 1rem !important;
-                   box-shadow: 0 2px 4px rgba(45, 80, 22, 0.2) !important;"
-            id="save-traits-btn">
-        <svg class="button-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 1.25rem; height: 1.25rem; margin-right: 0.5rem;">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3-3m0 0l-3 3m3-3v12"/>
-        </svg>
-        {{ __('traits.save_all_traits') }}
-    </button>
-
-    {{-- Hidden input for form submission --}}
-    <input type="hidden" 
-           name="traits" 
-           id="traits-json-{{ $egi ? $egi->id : 'new' }}"
-           value="[]">
 </div>
 
 {{-- Trait Modal (shared) - Solo per modalità editing --}}

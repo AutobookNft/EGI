@@ -7,20 +7,21 @@
 
 {{-- Traits Section - Forza il posizionamento naturale --}}
 <div class="traits-container" style="order: 0; position: relative; z-index: 1;">
+
+    {{-- Titolo della sezione --}}
       
+    {{-- VIEWER: SEMPRE visibile se ci sono traits --}}
+    @if($egi->traits && $egi->traits->count() > 0)
+        <div class="space-y-4">
+            <x-egi.traits-viewer :egi="$egi" />
+        </div>
+    @endif
     
+    {{-- EDITOR: Solo se creator (SENZA mostrare i traits) --}}
     @if(isset($canManage) && $canManage)
-        {{-- Solo il creator vede l'editor completo --}}
         <div class="space-y-4">
             <x-egi.traits-editor :egi="$egi" :can-edit="true" />
         </div>
-    @else
-        {{-- Tutti gli altri vedono SOLO i traits esistenti (se ci sono) --}}
-        @if($egi->traits && $egi->traits->count() > 0)
-            <div class="space-y-4">
-                <x-egi.traits-viewer :egi="$egi" />
-            </div>
-        @endif
     @endif
     
 </div>
