@@ -1,10 +1,135 @@
 {{-- resources/views/components/egi/traits-editor.blade.php --}}
 {{-- 
     EGI Traits Editor Component - EDITING
-    Gestion                <select class="form-select" id="trait-type-select" onchange="TraitsEditor.onTypeChanged()">
-                    <option value="">{{ __('traits.choose_type') }}</option>
-                </select>ggiunta/rimozione traits
+    Gestion                {{-- resources/views/components/egi/traits-editor.blade.php --}}
+{{-- 
+    EGI Traits Editor Component - EDITING & VIEWING
+    Gestione aggiunta/rimozione traits con controllo autorizzazioni
 --}}
+@props([
+    'egi' => null,
+    'canEdit' => false
+])
+
+{{-- Include CSS con Vite --}}
+@vite(['resources/css/traits-manager.css'])
+
+<div class="egi-traits-editor" 
+     id="traits-editor-{{ $egi ? $egi->id : 'new' }}"
+     data-egi-id="{{ $egi ? $egi->id : '' }}"
+     data-can-edit="{{ $canEdit ? 'true' : 'false' }}">
+    
+    {{-- Header con counter --}}
+    <div class="traits-header">
+        <h3 class="traits-title">
+            <span class="traits-icon">🎯</span>
+            {{ __('traits.title') }}
+        </h3>
+        <div class="traits-meta">
+            <span class="trait-counter">
+                <span class="traits-count">0</span>/30
+            </span>
+        </div>
+    </div>
+
+    {{-- Categories Navigation --}}
+    <div class="trait-categories" id="categories-nav">
+        {{-- Categories will be inserted here by JS --}}
+    </div>
+
+    @if($canEdit)
+        {{-- Editing Area - Solo per utenti autorizzati --}}
+        <div class="traits-list editing">
+            {{-- Empty State --}}
+            <div class="empty-state" id="empty-state" style="display: block;">
+                <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                          d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                </svg>
+                <p class="empty-text">{{ __('traits.empty_state') }}</p>
+                <button type="button" 
+                        class="empty-cta"
+                        onclick="TraitsEditor.openModal()">
+                    {{ __('traits.add_first_trait') }}
+                </button>
+            </div>
+
+            {{-- Traits Grid (editing mode) --}}
+            <div class="traits-grid" id="traits-grid">
+                {{-- Traits will be inserted here by JS --}}
+            </div>
+
+            {{-- Add Trait Button --}}
+            <button type="button" 
+                    class="add-trait-btn"
+                    onclick="TraitsEditor.openModal()"
+                    style="background: transparent !important; 
+                           border: 2px dashed #d4af37 !important; 
+                           color: #d4af37 !important; 
+                           padding: 0.75rem 1.5rem !important; 
+                           border-radius: 0.5rem !important; 
+                           font-weight: 600 !important; 
+                           cursor: pointer !important; 
+                           width: 100% !important; 
+                           margin-top: 1rem !important;
+                           font-size: 1rem !important;
+                           transition: all 0.2s ease !important;"
+                    onmouseover="this.style.backgroundColor='rgba(212, 175, 55, 0.1)'"
+                    onmouseout="this.style.backgroundColor='transparent'">
+                <svg class="button-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 1.25rem; height: 1.25rem; margin-right: 0.5rem;">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                </svg>
+                {{ __('traits.add_trait') }}
+            </button>
+        </div>
+
+        {{-- Save Button - Solo per utenti autorizzati --}}
+        <button type="button" 
+                onclick="TraitsEditor.saveAllTraits()"
+                class="save-traits-btn"
+                style="background: #2d5016 !important; 
+                       color: white !important; 
+                       border: none !important; 
+                       padding: 0.75rem 1.5rem !important; 
+                       border-radius: 0.5rem !important; 
+                       font-weight: 600 !important; 
+                       cursor: pointer !important; 
+                       width: 100% !important; 
+                       margin-top: 1rem !important;
+                       font-size: 1rem !important;
+                       box-shadow: 0 2px 4px rgba(45, 80, 22, 0.2) !important;"
+                id="save-traits-btn">
+            <svg class="button-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 1.25rem; height: 1.25rem; margin-right: 0.5rem;">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                    d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3-3m0 0l-3 3m3-3v12"/>
+            </svg>
+            {{ __('traits.save_all_traits') }}
+        </button>
+
+        {{-- Hidden input for form submission --}}
+        <input type="hidden" 
+               name="traits" 
+               id="traits-json-{{ $egi ? $egi->id : 'new' }}"
+               value="[]">
+    @else
+        {{-- Visualizzazione pubblica - Solo traits list e categorie con conteggi --}}
+        <div class="traits-list readonly">
+            {{-- Message for non-authorized users --}}
+            <div class="public-view-notice" style="text-align: center; padding: 1rem; background: rgba(45, 80, 22, 0.1); border-radius: 0.5rem; margin-bottom: 1rem; color: #2d5016;">
+                <svg style="width: 1.5rem; height: 1.5rem; margin: 0 auto 0.5rem; display: block;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <p style="margin: 0; font-size: 0.875rem;">{{ __('Solo il creator può modificare i traits di questo EGI') }}</p>
+            </div>
+
+            {{-- Traits Grid (readonly mode) --}}
+            <div class="traits-grid readonly" id="traits-grid-readonly">
+                {{-- Traits will be inserted here by JS --}}
+            </div>
+        </div>
+    @endif
+</div>
+
 @props([
     'egi' => null
 ])
@@ -120,7 +245,8 @@
            value="[]">
 </div>
 
-{{-- Trait Modal (shared) --}}
+{{-- Trait Modal (shared) - Solo per modalità editing --}}
+@if($canEdit)
 @once
 <div class="trait-modal" id="trait-modal" style="display: none;">
     <div class="modal-content">
@@ -186,6 +312,7 @@
     </div>
 </div>
 @endonce
+@endif
 
 {{-- Toast Container --}}
 @once
@@ -299,6 +426,7 @@ window.ToastManager = {
     window.TraitsEditor = {
         state: {
             egiId: null,
+            canEdit: false,
             categories: [],
             availableTypes: [],
             editingTraits: [],
@@ -320,8 +448,15 @@ window.ToastManager = {
             }
 
             this.state.egiId = egiId;
+            
+            // Controlla se è in modalità editing o readonly
+            const canEdit = container.getAttribute('data-can-edit') === 'true';
+            this.state.canEdit = canEdit;
+            
+            console.log('TraitsEditor: Mode -', canEdit ? 'EDITING' : 'READONLY');
+            
             this.loadCategories();
-            this.loadExistingTraits(); // Carica trait esistenti per la modifica
+            this.loadExistingTraits(); // Carica trait esistenti
         },
 
         async loadExistingTraits() {
@@ -434,6 +569,13 @@ window.ToastManager = {
         },
 
         async openModal() {
+            // Blocca l'apertura del modal se non in modalità editing
+            if (!this.state.canEdit) {
+                console.warn('TraitsEditor: Modal access denied - readonly mode');
+                ToastManager.warning('Solo il creator può modificare i traits di questo EGI');
+                return;
+            }
+
             try {
                 const modal = document.getElementById('trait-modal');
                 if (!modal) return;
@@ -672,6 +814,13 @@ window.ToastManager = {
         },
 
         addTrait() {
+            // Blocca l'aggiunta se non in modalità editing
+            if (!this.state.canEdit) {
+                console.warn('TraitsEditor: Add trait denied - readonly mode');
+                ToastManager.warning('Solo il creator può modificare i traits di questo EGI');
+                return;
+            }
+
             if (!this.state.modalData.value || !this.state.modalData.trait_type_id) {
                 return;
             }
@@ -699,6 +848,13 @@ window.ToastManager = {
         },
 
         removeTrait(index) {
+            // Blocca la rimozione se non in modalità editing
+            if (!this.state.canEdit) {
+                console.warn('TraitsEditor: Remove trait denied - readonly mode');
+                ToastManager.warning('Solo il creator può modificare i traits di questo EGI');
+                return;
+            }
+
             this.state.editingTraits.splice(index, 1);
             // Reorder
             this.state.editingTraits.forEach((trait, i) => {
@@ -716,18 +872,27 @@ window.ToastManager = {
         },
 
         renderEditingTraits() {
-            const grid = document.getElementById('traits-grid-editor');
+            // Determina quale grid utilizzare in base alla modalità
+            const gridId = this.state.canEdit ? 'traits-grid' : 'traits-grid-readonly';
+            const grid = document.getElementById(gridId);
             const emptyState = document.getElementById('empty-state');
             
-            if (!grid || !emptyState) return;
-
-            if (this.state.editingTraits.length === 0) {
-                emptyState.style.display = 'block';
-                grid.innerHTML = '';
+            if (!grid) {
+                console.error('TraitsEditor: Grid not found -', gridId);
                 return;
             }
 
-            emptyState.style.display = 'none';
+            if (this.state.editingTraits.length === 0) {
+                if (emptyState && this.state.canEdit) {
+                    emptyState.style.display = 'block';
+                }
+                grid.innerHTML = this.state.canEdit ? '' : '<div class="no-traits-message" style="text-align: center; padding: 2rem; color: #666;">Nessun trait disponibile</div>';
+                return;
+            }
+
+            if (emptyState && this.state.canEdit) {
+                emptyState.style.display = 'none';
+            }
             
             // Forza layout mobile se necessario
             if (window.innerWidth <= 768) {
@@ -739,27 +904,49 @@ window.ToastManager = {
             grid.innerHTML = this.state.editingTraits.map((trait, index) => {
                 const categoryColor = this.getCategoryColor(trait.category_id);
                 
-                return `
-                    <div class="trait-card" data-category="${trait.category_id}">
-                        <div class="trait-header">
-                            <span class="trait-category-badge" style="background-color: ${categoryColor}">
-                                ${this.getCategoryIcon(trait.category_id)}
-                            </span>
-                            <button type="button" 
-                                    class="trait-remove"
-                                    onclick="TraitsEditor.removeTrait(${index})">
-                                ×
-                            </button>
-                        </div>
-                        <div class="trait-content">
-                            <div class="trait-type">${trait.type_name}</div>
-                            <div class="trait-value">
-                                <span>${this.formatTraitValue(trait)}</span>
-                                ${trait.unit ? `<span class="trait-unit">${trait.unit}</span>` : ''}
+                // Renderizza diversamente in base alla modalità
+                if (this.state.canEdit) {
+                    // Modalità editing - con pulsante rimuovi
+                    return `
+                        <div class="trait-card" data-category="${trait.category_id}">
+                            <div class="trait-header">
+                                <span class="trait-category-badge" style="background-color: ${categoryColor}">
+                                    ${this.getCategoryIcon(trait.category_id)}
+                                </span>
+                                <button type="button" 
+                                        class="trait-remove"
+                                        onclick="TraitsEditor.removeTrait(${index})">
+                                    ×
+                                </button>
+                            </div>
+                            <div class="trait-content">
+                                <div class="trait-type">${trait.type_name}</div>
+                                <div class="trait-value">
+                                    <span>${this.formatTraitValue(trait)}</span>
+                                    ${trait.unit ? `<span class="trait-unit">${trait.unit}</span>` : ''}
+                                </div>
                             </div>
                         </div>
-                    </div>
-                `;
+                    `;
+                } else {
+                    // Modalità readonly - senza pulsante rimuovi
+                    return `
+                        <div class="trait-card readonly" data-category="${trait.category_id}">
+                            <div class="trait-header readonly">
+                                <span class="trait-category-badge" style="background-color: ${categoryColor}">
+                                    ${this.getCategoryIcon(trait.category_id)}
+                                </span>
+                            </div>
+                            <div class="trait-content">
+                                <div class="trait-type">${trait.type_name}</div>
+                                <div class="trait-value">
+                                    <span>${this.formatTraitValue(trait)}</span>
+                                    ${trait.unit ? `<span class="trait-unit">${trait.unit}</span>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
             }).join('');
         },
 
@@ -881,6 +1068,44 @@ window.ToastManager = {
         filterByCategory(categoryId) {
             // Implementation for category filtering if needed
             console.log('Filter by category:', categoryId);
+        }
+        },
+
+        async saveAllTraits() {
+            // Blocca il salvataggio se non in modalità editing
+            if (!this.state.canEdit) {
+                console.warn('TraitsEditor: Save traits denied - readonly mode');
+                ToastManager.warning('Solo il creator può modificare i traits di questo EGI');
+                return;
+            }
+
+            try {
+                ToastManager.info('Salvataggio traits in corso...');
+                
+                const response = await fetch(`/egis/${this.state.egiId}/traits`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({
+                        traits: this.state.editingTraits
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    ToastManager.success('Traits salvati con successo!');
+                    // Ricarica i traits dal server per sincronizzare gli ID
+                    await this.loadExistingTraits();
+                } else {
+                    ToastManager.error(data.message || 'Errore durante il salvataggio');
+                }
+            } catch (error) {
+                console.error('Error saving traits:', error);
+                ToastManager.error('Errore di connessione durante il salvataggio');
+            }
         }
     };
 
