@@ -1,14 +1,17 @@
 {{-- resources/views/egis/partials/sidebar/traits-section.blade.php --}}
 {{-- 
     Sezione traits viewer e editor
-    ORIGINE: righe 721-750 di show.blade.php
+    ORIGINE: righe 146-155 di show.blade.php (Traits Section)
     VARIABILI: $egi
 --}}
 
-{{-- 
-    SPOSTA QUI IL CODICE:
-    - Traits Section - Solo se ci sono traits esistenti
-    - <x-egi.traits-viewer :egi="$egi" />
-    - Traits Manager con border-t
-    - <x-egi.traits-editor :egi="$egi" />
---}}
+{{-- Traits Section - Solo se ci sono traits esistenti --}}
+@if($egi->egiTraits && $egi->egiTraits->count() > 0)
+<div class="space-y-4">
+    <x-egi.traits-viewer :egi="$egi" />
+</div>
+@endif
+{{-- Traits Manager --}}
+<div class="pt-6 mt-6 border-t border-emerald-700/30">
+    <x-egi.traits-editor :egi="$egi" />
+</div>

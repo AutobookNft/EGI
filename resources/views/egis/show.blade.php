@@ -143,52 +143,20 @@
                             {{-- Utility Display Section --}}
                             @include('egis.partials.sidebar.utility-section', compact('egi'))
                             
-                            {{-- Traits Section - Solo se ci sono traits esistenti --}}
-                            @if($egi->egiTraits && $egi->egiTraits->count() > 0)
-                            <div class="space-y-4">
-                                <x-egi.traits-viewer :egi="$egi" />
-                            </div>
-                            @endif
-                              {{-- Traits Manager --}}
-                            <div class="pt-6 mt-6 border-t border-emerald-700/30">
-                                <x-egi.traits-editor :egi="$egi" />
-                            </div>
+                            {{-- Traits Section --}}
+                            @include('egis.partials.sidebar.traits-section', compact('egi'))
 
                             {{-- Description Section --}}
-                            <div class="space-y-4">
-                                <h3 class="text-lg font-semibold text-white">{{ __('egi.about_this_piece') }}</h3>
-                                <div class="leading-relaxed prose-sm prose text-gray-300 prose-invert max-w-none">
-                                    {!! nl2br(e($egi->description ?? __('egi.default_description'))) !!}
-                                </div>
-                            </div>
+                            @include('egis.partials.sidebar.description-section', compact('egi'))
 
                             {{-- Reservation History --}}
-                            @if($egi->reservationCertificates && $egi->price && $egi->price > 0)
-                            <div class="space-y-4">
-                                <h3 class="text-lg font-semibold text-white">{{ __('egi.provenance') }}</h3>
-                                <x-egi-reservation-history :egi="$egi" :certificates="$egi->reservationCertificates" />
-                            </div>
-                            @endif
+                            @include('egis.partials.sidebar.reservation-history-section', compact('egi'))
 
                             {{-- Collection Link --}}
-                            <div class="pt-6 border-t border-gray-700/50">
-                                <a href="{{ route('home.collections.show', $collection->id) }}"
-                                    class="inline-flex items-center text-gray-300 transition-colors duration-200 hover:text-white group">
-                                    <svg class="w-4 h-4 mr-2 transition-transform duration-200 group-hover:-translate-x-1"
-                                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-                                    </svg>
-                                    {{ __('egi.view_full_collection') }}
-                                </a>
-                            </div>
+                            @include('egis.partials.sidebar.collection-link-section', compact('collection'))
 
                             {{-- Component Utility Manager (solo per creator) --}}
-                            @if(auth()->id() === $egi->user_id)
-                                <div class="pt-6 border-t border-gray-700/50">
-                                    <x-utility.utility-manager :egi="$egi" />
-                                </div>
-                            @endif
+                            @include('egis.partials.sidebar.utility-manager-section', compact('egi'))
                         </div>
                        
                     </div>
