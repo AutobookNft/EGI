@@ -40,7 +40,8 @@
                             2 => '#8E44AD', // Visual - Viola  
                             3 => '#1B365D', // Dimensions - Blu
                             4 => '#E67E22', // Special - Arancio
-                            5 => '#2D5016'  // Sustainability - Verde
+                            5 => '#2D5016', // Sustainability - Verde
+                            6 => '#8B4513'  // Cultural - Marrone
                         ];
                         
                         // Definisci le icone delle categorie
@@ -49,7 +50,8 @@
                             2 => '🎨', // Visual
                             3 => '📐', // Dimensions  
                             4 => '⚡', // Special
-                            5 => '🌿'  // Sustainability
+                            5 => '🌿', // Sustainability
+                            6 => '🏛️'  // Cultural
                         ];
                         
                         $categoryColor = $categoryColors[$trait->category_id] ?? '#6B6B6B';

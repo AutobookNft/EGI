@@ -910,7 +910,8 @@ window.ToastManager = {
                 2: '#8E44AD', // Visual - Viola
                 3: '#1B365D', // Dimensions - Blu
                 4: '#E67E22', // Special - Arancio
-                5: '#2D5016'  // Sustainability - Verde
+                5: '#2D5016', // Sustainability - Verde
+                6: '#8B4513'  // Cultural - Marrone
             };
             return colors[categoryId] || '#6B6B6B';
         },
@@ -921,16 +922,31 @@ window.ToastManager = {
                 2: '🎨', // Visual
                 3: '📐', // Dimensions
                 4: '⚡', // Special
-                5: '🌿'  // Sustainability
+                5: '🌿', // Sustainability
+                6: '🏛️'  // Cultural
             };
             return icons[categoryId] || '🏷️';
         },
 
         formatTraitValue(trait) {
+            // Debug log per capire cosa riceve la funzione
+            console.log('formatTraitValue called with:', trait);
+            
+            if (!trait) {
+                console.warn('formatTraitValue: trait is null/undefined');
+                return '';
+            }
+            
+            if (!trait.value && trait.value !== 0) {
+                console.warn('formatTraitValue: trait.value is null/undefined/empty:', trait);
+                return '';
+            }
+            
             if (trait.display_type === 'number' && trait.value) {
                 return parseFloat(trait.value).toLocaleString();
             }
-            return trait.value || '';
+            
+            return String(trait.value || '');
         },
 
         filterByCategory(categoryId) {
