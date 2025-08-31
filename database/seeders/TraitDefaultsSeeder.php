@@ -7,11 +7,11 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * Seeder for default trait categories and types
- * 
+ *
  * @package FlorenceEGI\Database\Seeders
  * @author Padmin D. Curtis (AI Partner OS3.0) for Fabio Cherici
- * @version 1.0.0 (FlorenceEGI Traits System)
- * @date 2024-12-27
+ * @version 1.0.1 (Extended FlorenceEGI Traits System)
+ * @date 2025-08-31
  */
 class TraitDefaultsSeeder extends Seeder {
     /**
@@ -25,14 +25,28 @@ class TraitDefaultsSeeder extends Seeder {
             ['name' => 'Dimensions', 'slug' => 'dimensions', 'icon' => '📐', 'is_system' => true, 'sort_order' => 3],
             ['name' => 'Special', 'slug' => 'special', 'icon' => '⚡', 'is_system' => true, 'sort_order' => 4],
             ['name' => 'Sustainability', 'slug' => 'sustainability', 'icon' => '🌿', 'is_system' => true, 'sort_order' => 5],
+            ['name' => 'Cultural', 'slug' => 'cultural', 'icon' => '🏛️', 'is_system' => true, 'sort_order' => 6],
         ];
 
         foreach ($categories as $category) {
-            $categoryId = DB::table('trait_categories')->insertGetId(
-                array_merge($category, ['created_at' => now(), 'updated_at' => now()])
-            );
+            // Check if category exists, if not insert it
+            $existingCategory = DB::table('trait_categories')
+                ->where('slug', $category['slug'])
+                ->first();
 
-            // Add trait types for each category
+            if ($existingCategory) {
+                $categoryId = $existingCategory->id;
+                // Update existing category with new data if needed
+                DB::table('trait_categories')
+                    ->where('id', $categoryId)
+                    ->update(array_merge($category, ['updated_at' => now()]));
+            } else {
+                $categoryId = DB::table('trait_categories')->insertGetId(
+                    array_merge($category, ['created_at' => now(), 'updated_at' => now()])
+                );
+            }
+
+            // Add trait types for each category (only if they don't exist)
             $this->seedTraitTypes($categoryId, $category['slug']);
         }
     }
@@ -279,15 +293,75 @@ class TraitDefaultsSeeder extends Seeder {
                     ],
                 ];
                 break;
+
+            case 'cultural':
+                $traitTypes = [
+                    [
+                        'name' => 'Cultural Origin',
+                        'slug' => 'cultural-origin',
+                        'display_type' => 'text',
+                        'allowed_values' => json_encode([
+                            'Florence',
+                            'Tuscany',
+                            'Italy',
+                            'Europe',
+                            'Other'
+                        ])
+                    ],
+                    [
+                        'name' => 'Thematic Focus',
+                        'slug' => 'thematic-focus',
+                        'display_type' => 'text',
+                        'allowed_values' => json_encode([
+                            'Ecological Renaissance',
+                            'Sacred Art',
+                            'Inner Landscape',
+                            'Metamorphosis',
+                            'Collective Memory'
+                        ])
+                    ],
+                    [
+                        'name' => 'Artisan Technique',
+                        'slug' => 'artisan-technique',
+                        'display_type' => 'text',
+                        'allowed_values' => json_encode([
+                            'Inlay',
+                            'Hand Embroidery',
+                            'Glass Blowing',
+                            'Loom Weaving',
+                            '3D Modeling',
+                            'Risograph Printing'
+                        ])
+                    ],
+                    [
+                        'name' => 'Edition Type',
+                        'slug' => 'edition-type',
+                        'display_type' => 'text',
+                        'allowed_values' => json_encode([
+                            'Unique Piece',
+                            'Limited Series',
+                            'Prototype'
+                        ])
+                    ]
+                ];
+                break;
         }
 
         foreach ($traitTypes as $type) {
-            DB::table('trait_types')->insert(array_merge($type, [
-                'category_id' => $categoryId,
-                'is_system' => true,
-                'created_at' => now(),
-                'updated_at' => now()
-            ]));
+            // Check if trait type already exists for this category
+            $existingType = DB::table('trait_types')
+                ->where('slug', $type['slug'])
+                ->where('category_id', $categoryId)
+                ->first();
+
+            if (!$existingType) {
+                DB::table('trait_types')->insert(array_merge($type, [
+                    'category_id' => $categoryId,
+                    'is_system' => true,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]));
+            }
         }
     }
 }

@@ -1,8 +1,8 @@
 {{-- resources/views/components/egi/traits-editor.blade.php --}}
-{{-- 
+{{--
     EGI Traits Editor Component - EDITING
     Gestion                {{-- resources/views/components/egi/traits-editor.blade.php --}}
-{{-- 
+{{--
     EGI Traits Editor Component - EDITING & VIEWING
     Gestione aggiunta/rimozione traits con controllo autorizzazioni
 --}}
@@ -14,11 +14,11 @@
 {{-- Include CSS con Vite --}}
 @vite(['resources/css/traits-manager.css'])
 
-<div class="egi-traits-editor" 
+<div class="egi-traits-editor"
      id="traits-editor-{{ $egi ? $egi->id : 'new' }}"
      data-egi-id="{{ $egi ? $egi->id : '' }}"
      data-can-edit="{{ $canEdit ? 'true' : 'false' }}">
-    
+
     {{-- Categories Navigation --}}
     <div class="trait-categories" id="categories-nav">
         {{-- Categories will be inserted here by JS --}}
@@ -27,19 +27,19 @@
     @if($canEdit)
         {{-- Area Editor - Solo bottoni di controllo per il creator --}}
         <div class="traits-editor-controls" style="margin-top: 1rem;">
-            
+
             {{-- Add Trait Button --}}
-            <button type="button" 
+            <button type="button"
                     class="add-trait-btn"
                     onclick="TraitsEditor.openModal()"
-                    style="background: transparent !important; 
-                           border: 2px dashed #d4af37 !important; 
-                           color: #d4af37 !important; 
-                           padding: 0.75rem 1.5rem !important; 
-                           border-radius: 0.5rem !important; 
-                           font-weight: 600 !important; 
-                           cursor: pointer !important; 
-                           width: 100% !important; 
+                    style="background: transparent !important;
+                           border: 2px dashed #d4af37 !important;
+                           color: #d4af37 !important;
+                           padding: 0.75rem 1.5rem !important;
+                           border-radius: 0.5rem !important;
+                           font-weight: 600 !important;
+                           cursor: pointer !important;
+                           width: 100% !important;
                            margin-bottom: 1rem !important;
                            font-size: 1rem !important;
                            transition: all 0.2s ease !important;"
@@ -52,35 +52,35 @@
             </button>
 
             {{-- Save Button --}}
-            <button type="button" 
+            <button type="button"
                     onclick="TraitsEditor.saveTraits()"
                     class="save-traits-btn"
-                    style="background: #2d5016 !important; 
-                           color: white !important; 
-                           border: none !important; 
-                           padding: 0.75rem 1.5rem !important; 
-                           border-radius: 0.5rem !important; 
-                           font-weight: 600 !important; 
-                           cursor: pointer !important; 
-                           width: 100% !important; 
+                    style="background: #2d5016 !important;
+                           color: white !important;
+                           border: none !important;
+                           padding: 0.75rem 1.5rem !important;
+                           border-radius: 0.5rem !important;
+                           font-weight: 600 !important;
+                           cursor: pointer !important;
+                           width: 100% !important;
                            font-size: 1rem !important;
                            box-shadow: 0 2px 4px rgba(45, 80, 22, 0.2) !important;"
                     onmouseover="this.style.backgroundColor='#3d6026'"
                     onmouseout="this.style.backgroundColor='#2d5016'">
-                {{ __('traits.save_traits') }}
+                {{ __('traits.save_all_traits') }}
             </button>
 
             {{-- Hidden area for editing state (used by JS) --}}
-            <div class="traits-list editing" style="display: none;">
+            {{-- <div class="traits-list editing" style="display: none;">
                 <div class="traits-grid" id="traits-grid">
-                    {{-- Traits will be inserted here by JS for editing --}}
+
                 </div>
-            </div>
+            </div> --}}
         </div>
 
         {{-- Hidden input for form submission --}}
-        <input type="hidden" 
-               name="traits" 
+        <input type="hidden"
+               name="traits"
                id="traits-json-{{ $egi ? $egi->id : 'new' }}"
                value="[]">
     @else
@@ -109,7 +109,7 @@
     <div class="modal-content">
         <div class="modal-header">
             <h4 class="modal-title">{{ __('traits.modal_title') }}</h4>
-            <button type="button" 
+            <button type="button"
                     class="modal-close"
                     onclick="TraitsEditor.closeModal()">
                 ×
@@ -153,12 +153,12 @@
         </div>
 
         <div class="modal-footer">
-            <button type="button" 
+            <button type="button"
                     class="btn-cancel"
                     onclick="TraitsEditor.closeModal()">
                 {{ __('traits.cancel') }}
             </button>
-            <button type="button" 
+            <button type="button"
                     class="btn-confirm"
                     id="confirm-trait-btn"
                     onclick="TraitsEditor.addTrait()"
@@ -198,7 +198,7 @@ window.TraitsTranslations = {
 // Toast Notification System
 window.ToastManager = {
     container: null,
-    
+
     init() {
         this.container = document.getElementById('toast-container');
         if (!this.container) {
@@ -208,20 +208,20 @@ window.ToastManager = {
             document.body.appendChild(this.container);
         }
     },
-    
+
     show(message, type = 'info', title = null, duration = 4000) {
         this.init();
-        
+
         const toast = document.createElement('div');
         toast.className = `toast ${type}`;
-        
+
         const icons = {
             success: '✅',
-            error: '❌', 
+            error: '❌',
             warning: '⚠️',
             info: 'ℹ️'
         };
-        
+
         const content = `
             <div class="toast-content">
                 <span class="toast-icon">${icons[type] || icons.info}</span>
@@ -233,22 +233,22 @@ window.ToastManager = {
             <button class="toast-close" onclick="ToastManager.close(this.parentNode)">×</button>
             <div class="toast-progress animate"></div>
         `;
-        
+
         toast.innerHTML = content;
         this.container.appendChild(toast);
-        
+
         // Trigger animation
         setTimeout(() => toast.classList.add('show'), 10);
-        
+
         // Auto remove
         setTimeout(() => this.close(toast), duration);
-        
+
         return toast;
     },
-    
+
     close(toast) {
         if (!toast || !toast.parentNode) return;
-        
+
         toast.classList.add('hide');
         setTimeout(() => {
             if (toast.parentNode) {
@@ -256,19 +256,19 @@ window.ToastManager = {
             }
         }, 300);
     },
-    
+
     success(message, title = null) {
         return this.show(message, 'success', title);
     },
-    
+
     error(message, title = null) {
         return this.show(message, 'error', title);
     },
-    
+
     warning(message, title = null) {
         return this.show(message, 'warning', title);
     },
-    
+
     info(message, title = null) {
         return this.show(message, 'info', title);
     }
@@ -297,7 +297,7 @@ window.ToastManager = {
 
         init: function(egiId) {
             console.log('TraitsEditor: Initializing for EGI', egiId);
-            
+
             const container = document.getElementById(`traits-editor-${egiId}`);
             if (!container) {
                 console.error('TraitsEditor: Container not found for EGI', egiId);
@@ -305,54 +305,25 @@ window.ToastManager = {
             }
 
             this.state.egiId = egiId;
-            
+
             // Controlla se è in modalità editing o readonly
             const canEdit = container.getAttribute('data-can-edit') === 'true';
             this.state.canEdit = canEdit;
-            
-            console.log('TraitsEditor: Mode -', canEdit ? 'EDITING' : 'READONLY');
-            
-            this.loadCategories();
-            this.loadExistingTraits(); // Carica trait esistenti
-        },
 
-        async loadExistingTraits() {
-            try {
-                const response = await fetch(`/egis/${this.state.egiId}/traits`);
-                const data = await response.json();
-                
-                if (data.success && data.traits) {
-                    // Converte i trait esistenti nel formato per editing
-                    this.state.editingTraits = data.traits.map(trait => ({
-                        id: trait.id, // ID reale dal database
-                        tempId: trait.id, // Usa l'ID reale anche come tempId
-                        category_id: trait.category_id,
-                        category_name: trait.category ? trait.category.name : 'Unknown',
-                        trait_type_id: trait.trait_type_id,
-                        type_name: trait.trait_type ? trait.trait_type.name : 'Unknown',
-                        value: trait.value,
-                        display_value: trait.display_value || trait.value,
-                        display_type: trait.trait_type ? trait.trait_type.display_type : 'text',
-                        unit: trait.trait_type ? trait.trait_type.unit : null,
-                        sort_order: trait.sort_order || 0
-                    }));
-                    
-                    console.log('TraitsEditor: Loaded existing traits for editing:', this.state.editingTraits);
-                    this.updateUI();
-                }
-            } catch (error) {
-                console.error('TraitsEditor: Error loading existing traits:', error);
-            }
+            console.log('TraitsEditor: Mode -', canEdit ? 'EDITING' : 'READONLY');
+
+            this.loadCategories();
+            // I traits vengono caricati dal viewer via PHP, non qui
         },
 
         async loadCategories() {
             try {
                 console.log('TraitsEditor: Loading categories...');
-                
+
                 // Aggiungi timeout per server lenti
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 secondi timeout
-                
+
                 const response = await fetch('/traits/categories', {
                     signal: controller.signal,
                     headers: {
@@ -361,18 +332,18 @@ window.ToastManager = {
                         'X-Requested-With': 'XMLHttpRequest'
                     }
                 });
-                
+
                 clearTimeout(timeoutId);
-                
+
                 console.log('TraitsEditor: Response status:', response.status);
-                
+
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                
+
                 const data = await response.json();
                 console.log('TraitsEditor: Categories response:', data);
-                
+
                 if (data.success && data.categories && Array.isArray(data.categories)) {
                     if (data.categories.length > 0) {
                         this.state.categories = data.categories;
@@ -387,11 +358,11 @@ window.ToastManager = {
                 }
             } catch (error) {
                 console.error('TraitsEditor: Error loading categories:', error);
-                
+
                 if (error.name === 'AbortError') {
                     console.error('TraitsEditor: Request timeout - server too slow');
                 }
-                
+
                 // Fallback: usa categorie statiche se il server fallisce
                 this.state.categories = [
                     {id: 1, name: 'Materials', slug: 'materials', icon: '📦'},
@@ -400,7 +371,7 @@ window.ToastManager = {
                     {id: 4, name: 'Special', slug: 'special', icon: '⚡'},
                     {id: 5, name: 'Sustainability', slug: 'sustainability', icon: '🌿'}
                 ];
-                
+
                 console.log('TraitsEditor: Using fallback categories');
                 this.renderCategories();
             }
@@ -409,10 +380,10 @@ window.ToastManager = {
         renderCategories() {
             const nav = document.getElementById('categories-nav');
             if (!nav) return;
-            
+
             nav.innerHTML = this.state.categories.map(cat => `
-                <button type="button" 
-                        class="category-tab" 
+                <button type="button"
+                        class="category-tab"
                         data-category-id="${cat.id}"
                         onclick="TraitsEditor.filterByCategory(${cat.id})">
                     <span class="category-icon">${cat.icon}</span>
@@ -420,7 +391,7 @@ window.ToastManager = {
                     <span class="category-count" data-category="${cat.id}">0</span>
                 </button>
             `).join('');
-            
+
             // Aggiorna i conteggi dopo aver renderizzato le categorie
             this.updateCategoryCounters();
         },
@@ -439,7 +410,7 @@ window.ToastManager = {
 
                 modal.style.display = 'flex';
                 this.resetModal();
-                
+
                 // Mostra subito il placeholder
                 this.renderModalCategories();
 
@@ -450,7 +421,7 @@ window.ToastManager = {
                 } else {
                     console.log('TraitsEditor: Modal opened with cached categories');
                 }
-                
+
                 // Rendi nuovamente le categorie dopo il caricamento
                 this.renderModalCategories();
             } catch (error) {
@@ -465,7 +436,7 @@ window.ToastManager = {
                 try {
                     console.log(`TraitsEditor: Loading categories attempt ${attempt}/${maxRetries}`);
                     await this.loadCategories();
-                    
+
                     // Se siamo arrivati qui senza errori e abbiamo categorie, esce
                     if (this.state.categories.length > 0) {
                         console.log('TraitsEditor: Categories loaded successfully on attempt', attempt);
@@ -473,12 +444,12 @@ window.ToastManager = {
                     }
                 } catch (error) {
                     console.error(`TraitsEditor: Attempt ${attempt} failed:`, error);
-                    
+
                     if (attempt === maxRetries) {
                         console.log('TraitsEditor: All attempts failed, using fallback categories');
                         throw error;
                     }
-                    
+
                     // Aspetta prima di ritentare (backoff esponenziale)
                     const delay = Math.pow(2, attempt - 1) * 1000; // 1s, 2s, 4s
                     console.log(`TraitsEditor: Waiting ${delay}ms before retry...`);
@@ -502,7 +473,7 @@ window.ToastManager = {
                 value: null,
                 currentType: null
             };
-            
+
             document.getElementById('type-selector-group').style.display = 'none';
             document.getElementById('value-selector-group').style.display = 'none';
             document.getElementById('trait-preview').style.display = 'none';
@@ -520,8 +491,8 @@ window.ToastManager = {
             }
 
             selector.innerHTML = this.state.categories.map(cat => `
-                <button type="button" 
-                        class="category-option" 
+                <button type="button"
+                        class="category-option"
                         onclick="TraitsEditor.selectCategory(${cat.id})"
                         data-category-id="${cat.id}">
                     <span class="category-icon">${cat.icon}</span>
@@ -532,7 +503,7 @@ window.ToastManager = {
 
         async selectCategory(categoryId) {
             this.state.modalData.category_id = categoryId;
-            
+
             // Highlight selected category
             document.querySelectorAll('.category-option').forEach(btn => {
                 btn.classList.toggle('selected', btn.dataset.categoryId == categoryId);
@@ -542,7 +513,7 @@ window.ToastManager = {
             try {
                 const response = await fetch(`/traits/categories/${categoryId}/types`);
                 const data = await response.json();
-                
+
                 if (data.success) {
                     this.state.availableTypes = data.types;
                     this.renderTypeSelector();
@@ -557,8 +528,8 @@ window.ToastManager = {
             const select = document.getElementById('trait-type-select');
             if (!select) return;
 
-            select.innerHTML = '<option value="">' + window.TraitsTranslations.choose_type + '</option>' + 
-                this.state.availableTypes.map(type => 
+            select.innerHTML = '<option value="">' + window.TraitsTranslations.choose_type + '</option>' +
+                this.state.availableTypes.map(type =>
                     `<option value="${type.id}">${type.name}</option>`
                 ).join('');
         },
@@ -566,7 +537,7 @@ window.ToastManager = {
         onTypeSelected() {
             const select = document.getElementById('trait-type-select');
             const typeId = select.value;
-            
+
             if (!typeId) return;
 
             const type = this.state.availableTypes.find(t => t.id == typeId);
@@ -582,13 +553,13 @@ window.ToastManager = {
             if (!container) return;
 
             let inputHtml = '';
-            
+
             // Parse allowed_values se è una stringa JSON
             let allowedValues = null;
             if (type.allowed_values) {
                 try {
-                    allowedValues = typeof type.allowed_values === 'string' 
-                        ? JSON.parse(type.allowed_values) 
+                    allowedValues = typeof type.allowed_values === 'string'
+                        ? JSON.parse(type.allowed_values)
                         : type.allowed_values;
                 } catch (e) {
                     console.error('Error parsing allowed values:', e);
@@ -609,9 +580,9 @@ window.ToastManager = {
                 const max = (type.display_type === 'percentage' || type.display_type === 'boost_number') ? '100' : '';
                 inputHtml = `
                     <div class="input-group">
-                        <input type="number" 
-                               class="form-input" 
-                               id="trait-value-input" 
+                        <input type="number"
+                               class="form-input"
+                               id="trait-value-input"
                                ${min !== '' ? `min="${min}"` : ''}
                                ${max !== '' ? `max="${max}"` : ''}
                                step="0.01"
@@ -623,17 +594,17 @@ window.ToastManager = {
             } else if (type.display_type === 'date') {
                 // Date input
                 inputHtml = `
-                    <input type="date" 
-                           class="form-input" 
-                           id="trait-value-input" 
+                    <input type="date"
+                           class="form-input"
+                           id="trait-value-input"
                            oninput="TraitsEditor.onValueChanged()">
                 `;
             } else {
                 // Text input
                 inputHtml = `
-                    <input type="text" 
-                           class="form-input" 
-                           id="trait-value-input" 
+                    <input type="text"
+                           class="form-input"
+                           id="trait-value-input"
                            placeholder="${window.TraitsTranslations.insert_value}"
                            oninput="TraitsEditor.onValueChanged()">
                 `;
@@ -645,9 +616,9 @@ window.ToastManager = {
         onValueChanged() {
             const input = document.getElementById('trait-value-input');
             const value = input.value.trim();
-            
+
             this.state.modalData.value = value;
-            
+
             if (value) {
                 this.updatePreview();
                 document.getElementById('confirm-trait-btn').disabled = false;
@@ -660,13 +631,13 @@ window.ToastManager = {
         updatePreview() {
             const preview = document.getElementById('trait-preview');
             const type = this.state.modalData.currentType;
-            
+
             if (!preview || !type) return;
 
             preview.querySelector('.preview-type').textContent = type.name;
             preview.querySelector('.preview-value').textContent = this.state.modalData.value;
             preview.querySelector('.preview-unit').textContent = type.unit || '';
-            
+
             preview.style.display = 'block';
         },
 
@@ -733,7 +704,7 @@ window.ToastManager = {
             const gridId = this.state.canEdit ? 'traits-grid' : 'traits-grid-readonly';
             const grid = document.getElementById(gridId);
             const emptyState = document.getElementById('empty-state');
-            
+
             if (!grid) {
                 console.error('TraitsEditor: Grid not found -', gridId);
                 return;
@@ -750,17 +721,17 @@ window.ToastManager = {
             if (emptyState && this.state.canEdit) {
                 emptyState.style.display = 'none';
             }
-            
+
             // Forza layout mobile se necessario
             if (window.innerWidth <= 768) {
                 grid.style.display = 'grid';
                 grid.style.gridTemplateColumns = 'repeat(3, 1fr)';
                 grid.style.gap = '0.5rem';
             }
-            
+
             grid.innerHTML = this.state.editingTraits.map((trait, index) => {
                 const categoryColor = this.getCategoryColor(trait.category_id);
-                
+
                 // Renderizza diversamente in base alla modalità
                 if (this.state.canEdit) {
                     // Modalità editing - con pulsante rimuovi
@@ -770,7 +741,7 @@ window.ToastManager = {
                                 <span class="trait-category-badge" style="background-color: ${categoryColor}">
                                     ${this.getCategoryIcon(trait.category_id)}
                                 </span>
-                                <button type="button" 
+                                <button type="button"
                                         class="trait-remove"
                                         onclick="TraitsEditor.removeTrait(${index})">
                                     ×
@@ -817,19 +788,19 @@ window.ToastManager = {
         updateCategoryCounters() {
             // Conteggio traits per categoria
             const categoryCounts = {};
-            
+
             // Inizializza tutti i conteggi a 0
             this.state.categories.forEach(cat => {
                 categoryCounts[cat.id] = 0;
             });
-            
+
             // Conta i traits per categoria (include sia editing che esistenti)
             this.state.editingTraits.forEach(trait => {
                 if (categoryCounts.hasOwnProperty(trait.category_id)) {
                     categoryCounts[trait.category_id]++;
                 }
             });
-            
+
             // Aggiorna i badge delle categorie
             Object.keys(categoryCounts).forEach(categoryId => {
                 const badge = document.querySelector(`[data-category="${categoryId}"]`);
@@ -842,11 +813,11 @@ window.ToastManager = {
         updateButtons() {
             const addBtn = document.getElementById('add-trait-btn');
             const saveBtn = document.getElementById('save-traits-btn');
-            
+
             if (addBtn) {
                 addBtn.style.display = this.state.editingTraits.length > 0 && this.state.editingTraits.length < 30 ? 'flex' : 'none';
             }
-            
+
             if (saveBtn) {
                 saveBtn.style.display = this.state.editingTraits.length > 0 ? 'flex' : 'none';
             }
@@ -866,10 +837,43 @@ window.ToastManager = {
                 ToastManager.warning('Solo il creator può modificare i traits di questo EGI');
                 return;
             }
-            
+
             if (this.state.editingTraits.length === 0) return;
 
             try {
+                // PRIMA: Carica i traits esistenti dal server
+                console.log('Loading existing traits before save...');
+                const existingResponse = await fetch(`/egis/${this.state.egiId}/traits`);
+                const existingData = await existingResponse.json();
+
+                let allTraits = [];
+
+                // Aggiungi i traits esistenti (con i loro ID originali)
+                if (existingData.success && existingData.traits) {
+                    allTraits = existingData.traits.map(trait => ({
+                        id: trait.id, // ID reale dal database
+                        category_id: trait.category_id,
+                        trait_type_id: trait.trait_type_id,
+                        value: trait.value,
+                        display_value: trait.display_value || trait.value,
+                        sort_order: trait.sort_order
+                    }));
+                }
+
+                // Aggiungi i nuovi traits (senza ID, saranno creati)
+                this.state.editingTraits.forEach(newTrait => {
+                    allTraits.push({
+                        // Nessun ID per i nuovi traits
+                        category_id: newTrait.category_id,
+                        trait_type_id: newTrait.trait_type_id,
+                        value: newTrait.value,
+                        display_value: newTrait.display_value || newTrait.value,
+                        sort_order: allTraits.length // Aggiungi alla fine
+                    });
+                });
+
+                console.log('Saving all traits (existing + new):', allTraits);
+
                 const response = await fetch(`/egis/${this.state.egiId}/traits`, {
                     method: 'POST',
                     headers: {
@@ -877,18 +881,18 @@ window.ToastManager = {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                     },
                     body: JSON.stringify({
-                        traits: this.state.editingTraits
+                        traits: allTraits
                     })
                 });
 
                 const data = await response.json();
-                
+
                 if (data.success) {
                     ToastManager.success(window.TraitsTranslations.save_success, '🎯 Traits Salvati');
                     // Reset editing state
                     this.state.editingTraits = [];
                     this.updateUI();
-                    
+
                     // Reload page to show updated viewer
                     setTimeout(() => location.reload(), 1500);
                 } else {
@@ -933,16 +937,19 @@ window.ToastManager = {
             // Implementation for category filtering if needed
             console.log('Filter by category:', categoryId);
         }
-        
+
     };
 
-    // Auto-initialize quando il DOM è pronto
+    // Auto-initialize quando il DOM è pronto - SOLO se l'editor è in modalità editing
     document.addEventListener('DOMContentLoaded', function() {
         const editor = document.querySelector('.egi-traits-editor');
         if (editor) {
-            const egiId = editor.dataset.egiId;
-            if (egiId) {
-                TraitsEditor.init(egiId);
+            const canEdit = editor.getAttribute('data-can-edit') === 'true';
+            if (canEdit) {
+                const egiId = editor.dataset.egiId;
+                if (egiId) {
+                    TraitsEditor.init(egiId);
+                }
             }
         }
     });
