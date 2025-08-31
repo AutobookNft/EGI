@@ -725,6 +725,9 @@ const TraitsViewer = {
     }
 };
 
+// Assign to window for global access
+window.TraitsViewer = TraitsViewer;
+
 // Auto-initialize quando il DOM è pronto
 document.addEventListener('DOMContentLoaded', function() {
     console.log('TraitsViewer: DOM loaded, initializing...');

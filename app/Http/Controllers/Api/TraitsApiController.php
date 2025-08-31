@@ -353,7 +353,7 @@ class TraitsApiController extends Controller {
                     'collection_id' => $egi->collection_id,
                     'traits_count' => count($traits)
                 ],
-                GdprActivityCategory::DATA_MODIFICATION
+                GdprActivityCategory::CONTENT_MODIFICATION
             );
 
             return response()->json([
@@ -465,7 +465,7 @@ class TraitsApiController extends Controller {
                     'collection_id' => $egi->collection_id,
                     'new_traits_count' => count($newTraits)
                 ],
-                GdprActivityCategory::DATA_MODIFICATION
+                GdprActivityCategory::CONTENT_MODIFICATION
             );
 
             return response()->json([
@@ -556,13 +556,13 @@ class TraitsApiController extends Controller {
             // For now, we'll use a simple approach and clear all cache
             Cache::flush();
 
-            Log::info('Traits rarity cache cleared for collection', [
+            $this->logger->info('TRAITS_API: Traits rarity cache cleared for collection', [
                 'collection_id' => $collectionId,
                 'pattern' => $pattern
             ]);
         } catch (\Exception $e) {
             // Log error but don't fail the main operation
-            Log::error('Failed to clear traits rarity cache', [
+            $this->logger->error('TRAITS_API: Failed to clear traits rarity cache', [
                 'collection_id' => $collectionId,
                 'error' => $e->getMessage()
             ]);
@@ -735,7 +735,7 @@ class TraitsApiController extends Controller {
                     'collection_id' => $egi->collection_id,
                     'trait_data' => $traitData
                 ],
-                GdprActivityCategory::DATA_MODIFICATION
+                GdprActivityCategory::CONTENT_MODIFICATION
             );
 
             return response()->json([
