@@ -175,8 +175,28 @@ $shouldShow = $hasTraits || $canEdit;
 
 @if($canEdit)
 {{-- Trait Modal --}}
-<div class="trait-modal" id="trait-modal-viewer" style="display: none;">
-    <div class="modal-content">
+<div class="trait-modal" id="trait-modal-viewer" style="display: none; 
+     position: fixed !important; 
+     top: 0 !important; 
+     left: 0 !important; 
+     width: 100vw !important; 
+     height: 100vh !important; 
+     z-index: 10000 !important; 
+     background: rgba(0, 0, 0, 0.7) !important; 
+     backdrop-filter: blur(8px) !important; 
+     align-items: center !important; 
+     justify-content: center !important; 
+     padding: 1rem !important; 
+     overflow-y: auto !important;">
+    <div class="modal-content" style="background: #ffffff !important; 
+         border-radius: 0.75rem !important; 
+         max-width: 500px !important; 
+         width: 90% !important; 
+         max-height: 80vh !important; 
+         overflow-y: auto !important; 
+         box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4) !important; 
+         position: relative !important; 
+         margin: auto !important;">
         <div class="modal-header">
             <h4 class="modal-title">{{ __('traits.modal_title') }}</h4>
             <button type="button"
@@ -510,7 +530,27 @@ const TraitsViewer = {
             const modal = document.getElementById('trait-modal-viewer');
             if (!modal) return;
 
+            // Move modal to body to avoid parent positioning issues
+            if (modal.parentNode !== document.body) {
+                document.body.appendChild(modal);
+            }
+
+            // Force positioning styles
             modal.style.display = 'flex';
+            modal.style.position = 'fixed';
+            modal.style.top = '0';
+            modal.style.left = '0';
+            modal.style.width = '100vw';
+            modal.style.height = '100vh';
+            modal.style.zIndex = '99999';
+            modal.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+            modal.style.alignItems = 'center';
+            modal.style.justifyContent = 'center';
+            modal.style.padding = '1rem';
+            
+            // Prevent body scroll when modal is open
+            document.body.style.overflow = 'hidden';
+            
             this.resetModal();
 
             // Load categories if not loaded
@@ -529,6 +569,8 @@ const TraitsViewer = {
         const modal = document.getElementById('trait-modal-viewer');
         if (modal) {
             modal.style.display = 'none';
+            // Restore body scroll
+            document.body.style.overflow = '';
             this.resetModal();
         }
     },
