@@ -423,7 +423,7 @@ class EgiController extends Controller {
 
     /**
      * Calculate rarity percentage for a trait value
-     * 
+     *
      * @param int $traitTypeId
      * @param string $value
      * @param int $collectionId
@@ -449,5 +449,105 @@ class EgiController extends Controller {
 
             return round(($egisWithTrait / $totalEgis) * 100, 2);
         });
+    }
+
+    /**
+     * Delete a specific trait from an EGI
+     *
+     * @param Request $request
+     * @param int $egiId
+     * @param int $traitId
+     * @return JsonResponse
+     */
+    public function deleteTrait(Request $request, int $egiId, int $traitId): JsonResponse
+    {
+        try {
+            // Load EGI with authorization check
+            $egi = Egi::with(['collection', 'traits'])->find($egiId);
+
+            if (!$egi) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'EGI non trovato.'
+                ], 404);
+            }
+
+            // Authorization check - only owner can delete traits
+            if (!FegiAuth::check() || FegiAuth::id() !== $egi->user_id) {
+                $this->logger->logInfo('EGI trait delete unauthorized', [
+                    'egi_id' => $egiId,
+                    'trait_id' => $traitId,
+                    'user_id' => FegiAuth::id(),
+                    'owner_id' => $egi->user_id
+                ]);
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Non autorizzato. Solo il proprietario può eliminare i traits.'
+                ], 403);
+            }
+
+            // Find the trait
+            $trait = $egi->traits()->where('id', $traitId)->first();
+
+            if (!$trait) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Trait non trovato per questo EGI.'
+                ], 404);
+            }
+
+            // Delete the trait
+            $trait->delete();
+
+            // Log the deletion
+            $this->logger->logInfo('EGI trait deleted successfully', [
+                'egi_id' => $egiId,
+                'trait_id' => $traitId,
+                'trait_type' => $trait->traitType->name ?? 'Unknown',
+                'trait_value' => $trait->value,
+                'user_id' => FegiAuth::id()
+            ]);
+
+            // GDPR audit log
+            app(AuditLogService::class)->logActivity(
+                GdprActivityCategory::DATA_MODIFICATION,
+                "Trait eliminato dall'EGI {$egi->name}",
+                [
+                    'egi_id' => $egiId,
+                    'trait_id' => $traitId,
+                    'trait_data' => [
+                        'type' => $trait->traitType->name ?? 'Unknown',
+                        'value' => $trait->value
+                    ]
+                ]
+            );
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Trait eliminato con successo.',
+                'data' => [
+                    'egi_id' => $egiId,
+                    'trait_id' => $traitId,
+                    'remaining_traits' => $egi->traits()->count()
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            $this->errorManager->handleError(
+                $e,
+                'EGI trait deletion failed',
+                [
+                    'egi_id' => $egiId,
+                    'trait_id' => $traitId,
+                    'user_id' => FegiAuth::id()
+                ]
+            );
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Errore interno del server durante l\'eliminazione del trait.'
+            ], 500);
+        }
     }
 }

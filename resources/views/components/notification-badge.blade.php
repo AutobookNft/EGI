@@ -167,6 +167,11 @@
 
             // Click outside to close
             document.addEventListener('click', (e) => {
+                // Ignore clicks on trait action buttons
+                if (e.target.closest('.trait-action-button')) {
+                    return;
+                }
+
                 if (!this.container.contains(e.target)) {
                     this.closeDropdown();
                 }
