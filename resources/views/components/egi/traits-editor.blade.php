@@ -751,15 +751,18 @@ window.ToastManager = {
 
         updateContainerVisibility() {
             if (this.state.canEdit) {
-                // In modalità editing, mostra il container editing e nascondi il readonly
+                // In modalità editing, mostra solo il container editing
                 const editingContainer = document.querySelector('.traits-list.editing');
-                const readonlyContainer = document.querySelector('.traits-list.readonly');
                 
                 if (editingContainer) {
                     editingContainer.style.display = 'block';
                 }
-                if (readonlyContainer) {
-                    readonlyContainer.style.display = 'none';
+                
+                // Nascondi eventuali traits renderizzati dal PHP nel container readonly
+                // per evitare duplicazioni
+                const readonlyGrid = document.getElementById('traits-grid-readonly');
+                if (readonlyGrid && readonlyGrid.parentElement) {
+                    readonlyGrid.parentElement.style.display = 'none';
                 }
             }
         },
@@ -828,6 +831,7 @@ window.ToastManager = {
                                     <span>${this.formatTraitValue(trait)}</span>
                                     ${trait.unit ? `<span class="trait-unit">${trait.unit}</span>` : ''}
                                 </div>
+                                ${this.renderRarityBar(trait)}
                             </div>
                         </div>
                     `;
@@ -846,6 +850,7 @@ window.ToastManager = {
                                     <span>${this.formatTraitValue(trait)}</span>
                                     ${trait.unit ? `<span class="trait-unit">${trait.unit}</span>` : ''}
                                 </div>
+                                ${this.renderRarityBar(trait)}
                             </div>
                         </div>
                     `;
@@ -1001,6 +1006,45 @@ window.ToastManager = {
                 6: '🏛️'  // Cultural
             };
             return icons[categoryId] || '🏷️';
+        },
+
+        renderRarityBar(trait) {
+            if (!trait.rarity_percentage) {
+                return '';
+            }
+
+            // Determina la classe di rarità in base alla percentuale
+            let rarityClass, barWidth;
+            if (trait.rarity_percentage >= 70) {
+                rarityClass = 'common';
+                barWidth = 30;
+            } else if (trait.rarity_percentage >= 40) {
+                rarityClass = 'uncommon';
+                barWidth = 45;
+            } else if (trait.rarity_percentage >= 20) {
+                rarityClass = 'rare';
+                barWidth = 60;
+            } else if (trait.rarity_percentage >= 10) {
+                rarityClass = 'epic';
+                barWidth = 75;
+            } else if (trait.rarity_percentage >= 5) {
+                rarityClass = 'legendary';
+                barWidth = 90;
+            } else {
+                rarityClass = 'mythic';
+                barWidth = 95;
+            }
+
+            return `
+                <div class="trait-rarity">
+                    <div class="rarity-bar ${rarityClass}">
+                        <div class="rarity-fill" style="width: ${barWidth}%"></div>
+                    </div>
+                    <div class="rarity-text">
+                        <span class="rarity-percentage">${trait.rarity_percentage.toFixed(1)}%</span>
+                    </div>
+                </div>
+            `;
         },
 
         formatTraitValue(trait) {
