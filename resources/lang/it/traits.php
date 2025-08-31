@@ -37,6 +37,19 @@ return [
     'network_error' => 'Errore di rete nel salvataggio',
     'unknown_error' => 'Errore sconosciuto',
 
+    // JavaScript Messages
+    'remove_success' => 'Trait rimosso con successo',
+    'remove_error' => 'Errore durante la rimozione',
+    'network_error_js' => 'Errore di rete',
+    'unauthorized' => 'Non autorizzato',
+    'confirm_remove' => 'Sei sicuro di voler rimuovere questo trait?',
+    'creator_only_modify' => 'Solo il creator può modificare i traits di questo EGI',
+    'modal_open_error' => 'Errore apertura modal',
+    'add_trait_error' => 'Errore aggiunta trait',
+    'unknown_error_js' => 'Errore sconosciuto',
+    'network_error_general' => 'Errore di rete',
+    'add_success' => 'Trait aggiunto con successo!',
+
     // Categories
     'categories' => [
         'materials' => 'Materiali',

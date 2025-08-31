@@ -37,6 +37,19 @@ return [
     'network_error' => 'Erreur réseau lors de l\'enregistrement',
     'unknown_error' => 'Erreur inconnue',
 
+    // JavaScript Messages
+    'remove_success' => 'Trait supprimé avec succès',
+    'remove_error' => 'Erreur lors de la suppression',
+    'network_error_js' => 'Erreur réseau',
+    'unauthorized' => 'Non autorisé',
+    'confirm_remove' => 'Êtes-vous sûr de vouloir supprimer ce trait?',
+    'creator_only_modify' => 'Seul le créateur peut modifier les traits de cet EGI',
+    'modal_open_error' => 'Erreur d\'ouverture de la modal',
+    'add_trait_error' => 'Erreur d\'ajout de trait',
+    'unknown_error_js' => 'Erreur inconnue',
+    'network_error_general' => 'Erreur réseau',
+    'add_success' => 'Trait ajouté avec succès!',
+
     // Categories
     'categories' => [
         'materials' => 'Matériaux',

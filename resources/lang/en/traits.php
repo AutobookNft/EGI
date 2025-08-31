@@ -37,6 +37,19 @@ return [
     'network_error' => 'Network error while saving',
     'unknown_error' => 'Unknown error',
 
+    // JavaScript Messages
+    'remove_success' => 'Trait removed successfully',
+    'remove_error' => 'Error during removal',
+    'network_error_js' => 'Network error',
+    'unauthorized' => 'Unauthorized',
+    'confirm_remove' => 'Are you sure you want to remove this trait?',
+    'creator_only_modify' => 'Only the creator can modify traits of this EGI',
+    'modal_open_error' => 'Error opening modal',
+    'add_trait_error' => 'Error adding trait',
+    'unknown_error_js' => 'Unknown error',
+    'network_error_general' => 'Network error',
+    'add_success' => 'Trait added successfully!',
+
     // Categories
     'categories' => [
         'materials' => 'Materials',

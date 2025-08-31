@@ -37,6 +37,19 @@ return [
     'network_error' => 'Error de red al guardar',
     'unknown_error' => 'Error desconocido',
 
+    // JavaScript Messages
+    'remove_success' => 'Rasgo eliminado con éxito',
+    'remove_error' => 'Error durante la eliminación',
+    'network_error_js' => 'Error de red',
+    'unauthorized' => 'No autorizado',
+    'confirm_remove' => '¿Estás seguro de que quieres eliminar este rasgo?',
+    'creator_only_modify' => 'Solo el creador puede modificar los rasgos de este EGI',
+    'modal_open_error' => 'Error al abrir modal',
+    'add_trait_error' => 'Error al agregar rasgo',
+    'unknown_error_js' => 'Error desconocido',
+    'network_error_general' => 'Error de red',
+    'add_success' => '¡Rasgo agregado con éxito!',
+
     // Categories
     'categories' => [
         'materials' => 'Materiales',

@@ -37,6 +37,19 @@ return [
     'network_error' => 'Erro de rede ao salvar',
     'unknown_error' => 'Erro desconhecido',
 
+    // JavaScript Messages
+    'remove_success' => 'Traço removido com sucesso',
+    'remove_error' => 'Erro durante a remoção',
+    'network_error_js' => 'Erro de rede',
+    'unauthorized' => 'Não autorizado',
+    'confirm_remove' => 'Tem certeza de que deseja remover este traço?',
+    'creator_only_modify' => 'Apenas o criador pode modificar traços deste EGI',
+    'modal_open_error' => 'Erro ao abrir modal',
+    'add_trait_error' => 'Erro ao adicionar traço',
+    'unknown_error_js' => 'Erro desconhecido',
+    'network_error_general' => 'Erro de rede',
+    'add_success' => 'Traço adicionado com sucesso!',
+
     // Categories
     'categories' => [
         'materials' => 'Materiais',

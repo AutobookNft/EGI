@@ -70,28 +70,10 @@ $canEdit = $egi && $canManage && FegiAuth::check() && FegiAuth::id() === $egi->u
             @if($egi && $egi->traits && $egi->traits->count() > 0)
                 @foreach($egi->traits as $trait)
                     @php
-                        // Definisci i colori delle categorie
-                        $categoryColors = [
-                            1 => '#D4A574', // Materials - Oro
-                            2 => '#8E44AD', // Visual - Viola
-                            3 => '#1B365D', // Dimensions - Blu
-                            4 => '#E67E22', // Special - Arancio
-                            5 => '#2D5016', // Sustainability - Verde
-                            6 => '#8B4513'  // Cultural - Marrone
-                        ];
-
-                        // Definisci le icone delle categorie
-                        $categoryIcons = [
-                            1 => '📦', // Materials
-                            2 => '🎨', // Visual
-                            3 => '📐', // Dimensions
-                            4 => '⚡', // Special
-                            5 => '🌿', // Sustainability
-                            6 => '🏛️'  // Cultural
-                        ];
-
-                        $categoryColor = $categoryColors[$trait->category_id] ?? '#6B6B6B';
-                        $categoryIcon = $categoryIcons[$trait->category_id] ?? '🏷️';
+                        // Carica colore e icona dal database
+                        $category = $trait->category;
+                        $categoryColor = $category ? $category->color : '#6B6B6B';
+                        $categoryIcon = $category ? $category->icon : '🏷️';
                     @endphp
 
                     <div class="trait-card readonly" data-category="{{ $trait->category_id }}" data-trait-id="{{ $trait->id }}" style="position: relative;">
@@ -183,7 +165,7 @@ $canEdit = $egi && $canManage && FegiAuth::check() && FegiAuth::id() === $egi->u
                 @endforeach
             @else
                 <div class="empty-state-viewer" style="text-align: center; padding: 2rem; color: #666; font-style: italic;">
-                    Nessun tratto definito.
+                    {{ __('traits.empty_state') }}
                 </div>
             @endif
         </div>
@@ -261,13 +243,19 @@ $canEdit = $egi && $canManage && FegiAuth::check() && FegiAuth::id() === $egi->u
 
 {{-- JavaScript per gestire edit mode --}}
 <script>
-// Translations for JavaScript
+// Translations for JavaScript (loaded from Laravel)
 window.TraitsTranslations = {
-    remove_success: 'Trait rimosso con successo',
-    remove_error: 'Errore durante la rimozione',
-    network_error: 'Errore di rete',
-    unauthorized: 'Non autorizzato',
-    confirm_remove: 'Sei sicuro di voler rimuovere questo trait?'
+    remove_success: @json(__('traits.remove_success')),
+    remove_error: @json(__('traits.remove_error')),
+    network_error: @json(__('traits.network_error_js')),
+    unauthorized: @json(__('traits.unauthorized')),
+    confirm_remove: @json(__('traits.confirm_remove')),
+    creator_only_modify: @json(__('traits.creator_only_modify')),
+    modal_open_error: @json(__('traits.modal_open_error')),
+    add_trait_error: @json(__('traits.add_trait_error')),
+    unknown_error: @json(__('traits.unknown_error_js')),
+    network_error_general: @json(__('traits.network_error_general')),
+    add_success: @json(__('traits.add_success'))
 };
 
 // Toast Notification System (extracted from traits-editor)
@@ -420,7 +408,7 @@ const TraitsViewer = {
         // Enhanced removeTrait function with ToastManager (extracted from traits-editor)
         if (!this.state.canEdit) {
             console.warn('TraitsViewer: Remove trait denied - readonly mode');
-            ToastManager.warning('Solo il creator può modificare i traits di questo EGI');
+            ToastManager.warning(window.TraitsTranslations.creator_only_modify);
             return;
         }
 
@@ -476,7 +464,7 @@ const TraitsViewer = {
             } else {
                 // Error toast
                 console.error('Server returned error:', data.message);
-                ToastManager.error(window.TraitsTranslations.remove_error + ': ' + (data.message || 'Errore sconosciuto'), '❌ Errore');
+                ToastManager.error(window.TraitsTranslations.remove_error + ': ' + (data.message || window.TraitsTranslations.unknown_error), '❌ Errore');
             }
         } catch (error) {
             console.error('TraitsViewer: Error removing trait:', error);
@@ -488,7 +476,7 @@ const TraitsViewer = {
     async openModal() {
         if (!this.state.canEdit) {
             console.warn('TraitsViewer: Modal access denied - readonly mode');
-            ToastManager.warning('Solo il creator può modificare i traits di questo EGI');
+            ToastManager.warning(window.TraitsTranslations.creator_only_modify);
             return;
         }
 
@@ -507,7 +495,7 @@ const TraitsViewer = {
             this.renderModalCategories();
         } catch (error) {
             console.error('Error opening modal:', error);
-            ToastManager.error('Errore apertura modal', '❌ Errore');
+            ToastManager.error(window.TraitsTranslations.modal_open_error, '❌ Errore');
         }
     },
 
@@ -697,17 +685,17 @@ const TraitsViewer = {
             const data = await response.json();
 
             if (data.success) {
-                ToastManager.success('Trait aggiunto con successo!', '🎯 Nuovo Trait');
+                ToastManager.success(window.TraitsTranslations.add_success, '🎯 Nuovo Trait');
                 this.closeModal();
 
                 // Reload page to show new trait
                 setTimeout(() => location.reload(), 1500);
             } else {
-                ToastManager.error('Errore aggiunta trait: ' + (data.message || 'Errore sconosciuto'), '❌ Errore');
+                ToastManager.error(window.TraitsTranslations.add_trait_error + ': ' + (data.message || window.TraitsTranslations.unknown_error), '❌ Errore');
             }
         } catch (error) {
             console.error('Error adding trait:', error);
-            ToastManager.error('Errore di rete', '🌐 Errore di Rete');
+            ToastManager.error(window.TraitsTranslations.network_error_general, '🌐 Errore di Rete');
         }
     }
 };

@@ -18,14 +18,14 @@ class TraitDefaultsSeeder extends Seeder {
      * Run the database seeds.
      */
     public function run(): void {
-        // Default Categories
+        // Default Categories with colors
         $categories = [
-            ['name' => 'Materials', 'slug' => 'materials', 'icon' => '📦', 'is_system' => true, 'sort_order' => 1],
-            ['name' => 'Visual', 'slug' => 'visual', 'icon' => '🎨', 'is_system' => true, 'sort_order' => 2],
-            ['name' => 'Dimensions', 'slug' => 'dimensions', 'icon' => '📐', 'is_system' => true, 'sort_order' => 3],
-            ['name' => 'Special', 'slug' => 'special', 'icon' => '⚡', 'is_system' => true, 'sort_order' => 4],
-            ['name' => 'Sustainability', 'slug' => 'sustainability', 'icon' => '🌿', 'is_system' => true, 'sort_order' => 5],
-            ['name' => 'Cultural', 'slug' => 'cultural', 'icon' => '🏛️', 'is_system' => true, 'sort_order' => 6],
+            ['name' => 'Materials', 'slug' => 'materials', 'icon' => '📦', 'color' => '#D4A574', 'is_system' => true, 'sort_order' => 1],
+            ['name' => 'Visual', 'slug' => 'visual', 'icon' => '🎨', 'color' => '#8E44AD', 'is_system' => true, 'sort_order' => 2],
+            ['name' => 'Dimensions', 'slug' => 'dimensions', 'icon' => '📐', 'color' => '#1B365D', 'is_system' => true, 'sort_order' => 3],
+            ['name' => 'Special', 'slug' => 'special', 'icon' => '⚡', 'color' => '#E67E22', 'is_system' => true, 'sort_order' => 4],
+            ['name' => 'Sustainability', 'slug' => 'sustainability', 'icon' => '🌿', 'color' => '#2D5016', 'is_system' => true, 'sort_order' => 5],
+            ['name' => 'Cultural', 'slug' => 'cultural', 'icon' => '🏛️', 'color' => '#8B4513', 'is_system' => true, 'sort_order' => 6],
         ];
 
         foreach ($categories as $category) {

@@ -37,6 +37,19 @@ return [
     'network_error' => 'Netzwerkfehler beim Speichern',
     'unknown_error' => 'Unbekannter Fehler',
 
+    // JavaScript Messages
+    'remove_success' => 'Eigenschaft erfolgreich entfernt',
+    'remove_error' => 'Fehler beim Entfernen',
+    'network_error_js' => 'Netzwerkfehler',
+    'unauthorized' => 'Nicht autorisiert',
+    'confirm_remove' => 'Sind Sie sicher, dass Sie diese Eigenschaft entfernen möchten?',
+    'creator_only_modify' => 'Nur der Ersteller kann Eigenschaften dieses EGI ändern',
+    'modal_open_error' => 'Fehler beim Öffnen des Modals',
+    'add_trait_error' => 'Fehler beim Hinzufügen der Eigenschaft',
+    'unknown_error_js' => 'Unbekannter Fehler',
+    'network_error_general' => 'Netzwerkfehler',
+    'add_success' => 'Eigenschaft erfolgreich hinzugefügt!',
+
     // Categories
     'categories' => [
         'materials' => 'Materialien',
