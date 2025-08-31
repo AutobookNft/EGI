@@ -50,6 +50,16 @@ return [
     'network_error_general' => 'Erreur réseau',
     'add_success' => 'Trait ajouté avec succès!',
 
+    // SweetAlert2 Messages
+    'confirm_delete_title' => 'Supprimer ce trait?',
+    'confirm_delete_text' => 'Cette action ne peut pas être annulée',
+    'confirm_delete_button' => 'Oui, supprimer',
+    'cancel_button' => 'Annuler',
+    'delete_success_title' => 'Supprimé!',
+    'delete_success_text' => 'Le trait a été supprimé avec succès',
+    'delete_error_title' => 'Erreur!',
+    'delete_error_text' => 'Une erreur s\'est produite lors de la suppression',
+
     // Categories
     'categories' => [
         'materials' => 'Matériaux',

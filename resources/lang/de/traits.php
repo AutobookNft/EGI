@@ -50,6 +50,16 @@ return [
     'network_error_general' => 'Netzwerkfehler',
     'add_success' => 'Eigenschaft erfolgreich hinzugefügt!',
 
+    // SweetAlert2 Messages
+    'confirm_delete_title' => 'Dieses Trait entfernen?',
+    'confirm_delete_text' => 'Diese Aktion kann nicht rückgängig gemacht werden',
+    'confirm_delete_button' => 'Ja, entfernen',
+    'cancel_button' => 'Abbrechen',
+    'delete_success_title' => 'Entfernt!',
+    'delete_success_text' => 'Das Trait wurde erfolgreich entfernt',
+    'delete_error_title' => 'Fehler!',
+    'delete_error_text' => 'Ein Fehler ist beim Entfernen aufgetreten',
+
     // Categories
     'categories' => [
         'materials' => 'Materialien',

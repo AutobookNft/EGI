@@ -50,6 +50,16 @@ return [
     'network_error_general' => 'Network error',
     'add_success' => 'Trait added successfully!',
 
+    // SweetAlert2 Messages
+    'confirm_delete_title' => 'Remove this trait?',
+    'confirm_delete_text' => 'This action cannot be undone',
+    'confirm_delete_button' => 'Yes, remove',
+    'cancel_button' => 'Cancel',
+    'delete_success_title' => 'Removed!',
+    'delete_success_text' => 'The trait has been removed successfully',
+    'delete_error_title' => 'Error!',
+    'delete_error_text' => 'An error occurred during removal',
+
     // Categories
     'categories' => [
         'materials' => 'Materials',

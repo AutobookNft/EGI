@@ -47,8 +47,18 @@ return [
     'modal_open_error' => 'Errore apertura modal',
     'add_trait_error' => 'Errore aggiunta trait',
     'unknown_error_js' => 'Errore sconosciuto',
-    'network_error_general' => 'Errore di rete',
-    'add_success' => 'Trait aggiunto con successo!',
+        'network_error_general' => 'Errore di rete',
+    'add_success' => 'Trait aggiunto con successo',
+
+    // SweetAlert2 Messages
+    'confirm_delete_title' => 'Rimuovere questo trait?',
+    'confirm_delete_text' => 'Questa azione non può essere annullata',
+    'confirm_delete_button' => 'Sì, rimuovi',
+    'cancel_button' => 'Annulla',
+    'delete_success_title' => 'Rimosso!',
+    'delete_success_text' => 'Il trait è stato rimosso con successo',
+    'delete_error_title' => 'Errore!',
+    'delete_error_text' => 'Si è verificato un errore durante la rimozione',
 
     // Categories
     'categories' => [

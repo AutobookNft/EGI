@@ -50,6 +50,16 @@ return [
     'network_error_general' => 'Erro de rede',
     'add_success' => 'Traço adicionado com sucesso!',
 
+    // SweetAlert2 Messages
+    'confirm_delete_title' => 'Remover este traço?',
+    'confirm_delete_text' => 'Esta ação não pode ser desfeita',
+    'confirm_delete_button' => 'Sim, remover',
+    'cancel_button' => 'Cancelar',
+    'delete_success_title' => 'Removido!',
+    'delete_success_text' => 'O traço foi removido com sucesso',
+    'delete_error_title' => 'Erro!',
+    'delete_error_text' => 'Ocorreu um erro durante a remoção',
+
     // Categories
     'categories' => [
         'materials' => 'Materiais',

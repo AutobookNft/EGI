@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Egi;
+use App\Models\EgiTrait;
 use App\Models\Collection;
 use App\Helpers\FegiAuth;
 use App\Services\Gdpr\AuditLogService;
@@ -100,14 +101,8 @@ class EgiController extends Controller {
                 'auth_type' => FegiAuth::getAuthType()
             ]);
 
-            // Calculate rarity for each trait
-            foreach ($egi->traits as $trait) {
-                $trait->rarity_percentage = $this->calculateRarity(
-                    $trait->trait_type_id,
-                    $trait->value,
-                    $egi->collection_id
-                );
-            }
+            // Rarity percentages are pre-calculated and stored in database
+            // No need for dynamic calculation anymore
 
             // Check if user can see CRUD box
             $canManage = false;
@@ -340,6 +335,12 @@ class EgiController extends Controller {
                 $egi->delete(); // Soft delete
             });
 
+            // Clear traits rarity cache after EGI deletion
+            $this->clearTraitsRarityCache($egi->collection_id);
+
+            // Update rarity percentages for remaining traits in collection
+            $this->updateRarityPercentages($egi->collection_id);
+
             // Log operational action (developers only - English)
             $this->logger->warning('EGI_DELETE: EGI deleted successfully', [
                 'user_id' => $user->id,
@@ -452,102 +453,95 @@ class EgiController extends Controller {
     }
 
     /**
-     * Delete a specific trait from an EGI
+     * Clear traits rarity cache for a specific collection
      *
-     * @param Request $request
-     * @param int $egiId
-     * @param int $traitId
-     * @return JsonResponse
+     * @param int $collectionId
+     * @return void
      */
-    public function deleteTrait(Request $request, int $egiId, int $traitId): JsonResponse
-    {
+    private function clearTraitsRarityCache(int $collectionId): void {
         try {
-            // Load EGI with authorization check
-            $egi = Egi::with(['collection', 'traits'])->find($egiId);
+            // Get all cache keys that match the pattern for this collection
+            $pattern = "trait_rarity_{$collectionId}_*";
 
-            if (!$egi) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'EGI non trovato.'
-                ], 404);
-            }
+            // Use Cache::flush() to clear all cache or implement more specific clearing
+            // For now, we'll use a simple approach and clear all cache
+            \Illuminate\Support\Facades\Cache::flush();
 
-            // Authorization check - only owner can delete traits
-            if (!FegiAuth::check() || FegiAuth::id() !== $egi->user_id) {
-                $this->logger->logInfo('EGI trait delete unauthorized', [
-                    'egi_id' => $egiId,
-                    'trait_id' => $traitId,
-                    'user_id' => FegiAuth::id(),
-                    'owner_id' => $egi->user_id
-                ]);
-
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Non autorizzato. Solo il proprietario può eliminare i traits.'
-                ], 403);
-            }
-
-            // Find the trait
-            $trait = $egi->traits()->where('id', $traitId)->first();
-
-            if (!$trait) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Trait non trovato per questo EGI.'
-                ], 404);
-            }
-
-            // Delete the trait
-            $trait->delete();
-
-            // Log the deletion
-            $this->logger->logInfo('EGI trait deleted successfully', [
-                'egi_id' => $egiId,
-                'trait_id' => $traitId,
-                'trait_type' => $trait->traitType->name ?? 'Unknown',
-                'trait_value' => $trait->value,
-                'user_id' => FegiAuth::id()
+            $this->logger->info('Traits rarity cache cleared for collection', [
+                'collection_id' => $collectionId,
+                'pattern' => $pattern
             ]);
-
-            // GDPR audit log
-            app(AuditLogService::class)->logActivity(
-                GdprActivityCategory::DATA_MODIFICATION,
-                "Trait eliminato dall'EGI {$egi->name}",
-                [
-                    'egi_id' => $egiId,
-                    'trait_id' => $traitId,
-                    'trait_data' => [
-                        'type' => $trait->traitType->name ?? 'Unknown',
-                        'value' => $trait->value
-                    ]
-                ]
-            );
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Trait eliminato con successo.',
-                'data' => [
-                    'egi_id' => $egiId,
-                    'trait_id' => $traitId,
-                    'remaining_traits' => $egi->traits()->count()
-                ]
-            ]);
-
         } catch (\Exception $e) {
-            $this->errorManager->handleError(
-                $e,
-                'EGI trait deletion failed',
-                [
-                    'egi_id' => $egiId,
-                    'trait_id' => $traitId,
-                    'user_id' => FegiAuth::id()
-                ]
-            );
+            // Log error but don't fail the main operation
+            $this->logger->error('Failed to clear traits rarity cache', [
+                'collection_id' => $collectionId,
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
 
-            return response()->json([
-                'success' => false,
-                'message' => 'Errore interno del server durante l\'eliminazione del trait.'
-            ], 500);
+    /**
+     * Update rarity percentages for all traits in a collection
+     *
+     * @param int $collectionId
+     * @return void
+     */
+    private function updateRarityPercentages(int $collectionId): void {
+        try {
+            $this->logger->info('Updating rarity percentages for collection', ['collection_id' => $collectionId]);
+
+            // Get total EGIs in collection
+            $totalEgis = Egi::where('collection_id', $collectionId)->count();
+
+            if ($totalEgis === 0) {
+                $this->logger->info('No EGIs in collection, skipping rarity update', ['collection_id' => $collectionId]);
+                return;
+            }
+
+            // Get all unique trait combinations (trait_type_id + value) in this collection
+            $uniqueTraits = EgiTrait::join('egis', 'egis.id', '=', 'egi_traits.egi_id')
+                ->where('egis.collection_id', $collectionId)
+                ->select('egi_traits.trait_type_id', 'egi_traits.value')
+                ->distinct()
+                ->get();
+
+            $this->logger->info('Found unique traits', ['count' => $uniqueTraits->count()]);
+
+            // Calculate and update rarity for each unique trait combination
+            foreach ($uniqueTraits as $uniqueTrait) {
+                // Count how many EGIs have this trait
+                $egisWithTrait = EgiTrait::join('egis', 'egis.id', '=', 'egi_traits.egi_id')
+                    ->where('egis.collection_id', $collectionId)
+                    ->where('egi_traits.trait_type_id', $uniqueTrait->trait_type_id)
+                    ->where('egi_traits.value', $uniqueTrait->value)
+                    ->count();
+
+                // Calculate percentage
+                $percentage = round(($egisWithTrait / $totalEgis) * 100, 2);
+
+                // Update all traits with this combination
+                $updatedCount = EgiTrait::join('egis', 'egis.id', '=', 'egi_traits.egi_id')
+                    ->where('egis.collection_id', $collectionId)
+                    ->where('egi_traits.trait_type_id', $uniqueTrait->trait_type_id)
+                    ->where('egi_traits.value', $uniqueTrait->value)
+                    ->update(['egi_traits.rarity_percentage' => $percentage]);
+
+                $this->logger->info('Updated rarity percentage', [
+                    'trait_type_id' => $uniqueTrait->trait_type_id,
+                    'value' => $uniqueTrait->value,
+                    'percentage' => $percentage,
+                    'egis_with_trait' => $egisWithTrait,
+                    'total_egis' => $totalEgis,
+                    'updated_count' => $updatedCount
+                ]);
+            }
+
+            $this->logger->info('Rarity percentages updated successfully for collection', ['collection_id' => $collectionId]);
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to update rarity percentages', [
+                'collection_id' => $collectionId,
+                'error' => $e->getMessage()
+            ]);
         }
     }
 }

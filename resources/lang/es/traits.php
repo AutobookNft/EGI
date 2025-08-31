@@ -50,6 +50,16 @@ return [
     'network_error_general' => 'Error de red',
     'add_success' => '¡Rasgo agregado con éxito!',
 
+    // SweetAlert2 Messages
+    'confirm_delete_title' => '¿Eliminar este rasgo?',
+    'confirm_delete_text' => 'Esta acción no se puede deshacer',
+    'confirm_delete_button' => 'Sí, eliminar',
+    'cancel_button' => 'Cancelar',
+    'delete_success_title' => '¡Eliminado!',
+    'delete_success_text' => 'El rasgo ha sido eliminado con éxito',
+    'delete_error_title' => '¡Error!',
+    'delete_error_text' => 'Se produjo un error durante la eliminación',
+
     // Categories
     'categories' => [
         'materials' => 'Materiales',

@@ -255,7 +255,17 @@ window.TraitsTranslations = {
     add_trait_error: @json(__('traits.add_trait_error')),
     unknown_error: @json(__('traits.unknown_error_js')),
     network_error_general: @json(__('traits.network_error_general')),
-    add_success: @json(__('traits.add_success'))
+    add_success: @json(__('traits.add_success')),
+
+    // SweetAlert2 translations
+    confirm_delete_title: @json(__('traits.confirm_delete_title')),
+    confirm_delete_text: @json(__('traits.confirm_delete_text')),
+    confirm_delete_button: @json(__('traits.confirm_delete_button')),
+    cancel_button: @json(__('traits.cancel_button')),
+    delete_success_title: @json(__('traits.delete_success_title')),
+    delete_success_text: @json(__('traits.delete_success_text')),
+    delete_error_title: @json(__('traits.delete_error_title')),
+    delete_error_text: @json(__('traits.delete_error_text'))
 };
 
 // Toast Notification System (extracted from traits-editor)
@@ -412,8 +422,22 @@ const TraitsViewer = {
             return;
         }
 
-        console.log('Showing confirmation dialog...');
-        if (!confirm(window.TraitsTranslations.confirm_remove)) {
+        console.log('Showing SweetAlert2 confirmation dialog...');
+
+        // Use SweetAlert2 for confirmation
+        const result = await Swal.fire({
+            title: window.TraitsTranslations.confirm_delete_title,
+            text: window.TraitsTranslations.confirm_delete_text,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: window.TraitsTranslations.confirm_delete_button,
+            cancelButtonText: window.TraitsTranslations.cancel_button,
+            reverseButtons: true
+        });
+
+        if (!result.isConfirmed) {
             console.log('User cancelled removal');
             return;
         }
@@ -435,6 +459,9 @@ const TraitsViewer = {
             console.log('Response data:', data);
 
             if (data.success) {
+                // Show toast success message (NOT SweetAlert2!)
+                ToastManager.success(window.TraitsTranslations.remove_success, '🎯 Trait Rimosso');
+
                 // Rimuovi il trait dal DOM con animazione smooth
                 const traitCard = document.querySelector(`[data-trait-id="${traitId}"]`);
                 console.log('Found trait card:', traitCard);
@@ -458,8 +485,6 @@ const TraitsViewer = {
                     console.log('Updated counter to:', currentCount - 1);
                 }
 
-                // Success toast
-                ToastManager.success(window.TraitsTranslations.remove_success, '🎯 Trait Rimosso');
                 console.log('TraitsViewer: Trait removed successfully');
             } else {
                 // Error toast

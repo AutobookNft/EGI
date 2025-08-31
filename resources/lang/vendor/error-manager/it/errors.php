@@ -76,6 +76,17 @@ return [
         'egi_page_rendering_error' => 'Eccezione durante il rendering della pagina di upload EGI: :exception_message',
         'egi_update_failed' => 'Aggiornamento EGI fallito: :error per utente :user_id su EGI :egi_id',
         'egi_delete_failed' => 'Eliminazione EGI fallita: :error per utente :user_id su EGI :egi_id',
+        'egi_trait_delete_failed' => 'Eliminazione trait EGI fallita: :error per utente :user_id su EGI :egi_id trait :trait_id',
+        'egi_not_found' => 'EGI non trovato con ID :egi_id per utente :user_id',
+        'trait_not_found' => 'Trait non trovato con ID :trait_id per EGI :egi_id utente :user_id',
+
+        // Traits API errors (messaggi per sviluppatori)
+        'traits_categories_load_failed' => 'Caricamento categorie traits fallito: :error per collezione :collection_id utente :user_id',
+        'traits_unauthorized_access' => 'Accesso non autorizzato ai traits: utente :user_id tentato accesso a EGI :egi_id proprietario :owner_id',
+        'traits_egi_published' => 'Tentativo modifica traits su EGI pubblicato: utente :user_id su EGI :egi_id',
+        'traits_no_data_provided' => 'Nessun dato traits fornito: utente :user_id per EGI :egi_id',
+        'traits_save_failed' => 'Salvataggio traits fallito: :error per utente :user_id su EGI :egi_id',
+        'traits_add_failed' => 'Aggiunta traits fallita: :error per utente :user_id su EGI :egi_id',
 
         // Errori CRUD Collection (messaggi per sviluppatori)
         'collection_update_failed' => 'Aggiornamento collezione fallito: :error per utente :user_id sulla collezione :collection_id',
@@ -376,6 +387,17 @@ return [
         'egi_page_rendering_error' => 'Si è verificato un problema durante il caricamento della pagina. Riprova più tardi o contatta l\'assistenza.',
         'egi_update_failed' => 'Impossibile aggiornare l\'EGI. Si prega di riprovare.',
         'egi_delete_failed' => 'Impossibile eliminare l\'EGI. Si prega di riprovare.',
+        'egi_trait_delete_failed' => 'Impossibile eliminare il trait dall\'EGI. Si prega di riprovare.',
+        'egi_not_found' => 'EGI non trovato. Verifica che l\'ID sia corretto.',
+        'trait_not_found' => 'Trait non trovato. Verifica che il trait esista.',
+
+        // Traits API errors (messaggi per utenti)
+        'traits_categories_load_failed' => 'Impossibile caricare le categorie dei traits. Riprova più tardi.',
+        'traits_unauthorized_access' => 'Non sei autorizzato a modificare questi traits.',
+        'traits_egi_published' => 'Non puoi modificare i traits di un EGI già pubblicato.',
+        'traits_no_data_provided' => 'Nessun dato dei traits fornito. Verifica i dati inseriti.',
+        'traits_save_failed' => 'Impossibile salvare i traits. Si prega di riprovare.',
+        'traits_add_failed' => 'Impossibile aggiungere i nuovi traits. Si prega di riprovare.',
 
         // Errori CRUD Collection (messaggi per utenti)
         'collection_update_failed' => 'Impossibile aggiornare la collezione. Si prega di riprovare.',

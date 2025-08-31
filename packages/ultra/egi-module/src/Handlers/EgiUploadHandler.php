@@ -500,6 +500,9 @@ class EgiUploadHandler {
         $egi->key_file = $egi->id;
         $egi->save(); // Second save with key_file
 
+        // Update rarity percentages for all traits in this collection
+        $this->updateRarityPercentages($collectionId);
+
         return $egi;
     }
 
@@ -1009,5 +1012,98 @@ class EgiUploadHandler {
         ];
 
         return in_array(strtolower($file->getMimeType()), $imageMimeTypes);
+    }
+
+    /**
+     * Update rarity percentages for all traits in a collection
+     *
+     * @param int $collectionId
+     * @return void
+     */
+    private function updateRarityPercentages(int $collectionId): void {
+        try {
+            Log::info('Updating rarity percentages for collection', ['collection_id' => $collectionId]);
+
+            // Get total EGIs in collection
+            $totalEgis = Egi::where('collection_id', $collectionId)->count();
+
+            if ($totalEgis === 0) {
+                Log::info('No EGIs in collection, skipping rarity update', ['collection_id' => $collectionId]);
+                return;
+            }
+
+            // Get all unique trait combinations (trait_type_id + value) in this collection
+            $uniqueTraits = \App\Models\EgiTrait::join('egis', 'egis.id', '=', 'egi_traits.egi_id')
+                ->where('egis.collection_id', $collectionId)
+                ->select('egi_traits.trait_type_id', 'egi_traits.value')
+                ->distinct()
+                ->get();
+
+            Log::info('Found unique traits', ['count' => $uniqueTraits->count()]);
+
+            // Calculate and update rarity for each unique trait combination
+            foreach ($uniqueTraits as $uniqueTrait) {
+                // Count how many EGIs have this trait
+                $egisWithTrait = \App\Models\EgiTrait::join('egis', 'egis.id', '=', 'egi_traits.egi_id')
+                    ->where('egis.collection_id', $collectionId)
+                    ->where('egi_traits.trait_type_id', $uniqueTrait->trait_type_id)
+                    ->where('egi_traits.value', $uniqueTrait->value)
+                    ->count();
+
+                // Calculate percentage
+                $percentage = round(($egisWithTrait / $totalEgis) * 100, 2);
+
+                // Update all traits with this combination
+                $updatedCount = \App\Models\EgiTrait::join('egis', 'egis.id', '=', 'egi_traits.egi_id')
+                    ->where('egis.collection_id', $collectionId)
+                    ->where('egi_traits.trait_type_id', $uniqueTrait->trait_type_id)
+                    ->where('egi_traits.value', $uniqueTrait->value)
+                    ->update(['egi_traits.rarity_percentage' => $percentage]);
+
+                Log::info('Updated rarity percentage', [
+                    'trait_type_id' => $uniqueTrait->trait_type_id,
+                    'value' => $uniqueTrait->value,
+                    'percentage' => $percentage,
+                    'egis_with_trait' => $egisWithTrait,
+                    'total_egis' => $totalEgis,
+                    'updated_count' => $updatedCount
+                ]);
+            }
+
+            Log::info('Rarity percentages updated successfully for collection', ['collection_id' => $collectionId]);
+        } catch (\Exception $e) {
+            Log::error('Failed to update rarity percentages', [
+                'collection_id' => $collectionId,
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * Clear traits rarity cache for a specific collection
+     *
+     * @param int $collectionId
+     * @return void
+     */
+    private function clearTraitsRarityCache(int $collectionId): void {
+        try {
+            // Get all cache keys that match the pattern for this collection
+            $pattern = "trait_rarity_{$collectionId}_*";
+
+            // Use Cache::flush() to clear all cache or implement more specific clearing
+            // For now, we'll use a simple approach and clear all cache
+            Cache::flush();
+
+            $this->logger->info('Traits rarity cache cleared for collection after EGI creation', [
+                'collection_id' => $collectionId,
+                'pattern' => $pattern
+            ]);
+        } catch (\Exception $e) {
+            // Log error but don't fail the main operation
+            $this->logger->error('Failed to clear traits rarity cache after EGI creation', [
+                'collection_id' => $collectionId,
+                'error' => $e->getMessage()
+            ]);
+        }
     }
 }

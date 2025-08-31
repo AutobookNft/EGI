@@ -76,6 +76,17 @@ return [
         'egi_page_rendering_error' => 'Exception during EGI upload page rendering: :exception_message',
         'egi_update_failed' => 'EGI update failed: :error for user :user_id on EGI :egi_id',
         'egi_delete_failed' => 'EGI deletion failed: :error for user :user_id on EGI :egi_id',
+        'egi_trait_delete_failed' => 'EGI trait deletion failed: :error for user :user_id on EGI :egi_id trait :trait_id',
+        'egi_not_found' => 'EGI not found with ID :egi_id for user :user_id',
+        'trait_not_found' => 'Trait not found with ID :trait_id for EGI :egi_id user :user_id',
+
+        // Traits API errors (developer messages)
+        'traits_categories_load_failed' => 'Traits categories loading failed: :error for collection :collection_id user :user_id',
+        'traits_unauthorized_access' => 'Unauthorized traits access: user :user_id attempted access to EGI :egi_id owner :owner_id',
+        'traits_egi_published' => 'Attempted traits modification on published EGI: user :user_id on EGI :egi_id',
+        'traits_no_data_provided' => 'No traits data provided: user :user_id for EGI :egi_id',
+        'traits_save_failed' => 'Traits save failed: :error for user :user_id on EGI :egi_id',
+        'traits_add_failed' => 'Traits addition failed: :error for user :user_id on EGI :egi_id',
 
         // Collection CRUD Errors (developer messages)
         'collection_update_failed' => 'Collection update failed: :error for user :user_id on collection :collection_id',
@@ -376,6 +387,17 @@ return [
         'egi_page_rendering_error' => 'An issue occurred while loading the page. Please try again later or contact support.',
         'egi_update_failed' => 'Unable to update the EGI. Please try again.',
         'egi_delete_failed' => 'Unable to delete the EGI. Please try again.',
+        'egi_trait_delete_failed' => 'Unable to delete the trait from the EGI. Please try again.',
+        'egi_not_found' => 'EGI not found. Please verify the ID is correct.',
+        'trait_not_found' => 'Trait not found. Please verify the trait exists.',
+
+        // Traits API errors (user messages)
+        'traits_categories_load_failed' => 'Unable to load trait categories. Please try again later.',
+        'traits_unauthorized_access' => 'You are not authorized to modify these traits.',
+        'traits_egi_published' => 'Cannot modify traits of a published EGI.',
+        'traits_no_data_provided' => 'No trait data provided. Please verify the data entered.',
+        'traits_save_failed' => 'Unable to save traits. Please try again.',
+        'traits_add_failed' => 'Unable to add new traits. Please try again.',
 
         // Collection CRUD Errors (user messages)
         'collection_update_failed' => 'Unable to update the collection. Please try again.',

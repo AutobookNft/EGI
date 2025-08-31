@@ -1015,6 +1015,106 @@ return [
             'msg_to' => 'sweet-alert',
         ],
 
+        'EGI_TRAIT_DELETE_FAILED' => [
+            'type' => 'critical',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.egi_trait_delete_failed',
+            'user_message_key' => 'error-manager::errors.user.egi_trait_delete_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        // Traits API specific errors
+        'TRAITS_CATEGORIES_LOAD_FAILED' => [
+            'type' => 'critical',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.traits_categories_load_failed',
+            'user_message_key' => 'error-manager::errors.user.traits_categories_load_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'TRAITS_UNAUTHORIZED_ACCESS' => [
+            'type' => 'security',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.traits_unauthorized_access',
+            'user_message_key' => 'error-manager::errors.user.traits_unauthorized_access',
+            'http_status_code' => 403,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'TRAITS_EGI_PUBLISHED' => [
+            'type' => 'validation',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.traits_egi_published',
+            'user_message_key' => 'error-manager::errors.user.traits_egi_published',
+            'http_status_code' => 403,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'TRAITS_NO_DATA_PROVIDED' => [
+            'type' => 'validation',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.traits_no_data_provided',
+            'user_message_key' => 'error-manager::errors.user.traits_no_data_provided',
+            'http_status_code' => 400,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'TRAITS_SAVE_FAILED' => [
+            'type' => 'critical',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.traits_save_failed',
+            'user_message_key' => 'error-manager::errors.user.traits_save_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'TRAITS_ADD_FAILED' => [
+            'type' => 'critical',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.traits_add_failed',
+            'user_message_key' => 'error-manager::errors.user.traits_add_failed',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'EGI_NOT_FOUND' => [
+            'type' => 'validation',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.egi_not_found',
+            'user_message_key' => 'error-manager::errors.user.egi_not_found',
+            'http_status_code' => 404,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'sweet-alert',
+        ],
+
+        'TRAIT_NOT_FOUND' => [
+            'type' => 'validation',
+            'blocking' => 'blocking',
+            'dev_message_key' => 'error-manager::errors.dev.trait_not_found',
+            'user_message_key' => 'error-manager::errors.user.trait_not_found',
+            'http_status_code' => 404,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'sweet-alert',
+        ],
+
         // ====================================================
         // Errori specifici per Collection CRUD Operations
         // ====================================================
