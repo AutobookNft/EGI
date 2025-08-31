@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Log;
 
 /**
  * API Controller for EGI Traits System
- * 
+ *
  * @package FlorenceEGI\Http\Controllers\Api
  * @author Padmin D. Curtis (AI Partner OS3.0) for Fabio Cherici
  * @version 1.0.0 (FlorenceEGI Traits System)
@@ -24,7 +24,7 @@ use Illuminate\Support\Facades\Log;
 class TraitsApiController extends Controller {
     /**
      * Get all available trait categories
-     * 
+     *
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
@@ -83,7 +83,7 @@ class TraitsApiController extends Controller {
 
     /**
      * Get trait types for a category
-     * 
+     *
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
@@ -111,7 +111,7 @@ class TraitsApiController extends Controller {
 
     /**
      * Get trait types for a specific category via URL parameter
-     * 
+     *
      * @param int $categoryId
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
@@ -135,7 +135,7 @@ class TraitsApiController extends Controller {
 
     /**
      * Get traits for an EGI
-     * 
+     *
      * @param int $egiId
      * @return \Illuminate\Http\JsonResponse
      */
@@ -178,7 +178,7 @@ class TraitsApiController extends Controller {
 
     /**
      * Save traits for an EGI
-     * 
+     *
      * @param Request $request
      * @param int $egiId
      * @return \Illuminate\Http\JsonResponse
@@ -304,8 +304,86 @@ class TraitsApiController extends Controller {
     }
 
     /**
+     * Add new traits to an EGI (without affecting existing ones)
+     *
+     * @param Request $request
+     * @param int $egiId
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function addEgiTraits(Request $request, $egiId) {
+        Log::info('AddEgiTraits called for EGI: ' . $egiId);
+        Log::info('Authenticated user ID: ' . (auth()->id() ?? 'NULL'));
+
+        try {
+            // Verifica che l'EGI esista
+            $egi = Egi::findOrFail($egiId);
+            Log::info('EGI found - Owner ID: ' . $egi->user_id);
+
+            // Verifica autorizzazione
+            if ($egi->user_id !== auth()->id()) {
+                Log::warning('Unauthorized trait add attempt for EGI: ' . $egiId . ' by user: ' . (auth()->id() ?? 'NULL'));
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized'
+                ], 403);
+            }
+
+            // Verifica che non sia pubblicato
+            if ($egi->is_published) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cannot modify traits after publication'
+                ], 403);
+            }
+
+            $newTraits = $request->input('traits', []);
+            Log::info('New traits to add:', $newTraits);
+
+            if (empty($newTraits)) {
+                Log::warning('No traits provided in request');
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No traits provided'
+                ], 400);
+            }
+
+            DB::transaction(function () use ($egiId, $newTraits) {
+                // Ottieni il massimo sort_order esistente per questo EGI
+                $maxSortOrder = EgiTrait::where('egi_id', $egiId)->max('sort_order') ?? -1;
+
+                // Crea solo i nuovi traits
+                foreach ($newTraits as $index => $traitData) {
+                    $created = EgiTrait::create([
+                        'egi_id' => $egiId,
+                        'category_id' => $traitData['category_id'],
+                        'trait_type_id' => $traitData['trait_type_id'],
+                        'value' => $traitData['value'],
+                        'display_value' => $traitData['display_value'] ?? $traitData['value'],
+                        'sort_order' => $maxSortOrder + 1 + $index, // Aggiungi alla fine
+                        'is_locked' => false
+                    ]);
+                    Log::info("Created new trait with ID: {$created->id} and value: {$traitData['value']}");
+                }
+            });
+
+            Log::info('New traits added successfully for EGI: ' . $egiId);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'New traits added successfully'
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error adding traits: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error adding traits: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Calculate rarity percentage for a trait value
-     * 
+     *
      * @param int $traitTypeId
      * @param string $value
      * @param int $collectionId
@@ -335,7 +413,7 @@ class TraitsApiController extends Controller {
 
     /**
      * Generate IPFS metadata for EGI traits
-     * 
+     *
      * @param int $egiId
      * @return array
      */

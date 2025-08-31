@@ -1,5 +1,5 @@
 {{-- resources/views/components/egi/traits-manager.blade.php --}}
-{{-- 
+{{--
     EGI Traits Manager Component - VANILLA JS VERSION
     @package FlorenceEGI\Components
     @author Padmin D. Curtis (AI Partner OS3.0) for Fabio Cherici
@@ -11,11 +11,11 @@
     'readonly' => false
 ])
 
-<div class="egi-traits-manager" 
+<div class="egi-traits-manager"
      id="traits-manager-{{ $egi ? $egi->id : 'new' }}-{{ $readonly ? 'readonly' : 'editable' }}"
      data-egi-id="{{ $egi ? $egi->id : '' }}"
      data-readonly="{{ $readonly ? 'true' : 'false' }}">
-    
+
     {{-- Header con counter e stato --}}
     <div class="traits-header">
         <h3 class="traits-title">
@@ -47,14 +47,14 @@
         {{-- Empty State --}}
         <div class="empty-state" id="empty-state" style="display: none;">
             <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
             </svg>
             @if($readonly)
             <p class="empty-text">{{ __('Nessun tratto definito per questo EGI.') }}</p>
             @else
             <p class="empty-text">{{ __('traits.empty_state') }}</p>
-            <button type="button" 
+            <button type="button"
                     class="empty-cta"
                     onclick="TraitsManager.openModal('{{ $egi ? $egi->id : 'new' }}')">
                 {{ __('traits.add_first_trait') }}
@@ -70,7 +70,7 @@
 
     {{-- Add Trait Button --}}
     @if(!$readonly)
-    <button type="button" 
+    <button type="button"
             class="add-trait-button"
             id="add-trait-btn"
             onclick="TraitsManager.openModal('{{ $egi ? $egi->id : 'new' }}')"
@@ -80,15 +80,15 @@
         </svg>
         {{ __('traits.add_trait') }}
     </button>
-    
+
     {{-- Save All Traits Button - SPOSTATO QUI FUORI DAL MODAL --}}
-    <button type="button" 
+    <button type="button"
             class="save-traits-button"
             onclick="TraitsManager.saveTraits()"
             style="display: none;"
             id="save-traits-btn">
         <svg class="button-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3-3m0 0l-3 3m3-3v12"/>
         </svg>
         Save All Traits
@@ -96,8 +96,8 @@
     @endif
 
     {{-- Hidden input for form submission --}}
-    <input type="hidden" 
-           name="traits" 
+    <input type="hidden"
+           name="traits"
            id="traits-json-{{ $egi ? $egi->id : 'new' }}"
            value="[]">
 </div>
@@ -108,7 +108,7 @@
     <div class="modal-content">
         <div class="modal-header">
             <h4 class="modal-title">{{ __('traits.add_new_trait') }}</h4>
-            <button type="button" 
+            <button type="button"
                     class="modal-close"
                     onclick="TraitsManager.closeModal()">
                 ×
@@ -152,12 +152,12 @@
         </div>
 
         <div class="modal-footer">
-            <button type="button" 
+            <button type="button"
                     class="btn-cancel"
                     onclick="TraitsManager.closeModal()">
                 {{ __('traits.cancel') }}
             </button>
-            <button type="button" 
+            <button type="button"
                     class="btn-confirm"
                     id="confirm-trait-btn"
                     onclick="TraitsManager.addTrait()"
@@ -176,7 +176,7 @@
 /**
  * EGI Traits Manager - Vanilla JavaScript
  * NO ALPINE.JS - Pure Enterprise JavaScript
- * 
+ *
  * @package FlorenceEGI
  * @author Padmin D. Curtis (AI Partner OS3.0) for Fabio Cherici
  * @version 2.0.0
@@ -213,7 +213,7 @@
      */
     TraitsManager.init = function(egiId, containerType) {
         console.log('TraitsManager: Initializing for EGI', egiId, 'type:', containerType);
-        
+
         const containerId = `traits-manager-${egiId}-${containerType}`;
         const container = document.getElementById(containerId);
         if (!container) {
@@ -222,12 +222,12 @@
         }
 
         const isReadonly = container.dataset.readonly === 'true';
-        
+
         // Per il primo componente (readonly o editabile), carica i dati
         if (!TraitsManager[`dataLoaded_${egiId}`]) {
             state.currentEgiId = egiId;
             TraitsManager[`dataLoaded_${egiId}`] = true;
-            
+
             // Load initial data
             loadCategories().then(() => {
                 if (egiId !== 'new') {
@@ -237,11 +237,11 @@
                 }
             });
         }
-        
+
         // Salva riferimento al container
         if (!TraitsManager.containers) TraitsManager.containers = {};
         if (!TraitsManager.containers[egiId]) TraitsManager.containers[egiId] = {};
-        
+
         TraitsManager.containers[egiId][containerType] = {
             container: container,
             grid: container.querySelector('#traits-grid'),
@@ -252,7 +252,7 @@
             categoriesNav: container.querySelector('#categories-nav'),
             readonly: isReadonly
         };
-        
+
         console.log('TraitsManager: Container registered for', egiId, containerType);
     };
 
@@ -266,7 +266,7 @@
             console.log('Response status:', response.status);
             const data = await response.json();
             console.log('Categories data:', data);
-            
+
             if (data.success) {
                 state.categories = data.categories;
                 renderCategories();
@@ -292,7 +292,7 @@
         try {
             const response = await fetch(`/egis/${egiId}/traits`);
             const data = await response.json();
-            
+
             if (data.success) {
                 state.existingTraits = data.traits || [];
                 state.editingTraits = []; // Inizia vuoto per l'editing
@@ -310,10 +310,10 @@
      */
     function renderCategories() {
         if (!elements.categoriesNav || state.readonly) return;
-        
+
         elements.categoriesNav.innerHTML = state.categories.map(cat => `
-            <button type="button" 
-                    class="category-tab" 
+            <button type="button"
+                    class="category-tab"
                     data-category-id="${cat.id}"
                     onclick="TraitsManager.filterByCategory(${cat.id})">
                 <span class="category-icon">${cat.icon}</span>
@@ -328,7 +328,7 @@
      */
     function updateAllContainers(egiId) {
         if (!TraitsManager.containers || !TraitsManager.containers[egiId]) return;
-        
+
         Object.values(TraitsManager.containers[egiId]).forEach(containerData => {
             updateContainerUI(containerData);
         });
@@ -339,10 +339,10 @@
      */
     function updateContainerUI(containerData) {
         if (!containerData) return;
-        
+
         // Determina quali traits mostrare
         const traitsToShow = containerData.readonly ? state.existingTraits : state.editingTraits;
-        
+
         // Update counter
         if (containerData.counter) {
             const count = containerData.readonly ? state.existingTraits.length : state.editingTraits.length;
@@ -370,7 +370,7 @@
 
         // Show/hide add button (solo per container editabile)
         if (containerData.addButton && !containerData.readonly) {
-            containerData.addButton.style.display = 
+            containerData.addButton.style.display =
                 (!state.isLocked && state.editingTraits.length < 30) ? 'flex' : 'none';
         }
 
@@ -405,7 +405,7 @@
         containerData.grid.innerHTML = traitsToRender.map((trait, index) => {
             const categoryColor = getCategoryColor(trait.category_id);
             const isRare = trait.rarity_percentage && trait.rarity_percentage < 10;
-            
+
             return `
                 <div class="trait-card ${isRare ? 'rare' : ''}" data-category="${trait.category_id}">
                     <div class="trait-header">
@@ -413,7 +413,7 @@
                             ${getCategoryIcon(trait.category_id)}
                         </span>
                         ${!containerData.readonly && !state.isLocked ? `
-                            <button type="button" 
+                            <button type="button"
                                     class="trait-remove"
                                     onclick="TraitsManager.removeTrait(${index})">
                                 ×
@@ -445,7 +445,7 @@
      */
     TraitsManager.openModal = function(egiId) {
         console.log('Opening modal for EGI:', egiId);
-        
+
         state.currentEgiId = egiId;
         state.modalData = {
             category_id: null,
@@ -493,8 +493,8 @@
 
         selector.innerHTML = state.categories.map(cat => `
             <label class="category-option">
-                <input type="radio" 
-                       name="modal_category" 
+                <input type="radio"
+                       name="modal_category"
                        value="${cat.id}"
                        onchange="TraitsManager.onCategorySelected(${cat.id})">
                 <div class="category-card">
@@ -517,7 +517,7 @@
         try {
             const response = await fetch(`/traits/types?category_id=${categoryId}`);
             const data = await response.json();
-            
+
             if (data.success) {
                 state.availableTypes = data.types || [];
                 renderTraitTypes();
@@ -533,11 +533,11 @@
     function renderTraitTypes() {
         const group = document.getElementById('type-selector-group');
         const select = document.getElementById('trait-type-select');
-        
+
         if (!group || !select) return;
 
         select.innerHTML = '<option value="">Choose a type...</option>' +
-            state.availableTypes.map(type => 
+            state.availableTypes.map(type =>
                 `<option value="${type.id}">${type.name}</option>`
             ).join('');
 
@@ -550,7 +550,7 @@
     TraitsManager.onTypeSelected = function() {
         const select = document.getElementById('trait-type-select');
         const typeId = parseInt(select.value);
-        
+
         if (!typeId) {
             document.getElementById('value-selector-group').style.display = 'none';
             return;
@@ -571,20 +571,20 @@
     function renderValueInput(type) {
         const group = document.getElementById('value-selector-group');
         const container = document.getElementById('value-input-container');
-        
+
         if (!group || !container) {
             console.error('Value selector elements not found');
             return;
         }
 
         let html = '';
-        
+
         // Parse allowed_values se è una stringa JSON
         let allowedValues = null;
         if (type.allowed_values) {
             try {
-                allowedValues = typeof type.allowed_values === 'string' 
-                    ? JSON.parse(type.allowed_values) 
+                allowedValues = typeof type.allowed_values === 'string'
+                    ? JSON.parse(type.allowed_values)
                     : type.allowed_values;
             } catch (e) {
                 console.error('Error parsing allowed values:', e);
@@ -605,7 +605,7 @@
             const max = (type.display_type === 'percentage' || type.display_type === 'boost_number') ? '100' : '';
             html = `
                 <div class="input-group">
-                    <input type="number" 
+                    <input type="number"
                         class="form-input"
                         id="trait-value-input"
                         ${min !== '' ? `min="${min}"` : ''}
@@ -619,7 +619,7 @@
         } else if (type.display_type === 'date') {
             // Date input
             html = `
-                <input type="date" 
+                <input type="date"
                     class="form-input"
                     id="trait-value-input"
                     onchange="TraitsManager.onValueChanged()">
@@ -627,7 +627,7 @@
         } else {
             // Fallback text input
             html = `
-                <input type="text" 
+                <input type="text"
                     class="form-input"
                     id="trait-value-input"
                     placeholder="Enter value"
@@ -648,15 +648,15 @@
             console.error('Cannot save traits without EGI ID');
             return;
         }
-        
+
         console.log('=== SAVING TRAITS ===');
         console.log('EGI ID:', state.currentEgiId);
         console.log('Traits to save:', state.traits);
         console.log('URL:', `/egis/${state.currentEgiId}/traits`);
-        
+
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
         console.log('CSRF Token:', csrfToken ? 'Found' : 'Missing');
-        
+
         try {
             const response = await fetch(`/egis/${state.currentEgiId}/traits`, {
                 method: 'POST',
@@ -669,13 +669,13 @@
                     traits: state.traits
                 })
             });
-            
+
             console.log('Response status:', response.status);
             console.log('Response headers:', Object.fromEntries(response.headers.entries()));
-            
+
             const data = await response.json();
             console.log('Save response data:', data);
-            
+
             if (data.success) {
                 // Mostra messaggio di successo
                 TraitsManager.showNotification('Traits saved successfully!', 'success');
@@ -709,7 +709,7 @@
         `;
         notification.textContent = message;
         document.body.appendChild(notification);
-        
+
         // Rimuovi dopo 3 secondi
         setTimeout(() => {
             notification.remove();
@@ -722,7 +722,7 @@
     TraitsManager.onValueChanged = function() {
         const input = document.getElementById('trait-value-input');
         const value = input.value;
-        
+
         state.modalData.value = value;
 
         // Update preview
@@ -833,24 +833,24 @@
     // Auto-initialize on DOM ready (solo una volta)
     if (!window.TraitsManagerInitialized) {
         window.TraitsManagerInitialized = true;
-        
+
         document.addEventListener('DOMContentLoaded', function() {
             console.log('=== TRAITS MANAGER INITIALIZING ===');
             // Find all trait managers on page
             const managers = document.querySelectorAll('.egi-traits-manager');
             console.log('Found managers:', managers.length);
-            
+
             managers.forEach(container => {
                 const egiId = container.dataset.egiId || 'new';
                 const containerId = container.id;
                 let containerType = 'editable'; // default
-                
+
                 if (containerId.includes('-readonly')) {
                     containerType = 'readonly';
                 } else if (containerId.includes('-editable')) {
                     containerType = 'editable';
                 }
-                
+
                 console.log('Initializing manager:', egiId, 'type:', containerType);
                 TraitsManager.init(egiId, containerType);
             });

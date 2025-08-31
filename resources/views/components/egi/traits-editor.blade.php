@@ -286,7 +286,8 @@ window.ToastManager = {
             canEdit: false,
             categories: [],
             availableTypes: [],
-            editingTraits: [],
+            editingTraits: [], // Solo traits nuovi aggiunti nella sessione
+            displayedTraits: [], // Traits esistenti caricati dal server
             modalData: {
                 category_id: null,
                 trait_type_id: null,
@@ -313,7 +314,7 @@ window.ToastManager = {
             console.log('TraitsEditor: Mode -', canEdit ? 'EDITING' : 'READONLY');
 
             this.loadCategories();
-            
+
             // Carica i traits esistenti SOLO in modalità editing
             if (canEdit) {
                 this.loadExistingTraits();
@@ -326,15 +327,14 @@ window.ToastManager = {
         async loadExistingTraits() {
             try {
                 console.log('TraitsEditor: Loading existing traits for EGI', this.state.egiId);
-                
+
                 const response = await fetch(`/egis/${this.state.egiId}/traits`);
                 const data = await response.json();
-                
+
                 if (data.success && data.traits) {
-                    // Converte i trait esistenti nel formato per editing
-                    this.state.editingTraits = data.traits.map(trait => ({
+                    // I traits esistenti vanno in displayedTraits, NON in editingTraits
+                    this.state.displayedTraits = data.traits.map(trait => ({
                         id: trait.id, // ID reale dal database
-                        tempId: trait.id, // Usa l'ID reale anche come tempId
                         category_id: trait.category_id,
                         category_name: trait.category ? trait.category.name : 'Unknown',
                         trait_type_id: trait.trait_type_id,
@@ -343,11 +343,16 @@ window.ToastManager = {
                         display_value: trait.display_value || trait.value,
                         display_type: trait.trait_type ? trait.trait_type.display_type : 'text',
                         unit: trait.trait_type ? trait.trait_type.unit : null,
-                        sort_order: trait.sort_order || 0
+                        sort_order: trait.sort_order || 0,
+                        rarity_percentage: trait.rarity_percentage || 0
                     }));
-                    
-                    console.log('TraitsEditor: Loaded existing traits for editing:', this.state.editingTraits);
-                    
+
+                    // editingTraits rimane vuoto - contiene solo i nuovi traits aggiunti
+                    this.state.editingTraits = [];
+
+                    console.log('TraitsEditor: Loaded existing traits for display:', this.state.displayedTraits);
+                    console.log('TraitsEditor: EditingTraits initialized as empty:', this.state.editingTraits);
+
                     // In editing mode, aggiorna il grid di editing con i traits esistenti
                     this.updateUI();
                 }
@@ -724,7 +729,7 @@ window.ToastManager = {
             this.closeModal();
         },
 
-        removeTrait(index) {
+        removeTrait(index, isNewTrait = false) {
             // Blocca la rimozione se non in modalità editing
             if (!this.state.canEdit) {
                 console.warn('TraitsEditor: Remove trait denied - readonly mode');
@@ -732,12 +737,28 @@ window.ToastManager = {
                 return;
             }
 
-            this.state.editingTraits.splice(index, 1);
-            // Reorder
-            this.state.editingTraits.forEach((trait, i) => {
-                trait.sort_order = i;
-            });
-            this.updateUI();
+            // Possiamo rimuovere solo i traits nuovi (quelli nell'editingTraits)
+            if (!isNewTrait) {
+                ToastManager.warning('I traits esistenti non possono essere rimossi');
+                return;
+            }
+
+            // Calcola l'indice corretto nell'array editingTraits
+            // L'indice fornito è relativo al combined array (displayedTraits + editingTraits)
+            const displayedCount = this.state.displayedTraits ? this.state.displayedTraits.length : 0;
+            const editingIndex = index - displayedCount;
+
+            if (editingIndex >= 0 && editingIndex < this.state.editingTraits.length) {
+                this.state.editingTraits.splice(editingIndex, 1);
+                // Reorder
+                this.state.editingTraits.forEach((trait, i) => {
+                    trait.sort_order = displayedCount + i;
+                });
+                this.updateUI();
+            } else {
+                console.error('TraitsEditor: Invalid editing trait index:', editingIndex);
+                ToastManager.error('Errore nella rimozione del trait');
+            }
         },
 
         updateUI() {
@@ -753,11 +774,11 @@ window.ToastManager = {
             if (this.state.canEdit) {
                 // In modalità editing, mostra solo il container editing
                 const editingContainer = document.querySelector('.traits-list.editing');
-                
+
                 if (editingContainer) {
                     editingContainer.style.display = 'block';
                 }
-                
+
                 // Nascondi eventuali traits renderizzati dal PHP nel container readonly
                 // per evitare duplicazioni
                 const readonlyGrid = document.getElementById('traits-grid-readonly');
@@ -778,21 +799,23 @@ window.ToastManager = {
                 return;
             }
 
-            if (this.state.editingTraits.length === 0) {
-                console.log('TraitsEditor: No editing traits to render');
-                
-                // NON sovrascrivere il grid se contiene già traits renderizzati dal PHP
-                // Controlla se il grid ha già contenuto (traits renderizzati dal server)
-                const existingTraits = grid.querySelectorAll('.trait-card');
-                if (existingTraits.length > 0) {
-                    console.log('TraitsEditor: Grid already contains server-rendered traits, skipping override');
-                    return;
-                }
-                
+            // Combina traits esistenti + traits nuovi (solo in editing mode)
+            let allTraits = [];
+            if (this.state.canEdit) {
+                // In editing mode: mostra sia traits esistenti che nuovi
+                allTraits = [...(this.state.displayedTraits || []), ...(this.state.editingTraits || [])];
+            } else {
+                // In readonly mode: mostra solo tramite il PHP
+                return;
+            }
+
+            if (allTraits.length === 0) {
+                console.log('TraitsEditor: No traits to render');
+
                 if (emptyState && this.state.canEdit) {
                     emptyState.style.display = 'block';
                 }
-                grid.innerHTML = this.state.canEdit ? '' : '<div class="no-traits-message" style="text-align: center; padding: 2rem; color: #666;">Nessun trait disponibile</div>';
+                grid.innerHTML = '';
                 return;
             }
 
@@ -807,61 +830,53 @@ window.ToastManager = {
                 grid.style.gap = '0.5rem';
             }
 
-            grid.innerHTML = this.state.editingTraits.map((trait, index) => {
+            grid.innerHTML = allTraits.map((trait, index) => {
                 const categoryColor = this.getCategoryColor(trait.category_id);
 
-                // Renderizza diversamente in base alla modalità
-                if (this.state.canEdit) {
-                    // Modalità editing - con pulsante rimuovi
-                    return `
-                        <div class="trait-card" data-category="${trait.category_id}">
-                            <div class="trait-header">
-                                <span class="trait-category-badge" style="background-color: ${categoryColor}">
-                                    ${this.getCategoryIcon(trait.category_id)}
-                                </span>
+                // Determina se il trait è esistente o nuovo in base alla sua posizione
+                const displayedCount = this.state.displayedTraits ? this.state.displayedTraits.length : 0;
+                const isExisting = index < displayedCount;
+                const isNew = !isExisting;
+
+                // Modalità editing - distingue tra traits esistenti e nuovi
+                return `
+                    <div class="trait-card ${isExisting ? 'existing' : 'new'}" data-category="${trait.category_id}">
+                        <div class="trait-header">
+                            <span class="trait-category-badge" style="background-color: ${categoryColor}">
+                                ${this.getCategoryIcon(trait.category_id)}
+                            </span>
+                            ${isNew ? `
                                 <button type="button"
                                         class="trait-remove"
-                                        onclick="TraitsEditor.removeTrait(${index})">
+                                        onclick="TraitsEditor.removeTrait(${index}, true)"
+                                        title="Rimuovi trait nuovo">
                                     ×
                                 </button>
-                            </div>
-                            <div class="trait-content">
-                                <div class="trait-type">${trait.type_name}</div>
-                                <div class="trait-value">
-                                    <span>${this.formatTraitValue(trait)}</span>
-                                    ${trait.unit ? `<span class="trait-unit">${trait.unit}</span>` : ''}
-                                </div>
-                                ${this.renderRarityBar(trait)}
-                            </div>
-                        </div>
-                    `;
-                } else {
-                    // Modalità readonly - senza pulsante rimuovi
-                    return `
-                        <div class="trait-card readonly" data-category="${trait.category_id}">
-                            <div class="trait-header readonly">
-                                <span class="trait-category-badge" style="background-color: ${categoryColor}">
-                                    ${this.getCategoryIcon(trait.category_id)}
+                            ` : `
+                                <span class="trait-status" title="Trait esistente - non eliminabile">
+                                    ✓
                                 </span>
-                            </div>
-                            <div class="trait-content">
-                                <div class="trait-type">${trait.type_name}</div>
-                                <div class="trait-value">
-                                    <span>${this.formatTraitValue(trait)}</span>
-                                    ${trait.unit ? `<span class="trait-unit">${trait.unit}</span>` : ''}
-                                </div>
-                                ${this.renderRarityBar(trait)}
-                            </div>
+                            `}
                         </div>
-                    `;
-                }
+                        <div class="trait-content">
+                            <div class="trait-type">${trait.type_name}</div>
+                            <div class="trait-value">
+                                <span>${this.formatTraitValue(trait)}</span>
+                                ${trait.unit ? `<span class="trait-unit">${trait.unit}</span>` : ''}
+                            </div>
+                            ${this.renderRarityBar(trait)}
+                        </div>
+                    </div>
+                `;
             }).join('');
         },
 
         updateCounter() {
             const counter = document.querySelector(`#traits-editor-${this.state.egiId} .traits-count`);
             if (counter) {
-                counter.textContent = this.state.editingTraits.length;
+                // Conta il totale: traits esistenti + traits nuovi
+                const totalCount = (this.state.displayedTraits?.length || 0) + (this.state.editingTraits?.length || 0);
+                counter.textContent = totalCount;
             }
         },
 
@@ -874,7 +889,16 @@ window.ToastManager = {
                 categoryCounts[cat.id] = 0;
             });
 
-            // Conta i traits per categoria (include sia editing che esistenti)
+            // Conta i traits esistenti
+            if (this.state.displayedTraits) {
+                this.state.displayedTraits.forEach(trait => {
+                    if (categoryCounts.hasOwnProperty(trait.category_id)) {
+                        categoryCounts[trait.category_id]++;
+                    }
+                });
+            }
+
+            // Conta i traits nuovi (da aggiungere)
             this.state.editingTraits.forEach(trait => {
                 if (categoryCounts.hasOwnProperty(trait.category_id)) {
                     categoryCounts[trait.category_id]++;
@@ -918,58 +942,40 @@ window.ToastManager = {
                 return;
             }
 
-            if (this.state.editingTraits.length === 0) return;
+            if (this.state.editingTraits.length === 0) {
+                ToastManager.info('Nessun nuovo trait da salvare');
+                return;
+            }
 
             try {
-                // PRIMA: Carica i traits esistenti dal server
-                console.log('Loading existing traits before save...');
-                const existingResponse = await fetch(`/egis/${this.state.egiId}/traits`);
-                const existingData = await existingResponse.json();
+                console.log('Saving only NEW traits:', this.state.editingTraits);
 
-                let allTraits = [];
+                // Invia solo i nuovi traits (quelli in editingTraits)
+                const newTraits = this.state.editingTraits.map(trait => ({
+                    // Nessun ID per i nuovi traits - saranno creati
+                    category_id: trait.category_id,
+                    trait_type_id: trait.trait_type_id,
+                    value: trait.value,
+                    display_value: trait.display_value || trait.value,
+                    sort_order: trait.sort_order || 0
+                }));
 
-                // Aggiungi i traits esistenti (con i loro ID originali)
-                if (existingData.success && existingData.traits) {
-                    allTraits = existingData.traits.map(trait => ({
-                        id: trait.id, // ID reale dal database
-                        category_id: trait.category_id,
-                        trait_type_id: trait.trait_type_id,
-                        value: trait.value,
-                        display_value: trait.display_value || trait.value,
-                        sort_order: trait.sort_order
-                    }));
-                }
-
-                // Aggiungi i nuovi traits (senza ID, saranno creati)
-                this.state.editingTraits.forEach(newTrait => {
-                    allTraits.push({
-                        // Nessun ID per i nuovi traits
-                        category_id: newTrait.category_id,
-                        trait_type_id: newTrait.trait_type_id,
-                        value: newTrait.value,
-                        display_value: newTrait.display_value || newTrait.value,
-                        sort_order: allTraits.length // Aggiungi alla fine
-                    });
-                });
-
-                console.log('Saving all traits (existing + new):', allTraits);
-
-                const response = await fetch(`/egis/${this.state.egiId}/traits`, {
+                const response = await fetch(`/egis/${this.state.egiId}/traits/add`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                     },
                     body: JSON.stringify({
-                        traits: allTraits
+                        traits: newTraits
                     })
                 });
 
                 const data = await response.json();
 
                 if (data.success) {
-                    ToastManager.success(window.TraitsTranslations.save_success, '🎯 Traits Salvati');
-                    // Reset editing state
+                    ToastManager.success(window.TraitsTranslations.save_success, '🎯 Nuovi Traits Salvati');
+                    // Reset editing state - nuovi traits diventano esistenti
                     this.state.editingTraits = [];
                     this.updateUI();
 
@@ -1050,21 +1056,21 @@ window.ToastManager = {
         formatTraitValue(trait) {
             // Debug log per capire cosa riceve la funzione
             console.log('formatTraitValue called with:', trait);
-            
+
             if (!trait) {
                 console.warn('formatTraitValue: trait is null/undefined');
                 return '';
             }
-            
+
             if (!trait.value && trait.value !== 0) {
                 console.warn('formatTraitValue: trait.value is null/undefined/empty:', trait);
                 return '';
             }
-            
+
             if (trait.display_type === 'number' && trait.value) {
                 return parseFloat(trait.value).toLocaleString();
             }
-            
+
             return String(trait.value || '');
         },
 

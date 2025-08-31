@@ -1,5 +1,5 @@
 {{-- resources/views/components/egi/traits-viewer.blade.php --}}
-{{-- 
+{{--
     EGI Traits Viewer Component - READONLY
     Solo visualizzazione dei traits esistenti renderizzati con PHP
 --}}
@@ -10,11 +10,11 @@
 {{-- Include CSS con Vite --}}
 @vite(['resources/css/traits-manager.css'])
 
-<div class="egi-traits-viewer" 
+<div class="egi-traits-viewer"
      id="traits-viewer-{{ $egi ? $egi->id : 'new' }}"
      data-egi-id="{{ $egi ? $egi->id : '' }}"
      style="position: relative !important; order: -1 !important; margin-top: 0 !important; margin-bottom: 2rem !important;">
-    
+
     {{-- Header con counter --}}
     <div class="traits-header">
         <h3 class="traits-title">
@@ -37,27 +37,27 @@
                         // Definisci i colori delle categorie
                         $categoryColors = [
                             1 => '#D4A574', // Materials - Oro
-                            2 => '#8E44AD', // Visual - Viola  
+                            2 => '#8E44AD', // Visual - Viola
                             3 => '#1B365D', // Dimensions - Blu
                             4 => '#E67E22', // Special - Arancio
                             5 => '#2D5016', // Sustainability - Verde
                             6 => '#8B4513'  // Cultural - Marrone
                         ];
-                        
+
                         // Definisci le icone delle categorie
                         $categoryIcons = [
                             1 => '📦', // Materials
                             2 => '🎨', // Visual
-                            3 => '📐', // Dimensions  
+                            3 => '📐', // Dimensions
                             4 => '⚡', // Special
                             5 => '🌿', // Sustainability
                             6 => '🏛️'  // Cultural
                         ];
-                        
+
                         $categoryColor = $categoryColors[$trait->category_id] ?? '#6B6B6B';
                         $categoryIcon = $categoryIcons[$trait->category_id] ?? '🏷️';
                     @endphp
-                    
+
                     <div class="trait-card readonly" data-category="{{ $trait->category_id }}">
                         <div class="trait-header readonly">
                             <span class="trait-category-badge" style="background-color: {{ $categoryColor }}">
@@ -72,7 +72,7 @@
                                     <span class="trait-unit">{{ $trait->traitType->unit }}</span>
                                 @endif
                             </div>
-                            
+
                             {{-- Barra di rarità --}}
                             @if(isset($trait->rarity_percentage) && $trait->rarity_percentage)
                                 @php
@@ -90,7 +90,7 @@
                                     } else {
                                         $rarityClass = 'mythic';
                                     }
-                                    
+
                                     // Formula semplice e diretta: più è raro, più la barra è lunga
                                     // Invertiamo direttamente la percentuale per creare differenze evidenti
                                     if ($trait->rarity_percentage <= 5) {
