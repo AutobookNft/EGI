@@ -691,6 +691,16 @@ class TraitsApiController extends Controller {
                 ]);
             }
 
+            // Check if EGI is published (cannot modify)
+            if ($egi->is_published) {
+                return $this->errorManager->handle('TRAITS_EGI_PUBLISHED', [
+                    'user_id' => $user->id,
+                    'egi_id' => $egiId,
+                    'trait_id' => $traitId,
+                    'action' => 'delete_trait'
+                ]);
+            }
+
             // Find the trait
             $trait = $egi->traits()->where('id', $traitId)->first();
 

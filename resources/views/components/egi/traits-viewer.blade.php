@@ -11,8 +11,8 @@
 
 @php
 use App\Helpers\FegiAuth;
-// Controllo autorizzazione: solo il proprietario dell'EGI può editare
-$canEdit = $egi && $canManage && FegiAuth::check() && FegiAuth::id() === $egi->user_id;
+// Controllo autorizzazione: solo il proprietario dell'EGI può editare E solo se non è pubblicato
+$canEdit = $egi && $canManage && FegiAuth::check() && FegiAuth::id() === $egi->user_id && !$egi->is_published;
 @endphp
 
 {{-- Include CSS con Vite --}}
