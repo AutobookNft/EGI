@@ -13,11 +13,15 @@
 use App\Helpers\FegiAuth;
 // Controllo autorizzazione: solo il proprietario dell'EGI può editare E solo se non è pubblicato
 $canEdit = $egi && $canManage && FegiAuth::check() && FegiAuth::id() === $egi->user_id && !$egi->is_published;
+// Determina se mostrare la sezione: solo se ci sono traits o se l'utente può editare
+$hasTraits = $egi && $egi->traits && $egi->traits->count() > 0;
+$shouldShow = $hasTraits || $canEdit;
 @endphp
 
 {{-- Include CSS con Vite --}}
 @vite(['resources/css/traits-manager.css'])
 
+@if($shouldShow)
 <div class="egi-traits-viewer"
      id="traits-viewer-{{ $egi ? $egi->id : 'new' }}"
      data-egi-id="{{ $egi ? $egi->id : '' }}"
@@ -163,14 +167,11 @@ $canEdit = $egi && $canManage && FegiAuth::check() && FegiAuth::id() === $egi->u
                         </div>
                     </div>
                 @endforeach
-            @else
-                <div class="empty-state-viewer" style="text-align: center; padding: 2rem; color: #666; font-style: italic;">
-                    {{ __('traits.empty_state') }}
-                </div>
             @endif
         </div>
     </div>
 </div>
+@endif
 
 @if($canEdit)
 {{-- Trait Modal --}}

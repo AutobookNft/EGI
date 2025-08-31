@@ -94,7 +94,7 @@
         $canModifyPrice = $isCreator && !$highestPriorityReservation;
         $isPriceLocked = $isCreator && $highestPriorityReservation;
         @endphp
-        
+
         {{-- Gallery Layout - Cinema Style con 3 Colonne --}}
         <div class="bg-gradient-to-br from-gray-900 via-black to-gray-900">
 
@@ -157,7 +157,7 @@
                             {{-- Component Utility Manager (solo per creator) --}}
                             @include('egis.partials.sidebar.utility-manager-section', compact('egi'))
                         </div>
-                       
+
                     </div>
                 </div>
         </div>
@@ -169,8 +169,8 @@
             {{-- TODO: Creare component utility-display per visualizzazione read-only --}}
             {{-- <x-utility.utility-display :utility="$egi->utility" /> --}}
         </div>
-    @endif        
-    
+    @endif
+
     {{-- Delete Confirmation Modal --}}
     @include('egis.partials.modals.delete-confirmation-modal', compact('canDeleteEgi', 'egi'))
 
@@ -262,7 +262,7 @@
         </div>
 
         {{-- Utility Details Modal --}}
-        @if($egi->utility)
+        @if($egi->utility && $egi->is_published == 0)
         <div id="utility-modal" class="fixed inset-0 z-50 items-center justify-center hidden bg-black/80 backdrop-blur-sm">
             <div class="relative w-full max-w-4xl mx-4 my-8 max-h-[90vh] overflow-hidden">
                 {{-- Modal Content --}}
@@ -296,20 +296,20 @@
                             @if($egi->utility->getMedia('utility_gallery')->count() > 0)
                             <div class="space-y-4">
                                 <h3 class="text-lg font-semibold text-orange-400">{{ __('utility.media.title') }}</h3>
-                                
+
                                 {{-- Main Carousel Image --}}
                                 <div class="relative">
                                     <div id="utility-carousel-container" class="relative overflow-hidden rounded-xl bg-black/30">
                                         <div id="utility-carousel-track" class="flex transition-transform duration-300 ease-in-out">
                                             @foreach($egi->utility->getMedia('utility_gallery') as $index => $media)
                                             <div class="flex-shrink-0 w-full">
-                                                <img src="{{ $media->getUrl() }}" 
-                                                     alt="Utility image {{ $index + 1 }}" 
+                                                <img src="{{ $media->getUrl() }}"
+                                                     alt="Utility image {{ $index + 1 }}"
                                                      class="object-cover w-full h-64 md:h-80">
                                             </div>
                                             @endforeach
                                         </div>
-                                        
+
                                         {{-- Carousel Controls --}}
                                         @if($egi->utility->getMedia('utility_gallery')->count() > 1)
                                         <button id="utility-carousel-prev" class="absolute p-2 text-white transition-colors transform -translate-y-1/2 rounded-full left-4 top-1/2 bg-black/50 hover:bg-black/70">
@@ -969,14 +969,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const utilityModal = document.getElementById('utility-modal');
     const utilityModalTrigger = document.getElementById('utility-modal-trigger');
     const utilityModalClose = document.getElementById('utility-modal-close');
-    
+
     // Carousel elements
     const carouselTrack = document.getElementById('utility-carousel-track');
     const carouselPrev = document.getElementById('utility-carousel-prev');
     const carouselNext = document.getElementById('utility-carousel-next');
     const carouselAutoplay = document.getElementById('utility-carousel-autoplay');
     const carouselIndicators = document.querySelectorAll('.utility-carousel-indicator');
-    
+
     let currentSlide = 0;
     let totalSlides = carouselIndicators.length;
     let autoplayInterval = null;
@@ -1001,7 +1001,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (carouselTrack && totalSlides > 0) {
             const translateX = -currentSlide * 100;
             carouselTrack.style.transform = `translateX(${translateX}%)`;
-            
+
             // Update indicators
             carouselIndicators.forEach((indicator, index) => {
                 if (index === currentSlide) {
@@ -1133,10 +1133,10 @@ document.addEventListener('DOMContentLoaded', function() {
         carouselTrack.addEventListener('touchend', function() {
             if (!isDragging) return;
             isDragging = false;
-            
+
             const diff = startX - endX;
             const threshold = 50; // Minimum swipe distance
-            
+
             if (Math.abs(diff) > threshold) {
                 stopAutoplay(); // Stop autoplay on swipe
                 if (diff > 0) {
@@ -1156,7 +1156,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize carousel
     if (totalSlides > 0) {
         updateCarousel();
-        
+
         // Start autoplay if there are multiple slides
         if (totalSlides > 1) {
             // Start autoplay when modal opens

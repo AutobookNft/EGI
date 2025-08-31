@@ -395,11 +395,6 @@ class EgiController extends Controller {
      */
     protected function canManageEgi($user, Egi $egi): bool {
         try {
-            // If EGI is published, no one can manage it (even the owner)
-            if ($egi->is_published) {
-                return false;
-            }
-
             $collection = $egi->collection;
 
             // Check collection membership via collection_users pivot table
