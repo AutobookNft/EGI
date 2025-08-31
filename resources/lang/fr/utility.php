@@ -104,9 +104,26 @@ return [
 
     // Erreurs de validation
     'validation' => [
+        'errors_found' => 'Quelques erreurs se sont produites :',
         'title_required' => 'Le titre est obligatoire',
         'type_required' => 'Veuillez sélectionner un type d\'utilité',
         'weight_required' => 'Le poids est obligatoire pour les biens physiques',
-        'valid_until_after' => 'La date de fin doit être postérieure à la date de début'
-    ]
+        'valid_until_after' => 'La date de fin doit être postérieure à la date de début',
+        'wait_upload_completion' => 'Veuillez attendre la fin du téléchargement des images',
+        'wait_before_save' => 'Veuillez attendre la fin du téléchargement des images avant de sauvegarder.',
+        'upload_in_progress' => 'Téléchargement déjà en cours. Veuillez attendre la fin avant d\'ajouter de nouvelles images.',
+        'select_images_only' => 'Veuillez sélectionner uniquement des fichiers image.',
+        'images_too_large' => 'Certaines images dépassent 10MB et ne peuvent pas être téléchargées.'
+    ],
+
+    // Messages JavaScript
+    'js' => [
+        'drag_drop_text' => 'Glissez les images ici ou cliquez pour sélectionner',
+        'processing_images' => 'Traitement des images en cours...',
+        'upload_in_progress' => 'Téléchargement des images en cours...',
+        'uploading' => 'Téléchargement en cours...',
+        'upload_completed' => 'Images téléchargées avec succès!'
+    ],
+
+    'upload_completed' => 'Images téléchargées avec succès!'
 ];

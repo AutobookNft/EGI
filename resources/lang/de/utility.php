@@ -104,9 +104,26 @@ return [
 
     // Validierungsfehler
     'validation' => [
+        'errors_found' => 'Einige Fehler sind aufgetreten:',
         'title_required' => 'Titel ist erforderlich',
         'type_required' => 'Bitte wählen Sie einen Nutzen-Typ',
         'weight_required' => 'Gewicht ist erforderlich für physische Güter',
-        'valid_until_after' => 'Enddatum muss nach dem Startdatum liegen'
-    ]
+        'valid_until_after' => 'Enddatum muss nach dem Startdatum liegen',
+        'wait_upload_completion' => 'Bitte warten Sie auf die Fertigstellung des Bild-Uploads',
+        'wait_before_save' => 'Bitte warten Sie auf die Fertigstellung des Bild-Uploads vor dem Speichern.',
+        'upload_in_progress' => 'Upload bereits in Bearbeitung. Bitte warten Sie auf die Fertigstellung vor dem Hinzufügen neuer Bilder.',
+        'select_images_only' => 'Bitte wählen Sie nur Bilddateien aus.',
+        'images_too_large' => 'Einige Bilder überschreiten 10MB und können nicht hochgeladen werden.'
+    ],
+
+    // JavaScript-Nachrichten
+    'js' => [
+        'drag_drop_text' => 'Bilder hierher ziehen oder klicken zum Auswählen',
+        'processing_images' => 'Bilder werden verarbeitet...',
+        'upload_in_progress' => 'Bilder werden hochgeladen...',
+        'uploading' => 'Wird hochgeladen...',
+        'upload_completed' => 'Bilder erfolgreich hochgeladen!'
+    ],
+
+    'upload_completed' => 'Bilder erfolgreich hochgeladen!'
 ];

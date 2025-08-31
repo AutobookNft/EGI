@@ -112,9 +112,26 @@ return [
 
     // Validation errors
     'validation' => [
+        'errors_found' => 'Some errors occurred:',
         'title_required' => 'Title is required',
         'type_required' => 'Please select a utility type',
         'weight_required' => 'Weight is required for physical goods',
-        'valid_until_after' => 'End date must be after start date'
-    ]
+        'valid_until_after' => 'End date must be after start date',
+        'wait_upload_completion' => 'Please wait for images upload to complete',
+        'wait_before_save' => 'Please wait for images upload to complete before saving.',
+        'upload_in_progress' => 'Upload already in progress. Please wait for completion before adding new images.',
+        'select_images_only' => 'Please select only image files.',
+        'images_too_large' => 'Some images exceed 10MB and cannot be uploaded.'
+    ],
+
+    // JavaScript messages
+    'js' => [
+        'drag_drop_text' => 'Drag images here or click to select',
+        'processing_images' => 'Processing images...',
+        'upload_in_progress' => 'Uploading images...',
+        'uploading' => 'Uploading...',
+        'upload_completed' => 'Images uploaded successfully!'
+    ],
+
+    'upload_completed' => 'Images uploaded successfully!'
 ];

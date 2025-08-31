@@ -51,6 +51,7 @@ return [
     'shipping' => [
         'title' => 'Dettagli Spedizione',
         'weight' => 'Peso (kg)',
+        'weight_help' => 'Peso necessario per calcolare i costi di spedizione',
         'dimensions' => 'Dimensioni (cm)',
         'length' => 'Lunghezza',
         'width' => 'Larghezza',
@@ -112,9 +113,30 @@ return [
 
     // Validation errors
     'validation' => [
+        'errors_found' => 'Si sono verificati alcuni errori:',
         'title_required' => 'Il titolo è obbligatorio',
         'type_required' => 'Seleziona un tipo di utility',
         'weight_required' => 'Il peso è obbligatorio per beni fisici',
-        'valid_until_after' => 'La data di fine deve essere successiva alla data di inizio'
-    ]
+        'valid_until_after' => 'La data di fine deve essere successiva alla data di inizio',
+        'wait_upload_completion' => 'Attendere il completamento del caricamento delle immagini',
+        'wait_before_save' => 'Attendere il completamento del caricamento delle immagini prima di salvare.',
+        'upload_in_progress' => 'Upload già in corso. Attendere il completamento prima di aggiungere nuove immagini.',
+        'select_images_only' => 'Per favore seleziona solo file immagine.',
+        'images_too_large' => 'Alcune immagini superano i 10MB e non possono essere caricate.',
+        'select_type' => 'Seleziona un tipo di utility',
+        'title_required' => 'Il titolo è obbligatorio',
+        'weight_required_physical' => 'Il peso è obbligatorio per beni fisici',
+        'correct_errors' => 'Per favore correggi i seguenti errori:'
+    ],
+
+    // JavaScript messages
+    'js' => [
+        'drag_drop_text' => 'Trascina qui le immagini o clicca per selezionare',
+        'processing_images' => 'Elaborazione immagini in corso...',
+        'upload_in_progress' => 'Caricamento immagini in corso...',
+        'uploading' => 'Caricamento in corso...',
+        'upload_completed' => 'Immagini caricate con successo!'
+    ],
+
+    'upload_completed' => 'Immagini caricate con successo!'
 ];

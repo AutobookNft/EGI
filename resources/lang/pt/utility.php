@@ -104,9 +104,26 @@ return [
 
     // Erros de validação
     'validation' => [
+        'errors_found' => 'Alguns erros ocorreram:',
         'title_required' => 'O título é obrigatório',
         'type_required' => 'Selecione um tipo de utilidade',
         'weight_required' => 'O peso é obrigatório para bens físicos',
-        'valid_until_after' => 'A data de fim deve ser posterior à data de início'
-    ]
+        'valid_until_after' => 'A data de fim deve ser posterior à data de início',
+        'wait_upload_completion' => 'Por favor aguarde a conclusão do carregamento das imagens',
+        'wait_before_save' => 'Por favor aguarde a conclusão do carregamento das imagens antes de salvar.',
+        'upload_in_progress' => 'Carregamento já em andamento. Por favor aguarde a conclusão antes de adicionar novas imagens.',
+        'select_images_only' => 'Por favor selecione apenas arquivos de imagem.',
+        'images_too_large' => 'Algumas imagens excedem 10MB e não podem ser carregadas.'
+    ],
+
+    // Mensagens JavaScript
+    'js' => [
+        'drag_drop_text' => 'Arraste imagens aqui ou clique para selecionar',
+        'processing_images' => 'Processando imagens...',
+        'upload_in_progress' => 'Carregando imagens...',
+        'uploading' => 'Carregando...',
+        'upload_completed' => 'Imagens carregadas com sucesso!'
+    ],
+
+    'upload_completed' => 'Imagens carregadas com sucesso!'
 ];
