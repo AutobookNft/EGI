@@ -296,7 +296,7 @@ window.ToastManager = {
             }
         },
 
-        init: function(egiId) {
+        async init(egiId) {
             console.log('TraitsEditor: Initializing for EGI', egiId);
 
             const container = document.getElementById(`traits-editor-${egiId}`);
@@ -313,11 +313,14 @@ window.ToastManager = {
 
             console.log('TraitsEditor: Mode -', canEdit ? 'EDITING' : 'READONLY');
 
-            this.loadCategories();
+            // Carica categorie prima
+            await this.loadCategories();
 
             // Carica i traits esistenti SOLO in modalità editing
             if (canEdit) {
-                this.loadExistingTraits();
+                await this.loadExistingTraits();
+                // Solo ora aggiorna la UI e nasconde il grid PHP
+                this.updateUI();
             } else {
                 // In modalità readonly, assicurati che il grid readonly sia visibile
                 this.ensureReadonlyGridVisibility();
@@ -352,16 +355,13 @@ window.ToastManager = {
 
                     console.log('TraitsEditor: Loaded existing traits for display:', this.state.displayedTraits);
                     console.log('TraitsEditor: EditingTraits initialized as empty:', this.state.editingTraits);
-
-                    // In editing mode, aggiorna il grid di editing con i traits esistenti
-                    this.updateUI();
+                    
+                    // NON chiamare updateUI() qui - verrà chiamata dall'init dopo await
                 }
             } catch (error) {
                 console.error('TraitsEditor: Error loading existing traits:', error);
             }
-        },
-
-        ensureReadonlyGridVisibility() {
+        },        ensureReadonlyGridVisibility() {
             // In modalità readonly, assicurati che il grid readonly contenga i traits
             const readonlyGrid = document.getElementById('traits-grid-readonly');
             if (readonlyGrid && readonlyGrid.children.length === 0) {
@@ -446,8 +446,7 @@ window.ToastManager = {
                 </button>
             `).join('');
 
-            // Aggiorna i conteggi dopo aver renderizzato le categorie
-            this.updateCategoryCounters();
+            // NON chiamare updateCategoryCounters() qui - verrà chiamata da updateUI() dopo aver caricato i traits
         },
 
         async openModal() {
@@ -1082,14 +1081,14 @@ window.ToastManager = {
     };
 
     // Auto-initialize quando il DOM è pronto - SOLO se l'editor è in modalità editing
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', async function() {
         const editor = document.querySelector('.egi-traits-editor');
         if (editor) {
             const canEdit = editor.getAttribute('data-can-edit') === 'true';
             if (canEdit) {
                 const egiId = editor.dataset.egiId;
                 if (egiId) {
-                    TraitsEditor.init(egiId);
+                    await TraitsEditor.init(egiId);
                 }
             }
         }
