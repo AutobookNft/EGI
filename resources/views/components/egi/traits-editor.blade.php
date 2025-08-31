@@ -71,11 +71,11 @@
             </button>
 
             {{-- Hidden area for editing state (used by JS) --}}
-            {{-- <div class="traits-list editing" style="display: none;">
+            <div class="traits-list editing" style="display: none;">
                 <div class="traits-grid" id="traits-grid">
 
                 </div>
-            </div> --}}
+            </div>
         </div>
 
         {{-- Hidden input for form submission --}}
@@ -313,7 +313,56 @@ window.ToastManager = {
             console.log('TraitsEditor: Mode -', canEdit ? 'EDITING' : 'READONLY');
 
             this.loadCategories();
-            // I traits vengono caricati dal viewer via PHP, non qui
+            
+            // Carica i traits esistenti SOLO in modalità editing
+            if (canEdit) {
+                this.loadExistingTraits();
+            } else {
+                // In modalità readonly, assicurati che il grid readonly sia visibile
+                this.ensureReadonlyGridVisibility();
+            }
+        },
+
+        async loadExistingTraits() {
+            try {
+                console.log('TraitsEditor: Loading existing traits for EGI', this.state.egiId);
+                
+                const response = await fetch(`/egis/${this.state.egiId}/traits`);
+                const data = await response.json();
+                
+                if (data.success && data.traits) {
+                    // Converte i trait esistenti nel formato per editing
+                    this.state.editingTraits = data.traits.map(trait => ({
+                        id: trait.id, // ID reale dal database
+                        tempId: trait.id, // Usa l'ID reale anche come tempId
+                        category_id: trait.category_id,
+                        category_name: trait.category ? trait.category.name : 'Unknown',
+                        trait_type_id: trait.trait_type_id,
+                        type_name: trait.trait_type ? trait.trait_type.name : 'Unknown',
+                        value: trait.value,
+                        display_value: trait.display_value || trait.value,
+                        display_type: trait.trait_type ? trait.trait_type.display_type : 'text',
+                        unit: trait.trait_type ? trait.trait_type.unit : null,
+                        sort_order: trait.sort_order || 0
+                    }));
+                    
+                    console.log('TraitsEditor: Loaded existing traits for editing:', this.state.editingTraits);
+                    
+                    // In editing mode, aggiorna il grid di editing con i traits esistenti
+                    this.updateUI();
+                }
+            } catch (error) {
+                console.error('TraitsEditor: Error loading existing traits:', error);
+            }
+        },
+
+        ensureReadonlyGridVisibility() {
+            // In modalità readonly, assicurati che il grid readonly contenga i traits
+            const readonlyGrid = document.getElementById('traits-grid-readonly');
+            if (readonlyGrid && readonlyGrid.children.length === 0) {
+                // Se il grid readonly è vuoto, nascondilo e mostra un messaggio
+                readonlyGrid.innerHTML = '<div class="no-traits-message" style="text-align: center; padding: 2rem; color: #666;">Nessun trait disponibile</div>';
+            }
         },
 
         async loadCategories() {
@@ -697,6 +746,22 @@ window.ToastManager = {
             this.updateCategoryCounters();
             this.updateButtons();
             this.updateHiddenInput();
+            this.updateContainerVisibility();
+        },
+
+        updateContainerVisibility() {
+            if (this.state.canEdit) {
+                // In modalità editing, mostra il container editing e nascondi il readonly
+                const editingContainer = document.querySelector('.traits-list.editing');
+                const readonlyContainer = document.querySelector('.traits-list.readonly');
+                
+                if (editingContainer) {
+                    editingContainer.style.display = 'block';
+                }
+                if (readonlyContainer) {
+                    readonlyContainer.style.display = 'none';
+                }
+            }
         },
 
         renderEditingTraits() {
@@ -711,6 +776,16 @@ window.ToastManager = {
             }
 
             if (this.state.editingTraits.length === 0) {
+                console.log('TraitsEditor: No editing traits to render');
+                
+                // NON sovrascrivere il grid se contiene già traits renderizzati dal PHP
+                // Controlla se il grid ha già contenuto (traits renderizzati dal server)
+                const existingTraits = grid.querySelectorAll('.trait-card');
+                if (existingTraits.length > 0) {
+                    console.log('TraitsEditor: Grid already contains server-rendered traits, skipping override');
+                    return;
+                }
+                
                 if (emptyState && this.state.canEdit) {
                     emptyState.style.display = 'block';
                 }
