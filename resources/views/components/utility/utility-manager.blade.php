@@ -390,7 +390,7 @@
                 {{ $utility ? __('label.update') : __('label.save') }} {{ __('utility.title') }}
             </button>
         </div>
-        
+
         {{-- Toast Container --}}
         <div class="toast-container" id="toast-container-utility"></div>
     </form>
@@ -720,7 +720,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-    
+
     // Aggiungi listener per il campo titolo
     const titleInput = document.querySelector('input[name="title"]');
     if (titleInput) {
@@ -730,7 +730,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-    
+
     // Aggiungi listener per i radio button del tipo
     const typeInputs = document.querySelectorAll('input[name="type"]');
     typeInputs.forEach(input => {
@@ -742,7 +742,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     alert.style.display = 'none';
                 }
             });
-            
+
             // Pulisci anche gli errori visuali da tutti i campi quando cambia il tipo
             const fieldsToClean = ['title', 'weight'];
             fieldsToClean.forEach(fieldName => {
@@ -753,45 +753,45 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     });
-    
+
     // Event listener per il bottone di submit per validazione
     const submitBtn = document.getElementById('utility-submit-btn');
     if (submitBtn) {
         let isValidating = false; // Protezione contro click multipli
-        
+
         submitBtn.addEventListener('click', function(e) {
             e.preventDefault(); // Previeni il submit diretto
-            
+
             // Evita click multipli durante la validazione
             if (isValidating) {
                 return;
             }
-            
+
             // Controlla upload in corso
             if (!checkUploadStatus()) {
                 return;
             }
-            
+
             isValidating = true;
-            
+
             // Feedback visivo durante la validazione
             const originalText = submitBtn.textContent;
             submitBtn.textContent = '...';
             submitBtn.disabled = true;
-            
+
             // Validazione immediata (senza timeout per debug)
             let errors = [];
             let hasErrors = false;
-            
+
             // Controlla se è stato selezionato un tipo di utility
             const typeInputs = document.querySelectorAll('input[name="type"]:checked');
             if (typeInputs.length === 0) {
                 errors.push(utilityTranslations.selectType);
                 hasErrors = true;
             }
-            
+
             const selectedType = typeInputs[0]?.value;
-            
+
             // Controlla titolo obbligatorio
             const titleInput = document.querySelector('input[name="title"]');
             if (!titleInput.value.trim()) {
@@ -802,7 +802,7 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 titleInput.classList.remove('border-red-500', 'bg-red-50');
             }
-            
+
             // Controlla peso se il tipo è physical o hybrid
             if (selectedType && ['physical', 'hybrid'].includes(selectedType)) {
                 const weightValidationInput = document.querySelector('input[name="weight"]');
@@ -817,16 +817,16 @@ document.addEventListener('DOMContentLoaded', function() {
                     weightValidationInput.classList.remove('border-red-500', 'bg-red-50');
                 }
             }
-            
+
             // Ripristina il bottone
             submitBtn.textContent = originalText;
             submitBtn.disabled = false;
             isValidating = false; // Reset protezione
-            
+
             // Se ci sono errori, mostra toast
             if (hasErrors) {
                 let errorList = errors.map((error, index) => `${index + 1}. ${error}`).join('<br>');
-                
+
                 ToastManager.error(errorList, '❌ ' + utilityTranslations.correctErrors, 6000);
             } else {
                 // Se la validazione passa, submita il form
@@ -834,7 +834,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-    
+
     // Inizializzazione se esiste già una utility
     @if($utility && $utility->type)
         toggleUtilitySections('{{ $utility->type }}');
@@ -977,11 +977,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
 /* Toast Animations */
 @keyframes toast-slide-in {
-    from { 
+    from {
         transform: translateX(100%);
         opacity: 0;
     }
-    to { 
+    to {
         transform: translateX(0);
         opacity: 1;
     }
@@ -999,7 +999,7 @@ document.addEventListener('DOMContentLoaded', function() {
         left: -5px;
         max-width: none;
     }
-    
+
     .toast {
         margin-bottom: 0;
     }
