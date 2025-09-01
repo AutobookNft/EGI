@@ -245,23 +245,23 @@ const TraitsViewer = {
     async openModal() {
         // Opens the traits editor modal for adding new traits
         console.log('TraitsViewer: Opening modal for adding traits');
-        
+
         if (!this.state.canEdit) {
             console.warn('TraitsViewer: Modal access denied - readonly mode');
             ToastManager.warning(window.TraitsTranslations.creator_only_modify);
             return;
         }
-        
+
         const modal = document.querySelector('#trait-modal-viewer');
         if (modal) {
             console.log('TraitsViewer: Found modal element:', modal);
-            
+
             // Move modal to body to avoid parent positioning issues - CRUCIAL!
             if (modal.parentNode !== document.body) {
                 console.log('TraitsViewer: Moving modal to body');
                 document.body.appendChild(modal);
             }
-            
+
             // Show the modal with proper styling
             modal.classList.remove('hidden');
             modal.style.display = 'flex';
@@ -277,7 +277,7 @@ const TraitsViewer = {
             modal.style.padding = '1rem';
             modal.style.visibility = 'visible';
             modal.style.opacity = '1';
-            
+
             // Ensure modal content is visible
             const modalContent = modal.querySelector('.modal-content');
             if (modalContent) {
@@ -299,34 +299,34 @@ const TraitsViewer = {
                     margin: auto !important;
                     pointer-events: auto !important;
                 `;
-                
+
                 // Also ensure all child elements are visible
                 const modalHeader = modalContent.querySelector('.modal-header');
                 const modalBody = modalContent.querySelector('.modal-body');
                 const modalFooter = modalContent.querySelector('.modal-footer');
-                
+
                 if (modalHeader) modalHeader.style.cssText = 'display: block !important; visibility: visible !important;';
                 if (modalBody) modalBody.style.cssText = 'display: block !important; visibility: visible !important;';
                 if (modalFooter) modalFooter.style.cssText = 'display: block !important; visibility: visible !important;';
-                
+
             } else {
                 console.error('TraitsViewer: Modal content (.modal-content) not found!');
             }
-            
+
             // Prevent body scroll when modal is open
             document.body.style.overflow = 'hidden';
-            
+
             console.log('TraitsViewer: Modal styling applied');
             console.log('TraitsViewer: Modal computed style:', window.getComputedStyle(modal));
-            
+
             // Reset modal state
             this.resetModal();
-            
+
             // Load categories if not loaded
             if (this.state.categories.length === 0) {
                 await this.loadCategories();
             }
-            
+
             this.renderModalCategories();
         } else {
             console.error('TraitsViewer: Modal #trait-modal-viewer not found');
@@ -721,11 +721,11 @@ class TraitImageManager {
                         const dt = new DataTransfer();
                         dt.items.add(files[0]);
                         fileInput.files = dt.files;
-                        
+
                         // Trigger change event
                         const changeEvent = new Event('change', { bubbles: true });
                         fileInput.dispatchEvent(changeEvent);
-                        
+
                         ToastManager.info('File selezionato tramite drag & drop!');
                     }
                 }
@@ -748,13 +748,14 @@ class TraitImageManager {
             }
         });
 
-        // Setup clicks on labels to trigger file input
+        // DISATTIVATO: Setup clicks on labels - ora usiamo onclick diretto nell'HTML
+        /*
         document.addEventListener('click', (e) => {
-            if (e.target.matches('label[for^="trait-image-input-"]') || 
+            if (e.target.matches('label[for^="trait-image-input-"]') ||
                 e.target.closest('label[for^="trait-image-input-"]')) {
                 e.preventDefault();
                 e.stopPropagation();
-                const label = e.target.matches('label[for^="trait-image-input-"]') ? 
+                const label = e.target.matches('label[for^="trait-image-input-"]') ?
                              e.target : e.target.closest('label[for^="trait-image-input-"]');
                 const inputId = label.getAttribute('for');
                 const input = document.getElementById(inputId);
@@ -764,8 +765,10 @@ class TraitImageManager {
                 }
             }
         });
+        */
 
-        // Setup clicks on upload area to trigger file input
+        // DISATTIVATO: Setup clicks on upload area - ora usiamo onclick diretto nell'HTML
+        /*
         document.addEventListener('click', (e) => {
             const uploadArea = e.target.closest('.trait-upload-area');
             if (uploadArea && !e.target.matches('input, button, textarea')) {
@@ -776,6 +779,7 @@ class TraitImageManager {
                 }
             }
         });
+        */
     }
 
     setupImageDeletion() {
@@ -818,7 +822,7 @@ class TraitImageManager {
         this.uploadInProgress.add(traitId);
 
         const formData = new FormData();
-        formData.append('image', file);
+        formData.append('trait_image', file);  // CORRETTO: usa 'trait_image' come nel form HTML
         formData.append('trait_id', traitId);
         formData.append('_token', document.querySelector('meta[name="csrf-token"]').content);
 
@@ -979,19 +983,44 @@ class TraitImageManager {
     }
 
     updateImageDisplay(traitId, imageUrl, thumbnailUrl) {
+        console.log('Updating image display for trait:', traitId, 'with URL:', imageUrl);
+
         const modal = document.querySelector(`#trait-modal-${traitId}`);
         if (modal) {
-            const preview = modal.querySelector('.image-preview img');
-            const deleteBtn = modal.querySelector('.delete-trait-image');
+            const previewContainer = modal.querySelector(`#trait-image-preview-${traitId}`);
+            const deleteBtn = modal.querySelector(`#trait-delete-image-btn-${traitId}`);
 
-            if (preview) {
-                preview.src = imageUrl;
-                preview.classList.remove('hidden');
+            if (previewContainer) {
+                console.log('Preview container found, updating...');
+
+                // Rimuovi il contenuto "no image"
+                const noImageDiv = previewContainer.querySelector('.py-8.text-gray-500');
+                if (noImageDiv) {
+                    noImageDiv.remove();
+                }
+
+                // Cerca l'immagine esistente o creane una nuova
+                let img = previewContainer.querySelector('img');
+                if (!img) {
+                    console.log('Creating new img element');
+                    img = document.createElement('img');
+                    img.className = 'object-contain h-auto max-w-full mx-auto rounded-lg max-h-64';
+                    previewContainer.appendChild(img);
+                }
+
+                img.src = imageUrl;
+                img.alt = 'Trait image';
+                console.log('Image src updated to:', imageUrl);
+            } else {
+                console.error('Preview container not found for trait:', traitId);
             }
 
             if (deleteBtn) {
-                deleteBtn.classList.remove('hidden');
+                deleteBtn.style.display = 'block';
+                console.log('Delete button shown');
             }
+        } else {
+            console.error('Modal not found for trait:', traitId);
         }
     }
 
@@ -1031,7 +1060,11 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Initialize TraitImageManager
-    new TraitImageManager();
+// Initialize managers only once (Singleton pattern)
+if (typeof window.TraitImageManagerInstance === 'undefined') {
+    window.TraitImageManagerInstance = new TraitImageManager();
+    console.log('TraitImageManager initialized once');
+}
 
     console.log('Integrated Traits System: Initialization complete');
 });

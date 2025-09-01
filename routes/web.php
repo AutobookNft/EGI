@@ -319,7 +319,7 @@ Route::prefix('traits')->group(function () {
     Route::post('/clear-cache', [TraitsApiController::class, 'clearCache'])
         ->name('traits.clear-cache')
         ->middleware('auth'); // Solo utenti autenticati possono pulire la cache
-    
+
     // Trait image management routes (usando il controller dedicato)
     Route::post('/image/upload', [App\Http\Controllers\TraitImageController::class, 'uploadImage'])
         ->name('traits.image.upload')

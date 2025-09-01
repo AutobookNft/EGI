@@ -162,27 +162,28 @@
 
 /* Better Text Contrast for Modal Content - DARK AND READABLE */
 .trait-modal .text-gray-600 {
-    color: #1f2937 !important;  /* Molto più scuro */
+    color: #1f2937 !important; /* Molto più scuro */
     font-weight: 600 !important;
 }
 
 .trait-modal .text-gray-800 {
-    color: #000000 !important;  /* Nero puro */
+    color: #000000 !important; /* Nero puro */
     font-weight: 700 !important;
 }
 
 .trait-modal .text-gray-500 {
-    color: #374151 !important;  /* Molto più scuro */
+    color: #374151 !important; /* Molto più scuro */
     font-weight: 500 !important;
 }
 
 .trait-modal .bg-gray-50 {
-    background-color: #e5e7eb !important;  /* Più scuro */
+    background-color: #e5e7eb !important; /* Più scuro */
     border: 2px solid #9ca3af !important;
 }
 
 /* Force dark text in modal information section only */
-.trait-modal h2, .trait-modal h3 {
+.trait-modal h2,
+.trait-modal h3 {
     color: #000000 !important;
     font-weight: 700 !important;
 }

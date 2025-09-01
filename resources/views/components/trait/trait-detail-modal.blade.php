@@ -54,7 +54,37 @@
                             <input type="hidden" name="trait_id" value="{{ $trait->id }}">
 
                             <div class="flex flex-col space-y-2">
-                                <label for="trait-image-input-{{ $trait->id }}" class="block w-full px-4 py-3 text-sm font-medium text-center text-blue-600 transition-colors border-2 border-blue-300 border-dashed rounded-lg cursor-pointer hover:bg-blue-50 hover:border-blue-400">
+                                <label for="trait-image-input-{{ $trait->id }}"
+                                       class="block w-full px-4 py-3 text-sm font-medium text-center text-blue-600 transition-colors border-2 border-blue-300 border-dashed rounded-lg cursor-pointer hover:bg-blue-50 hover:border-blue-400"
+                                       onclick="
+                                           console.log('Label clicked for trait {{ $trait->id }}');
+                                           const input = document.getElementById('trait-image-input-{{ $trait->id }}');
+                                           console.log('Input found:', input);
+                                           if (input) {
+                                               console.log('Moving input to body temporarily...');
+                                               const originalParent = input.parentNode;
+                                               document.body.appendChild(input);
+                                               input.style.position = 'fixed';
+                                               input.style.top = '-9999px';
+                                               input.style.left = '-9999px';
+                                               input.style.zIndex = '99999';
+
+                                               console.log('Calling input.click()...');
+                                               input.click();
+                                               console.log('input.click() called successfully');
+
+                                               setTimeout(() => {
+                                                   console.log('Moving input back to original position...');
+                                                   input.style.position = '';
+                                                   input.style.top = '';
+                                                   input.style.left = '';
+                                                   input.style.zIndex = '';
+                                                   originalParent.appendChild(input);
+                                               }, 100);
+                                           } else {
+                                               console.error('Input not found!');
+                                           }
+                                       ">
                                     <svg class="w-8 h-8 mx-auto mb-2 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
                                     </svg>
@@ -63,7 +93,8 @@
                                            name="trait_image"
                                            id="trait-image-input-{{ $trait->id }}"
                                            class="hidden"
-                                           accept="image/jpeg,image/png,image/webp,image/gif">
+                                           accept="image/jpeg,image/png,image/webp,image/gif"
+                                           onchange="console.log('✅ File selected for trait {{ $trait->id }}:', this.files[0] ? this.files[0].name : 'No file');">
                                 </label>
 
                                 <input type="text"
@@ -108,7 +139,7 @@
                 {{-- Trait Info Section - IDENTICA a traits-viewer --}}
                 <div class="space-y-4">
                     <h3 class="text-lg font-semibold text-gray-700">{{ __('label.trait_modal.trait_information') }}</h3>
-                    
+
                     {{-- REPLICA ESATTA della trait-card dal traits-viewer --}}
                     @php
                         // Carica colore e icona dal database - IDENTICO a traits-viewer

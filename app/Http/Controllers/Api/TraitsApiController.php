@@ -799,11 +799,11 @@ class TraitsApiController extends Controller {
             }
 
             $trait = EgiTrait::findOrFail($request->trait_id);
-            
+
             // Check if user can manage this EGI (same pattern as other methods)
             $user = FegiAuth::user();
             $egi = $trait->egi;
-            
+
             // Basic authorization check - user must be authenticated
             if (!$user) {
                 return response()->json([
@@ -842,7 +842,6 @@ class TraitsApiController extends Controller {
                     'thumbnail_url' => asset('storage/' . $path)
                 ]
             ]);
-
         } catch (\Exception $e) {
             return $this->errorManager->handle('TRAIT_IMAGE_UPLOAD_FAILED', [
                 'user_id' => FegiAuth::id(),
@@ -870,7 +869,7 @@ class TraitsApiController extends Controller {
             // Check if user can manage this EGI (same pattern as other methods)
             $user = FegiAuth::user();
             $egi = $trait->egi;
-            
+
             // Basic authorization check - user must be authenticated
             if (!$user) {
                 return response()->json([
@@ -907,7 +906,6 @@ class TraitsApiController extends Controller {
                     'trait_id' => $trait->id
                 ]
             ]);
-
         } catch (\Exception $e) {
             return $this->errorManager->handle('TRAIT_IMAGE_DELETE_FAILED', [
                 'user_id' => FegiAuth::id(),
