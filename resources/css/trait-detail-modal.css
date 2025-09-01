@@ -1,0 +1,356 @@
+/**
+ * Trait Detail Modal Styles
+ * Custom styling for trait image management modals
+ *
+ * @package FlorenceEGI\Traits\Assets
+ * @author Padmin D. Curtis (AI Partner OS3.0) for Fabio Cherici
+ * @version 1.0.0 (Trait Image System)
+ * @date 2025-09-01
+ */
+
+/* Modal Base Styles */
+.trait-modal {
+    backdrop-filter: blur(4px);
+    transition: all 0.3s ease;
+}
+
+.trait-modal.show {
+    display: flex !important;
+}
+
+/* Clickable Trait Cards */
+.trait-card {
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    position: relative;
+}
+
+.trait-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.trait-card.has-image::before {
+    content: "";
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 16px;
+    height: 16px;
+    background: #10b981;
+    border-radius: 50%;
+    border: 2px solid white;
+    z-index: 10;
+}
+
+.trait-card.has-image::after {
+    content: "📷";
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    font-size: 10px;
+    z-index: 11;
+}
+
+/* Image Preview Styles */
+.trait-image-preview {
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.trait-image-preview img {
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Upload Progress */
+.trait-upload-progress {
+    background: linear-gradient(to right, #3b82f6 0%, #1d4ed8 100%);
+    height: 8px;
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+/* File Input Styling */
+.trait-file-input {
+    transition: all 0.2s ease;
+}
+
+.trait-file-input:hover {
+    background-color: #f9fafb;
+}
+
+/* Button Styles */
+.trait-upload-btn {
+    background: linear-gradient(to right, #3b82f6, #1d4ed8);
+    transition: all 0.2s ease;
+}
+
+.trait-upload-btn:hover {
+    background: linear-gradient(to right, #1d4ed8, #1e40af);
+    transform: translateY(-1px);
+}
+
+.trait-upload-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.trait-delete-btn {
+    background: linear-gradient(to right, #dc2626, #b91c1c);
+    transition: all 0.2s ease;
+}
+
+.trait-delete-btn:hover {
+    background: linear-gradient(to right, #b91c1c, #991b1b);
+    transform: translateY(-1px);
+}
+
+/* Toast Notifications */
+.trait-toast {
+    min-width: 300px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(8px);
+}
+
+.trait-toast.success {
+    background: rgba(16, 185, 129, 0.95);
+}
+
+.trait-toast.error {
+    background: rgba(220, 38, 38, 0.95);
+}
+
+.trait-toast.info {
+    background: rgba(59, 130, 246, 0.95);
+}
+
+/* Rarity Badge Colors with Better Contrast */
+.rarity-common {
+    background-color: #6b7280;
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.rarity-uncommon {
+    background-color: #059669;
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.rarity-rare {
+    background-color: #2563eb;
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.rarity-epic {
+    background-color: #7c3aed;
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.rarity-legendary {
+    background-color: #db2777;
+    color: #ffffff;
+    font-weight: 600;
+}
+
+/* Better Text Contrast for Modal Content - DARK AND READABLE */
+.trait-modal .text-gray-600 {
+    color: #1f2937 !important;  /* Molto più scuro */
+    font-weight: 600 !important;
+}
+
+.trait-modal .text-gray-800 {
+    color: #000000 !important;  /* Nero puro */
+    font-weight: 700 !important;
+}
+
+.trait-modal .text-gray-500 {
+    color: #374151 !important;  /* Molto più scuro */
+    font-weight: 500 !important;
+}
+
+.trait-modal .bg-gray-50 {
+    background-color: #e5e7eb !important;  /* Più scuro */
+    border: 2px solid #9ca3af !important;
+}
+
+/* Force dark text in modal information section only */
+.trait-modal h2, .trait-modal h3 {
+    color: #000000 !important;
+    font-weight: 700 !important;
+}
+
+.trait-modal span.text-sm {
+    color: #1f2937 !important;
+    font-weight: 600 !important;
+}
+
+/* Dark theme for modal rarity badges - override Tailwind */
+.trait-modal .bg-purple-100 {
+    background-color: #db2777 !important;
+}
+.trait-modal .text-purple-800 {
+    color: #ffffff !important;
+}
+
+.trait-modal .bg-indigo-100 {
+    background-color: #7c3aed !important;
+}
+.trait-modal .text-indigo-800 {
+    color: #ffffff !important;
+}
+
+.trait-modal .bg-blue-100 {
+    background-color: #2563eb !important;
+}
+.trait-modal .text-blue-800 {
+    color: #ffffff !important;
+}
+
+.trait-modal .bg-green-100 {
+    background-color: #059669 !important;
+}
+.trait-modal .text-green-800 {
+    color: #ffffff !important;
+}
+
+.trait-modal .bg-gray-100 {
+    background-color: #6b7280 !important;
+}
+.trait-modal .text-gray-800 {
+    color: #ffffff !important;
+}
+
+/* Modal Animation */
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.trait-modal .bg-white {
+    animation: modalFadeIn 0.3s ease;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .trait-modal .max-w-2xl {
+        max-width: 95vw;
+        margin: 1rem;
+    }
+
+    .trait-modal .grid-cols-1.lg\\:grid-cols-2 {
+        grid-template-columns: 1fr;
+    }
+
+    .trait-card.has-image::before,
+    .trait-card.has-image::after {
+        top: 4px;
+        right: 4px;
+    }
+}
+
+/* Loading States */
+.trait-loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Drag & Drop Styles */
+.trait-upload-area {
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.trait-upload-area.border-blue-500 {
+    background-color: rgba(59, 130, 246, 0.1) !important;
+    border-color: #3b82f6 !important;
+    transform: scale(1.02);
+}
+
+.trait-upload-area:hover {
+    border-color: #9ca3af;
+    background-color: #f9fafb;
+}
+
+/* File Input Button Styles */
+.trait-upload-area label {
+    transition: all 0.2s ease;
+}
+
+.trait-upload-area label:hover {
+    background-color: #eff6ff !important;
+    border-color: #3b82f6 !important;
+    transform: translateY(-1px);
+}
+
+.trait-loading::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Accessibility */
+.trait-modal:focus-within {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+.trait-card:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .trait-card {
+        border: 2px solid;
+    }
+
+    .trait-card.has-image::before {
+        border-width: 3px;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .trait-modal,
+    .trait-card,
+    .trait-upload-btn,
+    .trait-delete-btn {
+        transition: none;
+    }
+
+    .trait-modal .bg-white {
+        animation: none;
+    }
+}

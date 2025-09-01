@@ -319,6 +319,14 @@ Route::prefix('traits')->group(function () {
     Route::post('/clear-cache', [TraitsApiController::class, 'clearCache'])
         ->name('traits.clear-cache')
         ->middleware('auth'); // Solo utenti autenticati possono pulire la cache
+    
+    // Trait image management routes (usando il controller dedicato)
+    Route::post('/image/upload', [App\Http\Controllers\TraitImageController::class, 'uploadImage'])
+        ->name('traits.image.upload')
+        ->middleware('auth');
+    Route::delete('/image/{trait}', [App\Http\Controllers\TraitImageController::class, 'deleteImage'])
+        ->name('traits.image.delete')
+        ->middleware('auth');
 });
 
 // Utility management routes
@@ -979,4 +987,27 @@ Route::middleware(['web', 'auth'])->prefix('user/preferences')->name('web.user.p
     // Collection badge data for authenticated users
     Route::get('/current-collection', [App\Http\Controllers\Api\UserPreferenceController::class, 'getCurrentCollection'])
         ->name('current-collection.get');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Trait Image Management Routes
+|--------------------------------------------------------------------------
+|
+| Routes for managing trait images with Spatie Media Library.
+| Handles upload, deletion, and information retrieval for trait images.
+|
+*/
+Route::middleware(['web', 'auth'])->prefix('traits')->name('traits.')->group(function () {
+    // Upload image for a trait
+    Route::post('/upload-image', [App\Http\Controllers\TraitImageController::class, 'uploadImage'])
+        ->name('upload-image');
+
+    // Delete image for a specific trait
+    Route::delete('/{trait}/delete-image', [App\Http\Controllers\TraitImageController::class, 'deleteImage'])
+        ->name('delete-image');
+
+    // Get image information for a specific trait
+    Route::get('/{trait}/image-info', [App\Http\Controllers\TraitImageController::class, 'getImageInfo'])
+        ->name('image-info');
 });

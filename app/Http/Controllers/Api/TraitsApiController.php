@@ -21,7 +21,16 @@ use Ultra\ErrorManager\Interfaces\ErrorManagerInterface;
  * @Oracode API Controller: EGI Traits System Management
  * 🎯 Purpose: Handle EGI traits CRUD operations with Ultra ecosystem integration
  * 🛡️ Privacy: Full GDPR compliance with audit logging and collection-based authorization
- * 🧱 Core Logic: FegiAuth-based authorization + trait management + rarity calculations + UEM error handling
+        } catch (\Exception $e) {
+            return $this->errorManager->handle('EGI_TRAIT_DELETE_FAILED', [
+                'user_id' => FegiAuth::id(),
+                'egi_id' => $egiId,
+                'trait_id' => $traitId,
+                'error' => $e->getMessage()
+            ], $e);
+        }
+    }
+}e Logic: FegiAuth-based authorization + trait management + rarity calculations + UEM error handling
  *
  * @package App\Http\Controllers\Api
  * @author Padmin D. Curtis (AI Partner OS3.0-Compliant) for Fabio Cherici
@@ -762,6 +771,147 @@ class TraitsApiController extends Controller {
                 'user_id' => FegiAuth::id(),
                 'egi_id' => $egiId,
                 'trait_id' => $traitId,
+                'error' => $e->getMessage()
+            ], $e);
+        }
+    }
+
+    /**
+     * Upload image for a trait
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function uploadTraitImage(Request $request): JsonResponse {
+        try {
+            $request->validate([
+                'trait_id' => 'required|exists:egi_traits,id',
+                'image' => 'required|image|max:10240', // 10MB max
+                'image_alt_text' => 'nullable|string|max:255',
+                'image_description' => 'nullable|string|max:1000'
+            ]);
+
+            if (!FegiAuth::check()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Utente non autorizzato.'
+                ], 401);
+            }
+
+            $trait = EgiTrait::findOrFail($request->trait_id);
+            
+            // Check if user can manage this EGI (same pattern as other methods)
+            $user = FegiAuth::user();
+            $egi = $trait->egi;
+            
+            // Basic authorization check - user must be authenticated
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Utente non autorizzato.'
+                ], 401);
+            }
+
+            // Handle file upload
+            $file = $request->file('image');
+            $filename = time() . '_' . $trait->id . '_' . $file->getClientOriginalName();
+            $path = $file->storeAs('trait-images', $filename, 'public');
+
+            // Update trait with image info
+            $trait->update([
+                'image_path' => $path,
+                'image_alt_text' => $request->image_alt_text,
+                'image_description' => $request->image_description
+            ]);
+
+            // Log GDPR activity
+            $this->auditLogService->log(
+                FegiAuth::id(),
+                GdprActivityCategory::DATA_MODIFICATION,
+                'trait_image_upload',
+                "Upload immagine per trait {$trait->name}",
+                ['trait_id' => $trait->id, 'egi_id' => $trait->egi_id]
+            );
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Immagine caricata con successo.',
+                'data' => [
+                    'trait_id' => $trait->id,
+                    'image_url' => asset('storage/' . $path),
+                    'thumbnail_url' => asset('storage/' . $path)
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            return $this->errorManager->handle('TRAIT_IMAGE_UPLOAD_FAILED', [
+                'user_id' => FegiAuth::id(),
+                'trait_id' => $request->trait_id ?? null,
+                'error' => $e->getMessage()
+            ], $e);
+        }
+    }
+
+    /**
+     * Delete image for a trait
+     *
+     * @param EgiTrait $trait
+     * @return JsonResponse
+     */
+    public function deleteTraitImage(EgiTrait $trait): JsonResponse {
+        try {
+            if (!FegiAuth::check()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Utente non autorizzato.'
+                ], 401);
+            }
+
+            // Check if user can manage this EGI (same pattern as other methods)
+            $user = FegiAuth::user();
+            $egi = $trait->egi;
+            
+            // Basic authorization check - user must be authenticated
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Utente non autorizzato.'
+                ], 401);
+            }
+
+            // Delete file if exists
+            if ($trait->image_path && file_exists(storage_path('app/public/' . $trait->image_path))) {
+                unlink(storage_path('app/public/' . $trait->image_path));
+            }
+
+            // Clear image data
+            $trait->update([
+                'image_path' => null,
+                'image_alt_text' => null,
+                'image_description' => null
+            ]);
+
+            // Log GDPR activity
+            $this->auditLogService->log(
+                FegiAuth::id(),
+                GdprActivityCategory::DATA_DELETION,
+                'trait_image_delete',
+                "Eliminazione immagine per trait {$trait->name}",
+                ['trait_id' => $trait->id, 'egi_id' => $trait->egi_id]
+            );
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Immagine eliminata con successo.',
+                'data' => [
+                    'trait_id' => $trait->id
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            return $this->errorManager->handle('TRAIT_IMAGE_DELETE_FAILED', [
+                'user_id' => FegiAuth::id(),
+                'trait_id' => $trait->id,
                 'error' => $e->getMessage()
             ], $e);
         }

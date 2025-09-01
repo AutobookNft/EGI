@@ -1,0 +1,563 @@
+/**
+ * Trait Detail Modal JavaScript
+ * Handles trait image upload, modal interaction, and UI feedback
+ *
+ * @package FlorenceEGI\Traits\Assets
+ * @author Padmin D. Curtis (AI Partner OS3.0) for Fabio Cherici
+ * @version 1.0.0 (Trait Image System)
+ * @date 2025-09-01
+ */
+
+class TraitImageManager {
+    constructor() {
+        this.init();
+        this.translations = this.loadTranslations();
+        this.uploadInProgress = new Set();
+    }
+
+    /**
+     * Initialize event listeners and modal functionality
+     */
+    init() {
+        // Modal open/close functionality
+        this.setupModalEvents();
+
+        // Image upload handling
+        this.setupImageUpload();
+
+        // Image deletion handling
+        this.setupImageDeletion();
+
+        // File input preview
+        this.setupFilePreview();
+    }
+
+    /**
+     * Setup event listeners for a single trait card
+     */
+    setupSingleCard(card) {
+        if (!card || !card.dataset.traitId) {
+            console.warn('Invalid card passed to setupSingleCard:', card);
+            return;
+        }
+
+        console.log('Setting up single card:', card.dataset.traitId);
+
+        // Force the card to be clickable with aggressive CSS
+        card.style.cssText += `
+            pointer-events: auto !important;
+            cursor: pointer !important;
+            z-index: 1000 !important;
+            position: relative !important;
+            display: block !important;
+        `;
+
+        // Remove any existing listeners to avoid duplicates
+        const newCard = card.cloneNode(true);
+        card.parentNode.replaceChild(newCard, card);
+
+        newCard.addEventListener('click', (e) => {
+            console.log('Single card click:', e.target, 'Card ID:', newCard.dataset.traitId);
+
+            // Skip if clicking on remove button
+            if (e.target.closest('.trait-remove')) {
+                console.log('Clicked on remove button - ignoring');
+                return;
+            }
+
+            e.stopPropagation();
+            e.preventDefault();
+            this.openModal(newCard.dataset.traitId);
+        });
+
+        console.log('Single card setup complete for:', newCard.dataset.traitId);
+    }
+
+    /**
+     * Load translations from meta tags or window object
+     */
+    loadTranslations() {
+        return window.traitTranslations || {
+            upload_success: 'Image uploaded successfully',
+            upload_error: 'Error uploading image',
+            delete_success: 'Image deleted successfully',
+            delete_error: 'Error deleting image',
+            confirm_delete: 'Are you sure you want to delete this image?',
+            uploading: 'Uploading...',
+            file_too_large: 'File is too large',
+            invalid_file_type: 'Invalid file type'
+        };
+    }
+
+    /**
+     * Setup modal open/close events
+     */
+    setupModalEvents() {
+        // Debug: Add direct click listeners to trait cards
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM loaded, searching for trait cards...');
+
+            // Try multiple selectors
+            const selectors = [
+                '.trait-card[data-trait-id]',
+                '[data-trait-id]',
+                '.trait-card',
+                '.clickable-trait',
+                '[data-trait-id]:not(.trait-modal)'
+            ];
+
+            selectors.forEach(selector => {
+                const elements = document.querySelectorAll(selector);
+                console.log(`Selector "${selector}" found:`, elements.length, elements);
+            });
+
+            // Check the entire traits-viewer content
+            const traitsViewer = document.querySelector('#traits-viewer-126');
+            if (traitsViewer) {
+                console.log('Traits viewer content:', traitsViewer.innerHTML);
+                console.log('Traits viewer children:', traitsViewer.children);
+            }
+
+            const traitCards = document.querySelectorAll('.trait-card[data-trait-id]');
+            console.log('Setting up direct listeners for trait cards:', traitCards.length);
+
+            if (traitCards.length === 0) {
+                console.warn('NO TRAIT CARDS FOUND! Setting up MutationObserver...');
+
+                // Use MutationObserver to wait for trait cards to be added
+                const observer = new MutationObserver((mutations) => {
+                    mutations.forEach((mutation) => {
+                        if (mutation.type === 'childList') {
+                            const addedNodes = Array.from(mutation.addedNodes);
+                            addedNodes.forEach(node => {
+                                if (node.nodeType === 1) { // Element node
+                                    // Check if the node itself is a trait card
+                                    if (node.matches && node.matches('.trait-card[data-trait-id]')) {
+                                        console.log('New trait card detected:', node.dataset.traitId);
+                                        this.setupSingleCard(node);
+                                    }
+                                    // Check for trait cards within the node
+                                    const innerCards = node.querySelectorAll('.trait-card[data-trait-id]');
+                                    if (innerCards.length > 0) {
+                                        console.log('Inner trait cards detected:', innerCards.length);
+                                        innerCards.forEach(card => this.setupSingleCard(card));
+                                    }
+                                }
+                            });
+                        }
+                    });
+                });
+
+                // Observe the traits container
+                const traitsContainer = document.querySelector('.traits-list, .egi-traits-viewer');
+                if (traitsContainer) {
+                    observer.observe(traitsContainer, {
+                        childList: true,
+                        subtree: true
+                    });
+                    console.log('MutationObserver set up on traits container');
+                }
+
+                // Try again with delays
+                setTimeout(() => {
+                    const delayedCards = document.querySelectorAll('.trait-card[data-trait-id]');
+                    console.log('Delayed search (2s) found:', delayedCards.length, 'cards');
+                    delayedCards.forEach(card => this.setupSingleCard(card));
+                }, 2000);
+
+                setTimeout(() => {
+                    const delayedCards2 = document.querySelectorAll('.trait-card[data-trait-id]');
+                    console.log('Delayed search (5s) found:', delayedCards2.length, 'cards');
+                    delayedCards2.forEach(card => this.setupSingleCard(card));
+                }, 5000);
+
+                return;
+            }
+
+            traitCards.forEach((card, index) => {
+                console.log(`Setting up listener for card ${index}:`, card.dataset.traitId);
+                console.log('Card element:', card);
+                console.log('Card computed style:', window.getComputedStyle(card));
+
+                // Force the card to be clickable with aggressive CSS
+                card.style.cssText += `
+                    pointer-events: auto !important;
+                    cursor: pointer !important;
+                    z-index: 1000 !important;
+                    position: relative !important;
+                    display: block !important;
+                `;
+
+                card.addEventListener('click', (e) => {
+                    console.log('Direct card click:', e.target, 'Card ID:', card.dataset.traitId);
+
+                    // Skip if clicking on remove button
+                    if (e.target.closest('.trait-remove')) {
+                        console.log('Clicked on remove button - ignoring');
+                        return;
+                    }
+
+                    e.stopPropagation();
+                    e.preventDefault();
+                    this.openModal(card.dataset.traitId);
+                });
+
+                // Test click programmatically
+                setTimeout(() => {
+                    console.log('Testing programmatic click on card:', card.dataset.traitId);
+                    // This should work if the issue is not with our code
+                }, 2000);
+            });
+        });
+
+        // Keep the original global listener as backup
+        document.addEventListener('click', (e) => {
+            console.log('Global click detected on:', e.target);
+            console.log('Click target classes:', e.target.className);
+
+            // Skip if clicking on remove button or its children
+            if (e.target.closest('.trait-remove')) {
+                console.log('Click on remove button - ignoring');
+                return;
+            }
+
+            const traitCard = e.target.closest('[data-trait-id]');
+            console.log('Found trait card via global listener:', traitCard);
+
+            if (traitCard && !e.target.closest('.trait-modal') && !traitCard.matches('.trait-modal')) {
+                const traitId = traitCard.dataset.traitId;
+                console.log('Opening modal for trait via global listener:', traitId);
+                this.openModal(traitId);
+            }
+        });
+
+        // Close modal events
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('trait-modal-close') ||
+                e.target.classList.contains('trait-modal')) {
+                this.closeModal(e.target.closest('.trait-modal'));
+            }
+        });
+
+        // ESC key to close modal
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                const openModal = document.querySelector('.trait-modal[style*="flex"]');
+                if (openModal) {
+                    this.closeModal(openModal);
+                }
+            }
+        });
+    }
+
+    /**
+     * Setup image upload functionality
+     */
+    setupImageUpload() {
+        document.addEventListener('submit', async (e) => {
+            if (e.target.id && e.target.id.startsWith('trait-image-form-')) {
+                e.preventDefault();
+
+                const form = e.target;
+                const traitId = form.querySelector('input[name="trait_id"]').value;
+
+                if (this.uploadInProgress.has(traitId)) {
+                    return; // Prevent multiple uploads
+                }
+
+                await this.handleImageUpload(form, traitId);
+            }
+        });
+    }
+
+    /**
+     * Setup image deletion functionality
+     */
+    setupImageDeletion() {
+        document.addEventListener('click', async (e) => {
+            if (e.target.id && e.target.id.startsWith('trait-delete-image-btn-')) {
+                e.preventDefault();
+
+                const button = e.target;
+                const traitId = button.id.replace('trait-delete-image-btn-', '');
+
+                // Confirm deletion
+                const confirmed = await this.showConfirmDialog(this.translations.confirm_delete);
+                if (confirmed) {
+                    await this.handleImageDeletion(traitId);
+                }
+            }
+        });
+    }
+
+    /**
+     * Setup file input preview functionality
+     */
+    setupFilePreview() {
+        document.addEventListener('change', (e) => {
+            if (e.target.type === 'file' && e.target.id && e.target.id.startsWith('trait-image-input-')) {
+                const file = e.target.files[0];
+                const traitId = e.target.id.replace('trait-image-input-', '');
+
+                if (file) {
+                    this.previewFile(file, traitId);
+                }
+            }
+        });
+    }
+
+    /**
+     * Open trait modal
+     */
+    openModal(traitId) {
+        const modal = document.getElementById(`trait-modal-${traitId}`);
+        if (modal) {
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+    }
+
+    /**
+     * Close trait modal
+     */
+    closeModal(modal) {
+        if (modal) {
+            modal.style.display = 'none';
+            document.body.style.overflow = '';
+        }
+    }
+
+    /**
+     * Handle image upload
+     */
+    async handleImageUpload(form, traitId) {
+        try {
+            this.uploadInProgress.add(traitId);
+            this.showUploadProgress(traitId, true);
+
+            const formData = new FormData(form);
+            const fileInput = form.querySelector('input[type="file"]');
+
+            // Validate file
+            if (!fileInput.files[0]) {
+                throw new Error('No file selected');
+            }
+
+            const response = await fetch('/traits/upload-image', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                }
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                this.showToast(traitId, this.translations.upload_success, 'success');
+                this.updateImagePreview(traitId, result.data);
+                form.reset(); // Clear form
+            } else {
+                throw new Error(result.message || this.translations.upload_error);
+            }
+
+        } catch (error) {
+            console.error('Upload error:', error);
+            this.showToast(traitId, error.message, 'error');
+        } finally {
+            this.uploadInProgress.delete(traitId);
+            this.showUploadProgress(traitId, false);
+        }
+    }
+
+    /**
+     * Handle image deletion
+     */
+    async handleImageDeletion(traitId) {
+        try {
+            const response = await fetch(`/traits/${traitId}/delete-image`, {
+                method: 'DELETE',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                this.showToast(traitId, this.translations.delete_success, 'success');
+                this.removeImagePreview(traitId);
+            } else {
+                throw new Error(result.message || this.translations.delete_error);
+            }
+
+        } catch (error) {
+            console.error('Delete error:', error);
+            this.showToast(traitId, error.message, 'error');
+        }
+    }
+
+    /**
+     * Preview selected file
+     */
+    previewFile(file, traitId) {
+        // Validate file type
+        if (!file.type.match(/^image\/(jpeg|png|webp|gif)$/)) {
+            this.showToast(traitId, this.translations.invalid_file_type, 'error');
+            return;
+        }
+
+        // Validate file size (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            this.showToast(traitId, this.translations.file_too_large, 'error');
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const preview = document.getElementById(`trait-image-preview-${traitId}`);
+            if (preview) {
+                preview.innerHTML = `
+                    <img src="${e.target.result}"
+                         alt="Preview"
+                         class="max-w-full h-auto rounded-lg mx-auto max-h-64 object-contain border-2 border-blue-300">
+                    <p class="text-sm text-blue-600 mt-2">${this.translations.preview_selected}</p>
+                `;
+            }
+        };
+        reader.readAsDataURL(file);
+    }
+
+    /**
+     * Update image preview after upload
+     */
+    updateImagePreview(traitId, data) {
+        const preview = document.getElementById(`trait-image-preview-${traitId}`);
+        if (preview && data.modal_image_url) {
+            preview.innerHTML = `
+                <img src="${data.modal_image_url}"
+                     alt="${data.image_alt_text || 'Trait image'}"
+                     class="max-w-full h-auto rounded-lg mx-auto max-h-64 object-contain">
+            `;
+        }
+
+        // Show delete button if not present
+        const deleteBtn = document.getElementById(`trait-delete-image-btn-${traitId}`);
+        if (!deleteBtn) {
+            const uploadBtn = document.getElementById(`trait-upload-btn-${traitId}`);
+            if (uploadBtn && uploadBtn.parentElement) {
+                const deleteButton = document.createElement('button');
+                deleteButton.type = 'button';
+                deleteButton.id = `trait-delete-image-btn-${traitId}`;
+                deleteButton.className = 'bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition-colors text-sm font-medium';
+                deleteButton.textContent = 'Delete Image';
+                uploadBtn.parentElement.appendChild(deleteButton);
+            }
+        }
+    }
+
+    /**
+     * Remove image preview after deletion
+     */
+    removeImagePreview(traitId) {
+        const preview = document.getElementById(`trait-image-preview-${traitId}`);
+        if (preview) {
+            preview.innerHTML = `
+                <div class="text-gray-500 py-8">
+                    <svg class="mx-auto h-16 w-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    <p class="mt-2">No image uploaded</p>
+                </div>
+            `;
+        }
+
+        // Remove delete button
+        const deleteBtn = document.getElementById(`trait-delete-image-btn-${traitId}`);
+        if (deleteBtn) {
+            deleteBtn.remove();
+        }
+    }
+
+    /**
+     * Show/hide upload progress
+     */
+    showUploadProgress(traitId, show) {
+        const progress = document.getElementById(`trait-upload-progress-${traitId}`);
+        const uploadBtn = document.getElementById(`trait-upload-btn-${traitId}`);
+
+        if (progress) {
+            progress.style.display = show ? 'block' : 'none';
+        }
+
+        if (uploadBtn) {
+            uploadBtn.disabled = show;
+            uploadBtn.textContent = show ? this.translations.uploading : 'Upload Image';
+        }
+    }
+
+    /**
+     * Show toast notification
+     */
+    showToast(traitId, message, type = 'info') {
+        const container = document.getElementById(`trait-toast-container-${traitId}`);
+        if (!container) return;
+
+        const toast = document.createElement('div');
+        toast.className = `toast-notification px-4 py-3 rounded-lg shadow-lg text-white transform transition-all duration-300 translate-x-full ${
+            type === 'success' ? 'bg-green-600' :
+            type === 'error' ? 'bg-red-600' : 'bg-blue-600'
+        }`;
+        toast.textContent = message;
+
+        container.appendChild(toast);
+
+        // Animate in
+        setTimeout(() => {
+            toast.classList.remove('translate-x-full');
+        }, 100);
+
+        // Auto remove
+        setTimeout(() => {
+            toast.classList.add('translate-x-full');
+            setTimeout(() => {
+                if (toast.parentElement) {
+                    toast.parentElement.removeChild(toast);
+                }
+            }, 300);
+        }, 3000);
+    }
+
+    /**
+     * Show confirmation dialog
+     */
+    showConfirmDialog(message) {
+        return new Promise((resolve) => {
+            // Use SweetAlert2 if available, otherwise fallback to confirm
+            if (window.Swal) {
+                Swal.fire({
+                    title: 'Confirm',
+                    text: message,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Yes, delete it!',
+                    cancelButtonText: 'Cancel'
+                }).then((result) => {
+                    resolve(result.isConfirmed);
+                });
+            } else {
+                resolve(confirm(message));
+            }
+        });
+    }
+}
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    new TraitImageManager();
+});

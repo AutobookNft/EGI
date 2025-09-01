@@ -33,6 +33,7 @@ export default defineConfig(({ mode }) => {
                     'resources/css/creator-home.css',
                     'resources/css/reservation-history.css', // Stili per cronologia prenotazioni
                     'resources/css/traits-manager.css', // Stili per gestione traits
+                    'resources/css/trait-detail-modal.css', // Stili per modal dettaglio trait
                     'resources/css/mega-menu.css', // Revolutionary mega menu styles
                     'resources/js/creator-home.js',
                     'resources/js/mega-menu-mobile.js', // Mobile mega menu functionality
@@ -60,6 +61,7 @@ export default defineConfig(({ mode }) => {
                     'resources/js/components/vanilla-mobile-menu.js',
                     'resources/js/components/vanilla-desktop-menu.js',
                     'resources/js/collection-edit-modal.js', // Modal per editing collection metadata
+                    'resources/js/traits-viewer-integrated.js', // Integrated traits viewer & image manager
                     'public/js/collection-edit-modal.js'
                 ],
                 refresh: [
