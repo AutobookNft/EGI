@@ -116,6 +116,15 @@ return [
         'images_too_large' => 'Certaines images dépassent 10MB et ne peuvent pas être téléchargées.'
     ],
 
+    // Actions
+    'actions' => [
+        'delete' => 'Supprimer l\'Utilitaire',
+        'confirm_delete_title' => 'Confirmer la Suppression',
+        'confirm_delete_message' => 'Êtes-vous sûr de vouloir supprimer cet utilitaire ? Cette action ne peut pas être annulée.',
+        'delete_success' => 'Utilitaire supprimé avec succès !',
+        'delete_error' => 'Erreur lors de la suppression de l\'utilitaire.',
+    ],
+
     // Messages JavaScript
     'js' => [
         'drag_drop_text' => 'Glissez les images ici ou cliquez pour sélectionner',

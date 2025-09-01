@@ -402,7 +402,7 @@ class UtilityController extends Controller {
     /**
      * Remove utility
      */
-    public function destroy(Utility $utility) {
+    public function destroy(Request $request, Utility $utility) {
         try {
             // Log inizio operazione
             if ($this->logger) {
@@ -472,10 +472,26 @@ class UtilityController extends Controller {
                 ]);
             }
 
-            return redirect()
-                ->route('egis.show', $egi)
-                ->with('success', 'Utility removed successfully.');
+            // Per richieste AJAX, restituisci JSON
+            if ($request->expectsJson() || $request->isXmlHttpRequest()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => __('utility.actions.delete_success')
+                ]);
+            }
+
+            // Per richieste normali, reindirizza - TEMPORANEAMENTE COMMENTATO PER DEBUG
+            // return redirect()
+            //     ->route('egis.show', $egi)
+            //     ->with('success', __('utility.actions.delete_success'));
+
+            // Invece, per ora, restituiamo sempre JSON
+            return response()->json([
+                'success' => true,
+                'message' => __('utility.actions.delete_success')
+            ]);
         } catch (\Exception $e) {
+
             // Errore critico - usa UEM
             $this->errorManager->handle('UTILITY_DELETION_ERROR', [
                 'user_id' => auth()->id(),

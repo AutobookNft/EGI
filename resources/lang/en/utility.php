@@ -124,6 +124,15 @@ return [
         'images_too_large' => 'Some images exceed 10MB and cannot be uploaded.'
     ],
 
+    // Actions
+    'actions' => [
+        'delete' => 'Delete Utility',
+        'confirm_delete_title' => 'Confirm Deletion',
+        'confirm_delete_message' => 'Are you sure you want to delete this utility? This action cannot be undone.',
+        'delete_success' => 'Utility deleted successfully!',
+        'delete_error' => 'Error during utility deletion.',
+    ],
+
     // JavaScript messages
     'js' => [
         'drag_drop_text' => 'Drag images here or click to select',

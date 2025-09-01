@@ -108,5 +108,14 @@ return [
         'type_required' => 'Selecciona un tipo de utilidad',
         'weight_required' => 'El peso es obligatorio para bienes físicos',
         'valid_until_after' => 'La fecha de fin debe ser posterior a la fecha de inicio'
+    ],
+
+    // Actions
+    'actions' => [
+        'delete' => 'Eliminar Utilidad',
+        'confirm_delete_title' => 'Confirmar Eliminación',
+        'confirm_delete_message' => '¿Estás seguro de que quieres eliminar esta utilidad? Esta acción no se puede deshacer.',
+        'delete_success' => '¡Utilidad eliminada con éxito!',
+        'delete_error' => 'Error al eliminar la utilidad.',
     ]
 ];

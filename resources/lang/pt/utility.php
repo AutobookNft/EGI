@@ -116,6 +116,15 @@ return [
         'images_too_large' => 'Algumas imagens excedem 10MB e não podem ser carregadas.'
     ],
 
+    // Ações
+    'actions' => [
+        'delete' => 'Excluir Utilitário',
+        'confirm_delete_title' => 'Confirmar Exclusão',
+        'confirm_delete_message' => 'Tem certeza de que deseja excluir este utilitário? Esta ação não pode ser desfeita.',
+        'delete_success' => 'Utilitário excluído com sucesso!',
+        'delete_error' => 'Erro ao excluir o utilitário.',
+    ],
+
     // Mensagens JavaScript
     'js' => [
         'drag_drop_text' => 'Arraste imagens aqui ou clique para selecionar',

@@ -116,6 +116,15 @@ return [
         'images_too_large' => 'Einige Bilder überschreiten 10MB und können nicht hochgeladen werden.'
     ],
 
+    // Aktionen
+    'actions' => [
+        'delete' => 'Utility Löschen',
+        'confirm_delete_title' => 'Löschung Bestätigen',
+        'confirm_delete_message' => 'Sind Sie sicher, dass Sie diese Utility löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.',
+        'delete_success' => 'Utility erfolgreich gelöscht!',
+        'delete_error' => 'Fehler beim Löschen der Utility.',
+    ],
+
     // JavaScript-Nachrichten
     'js' => [
         'drag_drop_text' => 'Bilder hierher ziehen oder klicken zum Auswählen',

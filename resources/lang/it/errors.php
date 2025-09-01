@@ -82,7 +82,7 @@ return [
 
     ],
     'the_input_must_be_a_string' => 'Il valore deve essere una stringa.',
-    'forbidden_term_warning' =>"
+    'forbidden_term_warning' => "
         <div style=\"text-align: left;\">
             <p>Gentile Utente,</p>
             </br>
@@ -97,7 +97,7 @@ return [
         </div>",
 
     'letter_of_the_rules_of_conduct' =>
-        '<a href=\":link\" style=\"color: blue; text-decoration: underline;\">
+    '<a href=\":link\" style=\"color: blue; text-decoration: underline;\">
             Consulta la pagina delle norme della comunità.
         </a>.',
 
@@ -153,5 +153,6 @@ return [
         'insufficient_balance' => 'Saldo insufficiente',
         'eco_nft_not_found' => 'EcoNFT non trovato',
         'no_traits_found' => 'Nessun trait trovato',
+        'egi_not_found' => 'L\'EGI con ID :id non è stato trovato. Potrebbe essere stato eliminato o non esistere.',
     ],
 ];

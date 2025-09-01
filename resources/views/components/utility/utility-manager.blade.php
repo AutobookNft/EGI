@@ -88,14 +88,6 @@
                 </label>
                 @endforeach
             </div>
-
-            {{-- Opzione "Nessuna Utility" --}}
-            @if($utility)
-            <label class="flex items-center mt-4 cursor-pointer">
-                <input type="radio" name="type" value="" class="mr-2">
-                <span class="text-sm text-gray-600">{{ __('utility.types.remove') }}</span>
-            </label>
-            @endif
         </div>
 
         {{-- Sezione Dettagli Base (sempre visibile se type selezionato) --}}
@@ -384,11 +376,25 @@
                 {{ __('label.cancel') }}
             </button>
 
-            <button type="submit"
-                    id="utility-submit-btn"
-                    class="px-6 py-2 text-white rounded-lg bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:bg-gray-400 disabled:cursor-not-allowed">
-                {{ $utility ? __('label.update') : __('label.save') }} {{ __('utility.title') }}
-            </button>
+            <div class="flex items-center gap-3">
+                @if($utility)
+                    <button type="button"
+                            id="delete-utility-btn"
+                            onclick="confirmDeleteUtility()"
+                            class="px-4 py-2 text-white transition-all duration-200 bg-red-600 border border-red-700 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500">
+                        <span class="flex items-center gap-2">
+                            <span>🗑️</span>
+                            {{ __('utility.actions.delete') }}
+                        </span>
+                    </button>
+                @endif
+
+                <button type="submit"
+                        id="utility-submit-btn"
+                        class="px-6 py-2 text-white rounded-lg bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:bg-gray-400 disabled:cursor-not-allowed">
+                    {{ $utility ? __('label.update') : __('label.save') }} {{ __('utility.title') }}
+                </button>
+            </div>
         </div>
 
         {{-- Toast Container --}}
@@ -409,7 +415,13 @@ const utilityTranslations = {
     selectType: '{{ __('utility.validation.select_type') }}',
     titleRequired: '{{ __('utility.validation.title_required') }}',
     weightRequiredPhysical: '{{ __('utility.validation.weight_required_physical') }}',
-    correctErrors: '{{ __('utility.validation.correct_errors') }}'
+    correctErrors: '{{ __('utility.validation.correct_errors') }}',
+    confirmDeleteTitle: '{{ __('utility.actions.confirm_delete_title') }}',
+    confirmDeleteMessage: '{{ __('utility.actions.confirm_delete_message') }}',
+    confirmDeleteButton: '{{ __('utility.actions.delete') }}',
+    cancelButton: '{{ __('traits.cancel') }}',
+    deleteSuccess: '{{ __('utility.actions.delete_success') }}',
+    deleteError: '{{ __('utility.actions.delete_error') }}'
 };
 
 // Variabili globali
@@ -840,6 +852,80 @@ document.addEventListener('DOMContentLoaded', function() {
         toggleUtilitySections('{{ $utility->type }}');
     @endif
 });
+
+// Funzione per confermare ed eliminare l'utility
+async function confirmDeleteUtility() {
+    // Usa SweetAlert2 per conferma
+    const result = await Swal.fire({
+        title: utilityTranslations.confirmDeleteTitle,
+        text: utilityTranslations.confirmDeleteMessage,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: utilityTranslations.confirmDeleteButton || 'Elimina',
+        cancelButtonText: utilityTranslations.cancelButton || 'Annulla',
+        reverseButtons: true
+    });
+
+    if (result.isConfirmed) {
+        deleteUtility();
+    }
+}
+
+// Funzione per eliminare l'utility
+async function deleteUtility() {
+    const deleteBtn = document.getElementById('delete-utility-btn');
+    const originalText = deleteBtn.innerHTML;
+
+    try {
+        // Feedback visivo
+        deleteBtn.innerHTML = '<span class="flex items-center gap-2"><span>⏳</span>Eliminazione...</span>';
+        deleteBtn.disabled = true;
+
+        // Costruisci l'URL della route
+        const utilityId = {{ $utility ? $utility->id : 'null' }};
+        if (!utilityId) {
+            throw new Error('ID utility non disponibile');
+        }
+
+        const deleteUrl = `{{ url('/utilities') }}/${utilityId}`;
+
+        // Creiamo un URL assoluto garantito
+        const absoluteUrl = new URL(deleteUrl, window.location.origin);
+
+        // Chiamata AJAX per eliminare
+        const response = await fetch(absoluteUrl.href, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+        });
+
+        if (response.ok) {
+            // Successo
+            ToastManager.success(utilityTranslations.deleteSuccess, '✅ Eliminazione Completata', 3000);
+
+            // Reindirizza dopo un breve delay
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+        } else {
+            throw new Error('Errore HTTP: ' + response.status);
+        }
+
+    } catch (error) {
+        console.error('Error deleting utility:', error);
+
+        // Ripristina il bottone
+        deleteBtn.innerHTML = originalText;
+        deleteBtn.disabled = false;
+
+        // Mostra errore
+        ToastManager.error(utilityTranslations.deleteError, '❌ Errore', 5000);
+    }
+}
 </script>
 
 {{-- CSS per Toast Notifications --}}

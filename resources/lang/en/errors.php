@@ -105,7 +105,7 @@ return [
         </div>",
 
     'letter_of_the_rules_of_conduct' =>
-        '<a href=\":link\" style=\"color: blue; text-decoration: underline;\">
+    '<a href=\":link\" style=\"color: blue; text-decoration: underline;\">
             See the community rules page.
         </a>.',
 
@@ -156,5 +156,6 @@ return [
         'insufficient_balance' => 'Insufficient balance',
         'eco_nft_not_found' => 'EcoNFT not found',
         'no_traits_found' => 'No traits found',
+        'egi_not_found' => 'EGI with ID :id was not found. It may have been deleted or does not exist.',
     ],
 ];

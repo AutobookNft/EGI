@@ -129,6 +129,15 @@ return [
         'correct_errors' => 'Per favore correggi i seguenti errori:'
     ],
 
+    // Azioni
+    'actions' => [
+        'delete' => 'Elimina Utility',
+        'confirm_delete_title' => 'Conferma Eliminazione',
+        'confirm_delete_message' => 'Sei sicuro di voler eliminare questa utility? Questa azione non può essere annullata.',
+        'delete_success' => 'Utility eliminata con successo!',
+        'delete_error' => 'Errore durante l\'eliminazione della utility.',
+    ],
+
     // JavaScript messages
     'js' => [
         'drag_drop_text' => 'Trascina qui le immagini o clicca per selezionare',

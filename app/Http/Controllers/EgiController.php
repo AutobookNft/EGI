@@ -90,7 +90,13 @@ class EgiController extends Controller {
                 'reservationCertificates',
                 'traits.category',
                 'traits.traitType'
-            ])->findOrFail($id);
+            ])->find($id);
+
+            // Check if EGI exists
+            if (!$egi) {
+                return redirect()->route('collections.index')
+                    ->with('error', __('errors.egi_not_found', ['id' => $id]));
+            }
 
             // Log page access (developers only - English)
             $this->logger->info('EGI_PAGE_ACCESS: EGI detail page accessed successfully', [
