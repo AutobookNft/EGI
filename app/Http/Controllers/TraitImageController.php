@@ -63,6 +63,11 @@ class TraitImageController extends Controller {
             return response()->json([
                 'success' => true,
                 'message' => __('traits.upload_success'),
+                'image_url' => $trait->image_url,
+                'thumbnail_url' => $trait->thumbnail_url,
+                'modal_image_url' => $trait->modal_image_url,
+                'image_alt_text' => $trait->image_alt_text,
+                'image_description' => $trait->image_description,
                 'data' => [
                     'image_url' => $trait->image_url,
                     'thumbnail_url' => $trait->thumbnail_url,

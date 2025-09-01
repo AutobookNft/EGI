@@ -298,81 +298,15 @@ class TraitImageManager {
 
         // Single event delegation for all trait cards
         document.addEventListener('click', (e) => {
-            // Cerca il trait card più vicino
-            const traitCard = e.target.closest('[data-trait-id]');
-            
-            // Verifica che non sia il pulsante rimuovi
-            const isRemoveButton = e.target.closest('.trait-remove');
-            
-            if (traitCard && !isRemoveButton) {
+            const traitCard = e.target.closest('[data-trait-id]:not(.trait-remove):not(.trait-remove *)');
+
+            if (traitCard && !e.target.closest('.trait-remove')) {
                 console.log('TraitImageManager: Trait card clicked:', traitCard.dataset.traitId);
-                console.log('TraitImageManager: Click target:', e.target);
-                console.log('TraitImageManager: Trait card element:', traitCard);
-                
                 e.preventDefault();
                 e.stopPropagation();
                 this.openImageModal(traitCard.dataset.traitId);
             }
         }, { passive: false });
-
-        // Forza il setup delle carte esistenti con stili corretti
-        this.setupCardStyles();
-    }
-
-    setupCardStyles() {
-        // Funzione per applicare stili alle carte
-        const applyCardStyles = () => {
-            const traitCards = document.querySelectorAll('[data-trait-id]');
-            console.log('TraitImageManager: Applying styles to', traitCards.length, 'trait cards');
-
-            traitCards.forEach(card => {
-                // Solo se non è il pulsante rimuovi
-                if (!card.closest('.trait-remove')) {
-                    card.style.cursor = 'pointer';
-                    card.style.pointerEvents = 'auto';
-                    card.style.position = 'relative';
-                    card.style.zIndex = '1';
-                    
-                    console.log('TraitImageManager: Styled card for trait:', card.dataset.traitId);
-                }
-            });
-        };
-
-        // Applica immediatamente
-        applyCardStyles();
-        
-        // Applica con ritardi per catturare contenuto dinamico
-        setTimeout(applyCardStyles, 100);
-        setTimeout(applyCardStyles, 500);
-        setTimeout(applyCardStyles, 1000);
-        
-        // Osserva le modifiche al DOM
-        const observer = new MutationObserver((mutations) => {
-            let hasNewCards = false;
-            mutations.forEach((mutation) => {
-                if (mutation.type === 'childList') {
-                    mutation.addedNodes.forEach((node) => {
-                        if (node.nodeType === 1) { // Element node
-                            if (node.hasAttribute && node.hasAttribute('data-trait-id')) {
-                                hasNewCards = true;
-                            } else if (node.querySelector && node.querySelector('[data-trait-id]')) {
-                                hasNewCards = true;
-                            }
-                        }
-                    });
-                }
-            });
-            
-            if (hasNewCards) {
-                console.log('TraitImageManager: New cards detected, applying styles...');
-                setTimeout(applyCardStyles, 10);
-            }
-        });
-
-        observer.observe(document.body, {
-            childList: true,
-            subtree: true
-        });
     }
 
     openImageModal(traitId) {

@@ -110,9 +110,10 @@
                             </div>
 
                             <div class="flex space-x-2">
+                                {{-- Upload automatico, pulsante nascosto --}}
                                 <button type="submit"
                                         id="trait-upload-btn-{{ $trait->id }}"
-                                        class="flex-1 px-4 py-2 text-sm font-medium text-white transition-colors bg-blue-600 rounded-md hover:bg-blue-700">
+                                        class="hidden flex-1 px-4 py-2 text-sm font-medium text-white transition-colors bg-blue-600 rounded-md hover:bg-blue-700">
                                     {{ __('label.trait_modal.upload_image') }}
                                 </button>
 
