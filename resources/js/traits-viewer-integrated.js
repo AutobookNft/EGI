@@ -98,7 +98,8 @@ const TraitsViewer = {
         container: null,
         categories: [],
         availableTypes: [],
-        isInitialized: false
+        isInitialized: false,
+        listenersAttached: false
     },
 
     init(egiId, canEdit = false, categories = [], availableTypes = []) {
@@ -127,9 +128,14 @@ const TraitsViewer = {
     },
 
     setupEventListeners() {
+        if (this.state.listenersAttached) {
+            console.log('TraitsViewer: Event listeners already attached, skipping...');
+            return;
+        }
+
         console.log('TraitsViewer: Setting up event listeners');
 
-        // Remove trait buttons
+        // Remove trait buttons - usa event delegation una sola volta
         document.addEventListener('click', (e) => {
             if (e.target.matches('.trait-remove')) {
                 e.preventDefault();
@@ -141,16 +147,25 @@ const TraitsViewer = {
             }
         });
 
-        // Add trait button
+        // Add trait button - listener specifico sul pulsante
         const addButton = this.state.container?.querySelector('.add-trait-btn');
         if (addButton) {
-            addButton.addEventListener('click', (e) => {
-                e.preventDefault();
-                this.openModal();
-            });
+            // Rimuovi listener esistenti prima di aggiungerne uno nuovo
+            addButton.removeEventListener('click', this.handleAddTraitClick);
+            addButton.addEventListener('click', this.handleAddTraitClick.bind(this));
+            console.log('TraitsViewer: Add trait button listener attached');
         }
 
+        this.state.listenersAttached = true;
         console.log('TraitsViewer: Event listeners setup complete');
+    },
+
+    // Funzione separata per gestire il click del pulsante add trait
+    handleAddTraitClick(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('TraitsViewer: Add trait button clicked');
+        TraitsViewer.openModal();
     },
 
     async removeTrait(traitId) {
@@ -788,27 +803,35 @@ class TraitImageManager {
 // INITIALIZATION
 // =============================================================================
 
-// Auto-initialize when DOM is ready
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('Integrated Traits System: DOM loaded, initializing...');
+// Prevent multiple initializations
+if (!window.IntegratedTraitsSystemInitialized) {
+    // Auto-initialize when DOM is ready
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Integrated Traits System: DOM loaded, initializing...');
 
-    // Initialize TraitsViewer
-    const container = document.querySelector('[id^="traits-viewer-"]');
-    if (container) {
-        const egiId = container.getAttribute('data-egi-id');
-        if (egiId) {
-            TraitsViewer.init(egiId);
+        // Initialize TraitsViewer
+        const container = document.querySelector('[id^="traits-viewer-"]');
+        if (container) {
+            const egiId = container.getAttribute('data-egi-id');
+            if (egiId) {
+                TraitsViewer.init(egiId);
+            }
         }
-    }
 
-    // Initialize TraitImageManager (single instance)
-    if (!window.TraitImageManagerInstance) {
-        window.TraitImageManagerInstance = new TraitImageManager();
-        console.log('TraitImageManager initialized');
-    }
+        // Initialize TraitImageManager (single instance)
+        if (!window.TraitImageManagerInstance) {
+            window.TraitImageManagerInstance = new TraitImageManager();
+            console.log('TraitImageManager initialized');
+        }
 
-    console.log('Integrated Traits System: Initialization complete');
-});
+        console.log('Integrated Traits System: Initialization complete');
+    });
+
+    // Mark as initialized
+    window.IntegratedTraitsSystemInitialized = true;
+} else {
+    console.log('Integrated Traits System: Already initialized, skipping...');
+}
 
 // Export for global access
 window.TraitsViewer = TraitsViewer;
