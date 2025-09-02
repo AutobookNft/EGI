@@ -33,6 +33,7 @@ class TraitDefaultsSeeder extends Seeder {
             ['name' => 'Sustainability', 'slug' => 'sustainability', 'icon' => '🌿', 'color' => '#2D5016', 'is_system' => true, 'sort_order' => 5],
             ['name' => 'Cultural', 'slug' => 'cultural', 'icon' => '🏛️', 'color' => '#8B4513', 'is_system' => true, 'sort_order' => 6],
             ['name' => 'Minecraft', 'slug' => 'minecraft', 'icon' => '🟫', 'color' => '#4A7C59', 'is_system' => true, 'sort_order' => 7],
+            ['name' => 'Categories', 'slug' => 'categories', 'icon' => '📋', 'color' => '#6366F1', 'is_system' => true, 'sort_order' => 8],
         ];
 
         foreach ($categories as $category) {
@@ -53,6 +54,33 @@ class TraitDefaultsSeeder extends Seeder {
         $traitTypes = [];
 
         switch ($categorySlug) {
+            
+            case 'categories':
+                $traitTypes = [
+                    [
+                    'name' => 'Categories',
+                    'slug' => 'categories',
+                    'display_type' => 'text',
+                    'allowed_values' => json_encode([
+                        'Games',
+                        'Business',
+                        'Art',
+                        'Music',
+                        'Sports',
+                        'Education',
+                        'Science',
+                        'Technology',
+                        'Collectibles',
+                        'Fantasy',
+                        'History',
+                        'Nature',
+                        'Fashion',
+                        'Food',
+                        'Travel'
+                        ])
+                    ],
+                ];
+                break;
             case 'materials':
                 $traitTypes = [
                     [

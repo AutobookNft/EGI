@@ -122,23 +122,38 @@ $shouldShow = $hasTraits || $canEdit;
                             <span class="trait-category-badge" style="background-color: {{ $categoryColor }}">
                                 {{ $categoryIcon }}
                             </span>
-                            @if($trait->image_url)
+                                                        @if($trait->getFirstMedia('trait_images'))
+                                @php
+                                    $media = $trait->getFirstMedia('trait_images');
+                                    $thumbnailUrl = $media ? $media->getUrl('thumb') : null;
+                                @endphp
                                 <span class="trait-image-indicator"
                                       style="position: absolute;
-                                             top: 0.25rem;
-                                             left: 0.25rem;
+                                             top: 1.5rem;
+                                             left: 1.8rem;
                                              background: rgba(34, 197, 94, 0.9);
                                              color: white;
                                              border-radius: 50%;
-                                             width: 1.25rem;
-                                             height: 1.25rem;
+                                             width: 2rem;
+                                             height: 2rem;
                                              display: flex;
                                              align-items: center;
                                              justify-content: center;
                                              font-size: 0.75rem;
-                                             z-index: 100;"
+                                             z-index: 100;
+                                             overflow: hidden;
+                                             border: 2px solid rgba(34, 197, 94, 0.9);"
                                       title="{{ __('traits.has_image') }}">
-                                    📷
+                                    @if($thumbnailUrl)
+                                        <img src="{{ $thumbnailUrl }}" 
+                                             alt="Trait image" 
+                                             style="width: 100%; 
+                                                    height: 100%; 
+                                                    object-fit: cover; 
+                                                    border-radius: 50%;">
+                                    @else
+                                        📷
+                                    @endif
                                 </span>
                             @endif
                         </div>
