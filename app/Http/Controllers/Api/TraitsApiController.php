@@ -491,6 +491,112 @@ class TraitsApiController extends Controller {
     }
 
     /**
+     * Add a single trait to an EGI
+     *
+     * @param Request $request
+     * @param int $egiId
+     * @return JsonResponse
+     */
+    public function addSingleTrait(Request $request, $egiId): JsonResponse {
+        try {
+            // Check authentication
+            if (!FegiAuth::check()) {
+                return $this->errorManager->handle('TRAITS_UNAUTHORIZED_ACCESS', [
+                    'egi_id' => $egiId,
+                    'action' => 'add_single_trait'
+                ]);
+            }
+
+            $user = FegiAuth::user();
+
+            // Log operation start (developers only - English)
+            $this->logger->info('TRAITS_API: Add single trait operation started', [
+                'egi_id' => $egiId,
+                'user_id' => $user->id,
+                'auth_type' => FegiAuth::getAuthType()
+            ]);
+
+            // Verify EGI exists and check ownership
+            $egi = Egi::findOrFail($egiId);
+
+            if ($egi->user_id !== $user->id) {
+                return $this->errorManager->handle('TRAITS_UNAUTHORIZED_ACCESS', [
+                    'user_id' => $user->id,
+                    'egi_id' => $egiId,
+                    'owner_id' => $egi->user_id,
+                    'action' => 'add_single_trait'
+                ]);
+            }
+
+            // Check if EGI is published (cannot modify)
+            if ($egi->is_published) {
+                return $this->errorManager->handle('TRAITS_EGI_PUBLISHED', [
+                    'user_id' => $user->id,
+                    'egi_id' => $egiId,
+                    'action' => 'add_single_trait'
+                ]);
+            }
+
+            // Validate required fields
+            $request->validate([
+                'trait_category_id' => 'required|exists:trait_categories,id',
+                'trait_type_id' => 'required|exists:trait_types,id',
+                'value' => 'required|string|max:255'
+            ]);
+
+            // Add single trait in transaction
+            $newTrait = DB::transaction(function () use ($egiId, $request) {
+                $maxSortOrder = EgiTrait::where('egi_id', $egiId)->max('sort_order') ?? -1;
+
+                return EgiTrait::create([
+                    'egi_id' => $egiId,
+                    'category_id' => $request->input('trait_category_id'),
+                    'trait_type_id' => $request->input('trait_type_id'),
+                    'value' => $request->input('value'),
+                    'display_value' => $request->input('display_value', $request->input('value')),
+                    'sort_order' => $maxSortOrder + 1,
+                    'is_locked' => false
+                ]);
+            });
+
+            // Update rarity percentages for collection
+            $this->updateRarityPercentages($egi->collection_id);
+
+            // Log successful operation (developers only - English)
+            $this->logger->info('TRAITS_API: Single trait added successfully', [
+                'user_id' => $user->id,
+                'egi_id' => $egiId,
+                'collection_id' => $egi->collection_id,
+                'trait_id' => $newTrait->id
+            ]);
+
+            // GDPR audit log
+            $this->auditLogService->logUserAction(
+                $user,
+                'egi_trait_added',
+                [
+                    'egi_id' => $egiId,
+                    'collection_id' => $egi->collection_id,
+                    'trait_id' => $newTrait->id
+                ],
+                GdprActivityCategory::CONTENT_MODIFICATION
+            );
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Trait added successfully',
+                'trait' => $newTrait
+            ]);
+        } catch (\Exception $e) {
+            return $this->errorManager->handle('TRAITS_ADD_SINGLE_FAILED', [
+                'user_id' => FegiAuth::id(),
+                'egi_id' => $egiId,
+                'error' => $e->getMessage()
+            ], $e);
+        }
+    }
+
+    /**
      * Generate IPFS metadata for EGI traits
      *
      * @param int $egiId

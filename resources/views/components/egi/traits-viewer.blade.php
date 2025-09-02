@@ -29,6 +29,7 @@ $shouldShow = $hasTraits || $canEdit;
      id="traits-viewer-{{ $egi ? $egi->id : 'new' }}"
      data-egi-id="{{ $egi ? $egi->id : '' }}"
      data-can-edit="{{ $canEdit ? 'true' : 'false' }}"
+     data-can-edit="{{ $canEdit ? 'true' : 'false' }}"
      style="position: relative !important; order: -1 !important; margin-top: 0 !important; margin-bottom: 2rem !important;">
 
     {{-- Header con counter --}}
@@ -49,7 +50,6 @@ $shouldShow = $hasTraits || $canEdit;
         <div class="traits-editor-controls" style="margin-bottom: 1rem;">
             <button type="button"
                     class="add-trait-btn"
-                    onclick="TraitsViewer.openModal()"
                     style="background: transparent !important;
                            border: 2px dashed #d4af37 !important;
                            color: #d4af37 !important;

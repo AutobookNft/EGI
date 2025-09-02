@@ -98,9 +98,11 @@ const TraitsViewer = {
         container: null,
         categories: [],
         availableTypes: [],
-        isInitialized: false,
-        listenersAttached: false
+        isInitialized: false
     },
+
+    // Flag globale per event delegation
+    globalListenersAttached: false,
 
     init(egiId, canEdit = false, categories = [], availableTypes = []) {
         if (this.state.isInitialized) {
@@ -128,44 +130,37 @@ const TraitsViewer = {
     },
 
     setupEventListeners() {
-        if (this.state.listenersAttached) {
-            console.log('TraitsViewer: Event listeners already attached, skipping...');
-            return;
-        }
-
-        console.log('TraitsViewer: Setting up event listeners');
-
-        // Remove trait buttons - usa event delegation una sola volta
-        document.addEventListener('click', (e) => {
-            if (e.target.matches('.trait-remove')) {
-                e.preventDefault();
-                e.stopPropagation();
-                const traitId = e.target.dataset.traitId;
-                if (traitId) {
-                    this.removeTrait(traitId);
+        // Event delegation globale - solo UNA volta per tutto il sistema
+        if (!TraitsViewer.globalListenersAttached) {
+            console.log('TraitsViewer: Setting up global event delegation...');
+            
+            document.addEventListener('click', (e) => {
+                // Gestisci pulsante "remove trait"
+                if (e.target.matches('.trait-remove')) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const traitId = e.target.dataset.traitId;
+                    if (traitId) {
+                        TraitsViewer.removeTrait(traitId);
+                    }
+                    return;
                 }
-            }
-        });
 
-        // Add trait button - listener specifico sul pulsante
-        const addButton = this.state.container?.querySelector('.add-trait-btn');
-        if (addButton) {
-            // Rimuovi listener esistenti prima di aggiungerne uno nuovo
-            addButton.removeEventListener('click', this.handleAddTraitClick);
-            addButton.addEventListener('click', this.handleAddTraitClick.bind(this));
-            console.log('TraitsViewer: Add trait button listener attached');
+                // Gestisci pulsante "add trait"
+                if (e.target.matches('.add-trait-btn') || e.target.closest('.add-trait-btn')) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('TraitsViewer: Add trait button clicked via delegation');
+                    TraitsViewer.openModal();
+                    return;
+                }
+            });
+
+            TraitsViewer.globalListenersAttached = true;
+            console.log('TraitsViewer: Global event delegation setup complete');
+        } else {
+            console.log('TraitsViewer: Global event delegation already attached, skipping...');
         }
-
-        this.state.listenersAttached = true;
-        console.log('TraitsViewer: Event listeners setup complete');
-    },
-
-    // Funzione separata per gestire il click del pulsante add trait
-    handleAddTraitClick(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        console.log('TraitsViewer: Add trait button clicked');
-        TraitsViewer.openModal();
     },
 
     async removeTrait(traitId) {
@@ -217,16 +212,30 @@ const TraitsViewer = {
 
     async openModal() {
         console.log('TraitsViewer: Opening modal for adding traits');
+        console.log('TraitsViewer: canEdit state:', this.state.canEdit);
+        console.log('TraitsViewer: Looking for modal #trait-modal-viewer');
 
-        if (!this.state.canEdit) {
-            ToastManager.warning(window.TraitsTranslations.creator_only_modify);
+        // Trova il container del traits viewer per determinare canEdit
+        const viewerContainer = document.querySelector('[id^="traits-viewer-"]');
+        const canEdit = viewerContainer ? viewerContainer.dataset.canEdit === 'true' : this.state.canEdit;
+        
+        console.log('TraitsViewer: Determined canEdit:', canEdit);
+
+        if (!canEdit) {
+            console.log('TraitsViewer: Cannot edit, showing warning');
+            ToastManager.warning(window.TraitsTranslations.creator_only_modify || 'Solo il creatore può modificare i traits');
             return;
         }
 
         const modal = document.querySelector('#trait-modal-viewer');
+        console.log('TraitsViewer: Modal element found:', !!modal);
+        
         if (modal) {
+            console.log('TraitsViewer: Setting up modal display...');
+            
             // Move modal to body to avoid parent positioning issues
             if (modal.parentNode !== document.body) {
+                console.log('TraitsViewer: Moving modal to body');
                 document.body.appendChild(modal);
             }
 
@@ -248,7 +257,10 @@ const TraitsViewer = {
 
             // Ensure modal content is visible
             const modalContent = modal.querySelector('.modal-content');
+            console.log('TraitsViewer: Modal content found:', !!modalContent);
+            
             if (modalContent) {
+                console.log('TraitsViewer: Applying modal content styles');
                 modalContent.style.cssText = `
                     display: block !important;
                     visibility: visible !important;
@@ -269,8 +281,421 @@ const TraitsViewer = {
             }
 
             console.log('TraitsViewer: Modal opened successfully');
+            ToastManager.success('Modal aperto!', 'Debug');
+            
+            // Carica le categorie dopo aver aperto il modal
+            this.loadCategories();
         } else {
-            console.error('TraitsViewer: Modal not found');
+            console.error('TraitsViewer: Modal not found with selector #trait-modal-viewer');
+            ToastManager.error('Modal non trovato!', 'Errore');
+        }
+    },
+
+    closeModal() {
+        console.log('TraitsViewer: Closing modal');
+        const modal = document.querySelector('#trait-modal-viewer');
+        if (modal) {
+            modal.style.display = 'none';
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+    },
+
+    async loadCategories() {
+        console.log('TraitsViewer: Loading categories...');
+        try {
+            const response = await fetch('/traits/categories');
+            const data = await response.json();
+            
+            if (data.success) {
+                this.renderCategories(data.categories);
+            } else {
+                console.error('TraitsViewer: Error loading categories:', data.message);
+                ToastManager.error('Errore nel caricamento delle categorie', 'Errore');
+            }
+        } catch (error) {
+            console.error('TraitsViewer: Network error loading categories:', error);
+            ToastManager.error('Errore di rete nel caricamento delle categorie', 'Errore');
+        }
+    },
+
+    renderCategories(categories) {
+        console.log('TraitsViewer: Rendering categories:', categories);
+        const container = document.getElementById('category-selector-viewer');
+        if (!container) {
+            console.error('TraitsViewer: Category container not found');
+            return;
+        }
+
+        container.innerHTML = '';
+        categories.forEach(category => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'category-btn';
+            button.dataset.categoryId = category.id;
+            button.innerHTML = `${category.icon} ${category.name}`;
+            button.onclick = () => this.onCategorySelected(category.id);
+            container.appendChild(button);
+        });
+    },
+
+    async onCategorySelected(categoryId) {
+        console.log('TraitsViewer: Category selected:', categoryId);
+        
+        // Highlight selected category
+        const categoryBtns = document.querySelectorAll('#category-selector-viewer .category-btn');
+        categoryBtns.forEach(btn => btn.classList.remove('active'));
+        const selectedBtn = document.querySelector(`#category-selector-viewer .category-btn[data-category-id="${categoryId}"]`);
+        if (selectedBtn) {
+            selectedBtn.classList.add('active');
+        }
+
+        // Reset subsequent selections
+        const typeSelect = document.getElementById('trait-type-select-viewer');
+        if (typeSelect) {
+            typeSelect.value = '';
+        }
+        
+        const valueGroup = document.getElementById('value-selector-group-viewer');
+        if (valueGroup) {
+            valueGroup.style.display = 'none';
+        }
+        
+        const preview = document.getElementById('trait-preview-viewer');
+        if (preview) {
+            preview.style.display = 'none';
+        }
+
+        // Load trait types for this category
+        await this.loadTraitTypes(categoryId);
+        
+        // Show trait type selector
+        const typeGroup = document.getElementById('type-selector-group-viewer');
+        if (typeGroup) {
+            typeGroup.style.display = 'block';
+        }
+        
+        // Validate form
+        this.validateForm();
+    },
+
+    async loadTraitTypes(categoryId) {
+        console.log('TraitsViewer: Loading trait types for category:', categoryId);
+        try {
+            const response = await fetch(`/traits/categories/${categoryId}/types`);
+            const data = await response.json();
+            
+            if (data.success) {
+                this.renderTraitTypes(data.types);
+            } else {
+                console.error('TraitsViewer: Error loading trait types:', data.message);
+                ToastManager.error('Errore nel caricamento dei tipi di trait', 'Errore');
+            }
+        } catch (error) {
+            console.error('TraitsViewer: Network error loading trait types:', error);
+            ToastManager.error('Errore di rete nel caricamento dei tipi', 'Errore');
+        }
+    },
+
+    renderTraitTypes(types) {
+        console.log('TraitsViewer: Rendering trait types:', types);
+        const select = document.getElementById('trait-type-select-viewer');
+        if (!select) {
+            console.error('TraitsViewer: Trait type select not found');
+            return;
+        }
+
+        // Store types data for later use
+        this.state.availableTypes = types;
+
+        select.innerHTML = '<option value="">Scegli un tipo...</option>';
+        types.forEach(type => {
+            console.log('TraitsViewer: Processing type:', type);
+            console.log('- type.input_type:', type.input_type);
+            console.log('- type.has_fixed_values:', type.has_fixed_values);
+            console.log('- type.allowed_values:', type.allowed_values);
+            
+            const option = document.createElement('option');
+            option.value = type.id;
+            option.textContent = type.name;
+            option.dataset.inputType = type.input_type || 'text';
+            
+            // Determina has_fixed_values: true se esiste allowed_values con elementi
+            const hasAllowedValues = type.allowed_values && Array.isArray(type.allowed_values) && type.allowed_values.length > 0;
+            option.dataset.hasFixedValues = hasAllowedValues ? 'true' : 'false';
+            
+            console.log('- hasAllowedValues:', hasAllowedValues);
+            console.log('- Setting hasFixedValues to:', option.dataset.hasFixedValues);
+            
+            // Store allowed_values as JSON string in dataset
+            if (type.allowed_values) {
+                option.dataset.allowedValues = JSON.stringify(type.allowed_values);
+                console.log('- Stored allowed_values:', option.dataset.allowedValues);
+            } else {
+                console.log('- No allowed_values to store');
+            }
+            
+            console.log('- Final dataset:', option.dataset);
+            select.appendChild(option);
+        });
+    },
+
+    onTypeSelected() {
+        console.log('TraitsViewer: Trait type selected');
+        const select = document.getElementById('trait-type-select-viewer');
+        if (!select || !select.value) {
+            console.log('TraitsViewer: No select or no value selected');
+            return;
+        }
+
+        const selectedOption = select.options[select.selectedIndex];
+        const inputType = selectedOption.dataset.inputType;
+        const hasFixedValues = selectedOption.dataset.hasFixedValues;
+        
+        console.log('TraitsViewer: Selected option details:');
+        console.log('- Option text:', selectedOption.textContent);
+        console.log('- Option value:', selectedOption.value);
+        console.log('- inputType (raw):', inputType);
+        console.log('- hasFixedValues (raw):', hasFixedValues);
+        console.log('- hasFixedValues === "true":', hasFixedValues === 'true');
+        console.log('- hasFixedValues === true:', hasFixedValues === true);
+        console.log('- typeof hasFixedValues:', typeof hasFixedValues);
+
+        // Show value input section
+        const valueGroup = document.getElementById('value-selector-group-viewer');
+        if (valueGroup) {
+            valueGroup.style.display = 'block';
+        }
+
+        // Convert string to boolean
+        const hasFixedValuesBool = hasFixedValues === 'true' || hasFixedValues === true;
+        console.log('TraitsViewer: hasFixedValuesBool:', hasFixedValuesBool);
+
+        // Render appropriate input based on type
+        this.renderValueInput(inputType, hasFixedValuesBool, select.value);
+    },
+
+    renderValueInput(inputType, hasFixedValues, typeId) {
+        console.log('TraitsViewer: Rendering value input:', { inputType, hasFixedValues, typeId });
+        const container = document.getElementById('value-input-container-viewer');
+        if (!container) {
+            console.error('TraitsViewer: Value input container not found');
+            return;
+        }
+
+        console.log('TraitsViewer: hasFixedValues =', hasFixedValues);
+
+        if (hasFixedValues) {
+            // Get allowed values from the stored type data
+            const select = document.getElementById('trait-type-select-viewer');
+            const selectedOption = select.options[select.selectedIndex];
+            console.log('TraitsViewer: Selected option:', selectedOption);
+            console.log('TraitsViewer: Selected option dataset:', selectedOption.dataset);
+            
+            const allowedValuesJson = selectedOption.dataset.allowedValues;
+            console.log('TraitsViewer: allowedValuesJson =', allowedValuesJson);
+            
+            if (allowedValuesJson && allowedValuesJson !== 'undefined') {
+                try {
+                    const allowedValues = JSON.parse(allowedValuesJson);
+                    console.log('TraitsViewer: Parsed allowed values:', allowedValues);
+                    this.renderFixedValuesSelect(allowedValues, container);
+                } catch (error) {
+                    console.error('TraitsViewer: Error parsing allowed values:', error);
+                    console.log('TraitsViewer: Falling back to text input due to parse error');
+                    this.renderTextInput(container);
+                }
+            } else {
+                console.log('TraitsViewer: No allowed values found in dataset, using text input');
+                this.renderTextInput(container);
+            }
+        } else {
+            console.log('TraitsViewer: No fixed values, rendering dynamic input');
+            // Create input based on type
+            this.renderDynamicInput(inputType, container);
+        }
+    },
+
+    renderFixedValuesSelect(allowedValues, container) {
+        console.log('TraitsViewer: Rendering fixed values select:', allowedValues);
+        let html = '<select class="form-select" id="trait-value-select-viewer" onchange="TraitsViewer.updatePreview()"><option value="">Scegli un valore...</option>';
+        
+        // allowedValues might be an array or an object
+        if (Array.isArray(allowedValues)) {
+            allowedValues.forEach(value => {
+                if (typeof value === 'string') {
+                    html += `<option value="${value}">${value}</option>`;
+                } else if (typeof value === 'object' && value.value && value.label) {
+                    html += `<option value="${value.value}">${value.label}</option>`;
+                }
+            });
+        } else if (typeof allowedValues === 'object') {
+            Object.entries(allowedValues).forEach(([key, value]) => {
+                html += `<option value="${key}">${value}</option>`;
+            });
+        }
+        
+        html += '</select>';
+        container.innerHTML = html;
+    },
+
+    renderDynamicInput(inputType, container) {
+        let input;
+        switch (inputType) {
+            case 'number':
+                input = '<input type="number" class="form-input" id="trait-value-input-viewer" placeholder="Inserisci valore numerico..." oninput="TraitsViewer.updatePreview()">';
+                break;
+            case 'text':
+            default:
+                input = '<input type="text" class="form-input" id="trait-value-input-viewer" placeholder="Inserisci valore..." oninput="TraitsViewer.updatePreview()">';
+                break;
+        }
+        container.innerHTML = input;
+    },
+
+    renderTextInput(container) {
+        container.innerHTML = '<input type="text" class="form-input" id="trait-value-input-viewer" placeholder="Inserisci valore..." oninput="TraitsViewer.updatePreview()">';
+    },
+
+    updatePreview() {
+        console.log('TraitsViewer: Updating preview');
+        
+        // Get selected type
+        const typeSelect = document.getElementById('trait-type-select-viewer');
+        if (!typeSelect || !typeSelect.value) {
+            this.validateForm();
+            return;
+        }
+        
+        const typeName = typeSelect.options[typeSelect.selectedIndex].textContent;
+        
+        // Get selected/entered value
+        let value = '';
+        const valueSelect = document.getElementById('trait-value-select-viewer');
+        const valueInput = document.getElementById('trait-value-input-viewer');
+        
+        if (valueSelect) {
+            value = valueSelect.options[valueSelect.selectedIndex]?.textContent || '';
+        } else if (valueInput) {
+            value = valueInput.value;
+        }
+        
+        // Update preview
+        const preview = document.getElementById('trait-preview-viewer');
+        if (preview && typeName && value) {
+            const previewType = preview.querySelector('.preview-type');
+            const previewValue = preview.querySelector('.preview-value');
+            
+            if (previewType) previewType.textContent = typeName;
+            if (previewValue) previewValue.textContent = value;
+            
+            preview.style.display = 'block';
+        } else if (preview) {
+            preview.style.display = 'none';
+        }
+        
+        // Validate form to enable/disable submit button
+        this.validateForm();
+    },
+
+    validateForm() {
+        const categorySelected = document.querySelector('#category-selector-viewer .category-btn.active');
+        const typeSelect = document.getElementById('trait-type-select-viewer');
+        const valueSelect = document.getElementById('trait-value-select-viewer');
+        const valueInput = document.getElementById('trait-value-input-viewer');
+        const confirmBtn = document.getElementById('confirm-trait-btn-viewer');
+        
+        let isValid = false;
+        
+        // Check if category is selected
+        if (categorySelected && typeSelect && typeSelect.value) {
+            // Check if value is provided
+            if (valueSelect && valueSelect.value) {
+                isValid = true;
+            } else if (valueInput && valueInput.value.trim()) {
+                isValid = true;
+            }
+        }
+        
+        console.log('TraitsViewer: Form validation:', {
+            categorySelected: !!categorySelected,
+            typeSelected: typeSelect ? !!typeSelect.value : false,
+            valueProvided: (valueSelect && valueSelect.value) || (valueInput && valueInput.value.trim()),
+            isValid
+        });
+        
+        // Enable/disable confirm button
+        if (confirmBtn) {
+            confirmBtn.disabled = !isValid;
+            if (isValid) {
+                confirmBtn.classList.remove('disabled');
+            } else {
+                confirmBtn.classList.add('disabled');
+            }
+        }
+        
+        return isValid;
+    },
+
+    async addTrait() {
+        console.log('TraitsViewer: Adding trait...');
+        
+        if (!this.validateForm()) {
+            ToastManager.error('Compila tutti i campi richiesti', 'Validazione');
+            return;
+        }
+        
+        // Recupera l'ID dell'EGI dal DOM
+        const traitsContainer = document.querySelector('[data-egi-id]');
+        const egiId = traitsContainer ? traitsContainer.getAttribute('data-egi-id') : null;
+        
+        if (!egiId) {
+            console.error('TraitsViewer: EGI ID not found');
+            ToastManager.error('ID EGI non trovato', 'Errore');
+            return;
+        }
+        
+        // Collect form data
+        const categoryBtn = document.querySelector('#category-selector-viewer .category-btn.active');
+        const typeSelect = document.getElementById('trait-type-select-viewer');
+        const valueSelect = document.getElementById('trait-value-select-viewer');
+        const valueInput = document.getElementById('trait-value-input-viewer');
+        
+        const categoryId = categoryBtn.dataset.categoryId;
+        const typeId = typeSelect.value;
+        const value = valueSelect ? valueSelect.value : valueInput.value.trim();
+        
+        console.log('TraitsViewer: Trait data:', { egiId, categoryId, typeId, value });
+        
+        try {
+            const response = await fetch(`/egis/${egiId}/traits/add-single`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    trait_category_id: categoryId,
+                    trait_type_id: typeId,
+                    value: value
+                })
+            });
+            
+            const data = await response.json();
+            console.log('TraitsViewer: Add trait response:', data);
+            
+            if (data.success) {
+                ToastManager.success('Trait aggiunto con successo!', 'Successo');
+                this.closeModal();
+                // Refresh the traits display
+                location.reload(); // Simple reload for now
+            } else {
+                ToastManager.error(data.message || 'Errore durante l\'aggiunta del trait', 'Errore');
+            }
+        } catch (error) {
+            console.error('TraitsViewer: Error adding trait:', error);
+            ToastManager.error('Errore di rete durante l\'aggiunta', 'Errore');
         }
     }
 };

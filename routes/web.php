@@ -303,6 +303,8 @@ Route::group(['prefix' => 'egis'], function () {
             ->name('egis.traits.save');
         Route::post('/{egi}/traits/add', [TraitsApiController::class, 'addEgiTraits'])
             ->name('egis.traits.add');
+        Route::post('/{egi}/traits/add-single', [TraitsApiController::class, 'addSingleTrait'])
+            ->name('egis.traits.add-single');
         Route::delete('/{egi}/traits/{trait}', [TraitsApiController::class, 'deleteTrait'])
             ->name('egis.traits.delete');
     });
