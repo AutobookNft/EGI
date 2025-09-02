@@ -171,7 +171,7 @@ const TraitsViewer = {
         console.log('TraitsViewer: Removing trait:', traitId);
 
         try {
-            const response = await fetch(`/traits/${traitId}`, {
+            const response = await fetch(`/egis/${this.state.egiId}/traits/${traitId}`, {
                 method: 'DELETE',
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
