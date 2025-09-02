@@ -300,15 +300,15 @@ class TraitImageManager {
         document.addEventListener('click', (e) => {
             // Cerca il trait card più vicino
             const traitCard = e.target.closest('[data-trait-id]');
-            
+
             // Verifica che non sia il pulsante rimuovi
             const isRemoveButton = e.target.closest('.trait-remove');
-            
+
             if (traitCard && !isRemoveButton) {
                 console.log('TraitImageManager: Trait card clicked:', traitCard.dataset.traitId);
                 console.log('TraitImageManager: Click target:', e.target);
                 console.log('TraitImageManager: Trait card element:', traitCard);
-                
+
                 e.preventDefault();
                 e.stopPropagation();
                 this.openImageModal(traitCard.dataset.traitId);
@@ -332,7 +332,7 @@ class TraitImageManager {
                     card.style.pointerEvents = 'auto';
                     card.style.position = 'relative';
                     card.style.zIndex = '1';
-                    
+
                     console.log('TraitImageManager: Styled card for trait:', card.dataset.traitId);
                 }
             });
@@ -340,12 +340,12 @@ class TraitImageManager {
 
         // Applica immediatamente
         applyCardStyles();
-        
+
         // Applica con ritardi per catturare contenuto dinamico
         setTimeout(applyCardStyles, 100);
         setTimeout(applyCardStyles, 500);
         setTimeout(applyCardStyles, 1000);
-        
+
         // Osserva le modifiche al DOM
         const observer = new MutationObserver((mutations) => {
             let hasNewCards = false;
@@ -362,7 +362,7 @@ class TraitImageManager {
                     });
                 }
             });
-            
+
             if (hasNewCards) {
                 console.log('TraitImageManager: New cards detected, applying styles...');
                 setTimeout(applyCardStyles, 10);
@@ -482,22 +482,61 @@ class TraitImageManager {
     }
 
     setupImageDeletion() {
+        console.log('TraitImageManager: Setting up image deletion listeners...');
+
         document.addEventListener('click', (e) => {
             if (e.target.matches('button[id^="trait-delete-image-btn-"]')) {
                 e.preventDefault();
-                const traitId = e.target.dataset.traitId;
+                e.stopPropagation();
+
+                // Estrai il trait ID dall'ID del pulsante
+                const buttonId = e.target.id;
+                const traitId = buttonId.replace('trait-delete-image-btn-', '');
+
+                console.log('TraitImageManager: Delete button clicked for trait:', traitId);
                 this.handleImageDeletion(traitId);
             }
         });
     }
 
     async handleImageDeletion(traitId) {
-        if (!confirm(this.translations.confirm_delete || 'Are you sure you want to delete this image?')) {
+        console.log('TraitImageManager: Handling image deletion for trait:', traitId);
+
+        // Conferma eliminazione con SweetAlert2
+        let confirmed = false;
+
+        if (window.Swal) {
+            const result = await Swal.fire({
+                title: 'Conferma eliminazione',
+                text: 'Sei sicuro di voler eliminare questa immagine? L\'azione non può essere annullata.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sì, elimina!',
+                cancelButtonText: 'Annulla',
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#6b7280',
+                customClass: {
+                    confirmButton: 'btn btn-danger',
+                    cancelButton: 'btn btn-secondary'
+                },
+                buttonsStyling: false
+            });
+
+            confirmed = result.isConfirmed;
+        } else {
+            // Fallback per browsers senza SweetAlert2
+            confirmed = confirm(this.translations.confirm_delete || 'Are you sure you want to delete this image?');
+        }
+
+        if (!confirmed) {
+            console.log('TraitImageManager: Image deletion cancelled by user');
             return;
         }
 
         try {
-            const response = await fetch(`/traits/image/delete/${traitId}`, {
+            ToastManager.info('Eliminazione in corso...', 'Elimina');
+
+            const response = await fetch(`/traits/image/${traitId}`, {
                 method: 'DELETE',
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -506,16 +545,46 @@ class TraitImageManager {
             });
 
             const data = await response.json();
+            console.log('TraitImageManager: Delete response:', data);
 
             if (data.success) {
                 ToastManager.success('Immagine eliminata con successo!', 'Successo');
                 this.clearImageDisplay(traitId);
+
+                // Mostra anche conferma con SweetAlert2 se disponibile
+                if (window.Swal) {
+                    Swal.fire({
+                        title: 'Eliminata!',
+                        text: 'L\'immagine è stata eliminata con successo.',
+                        icon: 'success',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                }
             } else {
                 ToastManager.error(data.message || 'Errore durante l\'eliminazione', 'Errore');
+
+                if (window.Swal) {
+                    Swal.fire({
+                        title: 'Errore!',
+                        text: data.message || 'Si è verificato un errore durante l\'eliminazione.',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
+                }
             }
         } catch (error) {
             console.error('TraitImageManager: Delete error:', error);
             ToastManager.error('Errore durante l\'eliminazione', 'Errore');
+
+            if (window.Swal) {
+                Swal.fire({
+                    title: 'Errore di rete!',
+                    text: 'Si è verificato un errore di connessione. Riprova più tardi.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            }
         }
     }
 
@@ -644,14 +713,31 @@ class TraitImageManager {
                 console.log('TraitImageManager: Image display updated');
             }
 
+            // Mostra il pulsante di eliminazione dopo caricamento riuscito
             if (deleteBtn) {
-                deleteBtn.style.display = 'block';
+                deleteBtn.style.display = 'inline-block';
+                deleteBtn.classList.remove('hidden');
                 console.log('TraitImageManager: Delete button shown');
+            } else {
+                // Se il pulsante non esiste, crealo dinamicamente
+                console.log('TraitImageManager: Creating delete button dynamically');
+                const formDiv = modal.querySelector('.flex.space-x-2');
+                if (formDiv) {
+                    const newDeleteBtn = document.createElement('button');
+                    newDeleteBtn.type = 'button';
+                    newDeleteBtn.id = `trait-delete-image-btn-${traitId}`;
+                    newDeleteBtn.className = 'px-4 py-2 text-sm font-medium text-white transition-colors bg-red-600 rounded-md hover:bg-red-700';
+                    newDeleteBtn.textContent = 'Elimina Immagine';
+                    formDiv.appendChild(newDeleteBtn);
+                    console.log('TraitImageManager: Delete button created dynamically');
+                }
             }
+        } else {
+            console.error('TraitImageManager: Modal not found for trait:', traitId);
         }
-    }
+    }    clearImageDisplay(traitId) {
+        console.log('TraitImageManager: Clearing image display for trait:', traitId);
 
-    clearImageDisplay(traitId) {
         const modal = document.querySelector(`#trait-modal-${traitId}`);
         if (modal) {
             const previewContainer = modal.querySelector(`#trait-image-preview-${traitId}`);
@@ -660,15 +746,25 @@ class TraitImageManager {
             if (previewContainer) {
                 previewContainer.innerHTML = `
                     <div class="py-8 text-gray-500 text-center">
-                        <i class="fas fa-image text-4xl mb-2"></i>
-                        <p>Nessuna immagine caricata</p>
+                        <svg class="w-16 h-16 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        <p class="mt-2">Nessuna immagine caricata</p>
+                        <p class="mt-1 text-xs text-gray-400">Trascina e rilascia i file qui</p>
+                        <p class="mt-1 text-xs text-gray-400">Supportati: JPG, PNG, WebP, GIF</p>
                     </div>
                 `;
+                console.log('TraitImageManager: Preview cleared');
             }
 
+            // Nascondi o rimuovi il pulsante di eliminazione
             if (deleteBtn) {
                 deleteBtn.style.display = 'none';
+                deleteBtn.classList.add('hidden');
+                console.log('TraitImageManager: Delete button hidden');
             }
+        } else {
+            console.error('TraitImageManager: Modal not found for trait:', traitId);
         }
     }
 
