@@ -356,5 +356,148 @@ return [
         'Prototype' => 'Prototype',
         'Monoprint' => 'Monotype',
         'Artist Proof' => 'Épreuve d\'Artiste',
+
+        // Accessory Type values
+        'Bag' => 'Sac',
+        'Backpack' => 'Sac à Dos',
+        'Tote' => 'Cabas',
+        'Crossbody' => 'Sac Bandoulière',
+        'Shoulder Bag' => 'Sac à Épaule',
+        'Clutch' => 'Pochette',
+        'Wallet' => 'Portefeuille',
+        'Card Holder' => 'Porte-Cartes',
+        'Coin Purse' => 'Porte-Monnaie',
+        'Belt' => 'Ceinture',
+        'Keychain' => 'Porte-Clés',
+        'Phone Case' => 'Étui Téléphone',
+        'Laptop Sleeve' => 'Housse Ordinateur',
+        'Watch Strap' => 'Bracelet Montre',
+        'Sunglasses' => 'Lunettes de Soleil',
+        'Glasses Frame' => 'Monture Lunettes',
+        'Hat' => 'Chapeau',
+        'Scarf' => 'Écharpe',
+        'Gloves' => 'Gants',
+        'Umbrella' => 'Parapluie',
+
+        // Accessory Component values
+        'Buckle' => 'Boucle',
+        'Zipper' => 'Fermeture Éclair',
+        'Magnetic Snap' => 'Fermeture Magnétique',
+        'Clasp' => 'Fermoir',
+        'Twist Lock' => 'Fermeture à Torsion',
+        'Padlock' => 'Cadenas',
+        'Hook' => 'Crochet',
+        'Tie' => 'Lacet',
+        'Velcro' => 'Velcro',
+        'Button' => 'Bouton',
+        'Stud' => 'Clou',
+        'Rivet' => 'Rivet',
+        'Chain' => 'Chaîne',
+        'Keyring' => 'Anneau Porte-Clés',
+        'Coin Pocket' => 'Poche Monnaie',
+        'Card Slot' => 'Fente Carte',
+        'Money Clip' => 'Pince à Billets',
+        'Tie Clip' => 'Pince à Cravate',
+        'Cufflink' => 'Bouton de Manchette',
+        'Brooch' => 'Broche',
+        'Charm' => 'Breloque',
+        'Pendant' => 'Pendentif',
+
+        // Closure Type values
+        'Drawstring' => 'Cordon',
+        'Hook-and-Loop' => 'Crochet et Boucle',
+        'Toggle' => 'Bouton-Bascule',
+        'Clip' => 'Clip',
+        'Open Top' => 'Ouvert en Haut',
+
+        // Hardware Finish values
+        'Gold' => 'Or',
+        'Rose Gold' => 'Or Rose',
+        'Silver' => 'Argent',
+        'Nickel' => 'Nickel',
+        'Gunmetal' => 'Gunmetal',
+        'Brass' => 'Laiton',
+        'Black' => 'Noir',
+        'Matte' => 'Mat',
+        'Polished' => 'Poli',
+        'Antique' => 'Antique',
+
+        // Strap Type values
+        'Adjustable' => 'Réglable',
+        'Detachable' => 'Détachable',
+        'Leather' => 'Cuir',
+        'Fabric' => 'Tissu',
+        'Top Handle' => 'Poignée Supérieure',
+        'Backpack Straps' => 'Bretelles Sac à Dos',
+        'Wristlet' => 'Bracelet Poignet',
+
+        // Pocket Layout values
+        'None' => 'Aucune',
+        'Card Slots' => 'Fentes Cartes',
+        'Internal Zipper Pocket' => 'Poche Interne Zippée',
+        'External Pocket' => 'Poche Externe',
+        'Slip Pocket' => 'Poche Ouverte',
+        'Pen Loop' => 'Boucle Stylo',
+        'Multi-Compartment' => 'Multi-Compartiments',
+
+        // Size Category values
+        'Mini' => 'Mini',
+        'Small' => 'Petit',
+        'Medium' => 'Moyen',
+        'Large' => 'Grand',
+        'Oversized' => 'Surdimensionné',
+
+        // Texture values
+        'Smooth' => 'Lisse',
+        'Pebbled' => 'Grainé',
+        'Saffiano' => 'Saffiano',
+        'Quilted' => 'Matelassé',
+        'Woven' => 'Tissé',
+        'Embossed' => 'Gaufré',
+        'Croc-Embossed' => 'Effet Crocodile',
+        'Suede Finish' => 'Finition Daim',
+        'Matelassé' => 'Matelassé',
+
+        // Lining values
+        'Unlined' => 'Sans Doublure',
+        'Cotton Lining' => 'Doublure Coton',
+        'Microfiber Lining' => 'Doublure Microfibre',
+        'Suede Lining' => 'Doublure Daim',
+        'Satin Lining' => 'Doublure Satin',
+
+        // Occasion values
+        'Everyday' => 'Quotidien',
+        'Business' => 'Affaires',
+        'Travel' => 'Voyage',
+        'Evening' => 'Soirée',
+        'Formal' => 'Formel',
+        'Outdoor' => 'Extérieur',
+        'Sport' => 'Sport',
+
+        // Compatibility values
+        'Phone' => 'Téléphone',
+        'Tablet' => 'Tablette',
+        'Laptop 13"' => 'Ordinateur 13"',
+        'Laptop 14"' => 'Ordinateur 14"',
+        'Laptop 15"' => 'Ordinateur 15"',
+        'Laptop 16"' => 'Ordinateur 16"',
+        'Passport' => 'Passeport',
+
+        // Water Protection values
+        'Splash Resistant' => 'Résistant aux Éclaboussures',
+        'Water Resistant' => 'Résistant à l\'Eau',
+        'Waterproof' => 'Imperméable',
+
+        // Personalization values
+        'Monogram' => 'Monogramme',
+        'Engraving' => 'Gravure',
+        'Custom Patch' => 'Patch Personnalisé',
+        'Custom Color' => 'Couleur Personnalisée',
+
+        // Structure values
+        'Soft' => 'Souple',
+        'Semi-Structured' => 'Semi-Structuré',
+        'Structured' => 'Structuré',
+        'Padded' => 'Rembourré',
     ],
 ];

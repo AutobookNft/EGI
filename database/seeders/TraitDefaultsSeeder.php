@@ -27,6 +27,7 @@ class TraitDefaultsSeeder extends Seeder {
         // Default Categories with colors
         $categories = [
             ['name' => 'Materials', 'slug' => 'materials', 'icon' => '📦', 'color' => '#D4A574', 'is_system' => true, 'sort_order' => 1],
+            ['name' => 'Accessories',   'slug' => 'accessories',   'icon' => '👜', 'color' => '#B56576', 'is_system' => true, 'sort_order' => 7],
             ['name' => 'Visual', 'slug' => 'visual', 'icon' => '🎨', 'color' => '#8E44AD', 'is_system' => true, 'sort_order' => 2],
             ['name' => 'Dimensions', 'slug' => 'dimensions', 'icon' => '📐', 'color' => '#1B365D', 'is_system' => true, 'sort_order' => 3],
             ['name' => 'Special', 'slug' => 'special', 'icon' => '⚡', 'color' => '#E67E22', 'is_system' => true, 'sort_order' => 4],
@@ -271,6 +272,156 @@ class TraitDefaultsSeeder extends Seeder {
                 ];
                 break;
 
+            case 'accessories':
+                $traitTypes = [
+                    [
+                        'name' => 'Accessory Type',
+                        'slug' => 'accessory-type',
+                        'display_type' => 'text',
+                        'allowed_values' => json_encode([
+                            'Bag','Backpack','Tote','Crossbody','Shoulder Bag','Clutch',
+                            'Wallet','Card Holder','Coin Purse','Belt','Keychain',
+                            'Phone Case','Laptop Sleeve','Watch Strap',
+                            'Sunglasses','Glasses Frame','Hat','Scarf','Gloves','Umbrella'
+                        ]),
+                    ],
+                    [
+                        'name' => 'Accessory Component',
+                        'slug' => 'accessory-component',
+                        'display_type' => 'text',
+                        'allowed_values' => json_encode([
+                            'Buckle',
+                            'Zipper',
+                            'Magnetic Snap',
+                            'Clasp',
+                            'Twist Lock',
+                            'Padlock',
+                            'Hook',
+                            'Tie',
+                            'Velcro',
+                            'Button',
+                            'Stud',
+                            'Rivet',
+                            'Chain',
+                            'Keyring',
+                            'Coin Pocket',
+                            'Card Slot',
+                            'Money Clip',
+                            'Tie Clip',
+                            'Cufflink',
+                            'Brooch',
+                            'Charm',
+                            'Pendant'
+                        ])
+                    ],
+
+                    [
+                        'name' => 'Closure Type',
+                        'slug' => 'closure-type',
+                        'display_type' => 'text',
+                        'allowed_values' => json_encode([
+                            'Zipper','Magnetic Snap','Buckle','Drawstring','Button',
+                            'Hook-and-Loop','Toggle','Twist Lock','Clip','Tie','Open Top'
+                        ]),
+                    ],
+                    [
+                        'name' => 'Hardware Finish',
+                        'slug' => 'hardware-finish',
+                        'display_type' => 'text',
+                        'allowed_values' => json_encode([
+                            'Gold','Rose Gold','Silver','Nickel','Gunmetal','Brass',
+                            'Black','Matte','Polished','Antique'
+                        ]),
+                    ],
+                    [
+                        'name' => 'Strap Type',
+                        'slug' => 'strap-type',
+                        'display_type' => 'text',
+                        'allowed_values' => json_encode([
+                            'Adjustable','Detachable','Chain','Leather','Fabric',
+                            'Crossbody','Shoulder','Wristlet','Top Handle','Backpack Straps'
+                        ]),
+                    ],
+                    [
+                        'name' => 'Pocket Layout',
+                        'slug' => 'pocket-layout',
+                        'display_type' => 'text',
+                        'allowed_values' => json_encode([
+                            'None','Card Slots','Coin Pocket','Internal Zipper Pocket',
+                            'External Pocket','Slip Pocket','Pen Loop','Multi-Compartment'
+                        ]),
+                    ],
+                    [
+                        'name' => 'Size Category',
+                        'slug' => 'size-category',
+                        'display_type' => 'text',
+                        'allowed_values' => json_encode([
+                            'Mini','Small','Medium','Large','Oversized'
+                        ]),
+                    ],
+                    [
+                        'name' => 'Texture',
+                        'slug' => 'texture',
+                        'display_type' => 'text',
+                        'allowed_values' => json_encode([
+                            'Smooth','Pebbled','Saffiano','Quilted','Woven',
+                            'Embossed','Croc-Embossed','Suede Finish','Matelassé'
+                        ]),
+                    ],
+                    [
+                        'name' => 'Lining',
+                        'slug' => 'lining',
+                        'display_type' => 'text',
+                        'allowed_values' => json_encode([
+                            'Unlined','Cotton Lining','Microfiber Lining',
+                            'Suede Lining','Satin Lining'
+                        ]),
+                    ],
+                    [
+                        'name' => 'Occasion',
+                        'slug' => 'occasion',
+                        'display_type' => 'text',
+                        'allowed_values' => json_encode([
+                            'Everyday','Business','Travel','Evening','Formal',
+                            'Outdoor','Sport'
+                        ]),
+                    ],
+                    [
+                        'name' => 'Compatibility',
+                        'slug' => 'compatibility',
+                        'display_type' => 'text',
+                        'allowed_values' => json_encode([
+                            'Phone','Tablet','Laptop 13"','Laptop 14"','Laptop 15"','Laptop 16"','Passport'
+                        ]),
+                    ],
+                    [
+                        'name' => 'Water Protection',
+                        'slug' => 'water-protection',
+                        'display_type' => 'text',
+                        'allowed_values' => json_encode([
+                            'None','Splash Resistant','Water Resistant','Waterproof'
+                        ]),
+                    ],
+                    [
+                        'name' => 'Personalization',
+                        'slug' => 'personalization',
+                        'display_type' => 'text',
+                        'allowed_values' => json_encode([
+                            'None','Monogram','Engraving','Custom Patch','Custom Color'
+                        ]),
+                    ],
+                    [
+                        'name' => 'Structure',
+                        'slug' => 'structure',
+                        'display_type' => 'text',
+                        'allowed_values' => json_encode([
+                            'Soft','Semi-Structured','Structured','Padded'
+                        ]),
+                    ],
+                ];
+                break;
+
+            
             case 'visual':
                 $traitTypes = [
                     [

@@ -38,6 +38,22 @@ return [
         'Thematic Focus' => 'Enfoque Temático',
         'Artisan Technique' => 'Técnica Artesanal',
         'Edition Type' => 'Tipo de Edición',
+        
+        // Accessories types
+        'Accessory Type' => 'Tipo de Accesorio',
+        'Accessory Component' => 'Componente Accesorio',
+        'Closure Type' => 'Tipo de Cierre',
+        'Hardware Finish' => 'Acabado Herrajes',
+        'Strap Type' => 'Tipo de Correa',
+        'Pocket Layout' => 'Distribución Bolsillos',
+        'Size Category' => 'Categoría Tamaño',
+        'Texture' => 'Textura',
+        'Lining' => 'Forro',
+        'Occasion' => 'Ocasión',
+        'Compatibility' => 'Compatibilidad',
+        'Water Protection' => 'Protección Agua',
+        'Personalization' => 'Personalización',
+        'Structure' => 'Estructura',
     ],
 
     // Values
@@ -330,5 +346,148 @@ return [
         'Prototype' => 'Prototipo',
         'Monoprint' => 'Monotipo',
         'Artist Proof' => 'Prueba de Artista',
+
+        // Accessory Type values
+        'Bag' => 'Bolso',
+        'Backpack' => 'Mochila',
+        'Tote' => 'Bolso Tote',
+        'Crossbody' => 'Bandolera',
+        'Shoulder Bag' => 'Bolso de Hombro',
+        'Clutch' => 'Clutch',
+        'Wallet' => 'Cartera',
+        'Card Holder' => 'Tarjetero',
+        'Coin Purse' => 'Monedero',
+        'Belt' => 'Cinturón',
+        'Keychain' => 'Llavero',
+        'Phone Case' => 'Funda Teléfono',
+        'Laptop Sleeve' => 'Funda Portátil',
+        'Watch Strap' => 'Correa Reloj',
+        'Sunglasses' => 'Gafas de Sol',
+        'Glasses Frame' => 'Montura Gafas',
+        'Hat' => 'Sombrero',
+        'Scarf' => 'Bufanda',
+        'Gloves' => 'Guantes',
+        'Umbrella' => 'Paraguas',
+
+        // Accessory Component values
+        'Buckle' => 'Hebilla',
+        'Zipper' => 'Cremallera',
+        'Magnetic Snap' => 'Cierre Magnético',
+        'Clasp' => 'Broche',
+        'Twist Lock' => 'Cierre de Torsión',
+        'Padlock' => 'Candado',
+        'Hook' => 'Gancho',
+        'Tie' => 'Cordón',
+        'Velcro' => 'Velcro',
+        'Button' => 'Botón',
+        'Stud' => 'Tachón',
+        'Rivet' => 'Remache',
+        'Chain' => 'Cadena',
+        'Keyring' => 'Aro Llavero',
+        'Coin Pocket' => 'Bolsillo Monedas',
+        'Card Slot' => 'Ranura Tarjeta',
+        'Money Clip' => 'Clip Dinero',
+        'Tie Clip' => 'Alfiler Corbata',
+        'Cufflink' => 'Gemelo',
+        'Brooch' => 'Broche',
+        'Charm' => 'Dije',
+        'Pendant' => 'Colgante',
+
+        // Closure Type values
+        'Drawstring' => 'Cordón',
+        'Hook-and-Loop' => 'Gancho y Bucle',
+        'Toggle' => 'Botón Palanca',
+        'Clip' => 'Clip',
+        'Open Top' => 'Abierto Arriba',
+
+        // Hardware Finish values
+        'Gold' => 'Oro',
+        'Rose Gold' => 'Oro Rosa',
+        'Silver' => 'Plata',
+        'Nickel' => 'Níquel',
+        'Gunmetal' => 'Gunmetal',
+        'Brass' => 'Latón',
+        'Black' => 'Negro',
+        'Matte' => 'Mate',
+        'Polished' => 'Pulido',
+        'Antique' => 'Antiguo',
+
+        // Strap Type values
+        'Adjustable' => 'Ajustable',
+        'Detachable' => 'Desmontable',
+        'Leather' => 'Cuero',
+        'Fabric' => 'Tela',
+        'Top Handle' => 'Asa Superior',
+        'Backpack Straps' => 'Tirantes Mochila',
+        'Wristlet' => 'Pulsera Muñeca',
+
+        // Pocket Layout values
+        'None' => 'Ninguno',
+        'Card Slots' => 'Ranuras Tarjetas',
+        'Internal Zipper Pocket' => 'Bolsillo Interno Cremallera',
+        'External Pocket' => 'Bolsillo Externo',
+        'Slip Pocket' => 'Bolsillo Abierto',
+        'Pen Loop' => 'Bucle Bolígrafo',
+        'Multi-Compartment' => 'Multi-Compartimento',
+
+        // Size Category values
+        'Mini' => 'Mini',
+        'Small' => 'Pequeño',
+        'Medium' => 'Mediano',
+        'Large' => 'Grande',
+        'Oversized' => 'Extragrande',
+
+        // Texture values
+        'Smooth' => 'Liso',
+        'Pebbled' => 'Granulado',
+        'Saffiano' => 'Saffiano',
+        'Quilted' => 'Acolchado',
+        'Woven' => 'Tejido',
+        'Embossed' => 'Grabado',
+        'Croc-Embossed' => 'Efecto Cocodrilo',
+        'Suede Finish' => 'Acabado Ante',
+        'Matelassé' => 'Matelassé',
+
+        // Lining values
+        'Unlined' => 'Sin Forro',
+        'Cotton Lining' => 'Forro Algodón',
+        'Microfiber Lining' => 'Forro Microfibra',
+        'Suede Lining' => 'Forro Ante',
+        'Satin Lining' => 'Forro Satén',
+
+        // Occasion values
+        'Everyday' => 'Diario',
+        'Business' => 'Negocios',
+        'Travel' => 'Viaje',
+        'Evening' => 'Noche',
+        'Formal' => 'Formal',
+        'Outdoor' => 'Exterior',
+        'Sport' => 'Deporte',
+
+        // Compatibility values
+        'Phone' => 'Teléfono',
+        'Tablet' => 'Tableta',
+        'Laptop 13"' => 'Portátil 13"',
+        'Laptop 14"' => 'Portátil 14"',
+        'Laptop 15"' => 'Portátil 15"',
+        'Laptop 16"' => 'Portátil 16"',
+        'Passport' => 'Pasaporte',
+
+        // Water Protection values
+        'Splash Resistant' => 'Resistente Salpicaduras',
+        'Water Resistant' => 'Resistente al Agua',
+        'Waterproof' => 'Impermeable',
+
+        // Personalization values
+        'Monogram' => 'Monograma',
+        'Engraving' => 'Grabado',
+        'Custom Patch' => 'Parche Personalizado',
+        'Custom Color' => 'Color Personalizado',
+
+        // Structure values
+        'Soft' => 'Suave',
+        'Semi-Structured' => 'Semi-Estructurado',
+        'Structured' => 'Estructurado',
+        'Padded' => 'Acolchado',
     ],
 ];
