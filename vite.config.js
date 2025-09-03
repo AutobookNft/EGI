@@ -62,7 +62,9 @@ export default defineConfig(({ mode }) => {
                     'resources/js/components/vanilla-desktop-menu.js',
                     'resources/js/collection-edit-modal.js', // Modal per editing collection metadata
                     'resources/js/traits-viewer-integrated.js', // Integrated traits viewer & image manager
-                    'public/js/collection-edit-modal.js'
+                    'public/js/collection-edit-modal.js',
+                    // Notifications system
+                    'resources/js/modules/notifications/responses/notification.js'
                 ],
                 refresh: [
                     'resources/**',
