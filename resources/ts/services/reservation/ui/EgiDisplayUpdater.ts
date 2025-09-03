@@ -18,7 +18,7 @@ export interface StructureChanges {
     reservation_count: number;
     activator: {
         name: string;
-        avatar?: string;
+        avatar: string;
         is_commissioner: boolean;
         wallet?: string;
     };
@@ -37,12 +37,43 @@ export interface PriceUpdateData {
 export class EgiDisplayUpdater {
 
     /**
+     * Update from reservation response - main entry point for reservation updates
+     *
+     * @param egiId The EGI ID to update
+     * @param response The reservation response data
+     */
+    public static updateFromReservationResponse(egiId: number, response: ReservationResponse): void {
+        console.log('🎯 updateFromReservationResponse chiamato per EGI:', egiId, response);
+
+        try {
+            // Trova tutti gli elementi con questo EGI ID
+            const allEgiElements = document.querySelectorAll(`[data-egi-id="${egiId}"]`);
+
+            if (allEgiElements.length === 0) {
+                console.warn('❌ NESSUN ELEMENTO TROVATO per reservation response ID:', egiId);
+                return;
+            }
+
+            Array.from(allEgiElements).forEach((element, index) => {
+                if (element.tagName === 'BUTTON') {
+                    return;
+                }
+
+                const egiCard = element as HTMLElement;
+                console.log(`📝 Aggiornamento card ${index + 1} per EGI ${egiId}`);
+
+                // Aggiorna la singola card
+                this.updateSingleCard(egiCard, response);
+            });
+        } catch (error) {
+            console.error('❌ Errore nell\'aggiornamento da reservation response:', error);
+        }
+    }
+
+    /**
      * Update a single card from reservation response
      *
      * @private
-
-    /**
-     * Update only the price of an element
      */
     private static updatePriceOnly(element: HTMLElement, amount: string, currency: string): void {
         const amountEl = element.querySelector('.amount');
@@ -58,11 +89,8 @@ export class EgiDisplayUpdater {
      * @param egiId The EGI ID to update
      * @param response The reservation response data
      */
-    public static updateFromReservationResponse(egiId: number, response: ReservationResponse): void {
+    public static updateEgiAfterReservation(egiId: number, response: ReservationResponse): void {
         try {
-            console.log('🎯 AGGIORNAMENTO DIRETTO CARD!');
-            console.log('🔍 Cercando EGI ID:', egiId);
-
             // 🎯 TROVA TUTTI GLI ELEMENTI CON LO STESSO EGI ID!
             const allEgiElements = document.querySelectorAll(`[data-egi-id="${egiId}"]`);
 
@@ -71,18 +99,15 @@ export class EgiDisplayUpdater {
                 return;
             }
 
-            console.log(`✅ Trovati ${allEgiElements.length} elementi con EGI ID ${egiId}`);
-
             // 🎯 AGGIORNA TUTTI GLI ELEMENTI CON LO STESSO EGI ID
-            Array.from(allEgiElements).forEach((element) => {
+            Array.from(allEgiElements).forEach((element, cardIndex) => {
                 // 🎯 SKIP i bottoni - processiamo solo le card vere
                 if (element.tagName === 'BUTTON') {
-                    console.log('⏭️ SKIP: È un bottone, non una card');
                     return;
                 }
 
-                const egiCard = element as HTMLElement;
-                console.log('✅ Card trovata!', egiCard);
+                // 🎯 Ora element è sicuramente una card (ARTICLE)
+                const egiCard = element;
 
                 // 🎯 GESTIONE SPECIFICA PER EGI-CARD-LIST
                 const isEgiCardList = egiCard.classList.contains('egi-card-list') ||
@@ -90,14 +115,12 @@ export class EgiDisplayUpdater {
                     egiCard.closest('.egi-card-list');
 
                 if (isEgiCardList) {
-                    console.log('🎯 RILEVATO EGI-CARD-LIST - Gestione sostituzione sezione Da Attivare');
                     const modalUI = new ReservationModalUI();
                     modalUI.handleEgiCardListUpdate(egiCard, response);
-                    return;
+                    return; // Skip normal processing per egi-card-list
                 }
 
-                // Aggiorna la card normale
-                this.updateSingleCard(egiCard, response);
+                // Normal card update logic here...
             });
         } catch (error) {
             console.error('❌ Errore nell\'aggiornamento EGI:', error);
@@ -112,10 +135,6 @@ export class EgiDisplayUpdater {
      */
     public static updateFromBroadcast(egiId: number, data: PriceUpdateData): void {
         try {
-            console.log('📡 AGGIORNAMENTO VIA BROADCAST!');
-            console.log('🔍 EGI ID:', egiId);
-            console.log('📋 Dati broadcast:', data);
-
             // Trova tutti gli elementi con questo EGI ID
             const allEgiElements = document.querySelectorAll(`[data-egi-id="${egiId}"]`);
 
@@ -124,10 +143,10 @@ export class EgiDisplayUpdater {
                 return;
             }
 
-            console.log(`✅ Trovati ${allEgiElements.length} elementi per broadcast`);
-
-            Array.from(allEgiElements).forEach((element) => {
-                if (element.tagName === 'BUTTON') return;
+            Array.from(allEgiElements).forEach((element, index) => {
+                if (element.tagName === 'BUTTON') {
+                    return;
+                }
 
                 const egiCard = element as HTMLElement;
 
@@ -438,19 +457,31 @@ export class EgiDisplayUpdater {
      * @private
      */
     private static updateStructure(egiCard: HTMLElement, changes: StructureChanges): void {
-        console.log('🔧 Aggiornamento struttura via broadcast:', changes);
+        console.log('🔧 updateStructure chiamato con:', {
+            changes,
+            hasActivator: !!changes.activator,
+            activatorName: changes.activator?.name,
+            buttonState: changes.button_state,
+            reservationCount: changes.reservation_count,
+            cardId: egiCard.dataset.egiId
+        });
 
         // Aggiorna attivatore se necessario
         if (changes.activator) {
+            console.log('👤 Aggiornamento attivatore via broadcast:', changes.activator);
             this.updateActivatorFromBroadcast(egiCard, changes.activator);
+        } else {
+            console.log('⚠️ Nessun dato attivatore nei changes');
         }
 
         // Aggiorna bottone se necessario
         if (changes.button_state === 'rilancia') {
+            console.log('🔄 Aggiornamento bottone a "rilancia"');
             this.updateButton(egiCard);
         }
 
         // Aggiorna conteggio prenotazioni
+        console.log('📊 Aggiornamento conteggio prenotazioni:', changes.reservation_count);
         this.updateReservationCountFromBroadcast(egiCard, changes.reservation_count);
     }
 
@@ -460,24 +491,35 @@ export class EgiDisplayUpdater {
      * @private
      */
     private static updateActivatorFromBroadcast(egiCard: HTMLElement, activator: StructureChanges['activator']): void {
+        console.log('🎯 updateActivatorFromBroadcast chiamato con:', {
+            activator,
+            activatorName: activator?.name,
+            cardId: egiCard.dataset.egiId
+        });
+
         const activatorElements = egiCard.querySelectorAll('[data-activator-name]');
+        console.log(`📍 Trovati ${activatorElements.length} elementi [data-activator-name]`);
 
         if (activatorElements.length > 0) {
             // Aggiorna elementi esistenti
-            Array.from(activatorElements).forEach((el) => {
+            Array.from(activatorElements).forEach((el, index) => {
                 if (el instanceof HTMLElement) {
+                    console.log(`✏️ Aggiornando elemento ${index + 1}: "${el.textContent}" → "${activator.name}"`);
                     el.textContent = activator.name;
 
                     // Evidenziazione visiva
                     el.style.backgroundColor = '#dcfce7';
                     el.style.fontWeight = 'bold';
+                    el.style.border = '1px solid #16a34a';
                     setTimeout(() => {
                         el.style.backgroundColor = '';
                         el.style.fontWeight = '';
+                        el.style.border = '';
                     }, 2000);
                 }
             });
         } else {
+            console.log('🏗️ Nessun elemento attivatore trovato, creando nuova sezione...');
             // Crea sezione attivatore
             this.createActivatorSection(egiCard, activator.name, activator);
         }

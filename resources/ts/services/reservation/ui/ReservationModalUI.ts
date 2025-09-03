@@ -9,7 +9,18 @@
  * @author GitHub Copilot for Fabio Cherici
  */
 
-import { ModalConfig, ValidationError } from '../types';
+// Local type definitions
+interface ModalConfig {
+    title: string;
+    content: string;
+    submitButtonText?: string;
+    cancelButtonText?: string;
+}
+
+interface ValidationError {
+    field: string;
+    message: string;
+}
 
 /**
  * UI component for reservation modal

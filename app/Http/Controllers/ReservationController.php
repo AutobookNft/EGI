@@ -56,18 +56,13 @@ class ReservationController extends Controller {
         $activatorData = [];
 
         if ($user) {
-            // Solo i commissioner mostrano nome reale
-            if ($user->usertype === 'commissioner') {
-                $displayName = $user->name ?? ($user->wallet ? substr($user->wallet, 0, 12) . '...' : 'Commissioner');
-            } else {
-                // Altri utenti mostrano sempre wallet troncato (o fallback se non c'è)
-                $displayName = $user->wallet ? substr($user->wallet, 0, 12) . '...' : 'Utente Anonimo';
-            }
+            // ✅ USA LA FUNZIONE HELPER PER CONSISTENZA
+            $formattedDisplay = formatActivatorDisplay($user);
 
             $activatorData = [
-                'name' => $displayName,
-                'avatar' => $user->profile_photo_url, // Gestisce automaticamente la privacy
-                'is_commissioner' => (bool)($user->usertype === 'commissioner'),
+                'name' => $formattedDisplay['name'],
+                'avatar' => $formattedDisplay['avatar'], // Ora gestito correttamente dalla helper
+                'is_commissioner' => $formattedDisplay['is_commissioner'],
                 'wallet' => $user->wallet ?? null
             ];
         } else {
