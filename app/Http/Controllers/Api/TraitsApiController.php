@@ -21,16 +21,6 @@ use Ultra\ErrorManager\Interfaces\ErrorManagerInterface;
  * @Oracode API Controller: EGI Traits System Management
  * 🎯 Purpose: Handle EGI traits CRUD operations with Ultra ecosystem integration
  * 🛡️ Privacy: Full GDPR compliance with audit logging and collection-based authorization
-        } catch (\Exception $e) {
-            return $this->errorManager->handle('EGI_TRAIT_DELETE_FAILED', [
-                'user_id' => FegiAuth::id(),
-                'egi_id' => $egiId,
-                'trait_id' => $traitId,
-                'error' => $e->getMessage()
-            ], $e);
-        }
-    }
-}e Logic: FegiAuth-based authorization + trait management + rarity calculations + UEM error handling
  *
  * @package App\Http\Controllers\Api
  * @author Padmin D. Curtis (AI Partner OS3.0-Compliant) for Fabio Cherici
@@ -80,6 +70,17 @@ class TraitsApiController extends Controller {
     }
 
     /**
+     * Helper method to translate trait values
+     *
+     * @param string $value
+     * @param string|null $locale
+     * @return string
+     */
+    private function translateTraitValue(string $value, ?string $locale = null): string {
+        return __('trait_elements.values.' . $value, [], $locale, $value);
+    }
+
+    /**
      * Get all available trait categories
      *
      * @param Request $request
@@ -117,6 +118,20 @@ class TraitsApiController extends Controller {
                 }
             );
 
+            // Add translations to categories
+            $categoriesWithTranslations = $categories->map(function ($category) {
+                return [
+                    'id' => $category->id,
+                    'name' => $category->name,
+                    'translated_name' => __('trait_elements.categories.' . $category->name, [], null, $category->name),
+                    'slug' => $category->slug,
+                    'icon' => $category->icon,
+                    'color' => $category->color,
+                    'is_system' => $category->is_system,
+                    'sort_order' => $category->sort_order,
+                ];
+            });
+
             $this->logger->info('TRAITS_API: Categories loaded successfully', [
                 'collection_id' => $collectionId,
                 'categories_count' => $categories->count(),
@@ -126,7 +141,7 @@ class TraitsApiController extends Controller {
 
             return response()->json([
                 'success' => true,
-                'categories' => $categories
+                'categories' => $categoriesWithTranslations
             ]);
         } catch (\Exception $e) {
             return $this->errorManager->handle('TRAITS_CATEGORIES_LOAD_FAILED', [
@@ -159,9 +174,26 @@ class TraitsApiController extends Controller {
             ->orderBy('name')
             ->get();
 
+        // Add translations to trait types
+        $typesWithTranslations = $types->map(function ($type) {
+            return [
+                'id' => $type->id,
+                'name' => $type->name,
+                'translated_name' => __('trait_elements.types.' . $type->name, [], null, $type->name),
+                'slug' => $type->slug,
+                'display_type' => $type->display_type,
+                'allowed_values' => $type->allowed_values,
+                'unit' => $type->unit,
+                'category_id' => $type->category_id,
+                'is_system' => $type->is_system,
+                'created_at' => $type->created_at,
+                'updated_at' => $type->updated_at,
+            ];
+        });
+
         return response()->json([
             'success' => true,
-            'types' => $types
+            'types' => $typesWithTranslations
         ]);
     }
 
@@ -183,9 +215,26 @@ class TraitsApiController extends Controller {
             ->orderBy('name')
             ->get();
 
+        // Add translations to trait types
+        $typesWithTranslations = $types->map(function ($type) {
+            return [
+                'id' => $type->id,
+                'name' => $type->name,
+                'translated_name' => __('trait_elements.types.' . $type->name, [], null, $type->name),
+                'slug' => $type->slug,
+                'display_type' => $type->display_type,
+                'allowed_values' => $type->allowed_values,
+                'unit' => $type->unit,
+                'category_id' => $type->category_id,
+                'is_system' => $type->is_system,
+                'created_at' => $type->created_at,
+                'updated_at' => $type->updated_at,
+            ];
+        });
+
         return response()->json([
             'success' => true,
-            'types' => $types
+            'types' => $typesWithTranslations
         ]);
     }
 
@@ -293,6 +342,12 @@ class TraitsApiController extends Controller {
 
                 // Process each trait
                 foreach ($traits as $index => $traitData) {
+                    // If display_value is not provided, translate the value
+                    $displayValue = $traitData['display_value'] ?? null;
+                    if (empty($displayValue)) {
+                        $displayValue = $this->translateTraitValue($traitData['value']);
+                    }
+
                     if (isset($traitData['id']) && $traitData['id'] > 0) {
                         // Update existing trait
                         $existingTrait = $existingTraits->where('id', $traitData['id'])->first();
@@ -302,7 +357,7 @@ class TraitsApiController extends Controller {
                                 'category_id' => $traitData['category_id'],
                                 'trait_type_id' => $traitData['trait_type_id'],
                                 'value' => $traitData['value'],
-                                'display_value' => $traitData['display_value'] ?? $traitData['value'],
+                                'display_value' => $displayValue,
                                 'sort_order' => $index
                             ]);
                             $keptTraitIds[] = $existingTrait->id;
@@ -313,7 +368,7 @@ class TraitsApiController extends Controller {
                                 'category_id' => $traitData['category_id'],
                                 'trait_type_id' => $traitData['trait_type_id'],
                                 'value' => $traitData['value'],
-                                'display_value' => $traitData['display_value'] ?? $traitData['value'],
+                                'display_value' => $displayValue,
                                 'sort_order' => $index,
                                 'is_locked' => false
                             ]);
@@ -326,7 +381,7 @@ class TraitsApiController extends Controller {
                             'category_id' => $traitData['category_id'],
                             'trait_type_id' => $traitData['trait_type_id'],
                             'value' => $traitData['value'],
-                            'display_value' => $traitData['display_value'] ?? $traitData['value'],
+                            'display_value' => $displayValue,
                             'sort_order' => $index,
                             'is_locked' => false
                         ]);
@@ -442,12 +497,18 @@ class TraitsApiController extends Controller {
                 $maxSortOrder = EgiTrait::where('egi_id', $egiId)->max('sort_order') ?? -1;
 
                 foreach ($newTraits as $index => $traitData) {
+                    // If display_value is not provided, translate the value
+                    $displayValue = $traitData['display_value'] ?? null;
+                    if (empty($displayValue)) {
+                        $displayValue = $this->translateTraitValue($traitData['value']);
+                    }
+
                     EgiTrait::create([
                         'egi_id' => $egiId,
                         'category_id' => $traitData['category_id'],
                         'trait_type_id' => $traitData['trait_type_id'],
                         'value' => $traitData['value'],
-                        'display_value' => $traitData['display_value'] ?? $traitData['value'],
+                        'display_value' => $displayValue,
                         'sort_order' => $maxSortOrder + 1 + $index,
                         'is_locked' => false
                     ]);
@@ -548,12 +609,18 @@ class TraitsApiController extends Controller {
             $newTrait = DB::transaction(function () use ($egiId, $request) {
                 $maxSortOrder = EgiTrait::where('egi_id', $egiId)->max('sort_order') ?? -1;
 
+                // If display_value is not provided, translate the value
+                $displayValue = $request->input('display_value');
+                if (empty($displayValue)) {
+                    $displayValue = $this->translateTraitValue($request->input('value'));
+                }
+
                 return EgiTrait::create([
                     'egi_id' => $egiId,
                     'category_id' => $request->input('trait_category_id'),
                     'trait_type_id' => $request->input('trait_type_id'),
                     'value' => $request->input('value'),
-                    'display_value' => $request->input('display_value', $request->input('value')),
+                    'display_value' => $displayValue,
                     'sort_order' => $maxSortOrder + 1,
                     'is_locked' => false
                 ]);
