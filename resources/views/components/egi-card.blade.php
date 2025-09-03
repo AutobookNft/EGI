@@ -507,88 +507,88 @@ $isCreator = auth()->check() && auth()->id() === $creatorId;
     </div>
 
     {{-- Utility Images Carousel --}}
-@if($egi->utility && $egi->utility->getMedia('utility_gallery')->count() > 0)
-<div class="px-2 pb-2 border-t border-white/5">
-    
-    @if($egi->utility->getMedia('utility_gallery')->count() > 5)
-    <div class="mt-1 text-center">
-        <span class="text-[10px] text-gray-400">
-            {{ __('utility.available_images', ['title' => $egi->utility->title, 'count' => $egi->utility->getMedia('utility_gallery')->count()]) }}
-        </span>
-    </div>
-    @endif
-    
-    <!-- Container con larghezza massima per forzare overflow -->
-    <div class="relative w-full" style="max-width: 280px;">
-        <!-- Scrollable Container -->
-        <div class="flex gap-2 py-1 overflow-x-auto utility-scroll-container scrollbar-hide"
-             style="scrollbar-width: none; -ms-overflow-style: none; -webkit-overflow-scrolling: touch;">
-            @foreach($egi->utility->getMedia('utility_gallery') as $index => $media)
-            <div class="flex-shrink-0 w-12 h-12 overflow-hidden transition-all duration-200 rounded-lg cursor-pointer hover:scale-105 hover:shadow-lg hover:ring-2 hover:ring-white/50"
-                 onclick="openUtilityImageModal('{{ $media->getUrl('large') }}', '{{ $egi->utility->title }}', {{ $index }})">
-                <img src="{{ $media->getUrl('thumb') }}" 
-                     alt="{{ $egi->utility->title }} - Image {{ $index + 1 }}"
-                     class="object-cover w-full h-full transition-opacity duration-200 opacity-80 hover:opacity-100"
-                     loading="lazy">
+    @if($egi->utility && $egi->utility->getMedia('utility_gallery')->count() > 0)
+        <div class="px-2 pb-2 border-t border-white/5">
+            
+            @if($egi->utility->getMedia('utility_gallery')->count() > 5)
+            <div class="mt-1 text-center">
+                <span class="text-[10px] text-gray-400">
+                    {{ __('utility.available_images', ['title' => $egi->utility->title, 'count' => $egi->utility->getMedia('utility_gallery')->count()]) }}
+                </span>
             </div>
-            @endforeach
+            @endif
+            
+            <!-- Container con larghezza massima per forzare overflow -->
+            <div class="relative w-full" style="max-width: 280px;">
+                <!-- Scrollable Container -->
+                <div class="flex gap-2 py-1 overflow-x-auto utility-scroll-container scrollbar-hide"
+                    style="scrollbar-width: none; -ms-overflow-style: none; -webkit-overflow-scrolling: touch;">
+                    @foreach($egi->utility->getMedia('utility_gallery') as $index => $media)
+                    <div class="flex-shrink-0 w-12 h-12 overflow-hidden transition-all duration-200 rounded-lg cursor-pointer hover:scale-105 hover:shadow-lg hover:ring-2 hover:ring-white/50"
+                        onclick="openUtilityImageModal('{{ $media->getUrl('large') }}', '{{ $egi->utility->title }}', {{ $index }})">
+                        <img src="{{ $media->getUrl('thumb') }}" 
+                            alt="{{ $egi->utility->title }} - Image {{ $index + 1 }}"
+                            class="object-cover w-full h-full transition-opacity duration-200 opacity-80 hover:opacity-100"
+                            loading="lazy">
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+
+            
         </div>
-    </div>
 
-    
-</div>
+        <style>
+        .scrollbar-hide {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
 
-<style>
-.scrollbar-hide {
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-}
-.scrollbar-hide::-webkit-scrollbar {
-    display: none;
-}
+        /* Forza lo scroll anche su desktop */
+        .utility-scroll-container {
+            overflow-x: scroll !important;
+            cursor: grab;
+        }
 
-/* Forza lo scroll anche su desktop */
-.utility-scroll-container {
-    overflow-x: scroll !important;
-    cursor: grab;
-}
+        .utility-scroll-container:active {
+            cursor: grabbing;
+        }
+        </style>
 
-.utility-scroll-container:active {
-    cursor: grabbing;
-}
-</style>
+        <script>
+        // Abilita drag scroll su desktop
+        document.querySelectorAll('.utility-scroll-container').forEach(container => {
+            let isDown = false;
+            let startX;
+            let scrollLeft;
 
-<script>
-// Abilita drag scroll su desktop
-document.querySelectorAll('.utility-scroll-container').forEach(container => {
-    let isDown = false;
-    let startX;
-    let scrollLeft;
+            container.addEventListener('mousedown', (e) => {
+                isDown = true;
+                startX = e.pageX - container.offsetLeft;
+                scrollLeft = container.scrollLeft;
+            });
 
-    container.addEventListener('mousedown', (e) => {
-        isDown = true;
-        startX = e.pageX - container.offsetLeft;
-        scrollLeft = container.scrollLeft;
-    });
+            container.addEventListener('mouseleave', () => {
+                isDown = false;
+            });
 
-    container.addEventListener('mouseleave', () => {
-        isDown = false;
-    });
+            container.addEventListener('mouseup', () => {
+                isDown = false;
+            });
 
-    container.addEventListener('mouseup', () => {
-        isDown = false;
-    });
-
-    container.addEventListener('mousemove', (e) => {
-        if (!isDown) return;
-        e.preventDefault();
-        const x = e.pageX - container.offsetLeft;
-        const walk = (x - startX) * 2;
-        container.scrollLeft = scrollLeft - walk;
-    });
-});
-</script>
-@endif
+            container.addEventListener('mousemove', (e) => {
+                if (!isDown) return;
+                e.preventDefault();
+                const x = e.pageX - container.offsetLeft;
+                const walk = (x - startX) * 2;
+                container.scrollLeft = scrollLeft - walk;
+            });
+        });
+        </script>
+    @endif
 
 
     {{-- 🔥 Reserve/Outbid Button - MANTIENE LA CLASSE reserve-button PER TYPESCRIPT --}}
@@ -620,35 +620,35 @@ document.querySelectorAll('.utility-scroll-container').forEach(container => {
             {{ __('egi.status.not_for_sale') }}
         </div>
     @endif --}}
-     @if(!$isCreator)
-    <div class="mt-3">
-        @if($egi->price && $egi->price > 0)
-        <button type="button" class="reserve-button w-full flex items-center justify-center px-4 py-2 text-sm font-medium text-white
-                {{ $hasCurrentReservation ? 'bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700' : 'bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700' }}
-                rounded-t-none rounded-b-lg transition-all transform hover:scale-[1.01]" data-egi-id="{{ $egi->id }}">
-            @if($hasCurrentReservation)
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-            </svg>
-            {{ __('egi.actions.outbid') ?? 'Rilancia' }}
+    @if(!$isCreator)
+        <div class="mt-3">
+            @if($egi->price && $egi->price > 0)
+            <button type="button" class="reserve-button w-full flex items-center justify-center px-4 py-2 text-sm font-medium text-white
+                    {{ $hasCurrentReservation ? 'bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700' : 'bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700' }}
+                    rounded-t-none rounded-b-lg transition-all transform hover:scale-[1.01]" data-egi-id="{{ $egi->id }}">
+                @if($hasCurrentReservation)
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+                {{ __('egi.actions.outbid') ?? 'Rilancia' }}
+                @else
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                {{ __('egi.actions.reserve') ?? 'Prenota' }}
+                @endif
+            </button>
             @else
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-            </svg>
-            {{ __('egi.actions.reserve') ?? 'Prenota' }}
+            <div
+                class="flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-gray-500 bg-gray-100 rounded-t-none rounded-b-lg">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L5.636 5.636" />
+                </svg>
+                {{ __('egi.status.not_for_sale') ?? 'Non in vendita' }}
+            </div>
             @endif
-        </button>
-        @else
-        <div
-            class="flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-gray-500 bg-gray-100 rounded-t-none rounded-b-lg">
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L5.636 5.636" />
-            </svg>
-            {{ __('egi.status.not_for_sale') ?? 'Non in vendita' }}
         </div>
-        @endif
-    </div>
     @endif
 </article>
 

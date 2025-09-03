@@ -132,7 +132,6 @@ class EgiController extends Controller {
 
             // Get all EGIs from the same collection for the navigation carousel
             $collectionEgis = $collection->egis()
-                ->where('is_published', true)
                 ->whereNotNull('key_file')
                 ->whereNotNull('extension')
                 ->orderBy('position')

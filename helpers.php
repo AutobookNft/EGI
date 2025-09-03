@@ -97,10 +97,12 @@ if (!function_exists('formatActivatorDisplay')) {
      * @return array ['name' => string, 'avatar' => string|null, 'is_commissioner' => bool]
      */
     function formatActivatorDisplay($user) {
+             
+        
         // Usa la nuova logica basata su usertype
         $isCommissioner = $user && $user->usertype === 'commissioner';
 
-        if ($isCommissioner) {
+        // if ($isCommissioner) {
             // Commissioner: show real name and real avatar (if uploaded) or generated
             $name = ($user->first_name && $user->last_name)
                 ? $user->first_name . ' ' . $user->last_name
@@ -124,32 +126,32 @@ if (!function_exists('formatActivatorDisplay')) {
                 'is_commissioner' => true,
                 'wallet_abbreviated' => null
             ];
-        } else {
-            // Non-commissioner: mostra wallet troncato + avatar generato
-            $walletAddress = $user->wallet ?? '';
-            $abbreviated = strlen($walletAddress) >= 10
-                ? substr($walletAddress, 0, 6) . '...' . substr($walletAddress, -4)
-                : ($walletAddress ?: 'Utente Anonimo');
+        // } else {
+        //     // Non-commissioner: mostra wallet troncato + avatar generato
+        //     $walletAddress = $user->wallet ?? '';
+        //     $abbreviated = strlen($walletAddress) >= 10
+        //         ? substr($walletAddress, 0, 6) . '...' . substr($walletAddress, -4)
+        //         : ($walletAddress ?: 'Utente Anonimo');
 
-            // Usa sempre profile_photo_url che ora restituisce avatar generato per non-commissioner
-            $avatar = null;
-            try {
-                $avatar = $user->profile_photo_url; // Ora sempre presente
-            } catch (\Exception $e) {
-                \Log::warning('Failed to get user avatar', [
-                    'user_id' => $user->id,
-                    'error' => $e->getMessage()
-                ]);
-                $avatar = $user->defaultProfilePhotoUrl(); // Fallback
-            }
+        //     // Usa sempre profile_photo_url che ora restituisce avatar generato per non-commissioner
+        //     $avatar = null;
+        //     try {
+        //         $avatar = $user->profile_photo_url; // Ora sempre presente
+        //     } catch (\Exception $e) {
+        //         \Log::warning('Failed to get user avatar', [
+        //             'user_id' => $user->id,
+        //             'error' => $e->getMessage()
+        //         ]);
+        //         $avatar = $user->defaultProfilePhotoUrl(); // Fallback
+        //     }
 
-            return [
-                'name' => $abbreviated,
-                'avatar' => $avatar, // Ora include l'avatar generato
-                'is_commissioner' => false,
-                'wallet_abbreviated' => $abbreviated
-            ];
-        }
+        //     return [
+        //         'name' => $abbreviated,
+        //         'avatar' => $avatar, // Ora include l'avatar generato
+        //         'is_commissioner' => false,
+        //         'wallet_abbreviated' => $abbreviated
+        //     ];
+        // }
     }
 }
 

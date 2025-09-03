@@ -512,7 +512,7 @@ class PersonalDataController extends BaseUserDomainController {
             if (array_key_exists($field, $validatedData)) {
                 $oldValue = $user->getRawOriginal($field);
                 $newValue = $validatedData[$field];
-                
+
                 // ✅ NORMALIZZAZIONE: Converte stringhe vuote in null per campi opzionali come nick_name
                 if (in_array($field, ['nick_name']) && $newValue === '') {
                     $newValue = null;
@@ -555,12 +555,12 @@ class PersonalDataController extends BaseUserDomainController {
             // ✅ FIX: Usa array_key_exists invece di isset per permettere la cancellazione dei campi
             if (array_key_exists($field, $validatedData)) {
                 $newValue = $validatedData[$field];
-                
+
                 // ✅ NORMALIZZAZIONE: Converte stringhe vuote in null per campi opzionali
                 if ($newValue === '') {
                     $newValue = null;
                 }
-                
+
                 if ($personalData->$field !== $newValue) {
                     $changes[$field] = ['old' => $personalData->$field, 'new' => $newValue];
                     $personalData->$field = $newValue;
