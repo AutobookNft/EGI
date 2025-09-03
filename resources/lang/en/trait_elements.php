@@ -38,7 +38,7 @@ return [
         'Thematic Focus' => 'Thematic Focus',
         'Artisan Technique' => 'Artisan Technique',
         'Edition Type' => 'Edition Type',
-        
+
         // Accessories types
         'Accessory Type' => 'Accessory Type',
         'Accessory Component' => 'Accessory Component',
@@ -347,7 +347,7 @@ return [
         'Monoprint' => 'Monoprint',
         'Artist Proof' => 'Artist Proof',
 
-        // Accessory values (already in English, adding for completeness)
+        // Accessory Type values
         'Bag' => 'Bag',
         'Backpack' => 'Backpack',
         'Tote' => 'Tote',
@@ -368,6 +368,8 @@ return [
         'Scarf' => 'Scarf',
         'Gloves' => 'Gloves',
         'Umbrella' => 'Umbrella',
+
+        // Accessory Component values
         'Buckle' => 'Buckle',
         'Zipper' => 'Zipper',
         'Magnetic Snap' => 'Magnetic Snap',
@@ -390,32 +392,52 @@ return [
         'Brooch' => 'Brooch',
         'Charm' => 'Charm',
         'Pendant' => 'Pendant',
+
+        // Closure Type values
         'Drawstring' => 'Drawstring',
         'Hook-and-Loop' => 'Hook-and-Loop',
         'Toggle' => 'Toggle',
         'Clip' => 'Clip',
         'Open Top' => 'Open Top',
+
+        // Hardware Finish values
         'Gold' => 'Gold',
         'Rose Gold' => 'Rose Gold',
         'Silver' => 'Silver',
         'Nickel' => 'Nickel',
         'Gunmetal' => 'Gunmetal',
         'Brass' => 'Brass',
+        'Black' => 'Black',
         'Matte' => 'Matte',
         'Polished' => 'Polished',
         'Antique' => 'Antique',
+
+        // Strap Type values
         'Adjustable' => 'Adjustable',
         'Detachable' => 'Detachable',
+        'Leather' => 'Leather',
+        'Fabric' => 'Fabric',
         'Top Handle' => 'Top Handle',
         'Backpack Straps' => 'Backpack Straps',
         'Wristlet' => 'Wristlet',
+
+        // Pocket Layout values
+        'None' => 'None',
+        'Card Slots' => 'Card Slots',
         'Internal Zipper Pocket' => 'Internal Zipper Pocket',
         'External Pocket' => 'External Pocket',
         'Slip Pocket' => 'Slip Pocket',
         'Pen Loop' => 'Pen Loop',
         'Multi-Compartment' => 'Multi-Compartment',
+
+        // Size Category values
         'Mini' => 'Mini',
+        'Small' => 'Small',
+        'Medium' => 'Medium',
+        'Large' => 'Large',
         'Oversized' => 'Oversized',
+
+        // Texture values
         'Smooth' => 'Smooth',
         'Pebbled' => 'Pebbled',
         'Saffiano' => 'Saffiano',
@@ -425,25 +447,44 @@ return [
         'Croc-Embossed' => 'Croc-Embossed',
         'Suede Finish' => 'Suede Finish',
         'Matelassé' => 'Matelassé',
+
+        // Lining values
         'Unlined' => 'Unlined',
         'Cotton Lining' => 'Cotton Lining',
         'Microfiber Lining' => 'Microfiber Lining',
         'Suede Lining' => 'Suede Lining',
         'Satin Lining' => 'Satin Lining',
+
+        // Occasion values
         'Everyday' => 'Everyday',
+        'Business' => 'Business',
+        'Travel' => 'Travel',
         'Evening' => 'Evening',
         'Formal' => 'Formal',
         'Outdoor' => 'Outdoor',
+        'Sport' => 'Sport',
+
+        // Compatibility values
         'Phone' => 'Phone',
         'Tablet' => 'Tablet',
+        'Laptop 13"' => 'Laptop 13"',
+        'Laptop 14"' => 'Laptop 14"',
+        'Laptop 15"' => 'Laptop 15"',
+        'Laptop 16"' => 'Laptop 16"',
         'Passport' => 'Passport',
+
+        // Water Protection values
         'Splash Resistant' => 'Splash Resistant',
         'Water Resistant' => 'Water Resistant',
         'Waterproof' => 'Waterproof',
+
+        // Personalization values
         'Monogram' => 'Monogram',
         'Engraving' => 'Engraving',
         'Custom Patch' => 'Custom Patch',
         'Custom Color' => 'Custom Color',
+
+        // Structure values
         'Soft' => 'Soft',
         'Semi-Structured' => 'Semi-Structured',
         'Structured' => 'Structured',

@@ -38,7 +38,7 @@ return [
         'Thematic Focus' => 'Focus Tematico',
         'Artisan Technique' => 'Tecnica Artigianale',
         'Edition Type' => 'Tipo di Edizione',
-        
+
         // Accessories types
         'Accessory Type' => 'Tipo di Accessorio',
         'Accessory Component' => 'Componente Accessorio',
