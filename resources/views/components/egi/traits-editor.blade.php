@@ -193,7 +193,26 @@ window.TraitsTranslations = {
     unknown_error: '{{ __('traits.unknown_error') }}'
 };
 
+// Translations for Trait Elements (categories, types, values)
+window.traitElementTranslations = {
+    categories: @json(__('trait_elements.categories')),
+    types: @json(__('trait_elements.types')),
+    values: @json(__('trait_elements.values'))
+};
+
 // Include traits-common.js functions here if needed, or load external file
+
+/**
+ * Helper function to translate trait values
+ * @param {string} value - The English value to translate
+ * @returns {string} - The translated value or original if not found
+ */
+function translateValue(value) {
+    if (window.traitElementTranslations && window.traitElementTranslations.values) {
+        return window.traitElementTranslations.values[value] || value;
+    }
+    return value;
+}
 
 // Toast Notification System
 window.ToastManager = {
@@ -441,7 +460,7 @@ window.ToastManager = {
                         data-category-id="${cat.id}"
                         onclick="TraitsEditor.filterByCategory(${cat.id})">
                     <span class="category-icon">${cat.icon}</span>
-                    <span class="category-name">${cat.name}</span>
+                    <span class="category-name">${cat.translated_name || cat.name}</span>
                     <span class="category-count" data-category="${cat.id}">0</span>
                 </button>
             `).join('');
@@ -549,7 +568,7 @@ window.ToastManager = {
                         onclick="TraitsEditor.selectCategory(${cat.id})"
                         data-category-id="${cat.id}">
                     <span class="category-icon">${cat.icon}</span>
-                    <span class="category-name">${cat.name}</span>
+                    <span class="category-name">${cat.translated_name || cat.name}</span>
                 </button>
             `).join('');
         },
@@ -583,7 +602,7 @@ window.ToastManager = {
 
             select.innerHTML = '<option value="">' + window.TraitsTranslations.choose_type + '</option>' +
                 this.state.availableTypes.map(type =>
-                    `<option value="${type.id}">${type.name}</option>`
+                    `<option value="${type.id}">${type.translated_name || type.name}</option>`
                 ).join('');
         },
 
@@ -624,7 +643,7 @@ window.ToastManager = {
                 inputHtml = `
                     <select class="form-select" id="trait-value-input" onchange="TraitsEditor.onValueChanged()">
                         <option value="">{{ __('traits.choose_value') }}</option>
-                        ${allowedValues.map(val => `<option value="${val}">${val}</option>`).join('')}
+                        ${allowedValues.map(val => `<option value="${val}">${translateValue(val)}</option>`).join('')}
                     </select>
                 `;
             } else if (type.display_type === 'number' || type.display_type === 'percentage' || type.display_type === 'boost_number') {
@@ -687,8 +706,8 @@ window.ToastManager = {
 
             if (!preview || !type) return;
 
-            preview.querySelector('.preview-type').textContent = type.name;
-            preview.querySelector('.preview-value').textContent = this.state.modalData.value;
+            preview.querySelector('.preview-type').textContent = type.translated_name || type.name;
+            preview.querySelector('.preview-value').textContent = translateValue(this.state.modalData.value);
             preview.querySelector('.preview-unit').textContent = type.unit || '';
 
             preview.style.display = 'block';

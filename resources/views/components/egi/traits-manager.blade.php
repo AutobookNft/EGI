@@ -169,7 +169,15 @@
 </div>
 @endonce
 
-
+{{-- JavaScript Translations --}}
+<script>
+// Translations for Trait Elements (categories, types, values)
+window.traitElementTranslations = {
+    categories: @json(__('trait_elements.categories')),
+    types: @json(__('trait_elements.types')),
+    values: @json(__('trait_elements.values'))
+};
+</script>
 
 {{-- JavaScript PURO - NIENTE ALPINE! --}}
 <script>
@@ -317,7 +325,7 @@
                     data-category-id="${cat.id}"
                     onclick="TraitsManager.filterByCategory(${cat.id})">
                 <span class="category-icon">${cat.icon}</span>
-                <span class="category-name">${cat.name}</span>
+                <span class="category-name">${cat.translated_name || cat.name}</span>
                 <span class="category-count">0</span>
             </button>
         `).join('');
@@ -499,7 +507,7 @@
                        onchange="TraitsManager.onCategorySelected(${cat.id})">
                 <div class="category-card">
                     <span class="category-icon">${cat.icon}</span>
-                    <span class="category-label">${cat.name}</span>
+                    <span class="category-label">${cat.translated_name || cat.name}</span>
                 </div>
             </label>
         `).join('');
@@ -538,7 +546,7 @@
 
         select.innerHTML = '<option value="">Choose a type...</option>' +
             state.availableTypes.map(type =>
-                `<option value="${type.id}">${type.name}</option>`
+                `<option value="${type.id}">${type.translated_name || type.name}</option>`
             ).join('');
 
         group.style.display = 'block';
@@ -596,7 +604,7 @@
             html = `
                 <select class="form-select" id="trait-value-input" onchange="TraitsManager.onValueChanged()">
                     <option value="">Choose a value...</option>
-                    ${allowedValues.map(v => `<option value="${v}">${v}</option>`).join('')}
+                    ${allowedValues.map(v => `<option value="${v}">${translateValue(v)}</option>`).join('')}
                 </select>
             `;
         } else if (type.display_type === 'number' || type.display_type === 'percentage' || type.display_type === 'boost_number') {
@@ -728,8 +736,8 @@
         // Update preview
         const preview = document.getElementById('trait-preview');
         if (value && preview) {
-            preview.querySelector('.preview-type').textContent = state.modalData.currentType.name;
-            preview.querySelector('.preview-value').textContent = value;
+            preview.querySelector('.preview-type').textContent = state.modalData.currentType.translated_name || state.modalData.currentType.name;
+            preview.querySelector('.preview-value').textContent = translateValue(value);
             preview.querySelector('.preview-unit').textContent = state.modalData.currentType.unit || '';
             preview.style.display = 'block';
         } else if (preview) {
@@ -808,14 +816,35 @@
         return category ? category.icon : '🏷️';
     }
 
+    /**
+     * Helper function to translate trait values
+     * @param {string} value - The English value to translate
+     * @returns {string} - The translated value or original if not found
+     */
+    function translateValue(value) {
+        if (window.traitElementTranslations && window.traitElementTranslations.values) {
+            return window.traitElementTranslations.values[value] || value;
+        }
+        return value;
+    }
+
     function formatTraitValue(trait) {
+        let displayValue;
+        
         if (trait.display_type === 'percentage') {
-            return trait.value + '%';
+            displayValue = trait.value + '%';
+        } else if (trait.display_type === 'date' && trait.value) {
+            displayValue = new Date(trait.value).getFullYear().toString();
+        } else {
+            displayValue = trait.value;
         }
-        if (trait.display_type === 'date' && trait.value) {
-            return new Date(trait.value).getFullYear();
+        
+        // Se il valore non è una percentuale o una data, prova a tradurre
+        if (trait.display_type !== 'percentage' && trait.display_type !== 'date') {
+            displayValue = translateValue(displayValue);
         }
-        return trait.value;
+        
+        return displayValue;
     }
 
     function updateCategoryCounts() {

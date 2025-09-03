@@ -122,7 +122,7 @@ $shouldShow = $hasTraits || $canEdit;
                             <span class="trait-category-badge" style="background-color: {{ $categoryColor }}">
                                 {{ $categoryIcon }}
                             </span>
-                                                        @if($trait->getFirstMedia('trait_images'))
+                            @if($trait->getFirstMedia('trait_images'))
                                 @php
                                     $media = $trait->getFirstMedia('trait_images');
                                     $thumbnailUrl = $media ? $media->getUrl('thumb') : null;
@@ -343,6 +343,13 @@ window.traitTranslations = {
     file_too_large: '{{ __('traits.file_too_large') }}',
     invalid_file_type: '{{ __('traits.invalid_file_type') }}',
     preview_selected: '{{ __('traits.preview_selected') }}'
+};
+
+// Translations for Trait Elements (categories, types, values)
+window.traitElementTranslations = {
+    categories: @json(__('trait_elements.categories')),
+    types: @json(__('trait_elements.types')),
+    values: @json(__('trait_elements.values'))
 };
 </script>
 

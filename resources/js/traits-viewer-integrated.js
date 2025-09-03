@@ -104,6 +104,18 @@ const TraitsViewer = {
     // Flag globale per event delegation
     globalListenersAttached: false,
 
+    /**
+     * Helper function to translate trait values
+     * @param {string} value - The English value to translate
+     * @returns {string} - The translated value or original if not found
+     */
+    translateValue(value) {
+        if (window.traitElementTranslations && window.traitElementTranslations.values) {
+            return window.traitElementTranslations.values[value] || value;
+        }
+        return value;
+    },
+
     init(egiId, canEdit = false, categories = [], availableTypes = []) {
         if (this.state.isInitialized) {
             console.log('TraitsViewer: Already initialized');
@@ -333,7 +345,10 @@ const TraitsViewer = {
             button.type = 'button';
             button.className = 'category-btn';
             button.dataset.categoryId = category.id;
-            button.innerHTML = `${category.icon} ${category.name}`;
+            
+            // Use translated_name if available, fallback to name
+            const displayName = category.translated_name || category.name;
+            button.innerHTML = `${category.icon} ${displayName}`;
             button.onclick = () => this.onCategorySelected(category.id);
             container.appendChild(button);
         });
@@ -417,7 +432,10 @@ const TraitsViewer = {
             
             const option = document.createElement('option');
             option.value = type.id;
-            option.textContent = type.name;
+            
+            // Use translated_name if available, fallback to name
+            const displayName = type.translated_name || type.name;
+            option.textContent = displayName;
             option.dataset.inputType = type.input_type || 'text';
             
             // Determina has_fixed_values: true se esiste allowed_values con elementi
@@ -524,14 +542,17 @@ const TraitsViewer = {
         if (Array.isArray(allowedValues)) {
             allowedValues.forEach(value => {
                 if (typeof value === 'string') {
-                    html += `<option value="${value}">${value}</option>`;
+                    const translatedValue = this.translateValue(value);
+                    html += `<option value="${value}">${translatedValue}</option>`;
                 } else if (typeof value === 'object' && value.value && value.label) {
-                    html += `<option value="${value.value}">${value.label}</option>`;
+                    const translatedLabel = this.translateValue(value.label);
+                    html += `<option value="${value.value}">${translatedLabel}</option>`;
                 }
             });
         } else if (typeof allowedValues === 'object') {
             Object.entries(allowedValues).forEach(([key, value]) => {
-                html += `<option value="${key}">${value}</option>`;
+                const translatedValue = this.translateValue(value);
+                html += `<option value="${key}">${translatedValue}</option>`;
             });
         }
         
