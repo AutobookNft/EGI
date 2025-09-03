@@ -191,7 +191,13 @@
                             @endif
                         </div>
                         <div class="trait-content">
-                            <div class="trait-type" style="color: #374151; font-weight: 600; font-size: 0.875rem; margin-bottom: 0.25rem;">{{ $trait->traitType ? $trait->traitType->name : 'Unknown' }}</div>
+                            <div class="trait-type" style="color: #374151; font-weight: 600; font-size: 0.875rem; margin-bottom: 0.25rem;">
+                                @if($trait->traitType)
+                                    {{ __('trait_elements.types.' . $trait->traitType->name, [], null) ?: $trait->traitType->name }}
+                                @else
+                                    Unknown
+                                @endif
+                            </div>
                             <div class="trait-value" style="color: #111827; font-weight: 700; font-size: 1.125rem;">
                                 <span>{{ $trait->display_value ?? $trait->value }}</span>
                                 @if($trait->traitType && $trait->traitType->unit)

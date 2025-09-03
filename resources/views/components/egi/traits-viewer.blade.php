@@ -158,7 +158,13 @@ $shouldShow = $hasTraits || $canEdit;
                             @endif
                         </div>
                         <div class="trait-content">
-                            <div class="trait-type">{{ $trait->traitType ? $trait->traitType->name : 'Unknown' }}</div>
+                            <div class="trait-type">
+                                @if($trait->traitType)
+                                    {{ __('trait_elements.types.' . $trait->traitType->name, [], null) ?: $trait->traitType->name }}
+                                @else
+                                    Unknown
+                                @endif
+                            </div>
                             <div class="trait-value">
                                 <span>{{ $trait->display_value ?? $trait->value }}</span>
                                 @if($trait->traitType && $trait->traitType->unit)
