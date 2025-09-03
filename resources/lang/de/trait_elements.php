@@ -9,6 +9,7 @@ return [
         'Special' => 'Besonders',
         'Sustainability' => 'Nachhaltigkeit',
         'Cultural' => 'Kulturell',
+        'Accessories' => 'Zubehör',
         'Categories' => 'Kategorien',
     ],
 

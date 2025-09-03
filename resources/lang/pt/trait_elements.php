@@ -9,6 +9,7 @@ return [
         'Special' => 'Especial',
         'Sustainability' => 'Sustentabilidade',
         'Cultural' => 'Cultural',
+        'Accessories' => 'Acessórios',
         'Categories' => 'Categorias',
     ],
 

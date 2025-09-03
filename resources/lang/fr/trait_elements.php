@@ -2,13 +2,40 @@
 
 return [
     // Categories
-    'categories' => [
+        'Eco Certification' => 'Certification Éco',
+        'Sustainability Score' => 'Score de Durabilité',
+        'Cultural Origin' => 'Origine Culturelle',
+        'Thematic Focus' => 'Thème Principal',
+        'Artisan Technique' => 'Technique Artisanale',
+        'Edition Type' => 'Type d\'Édition',
+        
+        // Accessories types
+        'Accessory Type' => 'Type d\'Accessoire',
+        'Accessory Component' => 'Composant Accessoire',
+        'Closure Type' => 'Type de Fermeture',
+        'Hardware Finish' => 'Finition Quincaillerie',
+        'Strap Type' => 'Type de Sangle',
+        'Pocket Layout' => 'Agencement Poches',
+        'Size Category' => 'Catégorie Taille',
+        'Texture' => 'Texture',
+        'Lining' => 'Doublure',
+        'Occasion' => 'Occasion',
+        'Compatibility' => 'Compatibilité',
+        'Water Protection' => 'Protection Eau',
+        'Personalization' => 'Personnalisation',
+        'Structure' => 'Structure',
+    ],
+
+    // Values
+    'values' => [
+        // Categories values
         'Materials' => 'Matériaux',
         'Visual' => 'Visuel',
         'Dimensions' => 'Dimensions',
         'Special' => 'Spécial',
         'Sustainability' => 'Durabilité',
         'Cultural' => 'Culturel',
+        'Accessories' => 'Accessoires',
         'Categories' => 'Catégories',
     ],
 
