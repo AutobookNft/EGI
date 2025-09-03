@@ -23,8 +23,10 @@
 
 {{-- Debug temporaneo: verifica che i dati arrivino correttamente --}}
 @if(config('app.debug'))
-    {{-- <div class="text-xs text-gray-500 p-2">DEBUG: {{ count($collections) }} collezioni caricate</div> --}}
+    {{-- <div class="p-2 text-xs text-gray-500">DEBUG: {{ count($collections) }} collezioni caricate</div> --}}
 @endif
+
+{{-- Carousel Collezioni in Evidenza --}}
 
 <div class="w-full py-8 {{ $marginClass }} {{ $bgClass }} md:py-10 lg:py-12">
     <div class="container px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
@@ -37,15 +39,6 @@
         <div class="relative overflow-hidden featured-collections-carousel">
             <div class="flex gap-4 pb-4 overflow-x-auto md:gap-6 snap-x snap-mandatory scrollbar-hide">
                 @forelse($collections as $index => $collection)
-                    {{-- VERSIONE MOBILE: Avatar compatto --}}
-                    <div class="flex-shrink-0 w-32 snap-start md:hidden collection-card-mobile" data-collection-id="{{ $collection->id ?? $index }}">
-                        <x-home-collection-card 
-                            :collection="$collection" 
-                            imageType="avatar" 
-                            displayType="avatar" 
-                        />
-                    </div>
-
                     {{-- VERSIONE DESKTOP: Card completa --}}
                     <div class="flex-shrink-0 hidden w-72 md:w-80 lg:w-96 snap-start md:block collection-card-desktop" data-collection-id="{{ $collection->id ?? $index }}">
                         <div class="h-full group">

@@ -59,18 +59,11 @@
     {{-- Nuovo slot per il carousel dei Creator - NASCOSTO su mobile --}}
     <x-slot name="belowHeroContent_1">
         <div class="hidden lg:block">
-            <x-collections-carousel :collections="$featuredCollections" title="Collezioni in Evidenza"
-                bgClass="bg-gray-900" marginClass="mb-12" />
+            
+            <x-collections-carousel :collections="$featuredCollections" bgClass="bg-gray-900" marginClass="mb-12" />
         </div>
     </x-slot>
-
-    <x-slot name="belowHeroContent_2">
-        {{-- Sezione: Ultime Gallerie Arrivate con effetti NFT - NASCOSTO su mobile --}}
-        <div class="hidden lg:block">
-            <x-collections-carousel :collections="$latestCollections" title={{ __('guest_home.latest_galleries_title')
-                }} bgClass="bg-gray-900" marginClass="mb-12" />
-        </div>
-    </x-slot>
+  
 
     {{-- Sezione: Protagonisti e Attori dell'Ecosistema --}}
     {{-- POPOLIAMO IL NUOVO SLOT $actorContent CON IL NOSTRO COMPONENTE actors-section --}}

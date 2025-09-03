@@ -81,8 +81,9 @@
                 <button
                     class="w-3 h-3 transition-colors duration-300 bg-gray-600 rounded-full hover:bg-blue-500 carousel-indicator"
                     data-slide="{{ $i }}"
-                    aria-label="{{ __('collector.carousel.navigation.slide', ['number' => $i + 1]) }}"></button>
-                @endfor
+                    aria-label="{{ __('collector.carousel.navigation.slide', ['number' => $i + 1]) }}">
+                </button>
+            @endfor
         </div>
 
         {{-- Call to Action - Solo per visitatori non loggati --}}

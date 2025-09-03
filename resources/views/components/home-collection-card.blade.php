@@ -9,21 +9,26 @@
 
 @php
     $isAvatarDisplay = ($displayType === 'avatar');
-    $logo = config('app.logo');
+    $logo = config('app.logo_01');
     $imageUrl = '';
+    
+    
+    // Prova ad usare Spatie Media se disponibile
     if ($collection) {
-        if ($imageType === 'avatar' && $collection->image_avatar) {
-            $imageUrl = asset($collection->image_avatar);
-        } elseif (($imageType === 'card' || $imageType === 'cover') && $collection->image_card) {
-            $imageUrl = asset($collection->image_card);
-        } elseif ($collection->image_cover) {
-             $imageUrl = asset($collection->image_cover);
+        if (method_exists($collection, 'getFirstMediaUrl')) {
+            $imageUrl = $collection->getFirstMediaUrl('head', 'card');
+            if ($imageUrl != '') {
+                // OK, abbiamo un'immagine
+            } else {
+                // Nessuna immagine, usa il logo di default
+                $imageUrl = asset($logo);
+            }
         } else {
-            $imageUrl = asset("images/logo/$logo");
+            $imageUrl = asset($logo);
         }
-    } else {
-        $imageUrl = asset("images/logo/$logo");
     }
+    
+    
 @endphp
 
 @if($collection)
@@ -40,11 +45,6 @@
                          class="object-cover w-full h-full transition-colors border-2 border-gray-700 rounded-full shadow-md group-hover:border-florence-gold"
                          loading="lazy" decoding="async"
                          width="96" height="96">
-                    @if($collection->is_verified)
-                        <span class="absolute bottom-0 right-0 block p-0.5 bg-blu-algoritmo border-2 border-gray-800 rounded-full" title="{{ __('Verified Collection') }}">
-                            <span class="text-sm text-white material-symbols-outlined">verified</span>
-                        </span>
-                    @endif
                 </div>
                 <h3 class="text-sm font-semibold text-white truncate font-body group-hover:text-florence-gold" title="{{ $collection->collection_name }}">
                     {{ Str::limit($collection->collection_name, 25) }}
@@ -59,6 +59,7 @@
             {{-- Visualizzazione CARD (Desktop/Tablet) --}}
             {{-- FIX: Il contenitore ora ha 'relative' per contenere gli 'absolute' --}}
             <div class="relative w-full {{ $imageType === 'cover' ? 'aspect-[3/4]' : 'aspect-square' }} overflow-hidden">
+                
                 <img src="{{ $imageUrl }}"
                      alt="{{ $collection->collection_name }}"
                      class="object-cover w-full h-full transition-transform duration-300 ease-in-out group-hover:scale-105"
