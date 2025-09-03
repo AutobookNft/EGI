@@ -507,9 +507,16 @@ class PersonalDataController extends BaseUserDomainController {
         // ===================================================================
         $userFields = ['name', 'last_name', 'email', 'nick_name'];
         foreach ($userFields as $field) {
-            if (isset($validatedData[$field])) {
+            // ✅ FIX: Verifica se il campo è presente nei dati validati (anche se vuoto)
+            // Questo permette di cancellare valori esistenti impostando il campo a stringa vuota o null
+            if (array_key_exists($field, $validatedData)) {
                 $oldValue = $user->getRawOriginal($field);
                 $newValue = $validatedData[$field];
+                
+                // ✅ NORMALIZZAZIONE: Converte stringhe vuote in null per campi opzionali come nick_name
+                if (in_array($field, ['nick_name']) && $newValue === '') {
+                    $newValue = null;
+                }
 
                 if ($oldValue !== $newValue) {
                     $changes[$field] = ['old' => $oldValue, 'new' => $newValue];
@@ -545,9 +552,19 @@ class PersonalDataController extends BaseUserDomainController {
         ];
 
         foreach ($personalDataFields as $field) {
-            if (isset($validatedData[$field]) && $personalData->$field !== $validatedData[$field]) {
-                $changes[$field] = ['old' => $personalData->$field, 'new' => $validatedData[$field]];
-                $personalData->$field = $validatedData[$field];
+            // ✅ FIX: Usa array_key_exists invece di isset per permettere la cancellazione dei campi
+            if (array_key_exists($field, $validatedData)) {
+                $newValue = $validatedData[$field];
+                
+                // ✅ NORMALIZZAZIONE: Converte stringhe vuote in null per campi opzionali
+                if ($newValue === '') {
+                    $newValue = null;
+                }
+                
+                if ($personalData->$field !== $newValue) {
+                    $changes[$field] = ['old' => $personalData->$field, 'new' => $newValue];
+                    $personalData->$field = $newValue;
+                }
             }
         }
         if ($personalData->isDirty()) {
@@ -630,15 +647,21 @@ class PersonalDataController extends BaseUserDomainController {
         // ===================================================================
         // 3. GESTIONE DEI DATI UTENTE (es. lingua)
         // ===================================================================
-        $userFields = ['name', 'last_name', 'language'];
-        foreach ($userFields as $field) {
-            if (isset($validatedData[$field]) && $user->$field !== $validatedData[$field]) {
-                $changes[$field] = ['old' => $user->$field, 'new' => $validatedData[$field]];
-                $user->$field = $validatedData[$field];
+        // Evitiamo duplicazioni: qui gestiamo SOLO il campo 'language'.
+        if (array_key_exists('language', $validatedData)) {
+            $oldValue = $user->getRawOriginal('language');
+            $newValue = $validatedData['language'];
+
+            // Normalizza stringa vuota a null per consentire la cancellazione
+            if ($newValue === '') {
+                $newValue = null;
             }
-        }
-        if ($user->isDirty()) {
-            $user->save();
+
+            if ($oldValue !== $newValue) {
+                $changes['language'] = ['old' => $oldValue, 'new' => $newValue];
+                $user->language = $newValue;
+                $user->save();
+            }
         }
 
         // ===================================================================
