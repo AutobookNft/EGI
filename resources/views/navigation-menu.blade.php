@@ -17,19 +17,7 @@
                             __('Frangette') }}</span>
                     </a>
                     {{-- Welcome Message - Dopo il logo per tutte le dimensioni --}}
-                    @if ($user)
-                    <div class="flex items-center ml-4">
-                        <span class="hidden text-sm font-medium text-emerald-400 sm:inline">{{ App\Helpers\FegiAuth::getWelcomeMessage() }}</span>
-                        <span class="text-xs font-medium text-emerald-500 sm:hidden">
-                            @php
-                            $welcomeMessage = App\Helpers\FegiAuth::getWelcomeMessage();
-                            // Rimuovi "Benvenuto/a," dalla versione mobile
-                            $mobileMessage = preg_replace('/^Benvenuto\/a,?\s*/i', '', $welcomeMessage);
-                            @endphp
-                            {{ $mobileMessage }}
-                        </span>
-                    </div>
-                    @endif
+                    <x-user-welcome />
                 </div>
                 {{-- Notification Badge (Desktop) --}}
                 @if(App\Helpers\FegiAuth::check())
