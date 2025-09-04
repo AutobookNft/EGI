@@ -765,14 +765,29 @@ class TraitImageManager {
             // Verifica che non sia il pulsante rimuovi
             const isRemoveButton = e.target.closest('.trait-remove');
 
-            if (traitCard && !isRemoveButton) {
-                console.log('TraitImageManager: Trait card clicked:', traitCard.dataset.traitId);
-                console.log('TraitImageManager: Click target:', e.target);
+            // IMPORTANTE: Verifica che non sia dentro un modal di edit
+            const isInsideModal = e.target.closest('.trait-modal, [id^="trait-modal-"]');
+
+            if (traitCard && !isRemoveButton && !isInsideModal) {
                 console.log('TraitImageManager: Trait card element:', traitCard);
 
-                e.preventDefault();
-                e.stopPropagation();
-                this.openImageModal(traitCard.dataset.traitId);
+                // Controlla se l'utente può editare verificando se esiste il data-can-edit
+                const traitsViewer = traitCard.closest('[data-can-edit]');
+                const canEdit = traitsViewer && traitsViewer.dataset.canEdit === 'true';
+                
+                if (canEdit) {
+                    // Utente proprietario di EGI non pubblicato: apri modal di edit
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.openImageModal(traitCard.dataset.traitId);
+                    return;
+                } else {
+                    // Utente non proprietario o EGI pubblicato: apri modal di visualizzazione
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.openViewModal(traitCard.dataset.traitId);
+                    return;
+                }
             }
         }, { passive: false });
 
@@ -837,18 +852,98 @@ class TraitImageManager {
     }
 
     openImageModal(traitId) {
-        console.log('TraitImageManager: Opening image modal for trait:', traitId);
-
         const modal = document.querySelector(`#trait-modal-${traitId}`);
         if (modal) {
             modal.classList.remove('hidden');
             modal.classList.add('flex');
             modal.style.display = 'flex';
-            console.log('TraitImageManager: Modal opened successfully');
         } else {
             console.error('TraitImageManager: Modal not found for trait:', traitId);
             ToastManager.error('Modal not found for this trait');
         }
+    }
+
+    openViewModal(traitId) {
+        // Creiamo il modal dinamicamente
+        this.createAndShowImageModal(traitId);
+    }
+
+    createAndShowImageModal(traitId) {
+        // Rimuovi modal esistente se presente
+        const existingModal = document.querySelector(`#trait-view-modal-${traitId}`);
+        if (existingModal) {
+            existingModal.remove();
+        }
+
+        // Trova il trait card per ottenere info
+        const traitCard = document.querySelector(`[data-trait-id="${traitId}"]`);
+        if (!traitCard) {
+            console.error('Trait card not found');
+            return;
+        }
+
+        // Cerca l'immagine del trait
+        const traitImage = traitCard.querySelector('img');
+        const imageUrl = traitImage ? traitImage.src : null;
+        const traitName = traitCard.querySelector('.trait-type')?.textContent || 'Trait';
+
+        // Crea il modal HTML
+        const modalHTML = `
+            <div id="trait-view-modal-${traitId}" 
+                 class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75"
+                 style="display: flex;">
+                
+                <div class="relative max-w-4xl max-h-[90vh] mx-4">
+                    <!-- Pulsante chiudi -->
+                    <button type="button" 
+                            class="absolute top-4 right-4 z-10 text-white text-3xl hover:text-gray-300"
+                            style="background: rgba(0,0,0,0.5); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;"
+                            onclick="document.getElementById('trait-view-modal-${traitId}').remove()">
+                        &times;
+                    </button>
+
+                    <!-- Contenuto -->
+                    <div class="text-center">
+                        ${imageUrl ? 
+                            `<img src="${imageUrl}" 
+                                 alt="${traitName}"
+                                 class="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl">` 
+                            : 
+                            `<div class="bg-white rounded-lg p-8 text-center">
+                                <div class="text-gray-500">
+                                    <svg class="w-24 h-24 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" 
+                                              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                    </svg>
+                                    <h3 class="text-xl font-semibold text-gray-700 mb-2">${traitName}</h3>
+                                    <p class="text-gray-500">Nessuna immagine disponibile</p>
+                                </div>
+                            </div>`
+                        }
+                        
+                        ${imageUrl ? 
+                            `<div class="mt-4 text-center">
+                                <div class="bg-black bg-opacity-50 rounded-lg px-4 py-2 inline-block">
+                                    <h3 class="text-white text-lg font-semibold">${traitName}</h3>
+                                </div>
+                            </div>` 
+                            : ''
+                        }
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Aggiungi il modal al DOM
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+        // Aggiungi listener per chiudere con click sul backdrop
+        const modal = document.getElementById(`trait-view-modal-${traitId}`);
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.remove();
+            }
+        });
     }
 
     setupImageUpload() {
@@ -1050,9 +1145,11 @@ class TraitImageManager {
     }
 
     setupModalCloseEvents() {
-        // Handle modal close buttons
+        // Handle modal close buttons (edit modal)
         document.addEventListener('click', (e) => {
             if (e.target.matches('.trait-modal-close')) {
+                e.preventDefault();
+                e.stopPropagation(); // FERMA LA PROPAGAZIONE!
                 const modal = e.target.closest('.trait-modal');
                 if (modal) {
                     modal.style.display = 'none';
@@ -1062,9 +1159,36 @@ class TraitImageManager {
             }
         });
 
-        // Handle backdrop clicks
+        // Handle view modal close buttons
+        document.addEventListener('click', (e) => {
+            if (e.target.matches('.trait-view-modal-close')) {
+                e.preventDefault();
+                e.stopPropagation(); // FERMA LA PROPAGAZIONE!
+                const modal = e.target.closest('[id^="trait-view-modal-"]');
+                if (modal) {
+                    modal.style.display = 'none';
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+                }
+            }
+        });
+
+        // Handle backdrop clicks (edit modal)
         document.addEventListener('click', (e) => {
             if (e.target.matches('.trait-modal')) {
+                e.preventDefault();
+                e.stopPropagation(); // FERMA LA PROPAGAZIONE!
+                e.target.style.display = 'none';
+                e.target.classList.add('hidden');
+                e.target.classList.remove('flex');
+            }
+        });
+
+        // Handle backdrop clicks (view modal)
+        document.addEventListener('click', (e) => {
+            if (e.target.matches('[id^="trait-view-modal-"]')) {
+                e.preventDefault();
+                e.stopPropagation(); // FERMA LA PROPAGAZIONE!
                 e.target.style.display = 'none';
                 e.target.classList.add('hidden');
                 e.target.classList.remove('flex');

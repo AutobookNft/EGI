@@ -29,7 +29,6 @@ $shouldShow = $hasTraits || $canEdit;
      id="traits-viewer-{{ $egi ? $egi->id : 'new' }}"
      data-egi-id="{{ $egi ? $egi->id : '' }}"
      data-can-edit="{{ $canEdit ? 'true' : 'false' }}"
-     data-can-edit="{{ $canEdit ? 'true' : 'false' }}"
      style="position: relative !important; order: -1 !important; margin-top: 0 !important; margin-bottom: 2rem !important;">
 
     {{-- Header con counter --}}
@@ -359,9 +358,10 @@ window.traitElementTranslations = {
 };
 </script>
 
-{{-- Include trait detail modals --}}
-@if($hasTraits)
+{{-- Include trait detail modals per tutti i trait visibili --}}
+@if($egi && $egi->traits && $egi->traits->count() > 0)
     @foreach($egi->traits as $trait)
+        {{-- Modal di edit per proprietari --}}
         <x-trait.trait-detail-modal :trait="$trait" />
     @endforeach
 @endif
