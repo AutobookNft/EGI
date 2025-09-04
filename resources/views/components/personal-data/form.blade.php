@@ -546,5 +546,70 @@ document.addEventListener('DOMContentLoaded', function() {
         // Sempre visibili per il trattamento contrattuale obbligatorio
         purposesDiv.style.display = 'block';
     }
+
+    // FIX: Gestisce il problema del campo nick_name che non si salva se non perde focus
+    const form = document.getElementById('personal-data-form');
+    const submitButton = form?.querySelector('[data-action="submit-form"]');
+    
+    if (form && submitButton) {
+        // Intercetta il click sul pulsante Salva
+        submitButton.addEventListener('click', function(e) {
+            console.log('🔧 DEBUG: Submit button clicked, ensuring all field values are captured...');
+            
+            // Forza il blur sull'elemento attualmente attivo (che ha focus)
+            if (document.activeElement && document.activeElement !== document.body) {
+                console.log('🔧 DEBUG: Active element found:', {
+                    tagName: document.activeElement.tagName,
+                    name: document.activeElement.name,
+                    id: document.activeElement.id,
+                    value: document.activeElement.value
+                });
+                
+                // Forza gli eventi di validazione/aggiornamento
+                document.activeElement.dispatchEvent(new Event('input', { bubbles: true }));
+                document.activeElement.dispatchEvent(new Event('change', { bubbles: true }));
+                document.activeElement.blur();
+            }
+            
+            // Breve delay per permettere ai cambiamenti di essere processati
+            setTimeout(() => {
+                console.log('🔧 DEBUG: Form values before submission:');
+                const formData = new FormData(form);
+                for (let [key, value] of formData.entries()) {
+                    if (key === 'nick_name') {
+                        console.log(`📝 ${key}: "${value}"`);
+                    }
+                }
+            }, 15);
+        });
+        
+        // Alternativa più robusta: intercetta il submit del form
+        form.addEventListener('submit', function(e) {
+            console.log('🔧 DEBUG: Form submit intercepted, final value sync...');
+            
+            // Cerca specificamente il campo nick_name se ha focus
+            const nickNameField = form.querySelector('#nick_name, [name="nick_name"]');
+            if (nickNameField && nickNameField === document.activeElement) {
+                console.log('🔧 DEBUG: nick_name field has focus, forcing value sync');
+                console.log('🔧 DEBUG: Current nick_name value:', nickNameField.value);
+                
+                // Forza tutti gli eventi di sincronizzazione
+                nickNameField.dispatchEvent(new Event('input', { bubbles: true }));
+                nickNameField.dispatchEvent(new Event('change', { bubbles: true }));
+                nickNameField.dispatchEvent(new Event('blur', { bubbles: true }));
+            }
+            
+            // Verifica generale su tutti i campi con focus
+            const activeInput = document.activeElement;
+            if (activeInput && activeInput.form === form && activeInput.tagName === 'INPUT') {
+                console.log('🔧 DEBUG: Syncing active input:', activeInput.name || activeInput.id);
+                activeInput.dispatchEvent(new Event('input', { bubbles: true }));
+                activeInput.dispatchEvent(new Event('change', { bubbles: true }));
+                activeInput.blur();
+            }
+        });
+        
+        console.log('✅ Personal data form field sync fix initialized');
+    }
 });
 </script>
