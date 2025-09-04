@@ -56,8 +56,17 @@ class NotificationBadge extends Component {
                 'user_type' => $user->is_weak_auth ? 'weak' : 'strong'
             ]);
 
-            // Get latest 5 notifications
+            // Get latest 5 unread notifications (same logic as Dashboard)
             $notifications = $user->customNotifications()
+                ->where(function ($query) {
+                    $query->where(function ($subQuery) {
+                        $subQuery->where('outcome', 'LIKE', '%pending%')
+                            ->whereNull('read_at');
+                    })->orWhere(function ($subQuery) {
+                        $subQuery->whereIn('outcome', ['accepted', 'rejected', 'expired'])
+                            ->whereNull('read_at');
+                    });
+                })
                 ->orderBy('created_at', 'desc')
                 ->limit(5)
                 ->get();

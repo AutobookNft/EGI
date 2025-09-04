@@ -15,8 +15,7 @@ use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\On;
 use Illuminate\Support\Facades\Log;
 
-class Dashboard extends Component
-{
+class Dashboard extends Component {
     public $collectionsCount;
     public $collectionMembersCount;
     public $notifications;
@@ -30,8 +29,7 @@ class Dashboard extends Component
     public $activeNotificationId = null;
     protected $user_id;
 
-    public function mount()
-    {
+    public function mount() {
         $user = FegiAuth::user();
 
         $this->user_id = $user?->id; // Salva l'ID utente se esiste, altrimenti sarà null
@@ -92,14 +90,13 @@ class Dashboard extends Component
      * @param int $userId The ID of the user (for created collections count)
      * @param int $collectionId The ID of the specific collection to count members for
      */
-    public function loadStats()
-    {
+    public function loadStats() {
         Log::channel('florenceegi')->info('Dashboard: loadStats - Started', ['for_user_id' => $this->user_id]);
 
         // Conta le collection create da questo utente (Usa $userId)
         $this->collectionsCount = Collection::where('creator_id', $this->user_id)->count();
 
-            // Conta il numero TOTALE di membri UNICI presenti nelle collection create da questo utente.
+        // Conta il numero TOTALE di membri UNICI presenti nelle collection create da questo utente.
         // Questa query filtra CollectionUser entries dove:
         // 1. L'entry CollectionUser appartiene a una Collection...
         // 2. ...la quale Collection è stata creata da $userId.
@@ -112,9 +109,8 @@ class Dashboard extends Component
             // Dentro whereHas, $query si riferisce al builder per il modello Collection.
             $query->where('creator_id', $userId);
         })
-        ->distinct('user_id') // <-- Conta solo i user_id unici tra le entry filtrate
-        ->count();
-
+            ->distinct('user_id') // <-- Conta solo i user_id unici tra le entry filtrate
+            ->count();
     }
 
     /**
@@ -123,8 +119,7 @@ class Dashboard extends Component
      * @return void
      */
     #[On('proposal-declined')]
-    public function handleProposalDeclined()
-    {
+    public function handleProposalDeclined() {
         // Log dell'evento per verifica
         Log::channel('florenceegi')->info('Dashboard: proposal-declined event received.');
 
@@ -136,8 +131,7 @@ class Dashboard extends Component
     }
 
     #[On('proposal-accepted')]
-    public function handleProposalAccepted()
-    {
+    public function handleProposalAccepted() {
         // Log dell'evento per verifica
         Log::channel('florenceegi')->info('Dashboard: proposal-accepted event received.');
 
@@ -148,13 +142,11 @@ class Dashboard extends Component
         session()->flash('message', __('The proposal was accepted successfully and a notification was sent to the proposer.'));
     }
 
-    public function openDeclineModal($notification)
-    {
+    public function openDeclineModal($notification) {
         $this->dispatch('open-decline-modal', $notification);
     }
 
-    public function openAcceptModal($notification)
-    {
+    public function openAcceptModal($notification) {
         // Log::channel('florenceegi')->info('Dashboard: openAcceptModal', [
         //     'notification' => $notification,
         // ]);
@@ -174,8 +166,7 @@ class Dashboard extends Component
     //     $this->loadNotifications();
     // }
     #[On('deleteNotification')]
-    public function deleteNotification($notificationId)
-    {
+    public function deleteNotification($notificationId) {
 
         $user = FegiAuth::user();
 
@@ -188,18 +179,17 @@ class Dashboard extends Component
         $this->loadNotifications();
     }
     #[On('load-notifications')]
-    public function loadNotifications()
-    {
+    public function loadNotifications() {
         $user = FegiAuth::user();
         // Usa optional() per evitare errori se user è null
         $this->pendingNotifications = optional($user)->customNotifications()
             ?->where(function ($query) {
                 $query->where(function ($subQuery) {
                     $subQuery->where('outcome', 'LIKE', '%pending%')
-                            ->whereNull('read_at');
+                        ->whereNull('read_at');
                 })->orWhere(function ($subQuery) {
                     $subQuery->whereIn('outcome', ['accepted', 'rejected', 'expired'])
-                            ->whereNull('read_at');
+                        ->whereNull('read_at');
                 });
             })
             ->orderBy('created_at', 'desc')
@@ -227,8 +217,7 @@ class Dashboard extends Component
         ]);
     }
 
-    public function handleNotificationAction($notificationId, $action)
-    {
+    public function handleNotificationAction($notificationId, $action) {
 
         $user = FegiAuth::user();
         Log::channel('florenceegi')->info('🔔 handleNotificationAction() - Handling notification action:', [
@@ -250,15 +239,13 @@ class Dashboard extends Component
         $this->loadNotifications();
     }
 
-    public function toggleHistoricalNotifications()
-    {
+    public function toggleHistoricalNotifications() {
         $this->loadNotifications();
         $this->showHistoricalNotifications = !$this->showHistoricalNotifications;
     }
 
     #[On('setActiveNotification')]
-    public function setActiveNotification($id)
-    {
+    public function setActiveNotification($id) {
         $this->activeNotificationId = $id;
         $this->loadNotifications();
 
@@ -271,8 +258,7 @@ class Dashboard extends Component
     }
 
 
-    public function getActiveNotification()
-    {
+    public function getActiveNotification() {
         Log::channel('florenceegi')->info('🔎 getActiveNotification() - Checking for active notification:', [
             'activeNotificationId' => $this->activeNotificationId,
         ]);
@@ -316,8 +302,7 @@ class Dashboard extends Component
         return $notification;
     }
 
-    public function render()
-    {
+    public function render() {
         return view('livewire.dashboard', [
             'pendingNotifications' => $this->pendingNotifications ?? collect(),
             'historicalNotifications' => $this->historicalNotifications ?? collect(),
