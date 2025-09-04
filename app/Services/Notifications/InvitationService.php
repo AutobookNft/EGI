@@ -237,7 +237,7 @@ class InvitationService {
                 // die();
 
                 // Controlla se l'utente è già membro della collezione
-                $existingMember = CollectionUser::where('collection_id', $invitationData->collection_id)
+                $existingMember = CollectionUser::where('collection_id', $invitationData->getCollectionId())
                     ->where('user_id', $receiver->id)
                     ->first();
 
