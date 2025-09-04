@@ -32,11 +32,11 @@
                  
             </div>
 
-            <div class="flex">
+            {{-- <div class="flex">
                 <div class="flex items-center text-4xl text-gray-700 shrink-0 dark:text-gray-500">
                     {{ Auth::user()?->name ?? '' }}
                 </div>
-            </div>
+            </div> --}}
 
             <!-- Desktop Mega Menu Component -->
             <div class="hidden sm:ms-6 sm:flex sm:items-center">

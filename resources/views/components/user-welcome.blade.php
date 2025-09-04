@@ -14,11 +14,13 @@ $user = App\Helpers\FegiAuth::user();
         @php
         $welcomeMessage = App\Helpers\FegiAuth::getWelcomeMessage();
         $user = App\Helpers\FegiAuth::user();
+        $userName = App\Helpers\FegiAuth::getUserName();
         
-        // Tronca solo il nick_name se è troppo lungo (max 7 caratteri + ...)
-        if ($user && $user->nick_name && strlen($user->nick_name) > 7) {
-            $truncatedNickName = substr($user->nick_name, 0, 7) . '...';
-            $mobileMessage = str_replace($user->nick_name, $truncatedNickName, $welcomeMessage);
+        // Tronca solo il userName (nick_name) se è troppo lungo (max 7 caratteri + ...)
+        if ($userName && strlen($userName) > 7) {
+            $truncatedUserName = substr($userName, 0, 7) . '...';
+            // Sostituisci solo l'username nel messaggio, preservando il resto
+            $mobileMessage = str_replace($userName, $truncatedUserName, $welcomeMessage);
         } else {
             $mobileMessage = $welcomeMessage;
         }
