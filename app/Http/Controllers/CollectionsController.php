@@ -52,7 +52,31 @@ class CollectionsController extends Controller {
 
         // Costruisci la query di base con le relazioni necessarie
         // Inizialmente selezioniamo solo le colonne della tabella collections
-        $query = Collection::with(['creator', 'epp', 'egis'])
+        $currentUserId = auth()->check() ? auth()->id() : session('connected_user_id');
+        
+        $query = Collection::with([
+            'creator',
+            'epp',
+            'egis' => function ($query) use ($currentUserId) {
+                // Se l'utente non è autenticato, mostra solo EGI pubblicati
+                if (!$currentUserId) {
+                    $query->where('is_published', true);
+                    return;
+                }
+                
+                // Se l'utente è autenticato, costruisce la query condizionale
+                $query->where(function ($q) use ($currentUserId) {
+                    // Mostra tutti gli EGI pubblicati
+                    $q->where('is_published', true)
+                      // O tutti gli EGI delle collezioni di cui è creatore
+                      ->orWhere(function ($subQuery) use ($currentUserId) {
+                          $subQuery->whereHas('collection', function ($collectionQuery) use ($currentUserId) {
+                              $collectionQuery->where('creator_id', $currentUserId);
+                          });
+                      });
+                });
+            }
+        ])
             ->select('collections.*'); // Seleziona tutte le colonne da 'collections' per evitare ambiguità iniziali
 
         // Nuovo filtro opzionale per creator_id
@@ -146,15 +170,40 @@ class CollectionsController extends Controller {
      * @return \Illuminate\View\View The view with collection details
      */
     public function show($id) {
+        // Determina l'ID dell'utente autenticato (strong o weak auth)
+        $currentUserId = auth()->check() ? auth()->id() : session('connected_user_id');
+        
+        // Prima carica la collection per controllare il creator_id
+        $collection = Collection::findOrFail($id);
+        $isCreator = $currentUserId && $currentUserId == $collection->creator_id;
+        
+        // Ricarica la collection con gli EGI filtrati in base ai permessi
         $collection = Collection::with([
             'creator',
             'epp',
+            'egis' => function ($query) use ($isCreator) {
+                if (!$isCreator) {
+                    // Non è il creatore: mostra solo EGI pubblicati
+                    $query->where('is_published', true);
+                }
+                // Se è il creatore: mostra tutti gli EGI (pubblicati e non)
+            },
             'egis.user',
             'egis.owner',
             'likes'
         ])
-        ->withCount(['egis', 'likes', 'reservations'])
-        ->findOrFail($id);
+            ->withCount([
+                'egis' => function ($query) use ($isCreator) {
+                    if (!$isCreator) {
+                        // Non è il creatore: conta solo EGI pubblicati
+                        $query->where('is_published', true);
+                    }
+                    // Se è il creatore: conta tutti gli EGI
+                },
+                'likes',
+                'reservations'
+            ])
+            ->findOrFail($id);
 
         // Verifica like per utente strong auth
         if (auth()->check()) {
