@@ -1076,6 +1076,28 @@ class PersonalDataManager {
     private showMessage(message: string, type: 'success' | 'error' | 'info' = 'info'): void {
         if (window.showToast) {
             window.showToast(message, type);
+        } else if (window.Swal) {
+            // Custom SweetAlert toast for personal data form - positioned lower to avoid covering welcome message
+            window.Swal.fire({
+                toast: true,
+                position: 'top-start',
+                icon: type === 'success' ? 'success' : type === 'error' ? 'error' : 'info',
+                title: message,
+                showConfirmButton: false,
+                timer: type === 'error' ? 8000 : 5000,
+                timerProgressBar: false, // Disabilitato temporaneamente per evitare errore SVG
+                customClass: {
+                    popup: 'personal-data-toast' // Custom class for this specific toast
+                },
+                willOpen: () => {
+                    // Applica il CSS prima che il toast diventi visibile per evitare l'effetto "salto"
+                    const toastElement = document.querySelector('.personal-data-toast') as HTMLElement;
+                    if (toastElement) {
+                        toastElement.style.transform = 'translateY(120px)';
+                        toastElement.style.zIndex = '9999';
+                    }
+                }
+            });
         } else {
             // Fallback message display
             const container = document.getElementById('error-container');

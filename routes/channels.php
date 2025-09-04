@@ -17,3 +17,8 @@ Broadcast::channel('price.{egiId}', function ($user = null, $egiId) {
     return true; // public per guest
     // per private: return $user !== null;
 });
+
+Broadcast::channel('user-welcome.{userId}', function ($user, $userId) {
+    // L'utente può ascoltare solo il proprio canale
+    return $user && (int) $user->id === (int) $userId;
+});

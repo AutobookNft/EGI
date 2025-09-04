@@ -160,3 +160,27 @@ Route::prefix('reservations/pre-launch')->group(function () {
             ->name('api.reservations.prelaunch.check');
     });
 });
+
+/*
+|--------------------------------------------------------------------------
+| User Welcome Message API Route
+|--------------------------------------------------------------------------
+*/
+
+// Get updated welcome message for user-welcome component
+Route::middleware(['auth:sanctum'])->get('/user/welcome-message', function (Request $request) {
+    $user = App\Helpers\FegiAuth::user();
+
+    if (!$user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'User not authenticated'
+        ], 401);
+    }
+
+    return response()->json([
+        'success' => true,
+        'welcome_message' => App\Helpers\FegiAuth::getWelcomeMessage(),
+        'user_name' => App\Helpers\FegiAuth::getUserName()
+    ]);
+})->name('api.user.welcome-message');

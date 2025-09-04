@@ -22,6 +22,7 @@ use App\Livewire\Collections\CreateCollection;
 use App\Livewire\Collections\HeadImagesManager;
 use App\Livewire\Notifications\Wallets\EditWalletModal;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Broadcast;
 use App\Livewire\PhotoUploader;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Api\BiographyController;
@@ -57,6 +58,8 @@ use App\Http\Controllers\Web\BiographyWebController;
 |
 */
 
+// Broadcast Authentication Routes
+Broadcast::routes(['middleware' => ['web', 'auth']]);
 
 
 Route::get('/test-loadstats', function () {

@@ -1,5 +1,5 @@
 <script>console.log('resources/views/navigation-menu.blade.php');</script>
-<nav x-data="{ open: false }" class="bg-white border-b border-gray-100 dark:border-gray-700 dark:bg-gray-800">
+<nav class="bg-white border-b border-gray-100 dark:border-gray-700 dark:bg-gray-800">
     <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
             <div class="flex">
@@ -43,21 +43,41 @@
                 <x-navigation.vanilla-desktop-menu />
             </div>
 
-            <!-- Sezione mobile (schermi piccoli) con due pulsanti: uno per la navbar, uno per la sidebar -->
+            <!-- Sezione mobile (schermi piccoli) con pulsante per la sidebar -->
             <div class="flex items-center -me-2 sm:hidden">
-                <!-- Pulsante per togglare il menu della NAVBAR (Alpine) -->
-                <button @click="open = ! open"
-                    class="inline-flex items-center justify-center p-2 text-gray-400 transition duration-150 ease-in-out rounded-md hover:bg-gray-100 hover:text-gray-500 focus:outline-none dark:text-gray-500 dark:hover:bg-gray-900 dark:hover:text-gray-400">
-                    <svg class="size-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                        <!-- Icona hamburger (visibile quando open = false) -->
-                        <path :class="{ 'inline-flex': !open, 'hidden': open }" class="inline-flex"
-                            stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 6h16M4 12h16M4 18h16" />
-                        <!-- Icona X (visibile quando open = true) -->
-                        <path :class="{ 'hidden': !open, 'inline-flex': open }" class="hidden" stroke-linecap="round"
-                            stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
+                {{-- Notification Badge (Mobile) --}}
+                @if(App\Helpers\FegiAuth::check())
+                <x-notification-badge />
+                @endif
+
+                {{-- Menu Mobile Button --}}
+                @auth
+                <button type="button" data-mobile-menu-trigger class="block p-1 transition-colors rounded-full md:hidden hover:bg-gray-800/50">
+                    @if (Laravel\Jetstream\Jetstream::managesProfilePhotos())
+                        <img class="object-cover rounded-full size-8 ring-2 ring-gray-600"
+                            src="{{ Auth::user()->profile_photo_url }}"
+                            alt="{{ Auth::user()->name }}" />
+                    @else
+                        <div class="flex items-center justify-center w-8 h-8 text-sm font-bold text-white bg-gray-600 rounded-full">
+                            {{ substr(Auth::user()->name, 0, 1) }}
+                        </div>
+                    @endif
                 </button>
+                @endauth
+
+                {{-- Bottone Accedi (Solo per guest su mobile) --}}
+                @guest
+                <div class="block md:hidden">
+                    <a href="{{ route('login') }}"
+                        class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-300 bg-gray-800 border border-gray-700 rounded-md hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                        {{ __('collection.login') }}
+                    </a>
+                    <a href="{{ route('register') }}" id="register-link-mobile"
+                        class="inline-flex items-center px-4 py-2 ml-2 text-sm font-medium text-gray-300 bg-gray-800 border border-gray-700 rounded-md hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                        {{ __('collection.register') }}
+                    </a>
+                </div>
+                @endguest
             </div>
         </div>
     </div>

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\User;
 
+use App\Events\UserWelcomeUpdated;
 use App\Http\Requests\User\UpdatePersonalDataRequest;
 use App\Models\User;
 use App\Models\UserPersonalData;
@@ -665,7 +666,25 @@ class PersonalDataController extends BaseUserDomainController {
         }
 
         // ===================================================================
-        // 4. RISULTATO FINALE
+        // 4. BROADCAST EVENT FOR REAL-TIME UI UPDATES
+        // ===================================================================
+
+        // Se ci sono stati cambiamenti ai dati che influenzano il messaggio di benvenuto
+        $welcomeRelatedFields = ['nick_name', 'name', 'last_name', 'gender'];
+        $welcomeDataChanged = array_intersect_key($changes, array_flip($welcomeRelatedFields));
+
+        if (!empty($welcomeDataChanged)) {
+            $this->logger->info('Broadcasting welcome message update', [
+                'user_id' => $user->id,
+                'changed_fields' => array_keys($welcomeDataChanged)
+            ]);
+
+            // Broadcast l'evento per aggiornare tutti i client connessi
+            broadcast(new UserWelcomeUpdated($user->id));
+        }
+
+        // ===================================================================
+        // 5. RISULTATO FINALE
         // ===================================================================
         return [
             'success' => true,

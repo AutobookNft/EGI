@@ -593,7 +593,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 console.log('🔧 DEBUG: Submitting form programmatically...');
                 isProcessingSubmit = false;
-                form.submit(); // Submit programmatico dopo il sync
+                
+                // Submit normale del form - il broadcast gestirà l'aggiornamento automaticamente
+                form.submit();
             }, 50); // Aumentato a 50ms per maggiore affidabilità
         });
         
