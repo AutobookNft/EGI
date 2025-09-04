@@ -52,8 +52,8 @@ class CollectionsController extends Controller {
 
         // Costruisci la query di base con le relazioni necessarie
         // Inizialmente selezioniamo solo le colonne della tabella collections
-        $currentUserId = auth()->check() ? auth()->id() : session('connected_user_id');
-        
+        $currentUserId = FegiAuth::id();
+
         $query = Collection::with([
             'creator',
             'epp',
@@ -63,17 +63,17 @@ class CollectionsController extends Controller {
                     $query->where('is_published', true);
                     return;
                 }
-                
+
                 // Se l'utente è autenticato, costruisce la query condizionale
                 $query->where(function ($q) use ($currentUserId) {
                     // Mostra tutti gli EGI pubblicati
                     $q->where('is_published', true)
-                      // O tutti gli EGI delle collezioni di cui è creatore
-                      ->orWhere(function ($subQuery) use ($currentUserId) {
-                          $subQuery->whereHas('collection', function ($collectionQuery) use ($currentUserId) {
-                              $collectionQuery->where('creator_id', $currentUserId);
-                          });
-                      });
+                        // O tutti gli EGI delle collezioni di cui è creatore
+                        ->orWhere(function ($subQuery) use ($currentUserId) {
+                            $subQuery->whereHas('collection', function ($collectionQuery) use ($currentUserId) {
+                                $collectionQuery->where('creator_id', $currentUserId);
+                            });
+                        });
                 });
             }
         ])
@@ -171,12 +171,12 @@ class CollectionsController extends Controller {
      */
     public function show($id) {
         // Determina l'ID dell'utente autenticato (strong o weak auth)
-        $currentUserId = auth()->check() ? auth()->id() : session('connected_user_id');
-        
+        $currentUserId = FegiAuth::id();
+
         // Prima carica la collection per controllare il creator_id
         $collection = Collection::findOrFail($id);
         $isCreator = $currentUserId && $currentUserId == $collection->creator_id;
-        
+
         // Ricarica la collection con gli EGI filtrati in base ai permessi
         $collection = Collection::with([
             'creator',
