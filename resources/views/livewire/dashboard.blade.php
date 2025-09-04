@@ -157,6 +157,59 @@ console.log('🔧 DEBUG: Script notifiche caricato con event delegation');
 document.addEventListener('DOMContentLoaded', function() {
     console.log('📊 DEBUG: DOM caricato, configurando event delegation...');
     
+    // 🔗 GESTIONE HIGHLIGHT NOTIFICA DAL BADGE
+    // Controlla se c'è un hash nell'URL per evidenziare una specifica notifica
+    function handleNotificationHighlight() {
+        const hash = window.location.hash;
+        if (hash && hash.startsWith('#notification-')) {
+            const notificationId = hash.replace('#notification-', '');
+            console.log('🎯 Richiesta evidenziazione notifica dal badge:', notificationId);
+            
+            // Trova la notifica thumbnail corrispondente
+            const notificationThumbnail = document.querySelector(`[data-notification-id="${notificationId}"]`);
+            if (notificationThumbnail) {
+                console.log('✅ Notifica trovata, evidenziando...', notificationThumbnail);
+                
+                // Scrolla alla notifica
+                notificationThumbnail.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'center' 
+                });
+                
+                // Evidenzia la notifica
+                notificationThumbnail.style.background = '#4F46E5';
+                notificationThumbnail.style.transform = 'scale(1.05)';
+                notificationThumbnail.style.boxShadow = '0 0 20px rgba(79, 70, 229, 0.5)';
+                
+                // Simula click per aprire i dettagli
+                setTimeout(() => {
+                    notificationThumbnail.click();
+                }, 500);
+                
+                // Rimuovi l'evidenziazione dopo qualche secondo
+                setTimeout(() => {
+                    notificationThumbnail.style.background = '';
+                    notificationThumbnail.style.transform = '';
+                    notificationThumbnail.style.boxShadow = '';
+                    // Rimuovi l'hash dall'URL
+                    history.replaceState(null, null, window.location.pathname);
+                }, 3000);
+            } else {
+                console.log('❌ Notifica non trovata nei thumbnails disponibili');
+            }
+        }
+    }
+    
+    // Esegui l'highlight al caricamento
+    handleNotificationHighlight();
+    
+    // Esegui l'highlight anche quando la pagina viene aggiornata via Livewire
+    if (typeof Livewire !== 'undefined') {
+        Livewire.hook('message.processed', () => {
+            setTimeout(handleNotificationHighlight, 100);
+        });
+    }
+    
     // Verifica contenitori notifiche esistenti
     const notificationContainers = document.querySelectorAll('#notification-details, .notification-thumbnail, .notification-item');
     console.log(`🔍 Contenitori notifiche trovati: ${notificationContainers.length}`, notificationContainers);

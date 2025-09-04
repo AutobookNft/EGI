@@ -29,6 +29,11 @@ class NotificationBadge extends Component {
         $this->logger = $logger;
         $this->errorManager = $errorManager;
 
+        // Inizializza le proprietà typed prima di loadNotifications()
+        $this->notifications = [];
+        $this->unreadCount = 0;
+        $this->hasNotifications = false;
+
         $this->loadNotifications();
     }
 
@@ -67,10 +72,11 @@ class NotificationBadge extends Component {
                 return [
                     'id' => $notification->id,
                     'type' => $this->getNotificationType($notification),
+                    'view' => $notification->data['view'] ?? 'notification',
                     'message' => $this->getNotificationMessage($notification),
                     'created_at' => $notification->created_at->diffForHumans(),
                     'is_read' => $notification->read_at !== null,
-                    'url' => route('notifications.show', $notification->id)
+                    'url' => route('dashboard') . '#notification-' . $notification->id
                 ];
             })->toArray();
 

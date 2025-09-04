@@ -194,11 +194,13 @@ class Dashboard extends Component
         // Usa optional() per evitare errori se user è null
         $this->pendingNotifications = optional($user)->customNotifications()
             ?->where(function ($query) {
-                $query->where('outcome', 'LIKE', '%pending%')
-                    ->orWhere(function ($subQuery) {
-                        $subQuery->whereIn('outcome', ['accepted', 'rejected', 'expired'])
-                                ->whereNull('read_at');
-                    });
+                $query->where(function ($subQuery) {
+                    $subQuery->where('outcome', 'LIKE', '%pending%')
+                            ->whereNull('read_at');
+                })->orWhere(function ($subQuery) {
+                    $subQuery->whereIn('outcome', ['accepted', 'rejected', 'expired'])
+                            ->whereNull('read_at');
+                });
             })
             ->orderBy('created_at', 'desc')
             ->with('model')
