@@ -436,6 +436,11 @@ return [
 
         // JavaScript messages
         'link_copied_to_clipboard' => 'Link in die Zwischenablage kopiert!',
+
+        // Edit data modal
+        'edit_button' => 'Daten bearbeiten',
+        'manage_team' => 'Team verwalten',
     ],
 
+    'back_to_collection' => 'Zurück zur Sammlung',
 ];

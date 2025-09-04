@@ -57,6 +57,7 @@ return [
     'create_new_gallery' => 'Create a new gallery',
     'invite_collection_member' => 'Invite a member to the collection',
     'came_back_to_collection' => 'Back to the collection',
+    'back_to_collection' => 'Back to Collection',
     'confirm_delete_title' => 'Are you sure?',
     'confirm_delete_text' => 'This action will permanently delete the :type image!',
     'confirm_delete_button' => 'Yes, delete!',
@@ -451,6 +452,7 @@ return [
 
         // Edit data modal
         'edit_button' => 'Edit data',
+        'manage_team' => 'Manage Team',
         'edit_modal_title' => 'Edit collection data',
         'field_name' => 'Name',
         'field_description' => 'Description',

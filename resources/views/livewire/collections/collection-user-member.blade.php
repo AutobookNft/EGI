@@ -5,14 +5,21 @@
 
         <!-- Titolo della sezione -->
         <div class="flex flex-wrap items-start justify-between gap-4 mb-6">
-            <div>
+            <div class="flex-1">
+                <!-- Bottone torna alla collection -->
+                <div class="mb-3">
+                    <a href="{{ route('home.collections.show', ['id' => $collectionId]) }}" 
+                       class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-300 transition-colors duration-200 rounded-lg hover:text-white hover:bg-gray-700">
+                        <span class="mr-2 material-symbols-outlined">arrow_back</span>
+                        {{ __('collection.back_to_collection') }}
+                    </a>
+                </div>
+                
                 <h2 class="text-2xl font-bold text-white">{{ $collectionName }}</h2>
                 <p class="text-sm text-gray-400">
                     {{ __('collection.wallet.owner') }}: {{ $collectionOwner->name }} {{ $collectionOwner->last_name }}
                 </p>
                 <p class="text-sm text-gray-400">{{ __('collection.team_members_description') }}</p>
-
-
             </div>
 
             @if ($canCreateTeam)
@@ -165,7 +172,7 @@
     </div>
 
     <!-- Bottone che permette di aprire la collection -->
-    @include('livewire.collection-manager-includes.back_to_collection_button')
+    {{-- @include('livewire.collection-manager-includes.back_to_collection_button') --}}
 
     @if ($show)
         <!-- Include le Modali -->

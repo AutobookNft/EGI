@@ -436,6 +436,11 @@ return [
 
         // JavaScript messages
         'link_copied_to_clipboard' => 'Lien copié dans le presse-papiers !',
+
+        // Edit data modal
+        'edit_button' => 'Modifier les données',
+        'manage_team' => 'Gérer l\'Équipe',
     ],
 
+    'back_to_collection' => 'Retour à la Collection',
 ];

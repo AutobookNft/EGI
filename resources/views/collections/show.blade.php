@@ -196,6 +196,14 @@ if (is_array($collection)) {
                     <span class="mr-0 text-lg material-symbols-outlined sm:text-base sm:mr-1">edit</span>
                     <span class="hidden text-sm sm:inline">{{ __('collection.show.edit_button') }}</span>
                 </button>
+
+                {{-- Team Management Button - Compact --}}
+                <a href="{{ route('collections.collection_user', ['id' => $collection->id]) }}"
+                    class="flex items-center justify-center w-10 h-10 text-sm font-medium text-white transition-all duration-300 border rounded-lg bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/20 sm:w-auto sm:h-auto sm:px-4 sm:py-2"
+                    title="{{ __('collection.show.manage_team') }}">
+                    <span class="mr-0 text-lg material-symbols-outlined sm:text-base sm:mr-1">group</span>
+                    <span class="hidden text-sm sm:inline">{{ __('collection.show.manage_team') }}</span>
+                </a>
                 @endif
             </div>
         </div>

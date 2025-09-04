@@ -58,6 +58,7 @@ return [
     'create_new_gallery' => 'Crea una nuova galleria',
     'invite_collection_member' => 'Invita un membro alla collection',
     'came_back_to_collection' => 'Torna alla collection',
+    'back_to_collection' => 'Torna alla Collezione',
     'confirm_delete_title' => 'Sei sicuro?',
     'confirm_delete_text' => 'Questa azione eliminerà l\'immagine :type definitivamente!',
     'confirm_delete_button' => 'Sì, elimina!',
@@ -467,6 +468,7 @@ return [
 
         // Edit data modal
         'edit_button' => 'Modifica dati',
+        'manage_team' => 'Gestisci Team',
         'edit_modal_title' => 'Modifica dati collezione',
         'field_name' => 'Nome',
         'field_description' => 'Descrizione',

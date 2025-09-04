@@ -17,8 +17,7 @@ use Ultra\UltraLogManager\UltraLogManager;
  * @date 2025-08-15
  * @purpose Handle user responses to reservation notifications (archive, dismiss, etc.)
  */
-class ReservationNotificationHandler implements NotificationHandlerInterface
-{
+class ReservationNotificationHandler implements NotificationHandlerInterface {
     /**
      * Constructor with dependency injection
      *
@@ -28,7 +27,8 @@ class ReservationNotificationHandler implements NotificationHandlerInterface
     public function __construct(
         private UltraLogManager $logger,
         private ErrorManagerInterface $errorManager
-    ) {}
+    ) {
+    }
 
     /**
      * Handle notification response action
@@ -38,8 +38,7 @@ class ReservationNotificationHandler implements NotificationHandlerInterface
      * @param array $data Additional data for the action
      * @return array Response array with success status and message
      */
-    public function handle(string $action, Model $payload, array $data = []): array
-    {
+    public function handle(string $action, Model $payload, array $data = []): array {
         if (!$payload instanceof NotificationPayloadReservation) {
             $this->logger->error('[RESERVATION_HANDLER] Invalid payload type', [
                 'expected' => NotificationPayloadReservation::class,
@@ -63,7 +62,7 @@ class ReservationNotificationHandler implements NotificationHandlerInterface
         ]);
 
         try {
-            return match($action) {
+            return match ($action) {
                 'archive' => $this->handleArchive($payload, $data),
                 'dismiss' => $this->handleDismiss($payload, $data),
                 'view_details' => $this->handleViewDetails($payload, $data),
@@ -96,8 +95,7 @@ class ReservationNotificationHandler implements NotificationHandlerInterface
      * @param array $data Additional data
      * @return array Response array
      */
-    private function handleArchive(NotificationPayloadReservation $payload, array $data): array
-    {
+    private function handleArchive(NotificationPayloadReservation $payload, array $data): array {
         try {
             // Mark the notification as read and archived
             if (isset($data['notification_id'])) {
@@ -132,7 +130,6 @@ class ReservationNotificationHandler implements NotificationHandlerInterface
                     'archived_at' => now()->toIso8601String()
                 ]
             ];
-
         } catch (\Exception $e) {
             $this->logger->error('[RESERVATION_HANDLER] Archive failed', [
                 'payload_id' => $payload->id,
@@ -150,8 +147,7 @@ class ReservationNotificationHandler implements NotificationHandlerInterface
      * @param array $data Additional data
      * @return array Response array
      */
-    private function handleDismiss(NotificationPayloadReservation $payload, array $data): array
-    {
+    private function handleDismiss(NotificationPayloadReservation $payload, array $data): array {
         try {
             // Soft delete the notification without marking as read
             if (isset($data['notification_id'])) {
@@ -174,7 +170,6 @@ class ReservationNotificationHandler implements NotificationHandlerInterface
                     'dismissed_at' => now()->toIso8601String()
                 ]
             ];
-
         } catch (\Exception $e) {
             $this->logger->error('[RESERVATION_HANDLER] Dismiss failed', [
                 'payload_id' => $payload->id,
@@ -192,8 +187,7 @@ class ReservationNotificationHandler implements NotificationHandlerInterface
      * @param array $data Additional data
      * @return array Response array
      */
-    private function handleViewDetails(NotificationPayloadReservation $payload, array $data): array
-    {
+    private function handleViewDetails(NotificationPayloadReservation $payload, array $data): array {
         try {
             $payload->load(['reservation.egi', 'reservation.user']);
 
@@ -219,7 +213,6 @@ class ReservationNotificationHandler implements NotificationHandlerInterface
                     ]
                 ]
             ];
-
         } catch (\Exception $e) {
             $this->logger->error('[RESERVATION_HANDLER] View details failed', [
                 'payload_id' => $payload->id,
@@ -237,8 +230,7 @@ class ReservationNotificationHandler implements NotificationHandlerInterface
      * @param array $data Additional data
      * @return array Response array
      */
-    private function handleViewRanking(NotificationPayloadReservation $payload, array $data): array
-    {
+    private function handleViewRanking(NotificationPayloadReservation $payload, array $data): array {
         try {
             // Get current ranking for this EGI
             $rankings = \App\Models\Reservation::active()
@@ -270,7 +262,6 @@ class ReservationNotificationHandler implements NotificationHandlerInterface
                     })
                 ]
             ];
-
         } catch (\Exception $e) {
             $this->logger->error('[RESERVATION_HANDLER] View ranking failed', [
                 'payload_id' => $payload->id,
@@ -288,8 +279,7 @@ class ReservationNotificationHandler implements NotificationHandlerInterface
      * @param NotificationPayloadReservation $payload The notification payload
      * @return array Response array
      */
-    private function handleUnknownAction(string $action, NotificationPayloadReservation $payload): array
-    {
+    private function handleUnknownAction(string $action, NotificationPayloadReservation $payload): array {
         $this->logger->warning('[RESERVATION_HANDLER] Unknown action requested', [
             'action' => $action,
             'payload_id' => $payload->id,
@@ -312,8 +302,7 @@ class ReservationNotificationHandler implements NotificationHandlerInterface
      *
      * @return array List of supported actions
      */
-    public function getSupportedActions(): array
-    {
+    public function getSupportedActions(): array {
         return [
             'archive' => __('reservation.notifications.actions.archive'),
             'dismiss' => __('reservation.notifications.actions.dismiss'),

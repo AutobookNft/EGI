@@ -436,6 +436,11 @@ return [
 
         // JavaScript messages
         'link_copied_to_clipboard' => '¡Enlace copiado al portapapeles!',
+
+        // Edit data modal
+        'edit_button' => 'Editar datos',
+        'manage_team' => 'Gestionar Equipo',
     ],
 
+    'back_to_collection' => 'Volver a la Colección',
 ];

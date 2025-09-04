@@ -47,7 +47,7 @@
             </div>
 
             <!-- Sidebar -->
-            <livewire:sidebar />
+            {{-- <livewire:sidebar /> --}}
 
             @stack('modals')
 

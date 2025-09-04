@@ -436,6 +436,11 @@ return [
 
         // JavaScript messages
         'link_copied_to_clipboard' => 'Link copiado para a área de transferência!',
+
+        // Edit data modal
+        'edit_button' => 'Editar dados',
+        'manage_team' => 'Gerenciar Equipe',
     ],
 
+    'back_to_collection' => 'Voltar à Coleção',
 ];
