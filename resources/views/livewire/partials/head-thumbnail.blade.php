@@ -36,8 +36,8 @@
     $borderClass = $borderColors[$priority];
 @endphp
 
-<!-- Modern Notification Card with Priority System -->
-<div class="notification-thumbnail group bg-white/10 hover:bg-white/20 border {{ $borderClass }} rounded-2xl p-4 transition-all duration-300 cursor-pointer transform hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/20 relative overflow-hidden"
+<!-- Modern Notification Card with Priority System - bordi ridotti -->
+<div class="notification-thumbnail group bg-white/10 hover:bg-white/20 rounded-2xl p-6 transition-all duration-300 cursor-pointer transform hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/20 relative overflow-hidden"
      data-notification-id="{{ $notif->id }}"
      data-created-at="{{ $notif->created_at }}"
      data-status="{{ $notif->model->status ?? null }}"

@@ -112,7 +112,13 @@
                     {{-- Notification Badge (Desktop) --}}
                     @if(App\Helpers\FegiAuth::check())
                     <div class="hidden md:block">
-                        <x-notification-badge />
+                        <x-notific                        /* MOBILE - Titolo cliccabile */
+                        w-full flex justify-between    /* Occupa tutto lo spazio */
+                        chevron visibile              /* Indica collassabilità */
+                        
+                        /* DESKTOP - Titolo normale */
+                        md:pointer-events-none        /* Non cliccabile */
+                        md:hidden                     /* Chevron nascosto */ation-badge />
                     </div>
                     @endif
 

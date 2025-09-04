@@ -99,22 +99,27 @@ class ReservationNotificationHandler implements NotificationHandlerInterface
     private function handleArchive(NotificationPayloadReservation $payload, array $data): array
     {
         try {
-            // Mark the notification as read
+            // Mark the notification as read and archived
             if (isset($data['notification_id'])) {
                 $notification = \DB::table('notifications')
                     ->where('id', $data['notification_id'])
                     ->where('notifiable_id', $payload->user_id)
                     ->first();
 
-                if ($notification && is_null($notification->read_at)) {
+                if ($notification) {
                     \DB::table('notifications')
                         ->where('id', $data['notification_id'])
-                        ->update(['read_at' => now()]);
+                        ->update([
+                            'read_at' => now(),
+                            'outcome' => \App\Enums\NotificationStatus::ARCHIVED->value // 🎯 QUESTO È IL FIX!
+                        ]);
 
                     $this->logger->info('[RESERVATION_HANDLER] Notification archived', [
                         'notification_id' => $data['notification_id'],
                         'payload_id' => $payload->id,
-                        'user_id' => $payload->user_id
+                        'user_id' => $payload->user_id,
+                        'previous_outcome' => $notification->outcome,
+                        'new_outcome' => \App\Enums\NotificationStatus::ARCHIVED->value
                     ]);
                 }
             }

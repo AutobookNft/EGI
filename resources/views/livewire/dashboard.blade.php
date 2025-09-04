@@ -1,5 +1,5 @@
 <div class="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-blue-900">
-    <div class="container px-4 py-8 mx-auto">
+    <div class="container px-4 py-8 mx-auto max-w-none">
         <!-- Notification Center Header -->
         <div class="mb-8 text-center">
             <h1 class="mb-2 text-4xl font-bold text-white font-display">
@@ -10,8 +10,8 @@
             </p>
         </div>
 
-        <!-- Main Notification Container -->
-        <div class="p-6 text-white border shadow-2xl bg-white/10 backdrop-blur-lg border-white/20 rounded-3xl"
+        <!-- Main Content - senza bordi e più largo -->
+        <div class="text-white"
              x-data="{
                  loading: false,
                  selectedNotification: null,
@@ -102,8 +102,8 @@
                 </div>
             </div>
 
-            <!-- Notification Details Section -->
-            <div id="notification-details" class="p-8 mb-6 transition-all duration-300 border bg-white/5 backdrop-blur-sm border-white/10 rounded-2xl hover:bg-white/10 hover:border-white/20">
+            <!-- Notification Details Section - più largo e senza bordi eccessivi -->
+            <div id="notification-details" class="p-8 mb-8 transition-all duration-300 bg-white/5 backdrop-blur-sm rounded-2xl hover:bg-white/10">
                 @php
                     if (count($pendingNotifications) > 0) {
                         $text = __('notification.select_notification');
@@ -220,6 +220,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Aggiorna il bottone
                 archiveButton.textContent = 'Archiviata!';
                 archiveButton.style.opacity = '0.5';
+                
+                // Refresh dei dati Livewire per aggiornare le notifiche
+                if (typeof Livewire !== 'undefined') {
+                    console.log("🔄 Refresh Livewire component...");
+                    Livewire.dispatch('load-notifications');
+                }
                 
                 // Trova e rimuovi la notifica dal DOM
                 const notificationElement = document.querySelector(`[data-notification-id="${notificationId}"]`);
