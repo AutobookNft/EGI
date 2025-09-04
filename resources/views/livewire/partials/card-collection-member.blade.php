@@ -59,7 +59,7 @@
             !$member->notificationPayloadWallets->contains('status', 'pending_create') &&
             !in_array($member->role, ['Natan', 'EPP']))
         <!-- Create Wallet Button -->
-        <button data-collection-id="{{ $member->collection_id }}" data-user-id="{{ $member->user_id }}"
+        <button data-collection-id="{{ $member->collection_id }}" data-wallet-address="{{ $memberWallet ?? '' }}" data-user-id="{{ $member->user_id }}"
             class="create-wallet-btn mt-4 flex w-full transform items-center justify-center rounded-xl bg-gradient-to-r from-purple-600 to-blue-500 px-6 py-2.5 font-medium text-white transition-all duration-300 hover:scale-[1.02] hover:from-purple-700 hover:to-blue-600">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />

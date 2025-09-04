@@ -17,46 +17,43 @@ export class RequestCreateNotificationWallet {
             btn.addEventListener('click', async (e) => {
                 const collectionId = e.target.dataset.collectionId;
                 const userId = parseInt(e.target.dataset.userId, 10);
+                const walletAddress = e.target.dataset.walletAddress || '';
 
-                console.log("🔍 Valori recuperati:", { collectionId, userId });
+                console.log("🔍 Valori recuperati:", { collectionId, userId, walletAddress });
 
                 if (!collectionId || isNaN(userId)) {
                     console.error("❌ Errore: Manca collectionId o userId nel dataset!");
                     return;
                 }
 
-                await this.openCreateWalletModal(collectionId, userId);
+                await this.openCreateWalletModal(collectionId, userId, walletAddress);
             });
         });
     }
-    async openCreateWalletModal(collectionId, userId) {
-        console.log("🔍 Aprendo modale con:", { collectionId, userId });
+    async openCreateWalletModal(collectionId, userId, walletAddress = '') {
+        const modalHtml = await this.getCreateModalHtml(walletAddress);
 
         try {
-            // 🔥 Assicura che le traduzioni siano caricate prima di aprire il modale
-            await this.ensureTranslationsLoaded();
-
             const result = await Swal.fire({
                 title: window.getTranslation('collection.wallet.create_the_wallet'),
-                html: await this.getCreateModalHtml(),
+                html: modalHtml,
                 showCancelButton: true,
-                confirmButtonText: window.getTranslation('collection.wallet.save'),
-                cancelButtonText: window.getTranslation('collection.wallet.cancel'),
+                confirmButtonText: window.getTranslation('collection.wallet.create'),
+                cancelButtonText: 'Annulla',
+                width: 600,
                 customClass: {
-                    container: 'wallet-modal-container',
-                    popup: 'wallet-modal-popup bg-gray-800',
-                    input: 'wallet-modal-input'
+                    popup: 'bg-gray-800 text-white',
+                    title: 'text-white',
+                    content: 'text-white'
                 },
                 preConfirm: () => this.validateAndCollectData(collectionId, userId)
             });
-
-            if (result.isConfirmed) {
-                // console.log("✅ Dati ricevuti da Swal:", result.value);
+            
+            if (result.isConfirmed && result.value) {
                 await this.handleCreateWallet(result.value);
             }
         } catch (error) {
-            console.error('Error in wallet modal:', error);
-            this.showError(window.getTranslation('collection.wallet.creation_error_generic'));
+            console.error("❌ Errore durante l'apertura del modal:", error);
         }
     }
 
@@ -83,7 +80,7 @@ export class RequestCreateNotificationWallet {
         return data;
     }
 
-    async getCreateModalHtml() {
+    async getCreateModalHtml(walletAddress = '') {
         console.log("🔍 Caricamento HTML del modale...");
 
         return `
@@ -96,6 +93,7 @@ export class RequestCreateNotificationWallet {
                            id="walletAddress"
                            class="swal2-input bg-gray-700 text-white"
                            style="width: 90%; max-width: 350px; margin: auto; padding: 8px;"
+                           value="${walletAddress}"
                            placeholder="${window.getTranslation('collection.wallet.address_placeholder')}">
                 </div>
 
@@ -178,7 +176,7 @@ export class RequestCreateNotificationWallet {
     showSuccess(message) {
         Swal.fire({
             icon: 'success',
-            title: window.getTranslation('collection.wallet.success_title'),
+            title: window.getTranslation('collection.wallet.creation_success'),
             text: message,
             timer: 3000
         });
@@ -187,7 +185,7 @@ export class RequestCreateNotificationWallet {
     showError(message) {
         Swal.fire({
             icon: 'error',
-            title: window.getTranslation('collection.wallet.error.error_title'),
+            title: window.getTranslation('collection.wallet.creation_error'),
             text: message
         });
     }

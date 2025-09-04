@@ -46,7 +46,12 @@
     <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
 
         @foreach ($collectionUsers as $member)
-            @include('livewire.partials.card-collection-member')
+            @php
+                // Recupera il wallet dell'utente membro
+                $memberUser = \App\Models\User::find($member->user_id);
+                $memberWallet = $memberUser ? $memberUser->wallet : '';
+            @endphp
+            @include('livewire.partials.card-collection-member', ['memberWallet' => $memberWallet])
         @endforeach
 
         <!-- Sezione Invitation proposal -->

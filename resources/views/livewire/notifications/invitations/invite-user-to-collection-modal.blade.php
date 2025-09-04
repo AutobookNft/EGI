@@ -1,5 +1,4 @@
 <div>
-
     <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
         <div class="w-full max-w-md p-6 bg-gray-800 shadow-lg rounded-2xl">
             <h3 class="mb-4 text-2xl font-bold text-white">{{ __('Invite Collection Member') }}</h3>

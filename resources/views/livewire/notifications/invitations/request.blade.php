@@ -92,7 +92,7 @@
                 data-action={{ App\Enums\NotificationStatus::ARCHIVED->value }}
                 aria-label="Archivia questa notifica"
                 style="{{ $notification->outcome === 'Accepted' ? 'display: block;' : 'display: none;' }}">
-                🗄️ {{ __('label.archived') }}
+                🗄️ {{ __('label.archive') }}
             </button>
         </div>
     </div>
