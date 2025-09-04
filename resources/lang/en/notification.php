@@ -61,12 +61,12 @@ return [
         'confirm_action_prompt' => 'Are you sure you want to confirm this action?',
         'unknown' => [
             'content' => 'You have received an unknown notification.',
-                'title' => 'Unknown Notification',
-            ],
+            'title' => 'Unknown Notification',
+        ],
         'consent_updated' => [
-                'content' => 'Your consent has been updated.',
-                'title' => 'Consent Updated',
-            ],
+            'content' => 'Your consent has been updated.',
+            'title' => 'Consent Updated',
+        ],
         'breach_report_received' => [
             'content' => 'You have received a data breach report.',
             'title' => 'Data Breach Report Received',
@@ -102,5 +102,15 @@ return [
 
     ],
 
+    // Notification Type Labels  
+    'Wallet' => 'Wallet',
+    'Highest Bid' => 'Highest Bid',
+    'Superseded' => 'Superseded',
+    'Invitation' => 'Invitation',
+    'Alert' => 'Alert',
+    'Urgent' => 'Urgent',
+    'New High Bid' => 'New High Bid',
+    'Recent' => 'Recent',
+    'Today' => 'Today',
+    'Older' => 'Older',
 ];
-

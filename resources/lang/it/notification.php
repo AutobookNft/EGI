@@ -120,5 +120,17 @@ return [
             'content' => 'Hai ricevuto una richiesta di consenso al trattamento dei dati.',
             'title' => 'Richiesta di consenso al trattamento dei dati ricevuta',
         ],
-    ]
+    ],
+
+    // Notification Type Labels
+    'Wallet' => 'Portafoglio',
+    'Highest Bid' => 'Offerta Più Alta',
+    'Superseded' => 'Superata',
+    'Invitation' => 'Invito',
+    'Alert' => 'Avviso',
+    'Urgent' => 'Urgente',
+    'New High Bid' => 'Nuova Offerta Alta',
+    'Recent' => 'Recente',
+    'Today' => 'Oggi',
+    'Older' => 'Precedente',
 ];

@@ -21,12 +21,12 @@ use Illuminate\Http\{Request, JsonResponse};
 use Illuminate\Support\Facades\{Auth, Log};
 use Illuminate\View\View;
 
-class NotificationWalletResponseController extends Controller
-{
+class NotificationWalletResponseController extends Controller {
     public function __construct(
         private readonly ResponseWalletService $responseWalletService,
         private readonly InvitationService $responseInvitationService,
-    ) {}
+    ) {
+    }
 
     /**
      * Gestisce la risposta a una notifica wallet (accettazione o rifiuto)
@@ -35,8 +35,7 @@ class NotificationWalletResponseController extends Controller
      * @return JsonResponse
      * @throws Exception
      */
-    public function response(Request $request): JsonResponse
-    {
+    public function response(Request $request): JsonResponse {
         $action = $request->input('action');
         $notificationId = $request->input('notificationId');
 
@@ -51,7 +50,8 @@ class NotificationWalletResponseController extends Controller
             NotificationStatus::UPDATE->value,
             NotificationStatus::REJECTED->value,
             NotificationStatus::ARCHIVED->value,
-            NotificationStatus::DONE->value])) {
+            NotificationStatus::DONE->value
+        ])) {
             return response()->json(
                 WalletResponse::error(
                     $notificationId,
@@ -70,7 +70,7 @@ class NotificationWalletResponseController extends Controller
 
             $notification = $this->findNotification($notificationId);
 
-            return match($action) {
+            return match ($action) {
                 NotificationStatus::ACCEPTED->value => $this->handleAcceptCreate($notification),
                 NotificationStatus::UPDATE->value => $this->handleAcceptUpdate($notification),
                 NotificationStatus::REJECTED->value => $this->handleReject($notification, $request),
@@ -79,8 +79,6 @@ class NotificationWalletResponseController extends Controller
 
                 default => $this->handleDone($notification)
             };
-
-
         } catch (Exception $e) {
 
             Log::channel('florenceegi')->error('Errore elaborazione notifica', [
@@ -100,8 +98,7 @@ class NotificationWalletResponseController extends Controller
     /**
      * Gestisce l'accettazione di una notifica wallet
      */
-    private function handleAcceptCreate(CustomDatabaseNotification $notification): JsonResponse
-    {
+    private function handleAcceptCreate(CustomDatabaseNotification $notification): JsonResponse {
 
         $acceptRequest = WalletAcceptRequest::fromNotification($notification);
 
@@ -122,8 +119,7 @@ class NotificationWalletResponseController extends Controller
     /**
      * Gestisce l'accettazione di una notifica wallet
      */
-    private function handleAcceptUpdate(CustomDatabaseNotification $notification): JsonResponse
-    {
+    private function handleAcceptUpdate(CustomDatabaseNotification $notification): JsonResponse {
 
         $acceptRequest = WalletAcceptRequest::fromNotification($notification);
 
@@ -167,14 +163,13 @@ class NotificationWalletResponseController extends Controller
     }
 
     /**
-    * Archivia una notifica marcandola come letta.
-    *
-    * @param Request $request
-    * @param CustomDatabaseNotification $notification
-    * @return JsonResponse
-    */
-    public function handleArchive(Request $request, CustomDatabaseNotification $notification): JsonResponse
-    {
+     * Archivia una notifica marcandola come letta.
+     *
+     * @param Request $request
+     * @param CustomDatabaseNotification $notification
+     * @return JsonResponse
+     */
+    public function handleArchive(Request $request, CustomDatabaseNotification $notification): JsonResponse {
 
         Log::channel('florenceegi')->info('Archiviazione notifica', [
             'notification_id' => $notification
@@ -201,7 +196,6 @@ class NotificationWalletResponseController extends Controller
                 )->toArray(),
                 200
             );
-
         } catch (Exception $e) {
             Log::channel('florenceegi')->error('Errore archiviazione notifica', [
                 'notification_id' => $notification->id,
@@ -221,8 +215,7 @@ class NotificationWalletResponseController extends Controller
     /**
      * Gestisce l'archiviazione di una notifica wallet
      */
-    private function handleDone(CustomDatabaseNotification $notification): JsonResponse
-    {
+    private function handleDone(CustomDatabaseNotification $notification): JsonResponse {
         $notification->markAsRead();
 
         return response()->json(
@@ -238,8 +231,7 @@ class NotificationWalletResponseController extends Controller
      *
      * @throws Exception Se la notifica non viene trovata
      */
-    private function findNotification(string $notificationId): CustomDatabaseNotification
-    {
+    private function findNotification(string $notificationId): CustomDatabaseNotification {
 
         Log::channel('florenceegi')->info('Ricerca notifica', [
             'notification_id' => $notificationId
@@ -261,15 +253,21 @@ class NotificationWalletResponseController extends Controller
     /**
      * Recupera le notifiche pendenti per l'utente corrente
      */
-    public function fetchHeadThumbnailList(): View
-    {
+    public function fetchHeadThumbnailList(): View {
 
         Log::channel('florenceegi')->info('Recupero notifiche pendenti');
 
         $pendingNotifications = Auth::user()
             ->customNotifications()
-            ->whereNull('read_at')
+            ->where(function ($query) {
+                $query->where('outcome', 'LIKE', '%pending%')
+                    ->orWhere(function ($subQuery) {
+                        $subQuery->whereIn('outcome', ['accepted', 'rejected', 'expired'])
+                            ->whereNull('read_at');
+                    });
+            })
             ->orderBy('created_at', 'desc')
+            ->with('model')
             ->get();
 
 
@@ -292,8 +290,7 @@ class NotificationWalletResponseController extends Controller
     /**
      * Prepara i dati della notifica per la visualizzazione
      */
-    public function prepare(CustomDatabaseNotification $notification): array
-    {
+    public function prepare(CustomDatabaseNotification $notification): array {
         $status = $this->responseWalletService->getNotificationStatus($notification);
         $statusClass = $this->responseWalletService->getNotificationStatusClass($status);
 
@@ -308,6 +305,4 @@ class NotificationWalletResponseController extends Controller
             'status' => $status,
         ];
     }
-
-
 }

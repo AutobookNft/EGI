@@ -18,6 +18,18 @@
         $priority = 'high';
         $priorityLabel = __('Urgent');
         $priorityIcon = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 15.5c-.77.833.192 2.5 1.732 2.5z"></path>';
+    } elseif ($notif->type === 'App\Notifications\Reservations\ReservationHighest') {
+        $priority = 'high';
+        $priorityLabel = __('New High Bid');
+        $priorityIcon = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>';
+    } elseif ($notif->type === 'App\Notifications\Invitations\InvitationRequest') {
+        $priority = 'medium';
+        $priorityLabel = __('Invitation');
+        $priorityIcon = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>';
+    } elseif ($notif->type === 'App\Notifications\Reservations\ReservationSuperseded') {
+        $priority = 'medium';
+        $priorityLabel = __('Superseded');
+        $priorityIcon = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16l-4-4m0 0l4-4m-4 4h18"></path>';
     } elseif ($notif->created_at->diffInHours() < 2) {
         $priority = 'high';
         $priorityLabel = __('Recent');
@@ -37,7 +49,7 @@
 @endphp
 
 <!-- Modern Notification Card with Priority System - bordi ridotti -->
-<div class="notification-thumbnail group bg-white/10 hover:bg-white/20 rounded-2xl p-6 transition-all duration-300 cursor-pointer transform hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/20 relative overflow-hidden"
+<div class="relative p-6 overflow-hidden transition-all duration-300 transform cursor-pointer notification-thumbnail group bg-white/10 hover:bg-white/20 rounded-2xl hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/20"
      data-notification-id="{{ $notif->id }}"
      data-created-at="{{ $notif->created_at }}"
      data-status="{{ $notif->model->status ?? null }}"
@@ -46,8 +58,8 @@
     <!-- Priority Indicator Strip -->
     <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r {{ $gradientClass }}"></div>
 
-    <!-- Priority Badge (Top Right) -->
-    <div class="absolute -top-2 -right-2 bg-gradient-to-r {{ $gradientClass }} text-white text-xs px-2 py-1 rounded-full font-medium shadow-lg {{ $priority === 'high' ? 'animate-pulse' : '' }}">
+    <!-- Priority Badge (Top Right) - posizionato all'interno del box -->
+    <div class="absolute top-0 right-[3px] bg-gradient-to-r {{ $gradientClass }} text-white text-xs px-2 py-1 rounded-full font-medium shadow-lg {{ $priority === 'high' ? 'animate-pulse' : '' }}">
         {{ $priorityLabel }}
     </div>
 
@@ -61,6 +73,24 @@
                         {!! $priorityIcon !!}
                     </svg>
                 </div>
+            @elseif ($notif->type === 'App\Notifications\Reservations\ReservationHighest')
+                <div class="p-2 bg-gradient-to-r {{ $gradientClass }} rounded-xl {{ $priority === 'high' ? 'animate-pulse' : '' }}">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        {!! $priorityIcon !!}
+                    </svg>
+                </div>
+            @elseif ($notif->type === 'App\Notifications\Invitations\InvitationRequest')
+                <div class="p-2 bg-gradient-to-r {{ $gradientClass }} rounded-xl">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        {!! $priorityIcon !!}
+                    </svg>
+                </div>
+            @elseif ($notif->type === 'App\Notifications\Reservations\ReservationSuperseded')
+                <div class="p-2 bg-gradient-to-r {{ $gradientClass }} rounded-xl">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        {!! $priorityIcon !!}
+                    </svg>
+                </div>
             @else
                 <div class="p-2 bg-gradient-to-r {{ $gradientClass }} rounded-xl">
                     <svg class="w-5 h-5 text-white" viewBox="0 0 20 20" fill="currentColor">
@@ -70,22 +100,28 @@
             @endif
 
             <!-- Type Badge with Priority Context -->
-            <span class="bg-gradient-to-r from-purple-600 to-blue-600 text-white text-xs px-2 py-1 rounded-full font-medium">
+            <span class="px-2 py-1 text-xs font-medium text-white rounded-full bg-gradient-to-r from-purple-600 to-blue-600">
                 @if($notif->type === 'App\Notifications\Wallets\WalletCreation')
                     {{ __('Wallet') }}
+                @elseif($notif->type === 'App\Notifications\Reservations\ReservationHighest')
+                    {{ __('Highest Bid') }}
+                @elseif($notif->type === 'App\Notifications\Reservations\ReservationSuperseded')
+                    {{ __('Superseded') }}
+                @elseif($notif->type === 'App\Notifications\Invitations\InvitationRequest')
+                    {{ __('Invitation') }}
                 @else
                     {{ __('Alert') }}
                 @endif
             </span>
         </div>        <!-- Time Badge with Priority Context -->
         <div class="flex flex-col items-end space-y-1">
-            <span class="text-xs text-gray-400 bg-white/5 px-2 py-1 rounded-lg">
+            <span class="px-2 py-1 text-xs text-gray-400 rounded-lg bg-white/5">
                 {{ $notif->created_at->diffForHumans() }}
             </span>
             @if($priority === 'high')
                 <div class="flex items-center space-x-1">
                     <div class="w-2 h-2 bg-red-500 rounded-full animate-ping"></div>
-                    <span class="text-xs text-red-400 font-medium">{{ __('Urgent') }}</span>
+                    <span class="text-xs font-medium text-red-400">{{ __('Urgent') }}</span>
                 </div>
             @endif
         </div>
@@ -94,7 +130,7 @@
     <!-- Card Content -->
     <div class="space-y-2">
         <!-- Message Preview -->
-        <h4 class="text-white font-medium text-sm line-clamp-2 group-hover:text-purple-200 transition-colors">
+        <h4 class="text-sm font-medium text-white transition-colors line-clamp-2 group-hover:text-purple-200">
             @if (!isset($notif->data['message']))
                 {{ __($notif->model->message) }}
             @else
@@ -122,5 +158,9 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
             </svg>
         </div>
+
+        <!-- Expiration Warning (hidden by default, shown by JS when needed) -->
+        <p id="expiration-warning" class="text-xs text-transparent" style="display: none;"></p>
+        <div id="text-tooltip" title=""></div>
     </div>
 </div>
