@@ -22,7 +22,7 @@ return [
     'approved' => 'Approuvé',
     'rejected' => 'Rejeté',
     'done' => 'Fait',
-    'archived' => 'Archivé',
+    'archive' => 'Archiver',
     'unauthorized_action' => 'Vous n\'êtes pas autorisé à effectuer ce type d\'action',
     'came_to_back' => 'Retour',
     "file_deleted_successfully" => "Fichier supprimé avec succès",
