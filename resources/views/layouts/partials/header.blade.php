@@ -107,8 +107,8 @@
                         </a>
                         {{-- Welcome Message - Dopo il logo per tutte le dimensioni --}}
                         @if ($user)
-                        <div class="items-center flex ml-4">
-                            <span class="text-sm font-medium text-emerald-400 hidden sm:inline">{{ App\Helpers\FegiAuth::getWelcomeMessage() }}</span>
+                        <div class="flex items-center ml-4">
+                            <span class="hidden text-sm font-medium text-emerald-400 sm:inline">{{ App\Helpers\FegiAuth::getWelcomeMessage() }}</span>
                             <span class="text-xs font-medium text-emerald-500 sm:hidden">
                                 @php
                                 $welcomeMessage = App\Helpers\FegiAuth::getWelcomeMessage();
@@ -147,7 +147,7 @@
 
                     @php
                     $authType = App\Helpers\FegiAuth::getAuthType(); // 'strong', 'weak', 'guest'
-                    $canCreateEgi = $user && $user->can('create_egi');
+                    $canCreateEgi = $user && $user->can('create_EGI');
                     @endphp
 
                     {{-- Nav Desktop --}}

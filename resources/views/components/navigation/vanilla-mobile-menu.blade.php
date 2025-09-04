@@ -52,7 +52,7 @@
 @php
 $user = App\Helpers\FegiAuth::user(); // User object or null
 $authType = App\Helpers\FegiAuth::getAuthType(); // 'strong', 'weak', 'guest'
-$canCreateEgi = $user && $user->can('create_egi');
+$canCreateEgi = $user && $user->can('create_EGI');
 
 @endphp
 

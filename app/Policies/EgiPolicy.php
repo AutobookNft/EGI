@@ -20,7 +20,7 @@ class EgiPolicy
      */
     public function view(User $user): bool
     {
-        return $user->can('read_egi');
+        return $user->can('read_EGI');
     }
 
     /**
@@ -28,7 +28,7 @@ class EgiPolicy
      */
     public function create(User $user): bool
     {
-        return $user->can('create_egi');
+        return $user->can('create_EGI');
     }
 
     /**
@@ -36,7 +36,7 @@ class EgiPolicy
      */
     public function update(User $user): bool
     {
-        return $user->can('update_egi');
+        return $user->can('update_EGI');
     }
 
     /**
@@ -44,7 +44,7 @@ class EgiPolicy
      */
     public function delete(User $user): bool
     {
-        return $user->can('delete_egi');
+        return $user->can('delete_EGI');
     }
 
     /**
