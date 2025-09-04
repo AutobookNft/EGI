@@ -36,7 +36,7 @@
     <div class="mb-3">
         {{-- Titolo cliccabile su mobile, statico su desktop --}}
         <button type="button" 
-                class="flex items-center justify-between w-full text-left text-base font-semibold text-white md:pointer-events-none"
+                class="flex items-center justify-between w-full text-base font-semibold text-left text-white md:pointer-events-none"
                 id="metadata-toggle"
                 aria-expanded="false"
                 aria-controls="metadata-content"

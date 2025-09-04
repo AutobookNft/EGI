@@ -42,31 +42,27 @@
         💎 {{ __('uploadmanager::uploadmanager.mint_your_masterpiece') }}
     </h2>
     
-    <!-- Enhanced drag & drop upload area - altezza ridotta su mobile -->
-    <div class="flex flex-col items-center justify-center w-full p-5 mb-4 transition-all duration-300 border-dashed h-36 md:h-44 border-3 border-blue-400/50 rounded-xl bg-purple-800/20 hover:bg-purple-800/30 group"
+    <!-- Enhanced drag & drop upload area con bordo tratteggiato tradizionale -->
+    <div class="flex flex-col items-center justify-center w-full p-6 mb-4 transition-all duration-300 border-dashed h-36 md:h-44 border-2 border-gray-400 rounded-lg bg-gray-50/5 hover:bg-gray-50/10 hover:border-blue-400 group"
          id="upload-drop-zone"
          role="group"
          aria-label="{{ trans('uploadmanager::uploadmanager.drag_files_here') }}">
 
         <!-- Drag & drop icon/illustration -->
-        <div class="mb-3 text-2xl text-blue-400 transition-transform duration-300 md:text-3xl group-hover:scale-110">
+        <div class="mb-3 text-2xl text-gray-400 transition-transform duration-300 md:text-3xl group-hover:scale-110 group-hover:text-blue-400">
             📤
         </div>
 
         <!-- Instructions with improved contrast -->
-        <p class="mb-4 text-sm text-center text-white md:text-base">
+        <p class="mb-4 text-sm text-center text-gray-300 md:text-base">
             {{ trans('uploadmanager::uploadmanager.drag_files_here') }} <br>
-            <span class="text-xs text-blue-200">{{ trans('uploadmanager::uploadmanager.or') }}</span>
+            <span class="text-xs text-gray-400">{{ trans('uploadmanager::uploadmanager.or') }}</span>
         </p>
 
-        <!-- Button styled with tooltip -->
-        <label for="files" id="file-label" class="relative cursor-pointer rounded-full bg-gradient-to-r from-purple-600 to-blue-600 px-5 py-2.5 flex items-center justify-center text-base font-semibold text-white transition-all duration-300 ease-in-out hover:from-purple-500 hover:to-blue-500 hover:shadow-lg nft-button group" aria-label="{{ trans('uploadmanager::uploadmanager.select_files_aria') }}">
-            {{ trans('uploadmanager::uploadmanager.select_files') }}
+        <!-- Link semplice al posto del bottone -->
+        <label for="files" id="file-label" class="relative cursor-pointer text-blue-400 hover:text-blue-300 underline transition-colors duration-200 text-sm md:text-base" aria-label="{{ trans('uploadmanager::uploadmanager.select_files_aria') }}">
+            Carica i tuoi file
             <input type="file" id="files" multiple class="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer">
-            <!-- Tooltip - solo su desktop -->
-            <span class="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-[10px] px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 w-32 text-center hidden md:block">
-                {{ trans('uploadmanager::uploadmanager.select_files_tooltip') }}
-            </span>
         </label>
         {{-- <div class="upload-dropzone text-center text-gray-200 text-xs mt-1.5">
             <!-- About upload size -->

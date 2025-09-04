@@ -25,9 +25,12 @@
                     <x-notification-badge />
                 </div>
                 @endif
+                @php
+                $authType = App\Helpers\FegiAuth::getAuthType(); // 'strong', 'weak', 'guest'
+                @endphp
                 <!-- Navigation Links Desktop -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    @include('partials.nav-links', ['isMobile' => false])
+                    @include('partials.nav-links', ['isMobile' => false, 'authType' => $authType])
                 </div>
                  
             </div>

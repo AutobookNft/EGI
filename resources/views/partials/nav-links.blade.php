@@ -1,6 +1,9 @@
 {{-- Navigation Script con Link Nascosti per Pagina Corrente --}}
 
 @php
+// Fallback per authType se non passato dall'include
+$authType = $authType ?? App\Helpers\FegiAuth::getAuthType();
+
 $navLinkClasses = $isMobile
 ? 'text-gray-300 hover:bg-gray-800 hover:text-emerald-400 block px-3 py-2.5 rounded-md text-base font-medium transition'
 : 'text-gray-300 hover:text-emerald-400 transition px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-800/40';

@@ -141,7 +141,7 @@
                     {{-- Nav Desktop --}}
                     <nav class="items-center hidden space-x-1 md:flex" role="navigation"
                         aria-label="{{ __('collection.main_navigation_aria_label') }}">
-                        @include('partials.nav-links', ['isMobile' => false])
+                        @include('partials.nav-links', ['isMobile' => false, 'authType' => $authType])
 
                         {{-- Dropdown My Galleries --}}
                         @can('create_collection')
