@@ -37,9 +37,9 @@ class NotificationPayloadInvitation extends Model implements NotifiablePayload {
         'metadata',
     ];
 
-    // protected $casts = [
-    //     'status' => InvitationStatus::class
-    // ];
+    protected $casts = [
+        'metadata' => 'array',
+    ];
 
     public function getNotificationData(): array {
         return [

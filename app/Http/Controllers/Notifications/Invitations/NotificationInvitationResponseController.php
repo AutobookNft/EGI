@@ -23,12 +23,21 @@ use Exception;
 use Illuminate\Http\{Request, JsonResponse};
 use Illuminate\Support\Facades\{Auth, Log};
 use Illuminate\View\View;
+use Ultra\EgiModule\Contracts\UserRoleServiceInterface;
 
 class NotificationInvitationResponseController extends Controller
 {
+    
+    /** @var UserRoleServiceInterface Service for managing user roles */
+    private UserRoleServiceInterface $roleService;
+
+    
     public function __construct(
         private readonly InvitationService $responseInvitationService,
-    ) {}
+        UserRoleServiceInterface $roleService
+    ) {
+        $this->roleService = $roleService;
+    }
 
     /**
      * Gestisce la risposta a una notifica invitation (accettazione o rifiuto)
@@ -103,13 +112,13 @@ class NotificationInvitationResponseController extends Controller
         /**
          * @var NotificationPayloadInvitation
          */
-        $walletPayload = NotificationPayloadInvitation::find($payloadId);
+        $invitationPayload = NotificationPayloadInvitation::find($payloadId);
 
-        if (!$walletPayload) {
+        if (!$invitationPayload) {
             throw new Exception(__('notification.not_found'));
         }
 
-        return $walletPayload;
+        return $invitationPayload;
     }
 
 
@@ -119,20 +128,21 @@ class NotificationInvitationResponseController extends Controller
             'notificationId' => $notificationId,
         ]);
 
-        $walletPayload = $this->findNotification($payloadId);
+        $invitationPayload = $this->findNotification($payloadId);
 
         /**
          * Accetta l'invito
          * @var NotificationPayloadInvitation
          * @exception Exception
          */
-        $this->responseInvitationService->acceptInvitation($walletPayload, $notificationId);
+        $this->responseInvitationService->acceptInvitation($invitationPayload, $notificationId);
+               
 
         return response()->json(
             InvitationResponse::success(
-             NotificationStatus::ACCEPTED->value
+                NotificationStatus::ACCEPTED->value
             )->toArray()
-        );
+    );
     }
 
 

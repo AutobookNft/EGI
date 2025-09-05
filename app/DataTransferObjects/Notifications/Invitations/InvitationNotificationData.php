@@ -13,6 +13,8 @@ class InvitationNotificationData implements InvitationNotificationDataInterface
         private readonly int $receiverId,
         private readonly ?string $email = '',
         private readonly string $role,
+        private readonly ?bool $is_owner = null,
+        private readonly ?string $joined_at = null,
         private readonly string $status,
         private readonly ?array $metadata = null
     ) {}
@@ -20,13 +22,16 @@ class InvitationNotificationData implements InvitationNotificationDataInterface
     public function toPayloadInArray(): array
     {
 
-        Log::channel('florenceegi')->info('InvitationNotificationData:toPayloadInArray', [
+        Log::channel('florenceegi')->info('DTO: InvitationNotificationData:toPayloadInArray', [
             'collection_id' => $this->collection_id,
             'proposer_id' => $this->proposerId,
             'receiver_id' => $this->receiverId,
             'email' => $this->email,
             'role' => $this->role,
+            'is_owner' => $this->is_owner ?? false,
+            'joined_at' => now(),
             'status' => $this->status,
+            'metadata' => $this->metadata,
         ]);
 
         return [
@@ -36,6 +41,7 @@ class InvitationNotificationData implements InvitationNotificationDataInterface
             'email' => $this->email,
             'role' => $this->role,
             'status' => $this->status,
+            'metadata' => $this->metadata,
         ];
     }
 
@@ -45,6 +51,9 @@ class InvitationNotificationData implements InvitationNotificationDataInterface
             'collection_id' => $this->collection_id,
             'user_id' => $this->receiverId,
             'role' => $this->role,
+            'is_owner' => $this->is_owner ?? false,
+            'joined_at' => now(),
+            'status' => $this->status,
             'metadata' => $this->metadata
         ];
     }
@@ -81,6 +90,16 @@ class InvitationNotificationData implements InvitationNotificationDataInterface
     }
     public function getMetadata(): ?array
     {
-        return null;
+        return $this->metadata;
+    }
+
+    public function getIsOwner(): ?bool
+    {
+        return $this->is_owner;
+    }
+
+    public function getJoinedAt(): ?string
+    {
+        return $this->joined_at;
     }
 }
