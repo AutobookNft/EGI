@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Ultra\EgiModule\Services;
 
+use App\Enums\NotificationStatus;
 use App\Helpers\FegiAuth;
 use App\Models\Collection;
 use App\Models\CollectionUser;
@@ -432,7 +433,7 @@ class UserRoleService implements UserRoleServiceInterface {
                     'creation_timestamp' => now()->toISOString(),
                     'created_by_service' => static::class
                 ], $metadata),
-                'status' => 'active'
+                'status' => NotificationStatus::ACTIVE->value // Ensure status is set to active
             ];
 
             // Create the collection-user record
@@ -548,7 +549,7 @@ class UserRoleService implements UserRoleServiceInterface {
      * @value-flow Retrieves actual permission sets from Spatie role system
      * @transparency-level Uses actual role-permission relationships from database
      */
-    protected function getPermissionsFromSpatieRole(string $roleName): array {
+    public function getPermissionsFromSpatieRole(string $roleName): array {
         $context = [
             'role_name' => $roleName,
             'operation' => 'get_spatie_role_permissions',

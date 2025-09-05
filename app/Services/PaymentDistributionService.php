@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\Gdpr\GdprActivityCategory;
 use App\Models\PaymentDistribution;
 use App\Models\Reservation;
 use App\Models\UserActivity;
@@ -317,7 +318,7 @@ class PaymentDistributionService {
                 UserActivity::create([
                     'user_id' => $distribution->user_id,
                     'action' => 'payment_distribution_created',
-                    'category' => 'blockchain_activity',
+                    'category' => GdprActivityCategory::BLOCKCHAIN_ACTIVITY,
                     'context' => [
                         'reservation_id' => $reservation->id,
                         'collection_id' => $distribution->collection_id,
@@ -335,7 +336,7 @@ class PaymentDistributionService {
                         'distribution_status' => $distribution->distribution_status->value,
                         'source' => 'PaymentDistributionService'
                     ],
-                    'privacy_level' => 'high', // Financial data requires high privacy
+                    'privacy_level' => GdprActivityCategory::BLOCKCHAIN_ACTIVITY->privacyLevel(), // Financial data requires high privacy
                     'ip_address' => request()->ip() ?? '127.0.0.1',
                     'user_agent' => request()->userAgent() ?? 'System/PaymentDistributionService',
                     'expires_at' => now()->addYears(7), // GDPR retention for financial records

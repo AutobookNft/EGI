@@ -41,6 +41,7 @@ class NotificationHandlerFactory
             }
 
             return app($handlerClass);
+        
         } catch (Exception $e) {
             Log::channel('florenceegi')->error('Errore creazione handler', [
                 'type' => $type->value,
