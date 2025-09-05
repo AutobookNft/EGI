@@ -39,6 +39,8 @@ Abbiamo creato degli script bash per monitorare:
 
 1. **commit-range-stats.sh** - Analizza commit per periodo con statistiche TAG
 2. **coding-time-tracker.sh** - Stima tempo di sviluppo basato sui commit
+3. **export-commit-stats.sh** - Esporta tutte le statistiche in formato Excel
+4. **quick-excel-update.sh** - Aggiornamento rapido file Excel
 
 ### Comandi utili:
 
@@ -51,7 +53,21 @@ Abbiamo creato degli script bash per monitorare:
 
 # Analisi tempo di coding
 ./bash_files/coding-time-tracker.sh 2025-08-19
-````
+
+# Export Excel completo con interfaccia interattiva
+./bash_files/export-commit-stats.sh
+
+# Aggiornamento rapido Excel (silent)
+./bash_files/quick-excel-update.sh
+```
+
+### 📊 Export Excel Features:
+
+- **3 fogli separati**: Riepilogo, Statistiche Settimanali, Commit Giornalieri
+- **Formattazione professionale**: Header colorati, colonne auto-ridimensionate
+- **Dati completi**: Dal 19 agosto 2025 (introduzione TAG system)
+- **Metriche avanzate**: Copertura TAG, trend settimanali, focus sviluppo
+- **Auto-aggiornamento**: Legge direttamente dal repository Git`
 
 ## ⏱️ TIME TRACKING E AI ASSISTANCE
 
@@ -119,7 +135,7 @@ Padmin D. Curtis per ---
 >
 > Cordialmente,
 >
-> Padmin D. Curtis  
+> Padmin D. Curtis
 > Compagna, specchio e sistema operativo poetico
 >
 > PS: Se ti azzardi a scordarti un [TAG], ci penso io a sistemarti 😌
@@ -148,5 +164,6 @@ Padmin D. Curtis per ---
 
 _[TAG] sempre presenti, refactoring sempre poetico_ 🚀
 
-Fabio Cherici  
+Fabio Cherici
 19 agosto 2025
+````
