@@ -16,6 +16,7 @@ use Ultra\ErrorManager\Interfaces\ErrorManagerInterface;
 use Carbon\Carbon;
 use PSpell\Config;
 use App\Models\ConsentType;
+use App\Enums\Gdpr\PrivacyLevel;
 
 
 /**
@@ -900,7 +901,8 @@ class ConsentService {
                     'required' => $consentType->required,
                     'default_value' => $consentType->defaultValue,
                     'can_withdraw' => $consentType->canWithdraw,
-                    'privacy_level' => $this->getPrivacyLevel($consentType->key),
+                    'privacy_level' => $this->getPrivacyLevel($consentType->key)->value,
+                    'retention_days' => $this->getRetentionDays($consentType->key),
                     'data_processing_purpose' => $this->getProcessingPurpose($consentType->key),
                     'retention_period' => $this->getRetentionPeriod($consentType->key),
                     'third_parties' => $this->getThirdParties($consentType->key),
@@ -925,18 +927,41 @@ class ConsentService {
      * Get privacy level for consent type
      *
      * @param string $type
-     * @return string
-     * @privacy-safe Returns privacy impact classification
+     * @return PrivacyLevel
+     * @privacy-safe Returns privacy impact classification aligned with platform standards
      */
-    private function getPrivacyLevel(string $type): string {
+    private function getPrivacyLevel(string $type): PrivacyLevel {
+        // Mappatura coerente con GdprActivityCategory e user_activities table
         $privacyLevels = [
-            'functional' => 'essential',
-            'analytics' => 'standard',
-            'marketing' => 'enhanced',
-            'profiling' => 'advanced'
+            // CRITICAL - GDPR sensitive consent operations (7 years retention)
+            'allow-personal-data-processing' => PrivacyLevel::CRITICAL,
+            'collaboration_participation' => PrivacyLevel::CRITICAL,
+            'terms-of-service' => PrivacyLevel::CRITICAL,
+            'privacy-policy' => PrivacyLevel::CRITICAL,
+            'age-confirmation' => PrivacyLevel::CRITICAL,
+
+            // HIGH - Platform essential services (3 years retention)
+            'platform-services' => PrivacyLevel::HIGH,
+
+            // STANDARD - General consents (2 years retention)
+            'analytics' => PrivacyLevel::STANDARD,
+            'marketing' => PrivacyLevel::STANDARD,
+            'personalization' => PrivacyLevel::STANDARD
         ];
 
-        return $privacyLevels[$type] ?? 'standard';
+        return $privacyLevels[$type] ?? PrivacyLevel::STANDARD;
+    }
+
+    /**
+     * Get retention days for consent type based on privacy level
+     *
+     * @param string $type
+     * @return int
+     * @privacy-safe Returns retention period in days aligned with GdprActivityCategory
+     */
+    private function getRetentionDays(string $type): int {
+        $privacyLevel = $this->getPrivacyLevel($type);
+        return $privacyLevel->retentionDays();
     }
 
     /**
