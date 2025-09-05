@@ -437,11 +437,6 @@ style.textContent = `
         min-height: 44px; /* iOS accessibility guideline */
     }
 
-    /* Fix Create EGI button contrast */
-    .js-create-egi-contextual-button {
-        color: #374151 !important;
-    }
-
     /* Smooth scrolling for mobile content */
     .mobile-menu-content {
         scroll-behavior: smooth;

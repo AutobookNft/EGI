@@ -45,7 +45,7 @@
          class="absolute right-0 z-50 invisible mt-2 transition-all duration-200 ease-out origin-top-right transform scale-95 opacity-0">
 
         <!-- Revolutionary Mega Menu Container -->
-        <div class="mega-menu-container bg-white/95 backdrop-blur-xl border border-gray-200/50 rounded-2xl shadow-2xl p-6 min-w-[380px] sm:min-w-[420px] lg:min-w-[500px] dark:bg-gray-900/95 dark:border-gray-700/50">
+        <div class="mega-menu-container bg-white/95 backdrop-blur-xl border border-gray-200/50 rounded-2xl shadow-2xl p-6 min-w-[380px] sm:min-w-[420px] lg:min-w-[500px] max-h-[70vh] overflow-y-auto dark:bg-gray-900/95 dark:border-gray-700/50">
 
             <!-- User Header Card -->
             <div class="p-4 mb-6 border user-header-card bg-gradient-to-r from-blue-500 to-purple-600 mobile-header-gradient rounded-xl border-blue-300/40 dark:border-blue-700/40">
@@ -53,7 +53,7 @@
                     @if (Laravel\Jetstream\Jetstream::managesProfilePhotos())
                         @if(Auth::check() && Auth::user()->id)
                             <a href="{{ route('creator.home', Auth::user()->id) }}" class="block transition-transform duration-300 hover:scale-105">
-                                <img class="object-cover rounded-full size-12 ring-2 ring-white/30 hover:ring-white/60 transition-all duration-300"
+                                <img class="object-cover transition-all duration-300 rounded-full size-12 ring-2 ring-white/30 hover:ring-white/60"
                                     src="{{ Auth::user()?->profile_photo_url ?? null }}"
                                     alt="{{ Auth::user()?->name ?? '' }}" />
                             </a>
@@ -65,7 +65,7 @@
                     @else
                         @if(Auth::check() && Auth::user()->id)
                             <a href="{{ route('creator.home', Auth::user()->id) }}" class="block transition-transform duration-300 hover:scale-105">
-                                <div class="flex items-center justify-center w-12 h-12 text-lg font-bold text-white rounded-full bg-white/20 hover:bg-white/30 transition-all duration-300">
+                                <div class="flex items-center justify-center w-12 h-12 text-lg font-bold text-white transition-all duration-300 rounded-full bg-white/20 hover:bg-white/30">
                                     {{ substr(Auth::user()?->name ?? 'U', 0, 1) }}
                                 </div>
                             </a>
@@ -88,7 +88,7 @@
             </div>
 
             <!-- Main Navigation (allineata al menu mobile) -->
-            <div class="mb-6 space-y-2">
+            {{-- <div class="mb-6 space-y-2">
                 <h4 class="px-1 text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">{{ __('menu.navigation') }}</h4>
                 <div class="space-y-1">
                     <a href="{{ url('/') }}" class="flex items-center gap-3 px-3 py-2 text-gray-700 transition-colors rounded-lg hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800/60">
@@ -136,11 +136,16 @@
                         <span class="font-medium">{{ __('guest_layout.epps') }}</span>
                     </a>
                 </div>
-            </div>
+            </div> --}}
 
             <!-- Menu Grid -->
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div class="grid grid-cols-1 gap-4">
 
+                 <!-- Dynamic Collections Carousel Card -->
+                @can('create_collection')
+                    <x-menu-collections-carousel :collections="Auth::user()->ownedCollections()->orderBy('position')->get()" />
+                @endcan               
+                
                 <!-- Account Management Card -->
                 <div class="p-4 border bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 rounded-2xl border-emerald-200/30 dark:border-emerald-800/30 mega-card">
                     <div class="flex items-center mb-3 space-x-3">
@@ -192,11 +197,6 @@
                         @endcan
                     </div>
                 </div>
-
-                <!-- Dynamic Collections Carousel Card -->
-                @can('create_collection')
-                    <x-menu-collections-carousel :collections="Auth::user()->ownedCollections()->orderBy('position')->get()" />
-                @endcan
 
                 <!-- Activity & Notifications Card -->
                 <div class="p-4 border bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 rounded-2xl border-orange-200/30 dark:border-orange-800/30 mega-card">
