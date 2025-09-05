@@ -169,17 +169,25 @@ class TestingTimeTracker extends Command
             ['Data', 'Inizio', 'Fine', 'Durata', 'Nota'],
             $sessions->map(function ($session) {
                 $timestamp = Carbon::parse($session['timestamp']);
-                $startTime = $timestamp->subMinutes($session['duration']);
+                $duration = abs($session['duration']); // Usa valore assoluto
+                $startTime = $timestamp->subMinutes($duration);
                 
                 return [
                     $timestamp->format('d/m/Y'),
                     $startTime->format('H:i'),
                     $timestamp->format('H:i'),
-                    $this->formatDuration($session['duration']),
+                    $this->formatDuration($duration), // Usa durata assoluta
                     substr($session['note'], 0, 30) . (strlen($session['note']) > 30 ? '...' : '')
                 ];
             })->toArray()
         );
+
+        $totalMinutes = $sessions->sum(function($session) { 
+            return abs($session['duration']); 
+        });
+        $avgMinutes = $sessions->avg(function($session) { 
+            return abs($session['duration']); 
+        });
 
         $this->info('📈 Statistiche:');
         $this->info('  • Sessioni totali: ' . $sessions->count());
