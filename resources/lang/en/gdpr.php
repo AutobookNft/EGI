@@ -188,6 +188,10 @@ return [
             'label' => 'Profiling',
             'description' => 'We use profiling to better understand your preferences and personalize our services to your needs.',
         ],
+        'collaboration_participation' => [
+            'label' => 'Collaboration Participation',
+            'description' => 'Consent to participate in collections collaboration, data sharing, and collaborative activities.',
+        ],
         'saving_consent' => 'Saving...',
         'consent_saved' => 'Saved',
         'saving_all_consents' => 'Saving all preferences...',
@@ -201,6 +205,7 @@ return [
             'analytics' => 'Platform improvement: usage analysis, performance monitoring, user experience optimization',
             'marketing' => 'Communication: newsletters, product updates, promotional offers, event notifications',
             'profiling' => 'Personalization: content recommendations, user behavior analysis, targeted suggestions',
+            'collaboration_participation' => 'Collaboration: data sharing within collections, collaborative activities, notifications',
         ],
 
         // Retention Periods
@@ -209,6 +214,7 @@ return [
             'analytics' => '2 years from last activity',
             'marketing' => '3 years from last interaction or consent withdrawal',
             'profiling' => '1 year from last activity or consent withdrawal',
+            'collaboration_participation' => 'Duration of collaboration + 30 days',
         ],
 
         // User Benefits

@@ -65,6 +65,10 @@ return [
             'name' => 'Personalizzazione contenuti',
             'description' => 'Consenti la personalizzazione di contenuti e raccomandazioni.',
         ],
+        'collaboration_participation' => [
+            'name' => 'Partecipazione alla Collaborazione',
+            'description' => 'Consenso a partecipare alla collaborazione di collezioni, condivisione dati e attività collaborative.',
+        ],
         'purposes' => [
             'account_management' => 'Gestione dell\'Account Utente',
             'service_delivery'   => 'Erogazione dei Servizi Richiesti',
@@ -348,13 +352,13 @@ return [
         'title' => 'Esporta i Tuoi Dati',
         'subtitle' => 'Richiedi una copia completa dei tuoi dati personali in formato portabile',
         'description' => 'Richiedi una copia dei tuoi dati personali. L\'elaborazione potrebbe richiedere alcuni minuti.',
-        
+
         // Data Categories
         'select_data_categories' => 'Seleziona le Categorie di Dati da Esportare',
         'categories' => [
             'profile' => 'Informazioni sul Profilo',
             'account' => 'Dettagli Account',
-            'preferences' => 'Preferenze e Impostazioni',  
+            'preferences' => 'Preferenze e Impostazioni',
             'activity' => 'Cronologia Attività',
             'consents' => 'Cronologia Consensi',
             'collections' => 'Collezioni e NFT',
@@ -363,7 +367,7 @@ return [
             'messages' => 'Messaggi e Comunicazioni',
             'biography' => 'Biografie e Contenuti',
         ],
-        
+
         // Category Descriptions
         'category_descriptions' => [
             'profile' => 'Dati anagrafici, informazioni di contatto, foto profilo e descrizioni personali',
@@ -385,7 +389,7 @@ return [
             'csv' => 'CSV - Compatibile con Fogli di Calcolo',
             'pdf' => 'PDF - Documento Leggibile',
         ],
-        
+
         // Format Descriptions
         'format_descriptions' => [
             'json' => 'Formato dati strutturato ideale per sviluppatori e integrazioni. Mantiene la struttura completa dei dati.',
@@ -399,17 +403,17 @@ return [
         'metadata_description' => 'Include informazioni tecniche come timestamp, IP address, versioni e audit trail.',
         'include_audit_trail' => 'Includi Registro Completo Attività',
         'audit_trail_description' => 'Include cronologia completa di tutte le modifiche e attività GDPR.',
-        
+
         // Actions
         'request_export' => 'Richiedi Esportazione Dati',
         'request_success' => 'Richiesta di esportazione inviata con successo. Riceverai una notifica al completamento.',
         'request_error' => 'Si è verificato un errore nell\'invio della richiesta. Riprova.',
-        
+
         // Export History  
         'history_title' => 'Cronologia Esportazioni',
         'no_exports' => 'Nessuna Esportazione Presente',
         'no_exports_description' => 'Non hai ancora richiesto alcuna esportazione dei tuoi dati. Utilizza il modulo sopra per richiederne una.',
-        
+
         // Export Item Details
         'export_format' => 'Esportazione {format}',
         'requested_on' => 'Richiesta il',
@@ -418,24 +422,24 @@ return [
         'file_size' => 'Dimensione',
         'download' => 'Scarica',
         'download_export' => 'Scarica Esportazione',
-        
+
         // Status
         'status' => [
             'pending' => 'In Attesa',
-            'processing' => 'In Elaborazione', 
+            'processing' => 'In Elaborazione',
             'completed' => 'Completata',
             'failed' => 'Fallita',
             'expired' => 'Scaduta',
         ],
-        
+
         // Rate Limiting
         'rate_limit_title' => 'Limite Esportazioni Raggiunto',
         'rate_limit_message' => 'Hai raggiunto il limite massimo di {max} esportazioni per oggi. Riprova domani.',
         'last_export_date' => 'Ultima esportazione: {date}',
-        
+
         // Validation
         'select_at_least_one_category' => 'Seleziona almeno una categoria di dati da esportare.',
-        
+
         // Legacy Support
         'request_button' => 'Richiedi Esportazione Dati',
         'format' => 'Formato di Esportazione',
