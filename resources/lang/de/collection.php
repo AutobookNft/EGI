@@ -9,6 +9,11 @@
 
 return [
     'my_galleries' => 'Meine Galerien',
+    'my_collections' => 'Meine Sammlungen',
+    'shared_collections' => 'Geteilte Sammlungen',
+    'joined_since' => 'Seit',
+    'can_edit' => 'Kann bearbeiten',
+    'view_only' => 'Nur anzeigen',
     'create_new_collection' => 'Neue Sammlung erstellen',
     'create_modal_subtitle' => 'Beginnen Sie Ihre künstlerische Reise mit einer neuen Sammlung',
     'close_modal' => 'Modal schließen',

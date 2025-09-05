@@ -31,7 +31,7 @@ class NotificationInvitationResponseController extends Controller
     ) {}
 
     /**
-     * Gestisce la risposta a una notifica wallet (accettazione o rifiuto)
+     * Gestisce la risposta a una notifica invitation (accettazione o rifiuto)
      * @param Request $request
      * @return JsonResponse
      * @throws Exception
@@ -106,7 +106,7 @@ class NotificationInvitationResponseController extends Controller
         $walletPayload = NotificationPayloadInvitation::find($payloadId);
 
         if (!$walletPayload) {
-            throw new Exception(__('notifications.not_found'));
+            throw new Exception(__('notification.not_found'));
         }
 
         return $walletPayload;

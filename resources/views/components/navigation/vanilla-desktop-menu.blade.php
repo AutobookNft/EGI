@@ -141,10 +141,13 @@
             <!-- Menu Grid -->
             <div class="grid grid-cols-1 gap-4">
 
-                 <!-- Dynamic Collections Carousel Card -->
+                <!-- Dynamic Collections Carousel Card -->
                 @can('create_collection')
                     <x-menu-collections-carousel :collections="Auth::user()->ownedCollections()->orderBy('position')->get()" />
-                @endcan               
+                @endcan
+                
+                <!-- Shared Collections Carousel Card - Collections where user is collaborator -->
+                <x-menu-guest-collections-carousel />
                 
                 <!-- Account Management Card -->
                 <div class="p-4 border bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 rounded-2xl border-emerald-200/30 dark:border-emerald-800/30 mega-card">

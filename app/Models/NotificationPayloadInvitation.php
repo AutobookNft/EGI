@@ -43,7 +43,7 @@ class NotificationPayloadInvitation extends Model implements NotifiablePayload {
 
     public function getNotificationData(): array {
         return [
-            'message' => __('Sei stato invitato a partecipare ad una collezione.'),
+            'message' => __('notification.invitation_received'),
             'collection_name' => $this->collection->name,
         ];
     }

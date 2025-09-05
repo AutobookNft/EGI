@@ -280,8 +280,9 @@ class User extends Authenticatable implements HasMedia {
      */
     public function collaborations(): BelongsToMany {
         return $this->belongsToMany(Collection::class, 'collection_user', 'user_id', 'collection_id')
-            ->withPivot(['role', 'is_owner']) // Include both role and is_owner from pivot table
+            ->withPivot(['role', 'is_owner', 'status']) // Include status from pivot table
             ->wherePivot('is_owner', '!=', 1) // Exclude collections where user is owner
+            ->wherePivot('status', 'active') // Only active collaborations
             ->withTimestamps(); // Include created_at e updated_at dalla tabella pivot
     }
 

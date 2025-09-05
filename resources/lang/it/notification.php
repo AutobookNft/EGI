@@ -29,6 +29,8 @@ return [
     'proposed_change_to_a_wallet' => 'Hai proposto la modifica a un portafoglio',
     'no_historical_notifications' => 'Nessuna notifica storica',
     'notification_list_error' => 'Errore durante il recupero delle notifiche',
+    'invitation_received' => 'Sei stato invitato a partecipare ad una collezione',
+    'not_found' => 'Notifica non trovata',
 
     // Badge Notifications
     'badge' => [

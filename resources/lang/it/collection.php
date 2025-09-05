@@ -1,7 +1,11 @@
 <?php
 
 /*
-|--------------------------------------------------------------------------
+|--------    'my_collections' => 'Le mie collezioni',
+    'shared_collections' => 'Collezioni condivise',
+    'joined_since' => 'Dal',
+    'can_edit' => 'Può modificare',
+    'view_only' => 'Solo visualizzazione',-----------------------------------------------------------------
 | Traduzione in italiano di tutti i dati dei dati di testata delle collection
 |--------------------------------------------------------------------------
 |
@@ -18,6 +22,10 @@ return [
     'minimum_2_characters' => 'Minimo 2 caratteri',
     'create_collection' => 'Crea Collezione',
     'my_collections' => 'Le Mie Collezioni',
+    'shared_collections' => 'Collezioni Condivise',
+    'joined_since' => 'Dal',
+    'can_edit' => 'Può modificare',
+    'view_only' => 'Solo visualizzazione',
     'no_collections' => 'Nessuna Collezione',
     'no_egis' => 'Nessun EGI',
     'no_price' => 'Nessun Prezzo',

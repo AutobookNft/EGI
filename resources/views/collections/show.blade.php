@@ -148,7 +148,8 @@ if (is_array($collection)) {
 
         {{-- Desktop Upload Button - Posizionamento originale --}}
         <div class="absolute z-20 hidden top-8 right-8 sm:block">
-            @if(auth()->check() && auth()->id() === ($collection->creator_id ?? null))
+            {{-- @if(auth()->check() && auth()->id() === ($collection->creator_id ?? null)) --}}
+            @can('create_collection')
             <button id="uploadBannerBtnDesktop" class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white transition-colors bg-indigo-600 rounded-lg hover:bg-indigo-700 backdrop-blur-sm"
                     data-uploading-label="{{ __('collection.show.uploading') }}"
                     data-upload-success="{{ __('collection.show.banner_updated') }}"
@@ -159,7 +160,7 @@ if (is_array($collection)) {
                 <span>{{ __('collection.show.upload_banner') }}</span>
             </button>
             <input type="file" id="bannerFileInputDesktop" accept="image/*" class="hidden" />
-            @endif
+            @endcan
         </div>
 
         {{-- CTA Section - Positioned at bottom right --}}
@@ -189,22 +190,24 @@ if (is_array($collection)) {
                 </button>
 
                 {{-- Edit Button - Compact --}}
-                @if(auth()->check() && auth()->id() === ($collection->creator_id ?? null))
+                @can('create_collection')
                 <button id="editMetaBtn"
                     class="flex items-center justify-center w-10 h-10 text-sm font-medium text-white transition-all duration-300 border rounded-lg bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/20 sm:w-auto sm:h-auto sm:px-4 sm:py-2"
                     title="{{ __('collection.show.edit_button') }}">
                     <span class="mr-0 text-lg material-symbols-outlined sm:text-base sm:mr-1">edit</span>
                     <span class="hidden text-sm sm:inline">{{ __('collection.show.edit_button') }}</span>
                 </button>
+                @endcan
 
                 {{-- Team Management Button - Compact --}}
+                @can('create_team')
                 <a href="{{ route('collections.collection_user', ['id' => $collection->id]) }}"
                     class="flex items-center justify-center w-10 h-10 text-sm font-medium text-white transition-all duration-300 border rounded-lg bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/20 sm:w-auto sm:h-auto sm:px-4 sm:py-2"
                     title="{{ __('collection.show.manage_team') }}">
                     <span class="mr-0 text-lg material-symbols-outlined sm:text-base sm:mr-1">group</span>
                     <span class="hidden text-sm sm:inline">{{ __('collection.show.manage_team') }}</span>
                 </a>
-                @endif
+                @endcan
             </div>
         </div>
 
