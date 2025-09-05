@@ -120,8 +120,65 @@ class EGICommitStatsExporter:
             
         return daily_stats
     
+    def get_testing_time_data(self, start_date, end_date):
+        """Estrae dati di testing time dal log per il periodo specificato"""
+        testing_log_path = self.git_repo_path / "storage" / "logs" / "testing_time.log"
+        
+        if not testing_log_path.exists():
+            return {
+                'total_minutes': 0,
+                'sessions_count': 0,
+                'avg_session_minutes': 0,
+                'daily_breakdown': {}
+            }
+        
+        import json
+        from datetime import datetime, timedelta
+        
+        # Parse date range
+        start_dt = datetime.strptime(start_date, '%Y-%m-%d')
+        end_dt = datetime.strptime(end_date, '%Y-%m-%d') + timedelta(days=1)
+        
+        total_minutes = 0
+        sessions_count = 0
+        daily_breakdown = {}
+        
+        try:
+            with open(testing_log_path, 'r') as f:
+                for line in f:
+                    try:
+                        data = json.loads(line.strip())
+                        if data['action'] == 'TESTING_END':
+                            timestamp = datetime.fromisoformat(data['timestamp'].replace('Z', '+00:00')).replace(tzinfo=None)
+                            
+                            if start_dt <= timestamp < end_dt:
+                                # Usa il valore assoluto per gestire durate negative dei dati storici
+                                duration = abs(data.get('duration', 0))
+                                date_key = timestamp.strftime('%Y-%m-%d')
+                                
+                                total_minutes += duration
+                                sessions_count += 1
+                                
+                                if date_key not in daily_breakdown:
+                                    daily_breakdown[date_key] = {'minutes': 0, 'sessions': 0}
+                                daily_breakdown[date_key]['minutes'] += duration
+                                daily_breakdown[date_key]['sessions'] += 1
+                    except:
+                        continue
+        except:
+            pass
+        
+        avg_session_minutes = total_minutes / sessions_count if sessions_count > 0 else 0
+        
+        return {
+            'total_minutes': total_minutes,
+            'sessions_count': sessions_count,
+            'avg_session_minutes': round(avg_session_minutes, 1),
+            'daily_breakdown': daily_breakdown
+        }
+    
     def generate_weekly_data(self):
-        """Genera dati settimanali dal 19 agosto 2025"""
+        """Genera dati settimanali dal 19 agosto 2025 con testing time"""
         weeks = [
             {
                 'name': 'Settimana 1',
@@ -148,11 +205,19 @@ class EGICommitStatsExporter:
         
         weekly_data = []
         all_daily_data = []
+        testing_summary = []
         
         for week in weeks:
-            # Analisi settimanale
+            # Analisi settimanale commit
             commits = self.get_commits_for_period(week['start_date'], week['end_date'])
             stats = self.analyze_commits(commits)
+            
+            # Analisi testing time
+            testing_data = self.get_testing_time_data(week['start_date'], week['end_date'])
+            
+            # Stima tempo coding (22 min per commit)
+            estimated_coding_minutes = stats['total_commits'] * 22
+            total_productive_minutes = testing_data['total_minutes'] + estimated_coding_minutes
             
             weekly_data.append({
                 'Settimana': week['name'],
@@ -168,32 +233,67 @@ class EGICommitStatsExporter:
                 'DOC': stats['tags']['DOC'],
                 'TEST': stats['tags']['TEST'],
                 'CHORE': stats['tags']['CHORE'],
-                'TAG Dominante': max(stats['tags'], key=stats['tags'].get) if any(stats['tags'].values()) else 'Nessuno'
+                'TAG Dominante': max(stats['tags'], key=stats['tags'].get) if any(stats['tags'].values()) else 'Nessuno',
+                'Testing Minutes': testing_data['total_minutes'],
+                'Testing Sessions': testing_data['sessions_count'],
+                'Avg Session (min)': testing_data['avg_session_minutes'],
+                'Coding Minutes (est)': estimated_coding_minutes,
+                'Total Productive Minutes': total_productive_minutes,
+                'Testing %': round((testing_data['total_minutes'] / total_productive_minutes) * 100, 1) if total_productive_minutes > 0 else 0
             })
             
-            # Dati giornalieri
+            # Dati giornalieri con testing
             daily_data = self.get_daily_commits(week['start_date'], week['end_date'])
             for day in daily_data:
                 day['settimana'] = week['name']
+                date_str = day['date']
+                
+                # Aggiungi dati testing per questo giorno
+                if date_str in testing_data['daily_breakdown']:
+                    day['testing_minutes'] = testing_data['daily_breakdown'][date_str]['minutes']
+                    day['testing_sessions'] = testing_data['daily_breakdown'][date_str]['sessions']
+                else:
+                    day['testing_minutes'] = 0
+                    day['testing_sessions'] = 0
+                
+                # Calcola tempo produttivo totale
+                day['coding_minutes_est'] = day['commits'] * 22
+                day['total_productive_minutes'] = day['testing_minutes'] + day['coding_minutes_est']
+                
                 all_daily_data.append(day)
+            
+            # Summary testing per settimana
+            testing_summary.append({
+                'Settimana': week['name'],
+                'Periodo': week['period'],
+                'Testing Totale (h)': round(testing_data['total_minutes'] / 60, 1),
+                'Sessioni Totali': testing_data['sessions_count'],
+                'Media Sessione (min)': testing_data['avg_session_minutes'],
+                'Coding Stimato (h)': round(estimated_coding_minutes / 60, 1),
+                'Tempo Produttivo (h)': round(total_productive_minutes / 60, 1),
+                'Rapporto Testing/Coding': f"{round((testing_data['total_minutes'] / estimated_coding_minutes) * 100, 1)}%" if estimated_coding_minutes > 0 else "N/A"
+            })
         
-        return weekly_data, all_daily_data
+        return weekly_data, all_daily_data, testing_summary
     
     def create_excel_file(self):
-        """Crea il file Excel con tutti i dati"""
-        print("📊 Generazione statistiche commit per Excel...")
+        """Crea il file Excel con tutti i dati inclusi testing time"""
+        print("📊 Generazione statistiche commit e testing per Excel...")
         
         # Genera dati
-        weekly_data, daily_data = self.generate_weekly_data()
+        weekly_data, daily_data, testing_summary = self.generate_weekly_data()
         
         # Crea DataFrames
         df_weekly = pd.DataFrame(weekly_data)
         df_daily = pd.DataFrame(daily_data)
+        df_testing = pd.DataFrame(testing_summary)
         
         # Dati di riepilogo
         total_commits = sum(week['Commit Totali'] for week in weekly_data)
         total_tagged = sum(week['Commit con TAG'] for week in weekly_data)
         avg_coverage = round(sum(week['Copertura TAG %'] for week in weekly_data) / len(weekly_data), 1)
+        total_testing_minutes = sum(week['Testing Minutes'] for week in weekly_data)
+        total_coding_minutes = sum(week['Coding Minutes (est)'] for week in weekly_data)
         
         summary_data = [{
             'Metrica': 'Commit Totali',
@@ -211,6 +311,18 @@ class EGICommitStatsExporter:
             'Metrica': 'Copertura TAG Media',
             'Valore': f'{avg_coverage}%',
             'Note': 'Media delle 3 settimane'
+        }, {
+            'Metrica': 'Testing Time Totale',
+            'Valore': f'{round(total_testing_minutes/60, 1)}h',
+            'Note': f'{total_testing_minutes} minuti'
+        }, {
+            'Metrica': 'Coding Time Stimato',
+            'Valore': f'{round(total_coding_minutes/60, 1)}h',
+            'Note': '22 min per commit'
+        }, {
+            'Metrica': 'Rapporto Testing/Coding',
+            'Valore': f'{round((total_testing_minutes/total_coding_minutes)*100, 1)}%' if total_coding_minutes > 0 else 'N/A',
+            'Note': 'Testing vs sviluppo'
         }]
         
         df_summary = pd.DataFrame(summary_data)
@@ -223,7 +335,10 @@ class EGICommitStatsExporter:
             # Sheet 2: Dati Settimanali  
             df_weekly.to_excel(writer, sheet_name='Statistiche Settimanali', index=False)
             
-            # Sheet 3: Dati Giornalieri
+            # Sheet 3: Testing Summary
+            df_testing.to_excel(writer, sheet_name='Testing Time Analysis', index=False)
+            
+            # Sheet 4: Dati Giornalieri
             df_daily.to_excel(writer, sheet_name='Commit Giornalieri', index=False)
             
             # Formattazione
@@ -231,6 +346,8 @@ class EGICommitStatsExporter:
         
         print(f"✅ File Excel creato: {self.output_file}")
         print(f"📁 Percorso completo: {self.output_file.absolute()}")
+        print(f"📊 Testing time totale: {round(total_testing_minutes/60, 1)}h")
+        print(f"💻 Coding time stimato: {round(total_coding_minutes/60, 1)}h")
         
         return str(self.output_file.absolute())
     
