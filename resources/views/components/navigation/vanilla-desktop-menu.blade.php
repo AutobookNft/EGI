@@ -91,9 +91,7 @@
             <div class="grid grid-cols-1 gap-4">
 
                 <!-- Dynamic Collections Carousel Card -->
-                @can('create_collection')
-                    <x-menu-collections-carousel :collections="Auth::user()->ownedCollections()->orderBy('position')->get()" />
-                @endcan
+                <x-menu-collections-carousel :collections="Auth::user()->ownedCollections()->orderBy('position')->get()" />
                 
                 <!-- Shared Collections Carousel Card - Collections where user is collaborator -->
                 <x-menu-guest-collections-carousel />

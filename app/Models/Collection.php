@@ -114,6 +114,36 @@ class Collection extends Model implements HasMedia {
     }
 
     /**
+     * Check if a user has a specific permission in this collection based on their role
+     * 
+     * @param User|int $user User model or user ID
+     * @param string $permission Permission name to check
+     * @return bool
+     */
+    public function userHasPermission($user, string $permission): bool {
+        $userId = is_numeric($user) ? $user : $user->id;
+
+        // Get user's role in this collection
+        $collectionUser = $this->users()->where('users.id', $userId)->first();
+
+        if (!$collectionUser) {
+            return false; // User is not part of this collection
+        }
+
+        // Get the role from pivot
+        $userRole = $collectionUser->pivot->role;
+
+        // Check if the role exists in Spatie and has the permission
+        $role = \Spatie\Permission\Models\Role::where('name', $userRole)->first();
+
+        if (!$role) {
+            return false; // Role doesn't exist in Spatie
+        }
+
+        return $role->hasPermissionTo($permission);
+    }
+
+    /**
      * Verifica se la collection può essere pubblicata.
      *
      * @return bool
