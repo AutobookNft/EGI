@@ -275,7 +275,8 @@ class NotificationWalletResponseController extends Controller {
             GdprActivityCategory::WALLET_MANAGEMENT
         );
 
-        $this->responseWalletService->archiveWallet($notification);
+        // Archive notification by marking as read
+        $notification->markAsRead();
 
         return response()->json(
             WalletResponse::success(
@@ -305,7 +306,8 @@ class NotificationWalletResponseController extends Controller {
             GdprActivityCategory::WALLET_MANAGEMENT
         );
 
-        $this->responseWalletService->doneWallet($notification);
+        // Mark notification as read (done)
+        $notification->markAsRead();
 
         return response()->json(
             WalletResponse::success(
