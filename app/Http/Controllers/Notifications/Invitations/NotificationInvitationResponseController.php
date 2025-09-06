@@ -10,7 +10,7 @@ use App\DataTransferObjects\Payloads\Invitations\{
 };
 
 use App\Enums\{
-    GdprActivityCategory,
+    Gdpr\GdprActivityCategory,
     NotificationHandlerType,
     NotificationStatus
 };

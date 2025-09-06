@@ -7,7 +7,7 @@ namespace App\Http\Controllers\Notifications\Wallets;
 use App\DataTransferObjects\Notifications\Wallets\WalletCreateRequest;
 use App\DataTransferObjects\Notifications\Wallets\WalletDonationRequest;
 use App\DataTransferObjects\Notifications\Wallets\WalletUpdateRequest;
-use App\Enums\GdprActivityCategory;
+use App\Enums\Gdpr\GdprActivityCategory;
 use App\Exceptions\WalletException;
 use App\Http\Controllers\Controller;
 use App\Rules\NoPendingWalletProposal;
