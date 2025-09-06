@@ -21,7 +21,7 @@ class TestingTimeTracker extends Command {
      *
      * @var string
      */
-    protected $signature = 'testing:time {action : start, stop, report, or status} {--note= : Nota opzionale per la sessione}';
+    protected $signature = 'testing:time {action : start, stop, report, status, or manual} {--note= : Nota opzionale per la sessione} {--duration= : Durata in minuti per sessione manuale}';
 
     /**
      * The console command description.
@@ -54,8 +54,10 @@ class TestingTimeTracker extends Command {
                 return $this->showReport();
             case 'status':
                 return $this->showStatus();
+            case 'manual':
+                return $this->addManualSession();
             default:
-                $this->error('Azione non valida. Usa: start, stop, report, status');
+                $this->error('Azione non valida. Usa: start, stop, report, status, manual');
                 return 1;
         }
     }
@@ -193,6 +195,32 @@ class TestingTimeTracker extends Command {
 
     private function isTestingActive() {
         return File::exists($this->activeFile);
+    }
+
+    private function addManualSession() {
+        $duration = $this->option('duration');
+        $note = $this->option('note') ?? 'Manual testing session';
+
+        if (!$duration || !is_numeric($duration) || $duration <= 0) {
+            $this->error('❌ Devi specificare una durata valida in minuti con --duration=N');
+            $this->info('💡 Esempio: php artisan testing:time manual --duration=22 --note="Test sistema notifiche"');
+            return 1;
+        }
+
+        $duration = (int) $duration;
+        $endTime = Carbon::now();
+        $startTime = $endTime->copy()->subMinutes($duration);
+
+        // Log sessione manuale come coppia start/stop
+        $this->logActivity('TESTING_START', $note . ' (retroattivo)', $startTime);
+        $this->logActivity('TESTING_STOP', $note . ' (retroattivo)', $endTime, $duration);
+
+        $this->info('✅ Sessione di testing retroattiva registrata!');
+        $this->info('🕐 Durata: ' . $this->formatDuration($duration));
+        $this->info('📝 Nota: ' . $note);
+        $this->info('⏰ Periodo: ' . $startTime->format('H:i:s') . ' - ' . $endTime->format('H:i:s'));
+
+        return 0;
     }
 
     private function logActivity($action, $note, $timestamp, $duration = null) {

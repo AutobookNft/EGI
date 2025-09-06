@@ -49,6 +49,9 @@ php artisan testing:time status
 # Ferma sessione corrente
 php artisan testing:time stop
 
+# Registra sessione retroattiva (manuale)
+php artisan testing:time manual --duration=N --note="Descrizione del test completato"
+
 # Report dettagliato ultimi 10 giorni
 php artisan testing:time report
 ```
@@ -143,13 +146,74 @@ python3 bash_files/complete-time-analysis.py --json
     php artisan testing:time status
     ```
 
-4. **Fine Giornata**:
+4. **Registrazione Retroattiva** (per sessioni dimenticate):
+
+    ```bash
+    # Registra una sessione già completata
+    php artisan testing:time manual --duration=X --note="Descrizione del test"
+
+    # Esempi pratici con durate diverse
+    php artisan testing:time manual --duration=15 --note="Debug traduzioni UI"
+    php artisan testing:time manual --duration=30 --note="Test completo workflow GDPR"
+    php artisan testing:time manual --duration=45 --note="Validazione sistema pagamenti"
+    ```
+
+5. **Fine Giornata**:
     ```bash
     php artisan testing:time report
     python3 bash_files/complete-time-analysis.py
     ```
 
-## 📈 Insights e Analytics
+## � Comando Manual - Registrazione Retroattiva
+
+### Sintassi Completa:
+
+```bash
+php artisan testing:time manual --duration=N --note="Descrizione"
+```
+
+### Parametri:
+
+-   `--duration=N` (obbligatorio): Durata in minuti della sessione completata
+-   `--note="..."` (opzionale): Descrizione del test effettuato
+
+### Scenari d'Uso:
+
+1. **Test dimenticato di tracciare**:
+
+    ```bash
+    php artisan testing:time manual --duration=25 --note="Test funzionalità login OAuth"
+    ```
+
+2. **Sessione di debug prolungata**:
+
+    ```bash
+    php artisan testing:time manual --duration=60 --note="Risoluzione bug sistema notifiche"
+    ```
+
+3. **Testing manuale interfaccia**:
+    ```bash
+    php artisan testing:time manual --duration=40 --note="Validazione UX responsive design"
+    ```
+
+### Comportamento:
+
+-   ✅ Registra automaticamente INIZIO e FINE sessione
+-   ⏰ Calcola timestamp retroattivo (ora corrente - durata)
+-   📝 Aggiunge "(retroattivo)" alla nota per distinguerla
+-   📊 Include nei report come sessione normale
+-   🔒 Non interferisce con sessioni attive
+
+### Esempio Output:
+
+```
+✅ Sessione di testing retroattiva registrata!
+🕐 Durata: 25m
+📝 Nota: Test funzionalità login OAuth
+⏰ Periodo: 09:15:30 - 09:40:30
+```
+
+## �📈 Insights e Analytics
 
 ### Metriche Chiave:
 
