@@ -3765,5 +3765,50 @@ return [
             'msg_to' => 'sweet-alert',
         ],
 
+        // Invitation Response Error Codes
+        'INVITATION_RESPONSE_INVALID_ACTION' => [
+            'type' => 'warning',
+            'blocking' => 'not',
+            'dev_message_key' => 'error-manager::errors.dev.invitation_response_invalid_action',
+            'user_message_key' => 'error-manager::errors.user.invitation_response_invalid_action',
+            'http_status_code' => 400,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'json',
+        ],
+
+        'INVITATION_RESPONSE_SYSTEM_ERROR' => [
+            'type' => 'error',
+            'blocking' => 'not',
+            'dev_message_key' => 'error-manager::errors.dev.invitation_response_system_error',
+            'user_message_key' => 'error-manager::errors.user.invitation_response_system_error',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'json',
+        ],
+
+        'INVITATION_ARCHIVE_NOT_FOUND' => [
+            'type' => 'warning',
+            'blocking' => 'not',
+            'dev_message_key' => 'error-manager::errors.dev.invitation_archive_not_found',
+            'user_message_key' => 'error-manager::errors.user.invitation_archive_not_found',
+            'http_status_code' => 404,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'json',
+        ],
+
+        'INVITATION_ARCHIVE_ERROR' => [
+            'type' => 'error',
+            'blocking' => 'not',
+            'dev_message_key' => 'error-manager::errors.dev.invitation_archive_error',
+            'user_message_key' => 'error-manager::errors.user.invitation_archive_error',
+            'http_status_code' => 500,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'json',
+        ],
+
     ]
 ];

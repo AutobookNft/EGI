@@ -10,18 +10,22 @@ use App\DataTransferObjects\Payloads\Invitations\{
 };
 
 use App\Enums\{
+    GdprActivityCategory,
     NotificationHandlerType,
     NotificationStatus
 };
 use App\Http\Controllers\Controller;
 use App\Models\CustomDatabaseNotification;
 use App\Models\NotificationPayloadInvitation;
+use App\Services\GDPR\AuditLogService;
 use App\Services\Notifications\InvitationService;
+use App\Services\UltraErrorManager\Contracts\ErrorManagerInterface;
+use App\Services\UltraLogManager\UltraLogManager;
 
 
 use Exception;
 use Illuminate\Http\{Request, JsonResponse};
-use Illuminate\Support\Facades\{Auth, Log};
+use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 use Ultra\EgiModule\Contracts\UserRoleServiceInterface;
 
@@ -34,6 +38,9 @@ class NotificationInvitationResponseController extends Controller
     
     public function __construct(
         private readonly InvitationService $responseInvitationService,
+        private readonly AuditLogService $auditLogService,
+        private readonly ErrorManagerInterface $errorManager,
+        private readonly UltraLogManager $ultraLogManager,
         UserRoleServiceInterface $roleService
     ) {
         $this->roleService = $roleService;
@@ -64,8 +71,25 @@ class NotificationInvitationResponseController extends Controller
             NotificationStatus::REJECTED->value,
             NotificationStatus::ARCHIVED->value,
             NotificationStatus::DONE->value])) {
-                Log::channel('florenceegi')->error('Azione non valida', [
-                    'action' => $action
+                
+                // GDPR: Log dell'errore di validazione
+                $this->auditLogService->logUserAction(
+                    user: Auth::user(),
+                    action: 'invitation_response_invalid_action',
+                    context: [
+                        'action' => $action,
+                        'payload_id' => $payloadId,
+                        'notification_id' => $notificationId,
+                        'error_type' => 'invalid_action',
+                    ],
+                    category: GdprActivityCategory::NOTIFICATION_MANAGEMENT
+                );
+
+                $this->errorManager->handle('INVITATION_RESPONSE_INVALID_ACTION', [
+                    'user_id' => Auth::id(),
+                    'action' => $action,
+                    'payload_id' => $payloadId,
+                    'notification_id' => $notificationId
                 ]);
                 return response()->json(
                 InvitationResponse::error(
@@ -87,12 +111,26 @@ class NotificationInvitationResponseController extends Controller
 
 
         } catch (Exception $e) {
+            // GDPR: Log dell'errore di sistema
+            $this->auditLogService->logUserAction(
+                user: Auth::user(),
+                action: 'invitation_response_system_error',
+                context: [
+                    'payload_id' => $payloadId,
+                    'notification_id' => $notificationId,
+                    'action' => $action,
+                    'error_type' => 'Exception',
+                    'error_message' => $e->getMessage(),
+                ],
+                category: GdprActivityCategory::NOTIFICATION_MANAGEMENT
+            );
 
-            Log::channel('florenceegi')->error('Errore elaborazione notifica', [
+            $this->errorManager->handle('INVITATION_RESPONSE_SYSTEM_ERROR', [
+                'user_id' => Auth::id(),
                 'error' => $e->getMessage(),
                 'payloadId' => $payloadId,
                 'action' => $action
-            ]);
+            ], $e);
 
             return response()->json(
                 InvitationResponse::error($e->getMessage())->toArray(),
@@ -124,8 +162,10 @@ class NotificationInvitationResponseController extends Controller
 
     private function handleAccept($payloadId, $notificationId): JsonResponse
     {
-        Log::channel('florenceegi')->info('Notifica di accettazione invitations', [
+        $this->ultraLogManager->info('Processing invitation acceptance', [
+            'user_id' => Auth::id(),
             'notificationId' => $notificationId,
+            'payloadId' => $payloadId
         ]);
 
         $invitationPayload = $this->findNotification($payloadId);
@@ -136,6 +176,18 @@ class NotificationInvitationResponseController extends Controller
          * @exception Exception
          */
         $this->responseInvitationService->acceptInvitation($invitationPayload, $notificationId);
+
+        // GDPR: Log dell'accettazione invito
+        $this->auditLogService->logUserAction(
+            user: Auth::user(),
+            action: 'invitation_accepted',
+            context: [
+                'payload_id' => $payloadId,
+                'notification_id' => $notificationId,
+                'invitation_type' => $invitationPayload->type ?? 'unknown',
+            ],
+            category: GdprActivityCategory::NOTIFICATION_MANAGEMENT
+        );
                
 
         return response()->json(
@@ -158,7 +210,8 @@ class NotificationInvitationResponseController extends Controller
 
     private function handleArchive($notifificationId): JsonResponse
     {
-        Log::channel('florenceegi')->info('Archiviazione notifica', [
+        $this->ultraLogManager->info('Processing notification archive', [
+            'user_id' => Auth::id(),
             'notificationId' => $notifificationId
         ]);
 
@@ -167,7 +220,19 @@ class NotificationInvitationResponseController extends Controller
             $notification = CustomDatabaseNotification::find($notifificationId);
 
             if (!$notification) {
-                Log::channel('florenceegi')->error('Errore nella ricerca della notifica', [
+                // GDPR: Log errore notifica non trovata
+                $this->auditLogService->logUserAction(
+                    user: Auth::user(),
+                    action: 'invitation_archive_not_found',
+                    context: [
+                        'notification_id' => $notifificationId,
+                        'error_type' => 'notification_not_found',
+                    ],
+                    category: GdprActivityCategory::NOTIFICATION_MANAGEMENT
+                );
+
+                $this->errorManager->handle('INVITATION_ARCHIVE_NOT_FOUND', [
+                    'user_id' => Auth::id(),
                     'notificationId' => $notifificationId
                 ]);
                 throw new Exception('Errore nella ricerca della notifica.');
@@ -176,6 +241,17 @@ class NotificationInvitationResponseController extends Controller
             $notification->update([
                 'read_at' => now()
             ]);
+
+            // GDPR: Log dell'archiviazione
+            $this->auditLogService->logUserAction(
+                user: Auth::user(),
+                action: 'invitation_archived',
+                context: [
+                    'notification_id' => $notifificationId,
+                    'archived_at' => now()->toDateTimeString(),
+                ],
+                category: GdprActivityCategory::NOTIFICATION_MANAGEMENT
+            );
 
             if (!$notification) {
                 return response()->json(
@@ -194,11 +270,23 @@ class NotificationInvitationResponseController extends Controller
             );
 
         } catch (Exception $e) {
+            // GDPR: Log dell'errore archiviazione
+            $this->auditLogService->logUserAction(
+                user: Auth::user(),
+                action: 'invitation_archive_error',
+                context: [
+                    'notification_id' => $notifificationId,
+                    'error_type' => 'Exception',
+                    'error_message' => $e->getMessage(),
+                ],
+                category: GdprActivityCategory::NOTIFICATION_MANAGEMENT
+            );
 
-            Log::channel('florenceegi')->error('Errore archiviazione notifica', [
-                'notification_id' => $notification->id,
+            $this->errorManager->handle('INVITATION_ARCHIVE_ERROR', [
+                'user_id' => Auth::id(),
+                'notification_id' => $notifificationId,
                 'error' => $e->getMessage()
-            ]);
+            ], $e);
 
             return response()->json(
                 InvitationResponse::error(
@@ -211,11 +299,23 @@ class NotificationInvitationResponseController extends Controller
 
     private function handleDone($payloadId, $notificationId): JsonResponse
     {
-
-        Log::channel('florenceegi')->info('Notifica completata', [
+        $this->ultraLogManager->info('Processing invitation completion', [
+            'user_id' => Auth::id(),
             'notificationId' => $notificationId,
             'payloadId' => $payloadId
         ]);
+
+        // GDPR: Log del completamento invito
+        $this->auditLogService->logUserAction(
+            user: Auth::user(),
+            action: 'invitation_completed',
+            context: [
+                'payload_id' => $payloadId,
+                'notification_id' => $notificationId,
+                'completed_at' => now()->toDateTimeString(),
+            ],
+            category: GdprActivityCategory::NOTIFICATION_MANAGEMENT
+        );
 
         return response()->json(
             InvitationResponse::success(
