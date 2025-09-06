@@ -46,6 +46,7 @@ return new class extends Migration
                 'media_management',     // File and media operations
                 'privacy_management',   // Privacy and consent operations
                 'personal_data_update', // Personal data updates
+                'wallet_management',    // Wallet and financial operations
             ]);
 
             // Context and metadata

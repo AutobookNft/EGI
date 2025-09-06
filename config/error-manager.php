@@ -3707,5 +3707,63 @@ return [
             'msg_to' => 'sweet-alert',
         ],
 
+        // ====================================================
+        // WALLET NOTIFICATION ERRORS
+        // ====================================================
+        'WALLET_NOTIFICATION_INVALID_ACTION' => [
+            'type' => 'warning',
+            'blocking' => 'not',
+            'dev_message_key' => 'error-manager::errors.dev.wallet_notification_invalid_action',
+            'user_message_key' => 'error-manager::errors.user.wallet_notification_invalid_action',
+            'http_status_code' => 400,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'json',
+        ],
+
+        'WALLET_NOTIFICATION_NOT_FOUND' => [
+            'type' => 'warning',
+            'blocking' => 'not',
+            'dev_message_key' => 'error-manager::errors.dev.wallet_notification_not_found',
+            'user_message_key' => 'error-manager::errors.user.wallet_notification_not_found',
+            'http_status_code' => 404,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'json',
+        ],
+
+        'WALLET_NOTIFICATION_PROCESSING_ERROR' => [
+            'type' => 'error',
+            'blocking' => 'not',
+            'dev_message_key' => 'error-manager::errors.dev.wallet_notification_processing_error',
+            'user_message_key' => 'error-manager::errors.user.wallet_notification_processing_error',
+            'http_status_code' => 500,
+            'devTeam_email_need' => true,
+            'notify_slack' => true,
+            'msg_to' => 'json',
+        ],
+
+        'WALLET_NOTIFICATION_UNAUTHORIZED' => [
+            'type' => 'warning',
+            'blocking' => 'semi-blocking',
+            'dev_message_key' => 'error-manager::errors.dev.wallet_notification_unauthorized',
+            'user_message_key' => 'error-manager::errors.user.wallet_notification_unauthorized',
+            'http_status_code' => 403,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'json',
+        ],
+
+        'WALLET_NOTIFICATION_FETCH_ERROR' => [
+            'type' => 'error',
+            'blocking' => 'not',
+            'dev_message_key' => 'error-manager::errors.dev.wallet_notification_fetch_error',
+            'user_message_key' => 'error-manager::errors.user.wallet_notification_fetch_error',
+            'http_status_code' => 500,
+            'devTeam_email_need' => false,
+            'notify_slack' => false,
+            'msg_to' => 'sweet-alert',
+        ],
+
     ]
 ];

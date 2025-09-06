@@ -64,6 +64,9 @@ enum GdprActivityCategory: string {
 /** Personal data updates */
     case PERSONAL_DATA_UPDATE = 'personal_data_update';
 
+/** Wallet and financial operations */
+    case WALLET_MANAGEMENT = 'wallet_management';
+
     /**
      * Ritorna la descrizione umana della categoria, OS2.0 style.
      */
@@ -85,6 +88,7 @@ enum GdprActivityCategory: string {
             self::MEDIA_MANAGEMENT => 'File Upload, Media and Asset Management',
             self::PRIVACY_MANAGEMENT => 'Privacy Settings and Consent Management',
             self::PERSONAL_DATA_UPDATE => 'Personal Data Updates and Modifications',
+            self::WALLET_MANAGEMENT => 'Wallet and Financial Operations Management',
         };
     }
 
@@ -99,7 +103,8 @@ enum GdprActivityCategory: string {
             self::GDPR_ACTIONS,
             self::DATA_DELETION,
             self::PRIVACY_MANAGEMENT,
-            self::PERSONAL_DATA_UPDATE => PrivacyLevel::CRITICAL,
+            self::PERSONAL_DATA_UPDATE,
+            self::WALLET_MANAGEMENT => PrivacyLevel::CRITICAL,
 
             // HIGH - Security and authentication (3 years retention)
             self::AUTHENTICATION,
