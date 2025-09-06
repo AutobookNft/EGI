@@ -159,9 +159,19 @@ python3 bash_files/complete-time-analysis.py --json
     ```
 
 5. **Fine Giornata**:
+
     ```bash
     php artisan testing:time report
     python3 bash_files/complete-time-analysis.py
+
+    # Aggiorna report Excel (opzionale - settimanale)
+    python3 bash_files/commit-stats-to-excel.py
+    ```
+
+6. **Report Settimanale**:
+    ```bash
+    # Genera report Excel completo per revisione settimanale
+    python3 bash_files/commit-stats-to-excel.py
     ```
 
 ## � Comando Manual - Registrazione Retroattiva
@@ -265,6 +275,49 @@ Il sistema si integra automaticamente con l'export Excel esistente:
 -   **Foglio Testing Time**: Dati giornalieri e settimanali
 -   **Metriche Combinate**: Testing + Coding in report unificati
 -   **Trend Analysis**: Evoluzione pattern di lavoro
+
+### 📊 Comando Export Excel
+
+**File**: `bash_files/commit-stats-to-excel.py`
+
+**Funzionalità**:
+
+-   Genera report Excel completo con statistiche commit e testing
+-   Combina dati di produttività da git e sessioni testing
+-   Calcola tempo totale di coding e testing
+-   Crea file Excel con grafici e metriche
+
+**Comando**:
+
+```bash
+# Genera/aggiorna report Excel completo
+python3 bash_files/commit-stats-to-excel.py
+```
+
+**Output**:
+
+-   **File**: `commit_statistics.xlsx` (nella root del progetto)
+-   **Contenuto**: Statistiche commit, testing time, coding time stimato
+-   **Formato**: Excel con celle formattate e calcoli automatici
+
+**Esempio Output**:
+
+```
+🚀 EGI Commit Statistics Excel Exporter
+==================================================
+📊 Generazione statistiche commit e testing per Excel...
+✅ File Excel creato: /home/fabio/EGI/commit_statistics.xlsx
+📊 Testing time totale: 2.8h
+💻 Coding time stimato: 101.6h
+🎉 Export completato con successo!
+```
+
+**Utilizzo Tipico**:
+
+1. Dopo una giornata produttiva per aggiornare le statistiche
+2. Prima di report settimanali per avere dati completi
+3. Per monitorare trend di produttività nel tempo
+4. Per condividere metriche con team o stakeholder
 
 ## 🚀 Estensioni Future
 

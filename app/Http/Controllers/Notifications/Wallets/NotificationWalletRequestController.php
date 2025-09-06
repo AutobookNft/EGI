@@ -13,25 +13,24 @@ use App\Http\Controllers\Controller;
 use App\Rules\NoPendingWalletProposal;
 use App\Services\Gdpr\AuditLogService;
 use App\Services\Notifications\RequestWalletService;
-use App\Services\UltraErrorManager\Contracts\ErrorManagerInterface;
-use App\Services\UltraLogManager\UltraLogManager;
+use Ultra\ErrorManager\Interfaces\ErrorManagerInterface;
+use Ultra\UltraLogManager\UltraLogManager;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Throwable;
 
-class NotificationWalletRequestController extends Controller
-{
+class NotificationWalletRequestController extends Controller {
     public function __construct(
         private readonly RequestWalletService $requestWalletService,
         private readonly AuditLogService $auditLogService,
         private readonly ErrorManagerInterface $errorManager,
         private readonly UltraLogManager $ultraLogManager
-    ) {}
+    ) {
+    }
 
-    public function requestCreateWallet(Request $request): JsonResponse
-    {
+    public function requestCreateWallet(Request $request): JsonResponse {
 
         $receiver_id = $request->input('receiver_id');
         $proposer_id = Auth::id();
@@ -91,7 +90,6 @@ class NotificationWalletRequestController extends Controller
             ]);
 
             return response()->json(['data' => $data], 200,);
-
         } catch (WalletException $e) {
             // GDPR: Log dell'errore wallet
             $this->auditLogService->logUserAction(
@@ -118,7 +116,6 @@ class NotificationWalletRequestController extends Controller
                 'message' => $e->getMessage(),
                 'success' => false
             ], 422);
-
         } catch (Exception $e) {
             // GDPR: Log dell'errore generico
             $this->auditLogService->logUserAction(
@@ -151,12 +148,10 @@ class NotificationWalletRequestController extends Controller
                 'message' => $e->getMessage(),
                 'success' => false
             ], 422);
-
         }
     }
 
-    public function requestUpdateWallet(Request $request): JsonResponse
-    {
+    public function requestUpdateWallet(Request $request): JsonResponse {
         $receiver_id = $request->input('receiver_id');
         $proposer_id = Auth::id();
         $collectionId = (int) $request->input('collection_id');
@@ -224,7 +219,6 @@ class NotificationWalletRequestController extends Controller
             ]);
 
             return response()->json(['data' => $data], 200,);
-
         } catch (WalletException $e) {
             // GDPR: Log dell'errore wallet update
             $this->auditLogService->logUserAction(
@@ -257,7 +251,6 @@ class NotificationWalletRequestController extends Controller
                 'message' => $e->getMessage(),
                 'success' => false
             ], 422);
-
         } catch (Exception $e) {
             // GDPR: Log dell'errore generico update
             $this->auditLogService->logUserAction(
@@ -293,8 +286,7 @@ class NotificationWalletRequestController extends Controller
         }
     }
 
-    public function requestDonation(Request $request): JsonResponse
-    {
+    public function requestDonation(Request $request): JsonResponse {
 
         try {
 
@@ -336,7 +328,6 @@ class NotificationWalletRequestController extends Controller
             ]);
 
             return response()->json(['data' => $walletRequest], 200,);
-
         } catch (WalletException $e) {
             // GDPR: Log dell'errore donation
             $this->auditLogService->logUserAction(
@@ -367,7 +358,6 @@ class NotificationWalletRequestController extends Controller
                 'message' => $e->getMessage(),
                 'success' => false
             ], 422);
-
         } catch (Exception $e) {
             // GDPR: Log dell'errore generico donation
             $this->auditLogService->logUserAction(
@@ -398,7 +388,6 @@ class NotificationWalletRequestController extends Controller
                 'message' => $e->getMessage(),
                 'success' => false
             ], 422);
-
         }
     }
 }

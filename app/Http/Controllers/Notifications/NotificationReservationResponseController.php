@@ -24,8 +24,7 @@ use Illuminate\Validation\Rule;
  * @date 2025-08-15
  * @purpose Handle API endpoints for reservation notification user interactions
  */
-class NotificationReservationResponseController extends Controller
-{
+class NotificationReservationResponseController extends Controller {
     /**
      * Constructor with dependency injection
      *
@@ -39,7 +38,8 @@ class NotificationReservationResponseController extends Controller
         private UltraLogManager $logger,
         private ErrorManagerInterface $errorManager,
         private AuditLogService $auditLogService
-    ) {}
+    ) {
+    }
 
     /**
      * Handle notification response (main endpoint)
@@ -47,8 +47,7 @@ class NotificationReservationResponseController extends Controller
      * @param Request $request The incoming request
      * @return JsonResponse API response
      */
-    public function response(Request $request): JsonResponse
-    {
+    public function response(Request $request): JsonResponse {
         // Validate request
         $validated = $request->validate([
             'notificationId' => 'required|uuid',
@@ -215,7 +214,6 @@ class NotificationReservationResponseController extends Controller
             );
 
             return response()->json($result);
-
         } catch (\Exception $e) {
             // GDPR: Log dell'errore di sistema
             $this->auditLogService->logUserAction(
@@ -251,8 +249,7 @@ class NotificationReservationResponseController extends Controller
      * @param Request $request The incoming request
      * @return JsonResponse API response
      */
-    public function notificationArchive(Request $request): JsonResponse
-    {
+    public function notificationArchive(Request $request): JsonResponse {
         // Validate request
         $validated = $request->validate([
             'notificationId' => 'required|uuid',
@@ -286,8 +283,7 @@ class NotificationReservationResponseController extends Controller
      * @param Request $request The incoming request
      * @return JsonResponse API response
      */
-    public function getDetails(Request $request): JsonResponse
-    {
+    public function getDetails(Request $request): JsonResponse {
         // Validate request
         $validated = $request->validate([
             'notificationId' => 'required|uuid'
@@ -376,7 +372,6 @@ class NotificationReservationResponseController extends Controller
                     ]
                 ]
             ]);
-
         } catch (\Exception $e) {
             // GDPR: Log dell'errore dettagli
             $this->auditLogService->logUserAction(
@@ -410,8 +405,7 @@ class NotificationReservationResponseController extends Controller
      * @param Request $request The incoming request
      * @return JsonResponse API response
      */
-    public function getRanking(Request $request): JsonResponse
-    {
+    public function getRanking(Request $request): JsonResponse {
         // Validate request
         $validated = $request->validate([
             'notificationId' => 'required|uuid',

@@ -45,6 +45,7 @@ return new class extends Migration {
                 'privacy_management',   // Privacy and consent operations
                 'personal_data_update', // Personal data updates
                 'wallet_management',    // Wallet and financial operations
+                'notification_management', // Notification management and interactions
             ]);
 
             // Context and metadata

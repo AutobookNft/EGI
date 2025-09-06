@@ -67,6 +67,9 @@ enum GdprActivityCategory: string {
 /** Wallet and financial operations */
     case WALLET_MANAGEMENT = 'wallet_management';
 
+/** Notification management and interactions */
+    case NOTIFICATION_MANAGEMENT = 'notification_management';
+
     /**
      * Ritorna la descrizione umana della categoria, OS2.0 style.
      */
@@ -89,6 +92,7 @@ enum GdprActivityCategory: string {
             self::PRIVACY_MANAGEMENT => 'Privacy Settings and Consent Management',
             self::PERSONAL_DATA_UPDATE => 'Personal Data Updates and Modifications',
             self::WALLET_MANAGEMENT => 'Wallet and Financial Operations Management',
+            self::NOTIFICATION_MANAGEMENT => 'Notification Management and User Interactions',
         };
     }
 
@@ -120,7 +124,8 @@ enum GdprActivityCategory: string {
             self::BLOCKCHAIN_ACTIVITY,
             self::MEDIA_MANAGEMENT,
             self::PLATFORM_USAGE,
-            self::SYSTEM_INTERACTION => PrivacyLevel::STANDARD,
+            self::SYSTEM_INTERACTION,
+            self::NOTIFICATION_MANAGEMENT => PrivacyLevel::STANDARD,
         };
     }
 

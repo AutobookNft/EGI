@@ -225,7 +225,10 @@ class NotificationWalletResponseController extends Controller {
      * Gestisce il rifiuto di una notifica wallet con GDPR audit
      */
     private function handleReject(CustomDatabaseNotification $notification, Request $request, array $logContext): JsonResponse {
-        $rejectRequest = WalletRejectRequest::fromNotificationAndRequest($notification, $request);
+        $rejectRequest = WalletRejectRequest::fromRequest(
+            $notification,
+            $request->input('reason', '')
+        );
 
         $this->logger->info('[WalletNotification] Processing wallet rejection', [
             ...$logContext,
