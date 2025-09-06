@@ -12,13 +12,11 @@ use Illuminate\Support\Facades\DB;
  * @date 2025-09-06
  * @purpose Add wallet_management to user_activities category enum for GDPR compliance
  */
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
-    public function up(): void
-    {
+    public function up(): void {
         // Per MySQL/MariaDB, modifichiamo l'enum aggiungendo wallet_management
         DB::statement("ALTER TABLE user_activities MODIFY COLUMN category ENUM(
             'authentication',
@@ -44,8 +42,7 @@ return new class extends Migration
     /**
      * Reverse the migrations.
      */
-    public function down(): void
-    {
+    public function down(): void {
         // Rimuovi wallet_management dall'enum (solo se non ci sono record con questo valore)
         DB::statement("ALTER TABLE user_activities MODIFY COLUMN category ENUM(
             'authentication',

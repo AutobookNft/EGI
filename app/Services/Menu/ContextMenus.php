@@ -40,16 +40,14 @@ use App\Services\Menu\Items\ViewBiographyMenu;
  * @package App\Services\Menu
  * @version 2.0
  */
-class ContextMenus
-{
+class ContextMenus {
     /**
      * Get menu groups for specific application context
      *
      * @param string $context The current application context
      * @return array Array of MenuGroup objects for the context
      */
-    public static function getMenusForContext(string $context): array
-    {
+    public static function getMenusForContext(string $context): array {
         $menus = [];
 
         switch ($context) {

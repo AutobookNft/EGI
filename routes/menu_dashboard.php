@@ -13,12 +13,12 @@ use App\Http\Controllers\EgiController;
 use App\Livewire\Collections\CreateCollection;
 
 Route::prefix('collections')->name('collections.')->group(function () {
-        Route::get('/', [CollectionsController::class, 'index'])->name('index');
+    Route::get('/', [CollectionsController::class, 'index'])->name('index');
 
-        Route::post('/store', [CollectionsController::class, 'store'])->name('store');
+    Route::post('/store', [CollectionsController::class, 'store'])->name('store');
 
-        // Altre rotte per le collezioni...
-    });
+    // Altre rotte per le collezioni...
+});
 
 
 // Dashboard e sezioni principali (tutte protette da autenticazione)
@@ -109,6 +109,4 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     // andrebbe definita in routes/api.php con middleware 'auth:api' (o Sanctum per API).
     // Per ora la lascio qui assumendo che i middleware siano appropriati.
     Route::get('/api/statistics/summary', [StatisticsController::class, 'summary'])->name('statistics.summary');
-
-
 }); // Fine del gruppo Route::middleware(['auth:sanctum', 'verified'])

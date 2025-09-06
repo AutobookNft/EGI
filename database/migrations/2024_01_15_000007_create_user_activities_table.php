@@ -11,16 +11,14 @@ use Illuminate\Support\Facades\Schema;
  * @date 2025-07-31
  * @purpose Comprehensive user activity audit trail with COMPLETE enum categories
  */
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations
      *
      * @return void
      * @privacy-safe Creates activity logging table with privacy controls
      */
-    public function up(): void
-    {
+    public function up(): void {
         Schema::create('user_activities', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
@@ -83,8 +81,7 @@ return new class extends Migration
      *
      * @return void
      */
-    public function down(): void
-    {
+    public function down(): void {
         Schema::dropIfExists('user_activities');
     }
 };

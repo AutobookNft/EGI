@@ -38,7 +38,7 @@ use Ultra\ErrorManager\Interfaces\ErrorManagerInterface;
  * @date 2025-06-12
  */
 class NotificationWalletResponseController extends Controller {
-    
+
     /**
      * Constructor with GDPR-enhanced dependency injection
      */
@@ -136,7 +136,6 @@ class NotificationWalletResponseController extends Controller {
             ]);
 
             return $result;
-
         } catch (Exception $e) {
             $errorContext = [
                 ...$logContext,
@@ -341,7 +340,7 @@ class NotificationWalletResponseController extends Controller {
                 ...$logContext,
                 'found' => false
             ];
-            
+
             $this->errorManager->handle('WALLET_NOTIFICATION_NOT_FOUND', $errorContext);
             throw new Exception(__('notifications.not_found'));
         }
@@ -367,7 +366,7 @@ class NotificationWalletResponseController extends Controller {
     public function fetchHeadThumbnailList(Request $request) {
         $userId = Auth::id();
         $isAjax = $request->ajax();
-        
+
         $logContext = [
             'operation' => 'fetch_wallet_notifications',
             'user_id' => $userId,
@@ -444,7 +443,6 @@ class NotificationWalletResponseController extends Controller {
 
             // Return full view for browser requests
             return view('livewire.partials.head-thumbnails-list', $viewData);
-
         } catch (Exception $e) {
             $errorContext = [
                 ...$logContext,
