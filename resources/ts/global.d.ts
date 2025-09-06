@@ -65,7 +65,7 @@ interface IsPendingStatusFunction {
 
 // --- 💰 TIPIZZAZIONI MODULI WALLET ---
 interface WalletNotificationModuleConstructor {
-    new (config: { apiBaseUrl: string }): any;
+    new(config: { apiBaseUrl: string }): any;
 }
 
 // Global Window Extensions
@@ -80,6 +80,7 @@ declare global {
 
         // --- 🔄 FUNCTIONS RESE GLOBALI DA APP.JS ---
         getTranslation: TranslationsFunction;
+        appTranslate: TranslationsFunction; // Sistema moderno di traduzioni
         ensureTranslationsLoaded: EnsureTranslationsLoadedFunction;
         getEnum: GetEnumFunction;
         isPendingStatus: IsPendingStatusFunction;
@@ -208,4 +209,4 @@ declare module '../js/legal/editor' {
 }
 
 // Questo export {} è FONDAMENTALE per far funzionare le dichiarazioni globali
-export {};
+export { };

@@ -12,6 +12,32 @@ export class RequestCreateNotificationWallet {
         return this;
     }
 
+    /**
+     * 🌐 Sistema di traduzione intelligente con fallback
+     * Prova prima il sistema moderno appTranslate, poi il sistema deprecato
+     */
+    translate(key, fallback = key) {
+        // Prova prima il sistema moderno
+        if (typeof window.appTranslate === 'function') {
+            try {
+                const result = window.appTranslate(key, fallback);
+                if (result && result !== key) {
+                    return result;
+                }
+            } catch (error) {
+                console.warn('🔄 appTranslate fallback to getTranslation for key:', key);
+            }
+        }
+        
+        // Fallback al sistema deprecato 
+        if (typeof window.getTranslation === 'function') {
+            return window.getTranslation(key, fallback);
+        }
+        
+        // Ultimo fallback
+        return fallback;
+    }
+
     bindEvents() {
         document.querySelectorAll('.create-wallet-btn').forEach(btn => {
             btn.addEventListener('click', async (e) => {
@@ -35,10 +61,10 @@ export class RequestCreateNotificationWallet {
 
         try {
             const result = await Swal.fire({
-                title: window.getTranslation('collection.wallet.create_the_wallet'),
+                title: this.translate('collection.wallet.create_the_wallet'),
                 html: modalHtml,
                 showCancelButton: true,
-                confirmButtonText: window.getTranslation('collection.wallet.create'),
+                confirmButtonText: this.translate('wallet_create'),
                 cancelButtonText: 'Annulla',
                 width: 600,
                 customClass: {
@@ -71,7 +97,7 @@ export class RequestCreateNotificationWallet {
 
         if (!walletAddress) {
             console.error("❌ Errore: Indirizzo wallet mancante!");
-            Swal.showValidationMessage(window.getTranslation('collection.wallet.validation.address_required'));
+            Swal.showValidationMessage(this.translate('collection.wallet.validation.address_required'));
             return null;
         }
 
@@ -87,38 +113,38 @@ export class RequestCreateNotificationWallet {
             <form id="wallet-modal-form" class="space-y-4">
                 <div class="mb-3">
                     <label for="walletAddress" class="block text-sm font-medium text-gray-300">
-                        ${window.getTranslation('collection.wallet.address')}
+                        ${this.translate('collection.wallet.address')}
                     </label>
                     <input type="text"
                            id="walletAddress"
                            class="swal2-input bg-gray-700 text-white"
                            style="width: 90%; max-width: 350px; margin: auto; padding: 8px;"
                            value="${walletAddress}"
-                           placeholder="${window.getTranslation('collection.wallet.address_placeholder')}">
+                           placeholder="${this.translate('collection.wallet.address_placeholder')}">
                 </div>
 
                 <div class="mb-3">
                     <label for="royaltyMint" class="block text-sm font-medium text-gray-300">
-                        ${window.getTranslation('collection.wallet.royalty_mint')}
+                        ${this.translate('collection.wallet.royalty_mint')}
                     </label>
                     <input type="number"
                            id="royaltyMint"
                            class="swal2-input bg-gray-700 text-white"
                            style="width: 90%; max-width: 350px; margin: auto; padding: 8px;"
                            step="0.01"
-                           placeholder="${window.getTranslation('collection.wallet.royalty_mint_placeholder')}">
+                           placeholder="${this.translate('collection.wallet.royalty_mint_placeholder')}">
                 </div>
 
                 <div class="mb-3">
                     <label for="royaltyRebind" class="block text-sm font-medium text-gray-300">
-                        ${window.getTranslation('collection.wallet.royalty_rebind')}
+                        ${this.translate('collection.wallet.royalty_rebind')}
                     </label>
                     <input type="number"
                            id="royaltyRebind"
                            class="swal2-input bg-gray-700 text-white"
                            style="width: 90%; max-width: 350px; margin: auto; padding: 8px;"
                            step="0.01"
-                           placeholder="${window.getTranslation('collection.wallet.royalty_rebind_placeholder')}">
+                           placeholder="${this.translate('collection.wallet.royalty_rebind_placeholder')}">
                 </div>
             </form>
         `;
@@ -145,7 +171,7 @@ export class RequestCreateNotificationWallet {
             if (!response.ok) {
                 throw new Error(result.message || 'Error creating wallet');
             } else if (response.ok) {
-                this.showSuccess(window.getTranslation('collection.wallet.creation_success'));
+                this.showSuccess(this.translate('collection.wallet.creation_success'));
                 this.updateUI(result.data);
             } else {
                 this.showError(result.message);
@@ -166,8 +192,8 @@ export class RequestCreateNotificationWallet {
 
         Swal.fire({
             icon: 'success',
-            title: window.getTranslation('collection.wallet.creation_success'),
-            text: window.getTranslation('collection.wallet.creation_success_detail'),
+            title: this.translate('collection.wallet.creation_success'),
+            text: this.translate('collection.wallet.creation_success_detail'),
             timer: 3000,
             showConfirmButton: false
         });
@@ -176,7 +202,7 @@ export class RequestCreateNotificationWallet {
     showSuccess(message) {
         Swal.fire({
             icon: 'success',
-            title: window.getTranslation('collection.wallet.creation_success'),
+            title: this.translate('collection.wallet.creation_success'),
             text: message,
             timer: 3000
         });
@@ -185,7 +211,8 @@ export class RequestCreateNotificationWallet {
     showError(message) {
         Swal.fire({
             icon: 'error',
-            title: window.getTranslation('collection.wallet.creation_error'),
+            title: this.translate('wallet_validation_check_pending_wallet_title'),
+                                   
             text: message
         });
     }

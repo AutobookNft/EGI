@@ -126,6 +126,7 @@ async function initializeTranslationsOrchestrated(): Promise<void> {
 
         // Rende disponibili le funzioni globalmente per compatibilità
         window.getTranslation = getTranslation;
+        window.appTranslate = appTranslate; // Sistema moderno di traduzioni
         window.ensureTranslationsLoaded = ensureTranslationsLoaded;
 
         console.log('Padmin Main: Translations system initialized successfully.');

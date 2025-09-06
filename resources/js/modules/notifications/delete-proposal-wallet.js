@@ -27,6 +27,32 @@ export class DeleteProposalWallet {
     }
 
     /**
+     * 🌐 Sistema di traduzione intelligente con fallback
+     * Prova prima il sistema moderno appTranslate, poi il sistema deprecato
+     */
+    translate(key, fallback = key) {
+        // Prova prima il sistema moderno
+        if (typeof window.appTranslate === 'function') {
+            try {
+                const result = window.appTranslate(key, fallback);
+                if (result && result !== key) {
+                    return result;
+                }
+            } catch (error) {
+                console.warn('🔄 appTranslate fallback to getTranslation for key:', key);
+            }
+        }
+        
+        // Fallback al sistema deprecato 
+        if (typeof window.getTranslation === 'function') {
+            return window.getTranslation(key, fallback);
+        }
+        
+        // Ultimo fallback
+        return fallback;
+    }
+
+    /**
         * @translation_desc Inizializza i listener degli eventi.
         */
     async init() {
@@ -64,12 +90,12 @@ export class DeleteProposalWallet {
     async showConfirmationModal(walletId, collectionId, userId) {
         /** @translation_desc Utilizziamo SweetAlert2 per mostrare la modale di conferma. */
         const result = await Swal.fire({
-            title: getTranslation('collection.wallet.confirmation_title'),
-            text: getTranslation('collection.wallet.confirmation_text', { walletId }),
+            title: this.translate('collection.wallet.confirmation_title'),
+            text: this.translate('collection.wallet.confirmation_text', { walletId }),
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonText: getTranslation('collection.wallet.confirm_delete'),
-            cancelButtonText: getTranslation('collection.wallet.cancel_delete'),
+            confirmButtonText: this.translate('collection.wallet.confirm_delete'),
+            cancelButtonText: this.translate('collection.wallet.cancel_delete'),
             customClass: {
                 confirmButton: 'btn btn-danger',  /** @translation_desc Stile del pulsante di conferma */
                 cancelButton: 'btn btn-secondary'  /** @translation_desc Stile del pulsante di annullamento */
@@ -121,20 +147,20 @@ export class DeleteProposalWallet {
 
                 Swal.fire({
                     icon: 'success',
-                    title: getTranslation('collection.wallet.deletion_success'),
-                    text: getTranslation('collection.wallet.deletion_success_text'),
+                    title: this.translate('collection.wallet.deletion_success'),
+                    text: this.translate('collection.wallet.deletion_success_text'),
                     timer: 3000,
                     showConfirmButton: false
                 });
             } else {
-                throw new Error(data.message || getTranslation('collection.wallet.deletion_error'));
+                throw new Error(data.message || this.translate('collection.wallet.deletion_error'));
             }
         } catch (error) {
             console.error('Errore:', error);
             Swal.fire({
                 icon: 'error',
-                title: getTranslation('collection.wallet.error_title'),
-                text: error.message || getTranslation('collection.wallet.deletion_error_generic')
+                title: this.translate('collection.wallet.error_title'),
+                text: error.message || this.translate('collection.wallet.deletion_error_generic')
             });
         }
     }
@@ -152,7 +178,7 @@ export class DeleteProposalWallet {
             button.classList.add('create-wallet-btn', 'btn', 'btn-primary', 'w-full', 'sm:w-auto');
             button.dataset.collectionId = collectionId;
             button.dataset.userId = userId;
-            button.textContent = getTranslation('collection.wallet.create_the_wallet');
+            button.textContent = this.translate('collection.wallet.create_the_wallet');
             userCard.appendChild(button);
         }
     }

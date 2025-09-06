@@ -7,19 +7,37 @@
 import { PayloadHandlerFactory } from '../factories/payload-handler-factory.js';
 import { NotificationActionRequest } from '../dto/notification-action-request.js';
 
-// 🔧 Fallback sicuro per traduzioni
-const getTranslationSafe = (key, fallback = 'Translation not available') => {
+// 🔧 Sistema di traduzione moderno con fallback retrocompatibile
+const getTranslationModern = (key, fallback = 'Translation not available') => {
+    // TENTATIVO 1: Sistema moderno appTranslate (preferito)
+    if (typeof window.appTranslate === 'function') {
+        try {
+            const result = window.appTranslate(key);
+            // Se appTranslate restituisce la chiave originale, significa che la traduzione non esiste
+            if (result && result !== key) {
+                return result;
+            }
+        } catch (error) {
+            console.warn(`Error in modern translation function for key: ${key}`, error);
+        }
+    }
+    
+    // TENTATIVO 2: Sistema deprecato getTranslation (retrocompatibilità)
     if (typeof window.getTranslation === 'function') {
         try {
             return window.getTranslation(key);
         } catch (error) {
-            console.warn(`Error in translation function for key: ${key}`, error);
-            return fallback;
+            console.warn(`Error in legacy translation function for key: ${key}`, error);
         }
     }
-    console.warn(`Translation function not available for key: ${key}`);
+    
+    // FALLBACK: Restituisce chiave o fallback
+    console.warn(`No translation system available for key: ${key}`);
     return fallback;
 };
+
+// 🔧 Alias per retrocompatibilità (sarà deprecato)
+const getTranslationSafe = getTranslationModern;
 
 let notificationInstance = null;
 
@@ -454,9 +472,9 @@ export default class Notification {
         if (detailsContainer) {
             const remainingNotifications = document.querySelectorAll('.notification-thumbnail').length;
             if (remainingNotifications === 0) {
-                detailsContainer.innerHTML = `<p class="text-gray-300 text-lg italic">${window.getTranslation('notification.no_notifications')}</p>`;
+                detailsContainer.innerHTML = `<p class="text-gray-300 text-lg italic">${getTranslationModern('notification.no_notifications', 'Nessuna notifica')}</p>`;
             } else {
-                detailsContainer.innerHTML = `<p class="text-gray-300 text-lg italic">${window.getTranslation('notification.select_notification')}</p>`;
+                detailsContainer.innerHTML = `<p class="text-gray-300 text-lg italic">${getTranslationModern('notification.select_notification', 'Seleziona una notifica')}</p>`;
             }
         }
     }

@@ -12,6 +12,32 @@ export class RequestUpdateNotificationWallet {
         return this;
     }
 
+    /**
+     * 🌐 Sistema di traduzione intelligente con fallback
+     * Prova prima il sistema moderno appTranslate, poi il sistema deprecato
+     */
+    translate(key, fallback = key) {
+        // Prova prima il sistema moderno
+        if (typeof window.appTranslate === 'function') {
+            try {
+                const result = window.appTranslate(key, fallback);
+                if (result && result !== key) {
+                    return result;
+                }
+            } catch (error) {
+                console.warn('🔄 appTranslate fallback to getTranslation for key:', key);
+            }
+        }
+        
+        // Fallback al sistema deprecato 
+        if (typeof window.getTranslation === 'function') {
+            return window.getTranslation(key, fallback);
+        }
+        
+        // Ultimo fallback
+        return fallback;
+    }
+
     bindEvents() {
         document.querySelectorAll('.update-wallet-btn').forEach(btn => {
             btn.addEventListener('click', async (e) => {
@@ -41,11 +67,11 @@ export class RequestUpdateNotificationWallet {
             await this.ensureTranslationsLoaded();
 
             const result = await Swal.fire({
-                title: window.getTranslation('collection.wallet.create_the_wallet'),
+                title: this.translate('collection.wallet.create_the_wallet'),
                 html: await this.getCreateModalHtml(walletAddress, old_royalty_mint, old_royalty_rebind),
                 showCancelButton: true,
-                confirmButtonText: window.getTranslation('collection.wallet.save'),
-                cancelButtonText: window.getTranslation('collection.wallet.cancel'),
+                confirmButtonText: this.translate('collection.wallet.save'),
+                cancelButtonText: this.translate('collection.wallet.cancel'),
                 customClass: {
                     container: 'wallet-modal-container',
                     popup: 'wallet-modal-popup bg-gray-800',
@@ -60,7 +86,7 @@ export class RequestUpdateNotificationWallet {
             }
         } catch (error) {
             console.error('Error in wallet modal:', error);
-            this.showError(window.getTranslation('collection.wallet.creation_error_generic'));
+            this.showError(this.translate('collection.wallet.creation_error_generic'));
         }
     }
 
@@ -77,7 +103,7 @@ export class RequestUpdateNotificationWallet {
 
         if (!walletAddress) {
             console.error("❌ Errore: Indirizzo wallet mancante!");
-            Swal.showValidationMessage(window.getTranslation('collection.wallet.validation.address_required'));
+            Swal.showValidationMessage(this.translate('collection.wallet.validation.address_required'));
             return null;
         }
 
@@ -93,14 +119,14 @@ export class RequestUpdateNotificationWallet {
             <form id="wallet-modal-form" class="space-y-4">
                 <div class="mb-3">
                     <label for="walletAddress" class="block text-sm font-medium text-gray-300">
-                        ${window.getTranslation('collection.wallet.address')}
+                        ${this.translate('collection.wallet.address')}
                         <h2 class="text-xl font-medium text-gray-100">${walletAddress}</h2>
                     </label>
                 </div>
 
                 <div class="mb-3">
                     <label for="royaltyMint" class="block text-sm font-medium text-gray-300">
-                        ${window.getTranslation('collection.wallet.royalty_mint')}
+                        ${this.translate('collection.wallet.royalty_mint')}
                     </label>
                     <input type="number"
                            id="royaltyMint"
@@ -113,7 +139,7 @@ export class RequestUpdateNotificationWallet {
 
                 <div class="mb-3">
                     <label for="royaltyRebind" class="block text-sm font-medium text-gray-300">
-                        ${window.getTranslation('collection.wallet.royalty_rebind')}
+                        ${this.translate('collection.wallet.royalty_rebind')}
                     </label>
                     <input type="number"
                            id="royaltyRebind"
@@ -149,7 +175,7 @@ export class RequestUpdateNotificationWallet {
             if (!response.ok) {
                 throw new Error(result.message || 'Error update wallet');
             } else if (response.ok) {
-                this.showSuccess(window.getTranslation('collection.wallet.creation_success'));
+                this.showSuccess(this.translate('collection.wallet.creation_success'));
                 this.updateUI(result.data);
             } else {
                 this.showError(result.message);
@@ -170,8 +196,8 @@ export class RequestUpdateNotificationWallet {
 
         Swal.fire({
             icon: 'success',
-            title: window.getTranslation('collection.wallet.creation_success'),
-            text: window.getTranslation('collection.wallet.creation_success_detail'),
+            title: this.translate('collection.wallet.creation_success'),
+            text: this.translate('collection.wallet.creation_success_detail'),
             timer: 3000,
             showConfirmButton: false
         });
@@ -180,7 +206,7 @@ export class RequestUpdateNotificationWallet {
     showSuccess(message) {
         Swal.fire({
             icon: 'success',
-            title: window.getTranslation('collection.wallet.success_title'),
+            title: this.translate('collection.wallet.success_title'),
             text: message,
             timer: 3000
         });
@@ -189,7 +215,7 @@ export class RequestUpdateNotificationWallet {
     showError(message) {
         Swal.fire({
             icon: 'error',
-            title: window.getTranslation('collection.wallet.error.error_title'),
+            title: this.translate('collection.wallet.error.error_title'),
             text: message
         });
     }
