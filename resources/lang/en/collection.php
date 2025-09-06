@@ -249,7 +249,8 @@ return [
         'royalty_mint_placeholder' => 'Enter the mint royalty percentage',
         'royalty_rebind_placeholder' => 'Enter the rebind royalty percentage',
         'validation' => [
-            'ceck_pending_wallet' => "It is not possible to perform the action because there is already a pending wallet.",
+            'check_pending_wallet' => "It is not possible to perform the action because there is already a pending wallet.",
+            'check_pending_wallet_title' => 'Validation Error',
             'address_required' => 'The wallet address is required.',
             'mint_invalid' => 'Invalid mint royalty percentage.',
             'rebind_invalid' => 'Invalid rebind royalty percentage.',

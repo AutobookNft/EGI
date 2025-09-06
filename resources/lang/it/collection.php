@@ -1,11 +1,7 @@
 <?php
 
 /*
-|--------    'my_collections' => 'Le mie collezioni',
-    'shared_collections' => 'Collezioni condivise',
-    'joined_since' => 'Dal',
-    'can_edit' => 'Può modificare',
-    'view_only' => 'Solo visualizzazione',-----------------------------------------------------------------
+|--------------------------------------------------------------------------
 | Traduzione in italiano di tutti i dati dei dati di testata delle collection
 |--------------------------------------------------------------------------
 |
@@ -162,13 +158,14 @@ return [
     'login' => 'Accedi',
     'register' => 'Registrati',
     'open_main_menu' => 'Apri menù principale',
-
+    
     'wallet' => [
         'wallets' => 'Wallet della collection',
         'copy_address' => 'Copia indirizzo',
         'donation' => 'Donazione',
         'donation_success' => 'Donazione effettuata con successo',
         'insufficient_quota' => 'Non hai sufficiente quota per creare un wallet',
+        'creation_error_pending' => 'Non è possibile eseguire l\'azione perché esiste già un wallet pending.',
         'write_royalty_mint' => 'Inserisci la percentuale di royalty per il minting',
         'write_royalty_rebind' => 'Inserisci la percentuale di royalty per il rebind',
         'user_role' => 'Ruolo',
@@ -256,7 +253,8 @@ return [
         'royalty_mint_placeholder' => 'Inserisci la percentuale di royalty di minting',
         'royalty_rebind_placeholder' => 'Inserisci la percentuale di royalty di rebind',
         'validation' => [
-            'ceck_pending_wallet' => 'Non è possibile eseguire l\'azione perché esiste già un wallet pending.',
+            'check_pending_wallet' => 'Non è possibile eseguire l\'azione perché esiste già un wallet pending.',
+            'check_pending_wallet_title' => 'Errore di validazione',
             'address_required' => 'L\'indirizzo del wallet è obbligatorio.',
             'mint_invalid' => 'Percentuale di royalty di minting non valida.',
             'rebind_invalid' => 'Percentuale di royalty di rebind non valida.',

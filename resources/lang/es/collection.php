@@ -237,7 +237,8 @@ return [
         'royalty_mint_placeholder' => 'Ingrese el porcentaje de regalías de acuñación',
         'royalty_rebind_placeholder' => 'Ingrese el porcentaje de regalías de reasignación',
         'validation' => [
-            'ceck_pending_wallet' => "No es posible realizar la acción porque ya existe una billetera pendiente.",
+            'check_pending_wallet' => "No es posible realizar la acción porque ya existe una billetera pendiente.",
+            'check_pending_wallet_title' => 'Error de validación',
             'address_required' => 'La dirección del monedero es obligatoria.',
             'mint_invalid' => 'Porcentaje de regalías de acuñación inválido.',
             'rebind_invalid' => 'Porcentaje de regalías de reasignación inválido.',

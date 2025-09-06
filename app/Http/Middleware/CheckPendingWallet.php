@@ -26,7 +26,7 @@ class CheckPendingWallet
                 'proposerId' => $proposerId
             ]);
             return response()->json([
-                'message' => __('collection.wallet.validation.ceck_pending_wallet'),
+                'message' => __('collection.wallet.validation.check_pending_wallet'),
             ], 422);
         }
 

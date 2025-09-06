@@ -146,6 +146,7 @@ return [
     'open_main_menu' => 'Ouvrir le menu principal',
 
     'wallet' => [
+        'wallets' => 'Portefeuille de la collection',
         'copy_address' => 'Copier l\'adresse',
         'donation' => 'Donation',
         'donation_success' => 'Donation envoyée avec succès',
@@ -237,7 +238,8 @@ return [
         'royalty_mint_placeholder' => 'Entrez le pourcentage de royalties de frappe',
         'royalty_rebind_placeholder' => 'Entrez le pourcentage de royalties de réattribution',
         'validation' => [
-            'ceck_pending_wallet' => 'Impossible d\'effectuer l\'action car un portefeuille est déjà en attente.',
+            'check_pending_wallet' => 'Impossible d\'effectuer l\'action car un portefeuille est déjà en attente.',
+            'check_pending_wallet_title' => 'Erreur de validation',
             'address_required' => 'L’adresse du portefeuille est requise.',
             'mint_invalid' => 'Pourcentage de royalties de frappe invalide.',
             'rebind_invalid' => 'Pourcentage de royalties de réattribution invalide.',

@@ -237,7 +237,8 @@ return [
         'royalty_mint_placeholder' => 'Geben Sie den Prägegebühren-Prozentsatz ein',
         'royalty_rebind_placeholder' => 'Geben Sie den Bindungsgebühren-Prozentsatz ein',
         'validation' => [
-            'ceck_pending_wallet' => "Die Aktion kann nicht ausgeführt werden, da bereits ein ausstehendes Wallet existiert.",
+            'check_pending_wallet' => "Die Aktion kann nicht ausgeführt werden, da bereits ein ausstehendes Wallet existiert.",
+            'check_pending_wallet_title' => 'Validierungsfehler',
             'address_required' => 'Die Wallet-Adresse ist erforderlich.',
             'mint_invalid' => 'Ungültiger Prägegebühren-Prozentsatz.',
             'rebind_invalid' => 'Ungültiger Bindungsgebühren-Prozentsatz.',

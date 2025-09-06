@@ -526,7 +526,8 @@ class AppConfigController extends Controller {
             'wallet_modal_subtitle' => 'collection.wallet.nft_subtitle',
 
             // Chiavi validation (semplificate rimuovendo collection.wallet.validation.)
-            'wallet_validation_ceck_pending_wallet' => 'collection.wallet.validation.ceck_pending_wallet',
+            'wallet_validation_check_pending_wallet' => 'collection.wallet.validation.check_pending_wallet',
+            'wallet_validation_check_pending_wallet_title' => 'collection.wallet.validation.check_pending_wallet_title',
             'wallet_validation_address_required' => 'collection.wallet.validation.address_required',
             'wallet_validation_mint_invalid' => 'collection.wallet.validation.mint_invalid',
             'wallet_validation_rebind_invalid' => 'collection.wallet.validation.rebind_invalid',
