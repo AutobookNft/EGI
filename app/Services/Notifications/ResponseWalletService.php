@@ -193,7 +193,10 @@ class ResponseWalletService
 
         // Inviare la notifica usando il factory pattern esistente
         $handler = $this->notificationFactory->getHandler(NotificationHandlerType::WALLET);
-        $handler->handle($recipient, $notificationData);
+        $handler->handle('request', $walletPayload, [
+            'user' => $recipient,
+            'notification_data' => $notificationData
+        ]);
 
         Log::channel('florenceegi')->info('Wallet request created successfully', [
             'wallet_payload_id' => $walletPayload->id,
@@ -232,7 +235,10 @@ class ResponseWalletService
         }
 
         $handler = $this->notificationFactory->getHandler(NotificationHandlerType::WALLET);
-        $handler->handle($recipient, $notificationData);
+        $handler->handle('accepted', $walletPayload, [
+            'user' => $recipient,
+            'notification_data' => $notificationData
+        ]);
     }
 
     /**
@@ -269,7 +275,10 @@ class ResponseWalletService
                 );
 
                 $handler = $this->notificationFactory->getHandler(NotificationHandlerType::WALLET);
-                $handler->handle($recipient, $notificationData);
+                $handler->handle('rejected', $walletPayload, [
+                    'user' => $recipient,
+                    'notification_data' => $notificationData
+                ]);
             });
         } catch (Exception $e) {
             Log::channel('florenceegi')->error('Errore durante il rifiuto del wallet:', [
@@ -343,7 +352,10 @@ class ResponseWalletService
                 );
 
                 $handler = $this->notificationFactory->getHandler(NotificationHandlerType::WALLET);
-                $handler->handle($recipient, $notificationData);
+                $handler->handle('expired', $walletPayload, [
+                    'user' => $recipient,
+                    'notification_data' => $notificationData
+                ]);
             });
         } catch (Exception $e) {
             Log::channel('florenceegi')->error('Errore durante la expired', [
