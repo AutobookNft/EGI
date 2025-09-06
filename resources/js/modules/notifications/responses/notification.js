@@ -7,6 +7,20 @@
 import { PayloadHandlerFactory } from '../factories/payload-handler-factory.js';
 import { NotificationActionRequest } from '../dto/notification-action-request.js';
 
+// 🔧 Fallback sicuro per traduzioni
+const getTranslationSafe = (key, fallback = 'Translation not available') => {
+    if (typeof window.getTranslation === 'function') {
+        try {
+            return window.getTranslation(key);
+        } catch (error) {
+            console.warn(`Error in translation function for key: ${key}`, error);
+            return fallback;
+        }
+    }
+    console.warn(`Translation function not available for key: ${key}`);
+    return fallback;
+};
+
 let notificationInstance = null;
 
 export default class Notification {
@@ -315,19 +329,75 @@ export default class Notification {
     }
 
     async reloadNotificationList() {
-        console.log('🔄 Ricarico lista notifiche');
+        console.log('🔄 Ricaricamento lista notifiche...');
+
         try {
-            const response = await fetch('/notifications/request');
+            // TEST: Prima prova endpoint senza auth
+            const noAuthResponse = await fetch('/notifications/test-no-auth', {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                credentials: 'include'
+            });
+            
+            if (noAuthResponse.ok) {
+                const noAuthData = await noAuthResponse.json();
+                console.log('🟢 Test endpoint SENZA auth risposta:', noAuthData);
+            } else {
+                console.error('🔴 Test endpoint SENZA auth fallito:', noAuthResponse.status);
+            }
+
+            // TEST: Prova endpoint con auth
+            const testResponse = await fetch('/notifications/test-ajax', {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                },
+                credentials: 'include'
+            });
+            
+            if (testResponse.ok) {
+                const testData = await testResponse.json();
+                console.log('🧪 Test endpoint CON auth risposta:', testData);
+            } else {
+                console.error('🚨 Test endpoint CON auth fallito:', testResponse.status);
+            }
+
+            const response = await fetch('/notifications/head-thumbnails', {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                },
+                credentials: 'include'
+            });
+            
             if (!response.ok) {
                 throw new Error(`Errore HTTP: ${response.status}`);
             }
-            const html = await response.text();
+            
+            const result = await response.json();
+            
+            if (!result.success) {
+                throw new Error(result.error || 'Errore sconosciuto dal server');
+            }
+            
+            const html = result.html;
+            
             // Validazione HTML basata su .notification-thumbnail
             if (!html || typeof html !== 'string') {
                 console.error('HTML non valido ricevuto dal server: contenuto vuoto o non stringa');
                 const detailsContainer = document.getElementById('notification-details');
                 if (detailsContainer) {
-                    detailsContainer.innerHTML = `<p class="text-red-500">Errore: ${window.getTranslation('notification.notification_list_error')}</p>`;
+                    detailsContainer.innerHTML = `<p class="text-red-500">Errore: ${getTranslationSafe('notification.notification_list_error', 'Errore nel caricamento delle notifiche')}</p>`;
                 }
                 return;
             }
@@ -337,7 +407,7 @@ export default class Notification {
                 this.bindEvents(); // Ri-lega eventi a pulsanti e thumbnail
                 this.highlightAllNotifications(); // Ricolora le thumbnail
                 const thumbnailCount = document.querySelectorAll('.notification-thumbnail').length;
-                // console.log(`🔄 Ricaricamento completato, thumbnail rilegate: ${thumbnailCount}`);
+                console.log(`🔄 Ricaricamento completato, thumbnail rilegate: ${thumbnailCount}, notifiche totali: ${result.count}`);
             } else {
                 console.error('Container notifiche non trovato');
             }
@@ -345,16 +415,16 @@ export default class Notification {
             const detailsContainer = document.getElementById('notification-details');
             if (detailsContainer) {
                 if (notifications.length === 0) {
-                    detailsContainer.innerHTML = `<p class="text-gray-300 text-lg italic">${window.getTranslation('notification.no_notifications')}</p>`;
+                    detailsContainer.innerHTML = `<p class="text-gray-300 text-lg italic">${getTranslationSafe('notification.no_notifications', 'Nessuna notifica')}</p>`;
                 } else {
-                    detailsContainer.innerHTML = `<p class="text-gray-300 text-lg italic">${window.getTranslation('notification.select_notification')}</p>`;
+                    detailsContainer.innerHTML = `<p class="text-gray-300 text-lg italic">${getTranslationSafe('notification.select_notification', 'Seleziona una notifica')}</p>`;
                 }
             }
         } catch (error) {
             console.error('Errore nel caricamento delle notifiche:', error);
             const detailsContainer = document.getElementById('notification-details');
             if (detailsContainer) {
-                detailsContainer.innerHTML = `<p class="text-red-500">Errore: ${window.getTranslation('notification.notification_list_error')}</p>`;
+                detailsContainer.innerHTML = `<p class="text-red-500">Errore: ${getTranslationSafe('notification.notification_list_error', 'Errore nel caricamento delle notifiche')}</p>`;
             }
         }
     }

@@ -252,91 +252,38 @@ class NotificationWalletResponseController extends Controller {
 
     /**
      * Recupera le notifiche pendenti per l'utente corrente
-     * Gestisce sia richieste browser che AJAX
      */
-    public function fetchHeadThumbnailList(Request $request) {
+    public function fetchHeadThumbnailList(): View {
 
-        Log::channel('florenceegi')->info('Recupero notifiche pendenti', [
-            'is_ajax' => $request->ajax(),
-            'user_id' => Auth::id(),
-            'user_authenticated' => Auth::check(),
-            'request_headers' => $request->headers->all()
+        Log::channel('florenceegi')->info('Recupero notifiche pendenti');
+
+        $pendingNotifications = Auth::user()
+            ->customNotifications()
+            ->where(function ($query) {
+                $query->where('outcome', 'LIKE', '%pending%')
+                    ->orWhere(function ($subQuery) {
+                        $subQuery->whereIn('outcome', ['accepted', 'rejected', 'expired'])
+                            ->whereNull('read_at');
+                    });
+            })
+            ->orderBy('created_at', 'desc')
+            ->with('model')
+            ->get();
+
+
+        log::channel('florenceegi')->info('Notifiche pendenti', [
+            'pending_notifications' => $pendingNotifications->count()
         ]);
 
-        // VERIFICA AUTENTICAZIONE
-        if (!Auth::check()) {
-            Log::channel('florenceegi')->error('Utente non autenticato per notifiche');
+        // Definisci la notifica attiva (se presente)
+        $activeNotificationId = $pendingNotifications->isNotEmpty()
+            ? $pendingNotifications->first()->id
+            : null;
 
-            if ($request->ajax()) {
-                return response()->json([
-                    'success' => false,
-                    'error' => 'Non autenticato',
-                    'html' => '<div class="text-red-500">Effettua il login</div>'
-                ], 401);
-            }
-
-            return redirect()->route('login');
-        }
-
-        try {
-            $pendingNotifications = Auth::user()
-                ->customNotifications()
-                ->where(function ($query) {
-                    $query->where('outcome', 'LIKE', '%pending%')
-                        ->orWhere(function ($subQuery) {
-                            $subQuery->whereIn('outcome', ['accepted', 'rejected', 'expired'])
-                                ->whereNull('read_at');
-                        });
-                })
-                ->orderBy('created_at', 'desc')
-                ->with('model')
-                ->get();
-
-            Log::channel('florenceegi')->info('Notifiche pendenti recuperate', [
-                'count' => $pendingNotifications->count(),
-                'user_id' => Auth::id()
-            ]);
-
-            // Definisci la notifica attiva (se presente)
-            $activeNotificationId = $pendingNotifications->isNotEmpty()
-                ? $pendingNotifications->first()->id
-                : null;
-
-            $viewData = [
-                'pendingNotifications' => $pendingNotifications,
-                'activeNotificationId' => $activeNotificationId
-            ];
-
-            // Se è una richiesta AJAX, restituisci solo HTML parziale
-            if ($request->ajax()) {
-                $html = view('livewire.partials.head-thumbnails-list', $viewData)->render();
-
-                return response()->json([
-                    'success' => true,
-                    'html' => $html,
-                    'count' => $pendingNotifications->count()
-                ]);
-            }
-
-            // Altrimenti restituisci la view completa
-            return view('livewire.partials.head-thumbnails-list', $viewData);
-        } catch (Exception $e) {
-            Log::channel('florenceegi')->error('Errore recupero notifiche pendenti', [
-                'error' => $e->getMessage(),
-                'user_id' => Auth::id(),
-                'is_ajax' => $request->ajax()
-            ]);
-
-            if ($request->ajax()) {
-                return response()->json([
-                    'success' => false,
-                    'error' => 'Errore nel caricamento delle notifiche',
-                    'html' => '<div class="text-red-500">Errore nel caricamento</div>'
-                ], 500);
-            }
-
-            throw $e;
-        }
+        return view('livewire.partials.head-thumbnails-list', [
+            'pendingNotifications' => $pendingNotifications,
+            'activeNotificationId' => $activeNotificationId // 🔥 Passato alla vista
+        ]);
     }
 
 

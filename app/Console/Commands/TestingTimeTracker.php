@@ -15,8 +15,7 @@ use Illuminate\Support\Facades\File;
  * Comando per tracciare il tempo speso in testing empirico della piattaforma.
  * Risolve il problema del "tempo invisibile" non tracciato da WakaTime.
  */
-class TestingTimeTracker extends Command
-{
+class TestingTimeTracker extends Command {
     /**
      * The name and signature of the console command.
      *
@@ -34,8 +33,7 @@ class TestingTimeTracker extends Command
     private $logFile;
     private $activeFile;
 
-    public function __construct()
-    {
+    public function __construct() {
         parent::__construct();
         $this->logFile = storage_path('logs/testing_time.log');
         $this->activeFile = storage_path('logs/.testing_active');
@@ -44,8 +42,7 @@ class TestingTimeTracker extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
-    {
+    public function handle() {
         $action = $this->argument('action');
 
         switch ($action) {
@@ -63,8 +60,7 @@ class TestingTimeTracker extends Command
         }
     }
 
-    private function startTesting()
-    {
+    private function startTesting() {
         if ($this->isTestingActive()) {
             $this->warn('⚠️  Una sessione di testing è già attiva!');
             return 1;
@@ -72,7 +68,7 @@ class TestingTimeTracker extends Command
 
         $now = Carbon::now();
         $note = $this->option('note') ?? 'Testing session';
-        
+
         // Crea file di sessione attiva
         File::put($this->activeFile, json_encode([
             'start_time' => $now->toISOString(),
@@ -86,12 +82,11 @@ class TestingTimeTracker extends Command
 
         $this->info('🚀 Sessione di testing iniziata: ' . $now->format('H:i:s'));
         $this->info('📝 Nota: ' . $note);
-        
+
         return 0;
     }
 
-    private function stopTesting()
-    {
+    private function stopTesting() {
         if (!$this->isTestingActive()) {
             $this->warn('⚠️  Nessuna sessione di testing attiva!');
             return 1;
@@ -115,8 +110,7 @@ class TestingTimeTracker extends Command
         return 0;
     }
 
-    private function showStatus()
-    {
+    private function showStatus() {
         if ($this->isTestingActive()) {
             $sessionData = json_decode(File::get($this->activeFile), true);
             $startTime = Carbon::parse($sessionData['start_time']);
@@ -135,8 +129,7 @@ class TestingTimeTracker extends Command
         return 0;
     }
 
-    private function showReport()
-    {
+    private function showReport() {
         if (!File::exists($this->logFile)) {
             $this->warn('📊 Nessun dato di testing disponibile');
             return 1;
@@ -156,7 +149,7 @@ class TestingTimeTracker extends Command
             });
 
         $sessions = $logs->where('action', 'TESTING_END');
-        
+
         if ($sessions->isEmpty()) {
             $this->warn('📊 Nessuna sessione completata negli ultimi 10 giorni');
             return 1;
@@ -171,7 +164,7 @@ class TestingTimeTracker extends Command
                 $timestamp = Carbon::parse($session['timestamp']);
                 $duration = abs($session['duration']); // Usa valore assoluto
                 $startTime = $timestamp->subMinutes($duration);
-                
+
                 return [
                     $timestamp->format('d/m/Y'),
                     $startTime->format('H:i'),
@@ -182,11 +175,11 @@ class TestingTimeTracker extends Command
             })->toArray()
         );
 
-        $totalMinutes = $sessions->sum(function($session) { 
-            return abs($session['duration']); 
+        $totalMinutes = $sessions->sum(function ($session) {
+            return abs($session['duration']);
         });
-        $avgMinutes = $sessions->avg(function($session) { 
-            return abs($session['duration']); 
+        $avgMinutes = $sessions->avg(function ($session) {
+            return abs($session['duration']);
         });
 
         $this->info('📈 Statistiche:');
@@ -198,13 +191,11 @@ class TestingTimeTracker extends Command
         return 0;
     }
 
-    private function isTestingActive()
-    {
+    private function isTestingActive() {
         return File::exists($this->activeFile);
     }
 
-    private function logActivity($action, $note, $timestamp, $duration = null)
-    {
+    private function logActivity($action, $note, $timestamp, $duration = null) {
         $logData = [
             'timestamp' => $timestamp->toISOString(),
             'action' => $action,
@@ -220,15 +211,14 @@ class TestingTimeTracker extends Command
         File::append($this->logFile, json_encode($logData) . "\n");
     }
 
-    private function formatDuration($minutes)
-    {
+    private function formatDuration($minutes) {
         $hours = floor($minutes / 60);
         $mins = $minutes % 60;
-        
+
         if ($hours > 0) {
             return sprintf('%dh %dm', $hours, $mins);
         }
-        
+
         return sprintf('%dm', $mins);
     }
 }

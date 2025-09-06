@@ -518,19 +518,37 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
 |--------------------------------------------------------------------------
 */
 Route::prefix('notifications')->group(function () {
-    Route::get('{id}/details', [NotificationDetailsController::class, 'show'])
-        ->name('notifications.details');
-
-    // Add alias for notification badge component
-    Route::get('{id}', [NotificationDetailsController::class, 'show'])
-        ->name('notifications.show');
-
-    // Add route for notifications index (all notifications page)
+    // Add route for notifications index (all notifications page) - deve essere PRIMA di {id}
     Route::get('/', function () {
         return view('notifications.index');
     })->name('notifications.index');
 
-    // Add route to mark notification as read
+    // Route specifiche devono essere PRIMA di quelle parametrizzate
+    Route::get('/head-thumbnails', [NotificationWalletResponseController::class, 'fetchHeadThumbnailList'])
+        ->name('head.thumbnails.list');
+
+    // TEST: endpoint semplice per debugging
+    Route::get('/test-ajax', function (\Illuminate\Http\Request $request) {
+        return response()->json([
+            'success' => true,
+            'is_ajax' => $request->ajax(),
+            'user_id' => Auth::id(),
+            'authenticated' => Auth::check(),
+            'message' => 'Test endpoint funziona'
+        ]);
+    });
+
+    // TEST: endpoint senza autenticazione
+    Route::get('/test-no-auth', function (\Illuminate\Http\Request $request) {
+        return response()->json([
+            'success' => true,
+            'is_ajax' => $request->ajax(),
+            'message' => 'Test endpoint senza auth funziona',
+            'headers' => $request->headers->all()
+        ]);
+    });
+
+    // Add route to mark notification as read - deve essere prima di {id}
     Route::post('{id}/read', function ($id) {
         $user = App\Helpers\FegiAuth::user();
         if ($user) {
@@ -543,8 +561,13 @@ Route::prefix('notifications')->group(function () {
         return response()->json(['error' => 'Not found'], 404);
     })->name('notifications.read');
 
-    Route::get('/request', [NotificationWalletResponseController::class, 'fetchHeadThumbnailList'])
-        ->name('head.thumbnails.list');
+    // Route parametrizzate ALLA FINE
+    Route::get('{id}/details', [NotificationDetailsController::class, 'show'])
+        ->name('notifications.details');
+
+    // Add alias for notification badge component - ULTIMA route parametrizzata
+    Route::get('{id}', [NotificationDetailsController::class, 'show'])
+        ->name('notifications.show');
 
     // Wallet notifications
     Route::prefix('wallet')->group(function () {
