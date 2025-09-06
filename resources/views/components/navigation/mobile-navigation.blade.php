@@ -177,11 +177,6 @@
                                 {{ __('menu.activity_log') }}
                             </a>
                         @endcan
-                        @can('view_notifications')
-                            <a href="{{ route('notifications.index') }}" class="block px-2 py-1 text-sm text-gray-600 transition-colors duration-200 rounded-lg dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-white/50 dark:hover:bg-black/20">
-                                {{ __('menu.notifications') }}
-                            </a>
-                        @endcan
                     </div>
                 </div>
 

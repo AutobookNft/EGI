@@ -16,7 +16,6 @@ use App\Services\Menu\Items\AccountDataMenu;
 use App\Services\Menu\Items\ActivityLogMenu;
 use App\Services\Menu\Items\BioProfileMenu;
 use App\Services\Menu\Items\BreachReportMenu;
-use App\Services\Menu\Items\NotificationsMenu;
 use App\Services\Menu\Items\ConsentMenu;
 use App\Services\Menu\Items\DeleteAccountMenu;
 use App\Services\Menu\Items\DocumentationMenu;
@@ -67,12 +66,6 @@ class ContextMenus
                     new StatisticsMenu(),
                 ]);
                 $menus[] = $statsMenu;
-
-                // Notifications menu
-                $notificationsMenu = new MenuGroup(__('menu.notifications'), 'bell', [
-                    new NotificationsMenu(),
-                ]);
-                $menus[] = $notificationsMenu;
 
                 // Personal data menu
                 $personalDataMenu = new MenuGroup(__('menu.personal_data'), 'user-cog', [

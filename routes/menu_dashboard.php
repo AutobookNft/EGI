@@ -3,7 +3,6 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardStaticController;
 use App\Http\Controllers\StatisticsController;
-use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\PersonalDataController;
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\GdprController;
@@ -60,13 +59,6 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
         // Se vuoi che sia sotto /statistics/summary-json, decommenta la riga sotto
         // e assicurati che il JS chiami il nome corretto (es. route('statistics.summary.json'))
         // Route::get('/summary-json', [StatisticsController::class, 'summary'])->name('summary.json');
-    });
-
-    // Notifications routes
-    Route::prefix('notifications')->name('notifications.')->group(function () {
-        Route::get('/', [NotificationsController::class, 'index'])->name('index');
-        Route::put('/{notification}/mark-as-read', [NotificationsController::class, 'markAsRead'])->name('mark-as-read');
-        // Altre rotte notifiche...
     });
 
     // Personal data routes

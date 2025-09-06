@@ -518,11 +518,6 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
 |--------------------------------------------------------------------------
 */
 Route::prefix('notifications')->group(function () {
-    // Add route for notifications index (all notifications page) - deve essere PRIMA di {id}
-    Route::get('/', function () {
-        return view('notifications.index');
-    })->name('notifications.index');
-
     // Route specifiche devono essere PRIMA di quelle parametrizzate
     Route::get('/head-thumbnails', [NotificationWalletResponseController::class, 'fetchHeadThumbnailList'])
         ->name('head.thumbnails.list');
