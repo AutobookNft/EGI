@@ -158,6 +158,7 @@ return [
             'analytics' => 'Analytics Consents',
             'marketing' => 'Marketing Consents',
             'profiling' => 'Profiling Consents',
+            'collaboration_participation' => 'Collaboration Participation',
         ],
 
         // Consent Descriptions
@@ -166,6 +167,7 @@ return [
             'analytics' => 'Used to analyze site usage and improve user experience.',
             'marketing' => 'Used to send you promotional communications and personalized offers.',
             'profiling' => 'Used to create personalized profiles and suggest relevant content.',
+            'collaboration_participation' => 'Allow participation in collaborative projects and shared activities with other platform users.',
         ],
 
         'essential' => [

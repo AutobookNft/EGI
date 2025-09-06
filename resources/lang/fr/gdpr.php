@@ -1,5 +1,5 @@
 <?php
-// resources/lang/it/gdpr.php
+// resources/lang/fr/gdpr.php
 
 return [
     /*
@@ -202,7 +202,7 @@ return [
             'age-confirmation' => 'Conferma Età',
             'personalization' => 'Personalizzazione dei Contenuti',
             'allow-personal-data-processing' => 'Consenti Trattamento Dati Personali',
-            'collaboration_participation' => 'Partecipazione alle Collaborazioni',
+            'collaboration_participation' => 'Participation aux Collaborations',
         ],
 
         // Descrizioni dei Consensi
@@ -217,7 +217,7 @@ return [
             'age-confirmation' => 'Conferma di avere la maggiore età per l\'utilizzo della piattaforma.',
             'personalization' => 'Consenti la personalizzazione dei contenuti e delle raccomandazioni in base alle tue preferenze.',
             'allow-personal-data-processing' => 'Consenti l\'elaborazione dei tuoi dati personali per migliorare i nostri servizi e fornirti un\'esperienza personalizzata.',
-            'collaboration_participation' => 'Consenti la partecipazione a progetti collaborativi e attività condivise con altri utenti della piattaforma.',
+            'collaboration_participation' => 'Permet la participation à des projets collaboratifs et aux activités partagées avec d\'autres utilisateurs de la plateforme.',
 
         ],
 
