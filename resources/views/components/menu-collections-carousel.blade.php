@@ -12,31 +12,43 @@
                 </svg>
             </div>
             <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ __('collection.my_collections') }}</h4>
+            
+            <!-- Badge con numero collezioni -->
+            <span class="inline-flex items-center px-2 py-1 text-xs font-medium text-purple-800 bg-purple-100 border border-purple-200 rounded-full dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-700">
+                {{ count($collections) }}
+            </span>
         </div>
 
-        {{-- @if(count($collections) > 1)
-            <div class="flex space-x-1">
-                <button type="button" class="p-1 text-gray-400 transition-colors carousel-prev-menu hover:text-purple-600">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-                    </svg>
-                </button>
-                <button type="button" class="p-1 text-gray-400 transition-colors carousel-next-menu hover:text-purple-600">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                    </svg>
-                </button>
-            </div>
-        @endif --}}
+        @if(count($collections) > 1)
+        <div class="flex items-center space-x-1">
+            <button type="button" 
+                    onclick="document.querySelector('.carousel-container-menu').scrollBy({left: -320, behavior: 'smooth'})"
+                    class="p-1 text-gray-400 transition-colors rounded hover:text-purple-600 dark:hover:text-purple-400">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+            </button>
+            <button type="button" 
+                    onclick="document.querySelector('.carousel-container-menu').scrollBy({left: 320, behavior: 'smooth'})"
+                    class="p-1 text-gray-400 transition-colors rounded hover:text-purple-600 dark:hover:text-purple-400">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+            </button>
+        </div>
+        @endif
     </div>
 
     <div class="relative menu-collections-carousel">
-        <div class="flex gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-hide">
-            @forelse($collections as $collection)
-                <div class="flex-shrink-0 w-full snap-start collection-slide">
-
-                    <a href="{{ route('home.collections.show', $collection->id) }}"
-                       class="block p-3 transition-all duration-200 rounded-lg bg-white/50 dark:bg-black/20 hover:bg-white/70 dark:hover:bg-black/30 hover:scale-105 group">
+        <!-- Carousel without visible scrollbar but with manual scrolling -->
+        <div class="pb-2 overflow-x-auto overflow-y-hidden carousel-container-menu">
+            
+            <!-- Flex container with proper spacing -->
+            <div class="flex gap-3 w-max">
+                @forelse($collections as $collection)
+                    <div class="flex-shrink-0 w-80">
+                        <a href="{{ route('home.collections.show', $collection->id) }}"
+                           class="block p-3 transition-all duration-200 rounded-lg bg-white/50 dark:bg-black/20 hover:bg-white/70 dark:hover:bg-black/30 hover:scale-105 group">
 
                         <div class="flex items-center space-x-3">
                             <!-- Collection Image/Icon -->
@@ -107,11 +119,6 @@
                                         {{ __('collection.type_' . $collection->type) }}
                                     </span>
                                 @endif
-                            </div>                            <!-- Arrow indicator -->
-                            <div class="flex-shrink-0">
-                                <svg class="w-4 h-4 text-gray-400 transition-transform duration-200 group-hover:text-purple-600 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                                </svg>
                             </div>
                         </div>
                     </a>
@@ -135,47 +142,95 @@
                     </button>
                 </div>
             @endforelse
+            </div>
         </div>
     </div>
 </div>
 
-@if(count($collections) > 1)
-    @once
-        @push('scripts')
-        <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const carousels = document.querySelectorAll('.menu-collections-carousel');
+<style>
+/* Hide scrollbar but keep functionality for menu carousel */
+.carousel-container-menu {
+    -ms-overflow-style: none;  /* Internet Explorer 10+ */
+    scrollbar-width: none;  /* Firefox */
+}
 
-            carousels.forEach(carousel => {
-                const container = carousel.querySelector('.snap-x');
-                const prevButton = carousel.parentElement.querySelector('.carousel-prev-menu');
-                const nextButton = carousel.parentElement.querySelector('.carousel-next-menu');
+.carousel-container-menu::-webkit-scrollbar { 
+    display: none;  /* Safari and Chrome */
+}
 
-                if (!container || !prevButton || !nextButton) return;
+.carousel-container-menu {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+}
+</style>
 
-                const slides = container.querySelectorAll('.collection-slide');
-                let currentSlide = 0;
-
-                function updateSlide() {
-                    const slideWidth = slides[0].offsetWidth;
-                    container.scrollTo({
-                        left: currentSlide * slideWidth,
-                        behavior: 'smooth'
-                    });
-                }
-
-                prevButton.addEventListener('click', () => {
-                    currentSlide = currentSlide > 0 ? currentSlide - 1 : slides.length - 1;
-                    updateSlide();
-                });
-
-                nextButton.addEventListener('click', () => {
-                    currentSlide = currentSlide < slides.length - 1 ? currentSlide + 1 : 0;
-                    updateSlide();
-                });
-            });
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const carousel = document.querySelector('.carousel-container-menu');
+    
+    if (carousel) {
+        // Mouse wheel scrolling - convert vertical to horizontal
+        carousel.addEventListener('wheel', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.scrollLeft += e.deltaY;
+        }, { passive: false });
+        
+        // Touch/drag scrolling
+        let isDown = false;
+        let startX;
+        let scrollLeft;
+        
+        // Mouse events
+        carousel.addEventListener('mousedown', function(e) {
+            isDown = true;
+            startX = e.pageX - carousel.offsetLeft;
+            scrollLeft = carousel.scrollLeft;
+            carousel.style.cursor = 'grabbing';
+            e.preventDefault();
         });
-        </script>
-        @endpush
-    @endonce
-@endif
+        
+        carousel.addEventListener('mouseleave', function() {
+            isDown = false;
+            carousel.style.cursor = 'grab';
+        });
+        
+        carousel.addEventListener('mouseup', function() {
+            isDown = false;
+            carousel.style.cursor = 'grab';
+        });
+        
+        carousel.addEventListener('mousemove', function(e) {
+            if (!isDown) return;
+            e.preventDefault();
+            const x = e.pageX - carousel.offsetLeft;
+            const walk = (x - startX) * 2;
+            carousel.scrollLeft = scrollLeft - walk;
+        });
+        
+        // Touch events for mobile
+        let touchStartX = 0;
+        let touchScrollLeft = 0;
+        
+        carousel.addEventListener('touchstart', function(e) {
+            touchStartX = e.touches[0].pageX - carousel.offsetLeft;
+            touchScrollLeft = carousel.scrollLeft;
+        });
+        
+        carousel.addEventListener('touchmove', function(e) {
+            if (!touchStartX) return;
+            e.preventDefault();
+            const x = e.touches[0].pageX - carousel.offsetLeft;
+            const walk = (x - touchStartX) * 2;
+            carousel.scrollLeft = touchScrollLeft - walk;
+        }, { passive: false });
+        
+        carousel.addEventListener('touchend', function() {
+            touchStartX = 0;
+        });
+        
+        // Set cursor
+        carousel.style.cursor = 'grab';
+    }
+});
+</script>

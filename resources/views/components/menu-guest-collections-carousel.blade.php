@@ -14,7 +14,9 @@
 
 {{-- Mostra il componente solo se ci sono collezioni condivise --}}
 @if($collections && count($collections) > 0)
+
 <div class="p-4 border bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 rounded-2xl border-emerald-200/30 dark:border-emerald-800/30 mega-card">
+    
     <div class="flex items-center justify-between mb-3">
         <div class="flex items-center space-x-2">
             <div class="flex items-center justify-center w-6 h-6 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500">
@@ -23,16 +25,43 @@
                 </svg>
             </div>
             <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ __('collection.shared_collections') }}</h4>
+            
+            <!-- Badge con numero collezioni -->
+            <span class="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-700">
+                {{ count($collections) }}
+            </span>
         </div>
+        
+        @if(count($collections) > 1)
+        <div class="flex items-center space-x-1">
+            <button type="button" 
+                    onclick="document.querySelector('.carousel-container').scrollBy({left: -320, behavior: 'smooth'})"
+                    class="p-1 text-gray-400 transition-colors rounded hover:text-emerald-600 dark:hover:text-emerald-400">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+            </button>
+            <button type="button" 
+                    onclick="document.querySelector('.carousel-container').scrollBy({left: 320, behavior: 'smooth'})"
+                    class="p-1 text-gray-400 transition-colors rounded hover:text-emerald-600 dark:hover:text-emerald-400">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+            </button>
+        </div>
+        @endif
     </div>
 
-    <div class="relative menu-guest-collections-carousel">
-        <div class="flex gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-hide">
-            @foreach($collections as $collection)
-                <div class="flex-shrink-0 w-full snap-start collection-slide">
-
-                    <a href="{{ route('home.collections.show', $collection->id) }}"
-                       class="block p-3 transition-all duration-200 rounded-lg bg-white/50 dark:bg-black/20 hover:bg-white/70 dark:hover:bg-black/30 hover:scale-105 group">
+        <div class="relative menu-guest-collections-carousel">
+        <!-- Carousel without visible scrollbar but with manual scrolling -->
+        <div class="pb-2 overflow-x-auto overflow-y-hidden carousel-container">
+            
+            <!-- Flex container with proper spacing -->
+            <div class="flex gap-3 w-max">
+                @foreach($collections as $collection)
+                    <div class="flex-shrink-0 w-80">
+                        <a href="{{ route('home.collections.show', $collection->id) }}"
+                           class="block p-3 transition-all duration-200 rounded-lg bg-white/50 dark:bg-black/20 hover:bg-white/70 dark:hover:bg-black/30 hover:scale-105 group">
 
                         <div class="flex items-center space-x-3">
                             <!-- Collection Image/Icon -->
@@ -122,7 +151,97 @@
                     </a>
                 </div>
             @endforeach
+            </div>
         </div>
     </div>
 </div>
+
+<style>
+/* Hide scrollbar but keep functionality */
+.carousel-container {
+    -ms-overflow-style: none;  /* Internet Explorer 10+ */
+    scrollbar-width: none;  /* Firefox */
+}
+
+.carousel-container::-webkit-scrollbar { 
+    display: none;  /* Safari and Chrome */
+}
+
+.carousel-container {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const carousel = document.querySelector('.carousel-container');
+    
+    if (carousel) {
+        // Mouse wheel scrolling - convert vertical to horizontal
+        carousel.addEventListener('wheel', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.scrollLeft += e.deltaY;
+        }, { passive: false });
+        
+        // Touch/drag scrolling
+        let isDown = false;
+        let startX;
+        let scrollLeft;
+        
+        // Mouse events
+        carousel.addEventListener('mousedown', function(e) {
+            isDown = true;
+            startX = e.pageX - carousel.offsetLeft;
+            scrollLeft = carousel.scrollLeft;
+            carousel.style.cursor = 'grabbing';
+            e.preventDefault();
+        });
+        
+        carousel.addEventListener('mouseleave', function() {
+            isDown = false;
+            carousel.style.cursor = 'grab';
+        });
+        
+        carousel.addEventListener('mouseup', function() {
+            isDown = false;
+            carousel.style.cursor = 'grab';
+        });
+        
+        carousel.addEventListener('mousemove', function(e) {
+            if (!isDown) return;
+            e.preventDefault();
+            const x = e.pageX - carousel.offsetLeft;
+            const walk = (x - startX) * 2;
+            carousel.scrollLeft = scrollLeft - walk;
+        });
+        
+        // Touch events for mobile
+        let touchStartX = 0;
+        let touchScrollLeft = 0;
+        
+        carousel.addEventListener('touchstart', function(e) {
+            touchStartX = e.touches[0].pageX - carousel.offsetLeft;
+            touchScrollLeft = carousel.scrollLeft;
+        });
+        
+        carousel.addEventListener('touchmove', function(e) {
+            if (!touchStartX) return;
+            e.preventDefault();
+            const x = e.touches[0].pageX - carousel.offsetLeft;
+            const walk = (x - touchStartX) * 2;
+            carousel.scrollLeft = touchScrollLeft - walk;
+        }, { passive: false });
+        
+        carousel.addEventListener('touchend', function() {
+            touchStartX = 0;
+        });
+        
+        // Set cursor
+        carousel.style.cursor = 'grab';
+    }
+});
+</script>
+
 @endif
