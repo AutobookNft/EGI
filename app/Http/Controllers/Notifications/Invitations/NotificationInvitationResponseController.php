@@ -17,7 +17,7 @@ use App\Enums\{
 use App\Http\Controllers\Controller;
 use App\Models\CustomDatabaseNotification;
 use App\Models\NotificationPayloadInvitation;
-use App\Services\GDPR\AuditLogService;
+use App\Services\Gdpr\AuditLogService;
 use App\Services\Notifications\InvitationService;
 use App\Services\UltraErrorManager\Contracts\ErrorManagerInterface;
 use App\Services\UltraLogManager\UltraLogManager;

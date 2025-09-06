@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\NotificationPayloadReservation;
 use App\Services\Notifications\ReservationNotificationHandler;
 use App\Helpers\FegiAuth;
+use App\Services\Gdpr\AuditLogService;
+use App\Enums\GdprActivityCategory;
 use Ultra\ErrorManager\Interfaces\ErrorManagerInterface;
 use Ultra\UltraLogManager\UltraLogManager;
 use Illuminate\Http\Request;
@@ -30,11 +32,13 @@ class NotificationReservationResponseController extends Controller
      * @param ReservationNotificationHandler $handler Notification handler
      * @param UltraLogManager $logger Ultra Log Manager
      * @param ErrorManagerInterface $errorManager Ultra Error Manager
+     * @param AuditLogService $auditLogService GDPR audit logging service
      */
     public function __construct(
         private ReservationNotificationHandler $handler,
         private UltraLogManager $logger,
-        private ErrorManagerInterface $errorManager
+        private ErrorManagerInterface $errorManager,
+        private AuditLogService $auditLogService
     ) {}
 
     /**

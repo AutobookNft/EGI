@@ -11,7 +11,7 @@ use App\Enums\GdprActivityCategory;
 use App\Exceptions\WalletException;
 use App\Http\Controllers\Controller;
 use App\Rules\NoPendingWalletProposal;
-use App\Services\GDPR\AuditLogService;
+use App\Services\Gdpr\AuditLogService;
 use App\Services\Notifications\RequestWalletService;
 use App\Services\UltraErrorManager\Contracts\ErrorManagerInterface;
 use App\Services\UltraLogManager\UltraLogManager;
