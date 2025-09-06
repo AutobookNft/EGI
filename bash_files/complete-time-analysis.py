@@ -52,7 +52,9 @@ class EGITimeAnalyzer:
     def get_commit_activity_today(self):
         """Ottiene attività commit per oggi"""
         try:
-            cmd = 'git log --oneline --since="today"'
+            # Usa data specifica invece di "today" che può avere problemi
+            today = datetime.now().strftime('%Y-%m-%d')
+            cmd = f'git log --oneline --since="{today} 00:00:00" --until="{today} 23:59:59"'
             result = subprocess.run(cmd, shell=True, capture_output=True, text=True, cwd=self.base_path)
             commits = [line.strip() for line in result.stdout.split('\n') if line.strip()]
             return len(commits), commits
