@@ -213,7 +213,7 @@ class TestingTimeTracker extends Command {
 
         // Log sessione manuale come coppia start/stop
         $this->logActivity('TESTING_START', $note . ' (retroattivo)', $startTime);
-        $this->logActivity('TESTING_STOP', $note . ' (retroattivo)', $endTime, $duration);
+        $this->logActivity('TESTING_END', $note . ' (retroattivo)', $endTime, $duration);
 
         $this->info('✅ Sessione di testing retroattiva registrata!');
         $this->info('🕐 Durata: ' . $this->formatDuration($duration));
